@@ -8,14 +8,14 @@ import lombok.Setter;
 @Setter
 public class C2SChallengeHpPacket extends Packet {
 
-    private char npcHp;
     private char playerHp;
+    private char npcHp;
 
     public C2SChallengeHpPacket(Packet packet) {
 
         super(packet);
 
-        this.npcHp = this.readChar();
         this.playerHp = this.readChar();
+        this.npcHp = this.readChar();
     }
 }
