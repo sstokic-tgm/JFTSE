@@ -1095,8 +1095,8 @@ public class PacketHandler {
         C2SChallengeHpPacket challengeHpPacket = new C2SChallengeHpPacket(packet);
 
         if(client.getActiveChallengeGame() instanceof ChallengeBattleGame) {
-            ((ChallengeBattleGame) client.getActiveChallengeGame()).setNpcHp(Character.getNumericValue(challengeHpPacket.getNpcHp()));
-            ((ChallengeBattleGame) client.getActiveChallengeGame()).setPlayerHp(Character.getNumericValue(challengeHpPacket.getPlayerHp()));
+            ((ChallengeBattleGame) client.getActiveChallengeGame()).setNpcHp((int)challengeHpPacket.getNpcHp());
+            ((ChallengeBattleGame) client.getActiveChallengeGame()).setPlayerHp((int)challengeHpPacket.getPlayerHp());
 	}
     }
 
