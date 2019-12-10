@@ -1,0 +1,1 @@
+INSERT INTO `fantasytennis`.`GameServer`(`host`, `port`, `gameServerType_id`) VALUES ('127.0.0.1', 5895, 2);
