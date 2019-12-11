@@ -466,12 +466,15 @@ public class PacketHandler {
 	characterPlayer.setName(characterCreatePacket.getNickname());
 	characterPlayer.setAlreadyCreated(true);
 	characterPlayer.setStrength(characterCreatePacket.getStrength());
-
 	characterPlayer.setStamina(characterCreatePacket.getStamina());
 	characterPlayer.setDexterity(characterCreatePacket.getDexterity());
 	characterPlayer.setWillpower(characterCreatePacket.getWillpower());
-	characterPlayer.setStatusPoints(characterCreatePacket.getStatusPoints());
-	characterPlayer.setLevel(characterCreatePacket.getLevel());
+	// make every new char level 20
+	// only temporary
+	characterPlayer.setStatusPoints((byte)(characterCreatePacket.getStatusPoints() + 20));
+	characterPlayer.setLevel((byte)20);
+	characterPlayer.setExpPoints(15623);
+	characterPlayer.setGold(100000);
 
 	// create pocket
 	Pocket pocket = new Pocket();
@@ -509,6 +512,12 @@ public class PacketHandler {
 
 	S2CCharacterCreateAnswerPacket characterCreateAnswerPacket = new S2CCharacterCreateAnswerPacket((char)0);
 	client.getPacketStream().write(characterCreateAnswerPacket);
+
+	InventoryImpl inventoryImpl = new InventoryImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
+	StatusPointsAddedDto statusPointsAddedDto = inventoryImpl.getStatusPointsFromCloths(characterPlayer);
+
+	S2CCharacterStatusPointChangePacket characterStatusPointChangeAnswerPacket = new S2CCharacterStatusPointChangePacket(characterPlayer, statusPointsAddedDto);
+	client.getPacketStream().write(characterStatusPointChangeAnswerPacket);
     }
 
     private void handleCharacterDeletePacket(Client client, Packet packet) {
