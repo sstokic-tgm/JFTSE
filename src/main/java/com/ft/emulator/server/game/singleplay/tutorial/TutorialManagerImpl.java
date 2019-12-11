@@ -70,7 +70,7 @@ public class TutorialManagerImpl extends Service {
 
 	    try {
 
-		tutorialProgress = tutorialProgressDao.save(tutorialProgress);
+		tutorialProgressDao.save(tutorialProgress);
 	    }
 	    catch (ValidationException e) {
 
@@ -84,23 +84,8 @@ public class TutorialManagerImpl extends Service {
 
 	    tutorialProgressEx.setSuccess(tutorialProgressEx.getSuccess() + 1);
 	    tutorialProgressEx.setAttempts(tutorialProgressEx.getAttempts() + 1);
-
-	    try {
-
-		tutorialProgressEx = tutorialProgressDao.save(tutorialProgressEx);
-	    }
-	    catch (ValidationException e) {
-
-		logger.error(e.getMessage());
-		e.printStackTrace();
-	    }
 	}
-
 	client.setActiveTutorialGame(null);
-
-	filters = new HashMap<>();
-	filters.put("characterPlayer", tutorialProgress.getCharacterPlayer());
-	List<TutorialProgress> tutorialProgressList = tutorialProgressDao.getList(filters, "characterPlayer", "tutorial");
 
 	List<Map<String, Object>> rewardItemList = new ArrayList<>();
 	try {
@@ -111,8 +96,8 @@ public class TutorialManagerImpl extends Service {
 	    e.printStackTrace();
 	}
 
-	int rewardExp = itemRewardImpl.getRewardExp(tutorialProgressEx != null, tutorial.getRewardExp());
-	int rewardGold = itemRewardImpl.getRewardGold(tutorialProgressEx != null, tutorial.getRewardGold());
+	int rewardExp = itemRewardImpl.getRewardExp(tutorialProgressEx != null, tutorial.getRewardExp(), true);
+	int rewardGold = itemRewardImpl.getRewardGold(tutorialProgressEx != null, tutorial.getRewardGold(), true);
 
 	LevelCalculatorImpl levelCalculatorImpl = new LevelCalculatorImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
 	byte level = levelCalculatorImpl.getLevel(rewardExp, client.getActiveCharacterPlayer().getExpPoints(), client.getActiveCharacterPlayer().getLevel());
@@ -129,12 +114,20 @@ public class TutorialManagerImpl extends Service {
 	    logger.error(e.getMessage());
 	    e.printStackTrace();
 	}
+	if(tutorialProgressEx != null) {
+
+	    try {
+		tutorialProgressDao.save(tutorialProgressEx);
+	    }
+	    catch (ValidationException e) {
+
+		logger.error(e.getMessage());
+		e.printStackTrace();
+	    }
+	}
 	client.setActiveCharacterPlayer(characterPlayer);
 
 	S2CTutorialFinishPacket tutorialFinishPacket = new S2CTutorialFinishPacket(true, level, rewardExp, rewardGold, (int)Math.ceil((double)timeNeeded / 1000), rewardItemList);
 	client.getPacketStream().write(tutorialFinishPacket);
-
-	S2CTutorialProgressAnswerPacket tutorialProgressAnswerPacket = new S2CTutorialProgressAnswerPacket(tutorialProgressList);
-	client.getPacketStream().write(tutorialProgressAnswerPacket);
     }
 }

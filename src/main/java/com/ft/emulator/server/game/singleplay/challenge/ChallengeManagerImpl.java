@@ -59,16 +59,19 @@ public class ChallengeManagerImpl extends Service {
 
 	ItemRewardImpl itemRewardImpl = new ItemRewardImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
 	List<Product> rewardProductList = new ArrayList<>();
+	int oldSuccessCount = 0;
+	int successCount;
 	if(challengeProgressEx == null) {
 
-	    rewardProductList.addAll(itemRewardImpl.getItemRewardChallenge(challenge, challengeProgressEx));
+	    successCount = win ? 1 : 0;
 
-	    challengeProgress.setSuccess(1);
+	    rewardProductList.addAll(itemRewardImpl.getItemRewardChallenge(challenge, challengeProgressEx, win, successCount, oldSuccessCount));
+
+	    challengeProgress.setSuccess(successCount);
 	    challengeProgress.setAttempts(1);
 
 	    try {
-
-		challengeProgress = challengeProgressDao.save(challengeProgress);
+		challengeProgressDao.save(challengeProgress);
 	    }
 	    catch (ValidationException e) {
 
@@ -78,27 +81,15 @@ public class ChallengeManagerImpl extends Service {
 	}
 	else {
 
-	    rewardProductList.addAll(itemRewardImpl.getItemRewardChallenge(challenge, challengeProgressEx));
+	    oldSuccessCount = challengeProgressEx.getSuccess();
+	    successCount = win ? challengeProgressEx.getSuccess() + 1 : oldSuccessCount;
 
-	    challengeProgressEx.setSuccess(challengeProgressEx.getSuccess() + 1);
+	    rewardProductList.addAll(itemRewardImpl.getItemRewardChallenge(challenge, challengeProgressEx, win, successCount, oldSuccessCount));
+
+	    challengeProgressEx.setSuccess(successCount);
 	    challengeProgressEx.setAttempts(challengeProgressEx.getAttempts() + 1);
-
-	    try {
-
-		challengeProgressEx = challengeProgressDao.save(challengeProgressEx);
-	    }
-	    catch (ValidationException e) {
-
-		logger.error(e.getMessage());
-		e.printStackTrace();
-	    }
 	}
-
 	client.setActiveChallengeGame(null);
-
-	filters = new HashMap<>();
-	filters.put("characterPlayer", challengeProgress.getCharacterPlayer());
-	List<ChallengeProgress> challengeProgressList = challengeProgressDao.getList(filters, "characterPlayer", "challenge");
 
 	List<Map<String, Object>> rewardItemList = new ArrayList<>();
 	try {
@@ -109,8 +100,9 @@ public class ChallengeManagerImpl extends Service {
 	    e.printStackTrace();
 	}
 
-	int rewardExp = itemRewardImpl.getRewardExp(challengeProgressEx != null, challenge.getRewardExp());
-	int rewardGold = itemRewardImpl.getRewardGold(challengeProgressEx != null, challenge.getRewardGold());
+	boolean disableItemReward = itemRewardImpl.disableItemReward(challengeProgressEx, win, successCount, oldSuccessCount);
+	int rewardExp = itemRewardImpl.getRewardExp(disableItemReward, challenge.getRewardExp(), win);
+	int rewardGold = itemRewardImpl.getRewardGold(disableItemReward, challenge.getRewardGold(), win);
 
 	LevelCalculatorImpl levelCalculatorImpl = new LevelCalculatorImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
 	byte level = levelCalculatorImpl.getLevel(rewardExp, client.getActiveCharacterPlayer().getExpPoints(), client.getActiveCharacterPlayer().getLevel());
@@ -127,12 +119,20 @@ public class ChallengeManagerImpl extends Service {
 	    logger.error(e.getMessage());
 	    e.printStackTrace();
 	}
+	if(challengeProgressEx != null) {
+
+	    try {
+		challengeProgressDao.save(challengeProgressEx);
+	    }
+	    catch (ValidationException e) {
+
+		logger.error(e.getMessage());
+		e.printStackTrace();
+	    }
+	}
 	client.setActiveCharacterPlayer(characterPlayer);
 
 	S2CChallengeFinishPacket challengeFinishPacket = new S2CChallengeFinishPacket(win, level, rewardExp, rewardGold, (int)Math.ceil((double)timeNeeded / 1000), rewardItemList);
 	client.getPacketStream().write(challengeFinishPacket);
-
-	S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
-	client.getPacketStream().write(challengeProgressAnswerPacket);
     }
 }

@@ -57,7 +57,7 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
 	    this.write((byte) 0);
 	    this.write((byte) 0);
 	    //??
-	    this.write(0);
+	    this.write(statusPointsAddedDto.getAddHp()); // add hp???
 	    this.write((byte) 0);
 	    this.write((byte) 0);
 	    this.write((byte) 0);

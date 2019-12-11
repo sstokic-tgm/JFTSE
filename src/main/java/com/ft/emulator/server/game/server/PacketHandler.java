@@ -1095,8 +1095,8 @@ public class PacketHandler {
         C2SChallengeHpPacket challengeHpPacket = new C2SChallengeHpPacket(packet);
 
         if(client.getActiveChallengeGame() instanceof ChallengeBattleGame) {
-            ((ChallengeBattleGame) client.getActiveChallengeGame()).setPlayerHp((int)challengeHpPacket.getPlayerHp());
-            ((ChallengeBattleGame) client.getActiveChallengeGame()).setNpcHp((int)challengeHpPacket.getNpcHp());
+            ((ChallengeBattleGame) client.getActiveChallengeGame()).setMaxPlayerHp((int)challengeHpPacket.getPlayerHp());
+            ((ChallengeBattleGame) client.getActiveChallengeGame()).setMaxNpcHp((int)challengeHpPacket.getNpcHp());
 	}
     }
 
@@ -1104,14 +1104,15 @@ public class PacketHandler {
 
         C2SChallengePointPacket challengePointPacket = new C2SChallengePointPacket(packet);
 
-	((ChallengeBasicGame) client.getActiveChallengeGame()).setPoints(challengePointPacket.getPointsPlayer(), challengePointPacket.getPointsNpc());
+	if(client.getActiveChallengeGame() != null) {
+	    ((ChallengeBasicGame) client.getActiveChallengeGame()).setPoints(challengePointPacket.getPointsPlayer(), challengePointPacket.getPointsNpc());
+	    if (client.getActiveChallengeGame().getFinished()) {
 
-	if(client.getActiveChallengeGame().getFinished()) {
+		boolean win = ((ChallengeBasicGame) client.getActiveChallengeGame()).getSetsPlayer() == 2;
 
-	    boolean win = ((ChallengeBasicGame) client.getActiveChallengeGame()).getSetsPlayer() == 2;
-
-	    ChallengeManagerImpl challengeManagerImpl = new ChallengeManagerImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
-	    challengeManagerImpl.finishChallengeGame(client, win);
+		ChallengeManagerImpl challengeManagerImpl = new ChallengeManagerImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
+		challengeManagerImpl.finishChallengeGame(client, win);
+	    }
 	}
     }
 
@@ -1119,13 +1120,15 @@ public class PacketHandler {
 
         C2SChallengeDamagePacket challengeDamagePacket = new C2SChallengeDamagePacket(packet);
 
-	((ChallengeBattleGame) client.getActiveChallengeGame()).setHp(challengeDamagePacket.getPlayer(), challengeDamagePacket.getDmg());
-	if(client.getActiveChallengeGame().getFinished()) {
+        if(client.getActiveChallengeGame() != null) {
+	    ((ChallengeBattleGame) client.getActiveChallengeGame()).setHp(challengeDamagePacket.getPlayer(), challengeDamagePacket.getDmg());
+	    if (client.getActiveChallengeGame().getFinished()) {
 
-	    boolean win = ((ChallengeBattleGame) client.getActiveChallengeGame()).getPlayerHp() > 0;
+		boolean win = ((ChallengeBattleGame) client.getActiveChallengeGame()).getPlayerHp() > 0;
 
-	    ChallengeManagerImpl challengeManagerImpl = new ChallengeManagerImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
-	    challengeManagerImpl.finishChallengeGame(client, win);
+		ChallengeManagerImpl challengeManagerImpl = new ChallengeManagerImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
+		challengeManagerImpl.finishChallengeGame(client, win);
+	    }
 	}
     }
 

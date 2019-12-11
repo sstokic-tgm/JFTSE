@@ -33,9 +33,25 @@ public class ItemRewardImpl extends Service {
 	characterPlayerPocketDao = new GenericModelDao<>(entityManagerFactory, CharacterPlayerPocket.class);
     }
 
-    public List<Product> getItemRewardChallenge(Challenge challenge, ChallengeProgress challengeProgress) {
+    public boolean disableItemReward(ChallengeProgress challengeProgress, Boolean win, Integer successCount, Integer oldSuccessCount) {
+	boolean disableItemReward = false;
+	if(challengeProgress == null && !win) {
+	    disableItemReward = true;
+	}
+	else if(challengeProgress != null && win && (successCount != 0 && oldSuccessCount == 0)) {
+	    disableItemReward = false;
+	}
+	else if(challengeProgress != null && win && (successCount != 0 && oldSuccessCount != 0)) {
+	    disableItemReward = true;
+	}
+	return disableItemReward;
+    }
 
-	return getProducts(challenge.getItemRewardRepeat(), challengeProgress != null, challenge.getRewardItem1(), challenge.getRewardItem2(), challenge.getRewardItem3());
+    public List<Product> getItemRewardChallenge(Challenge challenge, ChallengeProgress challengeProgress, Boolean win, Integer successCount, Integer oldSuccessCount) {
+
+        boolean disableItemReward = disableItemReward(challengeProgress, win, successCount, oldSuccessCount);
+
+	return getProducts(challenge.getItemRewardRepeat(), disableItemReward, challenge.getRewardItem1(), challenge.getRewardItem2(), challenge.getRewardItem3());
     }
 
     public List<Product> getItemRewardTutorial(Tutorial tutorial, TutorialProgress tutorialProgress) {
@@ -43,9 +59,9 @@ public class ItemRewardImpl extends Service {
 	return getProducts(tutorial.getItemRewardRepeat(), tutorialProgress != null, tutorial.getRewardItem1(), tutorial.getRewardItem2(), tutorial.getRewardItem3());
     }
 
-    private List<Product> getProducts(Boolean itemRewardRepeat, Boolean progressExists, Integer rewardItem1, Integer rewardItem2, Integer rewardItem3) {
+    private List<Product> getProducts(Boolean itemRewardRepeat, Boolean disableItemReward, Integer rewardItem1, Integer rewardItem2, Integer rewardItem3) {
 
-	if(!itemRewardRepeat && progressExists) {
+	if(!itemRewardRepeat && disableItemReward) {
 	    return new ArrayList<>();
 	}
 
@@ -73,17 +89,17 @@ public class ItemRewardImpl extends Service {
 	return result;
     }
 
-    public int getRewardExp(Boolean progressExists, int rewardExp) {
+    public int getRewardExp(Boolean progressExists, int rewardExp, Boolean win) {
 
-        if(progressExists) {
+        if(progressExists || !win) {
             return 0;
 	}
         return rewardExp;
     }
 
-    public int getRewardGold(Boolean progressExists, int rewardGold) {
+    public int getRewardGold(Boolean progressExists, int rewardGold, Boolean win) {
 
-	if(progressExists) {
+	if(progressExists || !win) {
 	    return 0;
 	}
 	return rewardGold;
