@@ -44,6 +44,9 @@ public class ItemRewardImpl extends Service {
 	else if(challengeProgress != null && win && (successCount != 0 && oldSuccessCount != 0)) {
 	    disableItemReward = true;
 	}
+	else if(challengeProgress != null && !win) {
+	    disableItemReward = true;
+	}
 	return disableItemReward;
     }
 
