@@ -76,5 +76,6 @@ public class GameServer extends NetworkThread {
 
 	    packetHandler.handlePacket(client, packet);
 	}
+	packetHandler.handleDisconnect(client);
     }
 }

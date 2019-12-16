@@ -41,7 +41,7 @@ public class S2CCharacterStatusPointChangePacket extends Packet {
         this.write((byte) 0);
         this.write((byte) 0);
         //??
-        this.write(0);
+        this.write(statusPointsAddedDto.getAddHp());
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);

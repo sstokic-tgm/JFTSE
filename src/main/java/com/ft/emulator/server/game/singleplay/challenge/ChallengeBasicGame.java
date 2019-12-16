@@ -34,7 +34,7 @@ public class ChallengeBasicGame extends ChallengeGame {
         this.pointsPlayer = pointsPlayer;
         this.pointsNpc = pointsNpc;
 
-        if(pointsPlayer == 4 && pointsNpc < 4) {
+        if(pointsPlayer == 4 && pointsNpc < 3) {
 
 	    this.setsPlayer++;
             this.pointsPlayer = 0;
@@ -46,7 +46,7 @@ public class ChallengeBasicGame extends ChallengeGame {
             this.pointsPlayer = 0;
             this.pointsNpc = 0;
 	}
-        else if(pointsNpc == 4 && pointsPlayer < 4) {
+        else if(pointsNpc == 4 && pointsPlayer < 3) {
 
             this.setsNpc++;
             this.pointsPlayer = 0;
