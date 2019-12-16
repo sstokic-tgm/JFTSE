@@ -57,6 +57,8 @@ public final class PacketID {
 
     public final static char C2SInventoryWearClothRequest = 0x1B63;
     public final static char S2CInventoryWearClothAnswer = 0x1B64;
+    public final static char C2SInventoryWearQuickRequest = 0x1BD8;
+    public final static char S2CInventoryWearQuickAnswer = 0x1BD9;
     public final static char S2CInventoryData = 0x1B69;
 
     public final static char C2SHomeItemsClearReq = 0x2552;
