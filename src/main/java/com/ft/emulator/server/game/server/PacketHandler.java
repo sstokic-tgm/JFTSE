@@ -25,6 +25,7 @@ import com.ft.emulator.server.game.inventory.InventoryImpl;
 import com.ft.emulator.server.game.item.EItemCategory;
 import com.ft.emulator.server.game.item.EItemUseType;
 import com.ft.emulator.server.game.matchplay.room.Room;
+import com.ft.emulator.server.game.matchplay.room.RoomImpl;
 import com.ft.emulator.server.game.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.money.MoneyImpl;
 import com.ft.emulator.server.game.server.packets.*;
@@ -105,6 +106,32 @@ public class PacketHandler {
 	productDao = new GenericModelDao<>(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory(), Product.class);
     }
 
+    public void handleDisconnect(Client client) {
+
+        client.setActiveTutorialGame(null);
+        client.setActiveChallengeGame(null);
+        client.setInLobby(false);
+	new RoomImpl().removePlayerFromRoom(client, this.gameHandler.getRooms());
+
+	// reset status
+	Account account = client.getAccount();
+	account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+	try {
+
+	    accountDao.save(account);
+	}
+	catch (ValidationException e) {
+
+	    logger.error(e.getMessage());
+	    e.printStackTrace();
+	    return;
+	}
+
+	if(!this.gameHandler.getClients().isEmpty()) {
+	    this.gameHandler.removeClient(client);
+	}
+    }
+
     public void handlePacket(Client client, Packet packet) {
 
 	switch (packet.getPacketId()) {
@@ -178,6 +205,11 @@ public class PacketHandler {
 	case PacketID.C2SInventoryWearClothRequest:
 
 	    this.handleInventoryWearClothPacket(client, packet);
+	    break;
+
+	case PacketID.C2SInventoryWearQuickRequest:
+
+	    this.handleInventoryWearQuickPacket(client, packet);
 	    break;
 
 	case PacketID.C2SShopMoneyReq:
@@ -463,6 +495,16 @@ public class PacketHandler {
 	    return;
 	}
 
+	// check name
+	Map<String, Object> filters = new HashMap<>();
+	filters.put("name", characterCreatePacket.getNickname());
+	List<CharacterPlayer> characterPlayerList = characterPlayerDao.getList(filters);
+	if(!characterPlayerList.isEmpty()) {
+	    S2CCharacterCreateAnswerPacket characterCreateAnswerPacket = new S2CCharacterCreateAnswerPacket((char)-1);
+	    client.getPacketStream().write(characterCreateAnswerPacket);
+	    return;
+	}
+
 	characterPlayer.setName(characterCreatePacket.getNickname());
 	characterPlayer.setAlreadyCreated(true);
 	characterPlayer.setStrength(characterCreatePacket.getStrength());
@@ -628,6 +670,9 @@ public class PacketHandler {
 
 	    S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char)0, equippedCloths, client.getActiveCharacterPlayer(), statusPointsAddedDto);
 	    client.getPacketStream().write(inventoryWearClothAnswerPacket);
+
+	    S2CCharacterStatusPointChangePacket characterStatusPointChangePacket = new S2CCharacterStatusPointChangePacket(client.getActiveCharacterPlayer(), statusPointsAddedDto);
+	    client.getPacketStream().write(characterStatusPointChangePacket);
 	}
 
 	S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(gameServerRequestPacket.getRequestType());
@@ -919,6 +964,14 @@ public class PacketHandler {
 	client.getPacketStream().write(inventoryWearClothAnswerPacket);
     }
 
+    private void handleInventoryWearQuickPacket(Client client, Packet packet) {
+
+        C2SInventoryWearQuickReqPacket inventoryWearQuickReqPacket = new C2SInventoryWearQuickReqPacket(packet);
+
+        S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(inventoryWearQuickReqPacket.getQuickSlotList());
+        client.getPacketStream().write(inventoryWearQuickAnswerPacket);
+    }
+
     private void handleShopMoneyRequestPacket(Client client, Packet packet) {
 
 	Packet unknownAnswer = new Packet(PacketID.S2CShopMoneyAnswer);
@@ -953,38 +1006,61 @@ public class PacketHandler {
 
 	if(result >= 0) {
 
-	    CharacterPlayerPocket characterPlayerPocket = new CharacterPlayerPocket();
-	    characterPlayerPocket.setCategory(product.getCategory());
-	    characterPlayerPocket.setItemIndex(product.getItem0());
-	    characterPlayerPocket.setUseType(product.getUseType());
+	    if(!product.getCategory().equals(EItemCategory.CHAR.getName())) {
 
-	    if (option == 0) {
-		characterPlayerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
-	    }
-	    else if (option == 1) {
-		characterPlayerPocket.setItemCount(product.getUse1());
-	    }
-	    else if (option == 2) {
-		characterPlayerPocket.setItemCount(product.getUse2());
-	    }
+		CharacterPlayerPocket characterPlayerPocket = new CharacterPlayerPocket();
+		characterPlayerPocket.setCategory(product.getCategory());
+		characterPlayerPocket.setItemIndex(product.getItem0());
+		characterPlayerPocket.setUseType(product.getUseType());
 
-	    Pocket pocket = client.getActiveCharacterPlayer().getPocket();
-	    logger.info(pocket.getId() + "");
-	    characterPlayerPocket.setPocket(pocket);
+		if (option == 0) {
+		    characterPlayerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
+		}
+		else if (option == 1) {
+		    characterPlayerPocket.setItemCount(product.getUse1());
+		}
+		else if (option == 2) {
+		    characterPlayerPocket.setItemCount(product.getUse2());
+		}
 
-	    try {
+		Pocket pocket = client.getActiveCharacterPlayer().getPocket();
+		logger.info(pocket.getId() + "");
+		characterPlayerPocket.setPocket(pocket);
 
-		characterPlayerPocket = characterPlayerPocketDao.save(characterPlayerPocket);
-		pocket = inventoryImpl.incrementPocketBelongings(pocket);
+		try {
+
+		    characterPlayerPocket = characterPlayerPocketDao.save(characterPlayerPocket);
+		    pocket = inventoryImpl.incrementPocketBelongings(pocket);
+		}
+		catch (ValidationException e) {
+		    logger.error(e.getMessage());
+		    e.printStackTrace();
+		}
+		client.getActiveCharacterPlayer().setPocket(pocket);
+
+		S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.SUCCESS, characterPlayerPocket);
+		client.getPacketStream().write(shopBuyPacketAnswer);
 	    }
-	    catch (ValidationException e) {
-		logger.error(e.getMessage());
-		e.printStackTrace();
-	    }
-	    client.getActiveCharacterPlayer().setPocket(pocket);
+	    else {
 
-	    S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.SUCCESS, characterPlayerPocket);
-	    client.getPacketStream().write(shopBuyPacketAnswer);
+		CharacterPlayer newCharacter = new CharacterPlayer();
+		newCharacter.setAccount(client.getAccount());
+		newCharacter.setCType(product.getForCharacter());
+		newCharacter.setFirstCharacter(false);
+
+		try {
+		    characterPlayerDao.save(newCharacter);
+		}
+		catch (ValidationException e) {
+
+		    logger.error(e.getMessage());
+		    e.printStackTrace();
+		    return;
+		}
+
+		S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.SUCCESS, null);
+		client.getPacketStream().write(shopBuyPacketAnswer);
+	    }
 
 	    try {
 		characterPlayer = moneyImpl.setMoney(characterPlayer, result);
@@ -1207,6 +1283,8 @@ public class PacketHandler {
 
     private void handleRoomCreatePacket(Client client, Packet packet) {
 
+	client.setInLobby(false);
+
         C2SRoomCreatePacket roomCreatePacket = new C2SRoomCreatePacket(packet);
 
 	Room room = new Room();
@@ -1236,7 +1314,10 @@ public class PacketHandler {
 	this.gameHandler.getRooms().add(room);
 
 	Packet roomCreateAnswerPacket = new Packet(PacketID.S2CRoomCreateAnswer);
-	roomCreateAnswerPacket.write(0);
+	roomCreateAnswerPacket.write((char)0);
+	roomCreateAnswerPacket.write((byte)0);
+	roomCreateAnswerPacket.write((byte)0);
+	roomCreateAnswerPacket.write((byte)0);
 	client.getPacketStream().write(roomCreateAnswerPacket);
 
 	S2CRoomInformation roomInformation = new S2CRoomInformation(room);
@@ -1256,7 +1337,7 @@ public class PacketHandler {
         Room room = this.gameHandler.getRooms().stream()
 		.filter(r -> r.getId() == roomJoinPacket.getRoomId())
 		.findAny()
-		.orElse(null);
+		.get();
 
         S2CRoomJoinAnswer roomJoinAnswer = new S2CRoomJoinAnswer((short)0, (byte)0, (byte)0, (byte)0);
         client.getPacketStream().write(roomJoinAnswer);
@@ -1332,10 +1413,49 @@ public class PacketHandler {
 
     private void handleRoomStartGame(Client client, Packet packet) {
 
+        List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
+        for(Client roomClient : clientsInRoom) {
+
+	    Packet testAnswer = new Packet((char)0x177C);
+	    testAnswer.write((char)0);
+	    roomClient.getPacketStream().write(testAnswer);
+
+	    Packet testAnswer3 = new Packet((char)0x17DE);
+	    testAnswer3.write((char)0);
+	    roomClient.getPacketStream().write(testAnswer3);
+
+	    Packet testAnswer2 = new Packet((char)0x17E6);
+	    testAnswer2.write((char)0);
+	    roomClient.getPacketStream().write(testAnswer2);
+
+	    // Stats
+	    Packet testAnswer4 = new Packet((char)0x17E4);
+	    testAnswer4.write((short)2);
+	    testAnswer4.write((short)0);
+	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getName());
+	    testAnswer4.write((short)0);
+	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getLevel());
+	    testAnswer4.write(1);
+	    testAnswer4.write(2);
+	    testAnswer4.write(3);
+	    testAnswer4.write((short)1);
+	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getName());
+	    testAnswer4.write((short)0);
+	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getLevel());
+	    testAnswer4.write(1);
+	    testAnswer4.write(2);
+	    testAnswer4.write(3);
+	    roomClient.getPacketStream().write(testAnswer4);
+	}
     }
 
     private void handle17DDPacket(Client client, Packet packet) {
 
+        // 0x26FC = basic single game end
+
+	Packet testAnswer = new Packet((char)0x18B3);
+	testAnswer.write((byte)1);
+	client.getPacketStream().write(testAnswer);
     }
 
     private void handleRoomListReqPacket(Client client, Packet packet) {
@@ -1347,8 +1467,12 @@ public class PacketHandler {
     private void handleLobbyUserListReqPacket(Client client, Packet packet) {
 
         C2SLobbyUserListRequestPacket lobbyUserListRequestPacket = new C2SLobbyUserListRequestPacket(packet);
+        byte page = lobbyUserListRequestPacket.getPage();
 
-        List<CharacterPlayer> lobbyCharacterList = this.gameHandler.getCharacterPlayersInLobby();
+        List<CharacterPlayer> lobbyCharacterList = this.gameHandler.getCharacterPlayersInLobby().stream()
+		.skip(page == 1 ? 0 : (page * 10) - 10)
+		.limit(10)
+		.collect(Collectors.toList());
 
         S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyCharacterList);
         client.getPacketStream().write(lobbyUserListAnswerPacket);
@@ -1357,6 +1481,14 @@ public class PacketHandler {
     private void handleLobbyJoinLeave(Client client, boolean joined) {
 
 	client.setInLobby(joined);
+
+	if(joined) {
+	    if(new RoomImpl().removePlayerFromRoom(client, this.gameHandler.getRooms())) {
+
+		S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRooms());
+		client.getPacketStream().write(roomListAnswerPacket);
+	    }
+	}
     }
 
     private void handleEmblemListRequestPacket(Client client, Packet packet) {
