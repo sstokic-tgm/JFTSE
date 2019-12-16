@@ -27,7 +27,7 @@ public class AuthenticationImpl extends Service {
 
 	em.close();
 
-	return accountList.size() != 1 ? null : accountList.get(0);
+	return (accountList == null || accountList.isEmpty()) ? null : accountList.get(0);
     }
 
     public List<GameServer> getGameServerList() {
