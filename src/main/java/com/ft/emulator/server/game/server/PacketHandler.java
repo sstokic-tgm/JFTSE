@@ -1424,28 +1424,9 @@ public class PacketHandler {
 	    testAnswer3.write((char)0);
 	    roomClient.getPacketStream().write(testAnswer3);
 
-	    Packet testAnswer2 = new Packet((char)0x17E6);
-	    testAnswer2.write((char)0);
-	    roomClient.getPacketStream().write(testAnswer2);
-
-	    // Stats
-	    Packet testAnswer4 = new Packet((char)0x17E4);
-	    testAnswer4.write((short)2);
-	    testAnswer4.write((short)0);
-	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getName());
-	    testAnswer4.write((short)0);
-	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getLevel());
-	    testAnswer4.write(1);
-	    testAnswer4.write(2);
-	    testAnswer4.write(3);
-	    testAnswer4.write((short)1);
-	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getName());
-	    testAnswer4.write((short)0);
-	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getLevel());
-	    testAnswer4.write(1);
-	    testAnswer4.write(2);
-	    testAnswer4.write(3);
-	    roomClient.getPacketStream().write(testAnswer4);
+	    testAnswer = new Packet((char)0x17DC);
+	    testAnswer.write((char)0);
+	    roomClient.getPacketStream().write(testAnswer);
 	}
     }
 
@@ -1453,9 +1434,38 @@ public class PacketHandler {
 
         // 0x26FC = basic single game end
 
-	Packet testAnswer = new Packet((char)0x18B3);
-	testAnswer.write((byte)1);
+	Packet testAnswer = new Packet((char) 0x17E0);
 	client.getPacketStream().write(testAnswer);
+
+	// Stats
+	Packet testAnswer4 = new Packet((char)0x17E4);
+	List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
+
+	testAnswer4.write((char)clientsInRoom.size());
+	int i = 0;
+	for(Client roomClient : clientsInRoom) {
+
+	    testAnswer4.write((char)i); // team??
+	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getName());
+	    testAnswer4.write((char)0);
+	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getLevel());
+	    testAnswer4.write(1);
+	    testAnswer4.write(2);
+	    testAnswer4.write(3);
+	    i++;
+	}
+	client.getPacketStream().write(testAnswer4);
+
+	testAnswer4 = new Packet((char)0x183A);
+	testAnswer4.write((char)clientsInRoom.size());
+	i = 0;
+	for(Client roomClient : clientsInRoom) {
+
+	    testAnswer4.write((char)i); // team??
+	    testAnswer4.write((char)i); // ??
+	    i++;
+	}
+	client.getPacketStream().write(testAnswer4);
     }
 
     private void handleRoomListReqPacket(Client client, Packet packet) {
@@ -1501,6 +1511,28 @@ public class PacketHandler {
 	if(unknownAnswer.getPacketId() == (char)0x200E) {
 	    unknownAnswer.write((char)1); // guild not active
 	    client.getPacketStream().write(unknownAnswer);
+	}
+	else if(unknownAnswer.getPacketId() == (char)0x17E2) {
+
+	    client.getPacketStream().write(unknownAnswer);
+
+	    Packet testAnswer = new Packet((char)0x183C);
+	    client.getPacketStream().write(testAnswer);
+
+	    List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
+	    testAnswer = new Packet((char)0x183E);
+	    testAnswer.write((char)1);
+	    int i = 0;
+	    for(Client roomClient : clientsInRoom) {
+
+	        testAnswer.write((char)i);
+	        testAnswer.write(1);
+	        testAnswer.write(2);
+	        testAnswer.write((byte)i == 1 ? 0 : 1);
+
+	        i++;
+		client.getPacketStream().write(testAnswer);
+	    }
 	}
 	else {
 	    unknownAnswer.write((short) 0);

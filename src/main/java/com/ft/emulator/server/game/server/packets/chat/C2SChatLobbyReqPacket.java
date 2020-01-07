@@ -16,6 +16,6 @@ public class C2SChatLobbyReqPacket extends Packet {
         super(packet);
 
         this.unk = this.readChar();
-        this.message = this.readUnicodeString().trim().replaceAll("[^a-zA-Z0-9\\s+]", "");
+        this.message = this.readUnicodeString().trim();
     }
 }

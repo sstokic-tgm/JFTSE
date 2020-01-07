@@ -2,7 +2,10 @@ package com.ft.emulator.server.game.matchplay.room;
 
 import com.ft.emulator.server.shared.module.Client;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RoomImpl {
 
@@ -16,8 +19,10 @@ public class RoomImpl {
 
 	    roomList.stream()
 		    .filter(r -> r.getId() == client.getActiveRoom().getId())
-		    .findAny()
-		    .ifPresent(r -> r.getPlayerList().removeIf(rp -> rp.getPlayer() == client.getActiveCharacterPlayer()));
+		    .map(Room::getPlayerList)
+		    .flatMap(Collection::stream)
+		    .collect(Collectors.toList())
+		    .removeIf(rp -> rp.getPlayer() == client.getActiveCharacterPlayer());
 
 	    removeRoom(roomList);
 

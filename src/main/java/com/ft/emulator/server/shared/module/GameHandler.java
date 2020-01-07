@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -44,35 +45,24 @@ public class GameHandler {
 
     public List<CharacterPlayer> getCharacterPlayersInLobby() {
 
-        List<CharacterPlayer> result = new ArrayList<>();
-        clients.forEach(c -> {
-            if(c.isInLobby()) {
-                result.add(c.getActiveCharacterPlayer());
-            }
-        });
-        return result;
+        return clients.stream()
+                .filter(Client::isInLobby)
+                .map(Client::getActiveCharacterPlayer)
+                .collect(Collectors.toList());
     }
 
     public List<Client> getClientsInRoom(char roomId) {
 
-        List<Client> result = new ArrayList<>();
-        clients.forEach(c -> {
-            if(c.getActiveRoom().getId() == roomId) {
-                result.add(c);
-            }
-        });
-        return result;
+        return clients.stream()
+                .filter(c -> c.getActiveRoom() != null && c.getActiveRoom().getId() == roomId)
+                .collect(Collectors.toList());
     }
 
     public List<Client> getClientsInLobby() {
 
-        List<Client> result = new ArrayList<>();
-        clients.forEach(c -> {
-            if(c.isInLobby()) {
-                result.add(c);
-            }
-        });
-        return result;
+        return clients.stream()
+                .filter(Client::isInLobby)
+                .collect(Collectors.toList());
     }
 
     public void removeClient(Client client) {
