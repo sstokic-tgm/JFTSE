@@ -1414,6 +1414,10 @@ public class PacketHandler {
     private void handleRoomStartGame(Client client, Packet packet) {
 
         List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
+
+        /*Packet testanswerudp = new Packet((char)0x17D8);
+        testanswerudp.write((char)clientsInRoom.size());*/
+
         for(Client roomClient : clientsInRoom) {
 
 	    Packet testAnswer = new Packet((char)0x177C);
@@ -1427,6 +1431,30 @@ public class PacketHandler {
 	    testAnswer = new Packet((char)0x17DC);
 	    testAnswer.write((char)0);
 	    roomClient.getPacketStream().write(testAnswer);
+
+	    /*testanswerudp.write("127.0.0.1");
+	    testanswerudp.write((char)0);*/
+	    testAnswer = new Packet((char)0x3EA);
+	    testAnswer.write("127.0.0.1");
+	    testAnswer.write((char)0);
+	    testAnswer.write((char)5895);
+	    testAnswer.write(0);
+	    testAnswer.write(0);
+	    testAnswer.write(0);
+	    testAnswer.write(0);
+	    roomClient.getPacketStream().write(testAnswer);
+	}
+
+	for(Client roomClient : clientsInRoom) {
+	    //roomClient.getPacketStream().write(testanswerudp);
+
+	    Packet testAnswer11 = new Packet((char)0x177E);
+	    testAnswer11.write((byte)0);
+	    testAnswer11.write((char)29999);
+	    testAnswer11.write("127.0.0.1");
+	    testAnswer11.write((char)0);
+	    testAnswer11.write((char)29999);
+	    roomClient.getPacketStream().write(testAnswer11);
 	}
     }
 
@@ -1527,12 +1555,19 @@ public class PacketHandler {
 
 	        testAnswer.write((char)i);
 	        testAnswer.write(1);
-	        testAnswer.write(2);
+	        testAnswer.write(1);
 	        testAnswer.write((byte)i == 1 ? 0 : 1);
 
 	        i++;
 		client.getPacketStream().write(testAnswer);
 	    }
+	}
+	else if(unknownAnswer.getPacketId() == (char)0x415) {
+
+	    packet.setCheckSerial((char) 0);
+	    packet.setCheckSum((char) 0);
+	    packet.setPacketId(unknownAnswer.getPacketId());
+	    client.getPacketStream().write(packet);
 	}
 	else {
 	    unknownAnswer.write((short) 0);
