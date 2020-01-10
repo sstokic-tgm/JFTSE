@@ -27,7 +27,7 @@ public class C2SRoomCreatePacket extends Packet {
 
         super(packet);
 
-        this.name = this.readUnicodeString().trim();
+        this.name = this.readUnicodeString();
         this.type = this.readByte();
         this.gameMode = this.readByte();
         this.rule = this.readByte();
@@ -42,7 +42,7 @@ public class C2SRoomCreatePacket extends Packet {
         this.ball = this.readInt();
 
         if(this.isPrivate) {
-            this.password = this.readUnicodeString().trim();
+            this.password = this.readUnicodeString();
 	}
     }
 }

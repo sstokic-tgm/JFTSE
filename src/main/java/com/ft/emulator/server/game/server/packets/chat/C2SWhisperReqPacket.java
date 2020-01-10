@@ -17,7 +17,7 @@ public class C2SWhisperReqPacket extends Packet {
         super(packet);
 
         this.unk = this.readChar();
-        this.receiverName = this.readUnicodeString().trim();
-        this.message = this.readUnicodeString().trim();
+        this.receiverName = this.readUnicodeString();
+        this.message = this.readUnicodeString();
     }
 }

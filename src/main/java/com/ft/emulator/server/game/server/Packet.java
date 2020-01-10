@@ -160,7 +160,7 @@ public class Packet {
         int stringLength = indexOf(this.data, new byte[] {0x00, 0x00}, this.readPosition) + 1 - this.readPosition;
 
         if(stringLength > 0) {
-            result = new String(this.data, this.readPosition, stringLength, Charset.forName("UTF-8"));
+            result = new String(this.data, this.readPosition, stringLength, Charset.forName("UTF-16LE"));
             this.readPosition += stringLength + 2;
 	}
 

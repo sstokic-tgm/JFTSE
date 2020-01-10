@@ -16,6 +16,6 @@ public class C2SChatRoomReqPacket extends Packet {
         super(packet);
 
         this.type = this.readByte();
-        this.message = this.readUnicodeString().trim();
+        this.message = this.readUnicodeString();
     }
 }
