@@ -212,6 +212,11 @@ public class PacketHandler {
 	    this.handleInventoryWearQuickPacket(client, packet);
 	    break;
 
+	case PacketID.C2SInventoryItemTimeExpiredRequest:
+
+	    this.handleInventoryItemTimeExpiredPacket(client, packet);
+	    break;
+
 	case PacketID.C2SShopMoneyReq:
 
 	    this.handleShopMoneyRequestPacket(client, packet);
@@ -719,6 +724,17 @@ public class PacketHandler {
 
 		        if(itemCount == 0) {
 		            inventoryImpl.removeItemFromInventory((long)inventoryItemId);
+
+			    try {
+				inventoryImpl.decrementPocketBelongings(client.getActiveCharacterPlayer().getPocket());
+			    }
+			    catch (ValidationException e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+			    }
+
+		            S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
+		            client.getPacketStream().write(inventoryItemRemoveAnswerPacket);
 			}
 		        else {
 
@@ -972,6 +988,28 @@ public class PacketHandler {
         client.getPacketStream().write(inventoryWearQuickAnswerPacket);
     }
 
+    private void handleInventoryItemTimeExpiredPacket(Client client, Packet packet) {
+
+	C2SInventoryItemTimeExpiredReqPacket inventoryItemTimeExpiredReqPacket = new C2SInventoryItemTimeExpiredReqPacket(packet);
+
+	Pocket pocket = client.getActiveCharacterPlayer().getPocket();
+
+	InventoryImpl inventoryImpl = new InventoryImpl(EntityManagerFactoryUtil.INSTANCE.getEntityManagerFactory());
+	inventoryImpl.removeItemFromInventory((long) inventoryItemTimeExpiredReqPacket.getItemPocketId());
+
+	try {
+	    pocket = inventoryImpl.decrementPocketBelongings(client.getActiveCharacterPlayer().getPocket());
+	}
+	catch (ValidationException e) {
+	    logger.error(e.getMessage());
+	    e.printStackTrace();
+	}
+	client.getActiveCharacterPlayer().setPocket(pocket);
+
+	S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemTimeExpiredReqPacket.getItemPocketId());
+	client.getPacketStream().write(inventoryItemRemoveAnswerPacket);
+    }
+
     private void handleShopMoneyRequestPacket(Client client, Packet packet) {
 
 	Packet unknownAnswer = new Packet(PacketID.S2CShopMoneyAnswer);
@@ -1023,8 +1061,15 @@ public class PacketHandler {
 		    characterPlayerPocket.setItemCount(product.getUse2());
 		}
 
+		if(characterPlayerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+
+		    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		    calendar.add(Calendar.DAY_OF_MONTH, characterPlayerPocket.getItemCount());
+
+		    characterPlayerPocket.setCreated(calendar.getTime());
+		}
+
 		Pocket pocket = client.getActiveCharacterPlayer().getPocket();
-		logger.info(pocket.getId() + "");
 		characterPlayerPocket.setPocket(pocket);
 
 		try {
@@ -1294,7 +1339,7 @@ public class PacketHandler {
 	room.setBattleMode(roomCreatePacket.getGameMode());
 	room.setLevel(client.getActiveCharacterPlayer().getLevel());
 	room.setLevelRange(roomCreatePacket.getLevelRange());
-	room.setMap((byte)1);
+	room.setMap((byte)8);
 	room.setBetting(false);
 	room.setBettingCoins((byte)0);
 	room.setBettingGold(0);
@@ -1443,6 +1488,9 @@ public class PacketHandler {
 	    testAnswer.write(0);
 	    testAnswer.write(0);
 	    roomClient.getPacketStream().write(testAnswer);
+
+	    testAnswer.setPacketId((char)0x17DA);
+	    roomClient.getPacketStream().write(testAnswer);
 	}
 
 	for(Client roomClient : clientsInRoom) {
@@ -1564,10 +1612,37 @@ public class PacketHandler {
 	}
 	else if(unknownAnswer.getPacketId() == (char)0x415) {
 
+	    List<Client> clientList = this.gameHandler.getClients();
+
+	    packet.setPacketId((char)0x415);
 	    packet.setCheckSerial((char) 0);
 	    packet.setCheckSum((char) 0);
-	    packet.setPacketId(unknownAnswer.getPacketId());
-	    client.getPacketStream().write(packet);
+
+	    for(Client cl : clientList) {
+		cl.getPacketStream().write(packet);
+	    }
+	}
+	else if(unknownAnswer.getPacketId() == (char)0x1D4D) {
+
+	    byte slotNum = packet.readByte();
+	    byte openClose = packet.readByte();
+
+	    unknownAnswer.write((byte)1);
+	    unknownAnswer.write((byte)2);
+	    unknownAnswer.write((byte)3);
+	    unknownAnswer.write((byte)4);
+
+	    List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
+	    clientsInRoom.forEach(cl -> cl.getPacketStream().write(unknownAnswer));
+	}
+	else if(unknownAnswer.getPacketId() == (char)0x18A3) {
+
+	    packet.setPacketId((char)0x18A3);
+	    packet.setCheckSerial((char) 0);
+	    packet.setCheckSum((char) 0);
+
+	    List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
+	    clientsInRoom.forEach(cl -> cl.getPacketStream().write(packet));
 	}
 	else {
 	    unknownAnswer.write((short) 0);
