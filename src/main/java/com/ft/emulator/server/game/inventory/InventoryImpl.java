@@ -9,14 +9,13 @@ import com.ft.emulator.server.database.model.item.ItemPart;
 import com.ft.emulator.server.database.model.pocket.CharacterPlayerPocket;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.game.item.EItemCategory;
+import com.ft.emulator.server.game.item.EItemUseType;
 import com.ft.emulator.server.game.server.packets.inventory.C2SInventoryWearClothReqPacket;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InventoryImpl extends Service {
 
@@ -70,7 +69,29 @@ public class InventoryImpl extends Service {
 
 	Map<String, Object> filter = new HashMap<>();
 	filter.put("pocket", playerPocket);
-	return characterPlayerPocketDao.getList(filter);
+
+	List<CharacterPlayerPocket> inventoryItems = characterPlayerPocketDao.getList(filter);
+	List<CharacterPlayerPocket> result = new ArrayList<>();
+	for(CharacterPlayerPocket ii : inventoryItems) {
+
+	    if(((ii.getCreated().getTime() * 10000) - (new Date().getTime() * 10000) <= 0) && ii.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+
+	        this.removeItemFromInventory(ii.getId());
+
+	        try {
+	            playerPocket = this.decrementPocketBelongings(playerPocket);
+		}
+	        catch (ValidationException e) { // shouldn't happen
+		    e.printStackTrace();
+		}
+
+	        continue;
+	    }
+
+	    result.add(ii);
+	}
+
+	return result;
     }
 
     public Integer getItemSellPrice(CharacterPlayerPocket item) {

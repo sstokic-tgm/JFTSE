@@ -153,6 +153,7 @@ public class ItemRewardImpl extends Service {
 	rewardItemMap.put("itemIndex", characterPlayerPocket.getItemIndex());
 	rewardItemMap.put("useType", characterPlayerPocket.getUseType());
 	rewardItemMap.put("itemCount", characterPlayerPocket.getItemCount());
+	rewardItemMap.put("created", characterPlayerPocket.getCreated());
 
 	rewardItemList.add(rewardItemMap);
     }

@@ -5,6 +5,7 @@ import com.ft.emulator.server.game.item.EItemUseType;
 import com.ft.emulator.server.game.server.Packet;
 import com.ft.emulator.server.game.server.PacketID;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public class S2CTutorialFinishPacket extends Packet {
 	    Long itemIndex = (Long)rewardItem.get("itemIndex");
 	    String useType = (String)rewardItem.get("useType");
 	    Integer itemCount = (Integer)rewardItem.get("itemCount");
+	    Date created = (Date)rewardItem.get("created");
 
 	    this.write(Math.toIntExact(id));
 	    this.write(EItemCategory.valueOf(category).getValue());
@@ -35,9 +37,9 @@ public class S2CTutorialFinishPacket extends Packet {
 	    this.write(useType.equals("N/A") ? (byte)0 : EItemUseType.valueOf(useType.toUpperCase()).getValue());
 	    this.write(itemCount);
 
+	    long timeLeft = (created.getTime() * 10000) - (new Date().getTime() * 10000);
+	    this.write(timeLeft);
 	    // ??
-	    this.write(0);
-	    this.write(0);
 	    this.write((byte)0);
 	    this.write((byte)0);
 	    this.write((byte)0);
