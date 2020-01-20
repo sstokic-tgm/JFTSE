@@ -6,6 +6,8 @@ import com.ft.emulator.server.game.item.EItemUseType;
 import com.ft.emulator.server.game.server.Packet;
 import com.ft.emulator.server.game.server.PacketID;
 
+import java.util.Date;
+
 public class S2CShopBuyPacket extends Packet {
 
     public final static short SUCCESS = 0;
@@ -22,28 +24,28 @@ public class S2CShopBuyPacket extends Packet {
 
     public S2CShopBuyPacket(short result, CharacterPlayerPocket characterPlayerPocket) {
 
-        super(PacketID.S2CShopBuyAnswer);
+	super(PacketID.S2CShopBuyAnswer);
 
-        this.write(result);
+	this.write(result);
 
-        if(result == SUCCESS && characterPlayerPocket != null) {
-            this.write((char) 1);
+	if (result == SUCCESS && characterPlayerPocket != null) {
+	    this.write((char) 1);
 
-            this.write(Math.toIntExact(characterPlayerPocket.getId()));
-            this.write(EItemCategory.valueOf(characterPlayerPocket.getCategory()).getValue());
-            this.write(Math.toIntExact(characterPlayerPocket.getItemIndex()));
-            this.write(characterPlayerPocket.getUseType().equals("N/A") ? (byte) 0 : EItemUseType.valueOf(characterPlayerPocket.getUseType().toUpperCase()).getValue());
-            this.write(characterPlayerPocket.getItemCount());
+	    this.write(Math.toIntExact(characterPlayerPocket.getId()));
+	    this.write(EItemCategory.valueOf(characterPlayerPocket.getCategory()).getValue());
+	    this.write(Math.toIntExact(characterPlayerPocket.getItemIndex()));
+	    this.write(characterPlayerPocket.getUseType().equals("N/A") ? (byte) 0 : EItemUseType.valueOf(characterPlayerPocket.getUseType().toUpperCase()).getValue());
+	    this.write(characterPlayerPocket.getItemCount());
 
-            // ??
-            this.write(0);
-            this.write(0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-        }
+	    long timeLeft = (characterPlayerPocket.getCreated().getTime() * 10000) - (new Date().getTime() * 10000);
+	    this.write(timeLeft);
+	    // ??
+	    this.write((byte) 0);
+	    this.write((byte) 0);
+	    this.write((byte) 0);
+	    this.write((byte) 0);
+	    this.write((byte) 0);
+	    this.write((byte) 0);
+	}
     }
 }
