@@ -1377,6 +1377,8 @@ public class PacketHandler {
 
     private void handleRoomJoinPacket(Client client, Packet packet) {
 
+	client.setInLobby(false);
+
         C2SRoomJoinPacket roomJoinPacket = new C2SRoomJoinPacket(packet);
 
         Room room = this.gameHandler.getRooms().stream()
@@ -1453,7 +1455,8 @@ public class PacketHandler {
         C2SRoomMapChangePacket roomMapChangePacket = new C2SRoomMapChangePacket(packet);
         S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(roomMapChangePacket.getMap());
 
-        client.getPacketStream().write(roomMapChangeAnswerPacket);
+	List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
+	clientsInRoom.forEach(c -> c.getPacketStream().write(roomMapChangeAnswerPacket));
     }
 
     private void handleRoomStartGame(Client client, Packet packet) {
@@ -1479,7 +1482,7 @@ public class PacketHandler {
 
 	    /*testanswerudp.write("127.0.0.1");
 	    testanswerudp.write((char)0);*/
-	    testAnswer = new Packet((char)0x3EA);
+	    /*testAnswer = new Packet((char)0x3EA);
 	    testAnswer.write("127.0.0.1");
 	    testAnswer.write((char)0);
 	    testAnswer.write((char)5895);
@@ -1487,21 +1490,40 @@ public class PacketHandler {
 	    testAnswer.write(0);
 	    testAnswer.write(0);
 	    testAnswer.write(0);
-	    roomClient.getPacketStream().write(testAnswer);
-
-	    testAnswer.setPacketId((char)0x17DA);
-	    roomClient.getPacketStream().write(testAnswer);
+	    roomClient.getPacketStream().write(testAnswer);*/
 	}
+
+	Packet testAnswer11 = new Packet((char)0x17DA);
+	//testAnswer11.write((byte) 1);
+	testAnswer11.write((char)client.getClientSocket().getPort());
+	testAnswer11.write("127.0.0.1");
+	testAnswer11.write((char)0);
+	testAnswer11.write((char)client.getClientSocket().getPort());
+	client.getPacketStream().write(testAnswer11);
+
+	testAnswer11 = new Packet((char)0x177E);
+	testAnswer11.write((byte) 1);
+	testAnswer11.write((char)client.getClientSocket().getPort());
+	testAnswer11.write("127.0.0.1");
+	testAnswer11.write((char)0);
+	testAnswer11.write((char)client.getClientSocket().getPort());
+	client.getPacketStream().write(testAnswer11);
+
+
 
 	for(Client roomClient : clientsInRoom) {
 	    //roomClient.getPacketStream().write(testanswerudp);
 
-	    Packet testAnswer11 = new Packet((char)0x177E);
-	    testAnswer11.write((byte)0);
-	    testAnswer11.write((char)29999);
+	    if(roomClient.getClientSocket().getPort() == client.getClientSocket().getPort()) {
+	        continue;
+	    }
+
+	    testAnswer11 = new Packet((char)0x177E);
+	    testAnswer11.write((byte) 0);
+	    testAnswer11.write((char)client.getClientSocket().getPort());
 	    testAnswer11.write("127.0.0.1");
 	    testAnswer11.write((char)0);
-	    testAnswer11.write((char)29999);
+	    testAnswer11.write((char)client.getClientSocket().getPort());
 	    roomClient.getPacketStream().write(testAnswer11);
 	}
     }
@@ -1546,7 +1568,15 @@ public class PacketHandler {
 
     private void handleRoomListReqPacket(Client client, Packet packet) {
 
-	S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRooms());
+        C2SRoomListRequestPacket roomListRequestPacket = new C2SRoomListRequestPacket(packet);
+        char page = roomListRequestPacket.getPage();
+
+	List<Room> rooms = this.gameHandler.getRooms().stream()
+		.skip(page == 0 ? 0 : (page * 5) - 5)
+		.limit(5)
+		.collect(Collectors.toList());
+
+	S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(rooms);
 	client.getPacketStream().write(roomListAnswerPacket);
     }
 
