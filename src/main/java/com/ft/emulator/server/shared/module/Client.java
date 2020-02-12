@@ -30,6 +30,7 @@ public class Client {
 
     public Client(Socket clientSocket) throws IOException {
 
+        clientSocket.setTcpNoDelay(true);
         this.clientSocket = clientSocket;
         this.packetStream = new PacketStream(this.clientSocket, new byte[4], new byte[4]);
     }
