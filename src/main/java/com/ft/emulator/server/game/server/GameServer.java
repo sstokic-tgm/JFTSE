@@ -72,7 +72,7 @@ public class GameServer extends NetworkThread {
 		clientStream.read(clientBuffer, 8, BitKit.bytesToShort(clientBuffer, 6));
 
 	    Packet packet = new Packet(clientBuffer);
-	    logger.info("RECV [" + String.format("0x%x", (int)packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+	    logger.info((this.port == 5896 ? "RELAY " : "") + "RECV [" + String.format("0x%x", (int)packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
 	    packetHandler.handlePacket(client, packet);
 	}

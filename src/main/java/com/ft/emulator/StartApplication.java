@@ -51,9 +51,11 @@ public class StartApplication {
         // init game server
         logger.info("Initializing game server...");
         GameServer gameServer = new GameServer(5895);
+        GameServer relayServer = new GameServer(5896);
         try {
 
             gameServer.start();
+            relayServer.start();
         }
         catch (Exception e) {
             logger.error("Failed to start game server!");
@@ -77,6 +79,7 @@ public class StartApplication {
 
         loginServer.stop();
         gameServer.stop();
+        relayServer.stop();
 
         EntityManagerFactoryUtil.INSTANCE.close();
     }
