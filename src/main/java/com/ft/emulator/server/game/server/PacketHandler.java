@@ -1463,9 +1463,6 @@ public class PacketHandler {
 
         List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
 
-        /*Packet testanswerudp = new Packet((char)0x17D8);
-        testanswerudp.write((char)clientsInRoom.size());*/
-
         for(Client roomClient : clientsInRoom) {
 
 	    Packet testAnswer = new Packet((char)0x177C);
@@ -1476,94 +1473,31 @@ public class PacketHandler {
 	    testAnswer3.write((char)0);
 	    roomClient.getPacketStream().write(testAnswer3);
 
-	    testAnswer = new Packet((char)0x17DC);
-	    testAnswer.write((char)0);
+	    testAnswer = new Packet((char)0x17E0);
 	    roomClient.getPacketStream().write(testAnswer);
-
-	    /*testanswerudp.write("127.0.0.1");
-	    testanswerudp.write((char)0);*/
-	    /*testAnswer = new Packet((char)0x3EA);
-	    testAnswer.write("127.0.0.1");
-	    testAnswer.write((char)0);
-	    testAnswer.write((char)5895);
-	    testAnswer.write(0);
-	    testAnswer.write(0);
-	    testAnswer.write(0);
-	    testAnswer.write(0);
-	    roomClient.getPacketStream().write(testAnswer);*/
 	}
 
-	Packet testAnswer11 = new Packet((char)0x17DA);
-	//testAnswer11.write((byte) 1);
-	testAnswer11.write((char)client.getClientSocket().getPort());
-	testAnswer11.write("127.0.0.1");
-	testAnswer11.write((char)0);
-	testAnswer11.write((char)client.getClientSocket().getPort());
-	client.getPacketStream().write(testAnswer11);
+	Packet testAnswer22 = new Packet((char)0x3EA);
+	testAnswer22.write("127.0.0.1");
+	testAnswer22.write((char)0);
+	testAnswer22.write((char)5896);
 
-	testAnswer11 = new Packet((char)0x177E);
-	testAnswer11.write((byte) 1);
-	testAnswer11.write((char)client.getClientSocket().getPort());
-	testAnswer11.write("127.0.0.1");
-	testAnswer11.write((char)0);
-	testAnswer11.write((char)client.getClientSocket().getPort());
-	client.getPacketStream().write(testAnswer11);
+	int clientsInRoomSize = clientsInRoom.size();
+	int maxClientsInRoom = 4;
+	int missingClientsCount = maxClientsInRoom - clientsInRoomSize;
 
-
-
-	for(Client roomClient : clientsInRoom) {
-	    //roomClient.getPacketStream().write(testanswerudp);
-
-	    if(roomClient.getClientSocket().getPort() == client.getClientSocket().getPort()) {
-	        continue;
-	    }
-
-	    testAnswer11 = new Packet((char)0x177E);
-	    testAnswer11.write((byte) 0);
-	    testAnswer11.write((char)client.getClientSocket().getPort());
-	    testAnswer11.write("127.0.0.1");
-	    testAnswer11.write((char)0);
-	    testAnswer11.write((char)client.getClientSocket().getPort());
-	    roomClient.getPacketStream().write(testAnswer11);
+	clientsInRoom.forEach(c -> testAnswer22.write(Math.toIntExact(c.getActiveCharacterPlayer().getId())));
+	for(int i = 1; i <= missingClientsCount; i++) {
+	    testAnswer22.write(0);
 	}
+	clientsInRoom.forEach(c -> c.getPacketStream().write(testAnswer22));
     }
 
     private void handle17DDPacket(Client client, Packet packet) {
 
         // 0x26FC = basic single game end
 
-	Packet testAnswer = new Packet((char) 0x17E0);
-	client.getPacketStream().write(testAnswer);
 
-	// Stats
-	Packet testAnswer4 = new Packet((char)0x17E4);
-	List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
-
-	testAnswer4.write((char)clientsInRoom.size());
-	int i = 0;
-	for(Client roomClient : clientsInRoom) {
-
-	    testAnswer4.write((char)i); // team??
-	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getName());
-	    testAnswer4.write((char)0);
-	    testAnswer4.write(roomClient.getActiveCharacterPlayer().getLevel());
-	    testAnswer4.write(1);
-	    testAnswer4.write(2);
-	    testAnswer4.write(3);
-	    i++;
-	}
-	client.getPacketStream().write(testAnswer4);
-
-	testAnswer4 = new Packet((char)0x183A);
-	testAnswer4.write((char)clientsInRoom.size());
-	i = 0;
-	for(Client roomClient : clientsInRoom) {
-
-	    testAnswer4.write((char)i); // team??
-	    testAnswer4.write((char)i); // ??
-	    i++;
-	}
-	client.getPacketStream().write(testAnswer4);
     }
 
     private void handleRoomListReqPacket(Client client, Packet packet) {
@@ -1620,38 +1554,85 @@ public class PacketHandler {
 	}
 	else if(unknownAnswer.getPacketId() == (char)0x17E2) {
 
+	    boolean isMaster = client.getActiveRoom().getPlayerList().stream()
+		    .anyMatch(pl -> pl.getPlayer().getId() == client.getActiveCharacterPlayer().getId() && pl.getMaster());
+
+	    unknownAnswer.write((short)0);
 	    client.getPacketStream().write(unknownAnswer);
 
 	    Packet testAnswer = new Packet((char)0x183C);
 	    client.getPacketStream().write(testAnswer);
 
 	    List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
-	    testAnswer = new Packet((char)0x183E);
-	    testAnswer.write((char)1);
+
+	    // Stats
+	    Packet testAnswer4 = new Packet((char)0x17E4);
+	    testAnswer4.write((char)clientsInRoom.size());
 	    int i = 0;
 	    for(Client roomClient : clientsInRoom) {
 
-	        testAnswer.write((char)i);
-	        testAnswer.write(1);
-	        testAnswer.write(1);
-	        testAnswer.write((byte)i == 1 ? 0 : 1);
-
-	        i++;
-		client.getPacketStream().write(testAnswer);
+		testAnswer4.write((char)i); // team??
+		testAnswer4.write(roomClient.getActiveCharacterPlayer().getName());
+		testAnswer4.write((char)0);
+		testAnswer4.write(roomClient.getActiveCharacterPlayer().getLevel());
+		testAnswer4.write(1);
+		testAnswer4.write(2);
+		testAnswer4.write(3);
+		i++;
 	    }
+	    client.getPacketStream().write(testAnswer4);
+
+	    testAnswer = new Packet((char)0x17E6);
+	    testAnswer.write((char)0);
+	    client.getPacketStream().write(testAnswer);
+
+	    testAnswer4 = new Packet((char)0x183A);
+	    if(isMaster) {
+		testAnswer4.write((char)0);
+		testAnswer4.write((char)1);
+		testAnswer4.write((char)0);
+	    }
+	    else {
+		testAnswer4.write((char)1);
+		testAnswer4.write((char)0);
+		testAnswer4.write((char)1);
+	    }
+	    client.getPacketStream().write(testAnswer4);
+
+	    testAnswer = new Packet((char)0x183E);
+	    testAnswer.write((char)1);
+	    if(isMaster) {
+		testAnswer.write((char)0);
+		testAnswer.write(0);
+		testAnswer.write(0);
+		testAnswer.write((byte)1);
+	    }
+	    else {
+		testAnswer.write((char)1);
+		testAnswer.write(1);
+		testAnswer.write(1);
+		testAnswer.write((byte)0);
+	    }
+	    client.getPacketStream().write(testAnswer);
+	}
+	else if(packet.getPacketId() == (char)0x3ED) {
+
+	    unknownAnswer.setPacketId((char)0x3EF);
+	    unknownAnswer.write((byte)0);
+	    client.getPacketStream().write(unknownAnswer);
 	}
 	else if(unknownAnswer.getPacketId() == (char)0x415) {
 
 	    List<Client> clientList = this.gameHandler.getClients();
 
-	    packet.setPacketId((char)0x415);
-	    packet.setCheckSerial((char) 0);
-	    packet.setCheckSum((char) 0);
-
+	    // relay the packet
+	    Packet p = new Packet(packet.getData());
 	    for(Client cl : clientList) {
-		cl.getPacketStream().write(packet);
+		cl.getPacketStream().write(p);
 	    }
 	}
+
+
 	else if(unknownAnswer.getPacketId() == (char)0x1D4D) {
 
 	    byte slotNum = packet.readByte();
@@ -1664,15 +1645,6 @@ public class PacketHandler {
 
 	    List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
 	    clientsInRoom.forEach(cl -> cl.getPacketStream().write(unknownAnswer));
-	}
-	else if(unknownAnswer.getPacketId() == (char)0x18A3) {
-
-	    packet.setPacketId((char)0x18A3);
-	    packet.setCheckSerial((char) 0);
-	    packet.setCheckSum((char) 0);
-
-	    List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(client.getActiveRoom().getId());
-	    clientsInRoom.forEach(cl -> cl.getPacketStream().write(packet));
 	}
 	else {
 	    unknownAnswer.write((short) 0);
