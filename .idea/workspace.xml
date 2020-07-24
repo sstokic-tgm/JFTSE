@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="eabce600-02e6-4baf-ae42-723aec59d005" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1efrVVYbi3HGunJO77yKlRqlt8J" />
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Stefan\IntelliJ-workspace\refactored-ft_server_emulator\src\test\resources" />
+      <recent name="C:\Users\Stefan\IntelliJ-workspace\refactored-ft_server_emulator\src\main\resources\templates" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.StartApplication">
+    <configuration name="StartApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.ft.emulator.StartApplication" />
+      <module name="ft_server_emulator" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.ft.emulator.server.game.core.auth.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="StartApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <module name="ft_server_emulator" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.ft.emulator.StartApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.StartApplication" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="eabce600-02e6-4baf-ae42-723aec59d005" name="Default Changelist" comment="" />
+      <created>1594723511709</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1594723511709</updated>
+      <workItem from="1594723516397" duration="26870000" />
+      <workItem from="1594751676023" duration="1020000" />
+      <workItem from="1594760390818" duration="5458000" />
+      <workItem from="1594769285924" duration="1888000" />
+      <workItem from="1594796497658" duration="18000" />
+      <workItem from="1594812628717" duration="2830000" />
+      <workItem from="1594820639280" duration="8122000" />
+      <workItem from="1594851333874" duration="1138000" />
+      <workItem from="1594907198544" duration="11591000" />
+      <workItem from="1595084456714" duration="25082000" />
+      <workItem from="1595235222074" duration="5117000" />
+      <workItem from="1595241023838" duration="205000" />
+      <workItem from="1595245428192" duration="10906000" />
+      <workItem from="1595268660094" duration="320000" />
+      <workItem from="1595279909954" duration="4809000" />
+      <workItem from="1595316772114" duration="25000" />
+      <workItem from="1595321613166" duration="4633000" />
+      <workItem from="1595347191248" duration="13551000" />
+      <workItem from="1595409004445" duration="36446000" />
+      <workItem from="1595496093223" duration="35201000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+</project>
