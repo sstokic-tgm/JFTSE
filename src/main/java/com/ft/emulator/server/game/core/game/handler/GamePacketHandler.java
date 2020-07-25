@@ -151,6 +151,9 @@ public class GamePacketHandler {
 	    // pass inventory & equipped items
 	    if (requestType == 2) {
 
+		S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+		connection.sendTCP(gameServerAnswerPacket);
+
 		List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
 		StreamUtils.batches(playerPocketList, 10)
 			.forEach(pocketList -> {
@@ -170,10 +173,14 @@ public class GamePacketHandler {
 
 		S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
 		connection.sendTCP(inventoryWearQuickAnswerPacket);
-	    }
 
-	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
+		gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 3, (byte) 0);
+		connection.sendTCP(gameServerAnswerPacket);
+	    }
+	    else {
+		S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+		connection.sendTCP(gameServerAnswerPacket);
+	    }
 	}
     }
 
