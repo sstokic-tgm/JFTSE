@@ -146,46 +146,47 @@ public class GamePacketHandler {
 	    S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
 	    connection.sendTCP(homeDataPacket);
 	}
+	else if (requestType == 1) {
+
+	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+	    connection.sendTCP(gameServerAnswerPacket);
+
+	    gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 2, (byte) 0);
+	    connection.sendTCP(gameServerAnswerPacket);
+	}
+	// pass inventory & equipped items
+	else if (requestType == 2) {
+
+	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+	    connection.sendTCP(gameServerAnswerPacket);
+
+	    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
+	    StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
+		S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+		connection.sendTCP(inventoryDataPacket);
+	    });
+
+	    StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+	    Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
+	    List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+
+	    S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
+	    connection.sendTCP(playerStatusPointChangePacket);
+
+	    S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
+	    connection.sendTCP(inventoryWearClothAnswerPacket);
+
+	    S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
+	    connection.sendTCP(inventoryWearQuickAnswerPacket);
+
+	    gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) (requestType + 1), (byte) 0);
+	    connection.sendTCP(gameServerAnswerPacket);
+	}
 	else {
-
-	    if (requestType == 1) {
-
-		S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-		connection.sendTCP(gameServerAnswerPacket);
-
-		gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 2, (byte) 0);
-		connection.sendTCP(gameServerAnswerPacket);
-	    }
-	    // pass inventory & equipped items
-	    else if (requestType == 2) {
-
-		S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-		connection.sendTCP(gameServerAnswerPacket);
-
-		List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
-		StreamUtils.batches(playerPocketList, 10)
-			.forEach(pocketList -> {
-			    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
-			    connection.sendTCP(inventoryDataPacket);
-			});
-
-		StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-		Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
-		List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
-
-		S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
-		connection.sendTCP(playerStatusPointChangePacket);
-
-		S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
-		connection.sendTCP(inventoryWearClothAnswerPacket);
-
-		S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
-		connection.sendTCP(inventoryWearQuickAnswerPacket);
-	    }
-	    else {
-		S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-		connection.sendTCP(gameServerAnswerPacket);
-	    }
+	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+	    connection.sendTCP(gameServerAnswerPacket);
+	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) (requestType + 1), (byte) 0);
+	    connection.sendTCP(gameServerAnswerPacket);
 	}
     }
 
