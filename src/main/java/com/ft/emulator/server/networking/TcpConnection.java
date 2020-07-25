@@ -15,6 +15,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 
 @Getter
 @Setter
@@ -162,91 +163,47 @@ public class TcpConnection {
 	if (currentObjectLength > readBuffer.capacity())
 	    throw new IOException("Unable to read object larger than read buffer: " + currentObjectLength);
 
-	if (currentObjectLength == 0 && bytesRead == 28) {
+	Packet packet = null;
+	if (currentObjectLength == 0 && bytesRead > 8) {
 
-	    readBuffer.position((bytesRead - 8 - 4));
+	    byte[] data = new byte[bytesRead];
 
-	    readBuffer.compact();
-	    bytesRead = socketChannel.read(readBuffer);
-	    readBuffer.flip();
+	    BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
 
-	    if (bytesRead == -1)
-		throw new SocketException("Connection is closed.");
+	    while (true) {
 
-	    currentObjectLength = BitKit.bytesToShort(readBuffer.array(), 6);
+	       int packetSize = BitKit.bytesToShort(data, 6);
+	       if (packetSize + 8 < data.length) {
 
-	    lastReadTime = System.currentTimeMillis();
-	    if (readBuffer.remaining() < currentObjectLength)
-		return null;
-	}
-	else if (currentObjectLength == 0 && bytesRead == 36) {
+	           byte[] tmp = new byte[data.length - 8];
+	           BitKit.blockCopy(data, 8, tmp, 0, tmp.length);
+	           data = new byte[tmp.length];
+	           BitKit.blockCopy(tmp, 0, data, 0, data.length);
+	       }
+	       else {
+	           break;
+	       }
+	    }
 
-	    readBuffer.position((bytesRead - 8 - 4));
-
-	    readBuffer.compact();
-	    bytesRead = socketChannel.read(readBuffer);
-	    readBuffer.flip();
-
-	    if (bytesRead == -1)
-		throw new SocketException("Connection is closed.");
-
-	    currentObjectLength = BitKit.bytesToShort(readBuffer.array(), 6);
-
-	    lastReadTime = System.currentTimeMillis();
-	    if (readBuffer.remaining() < currentObjectLength)
-		return null;
-	}
-	else if (currentObjectLength == 0) {
-
-	    readBuffer.position(8);
-
-	    readBuffer.compact();
-	    bytesRead = socketChannel.read(readBuffer);
-	    readBuffer.flip();
-
-	    if (bytesRead == -1)
-		throw new SocketException("Connection is closed.");
-
-	    currentObjectLength = BitKit.bytesToShort(readBuffer.array(), 6);
-
-	    lastReadTime = System.currentTimeMillis();
-	    if (readBuffer.remaining() < currentObjectLength)
-		return null;
+	    packet = new Packet(data);
 	}
 	else if ((bytesRead - currentObjectLength - 8) == 10) {
 
-	    readBuffer.position(12);
+	    byte[] data = new byte[bytesRead];
 
-	    readBuffer.compact();
-	    bytesRead = socketChannel.read(readBuffer);
-	    readBuffer.flip();
+	    BitKit.blockCopy(readBuffer.array(), 12, data, 0, bytesRead);
 
-	    if (bytesRead == -1)
-		throw new SocketException("Connection is closed.");
+	    packet = new Packet(data);
+	}
+	else {
 
-	    currentObjectLength = BitKit.bytesToShort(readBuffer.array(), 6);
+	    byte[] data = new byte[bytesRead];
 
-	    lastReadTime = System.currentTimeMillis();
-	    if (readBuffer.remaining() < currentObjectLength)
-		return null;
+	    BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
+
+	    packet = new Packet(data);
 	}
 
-	int length = currentObjectLength;
-	if (readBuffer.remaining() < length) {
-
-	    readBuffer.compact();
-	    bytesRead = socketChannel.read(readBuffer);
-	    readBuffer.flip();
-
-	    if (bytesRead == -1)
-		throw new SocketException("Connection is closed.");
-
-	    lastReadTime = System.currentTimeMillis();
-	    if (readBuffer.remaining() < length)
-		return null;
-	}
-
-	Packet packet = new Packet(decryptBytes(readBuffer.array(), currentObjectLength + 8));
 	log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
 	return packet;
