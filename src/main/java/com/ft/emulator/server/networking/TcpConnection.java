@@ -1,6 +1,7 @@
 package com.ft.emulator.server.networking;
 
 import com.ft.emulator.common.utilities.BitKit;
+import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;

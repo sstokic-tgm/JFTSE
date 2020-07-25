@@ -937,6 +937,11 @@ public class GamePacketHandler {
 	    S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
 	    connection.sendTCP(challengeProgressAnswerPacket);
 	}
+	// bandage fix for lobby join, since the packet is sent under other packets it's hard to extract every packet out of a recv
+	else if (requestType == 0) {
+
+	    connection.getClient().setInLobby(true);
+	}
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
