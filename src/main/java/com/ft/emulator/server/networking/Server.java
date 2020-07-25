@@ -201,7 +201,9 @@ public class Server implements Runnable {
 
 	long time = System.currentTimeMillis();
 	List<Connection> connections = this.connections;
-	for (Connection connection : connections) {
+	for (int i = 0; i < connections.size(); i++) {
+
+	    Connection connection = connections.get(i);
 
 	    if (connection.getTcpConnection().isTimedOut(time)) {
 		connection.close();
