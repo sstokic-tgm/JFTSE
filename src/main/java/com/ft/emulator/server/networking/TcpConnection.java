@@ -1,6 +1,7 @@
 package com.ft.emulator.server.networking;
 
 import com.ft.emulator.common.utilities.BitKit;
+import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
@@ -201,25 +202,16 @@ public class TcpConnection {
 
 	    BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
 
-	    while (true) {
-
-		int packetSize = BitKit.bytesToShort(data, 6);
-		if (packetSize != 0 && packetSize + 8 < data.length) {
-
-		    byte[] tmp = new byte[data.length - 8];
-		    BitKit.blockCopy(data, packetSize + 8, tmp, 0, tmp.length);
-		    data = new byte[tmp.length];
-		    BitKit.blockCopy(tmp, 0, data, 0, data.length);
-
-		    packet = new Packet(data);
-		    connection.notifyReceived(packet);
-		}
-		else {
-		    break;
-		}
-	    }
-
 	    packet = new Packet(data);
+
+	    if (packet.getPacketId() == PacketID.C2SRoomListReq) {
+
+	        connection.notifyReceived(packet);
+
+	        BitKit.blockCopy(data, packet.getDataLength() + 8, data, 0, bytesRead);
+
+	        packet = new Packet(data);
+	    }
 	}
 
 	log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
