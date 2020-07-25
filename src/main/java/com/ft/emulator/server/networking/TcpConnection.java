@@ -206,9 +206,10 @@ public class TcpConnection {
 
 	    if (packet.getPacketId() == PacketID.C2SRoomListReq) {
 
+		log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 	        connection.notifyReceived(packet);
 
-	        BitKit.blockCopy(data, packet.getDataLength() + 8, data, 0, bytesRead);
+	        BitKit.blockCopy(data, packet.getDataLength() + 8, data, 0, bytesRead - 8);
 
 	        packet = new Packet(data);
 	    }
