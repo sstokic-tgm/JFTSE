@@ -70,7 +70,7 @@ public class Server implements Runnable {
 
     public void bind(int tcpPort) throws IOException {
 
-        bind(new InetSocketAddress("127.0.0.1", tcpPort), null);
+        bind(new InetSocketAddress("0.0.0.0", tcpPort), null);
     }
 
     private void bind(InetSocketAddress tcpPort, InetSocketAddress udpPort) throws IOException {
@@ -201,7 +201,9 @@ public class Server implements Runnable {
 
 	long time = System.currentTimeMillis();
 	List<Connection> connections = this.connections;
-	for (Connection connection : connections) {
+	for (int i = 0; i < connections.size(); i++) {
+
+	    Connection connection = connections.get(i);
 
 	    if (connection.getTcpConnection().isTimedOut(time)) {
 		connection.close();
