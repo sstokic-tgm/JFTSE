@@ -164,7 +164,7 @@ public class TcpConnection {
 
 	if (currentObjectLength == 0 && bytesRead > 24) {
 
-	    readBuffer.position(24);
+	    readBuffer.position(28);
 
 	    readBuffer.compact();
 	    bytesRead = socketChannel.read(readBuffer);
