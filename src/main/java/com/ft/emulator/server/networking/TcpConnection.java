@@ -162,9 +162,26 @@ public class TcpConnection {
 	if (currentObjectLength > readBuffer.capacity())
 	    throw new IOException("Unable to read object larger than read buffer: " + currentObjectLength);
 
-	if (currentObjectLength == 0 && bytesRead > 24) {
+	if (currentObjectLength == 0 && bytesRead == 28) {
 
-	    readBuffer.position(28);
+	    readBuffer.position((bytesRead - 8 - 4));
+
+	    readBuffer.compact();
+	    bytesRead = socketChannel.read(readBuffer);
+	    readBuffer.flip();
+
+	    if (bytesRead == -1)
+		throw new SocketException("Connection is closed.");
+
+	    currentObjectLength = BitKit.bytesToShort(readBuffer.array(), 6);
+
+	    lastReadTime = System.currentTimeMillis();
+	    if (readBuffer.remaining() < currentObjectLength)
+		return null;
+	}
+	else if (currentObjectLength == 0 && bytesRead > 24) {
+
+	    readBuffer.position(24);
 
 	    readBuffer.compact();
 	    bytesRead = socketChannel.read(readBuffer);
