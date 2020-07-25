@@ -179,6 +179,23 @@ public class TcpConnection {
 	    if (readBuffer.remaining() < currentObjectLength)
 		return null;
 	}
+	else if (currentObjectLength == 0 && bytesRead == 36) {
+
+	    readBuffer.position((bytesRead - 8 - 4));
+
+	    readBuffer.compact();
+	    bytesRead = socketChannel.read(readBuffer);
+	    readBuffer.flip();
+
+	    if (bytesRead == -1)
+		throw new SocketException("Connection is closed.");
+
+	    currentObjectLength = BitKit.bytesToShort(readBuffer.array(), 6);
+
+	    lastReadTime = System.currentTimeMillis();
+	    if (readBuffer.remaining() < currentObjectLength)
+		return null;
+	}
 	else if (currentObjectLength == 0) {
 
 	    readBuffer.position(8);

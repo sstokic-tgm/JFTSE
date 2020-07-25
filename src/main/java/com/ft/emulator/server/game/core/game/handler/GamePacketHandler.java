@@ -185,8 +185,6 @@ public class GamePacketHandler {
 	else {
 	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
 	    connection.sendTCP(gameServerAnswerPacket);
-	    gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) (requestType + 1), (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
 	}
     }
 
