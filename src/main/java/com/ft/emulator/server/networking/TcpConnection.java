@@ -210,7 +210,7 @@ public class TcpConnection {
 	        connection.notifyReceived(packet);
 
 	        byte[] tmp = new byte[data.length - 8];
-	        BitKit.blockCopy(data, packet.getDataLength() + 8, tmp, 0, tmp.length);
+	        BitKit.blockCopy(readBuffer.array(), BitKit.bytesToShort(readBuffer.array(), 6) + 8, tmp, 0, tmp.length);
 
 	        packet = new Packet(tmp);
 	    }
