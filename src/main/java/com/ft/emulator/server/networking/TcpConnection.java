@@ -173,10 +173,10 @@ public class TcpConnection {
 	    while (true) {
 
 	       int packetSize = BitKit.bytesToShort(data, 6);
-	       if (packetSize + 8 < data.length) {
+	       if (packetSize == 0 && packetSize + 8 < data.length) {
 
 	           byte[] tmp = new byte[data.length - 8];
-	           BitKit.blockCopy(data, 8, tmp, 0, tmp.length);
+	           BitKit.blockCopy(data, packetSize + 8, tmp, 0, tmp.length);
 	           data = new byte[tmp.length];
 	           BitKit.blockCopy(tmp, 0, data, 0, data.length);
 	       }
