@@ -150,7 +150,7 @@ public class Server implements Runnable {
 
 		                    while(true) {
 
-		                        Packet packet = fromConnection.getTcpConnection().readPacket();
+		                        Packet packet = fromConnection.getTcpConnection().readPacket(fromConnection);
 		                        if(packet == null)
 		                            break;
 		                        fromConnection.notifyReceived(packet);

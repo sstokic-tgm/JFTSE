@@ -137,7 +137,7 @@ public class TcpConnection {
 	}
     }
 
-    public Packet readPacket() throws IOException {
+    public Packet readPacket(Connection connection) throws IOException {
 
 	readBuffer = ByteBuffer.allocate(4096);
 	readBuffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -200,6 +200,24 @@ public class TcpConnection {
 	    byte[] data = new byte[bytesRead];
 
 	    BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
+
+	    while (true) {
+
+		int packetSize = BitKit.bytesToShort(data, 6);
+		if (packetSize != 0 && packetSize + 8 < data.length) {
+
+		    byte[] tmp = new byte[data.length - 8];
+		    BitKit.blockCopy(data, packetSize + 8, tmp, 0, tmp.length);
+		    data = new byte[tmp.length];
+		    BitKit.blockCopy(tmp, 0, data, 0, data.length);
+
+		    packet = new Packet(data);
+		    connection.notifyReceived(packet);
+		}
+		else {
+		    break;
+		}
+	    }
 
 	    packet = new Packet(data);
 	}
