@@ -209,9 +209,10 @@ public class TcpConnection {
 		log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 	        connection.notifyReceived(packet);
 
-	        BitKit.blockCopy(data, packet.getDataLength() + 8, data, 0, bytesRead - 8);
+	        byte[] tmp = new byte[data.length - 8];
+	        BitKit.blockCopy(data, packet.getDataLength() + 8, tmp, 0, tmp.length);
 
-	        packet = new Packet(data);
+	        packet = new Packet(tmp);
 	    }
 	}
 
