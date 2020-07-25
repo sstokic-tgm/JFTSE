@@ -138,7 +138,7 @@ public class TcpConnection {
 	}
     }
 
-    public Packet readPacket(Connection connection) throws IOException {
+    public Packet readPacket() throws IOException {
 
 	readBuffer = ByteBuffer.allocate(4096);
 	readBuffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -203,16 +203,6 @@ public class TcpConnection {
 	    BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
 
 	    packet = new Packet(data);
-
-	    if (packet.getPacketId() == PacketID.C2SRoomListReq) {
-
-		log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
-	        connection.notifyReceived(packet);
-
-	        BitKit.blockCopy(data, BitKit.bytesToShort(data, 6) + 8, data, 0, bytesRead - (BitKit.bytesToShort(data, 6) + 8));
-
-	        packet = new Packet(data);
-	    }
 	}
 
 	log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));

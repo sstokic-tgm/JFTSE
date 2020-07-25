@@ -937,6 +937,10 @@ public class GamePacketHandler {
 	    S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
 	    connection.sendTCP(challengeProgressAnswerPacket);
 	}
+	else if (requestType == 4) {
+
+	    connection.getClient().setInLobby(true);
+	}
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
