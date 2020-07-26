@@ -11,7 +11,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class LevelExp extends AbstractIdBaseModel {
-
     @Column(unique = true)
     private Byte level;
     private Integer expValue;

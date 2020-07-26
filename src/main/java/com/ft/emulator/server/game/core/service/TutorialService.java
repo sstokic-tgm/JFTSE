@@ -22,7 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class TutorialService {
-
     private final TutorialRepository tutorialRepository;
     private final TutorialProgressRepository tutorialProgressRepository;
 
@@ -34,13 +33,11 @@ public class TutorialService {
     }
 
     public Tutorial findByTutorialIndex(Integer tutorialIndex) {
-
         Optional<Tutorial> tutorial = tutorialRepository.findByTutorialIndex(tutorialIndex);
         return tutorial.orElse(null);
     }
 
     public void finishGame(Connection connection) {
-
         long timeNeeded = connection.getClient().getActiveTutorialGame().getTimeNeeded();
 
         Tutorial tutorial = findByTutorialIndex(connection.getClient().getActiveTutorialGame().getTutorialIndex());
@@ -50,7 +47,6 @@ public class TutorialService {
         int rewardGold = 0;
         List<Product> rewardProductList = new ArrayList<>();
         if (tutorialProgress == null) {
-
             rewardProductList.addAll(itemRewardService.getItemRewardTutorial(tutorial, null));
 
             rewardGold = itemRewardService.getRewardGold(false, tutorial.getRewardGold(), true);
@@ -65,7 +61,6 @@ public class TutorialService {
             tutorialProgressRepository.save(tutorialProgress);
         }
         else {
-
             rewardProductList.addAll(itemRewardService.getItemRewardTutorial(tutorial, tutorialProgress));
 
             rewardGold = itemRewardService.getRewardGold(true, tutorial.getRewardGold(), true);

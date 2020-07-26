@@ -7,13 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SInventorySellItemCheckReqPacket extends Packet {
-
     private int itemPocketId;
 
     public C2SInventorySellItemCheckReqPacket(Packet packet) {
+        super(packet);
 
-	super(packet);
-
-	this.itemPocketId = this.readInt();
+        this.itemPocketId = this.readInt();
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface PlayerRepository extends JpaRepository<Player, Long> {
-
     Optional<Player> findByName(String name);
 
     @Query(value = "FROM Player p "

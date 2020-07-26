@@ -14,30 +14,27 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class LevelService {
-
     private final LevelExpRepository levelExpRepository;
 
     private final PlayerService playerService;
 
     public byte getLevel(int expValue, int currentExp, byte currentLevel) {
+        if (currentExp == 60)
+            return currentLevel;
 
-	if (currentExp == 60)
-	    return currentLevel;
+        int newExp = expValue + currentExp;
 
-	int newExp = expValue + currentExp;
+        List<LevelExp> levelExpList = levelExpRepository.findAllByLevel(currentLevel);
 
-	List<LevelExp> levelExpList = levelExpRepository.findAllByLevel(currentLevel);
+        if (levelExpList.isEmpty())
+            return currentLevel;
 
-	if (levelExpList.isEmpty())
-	    return currentLevel;
+        LevelExp levelExp = levelExpList.get(0);
 
-	LevelExp levelExp = levelExpList.get(0);
-
-	return newExp >= levelExp.getExpValue() ? (byte) (currentLevel + 1) : currentLevel;
+        return newExp >= levelExp.getExpValue() ? (byte) (currentLevel + 1) : currentLevel;
     }
 
     public Player setNewLevelStatusPoints(byte level, Player player) {
-
         if (level > player.getLevel())
             player.setStatusPoints((byte) (player.getStatusPoints() + 1));
 

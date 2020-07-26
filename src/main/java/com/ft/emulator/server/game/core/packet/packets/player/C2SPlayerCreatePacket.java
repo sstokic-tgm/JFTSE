@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SPlayerCreatePacket extends Packet {
-
     private int playerId;
     private String nickname;
     private byte strength;
@@ -18,7 +17,6 @@ public class C2SPlayerCreatePacket extends Packet {
     private byte level;
 
     public C2SPlayerCreatePacket(Packet packet) {
-
         super(packet);
 
         this.playerId = this.readInt();

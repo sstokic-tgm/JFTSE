@@ -16,7 +16,6 @@ import javax.persistence.ManyToOne;
 @Audited
 @Entity
 public class AccountHome extends AbstractBaseModel {
-
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
     private Account account;
 

@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SPlayerStatusPointChangePacket extends Packet {
-
     private byte strength;
     private byte stamina;
     private byte dexterity;
@@ -15,7 +14,6 @@ public class C2SPlayerStatusPointChangePacket extends Packet {
     private byte statusPoints;
 
     public C2SPlayerStatusPointChangePacket(Packet packet) {
-
         super(packet);
 
         this.strength = this.readByte();

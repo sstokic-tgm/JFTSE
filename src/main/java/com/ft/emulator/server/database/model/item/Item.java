@@ -11,7 +11,6 @@ import javax.persistence.MappedSuperclass;
 @Setter
 @MappedSuperclass
 public class Item extends AbstractIdBaseModel {
-
     @Column(unique = true)
     private Integer itemIndex;
 

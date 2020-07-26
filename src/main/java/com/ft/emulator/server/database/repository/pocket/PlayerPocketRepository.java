@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PlayerPocketRepository extends JpaRepository<PlayerPocket, Long> {
-
     Optional<PlayerPocket> findById(Long id);
     Optional<PlayerPocket> findByItemIndex(Integer itemIndex);
     Optional<PlayerPocket> findByIdAndPocket(Long id, Pocket pocket);

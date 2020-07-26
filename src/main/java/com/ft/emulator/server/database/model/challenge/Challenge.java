@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class Challenge extends ChallengeReward {
-
     @Column(unique = true)
     private Integer challengeIndex;
 

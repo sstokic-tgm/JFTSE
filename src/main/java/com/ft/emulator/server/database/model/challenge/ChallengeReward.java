@@ -10,7 +10,6 @@ import javax.persistence.MappedSuperclass;
 @Setter
 @MappedSuperclass
 public class ChallengeReward extends AbstractIdBaseModel {
-
     private Boolean itemRewardRepeat;
 
     private Integer quantityMin1;

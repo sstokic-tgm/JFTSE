@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
     @Query(value = "SELECT p.price0 FROM Product p WHERE p.item0 = :itemIndex AND p.category = :category")
     List<Integer> getItemSellPriceByItemIndexAndCategory(@Param("itemIndex") Integer itemIndex, @Param("category") String category);
 
