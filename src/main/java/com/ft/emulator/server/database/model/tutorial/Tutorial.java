@@ -11,7 +11,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class Tutorial extends ChallengeReward {
-
     @Column(unique = true)
     private Integer tutorialIndex;
 }

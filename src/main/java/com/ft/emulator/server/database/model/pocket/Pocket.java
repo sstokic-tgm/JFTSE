@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 @Audited
 @Entity
 public class Pocket extends AbstractBaseModel {
-
     private Integer belongings = 0;
     private Integer maxBelongings = 150;
 }

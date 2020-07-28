@@ -12,7 +12,6 @@ public class C2SChallengeHpPacket extends Packet {
     private char npcHp;
 
     public C2SChallengeHpPacket(Packet packet) {
-
         super(packet);
 
         this.playerHp = this.readChar();

@@ -15,7 +15,6 @@ import java.util.List;
 @Audited
 @Entity
 public class Account extends AbstractBaseModel {
-
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "account")
     private List<Player> playerList;
 

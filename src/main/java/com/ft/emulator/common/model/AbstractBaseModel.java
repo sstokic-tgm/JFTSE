@@ -14,14 +14,12 @@ import java.util.Date;
 @Audited
 @MappedSuperclass
 public class AbstractBaseModel extends AbstractIdBaseModel {
-
     private Date created;
     private Date modified;
 
     @PrePersist
     @PreUpdate
     protected void prePersist() {
-
         if(this.created == null)
             this.created = new Date();
 

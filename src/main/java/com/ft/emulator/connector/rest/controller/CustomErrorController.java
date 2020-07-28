@@ -10,23 +10,20 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class CustomErrorController implements ErrorController {
-
     private static final String PATH = "/error";
 
     @RequestMapping(value = PATH)
     public String handleError(HttpServletRequest request) {
-
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         if(status != null) {
-
             int statusCode = Integer.parseInt(status.toString());
             if(statusCode == HttpStatus.NOT_FOUND.value()) {
                 return "/error.html";
-	    }
+            }
             else {
                 return PATH;
-	    }
-	}
+            }
+        }
         return PATH;
     }
 

@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ItemPartRepository extends JpaRepository<ItemPart, Long> {
-
     List<ItemPart> findByItemIndexIn(List<Integer> itemIndexList);
 
     @Query(value = "SELECT ip.itemIndex FROM ItemPart ip WHERE ip.forPlayer = :forPlayer AND ip.part IN :part")

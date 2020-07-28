@@ -7,17 +7,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SShopRequestDataPreparePacket extends Packet {
-
     private byte category;
     private byte part;
     private byte player;
 
     public C2SShopRequestDataPreparePacket(Packet packet) {
+        super(packet);
 
-	super(packet);
-
-	this.category = this.readByte();
-	this.part = this.readByte();
-	this.player = this.readByte();
+        this.category = this.readByte();
+        this.part = this.readByte();
+        this.player = this.readByte();
     }
 }

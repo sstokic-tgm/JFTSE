@@ -13,7 +13,6 @@ import javax.persistence.ManyToOne;
 @Setter
 @Entity
 public class GameServer extends AbstractIdBaseModel {
-
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     private GameServerType gameServerType;
 

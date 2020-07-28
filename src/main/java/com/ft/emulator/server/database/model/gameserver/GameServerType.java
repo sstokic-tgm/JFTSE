@@ -11,9 +11,9 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class GameServerType extends AbstractIdBaseModel {
-
     @Column(unique = true)
     private Byte type;
+
     @Column(unique = true)
     private String name;
 }

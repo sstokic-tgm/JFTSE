@@ -16,12 +16,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class AuthenticationService {
-
     private final AccountRepository accountRepository;
     private final GameServerRepository gameServerRepository;
 
     public Account login(String username, String password) {
-
         List<Account> accountList = accountRepository.findByUsernameAndPassword(username, password);
 
         return (accountList == null || accountList.isEmpty()) ? null : accountList.get(0);
@@ -32,19 +30,16 @@ public class AuthenticationService {
     }
 
     public Account findAccountByUsername(String username) {
-
         Optional<Account> account = accountRepository.findAccountByUsername(username);
         return account.orElse(null);
     }
 
     public Account findAccountById(Long id) {
-
         Optional<Account> account = accountRepository.findAccountById(id);
         return account.orElse(null);
     }
 
     public List<GameServer> getGameServerList() {
-
-       return gameServerRepository.findAllFetched();
+        return gameServerRepository.findAllFetched();
     }
 }

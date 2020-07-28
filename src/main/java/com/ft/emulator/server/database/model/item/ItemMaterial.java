@@ -9,7 +9,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class ItemMaterial extends Item {
-
     private String useType;
 
     private Integer maxUse;

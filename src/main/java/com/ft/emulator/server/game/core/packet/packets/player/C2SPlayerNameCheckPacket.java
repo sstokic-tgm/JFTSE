@@ -7,11 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SPlayerNameCheckPacket extends Packet {
-
     private String nickname;
 
     public C2SPlayerNameCheckPacket(Packet packet) {
-
         super(packet);
 
         this.nickname = this.readUnicodeString();

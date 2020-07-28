@@ -7,11 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2STutorialBeginRequestPacket extends Packet {
-
     private char tutorialId;
 
     public C2STutorialBeginRequestPacket(Packet packet) {
-
         super(packet);
 
         this.tutorialId = this.readChar();

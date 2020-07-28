@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 @Audited
 @Entity
 public class QuickSlotEquipment extends AbstractBaseModel {
-
     private Integer slot1 = 0;
     private Integer slot2 = 0;
     private Integer slot3 = 0;

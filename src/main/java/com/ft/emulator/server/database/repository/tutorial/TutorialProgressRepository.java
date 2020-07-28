@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TutorialProgressRepository extends JpaRepository<TutorialProgress, Long> {
-
     @Query(value = "FROM TutorialProgress tp LEFT JOIN FETCH tp.player player LEFT JOIN FETCH tp.tutorial tutorial WHERE player_id = :playerId")
     List<TutorialProgress> findAllByPlayerIdFetched(Long playerId);
 
