@@ -3,6 +3,7 @@ package com.ft.emulator.server.networking;
 import com.ft.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -11,6 +12,7 @@ import java.util.*;
 
 @Getter
 @Setter
+@Log4j2
 public class Server implements Runnable {
     private final int writeBufferSize, objectBufferSize;
     private final Selector selector;
@@ -41,6 +43,10 @@ public class Server implements Runnable {
 
             public void idle(Connection connection) {
                 Server.this.connectionListeners.forEach(cl -> cl.idle(connection));
+            }
+
+            public void onException(Connection connection, Exception exception) {
+                Server.this.connectionListeners.forEach(cl -> cl.onException(connection, exception));
             }
         };
 
@@ -110,7 +116,7 @@ public class Server implements Runnable {
                     if (elapsedTime < 25)
                         Thread.sleep(25 - elapsedTime);
                 } catch (InterruptedException ie) {
-                    // empty..
+                    log.error(ie.getMessage());
                 }
             }
         } else {
@@ -139,6 +145,7 @@ public class Server implements Runnable {
                                         fromConnection.notifyReceived(packet);
                                     }
                                 } catch (IOException ioe) {
+                                    fromConnection.notifyException(ioe);
                                     fromConnection.close();
                                 }
                             } else if (selectionKey.isWritable()) {
@@ -146,6 +153,7 @@ public class Server implements Runnable {
                                 try {
                                     fromConnection.getTcpConnection().writeOperation();
                                 } catch (IOException ioe) {
+                                    fromConnection.notifyException(ioe);
                                     fromConnection.close();
                                 }
                             }
@@ -162,7 +170,7 @@ public class Server implements Runnable {
                                         acceptOperation(socketChannel);
                                 }
                                 catch (IOException ioe) {
-                                    // empty..
+                                    fromConnection.notifyException(ioe);
                                 }
                             }
                             continue;
@@ -170,6 +178,8 @@ public class Server implements Runnable {
                         selectionKey.channel().close();
 
                     } catch (CancelledKeyException cke) {
+                        fromConnection.notifyException(cke);
+
                         if(fromConnection != null)
                             fromConnection.close();
                         else
@@ -214,6 +224,7 @@ public class Server implements Runnable {
             try {
                 update(10000);
             } catch (IOException ioe) {
+                log.error(ioe.getMessage());
                 close();
             }
         }
@@ -250,6 +261,7 @@ public class Server implements Runnable {
             addConnection(connection);
             connection.notifyConnected();
         } catch (IOException ioe) {
+            log.error(ioe.getMessage());
             connection.close();
         }
     }

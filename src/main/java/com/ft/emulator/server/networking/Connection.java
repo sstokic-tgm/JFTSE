@@ -48,6 +48,7 @@ public class Connection {
 
             return tcpConnection.send(packet);
         } catch (IOException ioe) {
+            notifyException(ioe);
             close();
             return 0;
         }
@@ -100,6 +101,10 @@ public class Connection {
             if(!isIdle())
                 break;
         }
+    }
+
+    public void notifyException(Exception exception) {
+        connectionListeners.forEach(cl -> cl.onException(this, exception));
     }
 
     public InetSocketAddress getRemoteAddressTCP() {

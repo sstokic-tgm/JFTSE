@@ -8,4 +8,5 @@ public interface ConnectionListener {
     void disconnected(Connection connection);
     void received(Connection connection, Packet packet);
     void idle(Connection connection);
+    void onException(Connection connection, Exception exception);
 }
