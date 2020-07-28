@@ -22,7 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class HomeService {
-
     private final AccountHomeRepository accountHomeRepository;
     private final HomeInventoryRepository homeInventoryRepository;
     private final ItemHouseRepository itemHouseRepository;
@@ -37,15 +36,14 @@ public class HomeService {
     }
 
     public AccountHome findById(Long accountHomeId) {
-
-	Optional<AccountHome> accountHome = accountHomeRepository.findById(accountHomeId);
-	return accountHome.orElse(null);
+        Optional<AccountHome> accountHome = accountHomeRepository.findById(accountHomeId);
+        return accountHome.orElse(null);
     }
 
     public AccountHome findAccountHomeByAccountId(Long accountId) {
 
-	Optional<AccountHome> accountHome = accountHomeRepository.findAccountHomeByAccountId(accountId);
-	return accountHome.orElse(null);
+        Optional<AccountHome> accountHome = accountHomeRepository.findAccountHomeByAccountId(accountId);
+        return accountHome.orElse(null);
     }
 
     public List<HomeInventory> findAllByAccountHome(AccountHome accountHome) {
@@ -53,26 +51,21 @@ public class HomeService {
     }
 
     public ItemHouse findItemHouseByItemIndex(Integer itemIndex) {
-
         Optional<ItemHouse> itemHouse = itemHouseRepository.findItemHouseByItemIndex(itemIndex);
         return itemHouse.orElse(null);
     }
 
     public ItemHouseDeco findItemHouseDecoByItemIndex(Integer itemIndex) {
-
         Optional<ItemHouseDeco> itemHouseDeco = itemHouseDecoRepository.findItemHouseDecoByItemIndex(itemIndex);
         return itemHouseDeco.orElse(null);
     }
 
     public void updateAccountHomeStatsByHomeInventory(AccountHome accountHome, HomeInventory homeInventory, boolean addition) {
-
         ItemHouse itemHouse = itemHouseRepository.findItemHouseByLevel(accountHome.getLevel()).orElse(null);
         ItemHouseDeco itemHouseDeco = itemHouseDecoRepository.findItemHouseDecoByItemIndex(homeInventory.getItemIndex()).orElse(null);
 
         if (itemHouse != null && itemHouseDeco != null) {
-
             if (addition) {
-
                 byte basicBonusGold = (byte) (accountHome.getBasicBonusGold() + itemHouseDeco.getAddGold());
                 byte basicBonusExp = (byte) (accountHome.getBasicBonusExp() + itemHouseDeco.getAddExp());
                 byte battleBonusGold = (byte) (accountHome.getBattleBonusGold() + itemHouseDeco.getAddBattleGold());
@@ -88,7 +81,6 @@ public class HomeService {
                     accountHome.setFurnitureCount(accountHome.getFurnitureCount() + 1);
             }
             else {
-
                 byte basicBonusGold = (byte) (accountHome.getBasicBonusGold() - itemHouseDeco.getAddGold());
                 byte basicBonusExp = (byte) (accountHome.getBasicBonusExp() - itemHouseDeco.getAddExp());
                 byte battleBonusGold = (byte) (accountHome.getBattleBonusGold() - itemHouseDeco.getAddBattleGold());

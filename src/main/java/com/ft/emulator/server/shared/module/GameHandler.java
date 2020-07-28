@@ -34,15 +34,15 @@ public class GameHandler {
     public List<Player> getPlayersInLobby() {
 
         return clientList.stream()
-		.filter(Client::isInLobby)
-		.map(Client::getActivePlayer)
-		.collect(Collectors.toList());
+            .filter(Client::isInLobby)
+            .map(Client::getActivePlayer)
+            .collect(Collectors.toList());
     }
 
     public List<Client> getClientsInLobby() {
 
         return clientList.stream()
-		.filter(Client::isInLobby)
-		.collect(Collectors.toList());
+            .filter(Client::isInLobby)
+            .collect(Collectors.toList());
     }
 }

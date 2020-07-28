@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SInventoryWearClothReqPacket extends Packet {
-
     private int hair;
     private int face;
     private int dress;
@@ -22,20 +21,19 @@ public class C2SInventoryWearClothReqPacket extends Packet {
     private int dye;
 
     public C2SInventoryWearClothReqPacket(Packet packet) {
+        super(packet);
 
-	super(packet);
-
-	this.hair = this.readInt();
-	this.face = this.readInt();
-	this.dress = this.readInt();
-	this.pants = this.readInt();
-	this.socks = this.readInt();
-	this.shoes = this.readInt();
-	this.gloves = this.readInt();
-	this.racket = this.readInt();
-	this.glasses = this.readInt();
-	this.bag = this.readInt();
-	this.hat = this.readInt();
-	this.dye = this.readInt();
+        this.hair = this.readInt();
+        this.face = this.readInt();
+        this.dress = this.readInt();
+        this.pants = this.readInt();
+        this.socks = this.readInt();
+        this.shoes = this.readInt();
+        this.gloves = this.readInt();
+        this.racket = this.readInt();
+        this.glasses = this.readInt();
+        this.bag = this.readInt();
+        this.hat = this.readInt();
+        this.dye = this.readInt();
     }
 }

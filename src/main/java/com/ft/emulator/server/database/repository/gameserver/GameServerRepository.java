@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface GameServerRepository extends JpaRepository<GameServer, Long> {
-
     @Query(value = "FROM GameServer gs LEFT JOIN FETCH gs.gameServerType gst")
     List<GameServer> findAllFetched();
 }

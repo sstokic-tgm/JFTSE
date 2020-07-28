@@ -9,7 +9,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class ItemPart extends Item {
-
     private String forPlayer;
 
     private String part;

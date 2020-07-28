@@ -7,12 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SChallengePointPacket extends Packet {
-
     private byte pointsPlayer;
     private byte pointsNpc;
 
     public C2SChallengePointPacket(Packet packet) {
-
         super(packet);
 
         this.pointsPlayer = this.readByte();

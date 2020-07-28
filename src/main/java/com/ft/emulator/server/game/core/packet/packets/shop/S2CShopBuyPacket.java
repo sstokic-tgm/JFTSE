@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 
 public class S2CShopBuyPacket extends Packet {
-
     public final static short SUCCESS = 0;
     public final static short NEED_MORE_GOLD = -1;
     public final static short NEED_MORE_CASH = -2;
@@ -24,33 +23,30 @@ public class S2CShopBuyPacket extends Packet {
     public final static short INVENTORY_FULL = -98;
 
     public S2CShopBuyPacket(short result, List<PlayerPocket> playerPocketList) {
+        super(PacketID.S2CShopBuyAnswer);
 
-	super(PacketID.S2CShopBuyAnswer);
+        this.write(result);
 
-	this.write(result);
+        if (result == SUCCESS && playerPocketList != null && !playerPocketList.isEmpty()) {
+            this.write((char) playerPocketList.size());
 
-	if (result == SUCCESS && playerPocketList != null && !playerPocketList.isEmpty()) {
+            for (PlayerPocket playerPocket : playerPocketList) {
+                this.write((int) playerPocket.getId().longValue());
+                this.write(EItemCategory.valueOf(playerPocket.getCategory()).getValue());
+                this.write(playerPocket.getItemIndex());
+                this.write(playerPocket.getUseType().equals("N/A") ? (byte) 0 : EItemUseType.valueOf(playerPocket.getUseType().toUpperCase()).getValue());
+                this.write(playerPocket.getItemCount());
 
-	    this.write((char) playerPocketList.size());
-
-	    for (PlayerPocket playerPocket : playerPocketList) {
-
-		this.write((int) playerPocket.getId().longValue());
-		this.write(EItemCategory.valueOf(playerPocket.getCategory()).getValue());
-		this.write(playerPocket.getItemIndex());
-		this.write(playerPocket.getUseType().equals("N/A") ? (byte) 0 : EItemUseType.valueOf(playerPocket.getUseType().toUpperCase()).getValue());
-		this.write(playerPocket.getItemCount());
-
-		long timeLeft = (playerPocket.getCreated().getTime() * 10000) - (new Date().getTime() * 10000);
-		this.write(timeLeft);
-		// ??
-		this.write((byte) 0);
-		this.write((byte) 0);
-		this.write((byte) 0);
-		this.write((byte) 0);
-		this.write((byte) 0);
-		this.write((byte) 0);
-	    }
-	}
+                long timeLeft = (playerPocket.getCreated().getTime() * 10000) - (new Date().getTime() * 10000);
+                this.write(timeLeft);
+                // ??
+                this.write((byte) 0);
+                this.write((byte) 0);
+                this.write((byte) 0);
+                this.write((byte) 0);
+                this.write((byte) 0);
+                this.write((byte) 0);
+            }
+        }
     }
 }

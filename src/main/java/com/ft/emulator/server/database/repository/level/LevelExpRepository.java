@@ -6,6 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface LevelExpRepository extends JpaRepository<LevelExp, Long> {
-
     List<LevelExp> findAllByLevel(Byte level);
 }

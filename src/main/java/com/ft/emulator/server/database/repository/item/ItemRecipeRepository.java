@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ItemRecipeRepository extends JpaRepository<ItemRecipe, Long> {
-
     @Query(value = "SELECT ir.itemIndex FROM ItemRecipe ir WHERE ir.kind = :kind")
     List<Integer> findItemIndexListByKind(@Param("kind") String kind);
 

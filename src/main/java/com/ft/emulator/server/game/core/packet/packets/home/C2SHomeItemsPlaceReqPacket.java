@@ -12,30 +12,27 @@ import java.util.Map;
 @Getter
 @Setter
 public class C2SHomeItemsPlaceReqPacket extends Packet {
-
     private List<Map<String, Object>> homeItemDataList;
 
     public C2SHomeItemsPlaceReqPacket(Packet packet) {
+        super(packet);
 
-	super(packet);
+        homeItemDataList = new ArrayList<>();
 
-	homeItemDataList = new ArrayList<>();
-
-	char size = this.readChar();
-	for (char i = 0; i < size; i++) {
-
-	    Map<String, Object> homeItemData = new HashMap<>();
-	    homeItemData.put("inventoryItemId", this.readInt());
-	    homeItemData.put("unk0", this.readByte());
-	    homeItemData.put("unk1", this.readByte());
-	    homeItemData.put("unk2", this.readByte());
-	    homeItemData.put("unk3", this.readByte());
-	    homeItemData.put("itemIndex", this.readInt());
-	    homeItemData.put("unk4", this.readByte());
-	    homeItemData.put("unk5", this.readByte());
-	    homeItemData.put("xPos", this.readByte());
-	    homeItemData.put("yPos", this.readByte());
-	    homeItemDataList.add(homeItemData);
-	}
+        char size = this.readChar();
+        for (char i = 0; i < size; ++i) {
+            Map<String, Object> homeItemData = new HashMap<>();
+            homeItemData.put("inventoryItemId", this.readInt());
+            homeItemData.put("unk0", this.readByte());
+            homeItemData.put("unk1", this.readByte());
+            homeItemData.put("unk2", this.readByte());
+            homeItemData.put("unk3", this.readByte());
+            homeItemData.put("itemIndex", this.readInt());
+            homeItemData.put("unk4", this.readByte());
+            homeItemData.put("unk5", this.readByte());
+            homeItemData.put("xPos", this.readByte());
+            homeItemData.put("yPos", this.readByte());
+            homeItemDataList.add(homeItemData);
+        }
     }
 }

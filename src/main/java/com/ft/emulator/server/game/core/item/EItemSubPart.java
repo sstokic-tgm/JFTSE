@@ -15,45 +15,42 @@ public enum EItemSubPart {
     private final byte value;
 
     EItemSubPart(int value) {
-	this.value = (byte) value;
+        this.value = (byte) value;
     }
 
     public Byte getValue() {
-	return value;
+        return value;
     }
 
     public String getName() {
-	return toString();
+        return toString();
     }
 
     public static String getNameByValue(byte value) {
-
-	for (EItemSubPart itemSubPart : values()) {
-	    if (itemSubPart.getValue().equals(value)) {
-		return itemSubPart.getName();
-	    }
-	}
-	return null;
+        for (EItemSubPart itemSubPart : values()) {
+            if (itemSubPart.getValue().equals(value)) {
+                return itemSubPart.getName();
+            }
+        }
+        return null;
     }
 
     public static EItemSubPart valueOf(byte value) {
-
-	for (EItemSubPart itemSubPart : values()) {
-	    if (itemSubPart.getValue().equals(value)) {
-		return itemSubPart;
-	    }
-	}
-	return null;
+        for (EItemSubPart itemSubPart : values()) {
+            if (itemSubPart.getValue().equals(value)) {
+                return itemSubPart;
+            }
+        }
+        return null;
     }
 
     public static List<String> getNamesByValue(byte value) {
-
-	List<String> result = new ArrayList<>();
-	for (EItemSubPart itemSubPart : values()) {
-	    if (itemSubPart.getValue().equals(value)) {
-		result.add(itemSubPart.getName());
-	    }
-	}
-	return result;
+        List<String> result = new ArrayList<>();
+        for (EItemSubPart itemSubPart : values()) {
+            if (itemSubPart.getValue().equals(value)) {
+                result.add(itemSubPart.getName());
+            }
+        }
+        return result;
     }
 }

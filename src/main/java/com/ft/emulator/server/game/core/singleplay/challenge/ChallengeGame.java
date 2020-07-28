@@ -8,7 +8,6 @@ import java.util.Date;
 @Getter
 @Setter
 public abstract class ChallengeGame {
-
     private int challengeIndex;
 
     private Date startTime;

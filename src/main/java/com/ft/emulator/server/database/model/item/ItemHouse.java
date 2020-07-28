@@ -9,7 +9,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class ItemHouse extends Item {
-
     private String useType;
 
     private Byte level;

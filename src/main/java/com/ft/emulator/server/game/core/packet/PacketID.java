@@ -1,7 +1,6 @@
 package com.ft.emulator.server.game.core.packet;
 
 public final class PacketID {
-
     public final static char S2CLoginWelcomePacket = 0xFF9A;
     public final static char C2SLoginRequest = 0x0FA1;
     public final static char S2CLoginAnswerPacket = 0x0FA2;

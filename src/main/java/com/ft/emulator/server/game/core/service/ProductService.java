@@ -35,139 +35,115 @@ public class ProductService {
     private final PocketService pocketService;
 
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {
-
         List<Integer> productIndexList = new ArrayList<>(itemList.keySet());
 
-	List<Product> productList = productRepository.findProductsByProductIndexIn(productIndexList);
+        List<Product> productList = productRepository.findProductsByProductIndexIn(productIndexList);
 
-	Map<Product, Byte> result = new HashMap<>();
-	productList.forEach(p -> result.put(p, itemList.get(p.getProductIndex())));
+        Map<Product, Byte> result = new HashMap<>();
+        productList.forEach(p -> result.put(p, itemList.get(p.getProductIndex())));
 
         return result;
     }
 
     public int getProductListSize(byte category, byte part, byte player) {
+        long productListSize = 0;
 
-	long productListSize = 0;
+        switch (EItemCategory.valueOf(category)) {
 
-	switch (EItemCategory.valueOf(category)) {
+        case PARTS: {
+            List<Integer> itemIndexList = part == EItemPart.SET.getValue() ?
+                itemPartRepository.findItemIndexListByForPlayer(EItemChar.getNameByValue(player)) :
+                itemPartRepository.findItemIndexListByForPlayerAndPartIn(EItemChar.getNameByValue(player), EItemSubPart.getNamesByValue(part));
+            productListSize = part == EItemPart.SET.getValue() ?
+                productRepository.countProductsByCategoryAndEnabledAndItem0InAndItem1Not(EItemCategory.getNameByValue(category), true, itemIndexList, 0) :
+                productRepository.countProductsByCategoryAndEnabledAndItem0InAndItem1Is(EItemCategory.getNameByValue(category), true, itemIndexList, 0);
+        } break;
+        case HOUSE_DECO:
+            productListSize = productRepository.countProductsByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemHouseDecoRepository.findItemIndexListByKind(EItemHouseDeco.getNameByValue(part)));
+            break;
 
-	case PARTS: {
+        case RECIPE: {
+            List<Integer> itemIndexList = part == EItemRecipe.CHAR_ITEM.getValue() ?
+                itemRecipeRepository.findItemIndexListByKindAndForPlayer(EItemRecipe.getNameByValue(part), EItemChar.getNameByValue(player)) :
+                itemRecipeRepository.findItemIndexListByKind(EItemRecipe.getNameByValue(part));
+            productListSize = productRepository.countProductsByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemIndexList);
+        } break;
+        case LOTTERY:
+            productListSize = productRepository.countProductsByCategoryAndEnabledAndPriceType(EItemCategory.getNameByValue(category), true, part == 0 ? "MINT" : "GOLD");
+            break;
 
-	    List<Integer> itemIndexList = part == EItemPart.SET.getValue() ?
-		    itemPartRepository.findItemIndexListByForPlayer(EItemChar.getNameByValue(player)) :
-		    itemPartRepository.findItemIndexListByForPlayerAndPartIn(EItemChar.getNameByValue(player), EItemSubPart.getNamesByValue(part));
-	    productListSize = part == EItemPart.SET.getValue() ?
-		    productRepository.countProductsByCategoryAndEnabledAndItem0InAndItem1Not(EItemCategory.getNameByValue(category), true, itemIndexList, 0) :
-		    productRepository.countProductsByCategoryAndEnabledAndItem0InAndItem1Is(EItemCategory.getNameByValue(category), true, itemIndexList, 0);
+        case ENCHANT:
+            productListSize = productRepository.countProductsByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemEnchantRepository.getItemIndexListByKind(EItemEnchant.getNameByValue(part)));
+            break;
 
-	    break;
-	}
-	case HOUSE_DECO:
+        default:
+            productListSize = productRepository.countProductsByCategoryAndEnabled(EItemCategory.getNameByValue(category), true);
+            break;
+        }
 
-	    productListSize = productRepository.countProductsByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemHouseDecoRepository.findItemIndexListByKind(EItemHouseDeco.getNameByValue(part)));
-	    break;
-
-	case RECIPE: {
-
-	    List<Integer> itemIndexList = part == EItemRecipe.CHAR_ITEM.getValue() ?
-		    itemRecipeRepository.findItemIndexListByKindAndForPlayer(EItemRecipe.getNameByValue(part), EItemChar.getNameByValue(player)) :
-		    itemRecipeRepository.findItemIndexListByKind(EItemRecipe.getNameByValue(part));
-	    productListSize = productRepository.countProductsByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemIndexList);
-
-	    break;
-	}
-	case LOTTERY:
-
-	    productListSize = productRepository.countProductsByCategoryAndEnabledAndPriceType(EItemCategory.getNameByValue(category), true, part == 0 ? "MINT" : "GOLD");
-	    break;
-
-	case ENCHANT:
-
-	    productListSize = productRepository.countProductsByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemEnchantRepository.getItemIndexListByKind(EItemEnchant.getNameByValue(part)));
-	    break;
-
-	default:
-
-	    productListSize = productRepository.countProductsByCategoryAndEnabled(EItemCategory.getNameByValue(category), true);
-	    break;
-	}
-
-	return (int) productListSize;
+        return (int) productListSize;
     }
 
     public List<Product> getProductList(byte category, byte part, byte player, int page) {
-
         List<Product> productList;
 
-	Pageable pageWithSixElements = PageRequest.of(page == 1 ? 0 : (page - 1), 6, Sort.by("productIndex"));
+        Pageable pageWithSixElements = PageRequest.of(page == 1 ? 0 : (page - 1), 6, Sort.by("productIndex"));
 
-	switch (EItemCategory.valueOf(category)) {
+        switch (EItemCategory.valueOf(category)) {
 
-	case PARTS: {
+        case PARTS: {
+            List<Integer> itemIndexList = part == EItemPart.SET.getValue() ?
+                itemPartRepository.findItemIndexListByForPlayer(EItemChar.getNameByValue(player)) :
+                itemPartRepository.findItemIndexListByForPlayerAndPartIn(EItemChar.getNameByValue(player), EItemSubPart.getNamesByValue(part));
+            productList = part == EItemPart.SET.getValue() ?
+                productRepository.findAllByCategoryAndEnabledAndItem0InAndItem1Not(EItemCategory.getNameByValue(category), true, itemIndexList, 0, pageWithSixElements) :
+                productRepository.findAllByCategoryAndEnabledAndItem0InAndItem1Is(EItemCategory.getNameByValue(category), true, itemIndexList, 0, pageWithSixElements);
+        } break;
+        case HOUSE_DECO:
+            productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemHouseDecoRepository.findItemIndexListByKind(EItemHouseDeco.getNameByValue(part)), pageWithSixElements);
+            break;
 
-	    List<Integer> itemIndexList = part == EItemPart.SET.getValue() ?
-		    itemPartRepository.findItemIndexListByForPlayer(EItemChar.getNameByValue(player)) :
-		    itemPartRepository.findItemIndexListByForPlayerAndPartIn(EItemChar.getNameByValue(player), EItemSubPart.getNamesByValue(part));
-	    productList = part == EItemPart.SET.getValue() ?
-		    productRepository.findAllByCategoryAndEnabledAndItem0InAndItem1Not(EItemCategory.getNameByValue(category), true, itemIndexList, 0, pageWithSixElements) :
-		    productRepository.findAllByCategoryAndEnabledAndItem0InAndItem1Is(EItemCategory.getNameByValue(category), true, itemIndexList, 0, pageWithSixElements);
+        case RECIPE: {
+            List<Integer> itemIndexList = part == EItemRecipe.CHAR_ITEM.getValue() ?
+                itemRecipeRepository.findItemIndexListByKindAndForPlayer(EItemRecipe.getNameByValue(part), EItemChar.getNameByValue(player)) :
+                itemRecipeRepository.findItemIndexListByKind(EItemRecipe.getNameByValue(part));
+            productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemIndexList, pageWithSixElements);
+        } break;
+        case LOTTERY:
+            productList = productRepository.findAllByCategoryAndEnabledAndPriceType(EItemCategory.getNameByValue(category), true, part == 0 ? "MINT" : "GOLD", pageWithSixElements);
+            break;
 
-	    break;
-	}
-	case HOUSE_DECO:
+        case ENCHANT:
+            productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemEnchantRepository.getItemIndexListByKind(EItemEnchant.getNameByValue(part)), pageWithSixElements);
+            break;
 
-	    productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemHouseDecoRepository.findItemIndexListByKind(EItemHouseDeco.getNameByValue(part)), pageWithSixElements);
-	    break;
+        default:
+            productList = productRepository.findAllByCategoryAndEnabled(EItemCategory.getNameByValue(category), true, pageWithSixElements);
+            break;
+        }
 
-	case RECIPE: {
-
-	    List<Integer> itemIndexList = part == EItemRecipe.CHAR_ITEM.getValue() ?
-		    itemRecipeRepository.findItemIndexListByKindAndForPlayer(EItemRecipe.getNameByValue(part), EItemChar.getNameByValue(player)) :
-		    itemRecipeRepository.findItemIndexListByKind(EItemRecipe.getNameByValue(part));
-	    productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemIndexList, pageWithSixElements);
-
-	    break;
-	}
-	case LOTTERY:
-
-	    productList = productRepository.findAllByCategoryAndEnabledAndPriceType(EItemCategory.getNameByValue(category), true, part == 0 ? "MINT" : "GOLD", pageWithSixElements);
-	    break;
-
-	case ENCHANT:
-
-	    productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemEnchantRepository.getItemIndexListByKind(EItemEnchant.getNameByValue(part)), pageWithSixElements);
-	    break;
-
-	default:
-
-	    productList = productRepository.findAllByCategoryAndEnabled(EItemCategory.getNameByValue(category), true, pageWithSixElements);
-	    break;
-	}
-
-	return productList;
+        return productList;
     }
 
     public Player createNewPlayer(Account account, byte forPlayer) {
+        Player player = new Player();
+        player.setAccount(account);
+        player.setPlayerType(forPlayer);
+        player.setFirstPlayer(false);
 
-	Player player = new Player();
-	player.setAccount(account);
-	player.setPlayerType(forPlayer);
-	player.setFirstPlayer(false);
+        ClothEquipment clothEquipment = new ClothEquipment();
+        clothEquipment = clothEquipmentService.save(clothEquipment);
 
-	ClothEquipment clothEquipment = new ClothEquipment();
-	clothEquipment = clothEquipmentService.save(clothEquipment);
+        QuickSlotEquipment quickSlotEquipment = new QuickSlotEquipment();
+        quickSlotEquipment = quickSlotEquipmentService.save(quickSlotEquipment);
 
-	QuickSlotEquipment quickSlotEquipment = new QuickSlotEquipment();
-	quickSlotEquipment = quickSlotEquipmentService.save(quickSlotEquipment);
+        player.setClothEquipment(clothEquipment);
+        player.setQuickSlotEquipment(quickSlotEquipment);
 
-	player.setClothEquipment(clothEquipment);
-	player.setQuickSlotEquipment(quickSlotEquipment);
+        Pocket pocket = new Pocket();
+        pocket = pocketService.save(pocket);
+        player.setPocket(pocket);
 
-	Pocket pocket = new Pocket();
-	pocket = pocketService.save(pocket);
-	player.setPocket(pocket);
-
-	return playerService.save(player);
+        return playerService.save(player);
     }
 }

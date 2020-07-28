@@ -7,11 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SPlayerDeletePacket extends Packet {
-
     private int playerId;
 
     public C2SPlayerDeletePacket(Packet packet) {
-
         super(packet);
 
         this.playerId = this.readInt();

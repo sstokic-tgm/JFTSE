@@ -27,31 +27,26 @@ public class PlayerService {
     }
 
     public Player findById(Long playerId) {
-
-	Optional<Player> player = playerRepository.findById(playerId);
+        Optional<Player> player = playerRepository.findById(playerId);
         return player.orElse(null);
     }
 
     public Player findByIdFetched(Long playerId) {
-
         Optional<Player> player = playerRepository.findByIdFetched(playerId);
         return player.orElse(null);
     }
 
     public Player findByName(String name) {
-
         Optional<Player> player = playerRepository.findByName(name);
         return player.orElse(null);
     }
 
     public Player updateMoney(Player player, int gold) {
-
         player.setGold(player.getGold() + gold);
         return save(player);
     }
 
     public Player setMoney(Player player, int gold) {
-
         player.setGold(gold);
         return save(player);
     }
@@ -61,7 +56,6 @@ public class PlayerService {
     }
 
     public boolean isStatusPointHack(C2SPlayerStatusPointChangePacket playerStatusPointChangePacket, Player player) {
-
         // checking them so we are not 'hacked'
         byte serverStatusPoints = player.getStatusPoints();
         byte clientStatusPoints = playerStatusPointChangePacket.getStatusPoints();

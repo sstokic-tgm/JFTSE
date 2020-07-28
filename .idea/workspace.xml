@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="eabce600-02e6-4baf-ae42-723aec59d005" name="Default Changelist" comment="" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <list default="true" id="eabce600-02e6-4baf-ae42-723aec59d005" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -16,19 +37,22 @@
       </list>
     </option>
   </component>
-  <component name="MavenImportPreferences">
-    <option name="importingSettings">
-      <MavenImportingSettings>
-        <option name="importAutomatically" value="true" />
-      </MavenImportingSettings>
-    </option>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1efrVVYbi3HGunJO77yKlRqlt8J" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -36,22 +60,10 @@
       <recent name="C:\Users\Stefan\IntelliJ-workspace\refactored-ft_server_emulator\src\main\resources\templates" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
   <component name="RunManager" selected="Application.StartApplication">
-    <configuration name="StartApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration name="StartApplication" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.ft.emulator.StartApplication" />
-      <module name="ft_server_emulator" />
+      <module name="JFTSE" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.ft.emulator.server.game.core.auth.*" />
@@ -69,11 +81,9 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.StartApplication" />
-      </list>
-    </recent_temporary>
+    <list>
+      <item itemvalue="Application.StartApplication" />
+    </list>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -110,5 +120,47 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="626" y="159" key="#StartApplication" timestamp="1595770516715">
+      <screen x="0" y="0" width="1858" height="1080" />
+    </state>
+    <state x="626" y="159" key="#StartApplication/1920.0.1858.1080/0.0.1858.1080/-1920.0.1858.1080@0.0.1858.1080" timestamp="1595770516715" />
+    <state x="383" y="194" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1595770549196">
+      <screen x="0" y="0" width="1858" height="1080" />
+    </state>
+    <state x="383" y="194" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1858.1080/0.0.1858.1080/-1920.0.1858.1080@0.0.1858.1080" timestamp="1595770549196" />
+    <state width="1815" height="295" key="GridCell.Tab.0.bottom" timestamp="1595770519283">
+      <screen x="0" y="0" width="1858" height="1080" />
+    </state>
+    <state width="1815" height="295" key="GridCell.Tab.0.bottom/1920.0.1858.1080/0.0.1858.1080/-1920.0.1858.1080@0.0.1858.1080" timestamp="1595770519283" />
+    <state width="1815" height="295" key="GridCell.Tab.0.center" timestamp="1595770519283">
+      <screen x="0" y="0" width="1858" height="1080" />
+    </state>
+    <state width="1815" height="295" key="GridCell.Tab.0.center/1920.0.1858.1080/0.0.1858.1080/-1920.0.1858.1080@0.0.1858.1080" timestamp="1595770519283" />
+    <state width="1815" height="295" key="GridCell.Tab.0.left" timestamp="1595770519283">
+      <screen x="0" y="0" width="1858" height="1080" />
+    </state>
+    <state width="1815" height="295" key="GridCell.Tab.0.left/1920.0.1858.1080/0.0.1858.1080/-1920.0.1858.1080@0.0.1858.1080" timestamp="1595770519283" />
+    <state width="1815" height="295" key="GridCell.Tab.0.right" timestamp="1595770519283">
+      <screen x="0" y="0" width="1858" height="1080" />
+    </state>
+    <state width="1815" height="295" key="GridCell.Tab.0.right/1920.0.1858.1080/0.0.1858.1080/-1920.0.1858.1080@0.0.1858.1080" timestamp="1595770519283" />
+    <state x="430" y="184" key="SettingsEditor" timestamp="1595756395920">
+      <screen x="0" y="0" width="1858" height="1080" />
+    </state>
+    <state x="430" y="184" key="SettingsEditor/1920.0.1858.1080/0.0.1858.1080/-1920.0.1858.1080@0.0.1858.1080" timestamp="1595756395920" />
   </component>
 </project>

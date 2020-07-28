@@ -9,34 +9,32 @@ public enum EItemUseType {
     private byte value;
 
     EItemUseType(int value) {
-	this.value = (byte) value;
+        this.value = (byte) value;
     }
 
     public Byte getValue() {
-	return value;
+        return value;
     }
 
     public String getName() {
-	return StringUtils.capitalize(toString().toLowerCase());
+        return StringUtils.capitalize(toString().toLowerCase());
     }
 
     public static EItemUseType valueOf(byte value) {
-
-	for (EItemUseType itemUseType : values()) {
-	    if (itemUseType.getValue().equals(value)) {
-		return itemUseType;
-	    }
-	}
-	return null;
+        for (EItemUseType itemUseType : values()) {
+            if (itemUseType.getValue().equals(value)) {
+                return itemUseType;
+            }
+        }
+        return null;
     }
 
     public static Byte getValueByName(String name) {
-
-	for (EItemUseType itemUseType : values()) {
-	    if (itemUseType.getName().equals(name)) {
-		return itemUseType.getValue();
-	    }
-	}
-	return null;
+        for (EItemUseType itemUseType : values()) {
+            if (itemUseType.getName().equals(name)) {
+                return itemUseType.getValue();
+            }
+        }
+        return null;
     }
 }

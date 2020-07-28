@@ -14,7 +14,6 @@ import javax.persistence.*;
 @Audited
 @Entity
 public class ChallengeProgress extends AbstractBaseModel {
-
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;

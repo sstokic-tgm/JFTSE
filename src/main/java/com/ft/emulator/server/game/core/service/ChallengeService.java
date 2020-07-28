@@ -26,7 +26,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class ChallengeService {
-
     private final ChallengeRepository challengeRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
 
@@ -40,13 +39,11 @@ public class ChallengeService {
     }
 
     public Challenge findChallengeByChallengeIndex(Integer challengeIndex) {
-
         Optional<Challenge> challenge = challengeRepository.findChallengeByChallengeIndex(challengeIndex);
         return challenge.orElse(null);
     }
 
     public void finishGame(Connection connection, boolean win) {
-
         long timeNeeded = connection.getClient().getActiveChallengeGame().getTimeNeeded();
 
         Challenge challenge = findChallengeByChallengeIndex(connection.getClient().getActiveChallengeGame().getChallengeIndex());
@@ -60,7 +57,6 @@ public class ChallengeService {
         List<Product> rewardProductList = new ArrayList<>();
 
         if (challengeProgress == null) {
-
             successCount = win ? 1 : 0;
 
             rewardProductList.addAll(itemRewardService.getItemRewardChallenge(challenge, null, win, successCount, oldSuccessCount));
@@ -76,7 +72,6 @@ public class ChallengeService {
             challengeProgress.setAttempts(1);
         }
         else {
-
             oldSuccessCount = challengeProgress.getSuccess();
             successCount = win ? challengeProgress.getSuccess() + 1 : oldSuccessCount;
 
@@ -92,16 +87,13 @@ public class ChallengeService {
 
         List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(connection.getClient().getActivePlayer(), rewardProductList));
 
-
         // add account home bonuses to exp and gold
         AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getActivePlayer().getAccount().getId());
         if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBasicGame) {
-
             rewardExp += (rewardExp * (accountHome.getBasicBonusExp() / 100));
             rewardGold += (rewardGold * (accountHome.getBasicBonusGold() / 100));
         }
         else if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBattleGame) {
-
             rewardExp += (rewardExp * (accountHome.getBattleBonusExp() / 100));
             rewardGold += (rewardGold * (accountHome.getBattleBonusGold() / 100));
         }

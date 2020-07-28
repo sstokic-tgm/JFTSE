@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Setter
 @Entity
 public class Product extends AbstractIdBaseModel {
-
     @Column(unique = true)
     private Integer productIndex;
 

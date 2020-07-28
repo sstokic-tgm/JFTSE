@@ -13,7 +13,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class PocketService {
-
     private final PocketRepository pocketRepository;
 
     public Pocket save(Pocket pocket) {
@@ -21,38 +20,33 @@ public class PocketService {
     }
 
     public Pocket findById(Long pocketId) {
-
-	Optional<Pocket> pocket = pocketRepository.findById(pocketId);
-	return pocket.orElse(null);
+        Optional<Pocket> pocket = pocketRepository.findById(pocketId);
+        return pocket.orElse(null);
     }
 
     public Pocket incrementPocketBelongings(Pocket pocket) {
+        Optional<Pocket> tmpPocket = pocketRepository.findById(pocket.getId());
+        if (tmpPocket.isPresent()) {
+            pocket = tmpPocket.get();
 
-	Optional<Pocket> tmpPocket = pocketRepository.findById(pocket.getId());
-	if (tmpPocket.isPresent()) {
-
-	    pocket = tmpPocket.get();
-
-	    pocket.setBelongings(pocket.getBelongings() + 1);
-	    return save(pocket);
-	}
-	else {
-	    return pocket;
-	}
+            pocket.setBelongings(pocket.getBelongings() + 1);
+            return save(pocket);
+        }
+        else {
+            return pocket;
+        }
     }
 
     public Pocket decrementPocketBelongings(Pocket pocket) {
+        Optional<Pocket> tmpPocket = pocketRepository.findById(pocket.getId());
+        if (tmpPocket.isPresent()) {
+            pocket = tmpPocket.get();
 
-	Optional<Pocket> tmpPocket = pocketRepository.findById(pocket.getId());
-	if (tmpPocket.isPresent()) {
-
-	    pocket = tmpPocket.get();
-
-	    pocket.setBelongings(pocket.getBelongings() - 1);
-	    return save(pocket);
-	}
-	else {
-	    return pocket;
-	}
+            pocket.setBelongings(pocket.getBelongings() - 1);
+            return save(pocket);
+        }
+        else {
+            return pocket;
+        }
     }
 }
