@@ -9,74 +9,62 @@ import com.ft.emulator.server.shared.module.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AuthenticationServerNetworkListener implements ConnectionListener {
-
     @Autowired
     private AuthPacketHandler authPacketHandler;
 
     public void connected(Connection connection) {
+        Client client = new Client();
+        client.setConnection(connection);
 
-	Client client = new Client();
-	client.setConnection(connection);
-
-	connection.setClient(client);
-	authPacketHandler.sendWelcomePacket(connection);
+        connection.setClient(client);
+        authPacketHandler.sendWelcomePacket(connection);
     }
 
     public void disconnected(Connection connection) {
-
-	authPacketHandler.handleDisconnected(connection);
+        authPacketHandler.handleDisconnected(connection);
     }
 
     public void received(Connection connection, Packet packet) {
+        switch (packet.getPacketId()) {
+        case PacketID.C2SLoginRequest:
+            authPacketHandler.handleLoginPacket(connection, packet);
+            break;
 
-	switch (packet.getPacketId()) {
+        case PacketID.C2SDisconnectRequest:
+            authPacketHandler.handleDisconnectPacket(connection, packet);
+            break;
 
-	case PacketID.C2SLoginRequest:
+        case PacketID.C2SLoginFirstPlayerRequest:
+            authPacketHandler.handleFirstPlayerPacket(connection, packet);
+            break;
 
-	    authPacketHandler.handleLoginPacket(connection, packet);
-	    break;
+        case PacketID.C2SPlayerNameCheck:
+            authPacketHandler.handlePlayerNameCheckPacket(connection, packet);
+            break;
 
-	case PacketID.C2SDisconnectRequest:
+        case PacketID.C2SPlayerCreate:
+            authPacketHandler.handlePlayerCreatePacket(connection, packet);
+            break;
 
-	    authPacketHandler.handleDisconnectPacket(connection, packet);
-	    break;
+        case PacketID.C2SPlayerDelete:
+            authPacketHandler.handlePlayerDeletePacket(connection, packet);
+            break;
 
-	case PacketID.C2SLoginFirstPlayerRequest:
+        case PacketID.C2SAuthLoginData:
+            authPacketHandler.handleAuthServerLoginPacket(connection, packet);
+            break;
 
-	    authPacketHandler.handleFirstPlayerPacket(connection, packet);
-	    break;
+        case PacketID.C2SHeartbeat:
+        case PacketID.C2SLoginAliveClient:
+            break;
 
-	case PacketID.C2SPlayerNameCheck:
-
-	    authPacketHandler.handlePlayerNameCheckPacket(connection, packet);
-	    break;
-
-	case PacketID.C2SPlayerCreate:
-
-	    authPacketHandler.handlePlayerCreatePacket(connection, packet);
-	    break;
-
-	case PacketID.C2SPlayerDelete:
-
-	    authPacketHandler.handlePlayerDeletePacket(connection, packet);
-	    break;
-
-	case PacketID.C2SAuthLoginData:
-
-	    authPacketHandler.handleAuthServerLoginPacket(connection, packet);
-	    break;
-
-	case PacketID.C2SHeartbeat:
-	case PacketID.C2SLoginAliveClient:
-	    break;
-
-	default:
-
-	    authPacketHandler.handleUnknown(connection, packet);
-	    break;
-	}
+        default:
+            authPacketHandler.handleUnknown(connection, packet);
+            break;
+        }
     }
 
     public void idle(Connection connection) {
+        // empty..
     }
 }

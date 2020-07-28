@@ -65,7 +65,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class GamePacketHandler {
-
     private final GameHandler gameHandler;
 
     private final AuthenticationService authenticationService;
@@ -80,344 +79,312 @@ public class GamePacketHandler {
     private final ProductService productService;
 
     public GameHandler getGameHandler() {
-	return gameHandler;
+        return gameHandler;
     }
 
     public void sendWelcomePacket(Connection connection) {
-
-	S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
-	connection.sendTCP(welcomePacket);
+        S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
+        connection.sendTCP(welcomePacket);
     }
 
     public void handleGameServerLoginPacket(Connection connection, Packet packet) {
+        C2SGameServerLoginPacket gameServerLoginPacket = new C2SGameServerLoginPacket(packet);
 
-	C2SGameServerLoginPacket gameServerLoginPacket = new C2SGameServerLoginPacket(packet);
+        Player player = playerService.findByIdFetched((long) gameServerLoginPacket.getPlayerId());
+        if (player != null && player.getAccount() != null) {
+            Client client = connection.getClient();
+            Account account = player.getAccount();
 
-	Player player = playerService.findByIdFetched((long) gameServerLoginPacket.getPlayerId());
-	if (player != null && player.getAccount() != null) {
+            // set last login date
+            account.setLastLogin(new Date());
+            // mark as logged in
+            account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
+            account = authenticationService.updateAccount(account);
 
-	    Client client = connection.getClient();
-	    Account account = player.getAccount();
+            client.setAccount(account);
+            client.setActivePlayer(player);
+            connection.setClient(client);
 
-	    // set last login date
-	    account.setLastLogin(new Date());
-	    // mark as logged in
-	    account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
-	    account = authenticationService.updateAccount(account);
-
-	    client.setAccount(account);
-	    client.setActivePlayer(player);
-	    connection.setClient(client);
-
-	    S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
-	    connection.sendTCP(gameServerLoginAnswerPacket);
-	}
-	else {
-
-	    S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) -1, (byte) 0);
-	    connection.sendTCP(gameServerLoginAnswerPacket);
-	}
+            S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
+            connection.sendTCP(gameServerLoginAnswerPacket);
+        }
+        else {
+            S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) -1, (byte) 0);
+            connection.sendTCP(gameServerLoginAnswerPacket);
+        }
     }
 
     public void handleGameServerDataRequestPacket(Connection connection, Packet packet) {
-
         Client client = connection.getClient();
         Player player = client.getActivePlayer();
         Account account = client.getAccount();
 
-	C2SGameServerRequestPacket gameServerRequestPacket = new C2SGameServerRequestPacket(packet);
-	byte requestType = gameServerRequestPacket.getRequestType();
+        C2SGameServerRequestPacket gameServerRequestPacket = new C2SGameServerRequestPacket(packet);
+        byte requestType = gameServerRequestPacket.getRequestType();
 
-	// init data request packets and pass level & exp and home/house data
-	if (requestType == 0) {
+        // init data request packets and pass level & exp and home/house data
+        if (requestType == 0) {
+            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
 
-	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
+            // init data request packets
+            gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 1, (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
 
-	    // init data request packets
-	    gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 1, (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
+            S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
+            connection.sendTCP(playerLevelExpPacket);
 
-	    S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
-	    connection.sendTCP(playerLevelExpPacket);
+            AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
 
-	    AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
+            S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
+            connection.sendTCP(homeDataPacket);
+        }
+        else if (requestType == 1) {
+            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
 
-	    S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-	    connection.sendTCP(homeDataPacket);
-	}
-	else if (requestType == 1) {
+            gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 2, (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
+        }
+        // pass inventory & equipped items
+        else if (requestType == 2) {
+            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
 
-	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
+            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
+            StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
+                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+                    connection.sendTCP(inventoryDataPacket);
+                });
 
-	    gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 2, (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
-	}
-	// pass inventory & equipped items
-	else if (requestType == 2) {
+            StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+            Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
+            List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
 
-	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
+            S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
+            connection.sendTCP(playerStatusPointChangePacket);
 
-	    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
-	    StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
-		S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
-		connection.sendTCP(inventoryDataPacket);
-	    });
+            S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
+            connection.sendTCP(inventoryWearClothAnswerPacket);
 
-	    StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-	    Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
-	    List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+            S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
+            connection.sendTCP(inventoryWearQuickAnswerPacket);
 
-	    S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
-	    connection.sendTCP(playerStatusPointChangePacket);
-
-	    S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
-	    connection.sendTCP(inventoryWearClothAnswerPacket);
-
-	    S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
-	    connection.sendTCP(inventoryWearQuickAnswerPacket);
-
-	    gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) (requestType + 1), (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
-	}
-	else {
-	    S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-	    connection.sendTCP(gameServerAnswerPacket);
-	}
+            gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) (requestType + 1), (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
+        }
+        else {
+            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
+        }
     }
 
     public void handleHomeItemsLoadRequestPacket(Connection connection, Packet packet) {
+        AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
+        List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 
-	AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
-	List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
-
-	S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(homeInventoryList);
-	connection.sendTCP(homeItemsLoadAnswerPacket);
+        S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(homeInventoryList);
+        connection.sendTCP(homeItemsLoadAnswerPacket);
     }
 
     public void handleHomeItemsPlaceRequestPacket(Connection connection, Packet packet) {
+        C2SHomeItemsPlaceReqPacket homeItemsPlaceReqPacket = new C2SHomeItemsPlaceReqPacket(packet);
+        List<Map<String, Object>> homeItemDataList = homeItemsPlaceReqPacket.getHomeItemDataList();
 
-	C2SHomeItemsPlaceReqPacket homeItemsPlaceReqPacket = new C2SHomeItemsPlaceReqPacket(packet);
-	List<Map<String, Object>> homeItemDataList = homeItemsPlaceReqPacket.getHomeItemDataList();
+        AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
 
-	AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
+        homeItemDataList.forEach(hidl -> {
+                int inventoryItemId = (int)hidl.get("inventoryItemId");
 
-	homeItemDataList.forEach(hidl -> {
+                PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) inventoryItemId, connection.getClient().getActivePlayer().getPocket());
+                if (playerPocket != null) {
+                    int itemCount = playerPocket.getItemCount();
 
-	    int inventoryItemId = (int)hidl.get("inventoryItemId");
+                    // those items are deco items -> its placed on the wall
+                    if (itemCount % 3 != 0)
+                        --itemCount;
+                    else
+                        itemCount = 0;
 
-	    PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) inventoryItemId, connection.getClient().getActivePlayer().getPocket());
-	    if (playerPocket != null) {
+                    if (itemCount == 0) {
+                        playerPocketService.remove((long) inventoryItemId);
+                        pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
 
-	        int itemCount = playerPocket.getItemCount();
+                        S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
+                        connection.sendTCP(inventoryItemRemoveAnswerPacket);
+                    }
+                    else {
+                        playerPocket.setItemCount(itemCount);
+                        playerPocketService.save(playerPocket);
+                    }
 
-	        // those items are deco items -> its placed on the wall
-		if (itemCount % 3 != 0)
-		    itemCount--;
-		else
-		    itemCount = 0;
+                    int itemIndex = (int) hidl.get("itemIndex");
+                    byte unk0 = (byte) hidl.get("unk4");
+                    byte unk1 = (byte) hidl.get("unk5");
+                    byte xPos = (byte) hidl.get("xPos");
+                    byte yPos = (byte) hidl.get("yPos");
 
-		if (itemCount == 0) {
+                    HomeInventory homeInventory = new HomeInventory();
+                    homeInventory.setId((long) inventoryItemId);
+                    homeInventory.setAccountHome(accountHome);
+                    homeInventory.setItemIndex(itemIndex);
+                    homeInventory.setUnk0(unk0);
+                    homeInventory.setUnk1(unk1);
+                    homeInventory.setXPos(xPos);
+                    homeInventory.setYPos(yPos);
 
-		    playerPocketService.remove((long) inventoryItemId);
-		    pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
+                    homeInventory = homeService.save(homeInventory);
 
-		    S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
-		    connection.sendTCP(inventoryItemRemoveAnswerPacket);
-		}
-		else {
+                    homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
+                }
+            });
 
-		    playerPocket.setItemCount(itemCount);
-		    playerPocketService.save(playerPocket);
-		}
-
-		int itemIndex = (int) hidl.get("itemIndex");
-		byte unk0 = (byte) hidl.get("unk4");
-		byte unk1 = (byte) hidl.get("unk5");
-		byte xPos = (byte) hidl.get("xPos");
-		byte yPos = (byte) hidl.get("yPos");
-
-		HomeInventory homeInventory = new HomeInventory();
-		homeInventory.setId((long) inventoryItemId);
-		homeInventory.setAccountHome(accountHome);
-		homeInventory.setItemIndex(itemIndex);
-		homeInventory.setUnk0(unk0);
-		homeInventory.setUnk1(unk1);
-		homeInventory.setXPos(xPos);
-		homeInventory.setYPos(yPos);
-
-		homeInventory = homeService.save(homeInventory);
-
-		homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
-	    }
-	});
-
-	S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-	connection.sendTCP(homeDataPacket);
+        S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
+        connection.sendTCP(homeDataPacket);
     }
 
     public void handleHomeItemClearRequestPacket(Connection connection, Packet packet) {
 
-	AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
-	List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
+        AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
+        List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 
-	homeInventoryList.forEach(hil -> {
+        homeInventoryList.forEach(hil -> {
+                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndex(hil.getItemIndex(), connection.getClient().getActivePlayer().getPocket());
+                ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
 
-	    PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndex(hil.getItemIndex(), connection.getClient().getActivePlayer().getPocket());
-	    ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
+                // create a new one if null, null indicates that all items are placed
+                if (playerPocket == null) {
+                    playerPocket = new PlayerPocket();
+                    playerPocket.setItemIndex(hil.getItemIndex());
+                    playerPocket.setPocket(connection.getClient().getActivePlayer().getPocket());
+                    playerPocket.setItemCount(itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1);
+                    playerPocket.setCategory(EItemCategory.HOUSE_DECO.getName());
+                    playerPocket.setUseType(StringUtils.firstCharToUpperCase(EItemUseType.COUNT.getName().toLowerCase()));
 
-	    // create a new one if null, null indicates that all items are placed
-	    if (playerPocket == null) {
+                    pocketService.incrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
+                }
+                else {
+                    playerPocket.setItemCount(playerPocket.getItemCount() + (itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1));
+                }
 
-		playerPocket = new PlayerPocket();
-		playerPocket.setItemIndex(hil.getItemIndex());
-		playerPocket.setPocket(connection.getClient().getActivePlayer().getPocket());
-		playerPocket.setItemCount(itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1);
-		playerPocket.setCategory(EItemCategory.HOUSE_DECO.getName());
-		playerPocket.setUseType(StringUtils.firstCharToUpperCase(EItemUseType.COUNT.getName().toLowerCase()));
+                playerPocketService.save(playerPocket);
 
-		pocketService.incrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
-	    }
-	    else {
+                homeService.updateAccountHomeStatsByHomeInventory(accountHome, hil, false);
+                homeService.removeItemFromHomeInventory(hil.getId());
+            });
 
-	        playerPocket.setItemCount(playerPocket.getItemCount() + (itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1));
-	    }
+        S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(new ArrayList<>());
+        connection.sendTCP(homeItemsLoadAnswerPacket);
 
-	    playerPocketService.save(playerPocket);
+        S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
+        connection.sendTCP(homeDataPacket);
 
-	    homeService.updateAccountHomeStatsByHomeInventory(accountHome, hil, false);
-	    homeService.removeItemFromHomeInventory(hil.getId());
-	});
-
-	S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(new ArrayList<>());
-	connection.sendTCP(homeItemsLoadAnswerPacket);
-
-	S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-	connection.sendTCP(homeDataPacket);
-
-	List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
-	StreamUtils.batches(playerPocketList, 10)
-		.forEach(pocketList -> {
-		    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
-		    connection.sendTCP(inventoryDataPacket);
-		});
+        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
+        StreamUtils.batches(playerPocketList, 10)
+            .forEach(pocketList -> {
+                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+                    connection.sendTCP(inventoryDataPacket);
+                });
     }
 
     public void handleInventoryItemSellPackets(Connection connection, Packet packet) {
-
         switch (packet.getPacketId()) {
+        case PacketID.C2SInventorySellReq: {
+            byte status = S2CInventorySellAnswerPacket.SUCCESS;
 
-	case PacketID.C2SInventorySellReq: {
+            C2SInventorySellReqPacket inventorySellReqPacket = new C2SInventorySellReqPacket(packet);
+            int itemPocketId = inventorySellReqPacket.getItemPocketId();
 
-	    byte status = S2CInventorySellAnswerPacket.SUCCESS;
+            PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, connection.getClient().getActivePlayer().getPocket());
 
-	    C2SInventorySellReqPacket inventorySellReqPacket = new C2SInventorySellReqPacket(packet);
-	    int itemPocketId = inventorySellReqPacket.getItemPocketId();
+            if(playerPocket == null) {
+                status = S2CInventorySellAnswerPacket.NO_ITEM;
 
-	    PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, connection.getClient().getActivePlayer().getPocket());
+                S2CInventorySellAnswerPacket inventorySellAnswerPacket = new S2CInventorySellAnswerPacket(status, 0, 0);
+                connection.sendTCP(inventorySellAnswerPacket);
+                break;
+            }
 
-	    if(playerPocket == null) {
+            int sellPrice = playerPocketService.getSellPrice(playerPocket);
 
-	        status = S2CInventorySellAnswerPacket.NO_ITEM;
+            S2CInventorySellAnswerPacket inventorySellAnswerPacket = new S2CInventorySellAnswerPacket(status, itemPocketId, sellPrice);
+            connection.sendTCP(inventorySellAnswerPacket);
+        } break;
+        case PacketID.C2SInventorySellItemCheckReq: {
+            byte status = S2CInventorySellItemCheckAnswerPacket.SUCCESS;
 
-	        S2CInventorySellAnswerPacket inventorySellAnswerPacket = new S2CInventorySellAnswerPacket(status, 0, 0);
-	        connection.sendTCP(inventorySellAnswerPacket);
+            C2SInventorySellItemCheckReqPacket inventorySellItemCheckReqPacket = new C2SInventorySellItemCheckReqPacket(packet);
+            int itemPocketId = inventorySellItemCheckReqPacket.getItemPocketId();
 
-	        break;
-	    }
+            Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+            PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, pocket);
 
-	    int sellPrice = playerPocketService.getSellPrice(playerPocket);
+            if(playerPocket == null) {
+                status = S2CInventorySellAnswerPacket.NO_ITEM;
 
-	    S2CInventorySellAnswerPacket inventorySellAnswerPacket = new S2CInventorySellAnswerPacket(status, itemPocketId, sellPrice);
-	    connection.sendTCP(inventorySellAnswerPacket);
+                S2CInventorySellItemCheckAnswerPacket inventorySellItemCheckAnswerPacket = new S2CInventorySellItemCheckAnswerPacket(status);
+                connection.sendTCP(inventorySellItemCheckAnswerPacket);
+                break;
+            }
 
-	    break;
-	}
-	case PacketID.C2SInventorySellItemCheckReq: {
+            int sellPrice = playerPocketService.getSellPrice(playerPocket);
 
-	    byte status = S2CInventorySellItemCheckAnswerPacket.SUCCESS;
+            S2CInventorySellItemCheckAnswerPacket inventorySellItemCheckAnswerPacket = new S2CInventorySellItemCheckAnswerPacket(status);
+            connection.sendTCP(inventorySellItemCheckAnswerPacket);
 
-	    C2SInventorySellItemCheckReqPacket inventorySellItemCheckReqPacket = new C2SInventorySellItemCheckReqPacket(packet);
-	    int itemPocketId = inventorySellItemCheckReqPacket.getItemPocketId();
+            S2CInventorySellItemAnswerPacket inventorySellItemAnswerPacket = new S2CInventorySellItemAnswerPacket((char) playerPocket.getItemCount().intValue(), itemPocketId);
+            connection.sendTCP(inventorySellItemAnswerPacket);
 
-	    Pocket pocket = connection.getClient().getActivePlayer().getPocket();
-	    PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, pocket);
+            playerPocketService.remove(playerPocket.getId());
+            pocket = pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
+            connection.getClient().getActivePlayer().setPocket(pocket);
 
-	    if(playerPocket == null) {
+            Player player = connection.getClient().getActivePlayer();
+            player = playerService.updateMoney(player, sellPrice);
 
-	        status = S2CInventorySellAnswerPacket.NO_ITEM;
+            S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
+            connection.sendTCP(shopMoneyAnswerPacket);
 
-		S2CInventorySellItemCheckAnswerPacket inventorySellItemCheckAnswerPacket = new S2CInventorySellItemCheckAnswerPacket(status);
-		connection.sendTCP(inventorySellItemCheckAnswerPacket);
-
-		break;
-	    }
-
-	    int sellPrice = playerPocketService.getSellPrice(playerPocket);
-
-	    S2CInventorySellItemCheckAnswerPacket inventorySellItemCheckAnswerPacket = new S2CInventorySellItemCheckAnswerPacket(status);
-	    connection.sendTCP(inventorySellItemCheckAnswerPacket);
-
-	    S2CInventorySellItemAnswerPacket inventorySellItemAnswerPacket = new S2CInventorySellItemAnswerPacket((char) playerPocket.getItemCount().intValue(), itemPocketId);
-	    connection.sendTCP(inventorySellItemAnswerPacket);
-
-	    playerPocketService.remove(playerPocket.getId());
-	    pocket = pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
-	    connection.getClient().getActivePlayer().setPocket(pocket);
-
-	    Player player = connection.getClient().getActivePlayer();
-	    player = playerService.updateMoney(player, sellPrice);
-
-	    S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
-	    connection.sendTCP(shopMoneyAnswerPacket);
-
-	    connection.getClient().setActivePlayer(player);
-
-	    break;
-	}
-	}
+            connection.getClient().setActivePlayer(player);
+        } break;
+        }
     }
 
     public void handleInventoryWearClothPacket(Connection connection, Packet packet) {
-
         C2SInventoryWearClothReqPacket inventoryWearClothReqPacket = new C2SInventoryWearClothReqPacket(packet);
 
         Player player = connection.getClient().getActivePlayer();
-	ClothEquipment clothEquipment = player.getClothEquipment();
+        ClothEquipment clothEquipment = player.getClothEquipment();
 
-	clothEquipmentService.updateCloths(clothEquipment, inventoryWearClothReqPacket);
-	player.setClothEquipment(clothEquipment);
+        clothEquipmentService.updateCloths(clothEquipment, inventoryWearClothReqPacket);
+        player.setClothEquipment(clothEquipment);
 
-	player = playerService.save(player);
-	connection.getClient().setActivePlayer(player);
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
 
-	StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 
-	S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, inventoryWearClothReqPacket, player, statusPointsAddedDto);
-	connection.sendTCP(inventoryWearClothAnswerPacket);
+        S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, inventoryWearClothReqPacket, player, statusPointsAddedDto);
+        connection.sendTCP(inventoryWearClothAnswerPacket);
     }
 
     public void handleInventoryWearQuickPacket(Connection connection, Packet packet) {
-
         C2SInventoryWearQuickReqPacket inventoryWearQuickReqPacket = new C2SInventoryWearQuickReqPacket(packet);
 
         Player player = connection.getClient().getActivePlayer();
-	QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
+        QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
 
-	quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, inventoryWearQuickReqPacket.getQuickSlotList());
-	player.setQuickSlotEquipment(quickSlotEquipment);
+        quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, inventoryWearQuickReqPacket.getQuickSlotList());
+        player.setQuickSlotEquipment(quickSlotEquipment);
 
-	player = playerService.save(player);
-	connection.getClient().setActivePlayer(player);
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
 
         S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(inventoryWearQuickReqPacket.getQuickSlotList());
         connection.sendTCP(inventoryWearQuickAnswerPacket);
     }
 
     public void handleInventoryItemTimeExpiredPacket(Connection connection, Packet packet) {
-
         C2SInventoryItemTimeExpiredReqPacket inventoryItemTimeExpiredReqPacket = new C2SInventoryItemTimeExpiredReqPacket(packet);
 
         Pocket pocket = connection.getClient().getActivePlayer().getPocket();
@@ -432,465 +399,407 @@ public class GamePacketHandler {
     }
 
     public void handleShopMoneyRequestPacket(Connection connection, Packet packet) {
-
         Player player = playerService.findByIdFetched(connection.getClient().getActivePlayer().getId());
         connection.getClient().setActivePlayer(player);
 
-	S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
-	connection.sendTCP(shopMoneyAnswerPacket);
+        S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
+        connection.sendTCP(shopMoneyAnswerPacket);
     }
 
     public void handleShopBuyRequestPacket(Connection connection, Packet packet) {
+        C2SShopBuyPacket shopBuyPacket = new C2SShopBuyPacket(packet);
 
-	C2SShopBuyPacket shopBuyPacket = new C2SShopBuyPacket(packet);
+        Map<Integer, Byte> itemList = shopBuyPacket.getItemList();
 
-	Map<Integer, Byte> itemList = shopBuyPacket.getItemList();
+        Map<Product, Byte> productList = productService.findProductsByItemList(itemList);
 
-	Map<Product, Byte> productList = productService.findProductsByItemList(itemList);
+        Player player = connection.getClient().getActivePlayer();
 
-	Player player = connection.getClient().getActivePlayer();
+        int gold = player.getGold();
+        int costs = productList.keySet()
+            .stream()
+            .mapToInt(Product::getPrice0)
+            .sum();
 
-	int gold = player.getGold();
-	int costs = productList.keySet()
-		.stream()
-		.mapToInt(Product::getPrice0)
-		.sum();
+        int result = gold - costs;
 
-	int result = gold - costs;
+        List<PlayerPocket> playerPocketList = new ArrayList<>();
 
-	List<PlayerPocket> playerPocketList = new ArrayList<>();
+        if (result >= 0) {
+            for (Map.Entry<Product, Byte> data : productList.entrySet()) {
+                Product product = data.getKey();
+                byte option = data.getValue();
 
-	if (result >= 0) {
+                if (!product.getCategory().equals(EItemCategory.CHAR.getName())) {
+                    if (product.getCategory().equals(EItemCategory.HOUSE.getName())) {
 
-	    for (Map.Entry<Product, Byte> data : productList.entrySet()) {
+                        ItemHouse itemHouse = homeService.findItemHouseByItemIndex(product.getItem0());
+                        AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
 
-	        Product product = data.getKey();
-	        byte option = data.getValue();
+                        accountHome.setLevel(itemHouse.getLevel());
+                        accountHome = homeService.save(accountHome);
 
-	        if (!product.getCategory().equals(EItemCategory.CHAR.getName())) {
+                        S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
+                        connection.sendTCP(homeDataPacket);
+                    } else {
+                        // gold back
+                        if (product.getGoldBack() != 0)
+                            result += product.getGoldBack();
 
-	            if (product.getCategory().equals(EItemCategory.HOUSE.getName())) {
+                        Pocket pocket = connection.getClient().getActivePlayer().getPocket();
 
-			ItemHouse itemHouse = homeService.findItemHouseByItemIndex(product.getItem0());
-			AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
+                        if (product.getItem1() != 0) {
 
-			accountHome.setLevel(itemHouse.getLevel());
-			accountHome = homeService.save(accountHome);
+                            List<Integer> itemPartList = new ArrayList<>();
 
-			S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-			connection.sendTCP(homeDataPacket);
-		    }
-	            else {
-			// gold back
-			if (product.getGoldBack() != 0)
-			    result += product.getGoldBack();
+                            // use reflection to get indexes of item0-9
+                            ReflectionUtils.doWithFields(product.getClass(), field -> {
 
-			Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+                                    if (field.getName().startsWith("item")) {
 
-			if (product.getItem1() != 0) {
+                                        field.setAccessible(true);
 
-			    List<Integer> itemPartList = new ArrayList<>();
+                                        Integer itemIndex = (Integer) field.get(product);
+                                        if (itemIndex != 0) {
+                                            itemPartList.add(itemIndex);
+                                        }
 
-			    // use reflection to get indexes of item0-9
-			    ReflectionUtils.doWithFields(product.getClass(), field -> {
+                                        field.setAccessible(false);
+                                    }
+                                });
 
-				if (field.getName().startsWith("item")) {
+                            // case if set has player included, items are transferred to the new player
+                            if (product.getForPlayer() != -1) {
 
-				    field.setAccessible(true);
+                                Player newPlayer = productService.createNewPlayer(connection.getClient().getAccount(), product.getForPlayer());
+                                Pocket newPlayerPocket = pocketService.findById(newPlayer.getPocket().getId());
 
-				    Integer itemIndex = (Integer) field.get(product);
-				    if (itemIndex != 0) {
-					itemPartList.add(itemIndex);
-				    }
+                                for (Integer itemIndex : itemPartList) {
 
-				    field.setAccessible(false);
-				}
-			    });
+                                    PlayerPocket playerPocket = new PlayerPocket();
+                                    playerPocket.setCategory(product.getCategory());
+                                    playerPocket.setItemIndex(itemIndex);
+                                    playerPocket.setUseType(product.getUseType());
+                                    playerPocket.setItemCount(1);
+                                    playerPocket.setPocket(newPlayerPocket);
 
-			    // case if set has player included, items are transferred to the new player
-			    if (product.getForPlayer() != -1) {
+                                    playerPocketService.save(playerPocket);
+                                    newPlayerPocket = pocketService.incrementPocketBelongings(newPlayerPocket);
+                                }
+                            }
+                            else {
+                                for (Integer itemIndex : itemPartList) {
 
-			        Player newPlayer = productService.createNewPlayer(connection.getClient().getAccount(), product.getForPlayer());
-			        Pocket newPlayerPocket = pocketService.findById(newPlayer.getPocket().getId());
+                                    PlayerPocket playerPocket = new PlayerPocket();
+                                    playerPocket.setCategory(product.getCategory());
+                                    playerPocket.setItemIndex(itemIndex);
+                                    playerPocket.setUseType(product.getUseType());
+                                    playerPocket.setItemCount(1);
+                                    playerPocket.setPocket(pocket);
 
-				for (Integer itemIndex : itemPartList) {
+                                    playerPocket = playerPocketService.save(playerPocket);
+                                    pocket = pocketService.incrementPocketBelongings(pocket);
 
-				    PlayerPocket playerPocket = new PlayerPocket();
-				    playerPocket.setCategory(product.getCategory());
-				    playerPocket.setItemIndex(itemIndex);
-				    playerPocket.setUseType(product.getUseType());
-				    playerPocket.setItemCount(1);
-				    playerPocket.setPocket(newPlayerPocket);
+                                    // add item to result
+                                    playerPocketList.add(playerPocket);
+                                }
+                            }
+                        } else {
+                            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndex(product.getItem0(), player.getPocket());
+                            int existingItemCount = 0;
+                            boolean existingItem = false;
 
-				    playerPocketService.save(playerPocket);
-				    newPlayerPocket = pocketService.incrementPocketBelongings(newPlayerPocket);
-				}
-			    }
-			    else {
+                            if (playerPocket != null &&
+                                !playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
+                                existingItemCount = playerPocket.getItemCount();
+                                existingItem = true;
+                            } else {
+                                playerPocket = new PlayerPocket();
+                            }
 
-				for (Integer itemIndex : itemPartList) {
+                            playerPocket.setCategory(product.getCategory());
+                            playerPocket.setItemIndex(product.getItem0());
+                            playerPocket.setUseType(product.getUseType());
 
-				    PlayerPocket playerPocket = new PlayerPocket();
-				    playerPocket.setCategory(product.getCategory());
-				    playerPocket.setItemIndex(itemIndex);
-				    playerPocket.setUseType(product.getUseType());
-				    playerPocket.setItemCount(1);
-				    playerPocket.setPocket(pocket);
+                            if (option == 0)
+                                playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
+                            else if (option == 1)
+                                playerPocket.setItemCount(product.getUse1());
+                            else if (option == 2)
+                                playerPocket.setItemCount(product.getUse2());
 
-				    playerPocket = playerPocketService.save(playerPocket);
-				    pocket = pocketService.incrementPocketBelongings(pocket);
+                            playerPocket.setItemCount(playerPocket.getItemCount() + existingItemCount);
 
-				    // add item to result
-				    playerPocketList.add(playerPocket);
-				}
-			    }
-			}
-			else {
+                            if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+                                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                                cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
 
-			    PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndex(product.getItem0(), player.getPocket());
-			    int existingItemCount = 0;
-			    boolean existingItem = false;
-			    if (playerPocket != null) {
+                                playerPocket.setCreated(cal.getTime());
+                            }
+                            playerPocket.setPocket(pocket);
 
-			        if (!playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
+                            playerPocket = playerPocketService.save(playerPocket);
+                            if (!existingItem)
+                                pocket = pocketService.incrementPocketBelongings(pocket);
 
-			            existingItemCount = playerPocket.getItemCount();
-			            existingItem = true;
-				}
-			        else {
-			            playerPocket = new PlayerPocket();
-				}
-			    }
-			    else {
-			        playerPocket = new PlayerPocket();
-			    }
+                            // add item to result
+                            playerPocketList.add(playerPocket);
+                        }
 
-			    playerPocket.setCategory(product.getCategory());
-			    playerPocket.setItemIndex(product.getItem0());
-			    playerPocket.setUseType(product.getUseType());
+                        connection.getClient().getActivePlayer().setPocket(pocket);
+                    }
+                }
+                else {
+                    productService.createNewPlayer(connection.getClient().getAccount(), product.getForPlayer());
+                }
+            }
 
-			    if (option == 0)
-				playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
-			    else if (option == 1)
-				playerPocket.setItemCount(product.getUse1());
-			    else if (option == 2)
-				playerPocket.setItemCount(product.getUse2());
+            S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.SUCCESS, playerPocketList);
+            connection.sendTCP(shopBuyPacketAnswer);
 
-			    playerPocket.setItemCount(playerPocket.getItemCount() + existingItemCount);
+            player = playerService.setMoney(player, result);
 
-			    if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+            S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
+            connection.sendTCP(shopMoneyAnswerPacket);
 
-				Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-				cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
-
-				playerPocket.setCreated(cal.getTime());
-			    }
-			    playerPocket.setPocket(pocket);
-
-			    playerPocket = playerPocketService.save(playerPocket);
-			    if (!existingItem)
-			    	pocket = pocketService.incrementPocketBelongings(pocket);
-
-			    // add item to result
-			    playerPocketList.add(playerPocket);
-			}
-
-			connection.getClient().getActivePlayer().setPocket(pocket);
-		    }
-		}
-	        else {
-
-	            productService.createNewPlayer(connection.getClient().getAccount(), product.getForPlayer());
-		}
-	    }
-
-	    S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.SUCCESS, playerPocketList);
-	    connection.sendTCP(shopBuyPacketAnswer);
-
-	    player = playerService.setMoney(player, result);
-
-	    S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
-	    connection.sendTCP(shopMoneyAnswerPacket);
-
-	    connection.getClient().setActivePlayer(player);
-	}
-	else {
-
-	    S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NEED_MORE_GOLD, null);
-	    connection.sendTCP(shopBuyPacketAnswer);
-	}
+            connection.getClient().setActivePlayer(player);
+        } else {
+            S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NEED_MORE_GOLD, null);
+            connection.sendTCP(shopBuyPacketAnswer);
+        }
     }
 
     public void handleShopRequestDataPackets(Connection connection, Packet packet) {
-
         switch (packet.getPacketId()) {
+        case PacketID.C2SShopRequestDataPrepare: {
+            C2SShopRequestDataPreparePacket shopRequestDataPreparePacket = new C2SShopRequestDataPreparePacket(packet);
+            byte category = shopRequestDataPreparePacket.getCategory();
+            byte part = shopRequestDataPreparePacket.getPart();
+            byte player = shopRequestDataPreparePacket.getPlayer();
 
-	case PacketID.C2SShopRequestDataPrepare: {
+            int productListSize = productService.getProductListSize(category, part, player);
 
-	    C2SShopRequestDataPreparePacket shopRequestDataPreparePacket = new C2SShopRequestDataPreparePacket(packet);
-	    byte category = shopRequestDataPreparePacket.getCategory();
-	    byte part = shopRequestDataPreparePacket.getPart();
-	    byte player = shopRequestDataPreparePacket.getPlayer();
+            S2CShopAnswerDataPreparePacket shopAnswerDataPreparePacket = new S2CShopAnswerDataPreparePacket(category, part, player, productListSize);
+            connection.sendTCP(shopAnswerDataPreparePacket);
+        } break;
+        case PacketID.C2SShopRequestData: {
+            C2SShopRequestDataPacket shopRequestDataPacket = new C2SShopRequestDataPacket(packet);
 
-	    int productListSize = productService.getProductListSize(category, part, player);
+            byte category = shopRequestDataPacket.getCategory();
+            byte part = shopRequestDataPacket.getPart();
+            byte player = shopRequestDataPacket.getPlayer();
+            int page = BitKit.fromUnsignedInt(shopRequestDataPacket.getPage());
 
-	    S2CShopAnswerDataPreparePacket shopAnswerDataPreparePacket = new S2CShopAnswerDataPreparePacket(category, part, player, productListSize);
-	    connection.sendTCP(shopAnswerDataPreparePacket);
+            List<Product> productList = productService.getProductList(category, part, player, page);
 
-	    break;
-	}
-	case PacketID.C2SShopRequestData: {
-
-	    C2SShopRequestDataPacket shopRequestDataPacket = new C2SShopRequestDataPacket(packet);
-
-	    byte category = shopRequestDataPacket.getCategory();
-	    byte part = shopRequestDataPacket.getPart();
-	    byte player = shopRequestDataPacket.getPlayer();
-	    int page = BitKit.fromUnsignedInt(shopRequestDataPacket.getPage());
-
-	    List<Product> productList = productService.getProductList(category, part, player, page);
-
-	    S2CShopAnswerDataPacket shopAnswerDataPacket = new S2CShopAnswerDataPacket(productList.size(), productList);
-	    connection.sendTCP(shopAnswerDataPacket);
-
-	    break;
-	}
-	}
+            S2CShopAnswerDataPacket shopAnswerDataPacket = new S2CShopAnswerDataPacket(productList.size(), productList);
+            connection.sendTCP(shopAnswerDataPacket);
+        } break;
+        }
     }
 
     public void handlePlayerStatusPointChangePacket(Connection connection, Packet packet) {
+        C2SPlayerStatusPointChangePacket playerStatusPointChangePacket = new C2SPlayerStatusPointChangePacket(packet);
 
-	C2SPlayerStatusPointChangePacket playerStatusPointChangePacket = new C2SPlayerStatusPointChangePacket(packet);
+        Player player = connection.getClient().getActivePlayer();
 
-	Player player = connection.getClient().getActivePlayer();
+        // we can't change; attributes should be server sided
+        if (player.getStatusPoints() == 0) {
+            S2CPlayerStatusPointChangePacket playerStatusPointChangeAnswerPacket = new S2CPlayerStatusPointChangePacket(player, new StatusPointsAddedDto());
+            connection.sendTCP(playerStatusPointChangeAnswerPacket);
+        }
+        else if (player.getStatusPoints() > 0 && playerStatusPointChangePacket.getStatusPoints() >= 0) {
+            if (playerService.isStatusPointHack(playerStatusPointChangePacket, player)) {
+                S2CPlayerStatusPointChangePacket playerStatusPointChangeAnswerPacket = new S2CPlayerStatusPointChangePacket(player, new StatusPointsAddedDto());
+                connection.sendTCP(playerStatusPointChangeAnswerPacket);
+            } else {
+                player.setStrength(playerStatusPointChangePacket.getStrength());
+                player.setStamina(playerStatusPointChangePacket.getStamina());
+                player.setDexterity(playerStatusPointChangePacket.getDexterity());
+                player.setWillpower(playerStatusPointChangePacket.getWillpower());
+                player.setStatusPoints(playerStatusPointChangePacket.getStatusPoints());
 
-	// we can't change; attributes should be server sided
-	if (player.getStatusPoints() == 0) {
+                player = playerService.save(player);
 
-	    S2CPlayerStatusPointChangePacket playerStatusPointChangeAnswerPacket = new S2CPlayerStatusPointChangePacket(player, new StatusPointsAddedDto());
-	    connection.sendTCP(playerStatusPointChangeAnswerPacket);
-	}
-	else if (player.getStatusPoints() > 0 && playerStatusPointChangePacket.getStatusPoints() >= 0) {
+                connection.getClient().setActivePlayer(player);
 
-	    if (playerService.isStatusPointHack(playerStatusPointChangePacket, player)) {
+                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 
-		S2CPlayerStatusPointChangePacket playerStatusPointChangeAnswerPacket = new S2CPlayerStatusPointChangePacket(player, new StatusPointsAddedDto());
-		connection.sendTCP(playerStatusPointChangeAnswerPacket);
-	    }
-	    else {
-
-		player.setStrength(playerStatusPointChangePacket.getStrength());
-		player.setStamina(playerStatusPointChangePacket.getStamina());
-		player.setDexterity(playerStatusPointChangePacket.getDexterity());
-		player.setWillpower(playerStatusPointChangePacket.getWillpower());
-		player.setStatusPoints(playerStatusPointChangePacket.getStatusPoints());
-
-		player = playerService.save(player);
-
-		connection.getClient().setActivePlayer(player);
-
-		StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-
-		S2CPlayerStatusPointChangePacket playerStatusPointChangeAnswerPacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
-		connection.sendTCP(playerStatusPointChangeAnswerPacket);
-	    }
-	}
+                S2CPlayerStatusPointChangePacket playerStatusPointChangeAnswerPacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
+                connection.sendTCP(playerStatusPointChangeAnswerPacket);
+            }
+        }
     }
 
     public void handleChallengeProgressRequestPacket(Connection connection, Packet packet) {
-
         List<ChallengeProgress> challengeProgressList = challengeService.findAllByPlayerIdFetched(connection.getClient().getActivePlayer().getId());
 
-	S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
-	connection.sendTCP(challengeProgressAnswerPacket);
+        S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
+        connection.sendTCP(challengeProgressAnswerPacket);
     }
 
     public void handleTutorialProgressRequestPacket(Connection connection, Packet packet) {
-
         List<TutorialProgress> tutorialProgressList = tutorialService.findAllByPlayerIdFetched(connection.getClient().getActivePlayer().getId());
 
-	S2CTutorialProgressAnswerPacket tutorialProgressAnswerPacket = new S2CTutorialProgressAnswerPacket(tutorialProgressList);
-	connection.sendTCP(tutorialProgressAnswerPacket);
+        S2CTutorialProgressAnswerPacket tutorialProgressAnswerPacket = new S2CTutorialProgressAnswerPacket(tutorialProgressList);
+        connection.sendTCP(tutorialProgressAnswerPacket);
     }
 
     public void handleChallengeBeginRequestPacket(Connection connection, Packet packet) {
+        C2SChallengeBeginRequestPacket challengeBeginRequestPacket = new C2SChallengeBeginRequestPacket(packet);
+        int challengeId = challengeBeginRequestPacket.getChallengeId();
 
-	C2SChallengeBeginRequestPacket challengeBeginRequestPacket = new C2SChallengeBeginRequestPacket(packet);
-	int challengeId = challengeBeginRequestPacket.getChallengeId();
+        Challenge currentChallenge = challengeService.findChallengeByChallengeIndex(challengeId);
 
-	Challenge currentChallenge = challengeService.findChallengeByChallengeIndex(challengeId);
+        if (currentChallenge.getGameMode() == GameMode.BASIC)
+            connection.getClient().setActiveChallengeGame(new ChallengeBasicGame(challengeId));
+        else if (currentChallenge.getGameMode() == GameMode.BATTLE)
+            connection.getClient().setActiveChallengeGame(new ChallengeBattleGame(challengeId));
 
-	if (currentChallenge.getGameMode() == GameMode.BASIC)
-	    connection.getClient().setActiveChallengeGame(new ChallengeBasicGame(challengeId));
-	else if (currentChallenge.getGameMode() == GameMode.BATTLE)
-	    connection.getClient().setActiveChallengeGame(new ChallengeBattleGame(challengeId));
-
-	Packet answer = new Packet(PacketID.C2STutorialBegin);
-	answer.write((char) 1);
-	connection.sendTCP(answer);
+        Packet answer = new Packet(PacketID.C2STutorialBegin);
+        answer.write((char) 1);
+        connection.sendTCP(answer);
     }
 
     public void handleChallengeHpPacket(Connection connection, Packet packet) {
+        C2SChallengeHpPacket challengeHpPacket = new C2SChallengeHpPacket(packet);
 
-	C2SChallengeHpPacket challengeHpPacket = new C2SChallengeHpPacket(packet);
+        if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBattleGame) {
 
-	if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBattleGame) {
-
-	    ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).setMaxPlayerHp(challengeHpPacket.getPlayerHp());
-	    ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).setMaxNpcHp(challengeHpPacket.getNpcHp());
-	}
+            ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).setMaxPlayerHp(challengeHpPacket.getPlayerHp());
+            ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).setMaxNpcHp(challengeHpPacket.getNpcHp());
+        }
     }
 
     public void handleChallengePointPacket(Connection connection, Packet packet) {
+        C2SChallengePointPacket challengePointPacket = new C2SChallengePointPacket(packet);
 
-	C2SChallengePointPacket challengePointPacket = new C2SChallengePointPacket(packet);
+        if (connection.getClient().getActiveChallengeGame() != null) {
+            ((ChallengeBasicGame) connection.getClient().getActiveChallengeGame()).setPoints(challengePointPacket.getPointsPlayer(), challengePointPacket.getPointsNpc());
 
-	if (connection.getClient().getActiveChallengeGame() != null) {
+            if (connection.getClient().getActiveChallengeGame().isFinished()) {
+                boolean win = ((ChallengeBasicGame) connection.getClient().getActiveChallengeGame()).getSetsPlayer() == 2;
+                challengeService.finishGame(connection, win);
 
-	    ((ChallengeBasicGame) connection.getClient().getActiveChallengeGame()).setPoints(challengePointPacket.getPointsPlayer(), challengePointPacket.getPointsNpc());
-
-	    if (connection.getClient().getActiveChallengeGame().isFinished()) {
-
-		boolean win = ((ChallengeBasicGame) connection.getClient().getActiveChallengeGame()).getSetsPlayer() == 2;
-		challengeService.finishGame(connection, win);
-
-		connection.getClient().setActiveChallengeGame(null);
-	    }
-	}
+                connection.getClient().setActiveChallengeGame(null);
+            }
+        }
     }
 
     public void handleChallengeDamagePacket(Connection connection, Packet packet) {
+        C2SChallengeDamagePacket challengeDamagePacket = new C2SChallengeDamagePacket(packet);
 
-	C2SChallengeDamagePacket challengeDamagePacket = new C2SChallengeDamagePacket(packet);
+        if (connection.getClient().getActiveChallengeGame() != null) {
+            ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).setHp(challengeDamagePacket.getPlayer(), challengeDamagePacket.getDmg());
 
-	if (connection.getClient().getActiveChallengeGame() != null) {
+            if (connection.getClient().getActiveChallengeGame().isFinished()) {
+                boolean win = ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).getPlayerHp() > 0;
+                challengeService.finishGame(connection, win);
 
-	    ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).setHp(challengeDamagePacket.getPlayer(), challengeDamagePacket.getDmg());
-
-	    if (connection.getClient().getActiveChallengeGame().isFinished()) {
-
-		boolean win = ((ChallengeBattleGame) connection.getClient().getActiveChallengeGame()).getPlayerHp() > 0;
-		challengeService.finishGame(connection, win);
-
-		connection.getClient().setActiveChallengeGame(null);
-	    }
-	}
+                connection.getClient().setActiveChallengeGame(null);
+            }
+        }
     }
 
     public void handleQuickSlotUseRequest(Connection connection, Packet packet) {
+        C2SQuickSlotUseRequestPacket quickSlotUseRequestPacket = new C2SQuickSlotUseRequestPacket(packet);
 
-	C2SQuickSlotUseRequestPacket quickSlotUseRequestPacket = new C2SQuickSlotUseRequestPacket(packet);
+        Player player = connection.getClient().getActivePlayer();
+        Pocket pocket = player.getPocket();
 
-	Player player = connection.getClient().getActivePlayer();
-	Pocket pocket = player.getPocket();
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) quickSlotUseRequestPacket.getQuickSlotId(), pocket);
+        int itemCount = playerPocket.getItemCount() - 1;
 
-	PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) quickSlotUseRequestPacket.getQuickSlotId(), pocket);
-	int itemCount = playerPocket.getItemCount() - 1;
+        if (itemCount <= 0) {
 
-	if (itemCount <= 0) {
+            playerPocketService.remove(playerPocket.getId());
+            pocket = pocketService.decrementPocketBelongings(pocket);
+            connection.getClient().getActivePlayer().setPocket(pocket);
 
-	    playerPocketService.remove(playerPocket.getId());
-	    pocket = pocketService.decrementPocketBelongings(pocket);
-	    connection.getClient().getActivePlayer().setPocket(pocket);
+            QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
+            quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, quickSlotUseRequestPacket.getQuickSlotId());
+            player.setQuickSlotEquipment(quickSlotEquipment);
 
-	    QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
-	    quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, quickSlotUseRequestPacket.getQuickSlotId());
-	    player.setQuickSlotEquipment(quickSlotEquipment);
+            player = playerService.save(player);
+            connection.getClient().setActivePlayer(player);
 
-	    player = playerService.save(player);
-	    connection.getClient().setActivePlayer(player);
-
-	    S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(quickSlotUseRequestPacket.getQuickSlotId());
-	    connection.sendTCP(inventoryItemRemoveAnswerPacket);
-	}
-	else {
-	    playerPocket.setItemCount(itemCount);
-	    playerPocketService.save(playerPocket);
-	}
+            S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(quickSlotUseRequestPacket.getQuickSlotId());
+            connection.sendTCP(inventoryItemRemoveAnswerPacket);
+        } else {
+            playerPocket.setItemCount(itemCount);
+            playerPocketService.save(playerPocket);
+        }
     }
 
     public void handleChallengeSetPacket(Connection connection, Packet packet) {
+        // empty..
     }
 
     public void handleTutorialBeginPacket(Connection connection, Packet packet) {
+        C2STutorialBeginRequestPacket tutorialBeginRequestPacket = new C2STutorialBeginRequestPacket(packet);
+        int tutorialId = tutorialBeginRequestPacket.getTutorialId();
 
-	C2STutorialBeginRequestPacket tutorialBeginRequestPacket = new C2STutorialBeginRequestPacket(packet);
-	int tutorialId = tutorialBeginRequestPacket.getTutorialId();
+        connection.getClient().setActiveTutorialGame(new TutorialGame(tutorialId));
 
-	connection.getClient().setActiveTutorialGame(new TutorialGame(tutorialId));
-
-	Packet answer = new Packet(PacketID.C2STutorialBegin);
-	answer.write((char) 1);
-	connection.sendTCP(answer);
+        Packet answer = new Packet(PacketID.C2STutorialBegin);
+        answer.write((char) 1);
+        connection.sendTCP(answer);
     }
 
     public void handleTutorialEndPacket(Connection connection, Packet packet) {
+        C2STutorialEndPacket tutorialEndPacket = new C2STutorialEndPacket(packet);
+        connection.getClient().getActiveTutorialGame().finishTutorial();
 
-	C2STutorialEndPacket tutorialEndPacket = new C2STutorialEndPacket(packet);
-	connection.getClient().getActiveTutorialGame().finishTutorial();
+        tutorialService.finishGame(connection);
 
-	tutorialService.finishGame(connection);
-
-	connection.getClient().setActiveTutorialGame(null);
+        connection.getClient().setActiveTutorialGame(null);
     }
 
     public void handleLobbyUserListReqPacket(Connection connection, Packet packet) {
+        C2SLobbyUserListRequestPacket lobbyUserListRequestPacket = new C2SLobbyUserListRequestPacket(packet);
+        byte page = lobbyUserListRequestPacket.getPage();
 
-	C2SLobbyUserListRequestPacket lobbyUserListRequestPacket = new C2SLobbyUserListRequestPacket(packet);
-	byte page = lobbyUserListRequestPacket.getPage();
+        List<Player> lobbyPlayerList = this.gameHandler.getPlayersInLobby().stream()
+            .skip(page == 1 ? 0 : (page * 10) - 10)
+            .limit(10)
+            .collect(Collectors.toList());
 
-	List<Player> lobbyPlayerList = this.gameHandler.getPlayersInLobby().stream()
-		.skip(page == 1 ? 0 : (page * 10) - 10)
-		.limit(10)
-		.collect(Collectors.toList());
-
-	S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
-	connection.sendTCP(lobbyUserListAnswerPacket);
+        S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
+        connection.sendTCP(lobbyUserListAnswerPacket);
     }
 
     public void handleChatMessagePackets(Connection connection, Packet packet) {
+        switch (packet.getPacketId()) {
+        case PacketID.C2SChatLobbyReq: {
+            C2SChatLobbyReqPacket chatLobbyReqPacket = new C2SChatLobbyReqPacket(packet);
+            S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), connection.getClient().getActivePlayer().getName(), chatLobbyReqPacket.getMessage());
 
-	switch (packet.getPacketId()) {
+            this.getGameHandler().getClientList().forEach(cl -> cl.getConnection().sendTCP(chatLobbyAnswerPacket));
+        } break;
+        case PacketID.C2SChatRoomReq: {
+            C2SChatRoomReqPacket chatRoomReqPacket = new C2SChatRoomReqPacket(packet);
+            S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getActivePlayer().getName(), chatRoomReqPacket.getMessage());
+        } break;
+        case PacketID.C2SWhisperReq: {
+            C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
+            S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
-	case PacketID.C2SChatLobbyReq: {
+            this.getGameHandler().getClientList().stream()
+                .filter(cl -> cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
+                .findAny()
+                .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
 
-	    C2SChatLobbyReqPacket chatLobbyReqPacket = new C2SChatLobbyReqPacket(packet);
-	    S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), connection.getClient().getActivePlayer().getName(), chatLobbyReqPacket.getMessage());
-
-	    this.getGameHandler().getClientList().forEach(cl -> cl.getConnection().sendTCP(chatLobbyAnswerPacket));
-	    break;
-	}
-	case PacketID.C2SChatRoomReq: {
-
-	    C2SChatRoomReqPacket chatRoomReqPacket = new C2SChatRoomReqPacket(packet);
-	    S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getActivePlayer().getName(), chatRoomReqPacket.getMessage());
-
-	    break;
-	}
-	case PacketID.C2SWhisperReq: {
-
-	    C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
-	    S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
-
-	    this.getGameHandler().getClientList().stream()
-		    .filter(cl -> cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
-		    .findAny()
-		    .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
-
-	    connection.sendTCP(whisperAnswerPacket);
-	    break;
-	}
-	}
+            connection.sendTCP(whisperAnswerPacket);
+        } break;
+        }
     }
 
     public void handleLobbyJoinLeave(Connection connection, boolean joined) {
-
         connection.getClient().setInLobby(joined);
     }
 
     public void handleEmblemListRequestPacket(Connection connection, Packet packet) {
-
-
+        // empty..
     }
 
     public void handleDisconnectPacket(Connection connection, Packet packet) {
@@ -898,61 +807,54 @@ public class GamePacketHandler {
         // reset pocket
         List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
         playerPocketList.forEach(pp -> {
-	    S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket((int) pp.getId().longValue());
-	    connection.sendTCP(inventoryItemRemoveAnswerPacket);
-	});
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket((int) pp.getId().longValue());
+                connection.sendTCP(inventoryItemRemoveAnswerPacket);
+            });
 
-	// reset status
-	Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-	account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-	authenticationService.updateAccount(account);
+        // reset status
+        Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+        account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+        authenticationService.updateAccount(account);
 
-	S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-	connection.sendTCP(disconnectAnswerPacket);
+        S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+        connection.sendTCP(disconnectAnswerPacket);
     }
 
     public void handleDisconnected(Connection connection) {
+        if (connection.getClient().getAccount() != null) {
+            // reset status
+            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+            authenticationService.updateAccount(account);
+        }
 
-	if (connection.getClient().getAccount() != null) {
+        gameHandler.removeClient(connection.getClient());
 
-	    // reset status
-	    Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-	    account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-	    authenticationService.updateAccount(account);
-	}
-
-	gameHandler.removeClient(connection.getClient());
-
-	connection.setClient(null);
+        connection.setClient(null);
     }
 
     public void handle1071Packet(Connection connection, Packet packet) {
+        int requestType = packet.readInt();
 
-	int requestType = packet.readInt();
+        if (requestType == 9) {
+            List<ChallengeProgress> challengeProgressList = challengeService.findAllByPlayerIdFetched(connection.getClient().getActivePlayer().getId());
 
-	if (requestType == 9) {
-
-	    List<ChallengeProgress> challengeProgressList = challengeService.findAllByPlayerIdFetched(connection.getClient().getActivePlayer().getId());
-
-	    S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
-	    connection.sendTCP(challengeProgressAnswerPacket);
-	}
-	// bandage fix for lobby join, since the packet is sent under other packets it's hard to extract every packet out of a recv
-	else if (requestType == 0) {
-
-	    connection.getClient().setInLobby(true);
-	}
+            S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
+            connection.sendTCP(challengeProgressAnswerPacket);
+        }
+        // bandage fix for lobby join, since the packet is sent under other packets it's hard to extract every packet out of a recv
+        else if (requestType == 0) {
+            connection.getClient().setInLobby(true);
+        }
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
-
-	Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
-	if (unknownAnswer.getPacketId() == (char) 0x200E) {
-	    unknownAnswer.write((char) 1);
-	}
-	else {
-	    unknownAnswer.write((short) 0);
-	}
-	connection.sendTCP(unknownAnswer);
+        Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
+        if (unknownAnswer.getPacketId() == (char) 0x200E) {
+            unknownAnswer.write((char) 1);
+        } else {
+            unknownAnswer.write((short) 0);
+        }
+        connection.sendTCP(unknownAnswer);
     }
 }

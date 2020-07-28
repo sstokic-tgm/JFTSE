@@ -15,7 +15,6 @@ import javax.persistence.ManyToOne;
 @Audited
 @Entity
 public class PlayerPocket extends AbstractBaseModel {
-
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
     private Pocket pocket;
 

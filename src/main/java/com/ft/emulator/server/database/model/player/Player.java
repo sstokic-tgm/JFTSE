@@ -17,7 +17,6 @@ import java.util.List;
 @Audited
 @Entity
 public class Player extends AbstractBaseModel {
-
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private Account account;

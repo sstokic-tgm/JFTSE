@@ -13,7 +13,6 @@ import javax.persistence.OneToOne;
 @Audited
 @Entity
 public class ClothEquipment extends AbstractBaseModel {
-
     private Integer bag = 0;
     private Integer dress = 0;
     private Integer dye = 0;

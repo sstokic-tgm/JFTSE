@@ -9,7 +9,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class ItemHouseDeco extends Item {
-
     private String kind;
 
     private String useType;

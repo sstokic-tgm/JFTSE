@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface AccountHomeRepository extends JpaRepository<AccountHome, Long> {
-
     @Query(value = "FROM AccountHome ah LEFT JOIN FETCH ah.account account WHERE account.id = :accountId")
     Optional<AccountHome> findAccountHomeByAccountId(@Param("accountId") Long accountId);
 }

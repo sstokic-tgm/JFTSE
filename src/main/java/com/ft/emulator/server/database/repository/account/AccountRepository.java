@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-
     @Query(value = "FROM Account a LEFT JOIN FETCH a.playerList pl WHERE a.username = :username AND a.password = :password")
     List<Account> findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
 

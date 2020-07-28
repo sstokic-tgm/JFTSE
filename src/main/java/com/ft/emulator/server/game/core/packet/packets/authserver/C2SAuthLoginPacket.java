@@ -7,13 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SAuthLoginPacket extends Packet {
-
     private String username;
 
     public C2SAuthLoginPacket(Packet packet) {
-
         super(packet);
-
         this.username = this.readUnicodeString();
     }
 }

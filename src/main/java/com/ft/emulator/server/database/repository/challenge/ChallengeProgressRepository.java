@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChallengeProgressRepository extends JpaRepository<ChallengeProgress, Long> {
-
     @Query(value = "FROM ChallengeProgress cp LEFT JOIN FETCH cp.player player LEFT JOIN FETCH cp.challenge challenge WHERE player_id = :playerId")
     List<ChallengeProgress> findAllByPlayerIdFetched(Long playerId);
 

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemHouseDecoRepository extends JpaRepository<ItemHouseDeco, Long> {
-
     Optional<ItemHouseDeco> findItemHouseDecoByItemIndex(Integer itemIndex);
 
     @Query(value = "SELECT ihd.itemIndex FROM ItemHouseDeco ihd WHERE ihd.kind = :kind")

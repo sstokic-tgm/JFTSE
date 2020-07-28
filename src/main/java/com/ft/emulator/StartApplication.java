@@ -16,73 +16,71 @@ import java.util.Scanner;
 public class StartApplication {
 
     public static void main(String[] args) {
+        ConfigurableApplicationContext ctx = SpringApplication.run(StartApplication.class, args);
 
-	ConfigurableApplicationContext ctx = SpringApplication.run(StartApplication.class, args);
+        log.info("Initializing authentication server...");
+        AuthenticationServerNetworkListener authenticationNetworkListener = new AuthenticationServerNetworkListener();
+        // post dependency injection for this class
+        ctx.getBeanFactory().autowireBean(authenticationNetworkListener);
 
-	log.info("Initializing authentication server...");
-	AuthenticationServerNetworkListener authenticationNetworkListener = new AuthenticationServerNetworkListener();
-	// post dependency injection for this class
-	ctx.getBeanFactory().autowireBean(authenticationNetworkListener);
+        Server authenticationServer = new Server();
+        authenticationServer.addListener(authenticationNetworkListener);
 
-	Server authenticationServer = new Server();
-	authenticationServer.addListener(authenticationNetworkListener);
+        try {
+            authenticationServer.bind(5894);
+        }
+        catch (IOException ioe) {
+            log.error("Failed to start authentication server!");
+            ioe.printStackTrace();
+            ctx.close();
+            System.exit(1);
+        }
 
-	try {
-	    authenticationServer.bind(5894);
-	}
-	catch (IOException ioe) {
-	    log.error("Failed to start authentication server!");
-	    ioe.printStackTrace();
-	    ctx.close();
-	    System.exit(1);
-	}
+        authenticationServer.start("auth server");
 
-	authenticationServer.start("auth server");
+        log.info("Successfully initialized!");
+        log.info("--------------------------------------");
 
-	log.info("Successfully initialized!");
-	log.info("--------------------------------------");
+        log.info("Initializing game server...");
+        GameServerNetworkListener gameServerNetworkListener = new GameServerNetworkListener();
+        // post dependency injection for this class
+        ctx.getBeanFactory().autowireBean(gameServerNetworkListener);
 
-	log.info("Initializing game server...");
-	GameServerNetworkListener gameServerNetworkListener = new GameServerNetworkListener();
-	// post dependency injection for this class
-	ctx.getBeanFactory().autowireBean(gameServerNetworkListener);
+        Server gameServer = new Server();
+        gameServer.addListener(gameServerNetworkListener);
 
-	Server gameServer = new Server();
-	gameServer.addListener(gameServerNetworkListener);
+        try {
+            gameServer.bind(5895);
+        }
+        catch (IOException ioe) {
+            log.error("Failed to start game server!");
+            ioe.printStackTrace();
+            authenticationServer.stop();
+            ctx.close();
+            System.exit(1);
+        }
 
-	try {
-	    gameServer.bind(5895);
-	}
-	catch (IOException ioe) {
-	    log.error("Failed to start game server!");
-	    ioe.printStackTrace();
-	    authenticationServer.stop();
-	    ctx.close();
-	    System.exit(1);
-	}
+        gameServer.start("game server");
 
-	gameServer.start("game server");
+        log.info("Successfully initialized!");
+        log.info("--------------------------------------");
 
-	log.info("Successfully initialized!");
-	log.info("--------------------------------------");
+        log.info("Emulator successfully started!");
+        log.info("Write exit and confirm with enter to stop the emulator!");
 
-	log.info("Emulator successfully started!");
-	log.info("Write exit and confirm with enter to stop the emulator!");
+        Scanner scan = new Scanner(System.in);
+        String input;
+        while (true) {
+            input = scan.next();
 
-	Scanner scan = new Scanner(System.in);
-	String input;
-	while (true) {
+            if (input.equals("exit"))
+                break;
+        }
 
-	    input = scan.next();
+        log.info("Stopping the emulator...");
 
-	    if (input.equals("exit"))
-		break;
-	}
-
-	log.info("Stopping the emulator...");
-
-	authenticationServer.stop();
-	gameServer.stop();
-	ctx.close();
+        authenticationServer.stop();
+        gameServer.stop();
+        ctx.close();
     }
 }

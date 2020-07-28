@@ -12,7 +12,6 @@ import javax.persistence.MappedSuperclass;
 @Setter
 @MappedSuperclass
 public class AbstractIdBaseModel {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
