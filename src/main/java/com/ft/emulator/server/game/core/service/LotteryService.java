@@ -106,7 +106,7 @@ public class LotteryService {
         String playerTypeName = StringUtils.firstCharToUpperCase(EItemChar.getNameByValue(playerType).toLowerCase());
 
         try {
-            InputStream lotteryItemFile = ResourceUtil.getResource("res/lottery/Ini3_Lot_" + gachaIndex + ".xml");
+            InputStream lotteryItemFile = ResourceUtil.getResource("res/lottery/Ini3_Lot_" + (gachaIndex < 10 ? ("0" + gachaIndex) : gachaIndex ) + ".xml");
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(lotteryItemFile);
