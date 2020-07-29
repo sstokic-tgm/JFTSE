@@ -61,7 +61,6 @@ public class PlayerPocketService {
 
     public int getSellPrice(PlayerPocket playerPocket) {
         int itemCount = playerPocket.getItemCount();
-        itemCount = itemCount >= 50 ? 1 : itemCount;
 
         int sellPrice = 0;
 
@@ -75,7 +74,7 @@ public class PlayerPocketService {
         }
         else { // everything else buy price / 2
             List<Integer> sellPriceResult = productRepository.getItemSellPriceByItemIndexAndCategory(playerPocket.getItemIndex(), playerPocket.getCategory());
-            sellPrice = (int) Math.ceil((double) (sellPriceResult.get(0) * itemCount) / 2);
+            sellPrice = (int) Math.ceil((double) sellPriceResult.get(0) / 2);
         }
         return sellPrice;
     }
