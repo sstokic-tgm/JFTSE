@@ -166,6 +166,8 @@ public class TcpConnection {
 
             while (true) {
                 int packetSize = BitKit.bytesToShort(data, 6);
+                currentObjectLength = packetSize;
+
                 if (packetSize == 0 && packetSize + 8 < data.length) {
 
                     byte[] tmp = new byte[data.length - 8];
@@ -187,6 +189,24 @@ public class TcpConnection {
 
             packet = new Packet(data);
         }
+        else if (readBuffer.remaining() < currentObjectLength) {
+            readBuffer.compact();
+            bytesRead = socketChannel.read(readBuffer);
+            readBuffer.flip();
+
+            if (bytesRead == -1)
+                throw new SocketException("Connection is closed.");
+
+            lastReadTime = System.currentTimeMillis();
+
+            if (readBuffer.remaining() < currentObjectLength)
+                return null;
+
+            byte[] data = new byte[bytesRead];
+
+            BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
+            packet = new Packet(data);
+        }
         else {
             byte[] data = new byte[bytesRead];
 
@@ -194,6 +214,7 @@ public class TcpConnection {
 
             packet = new Packet(data);
         }
+        currentObjectLength = 0;
 
         log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
