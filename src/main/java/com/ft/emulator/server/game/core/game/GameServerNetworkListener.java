@@ -152,6 +152,10 @@ public class GameServerNetworkListener implements ConnectionListener {
             gamePacketHandler.handleEmblemListRequestPacket(connection, packet);
             break;
 
+        case PacketID.C2SOpenGachaReq:
+            gamePacketHandler.handleOpenGachaRequestPacket(connection, packet);
+            break;
+
         case PacketID.C2SHeartbeat:
         case PacketID.C2SLoginAliveClient:
             // empty..

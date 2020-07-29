@@ -80,6 +80,10 @@ public final class PacketID {
     public final static char C2SShopRequestData = 0x2387;
     public final static char S2CShopAnswerData = 0x2388;
 
+    public final static char C2SOpenGachaReq = 0x1F86;
+    public final static char S2COpenGachaAnswer = 0x1F87;
+    public final static char S2COpenGachaUnk = 0x1F88;
+
     public final static char C2SChatLobbyReq = 0x1705;
     public final static char S2CChatLobbyAnswer = 0x1706;
     public final static char C2SChatRoomReq = 0x1777;

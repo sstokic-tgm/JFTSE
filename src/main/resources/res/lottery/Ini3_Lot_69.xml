@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Cn Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Colorful Sunglass(Red)" ShopIndex="54845" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Colorful Sunglass(Orange)" ShopIndex="54852" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Colorful Sunglass(Yellow)" ShopIndex="54859" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Colorful Sunglass(Green)" ShopIndex="54866" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Colorful Sunglass(Blue)" ShopIndex="54873" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Ice Cream Racket(Strawberry)" ShopIndex="54810" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Ice Cream Racket(Peach)" ShopIndex="54817" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Ice Cream Racket(Lemon)" ShopIndex="54824" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Ice Cream Racket(Soda)" ShopIndex="54831" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Parasol" ShopIndex="1156" QuantityMin="1" QuantityMax="1" ChansPer="10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Colorful Sunglass(Red)" ShopIndex="54846" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Colorful Sunglass(Orange)" ShopIndex="54853" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Colorful Sunglass(Yellow)" ShopIndex="54860" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Colorful Sunglass(Green)" ShopIndex="54867" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Colorful Sunglass(Blue)" ShopIndex="54874" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Ice Cream Racket(Strawberry)" ShopIndex="54811" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Ice Cream Racket(Peach)" ShopIndex="54818" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Ice Cream Racket(Lemon)" ShopIndex="54825" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Ice Cream Racket(Soda)" ShopIndex="54832" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Parasol" ShopIndex="1156" QuantityMin="1" QuantityMax="1" ChansPer="10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Colorful Sunglass(Red)" ShopIndex="54847" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Colorful Sunglass(Orange)" ShopIndex="54854" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Colorful Sunglass(Yellow)" ShopIndex="54861" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Colorful Sunglass(Green)" ShopIndex="54868" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Colorful Sunglass(Blue)" ShopIndex="54875" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Ice Cream Racket(Strawberry)" ShopIndex="54812" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Ice Cream Racket(Peach)" ShopIndex="54819" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Ice Cream Racket(Lemon)" ShopIndex="54826" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Ice Cream Racket(Soda)" ShopIndex="54833" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Parasol" ShopIndex="1156" QuantityMin="1" QuantityMax="1" ChansPer="10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Colorful Sunglass(Red)" ShopIndex="54848" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Colorful Sunglass(Orange)" ShopIndex="54855" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Colorful Sunglass(Yellow)" ShopIndex="54862" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Colorful Sunglass(Green)" ShopIndex="54869" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Colorful Sunglass(Blue)" ShopIndex="54876" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Ice Cream Racket(Strawberry)" ShopIndex="54813" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="Ice Cream Racket(Peach)" ShopIndex="54820" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Ice Cream Racket(Lemon)" ShopIndex="54827" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Ice Cream Racket(Soda)" ShopIndex="54834" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Parasol" ShopIndex="1156" QuantityMin="1" QuantityMax="1" ChansPer="10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Colorful Sunglass(Red)" ShopIndex="54849" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Colorful Sunglass(Orange)" ShopIndex="54856" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Colorful Sunglass(Yellow)" ShopIndex="54863" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Colorful Sunglass(Green)" ShopIndex="54870" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Colorful Sunglass(Blue)" ShopIndex="54877" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Ice Cream Racket(Strawberry)" ShopIndex="54814" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="Ice Cream Racket(Peach)" ShopIndex="54821" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Ice Cream Racket(Lemon)" ShopIndex="54828" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Ice Cream Racket(Soda)" ShopIndex="54835" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Parasol" ShopIndex="1156" QuantityMin="1" QuantityMax="1" ChansPer="10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Colorful Sunglass(Red)" ShopIndex="54850" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Colorful Sunglass(Orange)" ShopIndex="54857" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Colorful Sunglass(Yellow)" ShopIndex="54864" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Colorful Sunglass(Green)" ShopIndex="54871" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Colorful Sunglass(Blue)" ShopIndex="54878" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Ice Cream Racket(Strawberry)" ShopIndex="54815" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="Ice Cream Racket(Peach)" ShopIndex="54822" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Ice Cream Racket(Lemon)" ShopIndex="54829" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Ice Cream Racket(Soda)" ShopIndex="54836" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Parasol" ShopIndex="1156" QuantityMin="1" QuantityMax="1" ChansPer="10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Colorful Sunglass(Red)" ShopIndex="54851" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Colorful Sunglass(Orange)" ShopIndex="54858" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Colorful Sunglass(Yellow)" ShopIndex="54865" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Colorful Sunglass(Green)" ShopIndex="54872" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Colorful Sunglass(Blue)" ShopIndex="54879" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Ice Cream Racket(Strawberry)" ShopIndex="54816" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="Ice Cream Racket(Peach)" ShopIndex="54823" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Ice Cream Racket(Lemon)" ShopIndex="54830" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Ice Cream Racket(Soda)" ShopIndex="54837" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Parasol" ShopIndex="1156" QuantityMin="1" QuantityMax="1" ChansPer="10" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

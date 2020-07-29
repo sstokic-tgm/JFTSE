@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2006 U (http://www.altova.com) by Marie (EMBRACE) -->
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Cactus Wall" ShopIndex="1123" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Cactus Wallpaper" ShopIndex="1124" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Cracked Sand Floor" ShopIndex="1125" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Cowboy Hat" ShopIndex="52083" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Cowboy Leather Glove" ShopIndex="52084" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Cowboy Check Shirt" ShopIndex="52085" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Cowboy Tassel Pants" ShopIndex="52086" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Cowboy Western Boots" ShopIndex="52087" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Sheriff Racket" ShopIndex="52113" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Cactus Wall" ShopIndex="1123" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Cactus Wallpaper" ShopIndex="1124" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Cracked Sand Floor" ShopIndex="1125" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Cowgirl Hat" ShopIndex="52088" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Cowgirl Leather Glove" ShopIndex="52089" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Cowgirl Check Shirt" ShopIndex="52090" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Cowgirl Hot Jean" ShopIndex="52091" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Cowgirl Western Boots" ShopIndex="52092" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Sheriff Racket" ShopIndex="52114" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Cactus Wall" ShopIndex="1123" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Cactus Wallpaper" ShopIndex="1124" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Cracked Sand Floor" ShopIndex="1125" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Cowboy Hat" ShopIndex="52093" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Cowboy Leather Glove" ShopIndex="52094" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Cowboy Check Shirt" ShopIndex="52095" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Cowboy Tassel Pants" ShopIndex="52096" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Cowboy Western Boots" ShopIndex="52097" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Sheriff Racket" ShopIndex="52115" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Cactus Wall" ShopIndex="1123" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Cactus Wallpaper" ShopIndex="1124" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Cracked Sand Floor" ShopIndex="1125" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Cowgirl Hat" ShopIndex="52098" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Cowgirl Leather Glove" ShopIndex="52099" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Cowgirl Check Shirt" ShopIndex="52100" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Cowgirl Hot Jean" ShopIndex="52101" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Cowgirl Western Boots" ShopIndex="52102" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Sheriff Racket" ShopIndex="52116" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Cactus Wall" ShopIndex="1123" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Cactus Wallpaper" ShopIndex="1124" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Cracked Sand Floor" ShopIndex="1125" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Cowgirl Hat" ShopIndex="52103" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Cowgirl Leather Glove" ShopIndex="52104" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Cowgirl Check Shirt" ShopIndex="52105" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Cowgirl Hot Jean" ShopIndex="52106" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Cowgirl Western Boots" ShopIndex="52107" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Sheriff Racket" ShopIndex="52117" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Cactus Wall" ShopIndex="1123" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Cactus Wallpaper" ShopIndex="1124" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Cracked Sand Floor" ShopIndex="1125" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Cowgirl Hat" ShopIndex="52108" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Cowgirl Leather Glove" ShopIndex="52109" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Cowgirl Check Shirt" ShopIndex="52110" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Cowgirl Hot Jean" ShopIndex="52111" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Cowgirl Western Boots" ShopIndex="52112" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Sheriff Racket" ShopIndex="52118" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Cactus Wall" ShopIndex="1123" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Cactus Wallpaper" ShopIndex="1124" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Cracked Sand Floor" ShopIndex="1125" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Cowboy Hat" ShopIndex="52833" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Cowboy Check Shirt" ShopIndex="52834" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Cowboy Tassel Pants" ShopIndex="52835" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Cowboy Western Boots" ShopIndex="52836" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Cowboy Leather Glove" ShopIndex="52837" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Sheriff Racket" ShopIndex="52838" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

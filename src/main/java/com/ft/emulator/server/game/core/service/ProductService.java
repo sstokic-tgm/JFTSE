@@ -45,6 +45,10 @@ public class ProductService {
         return result;
     }
 
+    public List<Product> findProductsByItemList(List<Integer> itemList) {
+        return productRepository.findProductsByProductIndexIn(itemList);
+    }
+
     public int getProductListSize(byte category, byte part, byte player) {
         long productListSize = 0;
 
