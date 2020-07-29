@@ -153,24 +153,30 @@ public class LotteryService {
 
         int existingItemCount = 0;
         boolean existingItem = false;
+        boolean existingPartItem = false;
 
         if (playerPocket != null && !playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
             existingItemCount = playerPocket.getItemCount();
             existingItem = true;
-        } else {
+        }
+        else if (playerPocket != null && playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
+            existingPartItem = true;
+        }
+        else {
             playerPocket = new PlayerPocket();
         }
 
-        playerPocket.setCategory(winningItem.getCategory());
-        playerPocket.setItemIndex(winningItem.getItem0());
-        playerPocket.setUseType(winningItem.getUseType());
-        playerPocket.setItemCount(lotteryItem.getQuantityMin() + existingItemCount);
-        playerPocket.setPocket(pocket);
+        if (!existingPartItem) {
+            playerPocket.setCategory(winningItem.getCategory());
+            playerPocket.setItemIndex(winningItem.getItem0());
+            playerPocket.setUseType(winningItem.getUseType());
+            playerPocket.setItemCount(lotteryItem.getQuantityMin() + existingItemCount);
+            playerPocket.setPocket(pocket);
 
-        playerPocket = playerPocketService.save(playerPocket);
-        if (!existingItem)
-            pocketService.incrementPocketBelongings(playerPocket.getPocket());
-
+            playerPocket = playerPocketService.save(playerPocket);
+            if (!existingItem)
+                pocketService.incrementPocketBelongings(playerPocket.getPocket());
+        }
         return playerPocket;
     }
 }
