@@ -121,6 +121,7 @@ public class TcpConnection {
             socketChannel.configureBlocking(false);
             Socket socket = socketChannel.socket();
             socket.setTcpNoDelay(true);
+            socket.setReuseAddress(true);
 
             selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
@@ -147,7 +148,7 @@ public class TcpConnection {
         lastReadTime = System.currentTimeMillis();
 
         if (bytesRead == -1)
-            throw new SocketException("Connection is closed.");
+            return null;
 
         if(bytesRead == 0)
             return null;
@@ -195,7 +196,7 @@ public class TcpConnection {
             readBuffer.flip();
 
             if (bytesRead == -1)
-                throw new SocketException("Connection is closed.");
+                return null;
 
             lastReadTime = System.currentTimeMillis();
 

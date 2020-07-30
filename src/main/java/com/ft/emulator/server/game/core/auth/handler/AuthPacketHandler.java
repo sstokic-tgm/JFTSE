@@ -231,6 +231,7 @@ public class AuthPacketHandler {
         }
 
         connection.setClient(null);
+        connection.close();
     }
 
     public void handleUnknown(Connection connection, Packet packet) {

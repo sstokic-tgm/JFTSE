@@ -844,6 +844,7 @@ public class GamePacketHandler {
         gameHandler.removeClient(connection.getClient());
 
         connection.setClient(null);
+        connection.close();
     }
 
     public void handle1071Packet(Connection connection, Packet packet) {
