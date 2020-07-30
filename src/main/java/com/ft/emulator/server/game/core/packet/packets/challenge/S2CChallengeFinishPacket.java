@@ -34,11 +34,11 @@ public class S2CChallengeFinishPacket extends Packet {
             long timeLeft = (created.getTime() * 10000) - (new Date().getTime() * 10000);
             this.write(timeLeft);
 
+            this.write((byte) 0); // enchant str
+            this.write((byte) 0); // enchant sta
+            this.write((byte) 0); // enchant dex
+            this.write((byte) 0); // enchant wil
             // ??
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
             this.write((byte) 0);
             this.write((byte) 0);
         }
