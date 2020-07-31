@@ -79,8 +79,16 @@ public class StartApplication {
 
         log.info("Stopping the emulator...");
 
-        authenticationServer.stop();
-        gameServer.stop();
+        try {
+            authenticationServer.dispose();
+            gameServer.dispose();
+        }
+        catch (IOException ioe) {
+            log.error(ioe.getMessage());
+            ctx.close();
+            System.exit(1);
+        }
         ctx.close();
+        System.exit(1);
     }
 }

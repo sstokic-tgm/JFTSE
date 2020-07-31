@@ -125,14 +125,17 @@ public class Server implements Runnable {
             Set<SelectionKey> keys = selector.selectedKeys();
 
             synchronized (keys) {
-                for(Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext();) {
+                for (Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext();) {
 
                     // keepAlive();
                     SelectionKey selectionKey = iter.next();
                     iter.remove();
-                    Connection fromConnection = (Connection)selectionKey.attachment();
+                    Connection fromConnection = (Connection) selectionKey.attachment();
 
                     try {
+                        if (!selectionKey.isValid())
+                            continue;
+
                         if (fromConnection != null) {
                             if(selectionKey.isReadable()) {
                                 try {
@@ -157,33 +160,34 @@ public class Server implements Runnable {
                                     fromConnection.close();
                                 }
                             }
-                            continue;
                         }
+                        else {
+                            if (selectionKey.isAcceptable()) {
+                                ServerSocketChannel serverSocketChannel = this.serverChannel;
 
-                        if (selectionKey.isAcceptable()) {
-                            ServerSocketChannel serverSocketChannel = this.serverChannel;
-
-                            if (serverSocketChannel != null) {
-                                try {
-                                    SocketChannel socketChannel = serverSocketChannel.accept();
-                                    if (socketChannel != null)
-                                        acceptOperation(socketChannel);
-                                }
-                                catch (IOException ioe) {
-                                    fromConnection.notifyException(ioe);
+                                if (serverSocketChannel != null) {
+                                    try {
+                                        SocketChannel socketChannel = serverSocketChannel.accept();
+                                        if (socketChannel != null)
+                                            acceptOperation(socketChannel);
+                                    } catch (IOException ioe) {
+                                        fromConnection.notifyException(ioe);
+                                    }
                                 }
                             }
-                            continue;
+                            else {
+                                selectionKey.channel().close();
+                            }
                         }
-                        selectionKey.channel().close();
-
-                    } catch (CancelledKeyException cke) {
-                        fromConnection.notifyException(cke);
-
-                        if(fromConnection != null)
+                    }
+                    catch (CancelledKeyException cke) {
+                        if(fromConnection != null) {
+                            fromConnection.notifyException(cke);
                             fromConnection.close();
-                        else
+                        }
+                        else {
                             selectionKey.channel().close();
+                        }
                     }
                 }
             }
@@ -222,7 +226,7 @@ public class Server implements Runnable {
         shutdown = false;
         while(!shutdown) {
             try {
-                update(10000);
+                update(0);
             } catch (IOException ioe) {
                 log.error(ioe.getMessage());
                 close();
@@ -313,7 +317,6 @@ public class Server implements Runnable {
 
     public void close() {
         connections.forEach(Connection::close);
-        connections.clear();
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 
@@ -337,9 +340,12 @@ public class Server implements Runnable {
     }
 
     public void dispose() throws IOException {
+        if (!shutdown) {
+            shutdown = true;
 
-        close();
-        selector.close();
+            close();
+            selector.close();
+        }
     }
 
     public Thread getUpdateThread() {
