@@ -77,7 +77,7 @@ public class Server implements Runnable {
 
             try {
                 serverChannel = selector.provider().openServerSocketChannel();
-                serverChannel.socket().bind(tcpPort);
+                serverChannel.socket().bind(tcpPort, 500);
                 serverChannel.configureBlocking(false);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
             } catch (IOException ioe) {
@@ -226,7 +226,7 @@ public class Server implements Runnable {
         shutdown = false;
         while(!shutdown) {
             try {
-                update(0);
+                update(10000);
             } catch (IOException ioe) {
                 log.error(ioe.getMessage());
                 close();
@@ -316,7 +316,10 @@ public class Server implements Runnable {
     }
 
     public void close() {
-        connections.forEach(Connection::close);
+        List<Connection> connections = this.connections;
+        for (int i = 0; i < connections.size(); ++i)
+            connections.get(i).close();
+        this.connections = new ArrayList<>();
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 
