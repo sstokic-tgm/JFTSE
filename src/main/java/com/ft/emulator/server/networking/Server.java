@@ -18,10 +18,8 @@ public class Server implements Runnable {
     private final Selector selector;
     private int emptySelects;
     private ServerSocketChannel serverChannel;
-    private List<Connection> connections = new ArrayList<>();
-    private Map<Integer, Connection> pendingConnections = new HashMap<>();
-    private List<ConnectionListener> connectionListeners = new ArrayList<>();
-    private Object listenerLock = new Object();
+    private List<Connection> connections = Collections.synchronizedList(new ArrayList<>());
+    private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
     private int nextConnectionID = 1;
     private volatile boolean shutdown;
     private Object updateLock = new Object();
@@ -77,7 +75,7 @@ public class Server implements Runnable {
 
             try {
                 serverChannel = selector.provider().openServerSocketChannel();
-                serverChannel.socket().bind(tcpPort, 500);
+                serverChannel.socket().bind(tcpPort);
                 serverChannel.configureBlocking(false);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
             } catch (IOException ioe) {
@@ -139,7 +137,6 @@ public class Server implements Runnable {
                         if (fromConnection != null) {
                             if(selectionKey.isReadable()) {
                                 try {
-
                                     while (true) {
 
                                         Packet packet = fromConnection.getTcpConnection().readPacket();
@@ -170,8 +167,9 @@ public class Server implements Runnable {
                                         SocketChannel socketChannel = serverSocketChannel.accept();
                                         if (socketChannel != null)
                                             acceptOperation(socketChannel);
-                                    } catch (IOException ioe) {
-                                        fromConnection.notifyException(ioe);
+                                    }
+                                    catch (IOException ioe) {
+                                        log.error(ioe.getMessage());
                                     }
                                 }
                             }
@@ -196,9 +194,7 @@ public class Server implements Runnable {
         long time = System.currentTimeMillis();
         List<Connection> connections = this.connections;
 
-        for (int i = 0; i < connections.size(); ++i) {
-            Connection connection = connections.get(i);
-
+        for (Connection connection : connections) {
             if (connection.getTcpConnection().isTimedOut(time)) {
                 connection.close();
             }
@@ -301,25 +297,21 @@ public class Server implements Runnable {
         if(connectionListener == null)
             throw new IllegalArgumentException("ConnectionListener cannot be null.");
 
-        synchronized (listenerLock) {
-            connectionListeners.add(connectionListener);
-        }
+        connectionListeners.add(connectionListener);
     }
 
     public void removeListener(ConnectionListener connectionListener) {
         if(connectionListener == null)
             throw new IllegalArgumentException("ConnectionListener cannot be null.");
 
-        synchronized (listenerLock) {
-            connectionListeners.remove(connectionListener);
-        }
+        connectionListeners.remove(connectionListener);
     }
 
     public void close() {
         List<Connection> connections = this.connections;
-        for (int i = 0; i < connections.size(); ++i)
-            connections.get(i).close();
-        this.connections = new ArrayList<>();
+        for (Connection connection : connections)
+            connection.close();
+        this.connections = Collections.synchronizedList(new ArrayList<>());
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 

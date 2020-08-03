@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -20,8 +21,7 @@ public class Connection {
     private String name;
     private Server server;
     private TcpConnection tcpConnection;
-    private List<ConnectionListener> connectionListeners = new ArrayList<>();
-    private Object listenerLock = new Object();
+    private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean isConnected;
 
     private Client client;
@@ -58,18 +58,14 @@ public class Connection {
         if(connectionListener == null)
             throw new IllegalArgumentException("ConnectionListener cannot be null.");
 
-        synchronized (listenerLock) {
-            connectionListeners.add(connectionListener);
-        }
+        connectionListeners.add(connectionListener);
     }
 
     public void removeListener(ConnectionListener connectionListener) {
         if(connectionListener == null)
             throw new IllegalArgumentException("ConnectionListener cannot be null.");
 
-        synchronized (listenerLock) {
-            connectionListeners.remove(connectionListener);
-        }
+        connectionListeners.remove(connectionListener);
     }
 
     public void close() {

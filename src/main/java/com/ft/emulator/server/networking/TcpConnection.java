@@ -148,7 +148,7 @@ public class TcpConnection {
         lastReadTime = System.currentTimeMillis();
 
         if (bytesRead == -1)
-            return null;
+            throw new SocketException("Connection is closed.");
 
         if(bytesRead == 0)
             return null;
@@ -159,7 +159,7 @@ public class TcpConnection {
         if (currentObjectLength > readBuffer.capacity())
             throw new IOException("Unable to read object larger than read buffer: " + currentObjectLength);
 
-        Packet packet = null;
+        Packet packet;
         if (currentObjectLength == 0 && bytesRead > 8) {
             byte[] data = new byte[bytesRead];
 
@@ -196,7 +196,7 @@ public class TcpConnection {
             readBuffer.flip();
 
             if (bytesRead == -1)
-                return null;
+                throw new SocketException("Connection is closed.");
 
             lastReadTime = System.currentTimeMillis();
 
