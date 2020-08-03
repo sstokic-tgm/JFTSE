@@ -512,7 +512,7 @@ public class GamePacketHandler {
                             int existingItemCount = 0;
                             boolean existingItem = false;
 
-                            if (playerPocket != null && !playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
+                            if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
                                 existingItemCount = playerPocket.getItemCount();
                                 existingItem = true;
                             } else {
