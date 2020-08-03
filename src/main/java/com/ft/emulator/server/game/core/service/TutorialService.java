@@ -76,8 +76,8 @@ public class TutorialService {
         byte level = levelService.getLevel(rewardExp, connection.getClient().getActivePlayer().getExpPoints(), connection.getClient().getActivePlayer().getLevel());
 
         Player player = connection.getClient().getActivePlayer();
-        player.setExpPoints(player.getExpPoints() + tutorial.getRewardExp());
-        player.setGold(player.getGold() + tutorial.getRewardGold());
+        player.setExpPoints(player.getExpPoints() + rewardExp);
+        player.setGold(player.getGold() + rewardGold);
 
         player = levelService.setNewLevelStatusPoints(level, player);
 
