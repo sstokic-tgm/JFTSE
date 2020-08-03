@@ -122,7 +122,6 @@ public class TcpConnection {
             Socket socket = socketChannel.socket();
             socket.setTcpNoDelay(true);
             socket.setKeepAlive(true);
-            socket.setSoTimeout(10000);
 
             selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
 

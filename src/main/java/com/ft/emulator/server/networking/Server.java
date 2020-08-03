@@ -307,8 +307,10 @@ public class Server implements Runnable {
         connectionListeners.remove(connectionListener);
     }
 
-    public void close() {
-        this.connections.forEach(Connection::close);
+    private void close() {
+        synchronized (this.connections) {
+            this.connections.forEach(Connection::close);
+        }
         this.connections = Collections.synchronizedList(new ArrayList<>());
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
