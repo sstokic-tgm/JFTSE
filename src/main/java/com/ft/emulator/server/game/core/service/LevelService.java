@@ -19,7 +19,7 @@ public class LevelService {
     private final PlayerService playerService;
 
     public byte getLevel(int expValue, int currentExp, byte currentLevel) {
-        if (currentExp == 60)
+        if (currentLevel == 60)
             return currentLevel;
 
         int newExp = expValue + currentExp;

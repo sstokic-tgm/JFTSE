@@ -84,6 +84,7 @@ public class ChallengeService {
             challengeProgress.setSuccess(successCount);
             challengeProgress.setAttempts(challengeProgress.getAttempts() + 1);
         }
+        challengeProgressRepository.save(challengeProgress);
 
         List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(connection.getClient().getActivePlayer(), rewardProductList));
 
@@ -109,8 +110,6 @@ public class ChallengeService {
         player.setGold(player.getGold() + challenge.getRewardGold());
 
         player = levelService.setNewLevelStatusPoints(level, player);
-
-        challengeProgressRepository.save(challengeProgress);
 
         connection.getClient().setActivePlayer(player);
 
