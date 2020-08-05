@@ -192,7 +192,7 @@ public class Server implements Runnable {
         }
 
         long time = System.currentTimeMillis();
-        for (int i = 0; i <= this.connections.size(); i++) {
+        for (int i = 0; i < this.connections.size(); i++) {
             Connection connection = this.connections.get(i);
 
             if (connection.getTcpConnection().isTimedOut(time)) {
@@ -210,7 +210,7 @@ public class Server implements Runnable {
 
     private void keepAlive() {
         long time = System.currentTimeMillis();
-        for (int i = 0; i <= this.connections.size(); i++) {
+        for (int i = 0; i < this.connections.size(); i++) {
             Connection connection = this.connections.get(i);
 
             if (connection.getTcpConnection().needsKeepAlive(time))
@@ -279,14 +279,14 @@ public class Server implements Runnable {
     }
 
     public void sendToAllTcp(Packet packet) {
-        for (int i = 0; i <= this.connections.size(); i++) {
+        for (int i = 0; i < this.connections.size(); i++) {
             Connection connection = this.connections.get(i);
             connection.sendTCP(packet);
         }
     }
 
     public void sendToTcp(int connectionId, Packet packet) {
-        for (int i = 0; i <= this.connections.size(); i++) {
+        for (int i = 0; i < this.connections.size(); i++) {
             Connection connection = this.connections.get(i);
 
             if (connection.getId() == connectionId) {
@@ -311,7 +311,7 @@ public class Server implements Runnable {
     }
 
     private void close() {
-        for (int i = 0; i <= this.connections.size(); i++)
+        for (int i = 0; i < this.connections.size(); i++)
             this.connections.get(i).close();
         this.connections = Collections.synchronizedList(new ArrayList<>());
 
