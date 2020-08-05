@@ -192,9 +192,9 @@ public class Server implements Runnable {
         }
 
         long time = System.currentTimeMillis();
-        List<Connection> connections = this.connections;
+        for (int i = 0; i <= this.connections.size(); i++) {
+            Connection connection = this.connections.get(i);
 
-        for (Connection connection : connections) {
             if (connection.getTcpConnection().isTimedOut(time)) {
                 connection.close();
             }
@@ -210,8 +210,8 @@ public class Server implements Runnable {
 
     private void keepAlive() {
         long time = System.currentTimeMillis();
-        List<Connection> connections = this.connections;
-        for (Connection connection : connections) {
+        for (int i = 0; i <= this.connections.size(); i++) {
+            Connection connection = this.connections.get(i);
 
             if (connection.getTcpConnection().needsKeepAlive(time))
                 connection.sendTCP(new Packet((char) 0x0FA3));
@@ -279,14 +279,17 @@ public class Server implements Runnable {
     }
 
     public void sendToAllTcp(Packet packet) {
-        for (Connection connection : connections) {
+        for (int i = 0; i <= this.connections.size(); i++) {
+            Connection connection = this.connections.get(i);
             connection.sendTCP(packet);
         }
     }
 
     public void sendToTcp(int connectionId, Packet packet) {
-        for(Connection connection : connections) {
-            if(connection.getId() == connectionId) {
+        for (int i = 0; i <= this.connections.size(); i++) {
+            Connection connection = this.connections.get(i);
+
+            if (connection.getId() == connectionId) {
                 connection.sendTCP(packet);
                 break;
             }
@@ -308,10 +311,9 @@ public class Server implements Runnable {
     }
 
     private void close() {
-        List<Connection> connections = this.connections;
-        for (Connection connection : connections)
-            connection.close();
-        connections = Collections.synchronizedList(new ArrayList<>());
+        for (int i = 0; i <= this.connections.size(); i++)
+            this.connections.get(i).close();
+        this.connections = Collections.synchronizedList(new ArrayList<>());
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 
