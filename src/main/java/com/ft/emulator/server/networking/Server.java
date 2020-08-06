@@ -75,6 +75,7 @@ public class Server implements Runnable {
 
             try {
                 serverChannel = selector.provider().openServerSocketChannel();
+                serverChannel.socket().setReuseAddress(true);
                 serverChannel.socket().bind(tcpPort);
                 serverChannel.configureBlocking(false);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
