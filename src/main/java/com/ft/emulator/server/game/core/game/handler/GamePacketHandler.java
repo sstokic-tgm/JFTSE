@@ -130,10 +130,6 @@ public class GamePacketHandler {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
 
-            // init data request packets
-            gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 1, (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
-
             S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
             connection.sendTCP(playerLevelExpPacket);
 
@@ -144,9 +140,6 @@ public class GamePacketHandler {
         }
         else if (requestType == 1) {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
-
-            gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) 2, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
         }
         // pass inventory & equipped items
@@ -172,9 +165,6 @@ public class GamePacketHandler {
 
             S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
             connection.sendTCP(inventoryWearQuickAnswerPacket);
-
-            gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) (requestType + 1), (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
         }
         else {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
@@ -857,7 +847,8 @@ public class GamePacketHandler {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
-        } else {
+        }
+        else {
             unknownAnswer.write((short) 0);
         }
         connection.sendTCP(unknownAnswer);
