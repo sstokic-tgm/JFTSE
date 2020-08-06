@@ -3,6 +3,8 @@ package com.ft.emulator;
 import com.ft.emulator.server.game.core.auth.AuthenticationServerNetworkListener;
 import com.ft.emulator.server.game.core.game.GameServerNetworkListener;
 import com.ft.emulator.server.networking.Server;
+import com.ft.emulator.server.shared.module.checker.AuthServerChecker;
+import com.ft.emulator.server.shared.module.checker.GameServerChecker;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,6 +12,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 @Log4j2
@@ -35,7 +40,6 @@ public class StartApplication {
             ctx.close();
             System.exit(1);
         }
-
         authenticationServer.start("auth server");
 
         log.info("Successfully initialized!");
@@ -55,11 +59,9 @@ public class StartApplication {
         catch (IOException ioe) {
             log.error("Failed to start game server!");
             ioe.printStackTrace();
-            authenticationServer.stop();
             ctx.close();
             System.exit(1);
         }
-
         gameServer.start("game server");
 
         log.info("Successfully initialized!");
@@ -67,6 +69,10 @@ public class StartApplication {
 
         log.info("Emulator successfully started!");
         log.info("Write exit and confirm with enter to stop the emulator!");
+
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+        executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new GameServerChecker(gameServer), 0, 5, TimeUnit.MINUTES);
 
         Scanner scan = new Scanner(System.in);
         String input;
@@ -78,6 +84,8 @@ public class StartApplication {
         }
 
         log.info("Stopping the emulator...");
+
+        executor.shutdown();
 
         try {
             authenticationServer.dispose();
