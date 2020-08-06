@@ -161,10 +161,6 @@ public class GameServerNetworkListener implements ConnectionListener {
             // empty..
             break;
 
-        case 0x1071:
-            gamePacketHandler.handle1071Packet(connection, packet);
-            break;
-
         default:
             gamePacketHandler.handleUnknown(connection, packet);
             break;
