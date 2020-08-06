@@ -433,6 +433,12 @@ public class GamePacketHandler {
                 Product product = data.getKey();
                 byte option = data.getValue();
 
+                // prevent user from buying pet till it'simplemented
+                if (product.getCategory().equals(EItemCategory.PET_CHAR.getName())) {
+                    result += product.getPrice0();
+                    continue;
+                }
+
                 if (!product.getCategory().equals(EItemCategory.CHAR.getName())) {
                     if (product.getCategory().equals(EItemCategory.HOUSE.getName())) {
 
