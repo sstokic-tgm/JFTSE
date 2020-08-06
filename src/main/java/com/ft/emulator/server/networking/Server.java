@@ -15,7 +15,7 @@ import java.util.*;
 @Log4j2
 public class Server implements Runnable {
     private final int writeBufferSize, objectBufferSize;
-    private final Selector selector;
+    private Selector selector;
     private int emptySelects;
     private ServerSocketChannel serverChannel;
     private List<Connection> connections = Collections.synchronizedList(new ArrayList<>());
@@ -55,6 +55,15 @@ public class Server implements Runnable {
     public Server(int writeBufferSize, int objectBufferSize) {
         this.writeBufferSize = writeBufferSize;
         this.objectBufferSize = objectBufferSize;
+
+        try {
+            selector = Selector.open();
+        } catch (IOException ioe) {
+            throw new RuntimeException("Error opening selector.", ioe);
+        }
+    }
+
+    public void restart() {
 
         try {
             selector = Selector.open();
@@ -315,6 +324,7 @@ public class Server implements Runnable {
         for (int i = 0; i < this.connections.size(); i++)
             this.connections.get(i).close();
         this.connections = Collections.synchronizedList(new ArrayList<>());
+        this.nextConnectionID = 1;
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 

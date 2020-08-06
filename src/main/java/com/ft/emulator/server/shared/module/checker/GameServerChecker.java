@@ -23,6 +23,7 @@ public class GameServerChecker extends ServerChecker implements Runnable {
 
             try {
                 server.dispose();
+                server.restart();
                 server.bind(5895);
             }
             catch (IOException ioe) {
