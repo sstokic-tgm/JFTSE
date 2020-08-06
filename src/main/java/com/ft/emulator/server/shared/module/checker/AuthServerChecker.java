@@ -23,6 +23,7 @@ public class AuthServerChecker extends ServerChecker implements Runnable {
 
             try {
                 server.dispose();
+                server.restart();
                 server.bind(5894);
             }
             catch (IOException ioe) {
