@@ -242,7 +242,7 @@ public class GamePacketHandler {
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 
         homeInventoryList.forEach(hil -> {
-                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndex(hil.getItemIndex(), connection.getClient().getActivePlayer().getPocket());
+                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(hil.getItemIndex(), connection.getClient().getActivePlayer().getPocket());
                 ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
 
                 // create a new one if null, null indicates that all items are placed
@@ -504,7 +504,7 @@ public class GamePacketHandler {
                                 }
                             }
                         } else {
-                            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndex(product.getItem0(), player.getPocket());
+                            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(product.getItem0(), player.getPocket());
                             int existingItemCount = 0;
                             boolean existingItem = false;
 
