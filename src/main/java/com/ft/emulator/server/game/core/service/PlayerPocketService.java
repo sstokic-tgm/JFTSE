@@ -34,7 +34,12 @@ public class PlayerPocketService {
         return playerPocket.orElse(null);
     }
 
-    public PlayerPocket getItemAsPocketByItemIndex(Integer itemIndex, Pocket pocket) {
+    public PlayerPocket getItemAsPocketByItemIndexAndCategoryAndPocket(Integer itemIndex, String category, Pocket pocket) {
+        Optional<PlayerPocket> playerPocket = playerPocketRepository.findByItemIndexAndCategoryAndPocket(itemIndex, category, pocket);
+        return playerPocket.orElse(null);
+    }
+
+    public PlayerPocket getItemAsPocketByItemIndexAndPocket(Integer itemIndex, Pocket pocket) {
         Optional<PlayerPocket> playerPocket = playerPocketRepository.findByItemIndexAndPocket(itemIndex, pocket);
         return playerPocket.orElse(null);
     }
