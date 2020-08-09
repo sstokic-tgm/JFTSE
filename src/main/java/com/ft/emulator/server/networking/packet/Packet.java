@@ -137,6 +137,12 @@ public class Packet {
         return element;
     }
 
+    public short readShort() {
+        short element = BitKit.bytesToShort(this.data, readPosition);
+        this.readPosition += 2;
+        return element;
+    }
+
     public String readUnicodeString() {
         String result = "";
         int stringLength = indexOf(this.data, new byte[] {0x00, 0x00}, this.readPosition) + 1 - this.readPosition;

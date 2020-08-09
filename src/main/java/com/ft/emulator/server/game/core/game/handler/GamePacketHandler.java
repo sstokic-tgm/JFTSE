@@ -21,6 +21,8 @@ import com.ft.emulator.server.database.model.tutorial.TutorialProgress;
 import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
+import com.ft.emulator.server.game.core.matchplay.room.Room;
+import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
@@ -38,6 +40,7 @@ import com.ft.emulator.server.game.core.packet.packets.home.S2CHomeItemsLoadAnsw
 import com.ft.emulator.server.game.core.packet.packets.inventory.*;
 import com.ft.emulator.server.game.core.packet.packets.lobby.C2SLobbyUserListRequestPacket;
 import com.ft.emulator.server.game.core.packet.packets.lobby.S2CLobbyUserListAnswerPacket;
+import com.ft.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
@@ -811,6 +814,76 @@ public class GamePacketHandler {
         connection.sendTCP(openGachaAnswerPacket);
     }
 
+    public void handleRoomCreateRequestPacket(Connection connection, Packet packet) {
+        C2SRoomCreateRequestPacket roomCreateRequestPacket = new C2SRoomCreateRequestPacket(packet);
+
+        Room room = new Room();
+        room.setRoomId((short) this.gameHandler.getRoomList().size());
+        room.setRoomName(roomCreateRequestPacket.getRoomName());
+        room.setUnk0(roomCreateRequestPacket.getUnk0());
+        room.setMode(roomCreateRequestPacket.getMode());
+        room.setRule(roomCreateRequestPacket.getRule());
+        room.setPlayers(roomCreateRequestPacket.getPlayers());
+        room.setPrivate(roomCreateRequestPacket.isPrivate());
+        room.setUnk1(roomCreateRequestPacket.getUnk1());
+        room.setSkillFree(roomCreateRequestPacket.isSkillFree());
+        room.setQuickSlot(roomCreateRequestPacket.isQuickSlot());
+        room.setLevel(connection.getClient().getActivePlayer().getLevel());
+        room.setLevelRange(roomCreateRequestPacket.getLevelRange());
+        room.setBettingType(roomCreateRequestPacket.getBettingType());
+        room.setBettingAmount(roomCreateRequestPacket.getBettingAmount());
+        room.setBall(roomCreateRequestPacket.getBall());
+        room.setMap((byte) 1);
+
+        RoomPlayer roomPlayer = new RoomPlayer();
+        roomPlayer.setPlayer(connection.getClient().getActivePlayer());
+        roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
+        roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
+        roomPlayer.setPosition((byte) 0);
+        roomPlayer.setMaster(true);
+        roomPlayer.setFitting(false);
+        room.getRoomPlayerList().add(roomPlayer);
+
+        this.gameHandler.getRoomList().add(room);
+        connection.getClient().setActiveRoom(room);
+
+        S2CRoomCreateAnswerPacket roomCreateAnswerPacket = new S2CRoomCreateAnswerPacket((char) 0, (byte) 0, (byte) 0, (byte) 0);
+        connection.sendTCP(roomCreateAnswerPacket);
+
+        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+        connection.sendTCP(roomInformationPacket);
+
+        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(room.getRoomPlayerList());
+        connection.sendTCP(roomPlayerInformationPacket);
+    }
+
+    public void handleRoomMapChangeRequestPacket(Connection connection, Packet packet) {
+        C2SRoomMapChangeRequestPacket roomMapChangeRequestPacket = new C2SRoomMapChangeRequestPacket(packet);
+        connection.getClient().getActiveRoom().setMap(roomMapChangeRequestPacket.getMap());
+
+        S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(roomMapChangeRequestPacket.getMap());
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomMapChangeAnswerPacket));
+    }
+
+    public void handleRoomPositionChangeRequestPacket(Connection connection, Packet packet) {
+        C2SRoomPositionChangeRequestPacket roomPositionChangeRequestPacket = new C2SRoomPositionChangeRequestPacket(packet);
+        short position = roomPositionChangeRequestPacket.getPosition();
+
+        short oldPosition = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
+                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .map(RoomPlayer::getPosition)
+                .findAny()
+                .get();
+
+        connection.getClient().getActiveRoom().getRoomPlayerList().forEach(rp -> {
+            if (rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                rp.setPosition(position);
+        });
+
+        S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, oldPosition, position);
+        connection.sendTCP(roomPositionChangeAnswerPacket);
+    }
+
     public void handleDisconnectPacket(Connection connection, Packet packet) {
 
         // reset pocket
@@ -847,6 +920,12 @@ public class GamePacketHandler {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
+        }
+        else if (unknownAnswer.getPacketId() == (char) 0x138A) {
+            unknownAnswer.write((char) 0); // result
+            unknownAnswer.write((byte) 0); // probably game mode 0 = room, 1 = chat
+            unknownAnswer.write((byte) 0); // 1 indicates if home items should be requested
+            unknownAnswer.write((byte) 0); // ??
         }
         else {
             unknownAnswer.write((short) 0);
