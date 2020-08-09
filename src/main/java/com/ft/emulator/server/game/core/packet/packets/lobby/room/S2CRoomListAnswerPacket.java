@@ -1,0 +1,38 @@
+package com.ft.emulator.server.game.core.packet.packets.lobby.room;
+
+import com.ft.emulator.common.utilities.BitKit;
+import com.ft.emulator.server.game.core.matchplay.room.Room;
+import com.ft.emulator.server.game.core.packet.PacketID;
+import com.ft.emulator.server.networking.packet.Packet;
+
+import java.util.List;
+
+public class S2CRoomListAnswerPacket extends Packet {
+    public S2CRoomListAnswerPacket(List<Room> roomList) {
+        super(PacketID.S2CRoomListAnswer);
+
+        this.write((char) roomList.size());
+        for (Room room : roomList) {
+            this.write(room.getRoomId());
+            this.write(room.getRoomName());
+            this.write(room.getUnk0());
+            this.write(room.getMode());
+            this.write(room.getRule());
+            this.write((byte) 0); // betting mode
+            this.write((byte) 0); // betting coins
+            this.write(room.getBettingAmount());
+            this.write(room.getBall());
+            this.write(room.getPlayers());
+            this.write(room.isPrivate());
+            this.write(room.getLevel());
+            this.write(room.getLevelRange());
+            this.write((byte) 0); // allow battlemon
+            this.write(room.getMap());
+            this.write(room.isSkillFree());
+            this.write(room.isQuickSlot());
+            this.write(BitKit.fromUnsignedInt(room.getRoomPlayerList().size()));
+            this.write((byte) 0); // ?
+            this.write((byte) 0); // ?
+        }
+    }
+}

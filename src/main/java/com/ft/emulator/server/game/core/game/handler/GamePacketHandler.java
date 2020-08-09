@@ -855,6 +855,12 @@ public class GamePacketHandler {
 
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(room.getRoomPlayerList());
         connection.sendTCP(roomPlayerInformationPacket);
+
+        S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
+        this.gameHandler.getClientList().forEach(c -> {
+            if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                c.getConnection().sendTCP(roomListAnswerPacket);
+        });
     }
 
     public void handleRoomMapChangeRequestPacket(Connection connection, Packet packet) {
