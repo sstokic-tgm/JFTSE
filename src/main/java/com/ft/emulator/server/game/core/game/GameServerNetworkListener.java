@@ -168,6 +168,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleRoomPositionChangeRequestPacket(connection, packet);
                 break;
 
+            case PacketID.C2SRoomListReq:
+                gamePacketHandler.handleRoomListRequestPacket(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..

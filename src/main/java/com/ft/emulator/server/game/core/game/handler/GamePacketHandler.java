@@ -894,6 +894,19 @@ public class GamePacketHandler {
         connection.sendTCP(roomPositionChangeAnswerPacket);
     }
 
+    public void handleRoomListRequestPacket(Connection connection, Packet packet) {
+        C2SRoomListRequestPacket roomListRequestPacket = new C2SRoomListRequestPacket(packet);
+        char page = roomListRequestPacket.getPage();
+
+        List<Room> roomList = this.gameHandler.getRoomList().stream()
+                .skip(page == 0 ? 0 : (page * 5) - 5)
+                .limit(5)
+                .collect(Collectors.toList());
+
+        S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(roomList);
+        connection.sendTCP(roomListAnswerPacket);
+    }
+
     public void handleDisconnectPacket(Connection connection, Packet packet) {
 
         // reset pocket
@@ -934,12 +947,6 @@ public class GamePacketHandler {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
-        }
-        else if (unknownAnswer.getPacketId() == (char) 0x138A) {
-            unknownAnswer.write((char) 0); // result
-            unknownAnswer.write((byte) 0); // probably game mode 0 = room, 1 = chat
-            unknownAnswer.write((byte) 0); // 1 indicates if home items should be requested
-            unknownAnswer.write((byte) 0); // ??
         }
         else {
             unknownAnswer.write((short) 0);
