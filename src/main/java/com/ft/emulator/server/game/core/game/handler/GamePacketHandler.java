@@ -797,6 +797,9 @@ public class GamePacketHandler {
 
     public void handleLobbyJoinLeave(Connection connection, boolean joined) {
         connection.getClient().setInLobby(joined);
+        if (joined) {
+            handleRoomPlayerChanges(connection);
+        }
     }
 
     public void handleEmblemListRequestPacket(Connection connection, Packet packet) {
@@ -846,6 +849,7 @@ public class GamePacketHandler {
 
         this.gameHandler.getRoomList().add(room);
         connection.getClient().setActiveRoom(room);
+        connection.getClient().setInLobby(false);
 
         S2CRoomCreateAnswerPacket roomCreateAnswerPacket = new S2CRoomCreateAnswerPacket((char) 0, (byte) 0, (byte) 0, (byte) 0);
         connection.sendTCP(roomCreateAnswerPacket);
@@ -857,7 +861,7 @@ public class GamePacketHandler {
         connection.sendTCP(roomPlayerInformationPacket);
 
         S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
-        this.gameHandler.getClientList().forEach(c -> {
+        this.gameHandler.getClientsInLobby().forEach(c -> {
             if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
                 c.getConnection().sendTCP(roomListAnswerPacket);
         });
@@ -899,6 +903,8 @@ public class GamePacketHandler {
                 connection.sendTCP(inventoryItemRemoveAnswerPacket);
             });
 
+        handleRoomPlayerChanges(connection);
+
         // reset status
         Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
         account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
@@ -914,6 +920,8 @@ public class GamePacketHandler {
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
             authenticationService.updateAccount(account);
+
+            handleRoomPlayerChanges(connection);
         }
 
         gameHandler.removeClient(connection.getClient());
@@ -937,5 +945,22 @@ public class GamePacketHandler {
             unknownAnswer.write((short) 0);
         }
         connection.sendTCP(unknownAnswer);
+    }
+
+    private void handleRoomPlayerChanges(Connection connection) {
+        if (connection.getClient().getActiveRoom() != null) {
+            List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+
+            roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+            connection.getClient().getActiveRoom().setRoomPlayerList(roomPlayerList);
+
+            this.gameHandler.getRoomList().removeIf(r -> r.getRoomPlayerList().isEmpty());
+
+            S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
+            this.gameHandler.getClientsInLobby().forEach(c -> {
+                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    c.getConnection().sendTCP(roomListAnswerPacket);
+            });
+        }
     }
 }
