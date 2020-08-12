@@ -160,6 +160,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleRoomCreateRequestPacket(connection, packet);
                 break;
 
+            case PacketID.C2SRoomJoin:
+                gamePacketHandler.handleRoomJoinRequestPacket(connection, packet);
+                break;
+
             case PacketID.C2SRoomMapChange:
                 gamePacketHandler.handleRoomMapChangeRequestPacket(connection, packet);
                 break;
