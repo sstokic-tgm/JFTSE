@@ -52,7 +52,7 @@ public class GameHandler {
     public List<Client> getClientsInRoom(short roomId) {
 
         return clientList.stream()
-                .filter(c -> c.getActiveRoom().getRoomId() == roomId)
+                .filter(c -> c.getActiveRoom() != null && c.getActiveRoom().getRoomId() == roomId)
                 .collect(Collectors.toList());
     }
 }
