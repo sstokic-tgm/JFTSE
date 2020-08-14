@@ -982,6 +982,21 @@ public class GamePacketHandler {
         this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
     }
 
+    public void handleRoomSlotCloseRequestPacket(Connection connection, Packet packet) {
+        C2SRoomSlotCloseRequestPacket roomSlotCloseRequestPacket = new C2SRoomSlotCloseRequestPacket(packet);
+        byte slot = roomSlotCloseRequestPacket.getSlot();
+        boolean deactivate = roomSlotCloseRequestPacket.isDeactivate();
+
+        S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket(slot, deactivate);
+        connection.sendTCP(roomSlotCloseAnswerPacket);
+    }
+
+    public void handleRoomStartGamePacket(Connection connection, Packet packet) {
+        Packet p1 = new Packet((char) 0x177C);
+        p1.write((char) 0);
+        connection.sendTCP(p1);
+    }
+
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {
         C2SRoomListRequestPacket roomListRequestPacket = new C2SRoomListRequestPacket(packet);
         char page = roomListRequestPacket.getPage();

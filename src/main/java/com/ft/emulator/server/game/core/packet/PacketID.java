@@ -44,6 +44,8 @@ public final class PacketID {
     public final static char S2CRoomPositionChangeAnswer = 0x1786;
     public final static char C2SRoomMapChange = 0x1788;
     public final static char S2CRoomMapChangeAnswer = 0x1789;
+    public final static char C2SRoomSlotCloseReq = 0x1D4C;
+    public final static char S2CRoomSlotCloseAnswer = 0x1D4E;
 
     public final static char S2CUnknownRoomJoin = 0x189D;
 
