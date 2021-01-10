@@ -184,6 +184,9 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleRoomStartGamePacket(connection, packet);
                 break;
 
+            case PacketID.C2SRoomCreateQuick:
+                gamePacketHandler.handleRoomCreateQuickRequestPacket(connection, packet);
+                
             case PacketID.C2SRoomListReq:
                 gamePacketHandler.handleRoomListRequestPacket(connection, packet);
                 break;
