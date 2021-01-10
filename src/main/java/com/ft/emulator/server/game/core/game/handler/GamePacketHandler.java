@@ -846,6 +846,7 @@ public class GamePacketHandler {
     public void handleRoomCreateQuickRequestPacket(Connection connection, Packet packet) {
         C2SRoomCreateQuickRequestPacket roomQuickCreateRequestPacket = new C2SRoomCreateQuickRequestPacket(packet);
         Player player = connection.getClient().getActivePlayer();
+        byte playerSize = roomQuickCreateRequestPacket.getPlayers();
 
         Room room = new Room();
         room.setRoomId((short) this.gameHandler.getRoomList().size());
@@ -853,7 +854,7 @@ public class GamePacketHandler {
         room.setUnk0(roomQuickCreateRequestPacket.getUnk0());
         room.setMode(roomQuickCreateRequestPacket.getMode());
         room.setRule((byte)0);
-        room.setPlayers(roomQuickCreateRequestPacket.getPlayers());
+        room.setPlayers(playerSize == 0 ? 2 : playerSize);
         room.setPrivate(false);
         room.setUnk1((byte)0);
         room.setSkillFree(true);
