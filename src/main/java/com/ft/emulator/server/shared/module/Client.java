@@ -25,4 +25,5 @@ public class Client {
 
     private Room activeRoom;
     private int lobbyGameModeTabFilter;
+    private byte lobbyCurrentPlayerListPage = 1;
 }
