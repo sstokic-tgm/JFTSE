@@ -803,7 +803,7 @@ public class GamePacketHandler {
             break;
         }
     }
-    
+
     public void handleLobbyJoinLeave(Connection connection, boolean joined) {
         connection.getClient().setInLobby(joined);
         if (joined && connection.getClient().getActiveRoom() != null) {
@@ -929,9 +929,10 @@ public class GamePacketHandler {
     public void handleRoomMapChangeRequestPacket(Connection connection, Packet packet) {
         C2SRoomMapChangeRequestPacket roomMapChangeRequestPacket = new C2SRoomMapChangeRequestPacket(packet);
         connection.getClient().getActiveRoom().setMap(roomMapChangeRequestPacket.getMap());
-
+        Room room = connection.getClient().getActiveRoom();
         S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(roomMapChangeRequestPacket.getMap());
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomMapChangeAnswerPacket));
+        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomMapChangeAnswerPacket));
+        this.refreshLobbyRoomListForAllClients(connection, room.getMode());
     }
 
     public void handleRoomPositionChangeRequestPacket(Connection connection, Packet packet) {
@@ -1109,11 +1110,15 @@ public class GamePacketHandler {
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(room.getRoomPlayerList());
         connection.sendTCP(roomPlayerInformationPacket);
 
+        this.refreshLobbyRoomListForAllClients(connection, room.getMode());
+    }
+
+    private void refreshLobbyRoomListForAllClients(Connection connection, int gameMode) {
         S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
         this.gameHandler.getClientsInLobby().forEach(c -> {
             int clientRoomModeFilter = c.getLobbyGameModeTabFilter();
             boolean isNotActivePlayer = !c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
-            boolean shouldRoomBeDisplayed = c.getLobbyGameModeTabFilter() == GameMode.ALL ? true : clientRoomModeFilter == room.getMode();
+            boolean shouldRoomBeDisplayed = c.getLobbyGameModeTabFilter() == GameMode.ALL ? true : clientRoomModeFilter == gameMode;
             if (isNotActivePlayer && shouldRoomBeDisplayed)
                 c.getConnection().sendTCP(roomListAnswerPacket);
 
