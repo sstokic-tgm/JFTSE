@@ -1000,8 +1000,30 @@ public class GamePacketHandler {
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {
         C2SRoomListRequestPacket roomListRequestPacket = new C2SRoomListRequestPacket(packet);
         char page = roomListRequestPacket.getPage();
+        int roomType = roomListRequestPacket.getRoomTypeTab();
+        int gameMode;
+        switch (roomType) {
+            case 256:
+                gameMode = GameMode.GUARDIAN;
+                break;
+            case 192:
+                gameMode = GameMode.BATTLE;
+                break;
+            case 48:
+                gameMode = GameMode.BASIC;
+                break;
+            case 1536:
+                gameMode = GameMode.BATTLEMON;
+                break;
+            default:
+                gameMode = GameMode.ALL;
+                break;
+        }
 
+        connection.getClient().setLobbyGameModeTabFilter(gameMode);
+        int finalGameMode = gameMode;
         List<Room> roomList = this.gameHandler.getRoomList().stream()
+                .filter(x -> finalGameMode == GameMode.ALL || x.getMode() == finalGameMode)
                 .skip(page == 0 ? 0 : (page * 5) - 5)
                 .limit(5)
                 .collect(Collectors.toList());
@@ -1082,7 +1104,10 @@ public class GamePacketHandler {
 
         S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
         this.gameHandler.getClientsInLobby().forEach(c -> {
-            if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+            int clientRoomModeFilter = c.getLobbyGameModeTabFilter();
+            boolean isNotActivePlayer = !c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
+            boolean shouldRoomBeDisplayed = c.getLobbyGameModeTabFilter() == GameMode.ALL ? true : clientRoomModeFilter == room.getMode();
+            if (isNotActivePlayer && shouldRoomBeDisplayed)
                 c.getConnection().sendTCP(roomListAnswerPacket);
         });
     }
