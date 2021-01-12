@@ -36,6 +36,8 @@ public final class PacketID {
     public final static char C2SRoomQuickSlotChange = 0x17a2;
     public final static char C2SRoomJoin = 0x138B;
     public final static char S2CRoomJoinAnswer = 0x138C;
+    public final static char C2SRoomLeave = 0x1771;
+    public final static char S2CRoomLeaveAnswer = 0x1772;
 
     public final static char S2CRoomListAnswer = 0x138E;
     public final static char S2CRoomPlayerInformation = 0x1394;

@@ -989,6 +989,22 @@ public class GamePacketHandler {
 
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(room.getRoomPlayerList());
         this.gameHandler.getClientsInRoom(roomJoinRequestPacket.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+        this.updateRoomForAllPlayersInMultiplayer(connection, room);
+    }
+
+    public void handleRoomLeaveRequestPacket(Connection connection, Packet packet) {
+        Room room = connection.getClient().getActiveRoom();
+        Player player = connection.getClient().getActivePlayer();
+        Optional<RoomPlayer> roomPlayer = room.getRoomPlayerList().stream().filter(x -> x.getPlayer().getId().equals(player.getId())).findFirst();
+        room.getRoomPlayerList().removeIf(x -> x.getPlayer().getId().equals(player.getId()));
+        connection.getClient().setInLobby(true);
+
+        Packet answerPacket = new Packet((char) PacketID.S2CRoomLeaveAnswer);
+        answerPacket.write(0);
+        connection.sendTCP(answerPacket);
+
+        S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, roomPlayer.get().getPosition(), (short) -1);
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
     }
 
     public void handleRoomReadyChangeRequestPacket(Connection connection, Packet packet) {
