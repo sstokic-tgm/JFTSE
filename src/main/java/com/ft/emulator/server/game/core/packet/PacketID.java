@@ -27,6 +27,13 @@ public final class PacketID {
     public final static char C2SRoomCreate = 0x1389;
     public final static char C2SRoomCreateQuick = 0x138f;
     public final static char S2CRoomCreateAnswer = 0x138A;
+    public final static char C2SRoomNameChange = 0x1791;
+    public final static char C2SRoomGameModeChange = 0x18b2;
+    public final static char C2SRoomIsPrivateChange = 0x178e;
+    public final static char C2SRoomLevelRangeChange = 0x178f;
+    public final static char C2SRoomSkillFreeChange = 0x1795;
+    public final static char C2SRoomAllowBattlemonChange = 0x1793;
+    public final static char C2SRoomQuickSlotChange = 0x17a2;
     public final static char C2SRoomJoin = 0x138B;
     public final static char S2CRoomJoinAnswer = 0x138C;
 

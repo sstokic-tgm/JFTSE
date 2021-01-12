@@ -6,16 +6,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class C2SRoomCreateQuickRequestPacket extends Packet {
-    private byte allowBattlemon;
+public class C2SRoomGameModeChangeRequestPacket extends Packet {
     private byte mode;
-    private byte players;
 
-    public C2SRoomCreateQuickRequestPacket(Packet packet) {
+    public C2SRoomGameModeChangeRequestPacket(Packet packet) {
         super(packet);
 
-        this.allowBattlemon = this.readByte();
         this.mode = this.readByte();
-        this.players = this.readByte();
     }
 }

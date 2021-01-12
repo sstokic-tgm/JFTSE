@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class C2SRoomCreateRequestPacket extends Packet {
     private String roomName;
-    private byte unk0;
+    private byte allowBattlemon;
     private byte mode;
     private byte rule;
     private byte players;
@@ -26,7 +26,7 @@ public class C2SRoomCreateRequestPacket extends Packet {
         super(packet);
 
         this.roomName = this.readUnicodeString();
-        this.unk0 = this.readByte();
+        this.allowBattlemon = this.readByte();
         this.mode = this.readByte();
         this.rule = this.readByte();
         this.players = this.readByte();

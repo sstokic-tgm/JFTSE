@@ -15,7 +15,7 @@ public class Room {
 
     private short roomId;
     private String roomName;
-    private byte unk0;
+    private byte allowBattlemon;
     private byte mode;
     private byte rule;
     private byte players;
