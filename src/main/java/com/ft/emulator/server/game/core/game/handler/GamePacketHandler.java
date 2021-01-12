@@ -779,29 +779,29 @@ public class GamePacketHandler {
 
     public void handleChatMessagePackets(Connection connection, Packet packet) {
         switch (packet.getPacketId()) {
-            case PacketID.C2SChatLobbyReq: {
-                C2SChatLobbyReqPacket chatLobbyReqPacket = new C2SChatLobbyReqPacket(packet);
-                S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), connection.getClient().getActivePlayer().getName(), chatLobbyReqPacket.getMessage());
+        case PacketID.C2SChatLobbyReq: {
+            C2SChatLobbyReqPacket chatLobbyReqPacket = new C2SChatLobbyReqPacket(packet);
+            S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), connection.getClient().getActivePlayer().getName(), chatLobbyReqPacket.getMessage());
 
-                this.getGameHandler().getClientList().forEach(cl -> cl.getConnection().sendTCP(chatLobbyAnswerPacket));
-            } break;
-            case PacketID.C2SChatRoomReq: {
-                C2SChatRoomReqPacket chatRoomReqPacket = new C2SChatRoomReqPacket(packet);
-                S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getActivePlayer().getName(), chatRoomReqPacket.getMessage());
+            this.getGameHandler().getClientList().forEach(cl -> cl.getConnection().sendTCP(chatLobbyAnswerPacket));
+        } break;
+        case PacketID.C2SChatRoomReq: {
+            C2SChatRoomReqPacket chatRoomReqPacket = new C2SChatRoomReqPacket(packet);
+            S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getActivePlayer().getName(), chatRoomReqPacket.getMessage());
 
-                this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
-            } break;
-            case PacketID.C2SWhisperReq: {
-                C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
-                S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+        } break;
+        case PacketID.C2SWhisperReq: {
+            C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
+            S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
-                this.getGameHandler().getClientList().stream()
-                        .filter(cl -> cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
-                        .findAny()
-                        .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
+            this.getGameHandler().getClientList().stream()
+                    .filter(cl -> cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
+                    .findAny()
+                    .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
 
-                connection.sendTCP(whisperAnswerPacket);
-            } break;
+            connection.sendTCP(whisperAnswerPacket);
+        } break;
         }
     }
 
@@ -920,7 +920,8 @@ public class GamePacketHandler {
         if (StringUtils.isEmpty(password)) {
             room.setPassword(null);
             room.setPrivate(false);
-        } else {
+        }
+        else {
             room.setPassword(password);
             room.setPrivate(true);
         }
@@ -1095,9 +1096,9 @@ public class GamePacketHandler {
     }
 
     public void handleRoomStartGamePacket(Connection connection, Packet packet) {
-        Packet p1 = new Packet((char) 0x17de);
+        Packet p1 = new Packet((char) 0x177C);
         p1.write(0);
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(p1));
+        connection.sendTCP(p1);
     }
 
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {
