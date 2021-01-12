@@ -10,7 +10,7 @@ public class S2CRoomInformationPacket extends Packet {
 
         this.write(room.getRoomId());
         this.write(room.getRoomName());
-        this.write(room.getUnk0());
+        this.write(room.getAllowBattlemon());
         this.write(room.getMode());
         this.write(room.getRule());
         this.write((byte) 0); // betting mode

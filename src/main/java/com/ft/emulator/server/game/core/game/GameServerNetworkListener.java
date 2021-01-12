@@ -160,8 +160,40 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleRoomCreateRequestPacket(connection, packet);
                 break;
 
+            case PacketID.C2SRoomNameChange:
+                gamePacketHandler.handleRoomNameChangePacket(connection, packet);
+                break;
+
+            case PacketID.C2SRoomGameModeChange:
+                gamePacketHandler.handleGameModeChangePacket(connection, packet);
+                break;
+
+            case PacketID.C2SRoomIsPrivateChange:
+                gamePacketHandler.handleRoomIsPrivateChangePacket(connection, packet);
+                break;
+
+            case PacketID.C2SRoomLevelRangeChange:
+                gamePacketHandler.handleRoomLevelRangeChangePacket(connection, packet);
+                break;
+
+            case PacketID.C2SRoomSkillFreeChange:
+                gamePacketHandler.handleRoomSkillFreeChangePacket(connection, packet);
+                break;
+
+            case PacketID.C2SRoomAllowBattlemonChange:
+                gamePacketHandler.handleRoomAllowBattlemonChangePacket(connection, packet);
+                break;
+
+            case PacketID.C2SRoomQuickSlotChange:
+                gamePacketHandler.handleRoomQuickSlotChangePacket(connection, packet);
+                break;
+
             case PacketID.C2SRoomJoin:
                 gamePacketHandler.handleRoomJoinRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SRoomLeave:
+                gamePacketHandler.handleRoomLeaveRequestPacket(connection, packet);
                 break;
 
             case PacketID.C2SRoomReadyChange:
@@ -184,6 +216,9 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleRoomStartGamePacket(connection, packet);
                 break;
 
+            case PacketID.C2SRoomCreateQuick:
+                gamePacketHandler.handleRoomCreateQuickRequestPacket(connection, packet);
+                
             case PacketID.C2SRoomListReq:
                 gamePacketHandler.handleRoomListRequestPacket(connection, packet);
                 break;
