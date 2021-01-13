@@ -31,4 +31,5 @@ public class Room {
     private int ball;
     private String password;
     private List<RoomPlayer> roomPlayerList;
+    private int status;
 }

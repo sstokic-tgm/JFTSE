@@ -49,8 +49,14 @@ public final class PacketID {
     public final static char S2CRoomInformation = 0x177A;
 
     public final static char C2SRoomReadyChange = 0x1775;
-    public final static char C2SRoomStartGame = 0x177B;
-    public final static char C2SGameAnimationLoop = 0x17DD;
+    public final static char C2SRoomTriggerStartGame = 0x177B;
+
+    // Not really sure what this does but it let the annoying "Starting game..." window disappear for room master
+    public final static char S2CRoomStartGameAck = 0x17e6;
+    public final static char S2CRoomStartGameCancelled = 0x17f3;
+    public final static char S2CRoomStartGame = 0x17de;
+    public final static char C2SGameAnimationSkipReady = 0x17DD;
+
     public final static char C2SRoomPositionChange = 0x1785;
     public final static char S2CRoomPositionChangeAnswer = 0x1786;
     public final static char C2SRoomMapChange = 0x1788;

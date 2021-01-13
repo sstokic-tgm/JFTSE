@@ -212,7 +212,7 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleRoomSlotCloseRequestPacket(connection, packet);
                 break;
 
-            case PacketID.C2SRoomStartGame:
+            case PacketID.C2SRoomTriggerStartGame:
                 gamePacketHandler.handleRoomStartGamePacket(connection, packet);
                 break;
 
@@ -222,6 +222,9 @@ public class GameServerNetworkListener implements ConnectionListener {
 
             case PacketID.C2SRoomListReq:
                 gamePacketHandler.handleRoomListRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGameAnimationSkipReady:
                 break;
 
             case PacketID.C2SHeartbeat:

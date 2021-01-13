@@ -18,6 +18,7 @@ import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.ft.emulator.server.database.model.pocket.PlayerPocket;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.database.model.tutorial.TutorialProgress;
+import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
@@ -1099,7 +1100,51 @@ public class GamePacketHandler {
     }
 
     public void handleRoomStartGamePacket(Connection connection, Packet packet) {
-        Packet p1 = new Packet((char) 0x177C);
+        Room room = connection.getClient().getActiveRoom();
+        if (room.getStatus() == RoomStatus.StartingGame) {
+            Packet roomStartGameAck = new Packet(PacketID.S2CRoomStartGameAck);
+            roomStartGameAck.write((char) 0);
+            connection.sendTCP(roomStartGameAck);
+            room.setStatus(RoomStatus.StartCancelled);
+            return;
+        }
+
+        room.setStatus(RoomStatus.StartingGame);
+
+        Thread thread = new Thread(() -> {
+            int secondsToCount = 5;
+            for (int i = 0; i < secondsToCount; i++) {
+                Room threadRoom = connection.getClient().getActiveRoom();
+                List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom()
+                    .getRoomPlayerList().stream().filter(x -> !x.isMaster()).collect(Collectors.toList());
+                boolean allReady = roomPlayerList.stream().allMatch(x -> x.isReady());
+                if (!allReady || threadRoom.getStatus() == RoomStatus.StartCancelled) {
+                    threadRoom.setStatus(RoomStatus.Idle);
+                    Packet startGameCancelledPacket = new Packet(PacketID.S2CRoomStartGameCancelled);
+                    startGameCancelledPacket.write((char) 0);
+                    this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(startGameCancelledPacket));
+                    return;
+                }
+
+                String message = String.format("Game starting in %s...", secondsToCount - i);
+                S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", message);
+                this.gameHandler.getClientsInRoom(threadRoom.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
+            startGamePacket.write((char) 0);
+            room.setStatus(RoomStatus.InGame);
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
+                .forEach(c -> c.getConnection().sendTCP(startGamePacket));
+        });
+        thread.start();
+
+        Packet p1 = new Packet(PacketID.S2CRoomStartGameAck);
         p1.write((char) 0);
         connection.sendTCP(p1);
     }
