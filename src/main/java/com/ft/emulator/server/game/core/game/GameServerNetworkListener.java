@@ -228,6 +228,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleGameAnimationReadyToSkipPacket(connection, packet);
                 break;
 
+            case PacketID.C2SGameAnimationSkipTriggered:
+                gamePacketHandler.handleGameAnimationSkipTriggeredPacket(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..

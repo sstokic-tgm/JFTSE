@@ -1148,8 +1148,37 @@ public class GamePacketHandler {
     }
 
     public void handleGameAnimationReadyToSkipPacket(Connection connection, Packet packet) {
+        Player player = connection.getClient().getActivePlayer();
+        Room room = connection.getClient().getActiveRoom();
+        room.getRoomPlayerList().stream()
+            .filter(x -> x.getPlayer().getId().equals(player.getId()))
+            .findFirst().ifPresent(rp -> rp.setGameAnimationSkipReady(true));
+        boolean allPlayerCanSkipAnimation = connection.getClient().getActiveRoom()
+                .getRoomPlayerList().stream().allMatch(x -> x.isGameAnimationSkipReady());
+
+        if (allPlayerCanSkipAnimation) {
+            Packet gameAnimationAllowSkipPacket = new Packet(PacketID.S2CGameAnimationAllowSkip);
+            gameAnimationAllowSkipPacket.write((char) 0);
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
+                .forEach(c -> c.getConnection().sendTCP(gameAnimationAllowSkipPacket));
+        }
+    }
+
+    public  void handleGameAnimationSkipTriggeredPacket(Connection connection, Packet packet) {
+        Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
+        gameAnimationSkipPacket.write((char) 0);
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
+            .forEach(c -> c.getConnection().sendTCP(gameAnimationSkipPacket));
+
+//        As of giving connection infos to clients 0x3EA is the packet you need, the structure of it is the host, port and player id's
+//        Were the clients connect must be a "new server" because it's for the tcp relay logic
+//        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+//        List<Long> playerIds = roomPlayerList.stream().map(x -> x.getPlayer().getId()).collect(Collectors.toList());
+//
 //        Packet gameTcpServerData = new Packet(PacketID.S2CGameTcpServerData);
-//        gameTcpServerData.write((char) 0);
+//        gameTcpServerData.write("localhost");
+//        gameTcpServerData.write(5894);
+//        gameTcpServerData.write(playerIds);
 //        connection.sendTCP(gameTcpServerData);
     }
 
