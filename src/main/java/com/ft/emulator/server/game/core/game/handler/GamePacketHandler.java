@@ -67,6 +67,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -969,8 +970,8 @@ public class GamePacketHandler {
                 .get();
 
         List<Short> usedPositions = room.getRoomPlayerList().stream().map(RoomPlayer::getPosition).collect(Collectors.toList());
-        short newPosition = (short) (usedPositions.get(usedPositions.size() - 1) + 1);
-        newPosition = newPosition == 4 ? (short) (newPosition + 1) : newPosition;
+
+        short newPosition = findFirstFreePositionInRoom(usedPositions, room);
 
         RoomPlayer roomPlayer = new RoomPlayer();
         roomPlayer.setPlayer(connection.getClient().getActivePlayer());
@@ -1353,5 +1354,35 @@ public class GamePacketHandler {
         }
 
         return room.getMode();
+    }
+
+    private short findFirstFreePositionInRoom(List<Short> usedPositions, Room room) {
+        short maxPositionIndex = 8;
+        byte players = room.getPlayers();
+
+        List<Short> copiedUsedPositions = new ArrayList<Short>(usedPositions);
+        copiedUsedPositions.add((short) 4);
+        if (players == 2){
+            copiedUsedPositions.add((short) 2);
+            copiedUsedPositions.add((short) 3);
+        }
+
+        short currentPosition = 0;
+        Collections.sort(copiedUsedPositions);
+        for (short usedPosition : copiedUsedPositions) {
+            if (currentPosition == usedPosition) {
+                currentPosition++;
+                continue;
+            }
+
+            if (currentPosition > maxPositionIndex) {
+                // TODO: In this case player shouldn't be allowed to enter room, because it's full
+                return -1;
+            }
+
+            return currentPosition;
+        }
+
+        return currentPosition;
     }
 }
