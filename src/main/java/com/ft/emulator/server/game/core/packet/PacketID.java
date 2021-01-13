@@ -56,6 +56,7 @@ public final class PacketID {
     public final static char S2CRoomStartGameCancelled = 0x17f3;
     public final static char S2CRoomStartGame = 0x17de;
     public final static char C2SGameAnimationSkipReady = 0x17DD;
+    public final static char S2CGameTcpServerData = 0x3EA;
 
     public final static char C2SRoomPositionChange = 0x1785;
     public final static char S2CRoomPositionChangeAnswer = 0x1786;

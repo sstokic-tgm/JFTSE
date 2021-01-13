@@ -1100,10 +1100,11 @@ public class GamePacketHandler {
     }
 
     public void handleRoomStartGamePacket(Connection connection, Packet packet) {
+        Packet roomStartGameAck = new Packet(PacketID.S2CRoomStartGameAck);
+        roomStartGameAck.write((char) 0);
+
         Room room = connection.getClient().getActiveRoom();
         if (room.getStatus() == RoomStatus.StartingGame) {
-            Packet roomStartGameAck = new Packet(PacketID.S2CRoomStartGameAck);
-            roomStartGameAck.write((char) 0);
             connection.sendTCP(roomStartGameAck);
             room.setStatus(RoomStatus.StartCancelled);
             return;
@@ -1143,10 +1144,13 @@ public class GamePacketHandler {
                 .forEach(c -> c.getConnection().sendTCP(startGamePacket));
         });
         thread.start();
+        connection.sendTCP(roomStartGameAck);
+    }
 
-        Packet p1 = new Packet(PacketID.S2CRoomStartGameAck);
-        p1.write((char) 0);
-        connection.sendTCP(p1);
+    public void handleGameAnimationReadyToSkipPacket(Connection connection, Packet packet) {
+//        Packet gameTcpServerData = new Packet(PacketID.S2CGameTcpServerData);
+//        gameTcpServerData.write((char) 0);
+//        connection.sendTCP(gameTcpServerData);
     }
 
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {
