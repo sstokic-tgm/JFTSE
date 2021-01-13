@@ -996,18 +996,10 @@ public class GamePacketHandler {
     }
 
     public void handleRoomLeaveRequestPacket(Connection connection, Packet packet) {
-        Room room = connection.getClient().getActiveRoom();
-        Player player = connection.getClient().getActivePlayer();
-        Optional<RoomPlayer> roomPlayer = room.getRoomPlayerList().stream().filter(x -> x.getPlayer().getId().equals(player.getId())).findFirst();
-        room.getRoomPlayerList().removeIf(x -> x.getPlayer().getId().equals(player.getId()));
-        connection.getClient().setInLobby(true);
-
+        handleRoomPlayerChanges(connection);
         Packet answerPacket = new Packet((char) PacketID.S2CRoomLeaveAnswer);
         answerPacket.write(0);
         connection.sendTCP(answerPacket);
-
-        S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, roomPlayer.get().getPosition(), (short) -1);
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
     }
 
     public void handleRoomReadyChangeRequestPacket(Connection connection, Packet packet) {
@@ -1316,9 +1308,11 @@ public class GamePacketHandler {
     private void handleRoomPlayerChanges(Connection connection) {
         if (connection.getClient().getActiveRoom() != null) {
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
-            boolean isMaster = roomPlayerList.stream()
-                    .anyMatch(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && rp.isMaster());
+            Optional<RoomPlayer> roomPlayer = roomPlayerList.stream()
+                    .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId())).findFirst();
 
+            final short playerPosition = roomPlayer.get().getPosition();
+            boolean isMaster = roomPlayer.isPresent() && roomPlayer.get().isMaster();
             roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
             if (isMaster) {
                 roomPlayerList.stream()
@@ -1338,6 +1332,9 @@ public class GamePacketHandler {
 
             S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
             this.gameHandler.getClientsInLobby().forEach(c -> c.getConnection().sendTCP(roomListAnswerPacket));
+
+            S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) -1);
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
 
             connection.getClient().setActiveRoom(null);
         }
