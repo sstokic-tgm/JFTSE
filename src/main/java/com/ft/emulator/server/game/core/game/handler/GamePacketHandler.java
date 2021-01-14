@@ -812,9 +812,7 @@ public class GamePacketHandler {
             handleRoomPlayerChanges(connection);
         }
 
-        this.gameHandler.getClientsInLobby().forEach(c -> {
-            this.refreshLobbyPlayerList(c);
-        });
+        this.refreshLobbyPlayerListForAllClients();
     }
 
     public void handleEmblemListRequestPacket(Connection connection, Packet packet) {
@@ -1009,6 +1007,7 @@ public class GamePacketHandler {
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(room.getRoomPlayerList());
         this.gameHandler.getClientsInRoom(roomJoinRequestPacket.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
         this.updateRoomForAllPlayersInMultiplayer(connection, room);
+        this.refreshLobbyPlayerListForAllClients();
     }
 
     public void handleRoomLeaveRequestPacket(Connection connection, Packet packet) {
@@ -1087,6 +1086,7 @@ public class GamePacketHandler {
         }
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(connection.getClient().getActiveRoom().getRoomPlayerList());
         this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+        this.refreshLobbyRoomListForAllClients(connection, getRoomMode(connection.getClient().getActiveRoom()));
     }
 
     public void handleRoomSlotCloseRequestPacket(Connection connection, Packet packet) {
@@ -1304,6 +1304,7 @@ public class GamePacketHandler {
         connection.sendTCP(roomPlayerInformationPacket);
 
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(room));
+        this.refreshLobbyPlayerListForAllClients();
     }
 
     private void refreshLobbyRoomListForAllClients(Connection connection, int gameMode) {
@@ -1314,19 +1315,19 @@ public class GamePacketHandler {
             boolean shouldRoomBeDisplayed = c.getLobbyGameModeTabFilter() == GameMode.ALL ? true : clientRoomModeFilter == gameMode;
             if (isNotActivePlayer && shouldRoomBeDisplayed)
                 c.getConnection().sendTCP(roomListAnswerPacket);
-
-            this.refreshLobbyPlayerList(c);
         });
     }
 
-    private void refreshLobbyPlayerList(Client client) {
-        byte currentPage = client.getLobbyCurrentPlayerListPage();
-        List<Player> lobbyPlayerList = this.gameHandler.getPlayersInLobby().stream()
-                .skip(currentPage == 1 ? 0 : (currentPage * 10) - 10)
-                .limit(10)
-                .collect(Collectors.toList());
-        S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
-        client.getConnection().sendTCP(lobbyUserListAnswerPacket);
+    private void refreshLobbyPlayerListForAllClients() {
+        this.gameHandler.getClientsInLobby().forEach(c -> {
+            byte currentPage = c.getLobbyCurrentPlayerListPage();
+            List<Player> lobbyPlayerList = this.gameHandler.getPlayersInLobby().stream()
+                    .skip(currentPage == 1 ? 0 : (currentPage * 10) - 10)
+                    .limit(10)
+                    .collect(Collectors.toList());
+            S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
+            c.getConnection().sendTCP(lobbyUserListAnswerPacket);
+        });
     }
 
     private void handleRoomPlayerChanges(Connection connection) {
