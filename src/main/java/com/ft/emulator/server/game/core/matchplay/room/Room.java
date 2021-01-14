@@ -1,9 +1,11 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
+import com.ft.emulator.server.game.core.constants.RoomPositionState;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -11,6 +13,13 @@ import java.util.List;
 public class Room {
     public Room() {
         roomPlayerList = new ArrayList<>();
+        positions = Arrays.asList(new Short[]{
+                RoomPositionState.Free, RoomPositionState.Free,
+                RoomPositionState.Free, RoomPositionState.Free,
+                RoomPositionState.Locked, RoomPositionState.Free,
+                RoomPositionState.Free, RoomPositionState.Free,
+                RoomPositionState.Free
+        });
     }
 
     private short roomId;
@@ -31,4 +40,6 @@ public class Room {
     private int ball;
     private String password;
     private List<RoomPlayer> roomPlayerList;
+    private List<Short> positions;
+    private int status;
 }

@@ -13,6 +13,7 @@ public class S2CRoomListAnswerPacket extends Packet {
 
         this.write((char) roomList.size());
         for (Room room : roomList) {
+            int nonSpectatorPlayerCount = (int) room.getRoomPlayerList().stream().filter(x -> x.getPosition() < 4).count();
             this.write(room.getRoomId());
             this.write(room.getRoomName());
             this.write(room.getAllowBattlemon());
@@ -30,7 +31,7 @@ public class S2CRoomListAnswerPacket extends Packet {
             this.write(room.getMap());
             this.write(room.isSkillFree());
             this.write(room.isQuickSlot());
-            this.write(BitKit.fromUnsignedInt(room.getRoomPlayerList().size()));
+            this.write(BitKit.fromUnsignedInt(nonSpectatorPlayerCount));
             this.write((byte) 0); // ?
             this.write((byte) 0); // ?
         }

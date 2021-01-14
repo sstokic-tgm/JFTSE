@@ -16,4 +16,5 @@ public class RoomPlayer {
     private boolean master;
     private boolean ready;
     private boolean fitting;
+    private boolean gameAnimationSkipReady;
 }
