@@ -970,9 +970,8 @@ public class GamePacketHandler {
 
         boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
         if (!anyPositionAvailable) {
-            // TODO: Return correct tcp packet. This is a workaround.
-            S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 2, room.getRoomName(), "The room is full");
-            connection.sendTCP(chatLobbyAnswerPacket);
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -1, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
             return;
         }
 
