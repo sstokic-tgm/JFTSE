@@ -18,6 +18,7 @@ import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.ft.emulator.server.database.model.pocket.PlayerPocket;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.database.model.tutorial.TutorialProgress;
+import com.ft.emulator.server.game.core.constants.RoomPositionState;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
@@ -64,10 +65,8 @@ import com.ft.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
-
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -969,15 +968,23 @@ public class GamePacketHandler {
                 .findAny()
                 .get();
 
-        List<Short> usedPositions = room.getRoomPlayerList().stream().map(RoomPlayer::getPosition).collect(Collectors.toList());
+        boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
+        if (!anyPositionAvailable) {
+            // TODO: Return correct tcp packet. This is a workaround.
+            S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 2, room.getRoomName(), "The room is full");
+            connection.sendTCP(chatLobbyAnswerPacket);
+            return;
+        }
 
-        short newPosition = findFirstFreePositionInRoom(usedPositions, room);
+        Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
+        int newPosition = room.getPositions().indexOf(num.get());
+        room.getPositions().set(newPosition, RoomPositionState.InUse);
 
         RoomPlayer roomPlayer = new RoomPlayer();
         roomPlayer.setPlayer(connection.getClient().getActivePlayer());
         roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
         roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
-        roomPlayer.setPosition(newPosition);
+        roomPlayer.setPosition((short) newPosition);
         roomPlayer.setMaster(false);
         roomPlayer.setFitting(false);
         room.getRoomPlayerList().add(roomPlayer);
@@ -990,6 +997,15 @@ public class GamePacketHandler {
 
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
         connection.sendTCP(roomInformationPacket);
+
+        List<Short> positions = room.getPositions();
+        for (int i = 0; i < positions.size(); i++) {
+            short positionState = room.getPositions().get(i);
+            if (positionState == RoomPositionState.Locked) {
+                S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
+                connection.sendTCP(roomSlotCloseAnswerPacket);
+            }
+        }
 
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(room.getRoomPlayerList());
         this.gameHandler.getClientsInRoom(roomJoinRequestPacket.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
@@ -1041,20 +1057,15 @@ public class GamePacketHandler {
                 connection.getClient().getActiveRoom().getRoomPlayerList().forEach(rp -> {
                     if (rp.getPlayer().getId().equals(requestingSlotChangePlayer.getPlayer().getId()) && rp.getPosition() != position) {
                         rp.setPosition(position);
-
-                        S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, requestingSlotChangePlayerOldPosition, rp.getPosition());
-                        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
+                        internalHandleRoomPositionChange(connection, requestingSlotChangePlayerOldPosition, rp.getPosition());
                     }
                     else if (!rp.getPlayer().getId().equals(requestingSlotChangePlayer.getPlayer().getId()) && rp.getPosition() == position) {
                         short otherSlotChangePlayerOldPosition = rp.getPosition();
                         rp.setPosition(requestingSlotChangePlayerOldPosition);
-
-                        S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, otherSlotChangePlayerOldPosition, requestingSlotChangePlayerOldPosition);
-                        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
+                        internalHandleRoomPositionChange(connection, otherSlotChangePlayerOldPosition, requestingSlotChangePlayerOldPosition);
 
                         requestingSlotChangePlayer.setPosition(position);
-                        S2CRoomPositionChangeAnswerPacket requestingSlotChangePlayerRoomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, requestingSlotChangePlayerOldPosition, requestingSlotChangePlayer.getPosition());
-                        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(requestingSlotChangePlayerRoomPositionChangeAnswerPacket));
+                        internalHandleRoomPositionChange(connection, requestingSlotChangePlayerOldPosition, requestingSlotChangePlayer.getPosition());
                     }
                 });
                 connection.getClient().getActiveRoom().getRoomPlayerList().forEach(rp -> {
@@ -1066,15 +1077,11 @@ public class GamePacketHandler {
                 connection.getClient().getActiveRoom().getRoomPlayerList().forEach(rp -> {
                     if (rp.getPlayer().getId().equals(requestingSlotChangePlayer.getPlayer().getId()) && rp.getPosition() != position) {
                         rp.setPosition(position);
-
-                        S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, requestingSlotChangePlayerOldPosition, rp.getPosition());
-                        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
+                        internalHandleRoomPositionChange(connection, requestingSlotChangePlayerOldPosition, rp.getPosition());
                     }
                     else if (!rp.getPlayer().getId().equals(requestingSlotChangePlayer.getPlayer().getId()) && rp.getPosition() == position) {
                         rp.setPosition(requestingSlotChangePlayerOldPosition);
-
-                        S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, requestingSlotChangePlayerOldPosition, rp.getPosition());
-                        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
+                        internalHandleRoomPositionChange(connection, requestingSlotChangePlayerOldPosition, rp.getPosition());
                     }
                 });
             }
@@ -1085,11 +1092,13 @@ public class GamePacketHandler {
 
     public void handleRoomSlotCloseRequestPacket(Connection connection, Packet packet) {
         C2SRoomSlotCloseRequestPacket roomSlotCloseRequestPacket = new C2SRoomSlotCloseRequestPacket(packet);
-        byte slot = roomSlotCloseRequestPacket.getSlot();
         boolean deactivate = roomSlotCloseRequestPacket.isDeactivate();
 
+        byte slot = roomSlotCloseRequestPacket.getSlot();
+        connection.getClient().getActiveRoom().getPositions().set(slot, deactivate ? RoomPositionState.Locked : RoomPositionState.Free);
+
         S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket(slot, deactivate);
-        connection.sendTCP(roomSlotCloseAnswerPacket);
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomSlotCloseAnswerPacket));
     }
 
     public void handleRoomStartGamePacket(Connection connection, Packet packet) {
@@ -1257,7 +1266,22 @@ public class GamePacketHandler {
         connection.sendTCP(unknownAnswer);
     }
 
+    private void internalHandleRoomPositionChange(Connection connection, short oldPosition, short newPosition) {
+        Room room = connection.getClient().getActiveRoom();
+        room.getPositions().set(oldPosition, RoomPositionState.Free);
+        room.getPositions().set(newPosition, RoomPositionState.InUse);
+        S2CRoomPositionChangeAnswerPacket roomPositionChangePacket = new S2CRoomPositionChangeAnswerPacket((char) 0, oldPosition, newPosition);
+        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangePacket));
+    }
+
     private void internalHandleRoomCreate(Connection connection, Room room) {
+        room.getPositions().set(0, RoomPositionState.InUse);
+
+        byte players = room.getPlayers();
+        if (players == 2) {
+            room.getPositions().set(2, RoomPositionState.Locked);
+            room.getPositions().set(3, RoomPositionState.Locked);
+        }
         RoomPlayer roomPlayer = new RoomPlayer();
         roomPlayer.setPlayer(connection.getClient().getActivePlayer());
         roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
@@ -1322,6 +1346,7 @@ public class GamePacketHandler {
                         .ifPresent(rp -> rp.setMaster(true));
             }
             connection.getClient().getActiveRoom().setRoomPlayerList(roomPlayerList);
+            connection.getClient().getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Free);
 
             this.gameHandler.getRoomList().removeIf(r -> r.getRoomPlayerList().isEmpty());
 
@@ -1354,35 +1379,5 @@ public class GamePacketHandler {
         }
 
         return room.getMode();
-    }
-
-    private short findFirstFreePositionInRoom(List<Short> usedPositions, Room room) {
-        short maxPositionIndex = 8;
-        byte players = room.getPlayers();
-
-        List<Short> copiedUsedPositions = new ArrayList<Short>(usedPositions);
-        copiedUsedPositions.add((short) 4);
-        if (players == 2){
-            copiedUsedPositions.add((short) 2);
-            copiedUsedPositions.add((short) 3);
-        }
-
-        short currentPosition = 0;
-        Collections.sort(copiedUsedPositions);
-        for (short usedPosition : copiedUsedPositions) {
-            if (currentPosition == usedPosition) {
-                currentPosition++;
-                continue;
-            }
-
-            if (currentPosition > maxPositionIndex) {
-                // TODO: In this case player shouldn't be allowed to enter room, because it's full
-                return -1;
-            }
-
-            return currentPosition;
-        }
-
-        return currentPosition;
     }
 }
