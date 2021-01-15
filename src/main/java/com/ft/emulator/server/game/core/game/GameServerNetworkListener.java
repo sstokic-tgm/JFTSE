@@ -1,8 +1,6 @@
 package com.ft.emulator.server.game.core.game;
 
 import com.ft.emulator.server.game.core.game.handler.GamePacketHandler;
-import com.ft.emulator.server.game.core.game.handler.MatchplayPacketHandler;
-import com.ft.emulator.server.game.core.packet.MatchplayPacketID;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.ConnectionListener;
@@ -13,12 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Log4j2
 public class GameServerNetworkListener implements ConnectionListener {
-
     @Autowired
     private GamePacketHandler gamePacketHandler;
-
-    @Autowired
-    private MatchplayPacketHandler matchplayPacketHandler;
 
     public void connected(Connection connection) {
 
@@ -235,10 +229,6 @@ public class GameServerNetworkListener implements ConnectionListener {
 
             case PacketID.C2SGameAnimationSkipTriggered:
                 gamePacketHandler.handleGameAnimationSkipTriggeredPacket(connection, packet);
-                break;
-
-            case MatchplayPacketID.C2SRelayPacketToAllClients:
-                matchplayPacketHandler.handleRelayPacketToAllClientsRequest(packet);
                 break;
 
             case PacketID.C2SHeartbeat:

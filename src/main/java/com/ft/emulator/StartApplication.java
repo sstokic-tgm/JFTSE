@@ -2,6 +2,7 @@ package com.ft.emulator;
 
 import com.ft.emulator.server.game.core.auth.AuthenticationServerNetworkListener;
 import com.ft.emulator.server.game.core.game.GameServerNetworkListener;
+import com.ft.emulator.server.game.core.game.RelayServerNetworkListener;
 import com.ft.emulator.server.networking.Server;
 import com.ft.emulator.server.shared.module.checker.AuthServerChecker;
 import com.ft.emulator.server.shared.module.checker.GameServerChecker;
@@ -67,24 +68,24 @@ public class StartApplication {
         log.info("Successfully initialized!");
         log.info("--------------------------------------");
 
-        log.info("Initializing game session server...");
-        GameServerNetworkListener gameSessionServerNetworkListener = new GameServerNetworkListener();
+        log.info("Initializing relay server...");
+        RelayServerNetworkListener relayServerNetworkListener = new RelayServerNetworkListener();
         // post dependency injection for this class
-        ctx.getBeanFactory().autowireBean(gameServerNetworkListener);
+        ctx.getBeanFactory().autowireBean(relayServerNetworkListener);
 
-        Server gameSessionServer = new Server();
-        gameSessionServer.addListener(gameServerNetworkListener);
+        Server relayServer = new Server();
+        relayServer.addListener(relayServerNetworkListener);
 
         try {
-            gameSessionServer.bind(5896);
+            relayServer.bind(5896);
         }
         catch (IOException ioe) {
-            log.error("Failed to start game server!");
+            log.error("Failed to start relay server!");
             ioe.printStackTrace();
             ctx.close();
             System.exit(1);
         }
-        gameSessionServer.start("game session server");
+        relayServer.start("relay server");
 
         log.info("Successfully initialized!");
         log.info("--------------------------------------");
@@ -95,7 +96,7 @@ public class StartApplication {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
         executor.scheduleWithFixedDelay(new GameServerChecker(gameServer), 0, 5, TimeUnit.MINUTES);
-        executor.scheduleWithFixedDelay(new GameServerChecker(gameSessionServer), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new GameServerChecker(relayServer), 0, 5, TimeUnit.MINUTES);
 
         Scanner scan = new Scanner(System.in);
         String input;
@@ -113,7 +114,7 @@ public class StartApplication {
         try {
             authenticationServer.dispose();
             gameServer.dispose();
-            gameSessionServer.dispose();
+            relayServer.dispose();
         }
         catch (IOException ioe) {
             log.error(ioe.getMessage());
