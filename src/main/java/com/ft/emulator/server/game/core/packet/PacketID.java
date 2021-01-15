@@ -59,7 +59,9 @@ public final class PacketID {
     public final static char S2CGameAnimationAllowSkip = 0x17E0;
     public final static char C2SGameAnimationSkipTriggered = 0x17e1;
     public final static char S2CGameAnimationSkip = 0x17e2;
+    public final static char S2CGameDisplayPlayerStats = 0x17E4;
     public final static char S2CGameTcpServerData = 0x3EA;
+    public final static char C2SGameServerConnectionProblem = 0x3f1;
 
     public final static char C2SRoomPositionChange = 0x1785;
     public final static char S2CRoomPositionChangeAnswer = 0x1786;

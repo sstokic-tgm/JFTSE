@@ -67,12 +67,35 @@ public class StartApplication {
         log.info("Successfully initialized!");
         log.info("--------------------------------------");
 
+        log.info("Initializing game session server...");
+        GameServerNetworkListener gameSessionServerNetworkListener = new GameServerNetworkListener();
+        // post dependency injection for this class
+        ctx.getBeanFactory().autowireBean(gameServerNetworkListener);
+
+        Server gameSessionServer = new Server();
+        gameSessionServer.addListener(gameServerNetworkListener);
+
+        try {
+            gameSessionServer.bind(5896);
+        }
+        catch (IOException ioe) {
+            log.error("Failed to start game server!");
+            ioe.printStackTrace();
+            ctx.close();
+            System.exit(1);
+        }
+        gameSessionServer.start("game session server");
+
+        log.info("Successfully initialized!");
+        log.info("--------------------------------------");
+
         log.info("Emulator successfully started!");
         log.info("Write exit and confirm with enter to stop the emulator!");
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
         executor.scheduleWithFixedDelay(new GameServerChecker(gameServer), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new GameServerChecker(gameSessionServer), 0, 5, TimeUnit.MINUTES);
 
         Scanner scan = new Scanner(System.in);
         String input;
@@ -90,6 +113,7 @@ public class StartApplication {
         try {
             authenticationServer.dispose();
             gameServer.dispose();
+            gameSessionServer.dispose();
         }
         catch (IOException ioe) {
             log.error(ioe.getMessage());
