@@ -1163,6 +1163,10 @@ public class GamePacketHandler {
 
         Packet playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
         sendPacketToAllInRoom(connection, playerStatsPacket);
+
+        Room room = connection.getClient().getActiveRoom();
+        S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room);
+        sendPacketToAllInRoom(connection, gameNetworkSettings);
     }
 
     private void sendPacketToAllInRoom(Connection connection, Packet packet) {

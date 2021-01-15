@@ -53,6 +53,7 @@ public final class PacketID {
 
     // Not really sure what this does but it let the annoying "Starting game..." window disappear for room master
     public final static char S2CRoomStartGameAck = 0x17e6;
+
     public final static char S2CRoomStartGameCancelled = 0x17f3;
     public final static char S2CRoomStartGame = 0x17de;
     public final static char C2SGameAnimationSkipReady = 0x17DD;
@@ -60,7 +61,7 @@ public final class PacketID {
     public final static char C2SGameAnimationSkipTriggered = 0x17e1;
     public final static char S2CGameAnimationSkip = 0x17e2;
     public final static char S2CGameDisplayPlayerStats = 0x17E4;
-    public final static char S2CGameTcpServerData = 0x3EA;
+    public final static char S2CGameNetworkSettings = 0x3EA;
     public final static char C2SGameServerConnectionProblem = 0x3f1;
 
     public final static char C2SRoomPositionChange = 0x1785;
