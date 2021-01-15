@@ -1188,7 +1188,7 @@ public class GamePacketHandler {
             S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room);
             sendPacketToAllInRoom(connection, gameNetworkSettings);
 
-            S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(roomPlayer.get());
+            S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe();
             sendPacketToAllInRoom(connection, matchplayTriggerServe);
         });
         thread.start();
