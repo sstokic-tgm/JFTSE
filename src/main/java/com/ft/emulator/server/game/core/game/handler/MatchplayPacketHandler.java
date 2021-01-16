@@ -90,7 +90,7 @@ public class MatchplayPacketHandler {
     }
 
     private void sendPacketToAllClientInSameGameSession(Connection connection, Packet packet) {
-        List<Client> clientList = relayHandler.getClientsInGameSession(connection.getClient());
+        List<Client> clientList = relayHandler.getClientsInGameSession(connection.getClient().getActiveGameSession().getSessionId());
         for (Client client : clientList) {
             if (client.getConnection().getId() == connection.getId()) {
                 continue;

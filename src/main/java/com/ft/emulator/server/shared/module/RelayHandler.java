@@ -31,10 +31,10 @@ public class RelayHandler {
         clientList.remove(client);
     }
 
-    public List<Client> getClientsInGameSession(Client client) {
+    public List<Client> getClientsInGameSession(int sessionId) {
         return clientList.stream()
                 .filter(c -> c.getActiveGameSession() != null
-                          && c.getActiveGameSession().getSessionId() == client.getActiveGameSession().getSessionId())
+                          && c.getActiveGameSession().getSessionId() == sessionId)
                 .collect(Collectors.toList());
     }
 }
