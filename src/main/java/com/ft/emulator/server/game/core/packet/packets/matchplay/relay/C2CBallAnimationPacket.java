@@ -9,7 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 public class C2CBallAnimationPacket extends Packet {
-    private List<Integer> playerIds;
     private short absoluteStartXPositionOnMap;
     private short absoluteStartYPositionOnMap;
     private short absoluteTouchXPositionOnMap;
