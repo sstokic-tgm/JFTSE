@@ -1182,11 +1182,14 @@ public class GamePacketHandler {
 
         Thread thread = new Thread(() -> {
             try {
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.SECONDS.sleep(8);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
+            Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
+            sendPacketToAllInRoom(connection, removeBlackBarsPacket);
+            
             S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe();
             sendPacketToAllInRoom(connection, matchplayTriggerServe);
         });
