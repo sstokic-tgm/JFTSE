@@ -6,6 +6,7 @@ import com.ft.emulator.server.game.core.game.RelayServerNetworkListener;
 import com.ft.emulator.server.networking.Server;
 import com.ft.emulator.server.shared.module.checker.AuthServerChecker;
 import com.ft.emulator.server.shared.module.checker.GameServerChecker;
+import com.ft.emulator.server.shared.module.checker.RelayServerChecker;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -96,7 +97,7 @@ public class StartApplication {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
         executor.scheduleWithFixedDelay(new GameServerChecker(gameServer), 0, 5, TimeUnit.MINUTES);
-        executor.scheduleWithFixedDelay(new GameServerChecker(relayServer), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer), 0, 5, TimeUnit.MINUTES);
 
         Scanner scan = new Scanner(System.in);
         String input;

@@ -9,12 +9,16 @@ import com.ft.emulator.server.shared.module.Client;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.concurrent.TimeUnit;
+
 @Log4j2
 public class RelayServerNetworkListener implements ConnectionListener {
     @Autowired
     private MatchplayPacketHandler matchplayPacketHandler;
 
     public void connected(Connection connection) {
+        long timeout = TimeUnit.MINUTES.toMillis(5);
+        connection.getTcpConnection().setTimeoutMillis((int) timeout);
         Client client = new Client();
         client.setConnection(connection);
 
