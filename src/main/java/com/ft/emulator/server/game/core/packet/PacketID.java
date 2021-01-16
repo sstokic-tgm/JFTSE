@@ -63,7 +63,7 @@ public final class PacketID {
     public final static char S2CGameDisplayPlayerStats = 0x17E4;
     public final static char S2CGameNetworkSettings = 0x3EA;
     public final static char C2SRelayPacketToAllClients = 0x414;
-    public final static char C2SMatchplayPlayerInformation = 0x3ed;
+    public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ed;
     public final static char S2CMatchplayAckPlayerInformation = 0x3EF;
     public final static char S2CMatchplayStartServe = 0x183E;
     public final static char C2SGameServerConnectionProblem = 0x3f1;

@@ -1,4 +1,4 @@
-package com.ft.emulator.server.game.core.packet.packets.multiplay;
+package com.ft.emulator.server.game.core.packet.packets.matchplay;
 
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;

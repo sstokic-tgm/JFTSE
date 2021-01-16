@@ -45,9 +45,9 @@ import com.ft.emulator.server.game.core.packet.packets.lobby.S2CLobbyUserListAns
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
-import com.ft.emulator.server.game.core.packet.packets.multiplay.S2CGameDisplayPlayerStatsPacket;
-import com.ft.emulator.server.game.core.packet.packets.multiplay.S2CGameNetworkSettingsPacket;
-import com.ft.emulator.server.game.core.packet.packets.multiplay.S2CMatchplayTriggerServe;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameNetworkSettingsPacket;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
 import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
 import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerLevelExpPacket;
 import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
@@ -66,7 +66,6 @@ import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
 import com.ft.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.annotation.Transient;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 import java.util.*;
@@ -1134,6 +1133,9 @@ public class GamePacketHandler {
                 }
             }
 
+            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room);
+            sendPacketToAllInRoom(connection, gameNetworkSettings);
+
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
             room.setStatus(RoomStatus.InitializingGame);
@@ -1184,9 +1186,6 @@ public class GamePacketHandler {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room);
-            sendPacketToAllInRoom(connection, gameNetworkSettings);
 
             S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe();
             sendPacketToAllInRoom(connection, matchplayTriggerServe);

@@ -29,6 +29,7 @@ public class RelayServerNetworkListener implements ConnectionListener {
 
     public void disconnected(Connection connection) {
         log.info(String.format("Connection %s is disconnecting", connection.getId()));
+        matchplayPacketHandler.handleDisconnect(connection);
         matchplayPacketHandler.getRelayHandler().removeClient(connection.getClient());
         connection.setClient(null);
         connection.close();
@@ -37,11 +38,11 @@ public class RelayServerNetworkListener implements ConnectionListener {
     public void received(Connection connection, Packet packet) {
         switch (packet.getPacketId()) {
             case PacketID.C2SRelayPacketToAllClients:
-                matchplayPacketHandler.handleRelayPacketToAllClientsRequest(connection, packet);
+                matchplayPacketHandler.handleRelayPacketToClientsInGameSessionRequest(connection, packet);
                 break;
 
-            case PacketID.C2SMatchplayPlayerInformation:
-                matchplayPacketHandler.handlePlayerInformationPacket(connection, packet);
+            case PacketID.C2SMatchplayRegisterPlayerForGameSession:
+                matchplayPacketHandler.handleRegisterPlayerForSession(connection, packet);
                 break;
 
             case PacketID.C2SHeartbeat:
