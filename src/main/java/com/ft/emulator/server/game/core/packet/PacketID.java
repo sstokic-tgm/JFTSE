@@ -25,9 +25,19 @@ public final class PacketID {
     public final static char S2CGameLoginData = 0x106A;
 
     public final static char C2SRoomCreate = 0x1389;
+    public final static char C2SRoomCreateQuick = 0x138f;
     public final static char S2CRoomCreateAnswer = 0x138A;
+    public final static char C2SRoomNameChange = 0x1791;
+    public final static char C2SRoomGameModeChange = 0x18b2;
+    public final static char C2SRoomIsPrivateChange = 0x178e;
+    public final static char C2SRoomLevelRangeChange = 0x178f;
+    public final static char C2SRoomSkillFreeChange = 0x1795;
+    public final static char C2SRoomAllowBattlemonChange = 0x1793;
+    public final static char C2SRoomQuickSlotChange = 0x17a2;
     public final static char C2SRoomJoin = 0x138B;
     public final static char S2CRoomJoinAnswer = 0x138C;
+    public final static char C2SRoomLeave = 0x1771;
+    public final static char S2CRoomLeaveAnswer = 0x1772;
 
     public final static char S2CRoomListAnswer = 0x138E;
     public final static char S2CRoomPlayerInformation = 0x1394;
@@ -39,11 +49,24 @@ public final class PacketID {
     public final static char S2CRoomInformation = 0x177A;
 
     public final static char C2SRoomReadyChange = 0x1775;
-    public final static char C2SRoomStartGame = 0x177B;
+    public final static char C2SRoomTriggerStartGame = 0x177B;
+
+    // Not really sure what this does but it let the annoying "Starting game..." window disappear for room master
+    public final static char S2CRoomStartGameAck = 0x17e6;
+    public final static char S2CRoomStartGameCancelled = 0x17f3;
+    public final static char S2CRoomStartGame = 0x17de;
+    public final static char C2SGameAnimationSkipReady = 0x17DD;
+    public final static char S2CGameAnimationAllowSkip = 0x17E0;
+    public final static char C2SGameAnimationSkipTriggered = 0x17e1;
+    public final static char S2CGameAnimationSkip = 0x17e2;
+    public final static char S2CGameTcpServerData = 0x3EA;
+
     public final static char C2SRoomPositionChange = 0x1785;
     public final static char S2CRoomPositionChangeAnswer = 0x1786;
     public final static char C2SRoomMapChange = 0x1788;
     public final static char S2CRoomMapChangeAnswer = 0x1789;
+    public final static char C2SRoomSlotCloseReq = 0x1D4C;
+    public final static char S2CRoomSlotCloseAnswer = 0x1D4E;
 
     public final static char S2CUnknownRoomJoin = 0x189D;
 
