@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Log4j2
 public class GameServerNetworkListener implements ConnectionListener {
-
     @Autowired
     private GamePacketHandler gamePacketHandler;
 

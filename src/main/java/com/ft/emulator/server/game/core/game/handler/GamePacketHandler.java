@@ -45,6 +45,9 @@ import com.ft.emulator.server.game.core.packet.packets.lobby.S2CLobbyUserListAns
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameNetworkSettingsPacket;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
 import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
 import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerLevelExpPacket;
 import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
@@ -66,6 +69,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -1129,9 +1133,12 @@ public class GamePacketHandler {
                 }
             }
 
+            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room);
+            sendPacketToAllInRoom(connection, gameNetworkSettings);
+
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
-            room.setStatus(RoomStatus.InGame);
+            room.setStatus(RoomStatus.InitializingGame);
             this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
                 .forEach(c -> c.getConnection().sendTCP(startGamePacket));
         });
@@ -1157,21 +1164,41 @@ public class GamePacketHandler {
     }
 
     public  void handleGameAnimationSkipTriggeredPacket(Connection connection, Packet packet) {
+        Room room = connection.getClient().getActiveRoom();
+        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+        Optional<RoomPlayer> roomPlayer = roomPlayerList.stream()
+                .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId())).findFirst();
+        if (room.getStatus() != RoomStatus.InitializingGame) {
+            return;
+        }
+
         Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
         gameAnimationSkipPacket.write((char) 0);
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
-            .forEach(c -> c.getConnection().sendTCP(gameAnimationSkipPacket));
+        sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
 
-//        As of giving connection infos to clients 0x3EA is the packet you need, the structure of it is the host, port and player id's
-//        Were the clients connect must be a "new server" because it's for the tcp relay logic
-//        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
-//        List<Long> playerIds = roomPlayerList.stream().map(x -> x.getPlayer().getId()).collect(Collectors.toList());
-//
-//        Packet gameTcpServerData = new Packet(PacketID.S2CGameTcpServerData);
-//        gameTcpServerData.write("localhost");
-//        gameTcpServerData.write(5894);
-//        gameTcpServerData.write(playerIds);
-//        connection.sendTCP(gameTcpServerData);
+        Packet playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
+        sendPacketToAllInRoom(connection, playerStatsPacket);
+        room.setStatus(RoomStatus.Running);
+
+        Thread thread = new Thread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(8);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
+            sendPacketToAllInRoom(connection, removeBlackBarsPacket);
+            
+            S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe();
+            sendPacketToAllInRoom(connection, matchplayTriggerServe);
+        });
+        thread.start();
+    }
+
+    private void sendPacketToAllInRoom(Connection connection, Packet packet) {
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
+                .forEach(c -> c.getConnection().sendTCP(packet));
     }
 
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {
