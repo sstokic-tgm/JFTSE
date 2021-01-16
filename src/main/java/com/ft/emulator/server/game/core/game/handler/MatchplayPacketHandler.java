@@ -5,6 +5,7 @@ import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.C2SMatchplayPlayerIdsInSessionPacket;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CPlayerAnimationPacket;
 import com.ft.emulator.server.game.core.service.PlayerService;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.List;
 
 @Service
@@ -21,7 +23,6 @@ import java.util.List;
 @Log4j2
 public class MatchplayPacketHandler {
     private final RelayHandler relayHandler;
-
     private final PlayerService playerService;
 
     public RelayHandler getRelayHandler() {
@@ -35,6 +36,18 @@ public class MatchplayPacketHandler {
 
     public void handleRelayPacketToClientsInGameSessionRequest(Connection connection, Packet packet) {
         Packet relayPacket = new Packet(packet.getData());
+        switch (relayPacket.getPacketId()) {
+            case PacketID.C2CBallAnimationPacket:
+                break;
+            case PacketID.C2CPlayerAnimationPacket:
+                C2CPlayerAnimationPacket c2CPlayerAnimationPacket = new C2CPlayerAnimationPacket(packet);
+                Point point = new Point(c2CPlayerAnimationPacket.getAbsoluteXPositionOnMap(), c2CPlayerAnimationPacket.getAbsoluteYPositionOnMap());
+                boolean playerInField = getGameFieldRectangle().contains(point);
+                if (!playerInField) {
+                    log.info("IM OUT");
+                }
+                break;
+        }
         sendPacketToAllClientInSameGameSession(connection, relayPacket);
     }
 
@@ -98,5 +111,9 @@ public class MatchplayPacketHandler {
 
             client.getConnection().sendTCP(packet);
         }
+    }
+
+    private static Rectangle getGameFieldRectangle() {
+        return new Rectangle(new Point(-6300, -12500), new Dimension(12600,25000));
     }
 }
