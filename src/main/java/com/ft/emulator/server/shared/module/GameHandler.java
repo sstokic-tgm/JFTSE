@@ -52,4 +52,8 @@ public class GameHandler {
                 .filter(c -> c.getActiveRoom() != null && c.getActiveRoom().getRoomId() == roomId)
                 .collect(Collectors.toList());
     }
+
+    public Client getClientOfPlayer(long playerId) {
+        return clientList.stream().filter(x -> x.getActivePlayer().getId() == playerId).findFirst().orElse(null);
+    }
 }

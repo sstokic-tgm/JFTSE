@@ -12,11 +12,12 @@ import java.util.List;
 @Setter
 public class GameSession {
     public GameSession() {
-        sessionPlayers = new ArrayList<>();
         clients = new ArrayList<>();
     }
 
     private int sessionId;
-    private List<Player> sessionPlayers;
+    private int lastBallHitByTeam = -1;
+    private long timeLastBallWasHit = -1;
     private List<Client> clients;
+    private Room room;
 }

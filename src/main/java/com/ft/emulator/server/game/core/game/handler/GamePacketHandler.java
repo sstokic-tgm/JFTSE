@@ -1207,11 +1207,6 @@ public class GamePacketHandler {
         thread.start();
     }
 
-    private void sendPacketToAllInRoom(Connection connection, Packet packet) {
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
-                .forEach(c -> c.getConnection().sendTCP(packet));
-    }
-
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {
         C2SRoomListRequestPacket roomListRequestPacket = new C2SRoomListRequestPacket(packet);
         char page = roomListRequestPacket.getPage();
@@ -1412,5 +1407,10 @@ public class GamePacketHandler {
         }
 
         return room.getMode();
+    }
+
+    private void sendPacketToAllInRoom(Connection connection, Packet packet) {
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
+                .forEach(c -> c.getConnection().sendTCP(packet));
     }
 }
