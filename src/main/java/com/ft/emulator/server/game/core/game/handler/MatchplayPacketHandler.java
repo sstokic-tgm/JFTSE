@@ -53,7 +53,7 @@ public class MatchplayPacketHandler {
                 gameSession.setLastBallHitByTeam(ballAnimationPacket.getPlayerPosition());
                 break;
             case PacketID.C2CPlayerAnimationPacket:
-                C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(packet);
+                C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(relayPacket);
                 break;
         }
 
@@ -75,8 +75,8 @@ public class MatchplayPacketHandler {
             GameSession gameSession = new GameSession();
             gameSession.setSessionId(sessionId);
             int playerId = matchplayPlayerIdsInSessionPacket.getPlayerIds().stream().findFirst().orElse(-1);
-            Client playerCLient = gameHandler.getClientOfPlayer(playerId);
-            gameSession.setRoom(playerCLient.getActiveRoom());
+            Client playerClient = gameHandler.getClientOfPlayer(playerId);
+            gameSession.setRoom(playerClient.getActiveRoom());
             gameSession.getClients().add(connection.getClient());
             connection.getClient().setActiveGameSession(gameSession);
             this.relayHandler.getSessionList().add(gameSession);

@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2CPlayerAnimationPacket extends Packet {
+    private char playerPosition;
     private short absoluteXPositionOnMap;
     private short absoluteYPositionOnMap;
     private short relativeXMovement;
@@ -16,7 +17,7 @@ public class C2CPlayerAnimationPacket extends Packet {
     public C2CPlayerAnimationPacket(Packet packet) {
         super(packet);
 
-        this.setReadPosition(this.getReadPosition() + 10); // Unknown bytes
+        this.playerPosition = this.readChar();
         this.absoluteXPositionOnMap = this.readShort();
         this.absoluteYPositionOnMap = this.readShort();
         this.relativeXMovement = this.readShort();

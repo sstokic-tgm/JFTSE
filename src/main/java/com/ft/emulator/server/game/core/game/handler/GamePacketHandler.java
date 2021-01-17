@@ -47,6 +47,7 @@ import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPa
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameNetworkSettingsPacket;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameSetNameColor;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
 import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
 import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerLevelExpPacket;
@@ -1153,7 +1154,7 @@ public class GamePacketHandler {
             .filter(x -> x.getPlayer().getId().equals(player.getId()))
             .findFirst().ifPresent(rp -> rp.setGameAnimationSkipReady(true));
         boolean allPlayerCanSkipAnimation = connection.getClient().getActiveRoom()
-                .getRoomPlayerList().stream().allMatch(x -> x.isGameAnimationSkipReady());
+                .getRoomPlayerList().stream().allMatch(RoomPlayer::isGameAnimationSkipReady);
 
         if (allPlayerCanSkipAnimation) {
             Packet gameAnimationAllowSkipPacket = new Packet(PacketID.S2CGameAnimationAllowSkip);

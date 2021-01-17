@@ -71,7 +71,7 @@ public final class PacketID {
     public final static char S2CMatchplayStartServe = 0x183E;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
-    public final static char C2CPlayerAnimationPacket = 0x32c9;
+    public final static char C2CPlayerAnimationPacket = 0x32C9;
 
     public final static char C2SRoomPositionChange = 0x1785;
     public final static char S2CRoomPositionChangeAnswer = 0x1786;

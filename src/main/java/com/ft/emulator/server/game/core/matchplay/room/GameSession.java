@@ -1,6 +1,5 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
-import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
