@@ -1203,7 +1203,6 @@ public class GamePacketHandler {
             Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
             sendPacketToAllInRoom(connection, removeBlackBarsPacket);
 
-            List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
             for (Client client : clients){
                 RoomPlayer rp = roomPlayerList.stream()
                         .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))

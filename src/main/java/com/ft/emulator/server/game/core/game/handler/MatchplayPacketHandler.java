@@ -54,14 +54,6 @@ public class MatchplayPacketHandler {
                 break;
             case PacketID.C2CPlayerAnimationPacket:
                 C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(packet);
-                if (playerAnimationPacket.getAnimationType() == PlayerAnimation.MissedBall) {
-                    log.info("BALL MISSED!");
-                }
-                Point point = new Point(playerAnimationPacket.getAbsoluteXPositionOnMap(), playerAnimationPacket.getAbsoluteYPositionOnMap());
-                boolean playerInField = getGameFieldRectangle().contains(point);
-                if (!playerInField) {
-                    log.info("IM OUT");
-                }
                 break;
         }
 
