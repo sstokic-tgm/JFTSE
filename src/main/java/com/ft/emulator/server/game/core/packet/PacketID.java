@@ -28,12 +28,12 @@ public final class PacketID {
     public final static char C2SRoomCreateQuick = 0x138f;
     public final static char S2CRoomCreateAnswer = 0x138A;
     public final static char C2SRoomNameChange = 0x1791;
-    public final static char C2SRoomGameModeChange = 0x18b2;
-    public final static char C2SRoomIsPrivateChange = 0x178e;
-    public final static char C2SRoomLevelRangeChange = 0x178f;
+    public final static char C2SRoomGameModeChange = 0x18B2;
+    public final static char C2SRoomIsPrivateChange = 0x178E;
+    public final static char C2SRoomLevelRangeChange = 0x178F;
     public final static char C2SRoomSkillFreeChange = 0x1795;
     public final static char C2SRoomAllowBattlemonChange = 0x1793;
-    public final static char C2SRoomQuickSlotChange = 0x17a2;
+    public final static char C2SRoomQuickSlotChange = 0x17A2;
     public final static char C2SRoomJoin = 0x138B;
     public final static char S2CRoomJoinAnswer = 0x138C;
     public final static char C2SRoomLeave = 0x1771;
@@ -52,23 +52,23 @@ public final class PacketID {
     public final static char C2SRoomTriggerStartGame = 0x177B;
 
     // Not really sure what this does but it let the annoying "Starting game..." window disappear for room master
-    public final static char S2CRoomStartGameAck = 0x17e6;
+    public final static char S2CRoomStartGameAck = 0x17E6;
 
-    public final static char S2CRoomStartGameCancelled = 0x17f3;
-    public final static char S2CRoomStartGame = 0x17de;
+    public final static char S2CRoomStartGameCancelled = 0x17F3;
+    public final static char S2CRoomStartGame = 0x17DE;
     public final static char C2SGameAnimationSkipReady = 0x17DD;
     public final static char S2CGameAnimationAllowSkip = 0x17E0;
-    public final static char C2SGameAnimationSkipTriggered = 0x17e1;
-    public final static char S2CGameAnimationSkip = 0x17e2;
+    public final static char C2SGameAnimationSkipTriggered = 0x17E1;
+    public final static char S2CGameAnimationSkip = 0x17E2;
     public final static char S2CGameDisplayPlayerStats = 0x17E4;
     public final static char S2CGameRemoveBlackBars = 0x183C;
     public final static char S2CGameNetworkSettings = 0x3EA;
     public final static char C2SRelayPacketToAllClients = 0x414;
-    public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ed;
+    public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ED;
     public final static char S2CMatchplayAckPlayerInformation = 0x3EF;
     public final static char S2CMatchplayStartServe = 0x183E;
-    public final static char C2SGameServerConnectionProblem = 0x3f1;
-    public final static char C2CBallAnimationPacket = 0x10e3;
+    public final static char C2SGameServerConnectionProblem = 0x3F1;
+    public final static char C2CBallAnimationPacket = 0x10E3;
     public final static char C2CPlayerAnimationPacket = 0x32c9;
 
     public final static char C2SRoomPositionChange = 0x1785;
