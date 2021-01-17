@@ -1189,9 +1189,20 @@ public class GamePacketHandler {
 
             Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
             sendPacketToAllInRoom(connection, removeBlackBarsPacket);
-            
-            S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe();
-            sendPacketToAllInRoom(connection, matchplayTriggerServe);
+
+            List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
+            for (Client client : clients){
+                RoomPlayer rp = roomPlayerList.stream()
+                        .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                        .findFirst().orElse(null);
+                if (rp == null) {
+                    continue;
+                }
+
+                boolean isMaster = rp.isMaster();  // This is temporary. Will implement more stuff to avoid this
+                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp, rp.getPosition(), isMaster);
+                client.getConnection().sendTCP(matchplayTriggerServe);
+            }
         });
         thread.start();
     }
