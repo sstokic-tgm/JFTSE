@@ -1172,6 +1172,19 @@ public class GamePacketHandler {
             return;
         }
 
+        List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
+        for (Client client : clients){
+            RoomPlayer rp = roomPlayerList.stream()
+                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .findFirst().orElse(null);
+            if (rp == null) {
+                continue;
+            }
+
+            S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(rp);
+            client.getConnection().sendTCP(setNameColorPacket);
+        }
+
         Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
         gameAnimationSkipPacket.write((char) 0);
         sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
