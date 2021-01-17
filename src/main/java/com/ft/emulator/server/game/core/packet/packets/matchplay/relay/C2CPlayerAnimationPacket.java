@@ -4,12 +4,9 @@ import com.ft.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 public class C2CPlayerAnimationPacket extends Packet {
-    private List<Integer> playerIds;
     private short absoluteXPositionOnMap;
     private short absoluteYPositionOnMap;
     private short relativeXMovement;
