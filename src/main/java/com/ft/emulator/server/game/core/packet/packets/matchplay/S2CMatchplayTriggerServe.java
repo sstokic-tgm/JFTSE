@@ -11,6 +11,6 @@ public class S2CMatchplayTriggerServe extends Packet {
         this.write((char) roomPlayer.getPosition());
         this.write(0); // Unk0
         this.write(gameFieldSide);
-        this.write((byte) (serveBall ? 1 : 0));
+        this.write(serveBall);
     }
 }
