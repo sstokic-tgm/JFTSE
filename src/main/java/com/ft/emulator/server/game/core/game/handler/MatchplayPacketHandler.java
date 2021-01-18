@@ -1,8 +1,6 @@
 package com.ft.emulator.server.game.core.game.handler;
 
-import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
-import com.ft.emulator.server.game.core.constants.PlayerAnimation;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
@@ -140,7 +138,20 @@ public class MatchplayPacketHandler {
                 boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
                 boolean shouldServe = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
                         !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
-                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp, rp.getPosition(), shouldServe);
+
+                float playerStartX;
+                float playerStartY = isRedTeam ? -120f : 120f;
+                if (isRedTeam) {
+                    playerStartX = gameSession.getLastRedTeamPlayerStartX() * (-1);
+                    gameSession.setLastRedTeamPlayerStartX(playerStartX);
+                }
+                else {
+                    playerStartX = gameSession.getLastBlueTeamPlayerStartX() * (-1);
+                    gameSession.setLastBlueTeamPlayerStartX(playerStartX);
+                }
+
+                S2CMatchplayTriggerServe matchplayTriggerServe =
+                        new S2CMatchplayTriggerServe(rp, playerStartX, playerStartY, shouldServe);
                 client.getConnection().sendTCP(matchplayTriggerServe);
             }
 

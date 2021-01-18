@@ -1,6 +1,5 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
-import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +15,8 @@ public class GameSession {
     }
 
     private int sessionId;
+    private float lastRedTeamPlayerStartX = 20;
+    private float lastBlueTeamPlayerStartX = -20;
     private int lastBallHitByTeam = -1;
     private long timeLastBallWasHit = -1;
     private List<Client> clients;

@@ -42,6 +42,10 @@ public class BitKit {
         return ByteBuffer.allocate(4).order(ByteOrder.nativeOrder()).putInt(value).array();
     }
 
+    public static byte[] getBytes(float value) {
+        return ByteBuffer.allocate(4).order(ByteOrder.nativeOrder()).putFloat(value).array();
+    }
+
     public static byte[] getBytes(long value) {
         return ByteBuffer.allocate(8).order(ByteOrder.nativeOrder()).putLong(value).array();
     }
