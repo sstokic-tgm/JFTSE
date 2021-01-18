@@ -1155,7 +1155,7 @@ public class GamePacketHandler {
             .filter(x -> x.getPlayer().getId().equals(player.getId()))
             .findFirst().ifPresent(rp -> rp.setGameAnimationSkipReady(true));
         boolean allPlayerCanSkipAnimation = connection.getClient().getActiveRoom()
-                .getRoomPlayerList().stream().allMatch(x -> x.isGameAnimationSkipReady());
+                .getRoomPlayerList().stream().allMatch(RoomPlayer::isGameAnimationSkipReady);
 
         if (allPlayerCanSkipAnimation) {
             Packet gameAnimationAllowSkipPacket = new Packet(PacketID.S2CGameAnimationAllowSkip);
