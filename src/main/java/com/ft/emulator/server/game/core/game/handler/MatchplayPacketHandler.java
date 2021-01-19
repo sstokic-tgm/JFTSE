@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
+import com.ft.emulator.server.game.core.matchplay.ClientPacket;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
@@ -17,14 +18,15 @@ import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
 import com.ft.emulator.server.shared.module.RelayHandler;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -154,18 +156,11 @@ public class MatchplayPacketHandler {
                 }
 
                 boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
-                boolean madePoint = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
-                        !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
-
-                float playerStartX;
-                float playerStartY = isRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
                 if (isRedTeam) {
-                    playerStartX = gameSession.getLastRedTeamPlayerStartX() * (-1);
-                    gameSession.setLastRedTeamPlayerStartX(playerStartX);
+                    gameSession.setRedTeamPlayerStartX(gameSession.getRedTeamPlayerStartX() * (-1));
                 }
                 else {
-                    playerStartX = gameSession.getLastBlueTeamPlayerStartX() * (-1);
-                    gameSession.setLastBlueTeamPlayerStartX(playerStartX);
+                    gameSession.setBlueTeamPlayerStartX(gameSession.getBlueTeamPlayerStartX() * (-1));
                 }
 
                 short winningPlayerPosition = (short) (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ? 0 : 1);
@@ -177,20 +172,51 @@ public class MatchplayPacketHandler {
                     S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
                     client.getConnection().sendTCP(matchplayTeamWinsSet);
                 }
-
-                TimerTask task = new TimerTask() {
-                    public void run() {
-                        S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
-                        client.getConnection().sendTCP(matchplayTriggerServe);
-                    }
-                };
-                Timer timer = new Timer("Timer");
-                timer.schedule(task, TimeUnit.SECONDS.toMillis(8));
             }
+
+            // Lets try to create only one task for the whole session instead for each player.
+            List<ClientPacket> packetsToSend = prepareServePacketsToSend(connection);
+            TimerTask task = new TimerTask() {
+                public void run() {
+                    packetsToSend.forEach(cp -> {
+                        cp.getClient().getConnection().sendTCP(cp.getPacket());
+                    });
+                }
+            };
+            Timer timer = new Timer("PointAnimationTimer");
+            timer.schedule(task, TimeUnit.SECONDS.toMillis(8));
 
             gameSession.setTimeLastBallWasHit(-1);
             gameSession.setLastBallHitByTeam(-1);
         }
+    }
+
+    private List<ClientPacket> prepareServePacketsToSend(Connection connection) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+        List<Client> clients = connection.getClient().getActiveGameSession().getClients();
+        List<ClientPacket> clientPackets = new ArrayList<>();
+        for (Client client : clients) {
+            RoomPlayer rp = roomPlayerList.stream()
+                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .findFirst().orElse(null);
+            if (rp == null) {
+                continue;
+            }
+
+            boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
+            boolean madePoint = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
+                    !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
+            float playerStartX = isRedTeam ? gameSession.getRedTeamPlayerStartX() : gameSession.getBlueTeamPlayerStartX();
+            float playerStartY = isRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
+            S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
+            ClientPacket clientPacket = new ClientPacket();
+            clientPacket.setPacket(matchplayTriggerServe);
+            clientPacket.setClient(client);
+            clientPackets.add(clientPacket);
+        }
+
+        return clientPackets;
     }
 
     private static Rectangle getGameFieldRectangle() {
