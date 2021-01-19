@@ -15,6 +15,8 @@ public class GameSession {
     }
 
     private int sessionId;
+    private float lastRedTeamPlayerStartX = 20;
+    private float lastBlueTeamPlayerStartX = -20;
     private int lastBallHitByTeam = -1;
     private long timeLastBallWasHit = -1;
     private List<Client> clients;

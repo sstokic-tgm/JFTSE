@@ -69,6 +69,7 @@ import com.ft.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -1212,8 +1213,15 @@ public class GamePacketHandler {
                     continue;
                 }
 
+                S2CMatchplayTriggerServe matchplayTriggerServe;
                 boolean isMaster = rp.isMaster();  // This is temporary. Will implement more stuff to avoid this
-                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp, rp.getPosition(), isMaster);
+                if (isMaster) {
+                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp, 20f, -120f, isMaster);
+                }
+                else {
+                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp, -20f, 120f, false);
+                }
+
                 client.getConnection().sendTCP(matchplayTriggerServe);
             }
         });
