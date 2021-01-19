@@ -10,6 +10,7 @@ import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.C2SMatchplayPlayerIdsInSessionPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTeamWinsPoint;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTeamWinsSet;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CBallAnimationPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CPlayerAnimationPacket;
@@ -125,6 +126,8 @@ public class MatchplayPacketHandler {
         {
             // We need to branch here later for different modes
             MatchplayBasicSingleGame game = (MatchplayBasicSingleGame) gameSession.getActiveMatchplayGame();
+            byte setsTeamRead = game.getSetsPlayer1();
+            byte setsTeamBlue = game.getSetsPlayer2();
             if (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam) {
                 game.setPoints((byte) (game.getPointsPlayer1() + 1), game.getPointsPlayer2());
             }
@@ -160,6 +163,11 @@ public class MatchplayPacketHandler {
                 S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
                         new S2CMatchplayTeamWinsPoint((short) (madePoint ? 0 : 1), false, game.getPointsPlayer1(), game.getPointsPlayer2());
                 client.getConnection().sendTCP(matchplayTeamWinsPoint);
+
+                if (setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2()) {
+                    S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
+                    client.getConnection().sendTCP(matchplayTeamWinsSet);
+                }
 
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
                 client.getConnection().sendTCP(matchplayTriggerServe);
