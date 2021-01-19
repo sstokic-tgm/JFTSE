@@ -23,6 +23,9 @@ import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
+import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
+import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
+import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
@@ -60,7 +63,7 @@ import com.ft.emulator.server.game.core.packet.packets.tutorial.S2CTutorialProgr
 import com.ft.emulator.server.game.core.service.*;
 import com.ft.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.ft.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
-import com.ft.emulator.server.game.core.singleplay.challenge.GameMode;
+import com.ft.emulator.server.game.core.constants.GameMode;
 import com.ft.emulator.server.game.core.singleplay.tutorial.TutorialGame;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
@@ -77,6 +80,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class GamePacketHandler {
+    private final GameSessionManager gameSessionManager;
     private final GameHandler gameHandler;
 
     private final AuthenticationService authenticationService;
@@ -1139,12 +1143,19 @@ public class GamePacketHandler {
             List<Client> clientInRoomLeftShiftLit = new ArrayList<>(clientsInRoom);
             clientsInRoom.forEach(c -> {
 
-                S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room, clientInRoomLeftShiftLit);
+                S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket("127.0.0.1", 5896, room, clientInRoomLeftShiftLit);
                 c.getConnection().sendTCP(gameNetworkSettings);
 
                 // shift list to the left, so every client has his player id in the first place when doing session register
                 clientInRoomLeftShiftLit.add(0, clientInRoomLeftShiftLit.remove(clientInRoomLeftShiftLit.size() - 1));
             });
+
+            GameSession gameSession = new GameSession();
+            gameSession.setSessionId(room.getRoomId());
+            gameSession.setClients(clientsInRoom);
+            // set specific matchplay game mode object, for now we only support basic single
+            gameSession.setActiveMatchplayGame(new MatchplayBasicSingleGame());
+            this.gameSessionManager.addGameSession(gameSession);
 
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);

@@ -9,11 +9,11 @@ import com.ft.emulator.server.shared.module.Client;
 import java.util.List;
 
 public class S2CGameNetworkSettingsPacket extends Packet {
-    public S2CGameNetworkSettingsPacket(Room room, List<Client> clientsInRoom) {
+    public S2CGameNetworkSettingsPacket(String host, int port, Room room, List<Client> clientsInRoom) {
         super(PacketID.S2CGameNetworkSettings);
 
-        this.write("127.0.0.1");
-        this.write((char) 5896);
+        this.write(host);
+        this.write((char) port);
 
         this.write((int) room.getRoomId()); // session id actually
 

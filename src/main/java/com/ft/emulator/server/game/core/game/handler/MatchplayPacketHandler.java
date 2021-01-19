@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
+import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
@@ -29,7 +30,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Log4j2
 public class MatchplayPacketHandler {
+    private final GameSessionManager gameSessionManager;
     private final RelayHandler relayHandler;
+
     private final PlayerService playerService;
 
     public RelayHandler getRelayHandler() {
@@ -49,7 +52,6 @@ public class MatchplayPacketHandler {
                 GameSession gameSession = connection.getClient().getActiveGameSession();
                 gameSession.setTimeLastBallWasHit(System.currentTimeMillis());
                 gameSession.setLastBallHitByTeam(ballAnimationPacket.getPlayerPosition());
-                gameSession.setLastPlayerPosition(ballAnimationPacket.getPlayerPosition());
                 break;
             case PacketID.C2CPlayerAnimationPacket:
                 C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(relayPacket);
@@ -65,19 +67,18 @@ public class MatchplayPacketHandler {
 
         int playerId = matchplayPlayerIdsInSessionPacket.getPlayerIds().stream().findFirst().orElse(-1);
         int sessionId = matchplayPlayerIdsInSessionPacket.getSessionId();
-        GameSession existingGameSession = this.getRelayHandler().getSessionList().stream()
-                .filter(x -> x.getSessionId() == sessionId).findFirst().orElse(null);
 
-        if (existingGameSession != null) {
-            existingGameSession.getClients().add(connection.getClient());
-            connection.getClient().setActiveGameSession(existingGameSession);
+        GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(sessionId);
+        if (gameSession != null) {
+            Client playerClient = gameSession.getClientByPlayerId(playerId); // throws NullPointerException
+            playerClient.setConnection(connection); // this might be also wrong, need to check if it overwrites the object inside gameSession
+                                                    // in terms of game server connection
+            connection.setClient(playerClient);
+            connection.getClient().setActiveGameSession(gameSession);
+            this.relayHandler.addClient(playerClient);
         }
         else {
-            GameSession gameSession = new GameSession();
-            gameSession.setSessionId(sessionId);
-            gameSession.getClients().add(connection.getClient());
-            connection.getClient().setActiveGameSession(gameSession);
-            this.relayHandler.getSessionList().add(gameSession);
+            // disconnect all clients maybe? put them back to the room mybe?
         }
 
         Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
@@ -87,6 +88,8 @@ public class MatchplayPacketHandler {
 
     public void handleDisconnect(Connection connection) {
         Client client = connection.getClient();
+        if (client == null) return; // server checker will throw null here, since we don't register a client for the connection,
+                                    // because originally we want that to do inside handleRegisterPlayerForSession, need solution
         GameSession gameSession = client.getActiveGameSession();
         if (gameSession == null) return;
 
@@ -120,31 +123,41 @@ public class MatchplayPacketHandler {
         if (gameSession == null) return;
         if (gameSession.getTimeLastBallWasHit() == -1) return;
         if (gameSession.getLastBallHitByTeam() == -1) return;
-        if (gameSession.getLastPlayerPosition() == -1) return;;
 
         long currentTime = System.currentTimeMillis();
         if (currentTime - gameSession.getTimeLastBallWasHit() > TimeUnit.SECONDS.toMillis(3))
         {
-            boolean isRedTeam = gameSession.getLastPlayerPosition() == 0 || gameSession.getLastPlayerPosition() == 2;
-            boolean shouldServe = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
-                    !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
+            List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+            List<Client> clients = connection.getClient().getActiveGameSession().getClients();
+            for (Client client : clients) {
+                RoomPlayer rp = roomPlayerList.stream()
+                        .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                        .findFirst().orElse(null);
+                if (rp == null) {
+                    continue;
+                }
 
-            float playerStartX;
-            float playerStartY = isRedTeam ? -120f : 120f;
-            if (isRedTeam) {
-                playerStartX = gameSession.getLastRedTeamPlayerStartX() * (-1);
-                gameSession.setLastRedTeamPlayerStartX(playerStartX);
+                boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
+                boolean shouldServe = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
+                        !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
+
+                float playerStartX;
+                float playerStartY = isRedTeam ? -120f : 120f;
+                if (isRedTeam) {
+                    playerStartX = gameSession.getLastRedTeamPlayerStartX() * (-1);
+                    gameSession.setLastRedTeamPlayerStartX(playerStartX);
+                }
+                else {
+                    playerStartX = gameSession.getLastBlueTeamPlayerStartX() * (-1);
+                    gameSession.setLastBlueTeamPlayerStartX(playerStartX);
+                }
+
+                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint((short) 0, false, (byte) 1, (byte) 0);
+                client.getConnection().sendTCP(matchplayTeamWinsPoint);
+
+                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, shouldServe);
+                client.getConnection().sendTCP(matchplayTriggerServe);
             }
-            else {
-                playerStartX = gameSession.getLastBlueTeamPlayerStartX() * (-1);
-                gameSession.setLastBlueTeamPlayerStartX(playerStartX);
-            }
-
-            S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint((short) 0, false, (byte) 1, (byte) 0);
-            connection.sendTCP(matchplayTeamWinsPoint);
-
-            S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(gameSession.getLastPlayerPosition(), playerStartX, playerStartY, shouldServe);
-            connection.sendTCP(matchplayTriggerServe);
         }
         gameSession.setTimeLastBallWasHit(-1);
         gameSession.setLastBallHitByTeam(-1);

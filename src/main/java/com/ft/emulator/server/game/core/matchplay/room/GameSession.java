@@ -1,5 +1,6 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
+import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,10 +16,18 @@ public class GameSession {
     }
 
     private int sessionId;
+    private MatchplayGame activeMatchplayGame;
+
     private float lastRedTeamPlayerStartX = 20;
     private float lastBlueTeamPlayerStartX = -20;
     private int lastBallHitByTeam = -1;
     private long timeLastBallWasHit = -1;
-    private byte lastPlayerPosition = -1;
-    private List<Client> clients;
+    private List<Client> clients; // holds everything from game server
+
+    public Client getClientByPlayerId(long playerId) {
+        return clients.stream()
+                .filter(c -> c.getActivePlayer().getId() == playerId)
+                .findFirst()
+                .orElse(null);
+    }
 }
