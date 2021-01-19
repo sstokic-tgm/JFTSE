@@ -2,6 +2,8 @@ package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
+import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
+import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
@@ -121,6 +123,15 @@ public class MatchplayPacketHandler {
         long currentTime = System.currentTimeMillis();
         if (currentTime - gameSession.getTimeLastBallWasHit() > TimeUnit.SECONDS.toMillis(3))
         {
+            // We need to branch here later for different modes
+            MatchplayBasicSingleGame game = (MatchplayBasicSingleGame) gameSession.getActiveMatchplayGame();
+            if (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam) {
+                game.setPoints((byte) (game.getPointsPlayer1() + 1), game.getPointsPlayer2());
+            }
+            else if (gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam) {
+                game.setPoints(game.getPointsPlayer1(), (byte) (game.getPointsPlayer2() + 1));
+            }
+
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
             List<Client> clients = connection.getClient().getActiveGameSession().getClients();
             for (Client client : clients) {
@@ -132,7 +143,7 @@ public class MatchplayPacketHandler {
                 }
 
                 boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
-                boolean shouldServe = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
+                boolean madePoint = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
                         !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
 
                 float playerStartX;
@@ -146,10 +157,11 @@ public class MatchplayPacketHandler {
                     gameSession.setLastBlueTeamPlayerStartX(playerStartX);
                 }
 
-                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint((short) 0, false, (byte) 1, (byte) 0);
+                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
+                        new S2CMatchplayTeamWinsPoint((short) (madePoint ? 0 : 1), false, game.getPointsPlayer1(), game.getPointsPlayer2());
                 client.getConnection().sendTCP(matchplayTeamWinsPoint);
 
-                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, shouldServe);
+                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
                 client.getConnection().sendTCP(matchplayTriggerServe);
             }
 
