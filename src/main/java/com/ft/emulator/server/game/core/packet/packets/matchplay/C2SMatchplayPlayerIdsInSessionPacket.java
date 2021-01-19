@@ -10,25 +10,20 @@ import java.util.List;
 @Getter
 @Setter
 public class C2SMatchplayPlayerIdsInSessionPacket extends Packet {
-    private List<Integer> playerIds;
+    private int sessionId;
     private byte unk0;
-    private byte unk1;
-    private byte unk2;
-    private byte unk3;
-    private byte unk4;
+    private List<Integer> playerIds;
 
     public C2SMatchplayPlayerIdsInSessionPacket(Packet packet) {
         super(packet);
 
         this.playerIds = new ArrayList<>();
+
+        this.sessionId = this.readInt();
+        this.unk0 = this.readByte();
         playerIds.add(packet.readInt());
-        this.unk0 = packet.readByte();
         playerIds.add(packet.readInt());
-        this.unk1 = packet.readByte();
         playerIds.add(packet.readInt());
-        this.unk2 = packet.readByte();
         playerIds.add(packet.readInt());
-        this.unk3 = packet.readByte();
-        this.unk4 = packet.readByte();
     }
 }

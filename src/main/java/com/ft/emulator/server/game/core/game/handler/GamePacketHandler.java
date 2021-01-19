@@ -1116,7 +1116,7 @@ public class GamePacketHandler {
                 Room threadRoom = connection.getClient().getActiveRoom();
                 List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom()
                     .getRoomPlayerList().stream().filter(x -> !x.isMaster()).collect(Collectors.toList());
-                boolean allReady = roomPlayerList.stream().filter(x -> x.getPosition() < 4).allMatch(x -> x.isReady());
+                boolean allReady = roomPlayerList.stream().filter(x -> x.getPosition() < 4).allMatch(RoomPlayer::isReady);
                 if (!allReady || threadRoom.getStatus() == RoomStatus.StartCancelled) {
                     threadRoom.setStatus(RoomStatus.Idle);
                     Packet startGameCancelledPacket = new Packet(PacketID.S2CRoomStartGameCancelled);
@@ -1135,8 +1135,16 @@ public class GamePacketHandler {
                 }
             }
 
-            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room);
-            sendPacketToAllInRoom(connection, gameNetworkSettings);
+            List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId());
+            List<Client> clientInRoomLeftShiftLit = new ArrayList<>(clientsInRoom);
+            clientsInRoom.forEach(c -> {
+
+                S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(room, clientInRoomLeftShiftLit);
+                c.getConnection().sendTCP(gameNetworkSettings);
+
+                // shift list to the left, so every client has his player id in the first place when doing session register
+                clientInRoomLeftShiftLit.add(0, clientInRoomLeftShiftLit.remove(clientInRoomLeftShiftLit.size() - 1));
+            });
 
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
@@ -1153,15 +1161,17 @@ public class GamePacketHandler {
         Room room = connection.getClient().getActiveRoom();
         room.getRoomPlayerList().stream()
             .filter(x -> x.getPlayer().getId().equals(player.getId()))
-            .findFirst().ifPresent(rp -> rp.setGameAnimationSkipReady(true));
-        boolean allPlayerCanSkipAnimation = connection.getClient().getActiveRoom()
-                .getRoomPlayerList().stream().allMatch(RoomPlayer::isGameAnimationSkipReady);
+            .findFirst()
+                .ifPresent(rp -> rp.setGameAnimationSkipReady(true));
+
+        boolean allPlayerCanSkipAnimation = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
+                .allMatch(RoomPlayer::isGameAnimationSkipReady);
 
         if (allPlayerCanSkipAnimation) {
             Packet gameAnimationAllowSkipPacket = new Packet(PacketID.S2CGameAnimationAllowSkip);
             gameAnimationAllowSkipPacket.write((char) 0);
             this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
-                .forEach(c -> c.getConnection().sendTCP(gameAnimationAllowSkipPacket));
+                    .forEach(c -> c.getConnection().sendTCP(gameAnimationAllowSkipPacket));
         }
     }
 
@@ -1169,63 +1179,62 @@ public class GamePacketHandler {
         Room room = connection.getClient().getActiveRoom();
         List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
         Optional<RoomPlayer> roomPlayer = roomPlayerList.stream()
-                .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId())).findFirst();
+                .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findFirst();
+
         if (room.getStatus() != RoomStatus.InitializingGame) {
             return;
         }
 
-        List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
-        for (Client client : clients){
-            RoomPlayer rp = roomPlayerList.stream()
-                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
-                    .findFirst().orElse(null);
-            if (rp == null) {
-                continue;
-            }
+        if (roomPlayer.isPresent()) {
+            Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
+            gameAnimationSkipPacket.write((char) 0);
+            sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
 
-            S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(rp);
-            client.getConnection().sendTCP(setNameColorPacket);
-        }
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
 
-        Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
-        gameAnimationSkipPacket.write((char) 0);
-        sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
-
-        Packet playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
-        sendPacketToAllInRoom(connection, playerStatsPacket);
-        room.setStatus(RoomStatus.Running);
-
-        Thread thread = new Thread(() -> {
-            try {
-                TimeUnit.SECONDS.sleep(8);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
-            sendPacketToAllInRoom(connection, removeBlackBarsPacket);
-
-            for (Client client : clients){
                 RoomPlayer rp = roomPlayerList.stream()
-                        .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                        .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
                         .findFirst().orElse(null);
-                if (rp == null) {
-                    continue;
+
+                S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(rp);
+                c.getConnection().sendTCP(setNameColorPacket);
+            });
+
+            Packet playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
+            sendPacketToAllInRoom(connection, playerStatsPacket);
+            room.setStatus(RoomStatus.Running);
+
+            Thread thread = new Thread(() -> {
+                try {
+                    TimeUnit.SECONDS.sleep(8);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
 
-                S2CMatchplayTriggerServe matchplayTriggerServe;
-                boolean isMaster = rp.isMaster();  // This is temporary. Will implement more stuff to avoid this
-                if (isMaster) {
-                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp, 20f, -120f, isMaster);
-                }
-                else {
-                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp, -20f, 120f, false);
-                }
+                Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
+                sendPacketToAllInRoom(connection, removeBlackBarsPacket);
 
-                client.getConnection().sendTCP(matchplayTriggerServe);
-            }
-        });
-        thread.start();
+                this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
+
+                    RoomPlayer rp = roomPlayerList.stream()
+                            .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
+                            .findFirst().orElse(null);
+
+                    S2CMatchplayTriggerServe matchplayTriggerServe;
+                    boolean isMaster = rp.isMaster();  // This is temporary. Will implement more stuff to avoid this
+                    if (isMaster) {
+                        matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), 20f, -120f, true);
+                    }
+                    else {
+                        matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), -20f, 120f, false);
+                    }
+
+                    c.getConnection().sendTCP(matchplayTriggerServe);
+                });
+            });
+            thread.start();
+        }
     }
 
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {

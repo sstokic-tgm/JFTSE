@@ -11,8 +11,10 @@ import java.util.List;
 public class C2CBallAnimationPacket extends Packet {
     private short absoluteStartXPositionOnMap;
     private short absoluteStartYPositionOnMap;
+    private short absoluteStartZPositionOnMap;
     private short absoluteTouchXPositionOnMap;
     private short absoluteTouchYPositionOnMap;
+    private short absoluteTouchZPositionOnMap;
     private byte ballSpeed;
     private byte ballAbility;
     private byte playerPosition;
@@ -20,13 +22,12 @@ public class C2CBallAnimationPacket extends Packet {
     public C2CBallAnimationPacket(Packet packet) {
         super(packet);
 
-        this.setReadPosition(this.getReadPosition() + 13); // Unknown bytes
         this.absoluteStartXPositionOnMap = this.readShort();
         this.absoluteStartYPositionOnMap = this.readShort();
-        this.readShort(); // Unknown
+        this.absoluteStartZPositionOnMap = this.readShort();
         this.absoluteTouchXPositionOnMap = this.readShort();
         this.absoluteTouchYPositionOnMap = this.readShort();
-        this.readShort(); // Unknown
+        this.absoluteTouchZPositionOnMap = this.readShort();
         this.readByte(); // Unknown
         this.ballSpeed = this.readByte();
         this.readByte(); // Unknown

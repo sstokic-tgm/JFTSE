@@ -19,6 +19,6 @@ public class GameSession {
     private float lastBlueTeamPlayerStartX = -20;
     private int lastBallHitByTeam = -1;
     private long timeLastBallWasHit = -1;
+    private byte lastPlayerPosition = -1;
     private List<Client> clients;
-    private Room room;
 }

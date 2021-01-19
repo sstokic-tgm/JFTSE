@@ -7,6 +7,7 @@ import com.ft.emulator.server.networking.packet.Packet;
 public class S2CGameSetNameColor extends Packet {
     public S2CGameSetNameColor(RoomPlayer roomPlayer) {
         super(PacketID.S2CGameSetNameColors);
+
         this.write((char) roomPlayer.getPosition());
 
         boolean isRedTeam = roomPlayer.getPosition() == 0 || roomPlayer.getPosition() == 2;

@@ -13,13 +13,12 @@ import java.util.List;
 public class Room {
     public Room() {
         roomPlayerList = new ArrayList<>();
-        positions = Arrays.asList(new Short[]{
+        positions = Arrays.asList(
                 RoomPositionState.Free, RoomPositionState.Free,
                 RoomPositionState.Free, RoomPositionState.Free,
                 RoomPositionState.Locked, RoomPositionState.Free,
                 RoomPositionState.Free, RoomPositionState.Free,
-                RoomPositionState.Free
-        });
+                RoomPositionState.Free);
     }
 
     private short roomId;
