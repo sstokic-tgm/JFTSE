@@ -43,13 +43,13 @@ public class MatchplayPacketHandler {
         Packet relayPacket = new Packet(packet.getData());
         switch (relayPacket.getPacketId()) {
             case PacketID.C2CBallAnimationPacket:
-                C2CBallAnimationPacket ballAnimationPacket = new C2CBallAnimationPacket(packet);
+                C2CBallAnimationPacket ballAnimationPacket = new C2CBallAnimationPacket(relayPacket);
                 GameSession gameSession = connection.getClient().getActiveGameSession();
                 gameSession.setTimeLastBallWasHit(System.currentTimeMillis());
                 gameSession.setLastBallHitByTeam(ballAnimationPacket.getPlayerPosition());
                 break;
             case PacketID.C2CPlayerAnimationPacket:
-                C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(packet);
+                C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(relayPacket);
                 break;
         }
 
