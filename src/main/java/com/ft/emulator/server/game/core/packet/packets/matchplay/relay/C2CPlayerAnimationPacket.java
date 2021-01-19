@@ -18,6 +18,7 @@ public class C2CPlayerAnimationPacket extends Packet {
         super(packet);
 
         this.playerPosition = this.readChar();
+        this.setReadPosition(this.getReadPosition() + 8); // Unknown bytes
         this.absoluteXPositionOnMap = this.readShort();
         this.absoluteYPositionOnMap = this.readShort();
         this.relativeXMovement = this.readShort();

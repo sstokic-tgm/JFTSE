@@ -3,7 +3,6 @@ package com.ft.emulator.server.game.core.game.handler;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
-import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
@@ -12,11 +11,9 @@ import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTea
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CBallAnimationPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CPlayerAnimationPacket;
-import com.ft.emulator.server.game.core.service.PlayerService;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
-import com.ft.emulator.server.shared.module.GameHandler;
 import com.ft.emulator.server.shared.module.RelayHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,8 +30,6 @@ public class MatchplayPacketHandler {
     private final GameSessionManager gameSessionManager;
     private final RelayHandler relayHandler;
 
-    private final PlayerService playerService;
-
     public RelayHandler getRelayHandler() {
         return relayHandler;
     }
@@ -48,13 +43,13 @@ public class MatchplayPacketHandler {
         Packet relayPacket = new Packet(packet.getData());
         switch (relayPacket.getPacketId()) {
             case PacketID.C2CBallAnimationPacket:
-                C2CBallAnimationPacket ballAnimationPacket = new C2CBallAnimationPacket(relayPacket);
+                C2CBallAnimationPacket ballAnimationPacket = new C2CBallAnimationPacket(packet);
                 GameSession gameSession = connection.getClient().getActiveGameSession();
                 gameSession.setTimeLastBallWasHit(System.currentTimeMillis());
                 gameSession.setLastBallHitByTeam(ballAnimationPacket.getPlayerPosition());
                 break;
             case PacketID.C2CPlayerAnimationPacket:
-                C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(relayPacket);
+                C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(packet);
                 break;
         }
 
@@ -70,11 +65,10 @@ public class MatchplayPacketHandler {
 
         GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(sessionId);
         if (gameSession != null) {
-            Client playerClient = gameSession.getClientByPlayerId(playerId); // throws NullPointerException
-            playerClient.setConnection(connection); // this might be also wrong, need to check if it overwrites the object inside gameSession
-                                                    // in terms of game server connection
+            Client playerClient = gameSession.getClientByPlayerId(playerId);
+            playerClient.setActiveGameSession(gameSession);
+            playerClient.setRelayConnection(connection);
             connection.setClient(playerClient);
-            connection.getClient().setActiveGameSession(gameSession);
             this.relayHandler.addClient(playerClient);
         }
         else {
@@ -94,7 +88,7 @@ public class MatchplayPacketHandler {
         if (gameSession == null) return;
 
         client.setActiveGameSession(null);
-        gameSession.getClients().removeIf(x -> x.getConnection().getId() == connection.getId());
+        gameSession.getClients().removeIf(x -> x.getRelayConnection().getId() == connection.getId());
         if (gameSession.getClients().size() == 0) {
             this.relayHandler.getSessionList().remove(gameSession);
         }
@@ -114,7 +108,7 @@ public class MatchplayPacketHandler {
     private void sendPacketToAllClientInSameGameSession(Connection connection, Packet packet) {
         List<Client> clientList = relayHandler.getClientsInGameSession(connection.getClient().getActiveGameSession().getSessionId());
         for (Client client : clientList) {
-            client.getConnection().sendTCP(packet);
+            client.getRelayConnection().sendTCP(packet);
         }
     }
 
@@ -158,9 +152,10 @@ public class MatchplayPacketHandler {
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, shouldServe);
                 client.getConnection().sendTCP(matchplayTriggerServe);
             }
+
+            gameSession.setTimeLastBallWasHit(-1);
+            gameSession.setLastBallHitByTeam(-1);
         }
-        gameSession.setTimeLastBallWasHit(-1);
-        gameSession.setLastBallHitByTeam(-1);
     }
 
     private static Rectangle getGameFieldRectangle() {

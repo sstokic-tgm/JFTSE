@@ -21,9 +21,9 @@ public class C2SMatchplayPlayerIdsInSessionPacket extends Packet {
 
         this.sessionId = this.readInt();
         this.unk0 = this.readByte();
-        playerIds.add(packet.readInt());
-        playerIds.add(packet.readInt());
-        playerIds.add(packet.readInt());
-        playerIds.add(packet.readInt());
+        playerIds.add(this.readInt());
+        playerIds.add(this.readInt());
+        playerIds.add(this.readInt());
+        playerIds.add(this.readInt());
     }
 }

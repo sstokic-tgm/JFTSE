@@ -1140,15 +1140,6 @@ public class GamePacketHandler {
             }
 
             List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId());
-            List<Client> clientInRoomLeftShiftLit = new ArrayList<>(clientsInRoom);
-            clientsInRoom.forEach(c -> {
-
-                S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket("127.0.0.1", 5896, room, clientInRoomLeftShiftLit);
-                c.getConnection().sendTCP(gameNetworkSettings);
-
-                // shift list to the left, so every client has his player id in the first place when doing session register
-                clientInRoomLeftShiftLit.add(0, clientInRoomLeftShiftLit.remove(clientInRoomLeftShiftLit.size() - 1));
-            });
 
             GameSession gameSession = new GameSession();
             gameSession.setSessionId(room.getRoomId());
@@ -1156,6 +1147,15 @@ public class GamePacketHandler {
             // set specific matchplay game mode object, for now we only support basic single
             gameSession.setActiveMatchplayGame(new MatchplayBasicSingleGame());
             this.gameSessionManager.addGameSession(gameSession);
+
+            List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
+            clientsInRoom.forEach(c -> {
+                S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket("127.0.0.1", 5896, room, clientInRoomLeftShiftList);
+                c.getConnection().sendTCP(gameNetworkSettings);
+
+                // shift list to the left, so every client has his player id in the first place when doing session register
+                clientInRoomLeftShiftList.add(0, clientInRoomLeftShiftList.remove(clientInRoomLeftShiftList.size() - 1));
+            });
 
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
