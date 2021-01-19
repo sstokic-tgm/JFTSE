@@ -2,7 +2,6 @@ package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
-import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
@@ -24,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -124,7 +125,7 @@ public class MatchplayPacketHandler {
         long currentTime = System.currentTimeMillis();
         if (currentTime - gameSession.getTimeLastBallWasHit() > TimeUnit.SECONDS.toMillis(3))
         {
-            // We need to branch here later for different modes
+            // We need to branch here later for different modes. Best would be without casting haha
             MatchplayBasicSingleGame game = (MatchplayBasicSingleGame) gameSession.getActiveMatchplayGame();
             byte setsTeamRead = game.getSetsPlayer1();
             byte setsTeamBlue = game.getSetsPlayer2();
@@ -133,6 +134,13 @@ public class MatchplayPacketHandler {
             }
             else if (gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam) {
                 game.setPoints(game.getPointsPlayer1(), (byte) (game.getPointsPlayer2() + 1));
+            }
+
+            boolean anyTeamWonSet = setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2();
+            if (anyTeamWonSet) {
+                // Not working yet correctly...
+//                gameSession.setRedTeamPlayerStartY(gameSession.getRedTeamPlayerStartY() * (-1));
+//                gameSession.setBlueTeamPlayerStartY(gameSession.getBlueTeamPlayerStartY() * (-1));
             }
 
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
@@ -150,7 +158,7 @@ public class MatchplayPacketHandler {
                         !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
 
                 float playerStartX;
-                float playerStartY = isRedTeam ? -120f : 120f;
+                float playerStartY = isRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
                 if (isRedTeam) {
                     playerStartX = gameSession.getLastRedTeamPlayerStartX() * (-1);
                     gameSession.setLastRedTeamPlayerStartX(playerStartX);
@@ -160,17 +168,24 @@ public class MatchplayPacketHandler {
                     gameSession.setLastBlueTeamPlayerStartX(playerStartX);
                 }
 
+                short winningPlayerPosition = (short) (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ? 0 : 1);
                 S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
-                        new S2CMatchplayTeamWinsPoint((short) (madePoint ? 0 : 1), false, game.getPointsPlayer1(), game.getPointsPlayer2());
+                        new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsPlayer1(), game.getPointsPlayer2());
                 client.getConnection().sendTCP(matchplayTeamWinsPoint);
 
-                if (setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2()) {
+                if (anyTeamWonSet) {
                     S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
                     client.getConnection().sendTCP(matchplayTeamWinsSet);
                 }
 
-                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
-                client.getConnection().sendTCP(matchplayTriggerServe);
+                TimerTask task = new TimerTask() {
+                    public void run() {
+                        S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
+                        client.getConnection().sendTCP(matchplayTriggerServe);
+                    }
+                };
+                Timer timer = new Timer("Timer");
+                timer.schedule(task, TimeUnit.SECONDS.toMillis(8));
             }
 
             gameSession.setTimeLastBallWasHit(-1);
