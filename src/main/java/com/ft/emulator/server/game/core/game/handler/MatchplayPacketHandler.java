@@ -193,6 +193,7 @@ public class MatchplayPacketHandler {
                 };
                 Timer timer = new Timer("LeaveGameInTimer");
                 timer.schedule(task, TimeUnit.SECONDS.toMillis(12));
+                this.gameSessionManager.getGameSessionList().remove(gameSession);
             }
             else {
                 List<ClientPacket> packetsToSend = prepareServePacketsToSend(connection);
