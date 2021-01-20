@@ -31,9 +31,9 @@ Since it's cross-platform I will not provide download links otherwise I will blo
 
 | Name | Version |
 |------|---------|
-| JDK / OpenJDK | 8 / 8 |
-| Maven | ≥ 3.6.1 |
-| MySQL | 5.7 |
+| JDK / OpenJDK | 15 / 15 |
+| Maven | ≥ 3.6.3 |
+| MySQL | 8.0 |
 | Any Java capable IDE [^1] | Any Version |
 | Fantasy Tennis Thai | 1.706 |
 
@@ -81,7 +81,7 @@ mvn clean install
 
 Before you run it the first time, please execute[^2] the SQL file **_create_fantasytennis.sql_** located inside **sql/create/**.
 
-Then you run the emulator via:
+Build the emulator and run it via:
 ```
 cd target
 java -jar ft_server_emulator.jar
@@ -95,7 +95,7 @@ When it says
 Then the initialization was successful and the server is running.
 
 Before you start to play, you have to do 3 more things:
-1. Execute[^2] the SQL file **__gameservertype.sql__** located inside **sql/insert/**
+1. Execute[^2] the SQL file **__gameservertype.sql__** located inside **sql/insert/** (execute this first!)
 2. Execute[^2] the SQL file **__gameserver.sql__** located inside **sql/insert/**
 3. Create[^2] an account inside the Account table. e.g: ```INSERT INTO `fantasytennis`.`Account`(`ap`, `gameMaster`, `password`, `status`, `username`) VALUES (0, b'1', 'test', 0, 'test');```
 
