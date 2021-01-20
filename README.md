@@ -81,8 +81,6 @@ mvn clean install
 
 Before you run it the first time, please execute[^2] the SQL file **_create_fantasytennis.sql_** located inside **sql/create/**.
 
-Then edit applications.properties and change spring.jpa.hibernate.ddl-auto=update to spring.jpa.hibernate.ddl-auto=create. Make sure you change it back after the first start!
-
 Build the emulator and run it via:
 ```
 cd target
