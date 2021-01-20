@@ -140,9 +140,8 @@ public class MatchplayPacketHandler {
 
             boolean anyTeamWonSet = setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2();
             if (anyTeamWonSet) {
-                // Not working yet correctly...
-//                gameSession.setRedTeamPlayerStartY(gameSession.getRedTeamPlayerStartY() * (-1));
-//                gameSession.setBlueTeamPlayerStartY(gameSession.getBlueTeamPlayerStartY() * (-1));
+                gameSession.setRedTeamPlayerStartY(gameSession.getRedTeamPlayerStartY() * (-1));
+                gameSession.setBlueTeamPlayerStartY(gameSession.getBlueTeamPlayerStartY() * (-1));
             }
 
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
@@ -179,7 +178,9 @@ public class MatchplayPacketHandler {
             TimerTask task = new TimerTask() {
                 public void run() {
                     packetsToSend.forEach(cp -> {
-                        cp.getClient().getConnection().sendTCP(cp.getPacket());
+                        packetsToSend.forEach(cpi -> {
+                            cp.getClient().getConnection().sendTCP(cpi.getPacket());
+                        });
                     });
                 }
             };
