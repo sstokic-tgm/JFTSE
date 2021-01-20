@@ -8,10 +8,7 @@ import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.C2SMatchplayPlayerIdsInSessionPacket;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTeamWinsPoint;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTeamWinsSet;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CBallAnimationPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CPlayerAnimationPacket;
 import com.ft.emulator.server.networking.Connection;
@@ -167,25 +164,50 @@ public class MatchplayPacketHandler {
                         new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsPlayer1(), game.getPointsPlayer2());
                 client.getConnection().sendTCP(matchplayTeamWinsPoint);
 
-                if (anyTeamWonSet) {
+                if (anyTeamWonSet && !game.isFinished()) {
                     S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
                     client.getConnection().sendTCP(matchplayTeamWinsSet);
+                }
+
+                if (game.isFinished()) {
+                    boolean wonGame = false;
+                    if (isRedTeam && game.getSetsPlayer1() == 2 || !isRedTeam && game.getSetsPlayer2() == 2) {
+                        wonGame = true;
+                    }
+
+                    short resultTitle = (short) (wonGame ? 1 : 0);
+                    S2CMatchplayEndBasicGame endBasicGame = new S2CMatchplayEndBasicGame(resultTitle);
+                    client.getConnection().sendTCP(endBasicGame);
                 }
             }
 
             // Lets try to create only one task for the whole session instead for each player.
-            List<ClientPacket> packetsToSend = prepareServePacketsToSend(connection);
-            TimerTask task = new TimerTask() {
-                public void run() {
-                    packetsToSend.forEach(cp -> {
-                        packetsToSend.forEach(cpi -> {
-                            cp.getClient().getConnection().sendTCP(cpi.getPacket());
+            if (game.isFinished()) {
+                TimerTask task = new TimerTask() {
+                    public void run() {
+                        S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                        clients.forEach(x -> {
+                            x.getConnection().sendTCP(backToRoomPacket);
                         });
-                    });
-                }
-            };
-            Timer timer = new Timer("PointAnimationTimer");
-            timer.schedule(task, TimeUnit.SECONDS.toMillis(8));
+                    }
+                };
+                Timer timer = new Timer("LeaveGameInTimer");
+                timer.schedule(task, TimeUnit.SECONDS.toMillis(12));
+            }
+            else {
+                List<ClientPacket> packetsToSend = prepareServePacketsToSend(connection);
+                TimerTask task = new TimerTask() {
+                    public void run() {
+                        packetsToSend.forEach(cp -> {
+                            packetsToSend.forEach(cpi -> {
+                                cp.getClient().getConnection().sendTCP(cpi.getPacket());
+                            });
+                        });
+                    }
+                };
+                Timer timer = new Timer("PointAnimationTimer");
+                timer.schedule(task, TimeUnit.SECONDS.toMillis(8));
+            }
 
             gameSession.setTimeLastBallWasHit(-1);
             gameSession.setLastBallHitByTeam(-1);
