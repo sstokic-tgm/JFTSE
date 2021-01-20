@@ -22,6 +22,7 @@ public class C2CBallAnimationPacket extends Packet {
     public C2CBallAnimationPacket(Packet packet) {
         super(packet);
 
+        this.setReadPosition(this.getReadPosition() + 5); // Unknown bytes
         this.absoluteStartXPositionOnMap = this.readShort();
         this.absoluteStartYPositionOnMap = this.readShort();
         this.absoluteStartZPositionOnMap = this.readShort();

@@ -1,28 +1,31 @@
 package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
+import com.ft.emulator.server.game.core.matchplay.ClientPacket;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
+import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
-import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.C2SMatchplayPlayerIdsInSessionPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTeamWinsPoint;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTeamWinsSet;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CBallAnimationPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.relay.C2CPlayerAnimationPacket;
-import com.ft.emulator.server.game.core.service.PlayerService;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
-import com.ft.emulator.server.shared.module.GameHandler;
 import com.ft.emulator.server.shared.module.RelayHandler;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,8 +35,6 @@ import java.util.concurrent.TimeUnit;
 public class MatchplayPacketHandler {
     private final GameSessionManager gameSessionManager;
     private final RelayHandler relayHandler;
-
-    private final PlayerService playerService;
 
     public RelayHandler getRelayHandler() {
         return relayHandler;
@@ -70,11 +71,10 @@ public class MatchplayPacketHandler {
 
         GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(sessionId);
         if (gameSession != null) {
-            Client playerClient = gameSession.getClientByPlayerId(playerId); // throws NullPointerException
-            playerClient.setConnection(connection); // this might be also wrong, need to check if it overwrites the object inside gameSession
-                                                    // in terms of game server connection
+            Client playerClient = gameSession.getClientByPlayerId(playerId);
+            playerClient.setActiveGameSession(gameSession);
+            playerClient.setRelayConnection(connection);
             connection.setClient(playerClient);
-            connection.getClient().setActiveGameSession(gameSession);
             this.relayHandler.addClient(playerClient);
         }
         else {
@@ -94,7 +94,7 @@ public class MatchplayPacketHandler {
         if (gameSession == null) return;
 
         client.setActiveGameSession(null);
-        gameSession.getClients().removeIf(x -> x.getConnection().getId() == connection.getId());
+        gameSession.getClients().removeIf(x -> x.getRelayConnection().getId() == connection.getId());
         if (gameSession.getClients().size() == 0) {
             this.relayHandler.getSessionList().remove(gameSession);
         }
@@ -114,7 +114,7 @@ public class MatchplayPacketHandler {
     private void sendPacketToAllClientInSameGameSession(Connection connection, Packet packet) {
         List<Client> clientList = relayHandler.getClientsInGameSession(connection.getClient().getActiveGameSession().getSessionId());
         for (Client client : clientList) {
-            client.getConnection().sendTCP(packet);
+            client.getRelayConnection().sendTCP(packet);
         }
     }
 
@@ -127,6 +127,24 @@ public class MatchplayPacketHandler {
         long currentTime = System.currentTimeMillis();
         if (currentTime - gameSession.getTimeLastBallWasHit() > TimeUnit.SECONDS.toMillis(3))
         {
+            // We need to branch here later for different modes. Best would be without casting haha
+            MatchplayBasicSingleGame game = (MatchplayBasicSingleGame) gameSession.getActiveMatchplayGame();
+            byte setsTeamRead = game.getSetsPlayer1();
+            byte setsTeamBlue = game.getSetsPlayer2();
+            if (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam) {
+                game.setPoints((byte) (game.getPointsPlayer1() + 1), game.getPointsPlayer2());
+            }
+            else if (gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam) {
+                game.setPoints(game.getPointsPlayer1(), (byte) (game.getPointsPlayer2() + 1));
+            }
+
+            boolean anyTeamWonSet = setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2();
+            if (anyTeamWonSet) {
+                // Not working yet correctly...
+//                gameSession.setRedTeamPlayerStartY(gameSession.getRedTeamPlayerStartY() * (-1));
+//                gameSession.setBlueTeamPlayerStartY(gameSession.getBlueTeamPlayerStartY() * (-1));
+            }
+
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
             List<Client> clients = connection.getClient().getActiveGameSession().getClients();
             for (Client client : clients) {
@@ -138,29 +156,67 @@ public class MatchplayPacketHandler {
                 }
 
                 boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
-                boolean shouldServe = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
-                        !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
-
-                float playerStartX;
-                float playerStartY = isRedTeam ? -120f : 120f;
                 if (isRedTeam) {
-                    playerStartX = gameSession.getLastRedTeamPlayerStartX() * (-1);
-                    gameSession.setLastRedTeamPlayerStartX(playerStartX);
+                    gameSession.setRedTeamPlayerStartX(gameSession.getRedTeamPlayerStartX() * (-1));
                 }
                 else {
-                    playerStartX = gameSession.getLastBlueTeamPlayerStartX() * (-1);
-                    gameSession.setLastBlueTeamPlayerStartX(playerStartX);
+                    gameSession.setBlueTeamPlayerStartX(gameSession.getBlueTeamPlayerStartX() * (-1));
                 }
 
-                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint((short) 0, false, (byte) 1, (byte) 0);
+                short winningPlayerPosition = (short) (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ? 0 : 1);
+                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
+                        new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsPlayer1(), game.getPointsPlayer2());
                 client.getConnection().sendTCP(matchplayTeamWinsPoint);
 
-                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, shouldServe);
-                client.getConnection().sendTCP(matchplayTriggerServe);
+                if (anyTeamWonSet) {
+                    S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
+                    client.getConnection().sendTCP(matchplayTeamWinsSet);
+                }
             }
+
+            // Lets try to create only one task for the whole session instead for each player.
+            List<ClientPacket> packetsToSend = prepareServePacketsToSend(connection);
+            TimerTask task = new TimerTask() {
+                public void run() {
+                    packetsToSend.forEach(cp -> {
+                        cp.getClient().getConnection().sendTCP(cp.getPacket());
+                    });
+                }
+            };
+            Timer timer = new Timer("PointAnimationTimer");
+            timer.schedule(task, TimeUnit.SECONDS.toMillis(8));
+
+            gameSession.setTimeLastBallWasHit(-1);
+            gameSession.setLastBallHitByTeam(-1);
         }
-        gameSession.setTimeLastBallWasHit(-1);
-        gameSession.setLastBallHitByTeam(-1);
+    }
+
+    private List<ClientPacket> prepareServePacketsToSend(Connection connection) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+        List<Client> clients = connection.getClient().getActiveGameSession().getClients();
+        List<ClientPacket> clientPackets = new ArrayList<>();
+        for (Client client : clients) {
+            RoomPlayer rp = roomPlayerList.stream()
+                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .findFirst().orElse(null);
+            if (rp == null) {
+                continue;
+            }
+
+            boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
+            boolean madePoint = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
+                    !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
+            float playerStartX = isRedTeam ? gameSession.getRedTeamPlayerStartX() : gameSession.getBlueTeamPlayerStartX();
+            float playerStartY = isRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
+            S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
+            ClientPacket clientPacket = new ClientPacket();
+            clientPacket.setPacket(matchplayTriggerServe);
+            clientPacket.setClient(client);
+            clientPackets.add(clientPacket);
+        }
+
+        return clientPackets;
     }
 
     private static Rectangle getGameFieldRectangle() {

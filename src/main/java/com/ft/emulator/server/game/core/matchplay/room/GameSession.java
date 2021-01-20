@@ -18,8 +18,10 @@ public class GameSession {
     private int sessionId;
     private MatchplayGame activeMatchplayGame;
 
-    private float lastRedTeamPlayerStartX = 20;
-    private float lastBlueTeamPlayerStartX = -20;
+    private float redTeamPlayerStartX = 20;
+    private float blueTeamPlayerStartX = -20;
+    private float redTeamPlayerStartY = -120;
+    private float blueTeamPlayerStartY = 120;
     private int lastBallHitByTeam = -1;
     private long timeLastBallWasHit = -1;
     private List<Client> clients; // holds everything from game server
