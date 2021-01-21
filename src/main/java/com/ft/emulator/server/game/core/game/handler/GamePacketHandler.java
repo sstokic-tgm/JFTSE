@@ -1072,9 +1072,8 @@ public class GamePacketHandler {
             }
 
             boolean requestingSlotChangePlayerIsMaster = requestingSlotChangePlayer.isMaster();
-            boolean playerIsSpectator = requestingSlotChangePlayerOldPosition > 3;
             boolean slotIsInUse = connection.getClient().getActiveRoom().getPositions().get(positionToClaim) == RoomPositionState.InUse;
-            if (playerIsSpectator && slotIsInUse && !requestingSlotChangePlayerIsMaster) {
+            if (slotIsInUse && !requestingSlotChangePlayerIsMaster) {
                 S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "You cannot claim this players slot");
                 connection.sendTCP(chatRoomAnswerPacket);
                 return;
