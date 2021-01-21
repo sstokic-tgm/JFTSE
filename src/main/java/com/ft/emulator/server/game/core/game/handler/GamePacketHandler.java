@@ -976,7 +976,7 @@ public class GamePacketHandler {
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
                 .get();
-        
+
         if (room.isPrivate() && !roomJoinRequestPacket.getPassword().equals(room.getPassword())) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
@@ -1095,6 +1095,32 @@ public class GamePacketHandler {
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(connection.getClient().getActiveRoom().getRoomPlayerList());
         this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(connection.getClient().getActiveRoom()));
+    }
+
+    public void handleRoomKickPlayerRequestPacket(Connection connection, Packet packet) {
+        C2SRoomKickPlayerRequestPacket roomKickPlayerRequestPacket = new C2SRoomKickPlayerRequestPacket(packet);
+        Room room = connection.getClient().getActiveRoom();
+
+        List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(room.getRoomId());
+        RoomPlayer playerToKick = room.getRoomPlayerList().stream()
+                .filter(rp -> rp.getPosition() == roomKickPlayerRequestPacket.getPosition())
+                .findAny()
+                .orElse(null);
+
+        if (playerToKick != null) {
+            Client client = clientsInRoom.stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(playerToKick.getPlayer().getId()))
+                    .findFirst().orElse(null);
+            if (client != null) {
+                handleRoomPlayerChanges(client.getConnection());
+                Packet answerPacket = new Packet(PacketID.S2CRoomLeaveAnswer);
+                answerPacket.write(0);
+                client.getConnection().sendTCP(answerPacket);
+
+                S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
+                client.getConnection().sendTCP(roomJoinAnswerPacket);
+            }
+        }
     }
 
     public void handleRoomSlotCloseRequestPacket(Connection connection, Packet packet) {

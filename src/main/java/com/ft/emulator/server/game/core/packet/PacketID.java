@@ -78,6 +78,7 @@ public final class PacketID {
     public final static char C2CPlayerAnimationPacket = 0x32C9;
 
     public final static char C2SRoomPositionChange = 0x1785;
+    public final static char C2SRoomKickPlayer = 0x178B;
     public final static char S2CRoomPositionChangeAnswer = 0x1786;
     public final static char C2SRoomMapChange = 0x1788;
     public final static char S2CRoomMapChangeAnswer = 0x1789;
