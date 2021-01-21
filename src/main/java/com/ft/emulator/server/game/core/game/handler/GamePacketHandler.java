@@ -1444,7 +1444,10 @@ public class GamePacketHandler {
                 roomPlayerList.stream()
                         .filter(rp -> !rp.isMaster())
                         .findFirst()
-                        .ifPresent(rp -> rp.setMaster(true));
+                        .ifPresent(rp -> {
+                            rp.setMaster(true);
+                            rp.setReady(false);
+                        });
             }
             connection.getClient().getActiveRoom().setRoomPlayerList(roomPlayerList);
             connection.getClient().getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Free);
