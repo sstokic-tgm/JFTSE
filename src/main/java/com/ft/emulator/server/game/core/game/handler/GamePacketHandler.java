@@ -851,6 +851,7 @@ public class GamePacketHandler {
         room.setRule(roomCreateRequestPacket.getRule());
         room.setPlayers(roomCreateRequestPacket.getPlayers());
         room.setPrivate(roomCreateRequestPacket.isPrivate());
+        room.setPassword(roomCreateRequestPacket.getPassword());
         room.setUnk1(roomCreateRequestPacket.getUnk1());
         room.setSkillFree(roomCreateRequestPacket.isSkillFree());
         room.setQuickSlot(roomCreateRequestPacket.isQuickSlot());
@@ -975,6 +976,12 @@ public class GamePacketHandler {
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
                 .get();
+        
+        if (room.isPrivate() && !roomJoinRequestPacket.getPassword().equals(room.getPassword())) {
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+            return;
+        }
 
         boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
         if (!anyPositionAvailable) {
