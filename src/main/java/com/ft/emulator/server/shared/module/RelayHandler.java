@@ -15,12 +15,10 @@ import java.util.stream.Collectors;
 @Setter
 public class RelayHandler {
     private List<Client> clientList;
-    private List<GameSession> sessionList;
 
     @PostConstruct
     public void init() {
         clientList = new ArrayList<>();
-        sessionList = new ArrayList<>();
     }
 
     public void addClient(Client client) {
