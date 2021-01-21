@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -110,7 +109,7 @@ public class MatchplayPacketHandler {
         client.setActiveGameSession(null);
         gameSession.getClients().removeIf(x -> x.getRelayConnection().getId() == connection.getId());
         if (gameSession.getClients().size() == 0) {
-            this.relayHandler.getSessionList().remove(gameSession);
+            this.gameSessionManager.removeGameSession(gameSession);
         }
     }
 
@@ -208,7 +207,8 @@ public class MatchplayPacketHandler {
                     float playerStartY = isRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
 
                     S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
-                    packetEventHandler.push(createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
+                    for (Client nestedClient : clients)
+                        packetEventHandler.push(createPacketEvent(nestedClient, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
                 }
             }
             gameSession.setTimeLastBallWasHit(-1);
@@ -220,6 +220,7 @@ public class MatchplayPacketHandler {
         long currentTime = Instant.now().toEpochMilli();
 
         // handle client packets in queue
+        // pick last occurring event for the ball animation packet
         PacketEvent clientPacketEvent = packetEventHandler.getClient_packetEventList().stream()
                 .filter(packetEvent -> packetEvent.getPacket().getPacketId() == PacketID.C2CBallAnimationPacket && packetEvent.shouldFire(currentTime))
                 .reduce((first, second) -> second)
