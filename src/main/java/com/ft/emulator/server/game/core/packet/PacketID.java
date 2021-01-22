@@ -76,7 +76,9 @@ public final class PacketID {
     public final static char S2CMatchplayStartServe = 0x183E;
     public final static char S2CMatchplayTeamWinsPoint = 0x1840;
     public final static char S2CMatchplayTeamWinsSet = 0x1842 ;
-    public final static char S2CMatchplayEndBasicGame = 0x26FC;
+    public final static char S2CMatchplayEndBasicGame = 0x26FC; // Not really sure if name really corresponds to packet.
+    public final static char S2CMatchPlaySetExperienceGainInfoData = 0x1846;
+    public final static char S2CMatchplaySetGameResultData = 0x1848;
     public final static char S2CMatchplayBackToRoom = 0x1780;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
@@ -161,4 +163,6 @@ public final class PacketID {
 
     public final static char C2SLobbyJoin = 0x237A;
     public final static char C2SLobbyLeave = 0x2379;
+
+    public final static char D2SDevPacket = 0x555;
 }

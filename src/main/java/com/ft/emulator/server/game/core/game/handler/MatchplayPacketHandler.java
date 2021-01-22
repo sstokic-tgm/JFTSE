@@ -176,14 +176,16 @@ public class MatchplayPacketHandler {
                     gameSession.setBlueTeamPlayerStartX(gameSession.getBlueTeamPlayerStartX() * (-1));
                 }
 
-                short winningPlayerPosition = (short) (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ? 0 : 1);
-                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
-                        new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsPlayer1(), game.getPointsPlayer2());
-                packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                if (!game.isFinished()) {
+                    short winningPlayerPosition = (short) (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ? 0 : 1);
+                    S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
+                            new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsPlayer1(), game.getPointsPlayer2());
+                    packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
-                if (anyTeamWonSet && !game.isFinished()) {
-                    S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
-                    packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsSet, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                    if (anyTeamWonSet) {
+                        S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
+                        packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsSet, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                    }
                 }
 
                 if (game.isFinished()) {
@@ -192,9 +194,13 @@ public class MatchplayPacketHandler {
                         wonGame = true;
                     }
 
-                    short resultTitle = (short) (wonGame ? 1 : 0);
-                    S2CMatchplayEndBasicGame endBasicGame = new S2CMatchplayEndBasicGame(resultTitle);
-                    packetEventHandler.push(createPacketEvent(client, endBasicGame, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                    byte resultTitle = (byte) (wonGame ? 1 : 0);
+                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle);
+                    packetEventHandler.push(createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+
+                    // TODO Order players by performance
+                    S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(new int[] { 0, 1 });
+                    packetEventHandler.push(createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                     S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                     packetEventHandler.push(createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);

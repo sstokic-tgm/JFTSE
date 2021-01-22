@@ -1334,6 +1334,12 @@ public class GamePacketHandler {
         connection.sendTCP(roomListAnswerPacket);
     }
 
+    public void handleDevPacket(Connection connection, Packet packet) {
+        byte[] data = packet.getData();
+        Packet packetToRelay = new Packet(data);
+        this.getGameHandler().getClientList().forEach(x -> x.getConnection().sendTCP(packetToRelay));
+    }
+
     public void handleDisconnectPacket(Connection connection, Packet packet) {
 
         // reset pocket
