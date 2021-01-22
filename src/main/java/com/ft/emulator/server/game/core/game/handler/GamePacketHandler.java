@@ -43,8 +43,7 @@ import com.ft.emulator.server.game.core.packet.packets.home.C2SHomeItemsPlaceReq
 import com.ft.emulator.server.game.core.packet.packets.home.S2CHomeDataPacket;
 import com.ft.emulator.server.game.core.packet.packets.home.S2CHomeItemsLoadAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.inventory.*;
-import com.ft.emulator.server.game.core.packet.packets.lobby.C2SLobbyUserListRequestPacket;
-import com.ft.emulator.server.game.core.packet.packets.lobby.S2CLobbyUserListAnswerPacket;
+import com.ft.emulator.server.game.core.packet.packets.lobby.*;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
@@ -786,6 +785,26 @@ public class GamePacketHandler {
 
         S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
         connection.sendTCP(lobbyUserListAnswerPacket);
+    }
+
+    public void handleLobbyUserInfoReqPacket(Connection connection, Packet packet) {
+        C2SLobbyUserInfoRequestPacket lobbyUserInfoRequestPacket = new C2SLobbyUserInfoRequestPacket(packet);
+
+        Player player = playerService.findByIdFetched((long) lobbyUserInfoRequestPacket.getPlayerId());
+        char result = (char) (player == null ? 1 : 0);
+
+        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player);
+        connection.sendTCP(lobbyUserInfoAnswerPacket);
+    }
+
+    public void handleLobbyUserInfoClothReqPacket(Connection connection, Packet packet) {
+        C2SLobbyUserInfoClothRequestPacket lobbyUserInfoClothRequestPacket = new C2SLobbyUserInfoClothRequestPacket(packet);
+
+        Player player = playerService.findByIdFetched((long) lobbyUserInfoClothRequestPacket.getPlayerId());
+        char result = (char) (player == null ? 1 : 0);
+
+        S2CLobbyUserInfoClothAnswerPacket lobbyUserInfoClothAnswerPacket = new S2CLobbyUserInfoClothAnswerPacket(result, player);
+        connection.sendTCP(lobbyUserInfoClothAnswerPacket);
     }
 
     public void handleChatMessagePackets(Connection connection, Packet packet) {
