@@ -2,6 +2,7 @@ package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
+import com.ft.emulator.server.game.core.constants.PlayerAnimationType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEvent;
@@ -68,8 +69,12 @@ public class MatchplayPacketHandler {
                 break;
             case PacketID.C2CPlayerAnimationPacket:
                 C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(relayPacket);
+                long eventFireTime = 0;
+                byte animationType = playerAnimationPacket.getAnimationType();
+                if (animationType == PlayerAnimationType.ActivateSkillshot || animationType == PlayerAnimationType.SkillshotOffensive || animationType == PlayerAnimationType.SkillshotDefensive)
+                    eventFireTime = TimeUnit.SECONDS.toMillis(5);
 
-                packetEventHandler.push(createPacketEvent(connection.getClient(), playerAnimationPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.CLIENT);
+                packetEventHandler.push(createPacketEvent(connection.getClient(), playerAnimationPacket, PacketEventType.DEFAULT, eventFireTime), PacketEventHandler.ServerClient.CLIENT);
                 break;
         }
 
@@ -95,14 +100,13 @@ public class MatchplayPacketHandler {
             connection.sendTCP(answer);
         }
         else {
-            // disconnect all clients maybe? put them back to the room mybe?
+            // disconnect all clients maybe? put them back to the room maybe?
         }
     }
 
     public void handleDisconnect(Connection connection) {
         Client client = connection.getClient();
-        if (client == null) return; // server checker will throw null here, since we don't register a client for the connection,
-                                    // because originally we want that to do inside handleRegisterPlayerForSession, need solution
+        if (client == null) return;
         GameSession gameSession = client.getActiveGameSession();
         if (gameSession == null) return;
 
@@ -115,12 +119,7 @@ public class MatchplayPacketHandler {
 
     public void handleUnknown(Connection connection, Packet packet) {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
-        if (unknownAnswer.getPacketId() == (char) 0x200E) {
-            unknownAnswer.write((char) 1);
-        }
-        else {
-            unknownAnswer.write((short) 0);
-        }
+        unknownAnswer.write((short) 0);
         connection.sendTCP(unknownAnswer);
     }
 
@@ -227,18 +226,47 @@ public class MatchplayPacketHandler {
 
         // handle client packets in queue
         // pick last occurring event for the ball animation packet
-        PacketEvent clientPacketEvent = packetEventHandler.getClient_packetEventList().stream()
+        PacketEvent clientPacketEventBall = packetEventHandler.getClient_packetEventList().stream()
                 .filter(packetEvent -> packetEvent.getPacket().getPacketId() == PacketID.C2CBallAnimationPacket && packetEvent.shouldFire(currentTime))
                 .reduce((first, second) -> second)
                 .orElse(null);
-        if (clientPacketEvent != null) {
-            handleGameSessionState(clientPacketEvent, currentTime);
-            int index = packetEventHandler.getClient_packetEventList().indexOf(clientPacketEvent);
+        PacketEvent clientPacketEventPlayer = packetEventHandler.getClient_packetEventList().stream()
+                .filter(packetEvent -> {
+                    C2CPlayerAnimationPacket playerAnimationPacket = new C2CPlayerAnimationPacket(packetEvent.getPacket());
+                    byte animationType = playerAnimationPacket.getAnimationType();
 
-            // clear all client packets from the event list up to the last index
-            for (int i = index; i >= 0; i--) {
-                packetEventHandler.remove(i, PacketEventHandler.ServerClient.CLIENT);
-                --index;
+                    if ((playerAnimationPacket.getPacketId() == PacketID.C2CPlayerAnimationPacket) &&
+                            (animationType == PlayerAnimationType.ActivateSkillshot || animationType == PlayerAnimationType.SkillshotOffensive ||
+                                    animationType == PlayerAnimationType.SkillshotDefensive))
+                        return true;
+                    else
+                        return false;
+                })
+                .reduce((first, second) -> second)
+                .orElse(null);
+
+        if (clientPacketEventBall != null) {
+            if (clientPacketEventPlayer == null) {
+                handleGameSessionState(clientPacketEventBall, currentTime);
+                int index = packetEventHandler.getClient_packetEventList().indexOf(clientPacketEventBall);
+
+                // clear all client packets from the event list up to the last index
+                for (int i = index; i >= 0; i--) {
+                    packetEventHandler.remove(i, PacketEventHandler.ServerClient.CLIENT);
+                    --index;
+                }
+            }
+            else {
+                if (clientPacketEventPlayer.shouldFire(currentTime)) {
+                    handleGameSessionState(clientPacketEventPlayer, currentTime);
+                    int index = packetEventHandler.getClient_packetEventList().indexOf(clientPacketEventPlayer);
+
+                    // clear all client packets from the event list up to the last index
+                    for (int i = index; i >= 0; i--) {
+                        packetEventHandler.remove(i, PacketEventHandler.ServerClient.CLIENT);
+                        --index;
+                    }
+                }
             }
         }
 
