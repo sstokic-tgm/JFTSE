@@ -134,6 +134,14 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleLobbyUserListReqPacket(connection, packet);
                 break;
 
+            case PacketID.C2SLobbyUserInfoRequest:
+                gamePacketHandler.handleLobbyUserInfoReqPacket(connection, packet);
+                break;
+
+            case PacketID.C2SLobbyUserInfoClothRequest:
+                gamePacketHandler.handleLobbyUserInfoClothReqPacket(connection, packet);
+                break;
+
             case PacketID.C2SChatLobbyReq:
             case PacketID.C2SChatRoomReq:
             case PacketID.C2SWhisperReq:
