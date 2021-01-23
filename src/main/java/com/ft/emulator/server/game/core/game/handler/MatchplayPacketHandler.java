@@ -172,10 +172,12 @@ public class MatchplayPacketHandler {
                 }
 
                 boolean isCurrentPlayerInRedTeam = isRedTeam(rp.getPosition());
-                if (isCurrentPlayerInRedTeam) {
-                    gameSession.setRedTeamPlayerStartX(gameSession.getRedTeamPlayerStartX() * (-1));
-                } else {
-                    gameSession.setBlueTeamPlayerStartX(gameSession.getBlueTeamPlayerStartX() * (-1));
+                if (!anyTeamWonSet) {
+                    if (isCurrentPlayerInRedTeam) {
+                        gameSession.setRedTeamPlayerStartX(gameSession.getRedTeamPlayerStartX() * (-1));
+                    } else {
+                        gameSession.setBlueTeamPlayerStartX(gameSession.getBlueTeamPlayerStartX() * (-1));
+                    }
                 }
 
                 if (!game.isFinished()) {
@@ -307,7 +309,11 @@ public class MatchplayPacketHandler {
 
     private boolean shouldPlayerServe(int amountActivePlayers, GameSession gameSession, boolean madePoint, int playerPosition) {
         boolean isSingles = amountActivePlayers == 2;
-        if (madePoint && playerPosition == 0 && IsEven(gameSession.getTimesCourtChanged()) || madePoint && isSingles) {
+        if (madePoint && isSingles) {
+            return true;
+        }
+
+        if (madePoint && playerPosition == 0 && IsEven(gameSession.getTimesCourtChanged())) {
             return true;
         }
 
@@ -315,7 +321,7 @@ public class MatchplayPacketHandler {
             return true;
         }
 
-        if (madePoint && playerPosition == 1 && IsEven(gameSession.getTimesCourtChanged()) || madePoint && isSingles) {
+        if (madePoint && playerPosition == 1 && IsEven(gameSession.getTimesCourtChanged())) {
             return true;
         }
 
