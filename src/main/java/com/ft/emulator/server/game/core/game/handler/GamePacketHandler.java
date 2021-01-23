@@ -20,6 +20,7 @@ import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.database.model.tutorial.TutorialProgress;
 import com.ft.emulator.server.game.core.constants.RoomPositionState;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
+import com.ft.emulator.server.game.core.constants.ServeType;
 import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
@@ -1286,7 +1287,10 @@ public class GamePacketHandler {
 
                     S2CMatchplayTriggerServe matchplayTriggerServe;
                     Point playerLocation = c.getActiveGameSession().getPlayerLocationsOnMap().get(rp.getPosition());
-                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerLocation.x, playerLocation.y, rp.isMaster());
+                    byte serveType = ServeType.None;
+                    if (rp.isMaster()) serveType = ServeType.ServeBall;
+                    if (rp.getPosition() == 1) serveType = ServeType.ReceiveBall;
+                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerLocation.x, playerLocation.y, serveType);
                     this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(rc -> {
                         rc.getConnection().sendTCP(matchplayTriggerServe);
                     });

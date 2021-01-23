@@ -2,6 +2,7 @@ package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.PlayerAnimationType;
+import com.ft.emulator.server.game.core.constants.ServeType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEvent;
@@ -210,10 +211,11 @@ public class MatchplayPacketHandler {
                     packetEventHandler.push(createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                 }
                 else {
-                    boolean serveBall = this.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
-                    Point startingLocation = this.getStartingLocation(isSingles, isRedTeamServing, serveBall, gameSession, rp.getPosition());
-
-                    S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), startingLocation.x, startingLocation.y, serveBall);
+                    boolean isInServingTeam = isRedTeamServing && isRedTeam(rp.getPosition()) || !isRedTeamServing && isBlueTeam(rp.getPosition());
+                    boolean shouldServeBall = this.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
+                    Point startingLocation = this.getStartingLocation(isSingles, isInServingTeam, shouldServeBall, gameSession, rp.getPosition());
+                    byte serveType = this.getServeType(shouldServeBall, isInServingTeam, startingLocation);
+                    S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), startingLocation.x, startingLocation.y, serveType);
                     for (Client nestedClient : clients)
                         packetEventHandler.push(createPacketEvent(nestedClient, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
                 }
@@ -296,13 +298,23 @@ public class MatchplayPacketHandler {
         return packetEvent;
     }
 
-    private Point getStartingLocation(boolean isSingles, boolean isRedTeamServing, boolean willServeBall, GameSession gameSession, int playerPosition) {
+    private byte getServeType(boolean willServeBall, boolean isInServingTeam, Point playerLocation) {
+        if (willServeBall) {
+            return ServeType.ServeBall;
+        }
+
+        if (!isInServingTeam && Math.abs(playerLocation.y) == 125) {
+            return ServeType.ReceiveBall;
+        }
+
+        return ServeType.None;
+    }
+
+    private Point getStartingLocation(boolean isSingles, boolean isInServingTeam, boolean willServeBall, GameSession gameSession, int playerPosition) {
         Point playerLocation = gameSession.getPlayerLocationsOnMap().get(playerPosition);
         if (isSingles) {
             return playerLocation;
         }
-
-        boolean isInServingTeam = isRedTeamServing && isRedTeam(playerPosition) || !isRedTeamServing && isBlueTeam(playerPosition);
 
         long servingPosY = 125;
         long nonServingPosY = 75;
