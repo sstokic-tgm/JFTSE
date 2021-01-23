@@ -22,8 +22,9 @@ public class GameSession {
     private float blueTeamPlayerStartX = -20;
     private float redTeamPlayerStartY = -120;
     private float blueTeamPlayerStartY = 120;
-    private int lastBallHitByTeam = -1;
+    private int lastBallHitByPlayer = -1;
     private long timeLastBallWasHit = -1;
+    private int timesCourtChanged = 0;
     private List<Client> clients; // holds everything from game server
 
     public Client getClientByPlayerId(long playerId) {

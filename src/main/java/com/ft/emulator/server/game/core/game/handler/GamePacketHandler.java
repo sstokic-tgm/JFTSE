@@ -1278,21 +1278,22 @@ public class GamePacketHandler {
                 sendPacketToAllInRoom(connection, removeBlackBarsPacket);
 
                 this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
-
                     RoomPlayer rp = roomPlayerList.stream()
                             .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
                             .findFirst().orElse(null);
 
                     S2CMatchplayTriggerServe matchplayTriggerServe;
-                    boolean isMaster = rp.isMaster();  // This is temporary. Will implement more stuff to avoid this
-                    if (isMaster) {
-                        matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), 20f, -120f, true);
+                    boolean isInRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
+                    if (isInRedTeam) {
+                        matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), 20f, -120f, rp.isMaster());
                     }
                     else {
                         matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), -20f, 120f, false);
                     }
 
-                    c.getConnection().sendTCP(matchplayTriggerServe);
+                    this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(rc -> {
+                        rc.getConnection().sendTCP(matchplayTriggerServe);
+                    });
                 });
             });
             thread.start();

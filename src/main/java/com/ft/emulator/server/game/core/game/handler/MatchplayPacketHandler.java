@@ -63,7 +63,7 @@ public class MatchplayPacketHandler {
             case PacketID.C2CBallAnimationPacket:
                 C2CBallAnimationPacket ballAnimationPacket = new C2CBallAnimationPacket(relayPacket);
                 gameSession.setTimeLastBallWasHit(Instant.now().toEpochMilli());
-                gameSession.setLastBallHitByTeam(ballAnimationPacket.getPlayerPosition());
+                gameSession.setLastBallHitByPlayer(ballAnimationPacket.getPlayerPosition());
 
                 packetEventHandler.push(createPacketEvent(connection.getClient(), ballAnimationPacket, PacketEventType.DEFAULT, TimeUnit.SECONDS.toMillis(3)), PacketEventHandler.ServerClient.CLIENT);
                 break;
@@ -135,7 +135,7 @@ public class MatchplayPacketHandler {
         GameSession gameSession = packetEvent.getClient().getActiveGameSession();
         if (gameSession == null) return;
         if (gameSession.getTimeLastBallWasHit() == -1) return;
-        if (gameSession.getLastBallHitByTeam() == -1) return;
+        if (gameSession.getLastBallHitByPlayer() == -1) return;
 
         if (currentTime - gameSession.getTimeLastBallWasHit() > packetEvent.getEventFireTime()) {
 
@@ -145,20 +145,23 @@ public class MatchplayPacketHandler {
             byte setsTeamRead = game.getSetsPlayer1();
             byte setsTeamBlue = game.getSetsPlayer2();
 
-            if (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam) {
+            if (isRedTeam(gameSession.getLastBallHitByPlayer())) {
                 game.setPoints((byte) (game.getPointsPlayer1() + 1), game.getPointsPlayer2());
             }
-            else if (gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam) {
+            else if (isBlueTeam(gameSession.getLastBallHitByPlayer())) {
                 game.setPoints(game.getPointsPlayer1(), (byte) (game.getPointsPlayer2() + 1));
             }
 
             boolean anyTeamWonSet = setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2();
             if (anyTeamWonSet) {
+                gameSession.setTimesCourtChanged(gameSession.getTimesCourtChanged() + 1);
                 gameSession.setRedTeamPlayerStartY(gameSession.getRedTeamPlayerStartY() * (-1));
                 gameSession.setBlueTeamPlayerStartY(gameSession.getBlueTeamPlayerStartY() * (-1));
             }
 
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+            int amountActivePlayers = (int) roomPlayerList.stream().filter(x -> x.getPosition() < 4).count();
+
             List<Client> clients = connection.getClient().getActiveGameSession().getClients();
             for (Client client : clients) {
                 RoomPlayer rp = roomPlayerList.stream()
@@ -168,15 +171,15 @@ public class MatchplayPacketHandler {
                     continue;
                 }
 
-                boolean isRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
-                if (isRedTeam) {
+                boolean isCurrentPlayerInRedTeam = isRedTeam(rp.getPosition());
+                if (isCurrentPlayerInRedTeam) {
                     gameSession.setRedTeamPlayerStartX(gameSession.getRedTeamPlayerStartX() * (-1));
                 } else {
                     gameSession.setBlueTeamPlayerStartX(gameSession.getBlueTeamPlayerStartX() * (-1));
                 }
 
                 if (!game.isFinished()) {
-                    short winningPlayerPosition = (short) (gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ? 0 : 1);
+                    short winningPlayerPosition = (short) (isRedTeam(gameSession.getLastBallHitByPlayer()) ? 0 : 1);
                     S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
                             new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsPlayer1(), game.getPointsPlayer2());
                     packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
@@ -189,7 +192,7 @@ public class MatchplayPacketHandler {
 
                 if (game.isFinished()) {
                     boolean wonGame = false;
-                    if (isRedTeam && game.getSetsPlayer1() == 2 || !isRedTeam && game.getSetsPlayer2() == 2) {
+                    if (isCurrentPlayerInRedTeam && game.getSetsPlayer1() == 2 || !isCurrentPlayerInRedTeam && game.getSetsPlayer2() == 2) {
                         wonGame = true;
                     }
 
@@ -205,19 +208,19 @@ public class MatchplayPacketHandler {
                     packetEventHandler.push(createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                 }
                 else {
+                    boolean madePoint = isCurrentPlayerInRedTeam && isRedTeam(gameSession.getLastBallHitByPlayer()) ||
+                            !isCurrentPlayerInRedTeam && isBlueTeam(gameSession.getLastBallHitByPlayer());
+                    float playerStartX = isCurrentPlayerInRedTeam ? gameSession.getRedTeamPlayerStartX() : gameSession.getBlueTeamPlayerStartX();
+                    float playerStartY = isCurrentPlayerInRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
 
-                    boolean madePoint = isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.RedTeam ||
-                            !isRedTeam && gameSession.getLastBallHitByTeam() == GameFieldSide.BlueTeam;
-                    float playerStartX = isRedTeam ? gameSession.getRedTeamPlayerStartX() : gameSession.getBlueTeamPlayerStartX();
-                    float playerStartY = isRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
-
-                    S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, madePoint);
+                    boolean serveBall = this.shouldPlayerServe(amountActivePlayers, gameSession, madePoint, rp.getPosition());
+                    S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, serveBall);
                     for (Client nestedClient : clients)
                         packetEventHandler.push(createPacketEvent(nestedClient, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
                 }
             }
             gameSession.setTimeLastBallWasHit(-1);
-            gameSession.setLastBallHitByTeam(-1);
+            gameSession.setLastBallHitByPlayer(-1);
         }
     }
 
@@ -292,6 +295,39 @@ public class MatchplayPacketHandler {
         packetEvent.setEventFireTime(eventFireTime);
 
         return packetEvent;
+    }
+
+    private boolean isRedTeam(int playerPos) {
+        return playerPos == 0 || playerPos == 2;
+    }
+
+    private boolean isBlueTeam(int playerPos) {
+        return playerPos == 1 || playerPos == 3;
+    }
+
+    private boolean shouldPlayerServe(int amountActivePlayers, GameSession gameSession, boolean madePoint, int playerPosition) {
+        boolean isSingles = amountActivePlayers == 2;
+        if (madePoint && playerPosition == 0 && IsEven(gameSession.getTimesCourtChanged()) || madePoint && isSingles) {
+            return true;
+        }
+
+        if (madePoint && playerPosition == 2 && !IsEven(gameSession.getTimesCourtChanged())) {
+            return true;
+        }
+
+        if (madePoint && playerPosition == 1 && IsEven(gameSession.getTimesCourtChanged()) || madePoint && isSingles) {
+            return true;
+        }
+
+        if (madePoint && playerPosition == 3 && !IsEven(gameSession.getTimesCourtChanged())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean IsEven(int number) {
+        return number % 2 == 0;
     }
 
     private static Rectangle getGameFieldRectangle() {
