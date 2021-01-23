@@ -72,7 +72,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -1283,14 +1285,8 @@ public class GamePacketHandler {
                             .findFirst().orElse(null);
 
                     S2CMatchplayTriggerServe matchplayTriggerServe;
-                    boolean isInRedTeam = rp.getPosition() == 0 || rp.getPosition() == 2;
-                    if (isInRedTeam) {
-                        matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), 20f, -120f, rp.isMaster());
-                    }
-                    else {
-                        matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), -20f, 120f, false);
-                    }
-
+                    Point playerLocation = c.getActiveGameSession().getPlayerLocationsOnMap().get(rp.getPosition());
+                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerLocation.x, playerLocation.y, rp.isMaster());
                     this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(rc -> {
                         rc.getConnection().sendTCP(matchplayTriggerServe);
                     });

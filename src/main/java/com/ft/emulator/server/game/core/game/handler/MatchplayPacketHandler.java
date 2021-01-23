@@ -1,6 +1,5 @@
 package com.ft.emulator.server.game.core.game.handler;
 
-import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.PlayerAnimationType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
@@ -155,12 +154,13 @@ public class MatchplayPacketHandler {
             boolean anyTeamWonSet = setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2();
             if (anyTeamWonSet) {
                 gameSession.setTimesCourtChanged(gameSession.getTimesCourtChanged() + 1);
-                gameSession.setRedTeamPlayerStartY(gameSession.getRedTeamPlayerStartY() * (-1));
-                gameSession.setBlueTeamPlayerStartY(gameSession.getBlueTeamPlayerStartY() * (-1));
+                gameSession.getPlayerLocationsOnMap().forEach(x -> x.setLocation(this.invertPointY(x)));
             }
 
+            boolean isRedTeamServing = this.isRedTeamServing(gameSession.getTimesCourtChanged());
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
             int amountActivePlayers = (int) roomPlayerList.stream().filter(x -> x.getPosition() < 4).count();
+            boolean isSingles = amountActivePlayers == 2;
 
             List<Client> clients = connection.getClient().getActiveGameSession().getClients();
             for (Client client : clients) {
@@ -172,12 +172,11 @@ public class MatchplayPacketHandler {
                 }
 
                 boolean isCurrentPlayerInRedTeam = isRedTeam(rp.getPosition());
-                if (!anyTeamWonSet) {
-                    if (isCurrentPlayerInRedTeam) {
-                        gameSession.setRedTeamPlayerStartX(gameSession.getRedTeamPlayerStartX() * (-1));
-                    } else {
-                        gameSession.setBlueTeamPlayerStartX(gameSession.getBlueTeamPlayerStartX() * (-1));
-                    }
+                boolean shouldPlayerSwitchServingSide =
+                        shouldSwitchServingSide(isSingles, isRedTeamServing, anyTeamWonSet, rp.getPosition());
+                if (shouldPlayerSwitchServingSide) {
+                    Point playerLocation = gameSession.getPlayerLocationsOnMap().get(rp.getPosition());
+                    gameSession.getPlayerLocationsOnMap().set(rp.getPosition(), this.invertPointX(playerLocation));
                 }
 
                 if (!game.isFinished()) {
@@ -210,13 +209,10 @@ public class MatchplayPacketHandler {
                     packetEventHandler.push(createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                 }
                 else {
-                    boolean madePoint = isCurrentPlayerInRedTeam && isRedTeam(gameSession.getLastBallHitByPlayer()) ||
-                            !isCurrentPlayerInRedTeam && isBlueTeam(gameSession.getLastBallHitByPlayer());
-                    float playerStartX = isCurrentPlayerInRedTeam ? gameSession.getRedTeamPlayerStartX() : gameSession.getBlueTeamPlayerStartX();
-                    float playerStartY = isCurrentPlayerInRedTeam ? gameSession.getRedTeamPlayerStartY() : gameSession.getBlueTeamPlayerStartY();
+                    boolean serveBall = this.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
+                    Point startingLocation = this.getStartingLocation(isSingles, isRedTeamServing, serveBall, gameSession, rp.getPosition());
 
-                    boolean serveBall = this.shouldPlayerServe(amountActivePlayers, gameSession, madePoint, rp.getPosition());
-                    S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerStartX, playerStartY, serveBall);
+                    S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), startingLocation.x, startingLocation.y, serveBall);
                     for (Client nestedClient : clients)
                         packetEventHandler.push(createPacketEvent(nestedClient, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
                 }
@@ -299,6 +295,53 @@ public class MatchplayPacketHandler {
         return packetEvent;
     }
 
+    private Point getStartingLocation(boolean isSingles, boolean isRedTeamServing, boolean willServeBall, GameSession gameSession, int playerPosition) {
+        Point playerLocation = gameSession.getPlayerLocationsOnMap().get(playerPosition);
+        if (isSingles) {
+            return playerLocation;
+        }
+
+        boolean isInServingTeam = isRedTeamServing && isRedTeam(playerPosition) || !isRedTeamServing && isBlueTeam(playerPosition);
+
+        long servingPosY = 125;
+        long nonServingPosY = 75;
+        long posY = playerLocation.y;
+        if (!isInServingTeam) {
+            if (playerLocation.y == servingPosY) {
+                posY = nonServingPosY;
+            }
+            if (playerLocation.y == -servingPosY) {
+                posY = -nonServingPosY;
+            }
+            if (playerLocation.y == nonServingPosY) {
+                posY = servingPosY;
+            }
+            if (playerLocation.y == -nonServingPosY) {
+                posY = -servingPosY;
+            }
+
+            playerLocation.setLocation(playerLocation.x, posY);
+            return playerLocation;
+        }
+
+        if (willServeBall) {
+            posY = playerLocation.y > 0 ? servingPosY : -servingPosY;
+        } else {
+            posY = playerLocation.y > 0 ? nonServingPosY : -nonServingPosY;
+        }
+
+        playerLocation.setLocation(playerLocation.x, posY);
+        return playerLocation;
+    }
+
+    private Point invertPointX(Point point) {
+        return new Point(point.x * (-1), point.y);
+    }
+
+    private Point invertPointY(Point point) {
+        return new Point(point.x, point.y  * (-1));
+    }
+
     private boolean isRedTeam(int playerPos) {
         return playerPos == 0 || playerPos == 2;
     }
@@ -307,32 +350,49 @@ public class MatchplayPacketHandler {
         return playerPos == 1 || playerPos == 3;
     }
 
-    private boolean shouldPlayerServe(int amountActivePlayers, GameSession gameSession, boolean madePoint, int playerPosition) {
-        boolean isSingles = amountActivePlayers == 2;
-        if (madePoint && isSingles) {
+    private boolean shouldSwitchServingSide(boolean isSingles, boolean isRedTeamServing, boolean anyTeamWonSet, int playerPosition) {
+        if (anyTeamWonSet) {
+            return false;
+        }
+
+        if (isSingles) {
             return true;
         }
 
-        if (madePoint && playerPosition == 0 && IsEven(gameSession.getTimesCourtChanged())) {
-            return true;
-        }
-
-        if (madePoint && playerPosition == 2 && !IsEven(gameSession.getTimesCourtChanged())) {
-            return true;
-        }
-
-        if (madePoint && playerPosition == 1 && IsEven(gameSession.getTimesCourtChanged())) {
-            return true;
-        }
-
-        if (madePoint && playerPosition == 3 && !IsEven(gameSession.getTimesCourtChanged())) {
+        if (isRedTeamServing && isRedTeam(playerPosition) || !isRedTeamServing && isBlueTeam(playerPosition)) {
             return true;
         }
 
         return false;
     }
 
-    private boolean IsEven(int number) {
+    private boolean isRedTeamServing(int timesCourtChanged) {
+        if (this.isEven(timesCourtChanged)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean shouldPlayerServe(boolean isSingles, int timesCourtChanged, int playerPosition) {
+        if (isSingles) {
+            if (this.isEven(playerPosition) && this.isEven(timesCourtChanged)) {
+                return true;
+            }
+
+            if (!this.isEven(playerPosition) && !this.isEven(timesCourtChanged)) {
+                return true;
+            }
+        } else {
+            if (playerPosition == timesCourtChanged) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isEven(int number) {
         return number % 2 == 0;
     }
 
