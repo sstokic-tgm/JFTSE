@@ -867,7 +867,7 @@ public class GamePacketHandler {
         C2SRoomCreateRequestPacket roomCreateRequestPacket = new C2SRoomCreateRequestPacket(packet);
 
         Room room = new Room();
-        room.setRoomId((short) this.gameHandler.getRoomList().size());
+        room.setRoomId(this.getRoomId());
         room.setRoomName(roomCreateRequestPacket.getRoomName());
         room.setAllowBattlemon(roomCreateRequestPacket.getAllowBattlemon());
         room.setMode(roomCreateRequestPacket.getMode());
@@ -894,7 +894,7 @@ public class GamePacketHandler {
         byte playerSize = roomQuickCreateRequestPacket.getPlayers();
 
         Room room = new Room();
-        room.setRoomId((short) this.gameHandler.getRoomList().size());
+        room.setRoomId(this.getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
         room.setAllowBattlemon(roomQuickCreateRequestPacket.getAllowBattlemon());
         room.setMode(roomQuickCreateRequestPacket.getMode());
@@ -1522,5 +1522,20 @@ public class GamePacketHandler {
     private void sendPacketToAllInRoom(Connection connection, Packet packet) {
         this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
                 .forEach(c -> c.getConnection().sendTCP(packet));
+    }
+
+    private short getRoomId() {
+        List<Short> roomIds = this.gameHandler.getRoomList().stream().map(x -> x.getRoomId()).collect(Collectors.toList());
+        List<Short> sortedRoomIds = roomIds.stream().sorted().collect(Collectors.toList());
+        short currentRoomId = 0;
+        for (Short roomId : sortedRoomIds) {
+            if (roomId != currentRoomId) {
+                return currentRoomId;
+            }
+
+            currentRoomId++;
+        }
+
+        return currentRoomId;
     }
 }
