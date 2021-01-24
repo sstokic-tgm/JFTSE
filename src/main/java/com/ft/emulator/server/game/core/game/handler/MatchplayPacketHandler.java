@@ -4,7 +4,7 @@ import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.PlayerAnimationType;
 import com.ft.emulator.server.game.core.constants.ServeType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
-import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
+import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEvent;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
@@ -142,7 +142,7 @@ public class MatchplayPacketHandler {
         if (currentTime - gameSession.getTimeLastBallWasHit() > packetEvent.getEventFireTime()) {
 
             // We need to branch here later for different modes. Best would be without casting haha
-            MatchplayBasicSingleGame game = (MatchplayBasicSingleGame) gameSession.getActiveMatchplayGame();
+            MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getActiveMatchplayGame();
 
             byte setsTeamRead = game.getSetsRedTeam();
             byte setsTeamBlue = game.getSetsBlueTeam();

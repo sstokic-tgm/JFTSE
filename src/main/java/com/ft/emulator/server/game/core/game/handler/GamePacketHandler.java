@@ -25,7 +25,7 @@ import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
-import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame;
+import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
@@ -1200,7 +1200,7 @@ public class GamePacketHandler {
             gameSession.setSessionId(room.getRoomId());
             gameSession.setClients(clientsInRoom);
             // set specific matchplay game mode object, for now we only support basic single
-            gameSession.setActiveMatchplayGame(new MatchplayBasicSingleGame());
+            gameSession.setActiveMatchplayGame(new MatchplayBasicGame());
             this.gameSessionManager.addGameSession(gameSession);
 
             List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);

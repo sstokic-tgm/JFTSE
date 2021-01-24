@@ -9,13 +9,13 @@ import java.util.TimeZone;
 
 @Getter
 @Setter
-public class MatchplayBasicSingleGame extends MatchplayGame {
+public class MatchplayBasicGame extends MatchplayGame {
     private byte pointsRedTeam;
     private byte pointsBlueTeam;
     private byte setsRedTeam;
     private byte setsBlueTeam;
 
-    public MatchplayBasicSingleGame() {
+    public MatchplayBasicGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
 
