@@ -1267,7 +1267,7 @@ public class GamePacketHandler {
                 c.getConnection().sendTCP(setNameColorPacket);
             });
 
-            Packet playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
+            S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
             sendPacketToAllInRoom(connection, playerStatsPacket);
             room.setStatus(RoomStatus.Running);
 

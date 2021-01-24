@@ -65,11 +65,11 @@ public final class PacketID {
     public final static char S2CGameAnimationAllowSkip = 0x17E0;
     public final static char C2SGameAnimationSkipTriggered = 0x17E1;
     public final static char S2CGameAnimationSkip = 0x17E2;
+    public final static char S2CGameEndLevelUpPlayerStats = 0x17E3;
     public final static char S2CGameDisplayPlayerStats = 0x17E4;
     public final static char S2CGameRemoveBlackBars = 0x183C;
     public final static char S2CGameNetworkSettings = 0x3EA;
     public final static char S2CGameSetNameColors = 0x183A;
-    public final static char S2CGamePlayerStats = 0x17E3;
     public final static char C2SRelayPacketToAllClients = 0x414;
     public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ED;
     public final static char S2CMatchplayAckPlayerInformation = 0x3EF;
