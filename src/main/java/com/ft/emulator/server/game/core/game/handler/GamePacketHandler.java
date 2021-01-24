@@ -1045,12 +1045,8 @@ public class GamePacketHandler {
         }
 
         List<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
-        this.gameHandler.getClientsInRoom(roomJoinRequestPacket.getRoomId()).forEach(c -> {
-            StreamUtils.batches(roomPlayerList, 2).forEach(playerList -> {
-                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(playerList);
-                c.getConnection().sendTCP(roomPlayerInformationPacket);
-            });
-        });
+        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+        this.gameHandler.getClientsInRoom(roomJoinRequestPacket.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
         this.updateRoomForAllPlayersInMultiplayer(connection, room);
         this.refreshLobbyPlayerListForAllClients();
     }
@@ -1071,12 +1067,8 @@ public class GamePacketHandler {
                 .ifPresent(rp -> rp.setReady(roomReadyChangeRequestPacket.isReady()));
 
         List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> {
-            StreamUtils.batches(roomPlayerList, 2).forEach(playerList -> {
-                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(playerList);
-                c.getConnection().sendTCP(roomPlayerInformationPacket);
-            });
-        });
+        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
     }
 
     public void handleRoomMapChangeRequestPacket(Connection connection, Packet packet) {
@@ -1125,12 +1117,8 @@ public class GamePacketHandler {
         }
 
         List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> {
-            StreamUtils.batches(roomPlayerList, 2).forEach(playerList -> {
-                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(playerList);
-                c.getConnection().sendTCP(roomPlayerInformationPacket);
-            });
-        });
+        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(connection.getClient().getActiveRoom()));
     }
 
@@ -1520,13 +1508,10 @@ public class GamePacketHandler {
 
             this.gameHandler.getRoomList().removeIf(r -> r.getRoomPlayerList().isEmpty());
 
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
             this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> {
-                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId())) {
-                    StreamUtils.batches(roomPlayerList, 2).forEach(playerList -> {
-                        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(playerList);
-                        c.getConnection().sendTCP(roomPlayerInformationPacket);
-                    });
-                }
+                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    c.getConnection().sendTCP(roomPlayerInformationPacket);
             });
 
             S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
