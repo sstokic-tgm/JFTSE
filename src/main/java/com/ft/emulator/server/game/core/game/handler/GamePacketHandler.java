@@ -1292,7 +1292,7 @@ public class GamePacketHandler {
                     GameSession gameSession = c.getActiveGameSession();
                     Point playerLocation = gameSession.getPlayerLocationsOnMap().get(rp.getPosition());
                     byte serveType = ServeType.None;
-                    if (rp.isMaster()) {
+                    if (rp.getPosition() == 0) {
                         serveType = ServeType.ServeBall;
 
                         if (gameSession.getActiveMatchplayGame() instanceof MatchplayBasicGame)
