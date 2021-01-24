@@ -10,45 +10,44 @@ import java.util.TimeZone;
 @Getter
 @Setter
 public class MatchplayBasicSingleGame extends MatchplayGame {
-    // maybe a rename to blue/red instead of player, not looking good if for double for example there is 1, 2, 3, 4
-    private byte pointsPlayer1;
-    private byte pointsPlayer2;
-    private byte setsPlayer1;
-    private byte setsPlayer2;
+    private byte pointsRedTeam;
+    private byte pointsBlueTeam;
+    private byte setsRedTeam;
+    private byte setsBlueTeam;
 
     public MatchplayBasicSingleGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
 
-        this.pointsPlayer1 = 0;
-        this.pointsPlayer2 = 0;
-        this.setsPlayer1 = 0;
-        this.setsPlayer2 = 0;
+        this.pointsRedTeam = 0;
+        this.pointsBlueTeam = 0;
+        this.setsRedTeam = 0;
+        this.setsBlueTeam = 0;
         this.setFinished(false);
     }
 
     public void setPoints(byte pointsPlayer1, byte pointsPlayer2) {
-        this.pointsPlayer1 = pointsPlayer1;
-        this.pointsPlayer2 = pointsPlayer2;
+        this.pointsRedTeam = pointsPlayer1;
+        this.pointsBlueTeam = pointsPlayer2;
 
         if(pointsPlayer1 == 4 && pointsPlayer2 < 3) {
-            this.setsPlayer1++;
+            this.setsRedTeam++;
             resetPoints();
         }
         else if(pointsPlayer1 > 4 && (pointsPlayer1 - pointsPlayer2) == 2) {
-            this.setsPlayer1++;
+            this.setsRedTeam++;
             resetPoints();
         }
         else if(pointsPlayer2 == 4 && pointsPlayer1 < 3) {
-            this.setsPlayer2++;
+            this.setsBlueTeam++;
             resetPoints();
         }
         else if(pointsPlayer2 > 4 && (pointsPlayer2 - pointsPlayer1) == 2) {
-            this.setsPlayer2++;
+            this.setsBlueTeam++;
             resetPoints();
         }
 
-        if(this.setsPlayer1 == 2 || this.setsPlayer2 == 2) {
+        if(this.setsRedTeam == 2 || this.setsBlueTeam == 2) {
             this.setFinished(true);
 
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -57,8 +56,8 @@ public class MatchplayBasicSingleGame extends MatchplayGame {
     }
 
     private void resetPoints() {
-        this.pointsPlayer1 = 0;
-        this.pointsPlayer2 = 0;
+        this.pointsRedTeam = 0;
+        this.pointsBlueTeam = 0;
     }
 
     @Override

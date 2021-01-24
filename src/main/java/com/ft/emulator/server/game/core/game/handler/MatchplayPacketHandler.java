@@ -144,17 +144,17 @@ public class MatchplayPacketHandler {
             // We need to branch here later for different modes. Best would be without casting haha
             MatchplayBasicSingleGame game = (MatchplayBasicSingleGame) gameSession.getActiveMatchplayGame();
 
-            byte setsTeamRead = game.getSetsPlayer1();
-            byte setsTeamBlue = game.getSetsPlayer2();
+            byte setsTeamRead = game.getSetsRedTeam();
+            byte setsTeamBlue = game.getSetsBlueTeam();
 
             if (isRedTeam(gameSession.getLastBallHitByPlayer())) {
-                game.setPoints((byte) (game.getPointsPlayer1() + 1), game.getPointsPlayer2());
+                game.setPoints((byte) (game.getPointsRedTeam() + 1), game.getPointsBlueTeam());
             }
             else if (isBlueTeam(gameSession.getLastBallHitByPlayer())) {
-                game.setPoints(game.getPointsPlayer1(), (byte) (game.getPointsPlayer2() + 1));
+                game.setPoints(game.getPointsRedTeam(), (byte) (game.getPointsBlueTeam() + 1));
             }
 
-            boolean anyTeamWonSet = setsTeamRead != game.getSetsPlayer1() || setsTeamBlue != game.getSetsPlayer2();
+            boolean anyTeamWonSet = setsTeamRead != game.getSetsRedTeam() || setsTeamBlue != game.getSetsBlueTeam();
             if (anyTeamWonSet) {
                 gameSession.setTimesCourtChanged(gameSession.getTimesCourtChanged() + 1);
                 gameSession.getPlayerLocationsOnMap().forEach(x -> x.setLocation(this.invertPointY(x)));
@@ -187,18 +187,18 @@ public class MatchplayPacketHandler {
                 if (!game.isFinished()) {
                     short winningPlayerPosition = (short) (isRedTeam(gameSession.getLastBallHitByPlayer()) ? 0 : 1);
                     S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
-                            new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsPlayer1(), game.getPointsPlayer2());
+                            new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsRedTeam(), game.getPointsBlueTeam());
                     packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                     if (anyTeamWonSet) {
-                        S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsPlayer1(), game.getSetsPlayer2());
+                        S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsRedTeam(), game.getSetsBlueTeam());
                         packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsSet, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                     }
                 }
 
                 if (game.isFinished()) {
                     boolean wonGame = false;
-                    if (isCurrentPlayerInRedTeam && game.getSetsPlayer1() == 2 || !isCurrentPlayerInRedTeam && game.getSetsPlayer2() == 2) {
+                    if (isCurrentPlayerInRedTeam && game.getSetsRedTeam() == 2 || !isCurrentPlayerInRedTeam && game.getSetsBlueTeam() == 2) {
                         wonGame = true;
                     }
 
