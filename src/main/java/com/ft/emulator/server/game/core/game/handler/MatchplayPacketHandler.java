@@ -9,6 +9,7 @@ import com.ft.emulator.server.game.core.matchplay.event.PacketEvent;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.awt.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -163,6 +165,8 @@ public class MatchplayPacketHandler {
             int amountActivePlayers = (int) roomPlayerList.stream().filter(x -> x.getPosition() < 4).count();
             boolean isSingles = amountActivePlayers == 2;
 
+            List<ServeInfo> serveInfo = new ArrayList<>();
+
             List<Client> clients = connection.getClient().getActiveGameSession().getClients();
             for (Client client : clients) {
                 RoomPlayer rp = roomPlayerList.stream()
@@ -215,11 +219,20 @@ public class MatchplayPacketHandler {
                     boolean shouldServeBall = this.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
                     Point startingLocation = this.getStartingLocation(isSingles, isInServingTeam, shouldServeBall, gameSession, rp.getPosition());
                     byte serveType = this.getServeType(shouldServeBall, isInServingTeam, startingLocation);
-                    S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), startingLocation.x, startingLocation.y, serveType);
-                    for (Client nestedClient : clients)
-                        packetEventHandler.push(createPacketEvent(nestedClient, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
+                    ServeInfo playerServeInfo = new ServeInfo();
+                    playerServeInfo.setPlayerPosition(rp.getPosition());
+                    playerServeInfo.setPlayerStartLocation(startingLocation);
+                    playerServeInfo.setServeType(serveType);
+                    serveInfo.add(playerServeInfo);
                 }
             }
+
+            if (serveInfo.size() > 0) {
+                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
+                for (Client client : clients)
+                    packetEventHandler.push(createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
+            }
+
             gameSession.setTimeLastBallWasHit(-1);
             gameSession.setLastBallHitByPlayer(-1);
         }

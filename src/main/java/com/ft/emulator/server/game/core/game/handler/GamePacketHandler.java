@@ -29,6 +29,7 @@ import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicSingleGame
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
@@ -1280,20 +1281,27 @@ public class GamePacketHandler {
                 Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
                 sendPacketToAllInRoom(connection, removeBlackBarsPacket);
 
-                this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
+                List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
+                List<ServeInfo> serveInfo = new ArrayList<>();
+                clients.forEach(c -> {
                     RoomPlayer rp = roomPlayerList.stream()
                             .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
                             .findFirst().orElse(null);
 
-                    S2CMatchplayTriggerServe matchplayTriggerServe;
                     Point playerLocation = c.getActiveGameSession().getPlayerLocationsOnMap().get(rp.getPosition());
                     byte serveType = ServeType.None;
                     if (rp.isMaster()) serveType = ServeType.ServeBall;
                     if (rp.getPosition() == 1) serveType = ServeType.ReceiveBall;
-                    matchplayTriggerServe = new S2CMatchplayTriggerServe(rp.getPosition(), playerLocation.x, playerLocation.y, serveType);
-                    this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(rc -> {
-                        rc.getConnection().sendTCP(matchplayTriggerServe);
-                    });
+                    ServeInfo playerServeInfo = new ServeInfo();
+                    playerServeInfo.setPlayerPosition(rp.getPosition());
+                    playerServeInfo.setPlayerStartLocation(playerLocation);
+                    playerServeInfo.setServeType(serveType);
+                    serveInfo.add(playerServeInfo);
+                });
+
+                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
+                clients.forEach(c -> {
+                    c.getConnection().sendTCP(matchplayTriggerServe);
                 });
             });
             thread.start();
