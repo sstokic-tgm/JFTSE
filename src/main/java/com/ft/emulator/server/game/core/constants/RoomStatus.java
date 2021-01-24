@@ -7,4 +7,5 @@ public class RoomStatus {
     public final static int InitializingGame = 4;
     public final static int AnimationSkipped = 5;
     public final static int Running = 6;
+    public final static int NotRunning = -1;
 }

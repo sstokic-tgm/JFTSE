@@ -14,4 +14,7 @@ public abstract class MatchplayGame {
     private boolean finished;
 
     public abstract long getTimeNeeded();
+
+    public abstract boolean isRedTeam(int playerPos);
+    public abstract boolean isBlueTeam(int playerPos);
 }

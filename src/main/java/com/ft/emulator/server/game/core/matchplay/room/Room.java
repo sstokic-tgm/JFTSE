@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
 import com.ft.emulator.server.game.core.constants.RoomPositionState;
+import com.ft.emulator.server.game.core.constants.RoomStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +20,7 @@ public class Room {
                 RoomPositionState.Locked, RoomPositionState.Free,
                 RoomPositionState.Free, RoomPositionState.Free,
                 RoomPositionState.Free);
+        status = RoomStatus.NotRunning;
     }
 
     private short roomId;

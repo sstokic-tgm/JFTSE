@@ -2,6 +2,7 @@ package com.ft.emulator.server.game.core.game.handler;
 
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.PlayerAnimationType;
+import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.constants.ServeType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
@@ -95,6 +96,7 @@ public class MatchplayPacketHandler {
             playerClient.setActiveGameSession(gameSession);
             playerClient.setRelayConnection(connection);
             connection.setClient(playerClient);
+
             this.relayHandler.addClient(playerClient);
 
             Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
@@ -113,6 +115,7 @@ public class MatchplayPacketHandler {
         if (gameSession == null) return;
 
         client.setActiveGameSession(null);
+        client.getActiveRoom().setStatus(RoomStatus.NotRunning); // reset status so joining players can join room
         gameSession.getClients().removeIf(x -> x.getRelayConnection().getId() == connection.getId());
         if (gameSession.getClients().size() == 0) {
             this.gameSessionManager.removeGameSession(gameSession);
@@ -139,31 +142,41 @@ public class MatchplayPacketHandler {
         if (gameSession.getTimeLastBallWasHit() == -1) return;
         if (gameSession.getLastBallHitByPlayer() == -1) return;
 
+        boolean isSingles = gameSession.getPlayers() == 2;
+
         if (currentTime - gameSession.getTimeLastBallWasHit() > packetEvent.getEventFireTime()) {
 
             // We need to branch here later for different modes. Best would be without casting haha
             MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getActiveMatchplayGame();
 
+            byte pointsTeamRed = game.getPointsRedTeam();
+            byte pointsTeamBlue = game.getPointsBlueTeam();
             byte setsTeamRead = game.getSetsRedTeam();
             byte setsTeamBlue = game.getSetsBlueTeam();
 
-            if (isRedTeam(gameSession.getLastBallHitByPlayer())) {
-                game.setPoints((byte) (game.getPointsRedTeam() + 1), game.getPointsBlueTeam());
+            boolean wrongReceiver = !game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), gameSession.getLastBallHitByPlayer()) && game.getReceiverPlayer().getPosition() != gameSession.getLastBallHitByPlayer();
+
+            if (game.isRedTeam(gameSession.getLastBallHitByPlayer())) {
+                if (wrongReceiver)
+                    game.setPoints(game.getPointsRedTeam(), (byte) (game.getPointsBlueTeam() + 1));
+                else
+                    game.setPoints((byte) (game.getPointsRedTeam() + 1), game.getPointsBlueTeam());
             }
-            else if (isBlueTeam(gameSession.getLastBallHitByPlayer())) {
-                game.setPoints(game.getPointsRedTeam(), (byte) (game.getPointsBlueTeam() + 1));
+            else if (game.isBlueTeam(gameSession.getLastBallHitByPlayer())) {
+                if (wrongReceiver)
+                    game.setPoints((byte) (game.getPointsRedTeam() + 1), game.getPointsBlueTeam());
+                else
+                    game.setPoints(game.getPointsRedTeam(), (byte) (game.getPointsBlueTeam() + 1));
             }
 
             boolean anyTeamWonSet = setsTeamRead != game.getSetsRedTeam() || setsTeamBlue != game.getSetsBlueTeam();
             if (anyTeamWonSet) {
                 gameSession.setTimesCourtChanged(gameSession.getTimesCourtChanged() + 1);
-                gameSession.getPlayerLocationsOnMap().forEach(x -> x.setLocation(this.invertPointY(x)));
+                gameSession.getPlayerLocationsOnMap().forEach(x -> x.setLocation(game.invertPointY(x)));
             }
 
-            boolean isRedTeamServing = this.isRedTeamServing(gameSession.getTimesCourtChanged());
+            boolean isRedTeamServing = game.isRedTeamServing(gameSession.getTimesCourtChanged());
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
-            int amountActivePlayers = (int) roomPlayerList.stream().filter(x -> x.getPosition() < 4).count();
-            boolean isSingles = amountActivePlayers == 2;
 
             List<ServeInfo> serveInfo = new ArrayList<>();
 
@@ -176,16 +189,21 @@ public class MatchplayPacketHandler {
                     continue;
                 }
 
-                boolean isCurrentPlayerInRedTeam = isRedTeam(rp.getPosition());
+                boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
                 boolean shouldPlayerSwitchServingSide =
-                        shouldSwitchServingSide(isSingles, isRedTeamServing, anyTeamWonSet, rp.getPosition());
+                        game.shouldSwitchServingSide(isSingles, isRedTeamServing, anyTeamWonSet, rp.getPosition());
                 if (shouldPlayerSwitchServingSide) {
                     Point playerLocation = gameSession.getPlayerLocationsOnMap().get(rp.getPosition());
-                    gameSession.getPlayerLocationsOnMap().set(rp.getPosition(), this.invertPointX(playerLocation));
+                    gameSession.getPlayerLocationsOnMap().set(rp.getPosition(), game.invertPointX(playerLocation));
                 }
 
                 if (!game.isFinished()) {
-                    short winningPlayerPosition = (short) (isRedTeam(gameSession.getLastBallHitByPlayer()) ? 0 : 1);
+                    short winningPlayerPosition = -1;
+                    if (pointsTeamRed != game.getPointsRedTeam())
+                        winningPlayerPosition = 0;
+                    else if (pointsTeamBlue != game.getPointsBlueTeam())
+                        winningPlayerPosition = 1;
+
                     S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
                             new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsRedTeam(), game.getPointsBlueTeam());
                     packetEventHandler.push(createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
@@ -215,10 +233,15 @@ public class MatchplayPacketHandler {
                     packetEventHandler.push(createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                 }
                 else {
-                    boolean isInServingTeam = isRedTeamServing && isRedTeam(rp.getPosition()) || !isRedTeamServing && isBlueTeam(rp.getPosition());
-                    boolean shouldServeBall = this.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
-                    Point startingLocation = this.getStartingLocation(isSingles, isInServingTeam, shouldServeBall, gameSession, rp.getPosition());
-                    byte serveType = this.getServeType(shouldServeBall, isInServingTeam, startingLocation);
+                    boolean isInServingTeam = isRedTeamServing && game.isRedTeam(rp.getPosition()) || !isRedTeamServing && game.isBlueTeam(rp.getPosition());
+                    boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
+                    Point startingLocation = game.getStartingLocation(isSingles, isInServingTeam, shouldServeBall, gameSession.getPlayerLocationsOnMap(), rp.getPosition());
+                    byte serveType = game.getServeType(shouldServeBall, isInServingTeam, startingLocation);
+                    if (serveType == ServeType.ServeBall)
+                        game.setServePlayer(rp);
+                    else if (serveType == ServeType.ReceiveBall)
+                        game.setReceiverPlayer(rp);
+
                     ServeInfo playerServeInfo = new ServeInfo();
                     playerServeInfo.setPlayerPosition(rp.getPosition());
                     playerServeInfo.setPlayerStartLocation(startingLocation);
@@ -309,117 +332,6 @@ public class MatchplayPacketHandler {
         packetEvent.setEventFireTime(eventFireTime);
 
         return packetEvent;
-    }
-
-    private byte getServeType(boolean willServeBall, boolean isInServingTeam, Point playerLocation) {
-        if (willServeBall) {
-            return ServeType.ServeBall;
-        }
-
-        if (!isInServingTeam && Math.abs(playerLocation.y) == 125) {
-            return ServeType.ReceiveBall;
-        }
-
-        return ServeType.None;
-    }
-
-    private Point getStartingLocation(boolean isSingles, boolean isInServingTeam, boolean willServeBall, GameSession gameSession, int playerPosition) {
-        Point playerLocation = gameSession.getPlayerLocationsOnMap().get(playerPosition);
-        if (isSingles) {
-            return playerLocation;
-        }
-
-        long servingPosY = 125;
-        long nonServingPosY = 75;
-        long posY = playerLocation.y;
-        if (!isInServingTeam) {
-            if (playerLocation.y == servingPosY) {
-                posY = nonServingPosY;
-            }
-            if (playerLocation.y == -servingPosY) {
-                posY = -nonServingPosY;
-            }
-            if (playerLocation.y == nonServingPosY) {
-                posY = servingPosY;
-            }
-            if (playerLocation.y == -nonServingPosY) {
-                posY = -servingPosY;
-            }
-
-            playerLocation.setLocation(playerLocation.x, posY);
-            return playerLocation;
-        }
-
-        if (willServeBall) {
-            posY = playerLocation.y > 0 ? servingPosY : -servingPosY;
-        } else {
-            posY = playerLocation.y > 0 ? nonServingPosY : -nonServingPosY;
-        }
-
-        playerLocation.setLocation(playerLocation.x, posY);
-        return playerLocation;
-    }
-
-    private Point invertPointX(Point point) {
-        return new Point(point.x * (-1), point.y);
-    }
-
-    private Point invertPointY(Point point) {
-        return new Point(point.x, point.y  * (-1));
-    }
-
-    private boolean isRedTeam(int playerPos) {
-        return playerPos == 0 || playerPos == 2;
-    }
-
-    private boolean isBlueTeam(int playerPos) {
-        return playerPos == 1 || playerPos == 3;
-    }
-
-    private boolean shouldSwitchServingSide(boolean isSingles, boolean isRedTeamServing, boolean anyTeamWonSet, int playerPosition) {
-        if (anyTeamWonSet) {
-            return false;
-        }
-
-        if (isSingles) {
-            return true;
-        }
-
-        if (isRedTeamServing && isRedTeam(playerPosition) || !isRedTeamServing && isBlueTeam(playerPosition)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean isRedTeamServing(int timesCourtChanged) {
-        if (this.isEven(timesCourtChanged)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean shouldPlayerServe(boolean isSingles, int timesCourtChanged, int playerPosition) {
-        if (isSingles) {
-            if (this.isEven(playerPosition) && this.isEven(timesCourtChanged)) {
-                return true;
-            }
-
-            if (!this.isEven(playerPosition) && !this.isEven(timesCourtChanged)) {
-                return true;
-            }
-        } else {
-            if (playerPosition == timesCourtChanged) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isEven(int number) {
-        return number % 2 == 0;
     }
 
     private static Rectangle getGameFieldRectangle() {

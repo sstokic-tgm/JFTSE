@@ -1,6 +1,5 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
-import com.ft.emulator.server.game.core.constants.RoomPositionState;
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.shared.module.Client;
 import lombok.Getter;
@@ -26,6 +25,7 @@ public class GameSession {
 
     private int sessionId;
     private MatchplayGame activeMatchplayGame;
+    private byte players;
 
     private List<Point> playerLocationsOnMap;
     private int lastBallHitByPlayer = -1;

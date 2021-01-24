@@ -1007,7 +1007,7 @@ public class GamePacketHandler {
         }
 
         boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
-        if (!anyPositionAvailable) {
+        if (!anyPositionAvailable || room.getStatus() != RoomStatus.NotRunning) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -1, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
             return;
@@ -1201,6 +1201,7 @@ public class GamePacketHandler {
             gameSession.setClients(clientsInRoom);
             // set specific matchplay game mode object, for now we only support basic single
             gameSession.setActiveMatchplayGame(new MatchplayBasicGame());
+            gameSession.setPlayers(room.getPlayers());
             this.gameSessionManager.addGameSession(gameSession);
 
             List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
@@ -1288,10 +1289,21 @@ public class GamePacketHandler {
                             .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
                             .findFirst().orElse(null);
 
-                    Point playerLocation = c.getActiveGameSession().getPlayerLocationsOnMap().get(rp.getPosition());
+                    GameSession gameSession = c.getActiveGameSession();
+                    Point playerLocation = gameSession.getPlayerLocationsOnMap().get(rp.getPosition());
                     byte serveType = ServeType.None;
-                    if (rp.isMaster()) serveType = ServeType.ServeBall;
-                    if (rp.getPosition() == 1) serveType = ServeType.ReceiveBall;
+                    if (rp.isMaster()) {
+                        serveType = ServeType.ServeBall;
+
+                        if (gameSession.getActiveMatchplayGame() instanceof MatchplayBasicGame)
+                            ((MatchplayBasicGame) gameSession.getActiveMatchplayGame()).setServePlayer(rp);
+                    }
+                    if (rp.getPosition() == 1) {
+                        serveType = ServeType.ReceiveBall;
+
+                        if (gameSession.getActiveMatchplayGame() instanceof MatchplayBasicGame)
+                            ((MatchplayBasicGame) gameSession.getActiveMatchplayGame()).setReceiverPlayer(rp);
+                    }
                     ServeInfo playerServeInfo = new ServeInfo();
                     playerServeInfo.setPlayerPosition(rp.getPosition());
                     playerServeInfo.setPlayerStartLocation(playerLocation);
