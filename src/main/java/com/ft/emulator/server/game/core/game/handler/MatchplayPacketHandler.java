@@ -9,6 +9,7 @@ import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEvent;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
+import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
@@ -115,8 +116,14 @@ public class MatchplayPacketHandler {
         if (gameSession == null) return;
 
         client.setActiveGameSession(null);
-        client.getActiveRoom().setStatus(RoomStatus.NotRunning); // reset status so joining players can join room
         gameSession.getClients().removeIf(x -> x.getRelayConnection().getId() == connection.getId());
+
+        Room room = client.getActiveRoom();
+        if (room != null) {
+            // TODO: Joining player should be able to join running game replacing the disconnected one
+            room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
+        }
+
         if (gameSession.getClients().size() == 0) {
             this.gameSessionManager.removeGameSession(gameSession);
         }
