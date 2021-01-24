@@ -1167,6 +1167,11 @@ public class GamePacketHandler {
             return;
         }
 
+        if (room.getStatus() != RoomStatus.NotRunning) {
+            connection.sendTCP(roomStartGameAck);
+            return;
+        }
+
         room.setStatus(RoomStatus.StartingGame);
 
         Thread thread = new Thread(() -> {
@@ -1177,7 +1182,7 @@ public class GamePacketHandler {
                     .getRoomPlayerList().stream().filter(x -> !x.isMaster()).collect(Collectors.toList());
                 boolean allReady = roomPlayerList.stream().filter(x -> x.getPosition() < 4).allMatch(RoomPlayer::isReady);
                 if (!allReady || threadRoom.getStatus() == RoomStatus.StartCancelled) {
-                    threadRoom.setStatus(RoomStatus.Idle);
+                    threadRoom.setStatus(RoomStatus.NotRunning);
                     Packet startGameCancelledPacket = new Packet(PacketID.S2CRoomStartGameCancelled);
                     startGameCancelledPacket.write((char) 0);
                     this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(startGameCancelledPacket));
