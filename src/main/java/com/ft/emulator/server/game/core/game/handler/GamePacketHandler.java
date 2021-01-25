@@ -1267,24 +1267,30 @@ public class GamePacketHandler {
                 .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
                 .findFirst();
 
+
+        RoomPlayer playerInSlot0 = roomPlayerList.stream()
+                .filter(x -> x.getPosition() == 0)
+                .findFirst().orElse(null);
+        Client clientToHostGame = gameHandler.getClientsInRoom(room.getRoomId()).stream()
+                .filter(x -> playerInSlot0 != null && x.getActivePlayer().getId() == playerInSlot0.getPlayer().getId())
+                .findFirst()
+                .orElse(connection.getClient());
+
         if (room.getStatus() != RoomStatus.InitializingGame) {
             return;
         }
 
         if (roomPlayer.isPresent()) {
+            Packet setHostPacket = new Packet(PacketID.S2CSetHost);
+            setHostPacket.write((byte) 1);
+            clientToHostGame.getConnection().sendTCP(setHostPacket);
 
-            if (roomPlayer.get().getPosition() == 0) {
-                Packet setHostPacket = new Packet(PacketID.S2CSetHost);
-                setHostPacket.write((byte) 1);
-                connection.sendTCP(setHostPacket);
-
-                Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
-                connection.sendTCP(setHostUnknownPacket);
-            }
+            Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
+            clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
 
             Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
             gameAnimationSkipPacket.write((char) 0);
-            sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
+            sendPacketToAllInRoom(clientToHostGame.getConnection(), gameAnimationSkipPacket);
 
             this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
 
