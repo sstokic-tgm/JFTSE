@@ -106,13 +106,13 @@ public class MatchplayBasicGame extends MatchplayGame {
             if (playerLocation.y == servingPosY) {
                 posY = nonServingPosY;
             }
-            if (playerLocation.y == -servingPosY) {
+            else if (playerLocation.y == -servingPosY) {
                 posY = -nonServingPosY;
             }
-            if (playerLocation.y == nonServingPosY) {
+            else if (playerLocation.y == nonServingPosY) {
                 posY = servingPosY;
             }
-            if (playerLocation.y == -nonServingPosY) {
+            else if (playerLocation.y == -nonServingPosY) {
                 posY = -servingPosY;
             }
 
