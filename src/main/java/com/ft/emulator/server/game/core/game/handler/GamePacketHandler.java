@@ -18,14 +18,13 @@ import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.ft.emulator.server.database.model.pocket.PlayerPocket;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.database.model.tutorial.TutorialProgress;
-import com.ft.emulator.server.game.core.constants.RoomPositionState;
-import com.ft.emulator.server.game.core.constants.RoomStatus;
-import com.ft.emulator.server.game.core.constants.ServeType;
+import com.ft.emulator.server.game.core.constants.*;
 import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
+import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
@@ -62,7 +61,6 @@ import com.ft.emulator.server.game.core.packet.packets.tutorial.S2CTutorialProgr
 import com.ft.emulator.server.game.core.service.*;
 import com.ft.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.ft.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
-import com.ft.emulator.server.game.core.constants.GameMode;
 import com.ft.emulator.server.game.core.singleplay.tutorial.TutorialGame;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
@@ -72,9 +70,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
+import javax.annotation.PostConstruct;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -83,6 +84,7 @@ import java.util.stream.Collectors;
 public class GamePacketHandler {
     private final GameSessionManager gameSessionManager;
     private final GameHandler gameHandler;
+    private final PacketEventHandler packetEventHandler;
 
     private final AuthenticationService authenticationService;
     private final PlayerService playerService;
@@ -95,6 +97,13 @@ public class GamePacketHandler {
     private final TutorialService tutorialService;
     private final ProductService productService;
     private final LotteryService lotteryService;
+
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+    @PostConstruct
+    public void init() {
+        scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 1, TimeUnit.MILLISECONDS);
+    }
 
     public GameHandler getGameHandler() {
         return gameHandler;
@@ -1263,6 +1272,16 @@ public class GamePacketHandler {
         }
 
         if (roomPlayer.isPresent()) {
+
+            if (roomPlayer.get().getPosition() == 0) {
+                Packet setHostPacket = new Packet(PacketID.S2CSetHost);
+                setHostPacket.write((byte) 1);
+                connection.sendTCP(setHostPacket);
+
+                Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
+                connection.sendTCP(setHostUnknownPacket);
+            }
+
             Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
             gameAnimationSkipPacket.write((char) 0);
             sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
@@ -1368,6 +1387,113 @@ public class GamePacketHandler {
         byte[] data = packet.getData();
         Packet packetToRelay = new Packet(data);
         this.getGameHandler().getClientList().forEach(x -> x.getConnection().sendTCP(packetToRelay));
+    }
+
+    public void handleMatchplayPointPacket(Connection connection, Packet packet) {
+        C2SMatchplayPointPacket matchplayPointPacket = new C2SMatchplayPointPacket(packet);
+
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession != null) {
+            MatchplayBasicGame game = (MatchplayBasicGame) connection.getClient().getActiveGameSession().getActiveMatchplayGame();
+
+            boolean isSingles = gameSession.getPlayers() == 2;
+            byte pointsTeamRed = game.getPointsRedTeam();
+            byte pointsTeamBlue = game.getPointsBlueTeam();
+            byte setsTeamRead = game.getSetsRedTeam();
+            byte setsTeamBlue = game.getSetsBlueTeam();
+
+            if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
+                game.setPoints((byte) (pointsTeamRed + 1), pointsTeamBlue);
+            else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
+                game.setPoints(pointsTeamRed, (byte) (pointsTeamBlue + 1));
+
+            boolean anyTeamWonSet = setsTeamRead != game.getSetsRedTeam() || setsTeamBlue != game.getSetsBlueTeam();
+            if (anyTeamWonSet) {
+                gameSession.setTimesCourtChanged(gameSession.getTimesCourtChanged() + 1);
+                gameSession.getPlayerLocationsOnMap().forEach(x -> x.setLocation(game.invertPointY(x)));
+            }
+
+            boolean isRedTeamServing = game.isRedTeamServing(gameSession.getTimesCourtChanged());
+            List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+
+            List<ServeInfo> serveInfo = new ArrayList<>();
+
+            List<Client> clients = gameSession.getClients();
+            for (Client client : clients) {
+                RoomPlayer rp = roomPlayerList.stream()
+                        .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                        .findFirst().orElse(null);
+                if (rp == null) {
+                    continue;
+                }
+
+                boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
+                boolean shouldPlayerSwitchServingSide =
+                        game.shouldSwitchServingSide(isSingles, isRedTeamServing, anyTeamWonSet, rp.getPosition());
+                if (shouldPlayerSwitchServingSide) {
+                    Point playerLocation = gameSession.getPlayerLocationsOnMap().get(rp.getPosition());
+                    gameSession.getPlayerLocationsOnMap().set(rp.getPosition(), game.invertPointX(playerLocation));
+                }
+
+                if (!game.isFinished()) {
+                    short winningPlayerPosition = -1;
+                    if (pointsTeamRed != game.getPointsRedTeam())
+                        winningPlayerPosition = 0;
+                    else if (pointsTeamBlue != game.getPointsBlueTeam())
+                        winningPlayerPosition = 1;
+
+                    S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
+                            new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsRedTeam(), game.getPointsBlueTeam());
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+
+                    if (anyTeamWonSet) {
+                        S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet(game.getSetsRedTeam(), game.getSetsBlueTeam());
+                        packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTeamWinsSet, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                    }
+                }
+
+                if (game.isFinished()) {
+                    boolean wonGame = false;
+                    if (isCurrentPlayerInRedTeam && game.getSetsRedTeam() == 2 || !isCurrentPlayerInRedTeam && game.getSetsBlueTeam() == 2) {
+                        wonGame = true;
+                    }
+
+                    rp.setReady(false);
+                    byte resultTitle = (byte) (wonGame ? 1 : 0);
+                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000));
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+
+                    // TODO Order players by performance
+                    S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(new int[] { 0, 1 });
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+
+                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+                }
+                else {
+                    boolean isInServingTeam = isRedTeamServing && game.isRedTeam(rp.getPosition()) || !isRedTeamServing && game.isBlueTeam(rp.getPosition());
+                    boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
+                    Point startingLocation = game.getStartingLocation(isSingles, isInServingTeam, shouldServeBall, gameSession.getPlayerLocationsOnMap(), rp.getPosition());
+                    byte serveType = game.getServeType(shouldServeBall, isInServingTeam, startingLocation);
+                    if (serveType == ServeType.ServeBall)
+                        game.setServePlayer(rp);
+                    else if (serveType == ServeType.ReceiveBall)
+                        game.setReceiverPlayer(rp);
+
+                    ServeInfo playerServeInfo = new ServeInfo();
+                    playerServeInfo.setPlayerPosition(rp.getPosition());
+                    playerServeInfo.setPlayerStartLocation(startingLocation);
+                    playerServeInfo.setServeType(serveType);
+                    serveInfo.add(playerServeInfo);
+                }
+            }
+
+            if (serveInfo.size() > 0) {
+                S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
+                for (Client client : clients)
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
+            }
+        }
     }
 
     public void handleDisconnectPacket(Connection connection, Packet packet) {

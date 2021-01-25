@@ -1,11 +1,15 @@
 package com.ft.emulator.server.game.core.matchplay.event;
 
+import com.ft.emulator.server.game.core.constants.PacketEventType;
+import com.ft.emulator.server.networking.packet.Packet;
+import com.ft.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.Instant;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
@@ -75,5 +79,32 @@ public class PacketEventHandler {
             server_packetEventList.remove(index);
         else
             client_packetEventList.remove(index);
+    }
+
+    public void handleQueuedPackets() {
+        long currentTime = Instant.now().toEpochMilli();
+
+        // handle server packets in queue
+        for (int i = 0; i < server_packetEventList.size(); i++) {
+            PacketEvent packetEvent = server_packetEventList.get(i);
+            if (!packetEvent.isFired() && packetEvent.shouldFire(currentTime)) {
+                packetEvent.fire();
+                this.remove(i, PacketEventHandler.ServerClient.SERVER);
+            }
+        }
+    }
+
+    public PacketEvent createPacketEvent(Client client, Packet packet, PacketEventType packetEventType, long eventFireTime) {
+        long packetTimestamp = Instant.now().toEpochMilli();
+
+        PacketEvent packetEvent = new PacketEvent();
+        packetEvent.setSender(client.getConnection());
+        packetEvent.setClient(client);
+        packetEvent.setPacket(packet);
+        packetEvent.setPacketTimestamp(packetTimestamp);
+        packetEvent.setPacketEventType(packetEventType);
+        packetEvent.setEventFireTime(eventFireTime);
+
+        return packetEvent;
     }
 }
