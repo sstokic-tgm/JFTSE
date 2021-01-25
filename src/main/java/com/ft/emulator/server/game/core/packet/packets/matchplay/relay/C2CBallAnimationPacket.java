@@ -4,8 +4,6 @@ import com.ft.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 public class C2CBallAnimationPacket extends Packet {
@@ -31,7 +29,7 @@ public class C2CBallAnimationPacket extends Packet {
         this.absoluteTouchZPositionOnMap = this.readShort();
         this.readByte(); // Unknown
         this.ballSpeed = this.readByte();
-        this.readByte(); // Unknown
+        this.readByte(); // 07 = serve, 00 = s hit, 02 = lob, 01 = slice, 0x0A = skillshot (not sure if racket independent)
         this.readByte(); // Unknown
         this.ballAbility = this.readByte();
         this.readByte();

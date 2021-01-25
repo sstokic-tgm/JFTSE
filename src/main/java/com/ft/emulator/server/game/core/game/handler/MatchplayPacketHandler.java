@@ -69,6 +69,7 @@ public class MatchplayPacketHandler {
                 gameSession.setTimeLastBallWasHit(Instant.now().toEpochMilli());
                 gameSession.setLastBallHitByPlayer(ballAnimationPacket.getPlayerPosition());
 
+                log.info("Session " + gameSession.getSessionId() + " received ball animation Packet, playerPos " + ballAnimationPacket.getPlayerPosition() + " " + connection.getClient().getActivePlayer().getName());
                 packetEventHandler.push(createPacketEvent(connection.getClient(), ballAnimationPacket, PacketEventType.DEFAULT, TimeUnit.SECONDS.toMillis(3)), PacketEventHandler.ServerClient.CLIENT);
                 break;
             case PacketID.C2CPlayerAnimationPacket:
@@ -120,6 +121,11 @@ public class MatchplayPacketHandler {
 
         Room room = client.getActiveRoom();
         if (room != null) {
+            if (room.getStatus() != RoomStatus.NotRunning) {
+                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                gameSession.getClients().forEach(c -> c.getConnection().sendTCP(backToRoomPacket));
+            }
+
             // TODO: Joining player should be able to join running game replacing the disconnected one
             room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
         }
@@ -175,6 +181,8 @@ public class MatchplayPacketHandler {
                 else
                     game.setPoints(game.getPointsRedTeam(), (byte) (game.getPointsBlueTeam() + 1));
             }
+            log.info("Session " + gameSession.getSessionId() + " proceeded point red " + game.getPointsRedTeam() + " blue " + game.getPointsBlueTeam() + " last ball packet playerPos " + gameSession.getLastBallHitByPlayer() + " "
+                    + connection.getClient().getActiveRoom().getRoomPlayerList().stream().filter(rp -> rp.getPosition() == gameSession.getLastBallHitByPlayer()).findAny().get().getPlayer().getName());
 
             boolean anyTeamWonSet = setsTeamRead != game.getSetsRedTeam() || setsTeamBlue != game.getSetsBlueTeam();
             if (anyTeamWonSet) {
