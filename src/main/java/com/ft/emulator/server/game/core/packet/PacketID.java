@@ -5,6 +5,7 @@ public final class PacketID {
     public final static char C2SLoginRequest = 0x0FA1;
     public final static char S2CLoginAnswerPacket = 0x0FA2;
     public final static char C2SHeartbeat = 0x0FA3;
+    public final static char S2CServerNotice = 0x0FA6;
     public final static char C2SDisconnectRequest = 0x0FA7;
     public final static char S2CDisconnectAnswer = 0xFA8;
     public final static char C2SAuthLoginData = 0xFA9;

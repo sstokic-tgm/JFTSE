@@ -32,6 +32,7 @@ import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
+import com.ft.emulator.server.game.core.packet.packets.S2CServerNoticePacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.authserver.gameserver.C2SGameServerLoginPacket;
@@ -49,10 +50,7 @@ import com.ft.emulator.server.game.core.packet.packets.lobby.*;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameNetworkSettingsPacket;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CGameSetNameColor;
-import com.ft.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
+import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
 import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerLevelExpPacket;
 import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
@@ -127,6 +125,9 @@ public class GamePacketHandler {
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
             connection.sendTCP(gameServerLoginAnswerPacket);
+
+            S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket("Please open and play only basic rooms and matches - JFTSE team");
+            connection.sendTCP(serverNoticePacket);
         }
         else {
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) -1, (byte) 0);
@@ -1397,6 +1398,19 @@ public class GamePacketHandler {
             authenticationService.updateAccount(account);
 
             handleRoomPlayerChanges(connection);
+
+            GameSession gameSession = connection.getClient().getActiveGameSession();
+            if (gameSession != null) {
+
+                gameSession.getClients().forEach(c -> {
+                    c.setActiveGameSession(null);
+
+                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                    c.getConnection().sendTCP(backToRoomPacket);
+                });
+                gameSession.getClients().clear();
+                this.gameSessionManager.removeGameSession(gameSession);
+            }
         }
 
         gameHandler.removeClient(connection.getClient());

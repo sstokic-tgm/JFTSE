@@ -24,7 +24,7 @@ public class RelayServerNetworkListener implements ConnectionListener {
     }
 
     public void disconnected(Connection connection) {
-        matchplayPacketHandler.handleDisconnect(connection);
+        matchplayPacketHandler.handleDisconnected(connection);
         matchplayPacketHandler.getRelayHandler().removeClient(connection.getClient());
         connection.setClient(null);
         connection.close();

@@ -110,7 +110,7 @@ public class MatchplayPacketHandler {
         }
     }
 
-    public void handleDisconnect(Connection connection) {
+    public void handleDisconnected(Connection connection) {
         Client client = connection.getClient();
         if (client == null) return;
         GameSession gameSession = client.getActiveGameSession();
@@ -121,11 +121,6 @@ public class MatchplayPacketHandler {
 
         Room room = client.getActiveRoom();
         if (room != null) {
-            if (room.getStatus() != RoomStatus.NotRunning) {
-                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                gameSession.getClients().forEach(c -> c.getConnection().sendTCP(backToRoomPacket));
-            }
-
             // TODO: Joining player should be able to join running game replacing the disconnected one
             room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
         }
