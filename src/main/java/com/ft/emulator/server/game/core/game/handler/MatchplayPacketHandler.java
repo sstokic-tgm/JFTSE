@@ -46,7 +46,7 @@ public class MatchplayPacketHandler {
 
     @PostConstruct
     public void init() {
-        scheduledExecutorService.scheduleAtFixedRate(this::handleQueuedPackets, 0, 1, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::handleQueuedPackets, 0, 150, TimeUnit.MILLISECONDS);
     }
 
     public RelayHandler getRelayHandler() {
