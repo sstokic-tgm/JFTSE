@@ -73,18 +73,25 @@ public class MatchplayPacketHandler {
         GameSession gameSession = client.getActiveGameSession();
         if (gameSession == null) return;
 
-        client.setActiveGameSession(null);
-        gameSession.getClients().removeIf(x -> x.getRelayConnection().getId() == connection.getId());
-
         Room room = client.getActiveRoom();
         if (room != null) {
             // TODO: Joining player should be able to join running game replacing the disconnected one
             room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
         }
 
-        if (gameSession.getClients().size() == 0) {
-            this.gameSessionManager.removeGameSession(gameSession);
-        }
+        gameSession.getClients().forEach(c -> {
+            c.setActiveGameSession(null);
+
+            S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+            c.getConnection().sendTCP(backToRoomPacket);
+        });
+        gameSession.getClients().clear();
+        gameSessionManager.removeGameSession(gameSession);
+
+        this.relayHandler.removeClient(connection.getClient());
+
+        connection.setClient(null);
+        connection.close();
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
