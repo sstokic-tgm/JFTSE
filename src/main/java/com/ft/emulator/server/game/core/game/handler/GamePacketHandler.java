@@ -1132,6 +1132,7 @@ public class GamePacketHandler {
         }
 
         List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+        roomPlayerList.forEach(x -> x.setReady(false));
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
         this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(connection.getClient().getActiveRoom()));
@@ -1549,10 +1550,14 @@ public class GamePacketHandler {
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
             authenticationService.updateAccount(account);
 
+            Room room = connection.getClient().getActiveRoom();
             handleRoomPlayerChanges(connection);
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
+                if (room != null) {
+                    room.getRoomPlayerList().forEach(x -> x.setReady(false));
+                }
 
                 gameSession.getClients().forEach(c -> {
                     c.setActiveGameSession(null);

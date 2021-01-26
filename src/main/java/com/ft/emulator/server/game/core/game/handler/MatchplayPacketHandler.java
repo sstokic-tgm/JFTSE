@@ -83,6 +83,7 @@ public class MatchplayPacketHandler {
         if (room != null) {
             // TODO: Joining player should be able to join running game replacing the disconnected one
             room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
+            room.getRoomPlayerList().forEach(x -> x.setReady(false));
 
             this.relayHandler.getClientList().forEach(c -> {
                 RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
