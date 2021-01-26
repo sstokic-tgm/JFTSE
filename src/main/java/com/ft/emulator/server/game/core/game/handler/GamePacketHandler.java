@@ -1499,13 +1499,15 @@ public class GamePacketHandler {
                 else {
                     boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
                     byte serveType = ServeType.None;
-                    if (shouldServeBall)
+                    if (shouldServeBall) {
                         serveType = ServeType.ServeBall;
                         game.setServePlayer(rp);
+                    }
 
-                    if (!shouldServeBall && isSingles)
+                    if (!shouldServeBall && isSingles) {
                         serveType = ServeType.ReceiveBall;
                         game.setReceiverPlayer(rp);
+                    }
 
                     ServeInfo playerServeInfo = new ServeInfo();
                     playerServeInfo.setPlayerPosition(rp.getPosition());
