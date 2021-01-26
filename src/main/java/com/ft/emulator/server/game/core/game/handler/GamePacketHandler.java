@@ -1461,7 +1461,7 @@ public class GamePacketHandler {
                         winningPlayerPosition = 1;
 
                     S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
-                            new S2CMatchplayTeamWinsPoint(winningPlayerPosition, false, game.getPointsRedTeam(), game.getPointsBlueTeam());
+                            new S2CMatchplayTeamWinsPoint(winningPlayerPosition, matchplayPointPacket.getBallState(), game.getPointsRedTeam(), game.getPointsBlueTeam());
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                     if (anyTeamWonSet) {

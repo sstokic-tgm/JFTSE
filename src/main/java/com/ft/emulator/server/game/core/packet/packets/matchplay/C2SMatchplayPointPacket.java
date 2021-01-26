@@ -9,15 +9,15 @@ import lombok.Setter;
 public class C2SMatchplayPointPacket extends Packet {
     private byte pointsTeam;
     private byte unk0;
-    private byte unk1;
-    private byte unk2;
+    private byte ballState;
+    private byte playerPosition;
 
     public C2SMatchplayPointPacket(Packet packet) {
         super(packet);
 
         this.pointsTeam = this.readByte();
         this.unk0 = this.readByte();
-        this.unk1 = this.readByte();
-        this.unk2 = this.readByte(); // maybe player pos, but this had sometimes value 4
+        this.ballState = this.readByte();
+        this.playerPosition = this.readByte(); // 4 when ball state is invalid (e.g. out)
     }
 }

@@ -4,11 +4,11 @@ import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 
 public class S2CMatchplayTeamWinsPoint extends Packet {
-    public S2CMatchplayTeamWinsPoint(short positionOfWinningPlayer, boolean isBallOut, byte redTeamPoints, byte blueTeamPoints) {
+    public S2CMatchplayTeamWinsPoint(short positionOfWinningPlayer, byte ballState, byte redTeamPoints, byte blueTeamPoints) {
         super(PacketID.S2CMatchplayTeamWinsPoint);
 
         this.write(positionOfWinningPlayer);
-        this.write(isBallOut);
+        this.write(ballState);
         this.write(redTeamPoints);
         this.write(blueTeamPoints);
     }
