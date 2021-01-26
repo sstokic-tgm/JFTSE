@@ -88,6 +88,7 @@ public final class PacketID {
 
     public final static char S2CSetHost = 0x177E;
     public final static char S2CSetHostUnknown = 0x17DA;
+    public final static char S2CUnsetHost = 0x17D6;
 
     public final static char C2SRoomPositionChange = 0x1785;
     public final static char C2SRoomKickPlayer = 0x178B;

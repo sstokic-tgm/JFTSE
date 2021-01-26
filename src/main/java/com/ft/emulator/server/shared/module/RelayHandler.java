@@ -29,6 +29,10 @@ public class RelayHandler {
         clientList.remove(client);
     }
 
+    public void removeClient(int index) {
+        clientList.remove(index);
+    }
+
     public List<Client> getClientsInGameSession(int sessionId) {
         return clientList.stream()
                 .filter(c -> c.getActiveGameSession() != null

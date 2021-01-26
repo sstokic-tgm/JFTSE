@@ -1221,6 +1221,7 @@ public class GamePacketHandler {
             gameSession.setActiveMatchplayGame(new MatchplayBasicGame());
             gameSession.setPlayers(room.getPlayers());
             this.gameSessionManager.addGameSession(gameSession);
+            connection.getClient().setActiveGameSession(gameSession); // this fixes it, the thing is, we set the game session in relay handler, but lets do it double times
 
             List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
             clientsInRoom.forEach(c -> {
@@ -1475,6 +1476,12 @@ public class GamePacketHandler {
 
                     S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+
+                    if (rp.getPosition() == 0) {
+                        Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
+                        unsetHostPacket.write((byte) 0);
+                        packetEventHandler.push(packetEventHandler.createPacketEvent(client, unsetHostPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+                    }
                 }
                 else {
                     boolean isInServingTeam = isRedTeamServing && game.isRedTeam(rp.getPosition()) || !isRedTeamServing && game.isBlueTeam(rp.getPosition());

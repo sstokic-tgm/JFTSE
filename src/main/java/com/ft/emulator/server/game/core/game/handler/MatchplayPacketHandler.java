@@ -4,6 +4,7 @@ import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
+import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
@@ -77,6 +78,19 @@ public class MatchplayPacketHandler {
         if (room != null) {
             // TODO: Joining player should be able to join running game replacing the disconnected one
             room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
+
+            this.relayHandler.getClientList().forEach(c -> {
+                RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
+                        .filter(rp -> rp.getPosition() == 0 && rp.getPlayer().getId().equals(c.getActivePlayer().getId()))
+                        .findAny()
+                        .orElse(null);
+
+                if (roomPlayer != null) {
+                    Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
+                    unsetHostPacket.write((byte) 0);
+                    c.getConnection().sendTCP(unsetHostPacket);
+                }
+            });
         }
 
         gameSession.getClients().forEach(c -> {
@@ -88,7 +102,15 @@ public class MatchplayPacketHandler {
         gameSession.getClients().clear();
         gameSessionManager.removeGameSession(gameSession);
 
-        this.relayHandler.removeClient(connection.getClient());
+        for (int i = 0; i < this.relayHandler.getClientList().size(); i++) {
+            Connection relayConnection = this.relayHandler.getClientList().get(i).getRelayConnection();
+            if (relayConnection.getId() != connection.getId()) {
+                relayConnection.setClient(null);
+                relayConnection.close();
+            }
+
+            this.relayHandler.removeClient(i);
+        }
 
         connection.setClient(null);
         connection.close();
