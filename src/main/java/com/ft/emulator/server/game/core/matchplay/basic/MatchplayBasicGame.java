@@ -3,6 +3,7 @@ package com.ft.emulator.server.game.core.matchplay.basic;
 import com.ft.emulator.server.game.core.constants.ServeType;
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -81,55 +82,6 @@ public class MatchplayBasicGame extends MatchplayGame {
         return playerPos == 1 || playerPos == 3;
     }
 
-    public byte getServeType(boolean willServeBall, boolean isInServingTeam, Point playerLocation) {
-        if (willServeBall) {
-            return ServeType.ServeBall;
-        }
-
-        if (!isInServingTeam && Math.abs(playerLocation.y) == 125) {
-            return ServeType.ReceiveBall;
-        }
-
-        return ServeType.None;
-    }
-
-    public Point getStartingLocation(boolean isSingles, boolean isInServingTeam, boolean willServeBall, List<Point> playerLocationsOnMap, int playerPosition) {
-        Point playerLocation = playerLocationsOnMap.get(playerPosition);
-        if (isSingles) {
-            return playerLocation;
-        }
-
-        long servingPosY = 125;
-        long nonServingPosY = 75;
-        long posY = playerLocation.y;
-        if (!isInServingTeam) {
-            if (playerLocation.y == servingPosY) {
-                posY = nonServingPosY;
-            }
-            else if (playerLocation.y == -servingPosY) {
-                posY = -nonServingPosY;
-            }
-            else if (playerLocation.y == nonServingPosY) {
-                posY = servingPosY;
-            }
-            else if (playerLocation.y == -nonServingPosY) {
-                posY = -servingPosY;
-            }
-
-            playerLocation.setLocation(playerLocation.x, posY);
-            return playerLocation;
-        }
-
-        if (willServeBall) {
-            posY = playerLocation.y > 0 ? servingPosY : -servingPosY;
-        } else {
-            posY = playerLocation.y > 0 ? nonServingPosY : -nonServingPosY;
-        }
-
-        playerLocation.setLocation(playerLocation.x, posY);
-        return playerLocation;
-    }
-
     public Point invertPointX(Point point) {
         return new Point(point.x * (-1), point.y);
     }
@@ -163,6 +115,54 @@ public class MatchplayBasicGame extends MatchplayGame {
         } else {
             return playerPosition == timesCourtChanged;
         }
+    }
+
+    public void setPlayerLocationsForDoubles(List<ServeInfo> serveInfo) {
+        long outerFieldPosY = 125;
+        long innerFieldPosY = 75;
+
+        ServeInfo server = serveInfo.stream().filter(x -> x.getServeType() == ServeType.ServeBall).findFirst().orElse(null);
+        if (server == null) return;
+
+        Point serverLocation = server.getPlayerStartLocation();
+        serverLocation.setLocation(serverLocation.x, this.getCorrectCourtPositionY(serverLocation.y, outerFieldPosY));
+
+        ServeInfo nonServer = serveInfo.stream()
+                .filter(x -> this.areInSameTeam(server.getPlayerPosition(), x.getPlayerPosition()) && x.getPlayerStartLocation().x == serverLocation.x * (-1))
+                .findFirst()
+                .orElse(null);
+        if (nonServer != null) {
+            Point nonServerStartLocation = nonServer.getPlayerStartLocation();
+            nonServer.getPlayerStartLocation().setLocation(nonServerStartLocation.x, this.getCorrectCourtPositionY(nonServerStartLocation.y, innerFieldPosY));
+        }
+
+        ServeInfo receiver = serveInfo.stream()
+                .filter(x -> !this.areInSameTeam(server.getPlayerPosition(), x.getPlayerPosition()) && x.getPlayerStartLocation().x == serverLocation.x * (-1))
+                .findFirst()
+                .orElse(null);
+        if (receiver != null) {
+            Point receiverStartLocation = receiver.getPlayerStartLocation();
+            receiver.getPlayerStartLocation().setLocation(receiverStartLocation.x, this.getCorrectCourtPositionY(receiverStartLocation.y, outerFieldPosY));
+            receiver.setServeType(ServeType.ReceiveBall);
+        }
+
+        ServeInfo nonReceiver = serveInfo.stream()
+                .filter(x -> !this.areInSameTeam(server.getPlayerPosition(), x.getPlayerPosition()) && x.getPlayerStartLocation().x == serverLocation.x)
+                .findFirst()
+                .orElse(null);
+        if (nonReceiver != null) {
+            Point nonReceiverPlayerStartLocation = nonReceiver.getPlayerStartLocation();
+            nonReceiver.getPlayerStartLocation().setLocation(nonReceiverPlayerStartLocation.x, this.getCorrectCourtPositionY(nonReceiverPlayerStartLocation.y, innerFieldPosY));
+        }
+    }
+
+    private boolean areInSameTeam(int playerPosition, int playerPosition1) {
+        return this.isRedTeam(playerPosition) && this.isRedTeam(playerPosition1) ||
+                this.isBlueTeam(playerPosition) && this.isBlueTeam(playerPosition1);
+    }
+
+    private long getCorrectCourtPositionY(long playerPositionY, long targetYPosition) {
+        return playerPositionY > 0 ? targetYPosition : -targetYPosition;
     }
 
     private boolean isEven(int number) {

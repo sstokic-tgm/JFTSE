@@ -1497,24 +1497,39 @@ public class GamePacketHandler {
                     this.sendDelayedRoomInformationRefreshToClient(client, 12100);
                 }
                 else {
-                    boolean isInServingTeam = isRedTeamServing && game.isRedTeam(rp.getPosition()) || !isRedTeamServing && game.isBlueTeam(rp.getPosition());
                     boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
-                    Point startingLocation = game.getStartingLocation(isSingles, isInServingTeam, shouldServeBall, gameSession.getPlayerLocationsOnMap(), rp.getPosition());
-                    byte serveType = game.getServeType(shouldServeBall, isInServingTeam, startingLocation);
-                    if (serveType == ServeType.ServeBall)
+                    byte serveType = ServeType.None;
+                    if (shouldServeBall)
+                        serveType = ServeType.ServeBall;
                         game.setServePlayer(rp);
-                    else if (serveType == ServeType.ReceiveBall)
+
+                    if (!shouldServeBall && isSingles)
+                        serveType = ServeType.ReceiveBall;
                         game.setReceiverPlayer(rp);
 
                     ServeInfo playerServeInfo = new ServeInfo();
                     playerServeInfo.setPlayerPosition(rp.getPosition());
-                    playerServeInfo.setPlayerStartLocation(startingLocation);
+                    playerServeInfo.setPlayerStartLocation(gameSession.getPlayerLocationsOnMap().get(rp.getPosition()));
                     playerServeInfo.setServeType(serveType);
                     serveInfo.add(playerServeInfo);
                 }
             }
 
             if (serveInfo.size() > 0) {
+                if (!isSingles) {
+                    game.setPlayerLocationsForDoubles(serveInfo);
+                    ServeInfo receiver = serveInfo.stream()
+                            .filter(x -> x.getServeType() == ServeType.ReceiveBall)
+                            .findFirst()
+                            .orElse(null);
+                    if (receiver != null) {
+                        roomPlayerList.stream()
+                                .filter(x -> x.getPosition() == receiver.getPlayerPosition())
+                                .findFirst()
+                                .ifPresent(x -> game.setReceiverPlayer(x));
+                    }
+                }
+
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
                 for (Client client : clients)
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
