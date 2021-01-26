@@ -827,20 +827,25 @@ public class GamePacketHandler {
             C2SChatLobbyReqPacket chatLobbyReqPacket = new C2SChatLobbyReqPacket(packet);
             S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), connection.getClient().getActivePlayer().getName(), chatLobbyReqPacket.getMessage());
 
-            this.getGameHandler().getClientList().forEach(cl -> cl.getConnection().sendTCP(chatLobbyAnswerPacket));
+            List<Client> clientList = this.getGameHandler().getClientList().stream()
+                    .filter(Client::isInLobby)
+                    .collect(Collectors.toList());
+            clientList.forEach(c -> c.getConnection().sendTCP(chatLobbyAnswerPacket));
         } break;
         case PacketID.C2SChatRoomReq: {
             C2SChatRoomReqPacket chatRoomReqPacket = new C2SChatRoomReqPacket(packet);
             S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getActivePlayer().getName(), chatRoomReqPacket.getMessage());
 
-            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+            Room room = connection.getClient().getActiveRoom();
+            if (room != null)
+                this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
         } break;
         case PacketID.C2SWhisperReq: {
             C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
             S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
             this.getGameHandler().getClientList().stream()
-                .filter(cl -> cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
+                .filter(cl -> cl.getActivePlayer() != null && cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
                 .findAny()
                 .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
 
