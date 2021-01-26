@@ -880,7 +880,7 @@ public class GamePacketHandler {
         room.setRoomId(this.getRoomId());
         room.setRoomName(roomCreateRequestPacket.getRoomName());
         room.setAllowBattlemon(roomCreateRequestPacket.getAllowBattlemon());
-        room.setMode(roomCreateRequestPacket.getMode());
+        room.setMode(roomCreateRequestPacket.getMode() != GameMode.BASIC ? (byte) GameMode.BASIC : roomCreateRequestPacket.getMode());
         room.setRule(roomCreateRequestPacket.getRule());
         room.setPlayers(roomCreateRequestPacket.getPlayers());
         room.setPrivate(roomCreateRequestPacket.isPrivate());
@@ -907,7 +907,7 @@ public class GamePacketHandler {
         room.setRoomId(this.getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
         room.setAllowBattlemon(roomQuickCreateRequestPacket.getAllowBattlemon());
-        room.setMode(roomQuickCreateRequestPacket.getMode());
+        room.setMode(roomQuickCreateRequestPacket.getMode() != GameMode.BASIC ? (byte) GameMode.BASIC : roomQuickCreateRequestPacket.getMode());
         room.setRule((byte) 0);
         room.setPlayers(playerSize == 0 ? 2 : playerSize);
         room.setPrivate(false);
