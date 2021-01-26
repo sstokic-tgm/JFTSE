@@ -1493,7 +1493,7 @@ public class GamePacketHandler {
                         packetEventHandler.push(packetEventHandler.createPacketEvent(client, unsetHostPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                     }
 
-                    this.sendDelayedRoomInformationRefreshToClient(client);
+                    this.sendDelayedRoomInformationRefreshToClient(client, 12100);
                 }
                 else {
                     boolean isInServingTeam = isRedTeamServing && game.isRedTeam(rp.getPosition()) || !isRedTeamServing && game.isBlueTeam(rp.getPosition());
@@ -1559,7 +1559,7 @@ public class GamePacketHandler {
 
                     S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                     c.getConnection().sendTCP(backToRoomPacket);
-                    this.sendDelayedRoomInformationRefreshToClient(c);
+                    this.sendDelayedRoomInformationRefreshToClient(c, 100);
                 });
                 gameSession.getClients().clear();
                 this.gameSessionManager.removeGameSession(gameSession);
@@ -1698,15 +1698,15 @@ public class GamePacketHandler {
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(room));
     }
 
-    private void sendDelayedRoomInformationRefreshToClient(Client client) {
+    private void sendDelayedRoomInformationRefreshToClient(Client client, long eventFireTime) {
         if (client == null) return;
 
         Room currentClientRoom = client.getActiveRoom();
         if (currentClientRoom != null) {
             S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
             S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
-            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
-            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomPlayerInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
+            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomInformationPacket, PacketEventType.FIRE_DELAYED, eventFireTime), PacketEventHandler.ServerClient.SERVER);
+            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomPlayerInformationPacket, PacketEventType.FIRE_DELAYED, eventFireTime), PacketEventHandler.ServerClient.SERVER);
         }
     }
 
