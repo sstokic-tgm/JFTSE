@@ -1,12 +1,16 @@
 package com.ft.emulator.server.game.core.game.handler;
 
+import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
+import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
+import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomInformationPacket;
+import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
@@ -25,6 +29,7 @@ import java.util.List;
 public class MatchplayPacketHandler {
     private final GameSessionManager gameSessionManager;
     private final RelayHandler relayHandler;
+    private final PacketEventHandler packetEventHandler;
 
     @PostConstruct
     public void init() {
@@ -98,7 +103,15 @@ public class MatchplayPacketHandler {
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
             c.getConnection().sendTCP(backToRoomPacket);
+            Room currentClientRoom = c.getActiveRoom();
+            if (currentClientRoom != null) {
+                S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
+                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
+                packetEventHandler.push(packetEventHandler.createPacketEvent(c.getConnection().getClient(), roomInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
+                packetEventHandler.push(packetEventHandler.createPacketEvent(c.getConnection().getClient(), roomPlayerInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
+            }
         });
+
         gameSession.getClients().clear();
         gameSessionManager.removeGameSession(gameSession);
 

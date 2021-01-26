@@ -1319,6 +1319,11 @@ public class GamePacketHandler {
                     e.printStackTrace();
                 }
 
+                Room threadRoom = connection.getClient().getActiveRoom();
+                if (threadRoom == null || threadRoom.getStatus() != RoomStatus.Running) {
+                    return;
+                }
+
                 Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
                 sendPacketToAllInRoom(connection, removeBlackBarsPacket);
 
@@ -1487,6 +1492,8 @@ public class GamePacketHandler {
                         unsetHostPacket.write((byte) 0);
                         packetEventHandler.push(packetEventHandler.createPacketEvent(client, unsetHostPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                     }
+
+                    this.sendDelayedRoomInformationRefreshToClient(client);
                 }
                 else {
                     boolean isInServingTeam = isRedTeamServing && game.isRedTeam(rp.getPosition()) || !isRedTeamServing && game.isBlueTeam(rp.getPosition());
@@ -1552,6 +1559,7 @@ public class GamePacketHandler {
 
                     S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                     c.getConnection().sendTCP(backToRoomPacket);
+                    this.sendDelayedRoomInformationRefreshToClient(c);
                 });
                 gameSession.getClients().clear();
                 this.gameSessionManager.removeGameSession(gameSession);
@@ -1688,6 +1696,18 @@ public class GamePacketHandler {
         connection.sendTCP(roomInformationPacket);
         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(room));
+    }
+
+    private void sendDelayedRoomInformationRefreshToClient(Client client) {
+        if (client == null) return;
+
+        Room currentClientRoom = client.getActiveRoom();
+        if (currentClientRoom != null) {
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
+            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
+            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomPlayerInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
+        }
     }
 
     private int getRoomMode(Room room) {
