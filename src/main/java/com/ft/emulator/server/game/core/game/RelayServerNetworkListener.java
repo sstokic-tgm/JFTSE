@@ -53,6 +53,6 @@ public class RelayServerNetworkListener implements ConnectionListener {
     }
 
     public void onException(Connection connection, Exception exception) {
-        log.error(exception.getMessage());
+        log.error(exception.getMessage(), exception);
     }
 }

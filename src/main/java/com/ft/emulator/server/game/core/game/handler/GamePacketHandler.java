@@ -1510,20 +1510,21 @@ public class GamePacketHandler {
     }
 
     public void handleDisconnectPacket(Connection connection, Packet packet) {
+        if (connection.getClient().getAccount() != null) {
+            // reset pocket
+            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
+            playerPocketList.forEach(pp -> {
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket((int) pp.getId().longValue());
+                connection.sendTCP(inventoryItemRemoveAnswerPacket);
+            });
 
-        // reset pocket
-        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
-        playerPocketList.forEach(pp -> {
-            S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket((int) pp.getId().longValue());
-            connection.sendTCP(inventoryItemRemoveAnswerPacket);
-        });
+            handleRoomPlayerChanges(connection);
 
-        handleRoomPlayerChanges(connection);
-
-        // reset status
-        Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-        account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-        authenticationService.updateAccount(account);
+            // reset status
+            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+            authenticationService.updateAccount(account);
+        }
 
         S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
         connection.sendTCP(disconnectAnswerPacket);
