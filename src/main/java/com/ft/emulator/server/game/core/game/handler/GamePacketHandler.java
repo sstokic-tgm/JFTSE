@@ -78,6 +78,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -352,8 +353,13 @@ public class GamePacketHandler {
             S2CInventorySellItemCheckAnswerPacket inventorySellItemCheckAnswerPacket = new S2CInventorySellItemCheckAnswerPacket(status);
             connection.sendTCP(inventorySellItemCheckAnswerPacket);
 
-            S2CInventorySellItemAnswerPacket inventorySellItemAnswerPacket = new S2CInventorySellItemAnswerPacket((char) playerPocket.getItemCount().intValue(), itemPocketId);
-            connection.sendTCP(inventorySellItemAnswerPacket);
+            List<Integer> itemsCount = IntStream.range(0, playerPocket.getItemCount().intValue()).boxed().collect(Collectors.toList());
+            StreamUtils.batches(itemsCount, 500)
+                .forEach(itemCount -> {
+                    S2CInventorySellItemAnswerPacket inventorySellItemAnswerPacket = new S2CInventorySellItemAnswerPacket((char) itemCount.size(), itemPocketId);
+                    connection.sendTCP(inventorySellItemAnswerPacket);
+                });
+
 
             playerPocketService.remove(playerPocket.getId());
             pocket = pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
