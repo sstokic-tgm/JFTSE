@@ -1462,14 +1462,14 @@ public class GamePacketHandler {
                 }
 
                 if (!game.isFinished()) {
-                    short winningPlayerPosition = -1;
-                    if (pointsTeamRed != game.getPointsRedTeam())
-                        winningPlayerPosition = 0;
-                    else if (pointsTeamBlue != game.getPointsBlueTeam())
-                        winningPlayerPosition = 1;
+                    short pointingTeamPosition = -1;
+                    if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
+                        pointingTeamPosition = 0;
+                    else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
+                        pointingTeamPosition = 1;
 
                     S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint =
-                            new S2CMatchplayTeamWinsPoint(winningPlayerPosition, matchplayPointPacket.getBallState(), game.getPointsRedTeam(), game.getPointsBlueTeam());
+                            new S2CMatchplayTeamWinsPoint(pointingTeamPosition, matchplayPointPacket.getBallState(), game.getPointsRedTeam(), game.getPointsBlueTeam());
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                     if (anyTeamWonSet) {
