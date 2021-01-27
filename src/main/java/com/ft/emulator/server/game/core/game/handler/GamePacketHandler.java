@@ -1281,7 +1281,7 @@ public class GamePacketHandler {
                 .filter(x -> x.getPosition() == 0)
                 .findFirst().orElse(null);
         Client clientToHostGame = gameHandler.getClientsInRoom(room.getRoomId()).stream()
-                .filter(x -> playerInSlot0 != null && x.getActivePlayer().getId() == playerInSlot0.getPlayer().getId())
+                .filter(x -> playerInSlot0 != null && x.getActivePlayer().getId().equals(playerInSlot0.getPlayer().getId()))
                 .findFirst()
                 .orElse(connection.getClient());
 
