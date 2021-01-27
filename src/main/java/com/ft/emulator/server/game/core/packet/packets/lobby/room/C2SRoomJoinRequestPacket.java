@@ -8,10 +8,13 @@ import lombok.Setter;
 @Setter
 public class C2SRoomJoinRequestPacket extends Packet {
     private short roomId;
+    private String password;
 
     public C2SRoomJoinRequestPacket(Packet packet) {
         super(packet);
 
         this.roomId = this.readShort();
+        this.readByte();
+        this.password = this.readUnicodeString();
     }
 }

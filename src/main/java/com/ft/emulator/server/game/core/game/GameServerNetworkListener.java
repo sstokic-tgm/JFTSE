@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Log4j2
 public class GameServerNetworkListener implements ConnectionListener {
-
     @Autowired
     private GamePacketHandler gamePacketHandler;
 
@@ -216,6 +215,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleRoomPositionChangeRequestPacket(connection, packet);
                 break;
 
+            case PacketID.C2SRoomKickPlayer:
+                gamePacketHandler.handleRoomKickPlayerRequestPacket(connection, packet);
+                break;
+
             case PacketID.C2SRoomSlotCloseReq:
                 gamePacketHandler.handleRoomSlotCloseRequestPacket(connection, packet);
                 break;
@@ -240,6 +243,18 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleGameAnimationSkipTriggeredPacket(connection, packet);
                 break;
 
+            case PacketID.D2SDevPacket:
+                gamePacketHandler.handleDevPacket(connection, packet);
+                break;
+
+            case PacketID.C2SMatchplayPoint:
+                gamePacketHandler.handleMatchplayPointPacket(connection, packet);
+                break;
+
+            case 0x1773:
+                gamePacketHandler.handle1773Packet(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..
@@ -256,6 +271,6 @@ public class GameServerNetworkListener implements ConnectionListener {
     }
 
     public void onException(Connection connection, Exception exception) {
-        log.error(exception.getMessage());
+        log.error(exception.getMessage(), exception);
     }
 }

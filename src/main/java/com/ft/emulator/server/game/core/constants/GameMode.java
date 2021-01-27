@@ -1,4 +1,4 @@
-package com.ft.emulator.server.game.core.singleplay.challenge;
+package com.ft.emulator.server.game.core.constants;
 
 public abstract class GameMode {
     public final static short ALL = -2;

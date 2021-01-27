@@ -10,7 +10,7 @@ import com.ft.emulator.server.database.repository.challenge.ChallengeRepository;
 import com.ft.emulator.server.database.repository.item.*;
 import com.ft.emulator.server.database.repository.level.LevelExpRepository;
 import com.ft.emulator.server.database.repository.tutorial.TutorialRepository;
-import com.ft.emulator.server.game.core.singleplay.challenge.GameMode;
+import com.ft.emulator.server.game.core.constants.GameMode;
 import lombok.extern.log4j.Log4j2;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;

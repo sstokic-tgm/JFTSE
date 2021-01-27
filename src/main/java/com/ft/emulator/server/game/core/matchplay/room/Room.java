@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
 import com.ft.emulator.server.game.core.constants.RoomPositionState;
+import com.ft.emulator.server.game.core.constants.RoomStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,13 +14,13 @@ import java.util.List;
 public class Room {
     public Room() {
         roomPlayerList = new ArrayList<>();
-        positions = Arrays.asList(new Short[]{
+        positions = Arrays.asList(
                 RoomPositionState.Free, RoomPositionState.Free,
                 RoomPositionState.Free, RoomPositionState.Free,
                 RoomPositionState.Locked, RoomPositionState.Free,
                 RoomPositionState.Free, RoomPositionState.Free,
-                RoomPositionState.Free
-        });
+                RoomPositionState.Free);
+        status = RoomStatus.NotRunning;
     }
 
     private short roomId;

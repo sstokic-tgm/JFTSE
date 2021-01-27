@@ -37,8 +37,8 @@ public class PlayerService {
     }
 
     public Player findByName(String name) {
-        Optional<Player> player = playerRepository.findByName(name);
-        return player.orElse(null);
+        List<Player> playerList = playerRepository.findAllByName(name);
+        return playerList.size() != 0 ? playerList.get(0) : null;
     }
 
     public Player updateMoney(Player player, int gold) {
