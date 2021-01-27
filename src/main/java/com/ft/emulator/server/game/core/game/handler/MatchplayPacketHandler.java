@@ -58,11 +58,15 @@ public class MatchplayPacketHandler {
         GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(sessionId);
         if (gameSession != null) {
             Client playerClient = gameSession.getClientByPlayerId(playerId);
-            playerClient.setActiveGameSession(gameSession);
-            playerClient.setRelayConnection(connection);
-            connection.setClient(playerClient);
+            Client client = new Client();
+            client.setActiveRoom(playerClient.getActiveRoom());
+            client.setActivePlayer(playerClient.getActivePlayer());
+            client.setActiveGameSession(gameSession);
+            client.setConnection(playerClient.getConnection());
+            client.setRelayConnection(connection);
 
-            this.relayHandler.addClient(playerClient);
+            connection.setClient(client);
+            this.relayHandler.addClient(client);
 
             Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
             answer.write((byte) 0);
@@ -104,30 +108,17 @@ public class MatchplayPacketHandler {
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
             c.getConnection().sendTCP(backToRoomPacket);
-            Room currentClientRoom = c.getActiveRoom();
-            if (currentClientRoom != null) {
-                S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
-                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
-                packetEventHandler.push(packetEventHandler.createPacketEvent(c.getConnection().getClient(), roomInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
-                packetEventHandler.push(packetEventHandler.createPacketEvent(c.getConnection().getClient(), roomPlayerInformationPacket, PacketEventType.FIRE_DELAYED, 100), PacketEventHandler.ServerClient.SERVER);
-            }
         });
 
-        gameSession.getClients().clear();
         gameSessionManager.removeGameSession(gameSession);
 
         for (int i = 0; i < this.relayHandler.getClientList().size(); i++) {
             Connection relayConnection = this.relayHandler.getClientList().get(i).getRelayConnection();
-            if (relayConnection.getId() != connection.getId()) {
-                relayConnection.setClient(null);
-                relayConnection.close();
-            }
+            relayConnection.setClient(null);
+            relayConnection.close();
 
             this.relayHandler.removeClient(i);
         }
-
-        connection.setClient(null);
-        connection.close();
     }
 
     public void handleUnknown(Connection connection, Packet packet) {

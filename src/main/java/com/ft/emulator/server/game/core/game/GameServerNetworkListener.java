@@ -251,6 +251,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleMatchplayPointPacket(connection, packet);
                 break;
 
+            case 0x1773:
+                gamePacketHandler.handle1773Packet(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..

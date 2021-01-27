@@ -1222,12 +1222,14 @@ public class GamePacketHandler {
 
             GameSession gameSession = new GameSession();
             gameSession.setSessionId(room.getRoomId());
-            gameSession.setClients(clientsInRoom);
             // set specific matchplay game mode object, for now we only support basic single
             gameSession.setActiveMatchplayGame(new MatchplayBasicGame());
             gameSession.setPlayers(room.getPlayers());
+
+            clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
+
+            gameSession.setClients(clientsInRoom);
             this.gameSessionManager.addGameSession(gameSession);
-            connection.getClient().setActiveGameSession(gameSession); // this fixes it, the thing is, we set the game session in relay handler, but lets do it double times
 
             List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
             clientsInRoom.forEach(c -> {
@@ -1493,8 +1495,6 @@ public class GamePacketHandler {
                         unsetHostPacket.write((byte) 0);
                         packetEventHandler.push(packetEventHandler.createPacketEvent(client, unsetHostPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                     }
-
-                    this.sendDelayedRoomInformationRefreshToClient(client, 12100);
                 }
                 else {
                     boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
@@ -1581,7 +1581,6 @@ public class GamePacketHandler {
 
                     S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                     c.getConnection().sendTCP(backToRoomPacket);
-                    this.sendDelayedRoomInformationRefreshToClient(c, 100);
                 });
                 gameSession.getClients().clear();
                 this.gameSessionManager.removeGameSession(gameSession);
@@ -1592,6 +1591,25 @@ public class GamePacketHandler {
 
         connection.setClient(null);
         connection.close();
+    }
+
+    public void handle1773Packet(Connection connection, Packet packet) {
+        Room currentClientRoom = connection.getClient().getActiveRoom();
+
+        short position = currentClientRoom.getRoomPlayerList().stream()
+                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findAny()
+                .get()
+                .getPosition();
+
+        Packet answer = new Packet((char) 0x1774);
+        answer.write(position);
+        connection.sendTCP(answer);
+
+        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
+        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
+        connection.sendTCP(roomInformationPacket);
+        connection.sendTCP(roomPlayerInformationPacket);
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
@@ -1678,7 +1696,8 @@ public class GamePacketHandler {
         if (connection.getClient().getActiveRoom() != null) {
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
             Optional<RoomPlayer> roomPlayer = roomPlayerList.stream()
-                    .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId())).findFirst();
+                    .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    .findFirst();
 
             final short playerPosition = roomPlayer.get().getPosition();
             boolean isMaster = roomPlayer.isPresent() && roomPlayer.get().isMaster();
@@ -1704,10 +1723,16 @@ public class GamePacketHandler {
             });
 
             S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.gameHandler.getRoomList());
-            this.gameHandler.getClientsInLobby().forEach(c -> c.getConnection().sendTCP(roomListAnswerPacket));
+            this.gameHandler.getClientsInLobby().forEach(c -> {
+                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    c.getConnection().sendTCP(roomListAnswerPacket);
+            });
 
             S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) -1);
-            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPositionChangeAnswerPacket));
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> {
+                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
+            });
 
             connection.getClient().setActiveRoom(null);
         }
@@ -1718,18 +1743,6 @@ public class GamePacketHandler {
         connection.sendTCP(roomInformationPacket);
         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(room));
-    }
-
-    private void sendDelayedRoomInformationRefreshToClient(Client client, long eventFireTime) {
-        if (client == null) return;
-
-        Room currentClientRoom = client.getActiveRoom();
-        if (currentClientRoom != null) {
-            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
-            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomInformationPacket, PacketEventType.FIRE_DELAYED, eventFireTime), PacketEventHandler.ServerClient.SERVER);
-            packetEventHandler.push(packetEventHandler.createPacketEvent(client.getConnection().getClient(), roomPlayerInformationPacket, PacketEventType.FIRE_DELAYED, eventFireTime), PacketEventHandler.ServerClient.SERVER);
-        }
     }
 
     private int getRoomMode(Room room) {
