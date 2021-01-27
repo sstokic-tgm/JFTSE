@@ -22,7 +22,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write(roomPlayer.getPosition());
             this.write(player.getName());
             this.write(player.getLevel());
-            this.write((byte) 0);
+            this.write(player.getAccount().getGameMaster());
             this.write(roomPlayer.isMaster());
             this.write(roomPlayer.isReady());
             this.write(roomPlayer.isFitting());

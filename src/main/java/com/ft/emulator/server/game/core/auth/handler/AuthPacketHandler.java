@@ -213,10 +213,12 @@ public class AuthPacketHandler {
     }
 
     public void handleDisconnectPacket(Connection connection, Packet packet) {
-        // reset status
-        Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-        account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-        authenticationService.updateAccount(account);
+        if (connection.getClient().getAccount() != null) {
+            // reset status
+            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+            authenticationService.updateAccount(account);
+        }
 
         S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
         connection.sendTCP(disconnectAnswerPacket);

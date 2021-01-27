@@ -5,6 +5,7 @@ public final class PacketID {
     public final static char C2SLoginRequest = 0x0FA1;
     public final static char S2CLoginAnswerPacket = 0x0FA2;
     public final static char C2SHeartbeat = 0x0FA3;
+    public final static char S2CServerNotice = 0x0FA6;
     public final static char C2SDisconnectRequest = 0x0FA7;
     public final static char S2CDisconnectAnswer = 0xFA8;
     public final static char C2SAuthLoginData = 0xFA9;
@@ -28,12 +29,12 @@ public final class PacketID {
     public final static char C2SRoomCreateQuick = 0x138f;
     public final static char S2CRoomCreateAnswer = 0x138A;
     public final static char C2SRoomNameChange = 0x1791;
-    public final static char C2SRoomGameModeChange = 0x18b2;
-    public final static char C2SRoomIsPrivateChange = 0x178e;
-    public final static char C2SRoomLevelRangeChange = 0x178f;
+    public final static char C2SRoomGameModeChange = 0x18B2;
+    public final static char C2SRoomIsPrivateChange = 0x178E;
+    public final static char C2SRoomLevelRangeChange = 0x178F;
     public final static char C2SRoomSkillFreeChange = 0x1795;
     public final static char C2SRoomAllowBattlemonChange = 0x1793;
-    public final static char C2SRoomQuickSlotChange = 0x17a2;
+    public final static char C2SRoomQuickSlotChange = 0x17A2;
     public final static char C2SRoomJoin = 0x138B;
     public final static char S2CRoomJoinAnswer = 0x138C;
     public final static char C2SRoomLeave = 0x1771;
@@ -46,22 +47,51 @@ public final class PacketID {
     public final static char C2SLobbyUserListRequest = 0x1707;
     public final static char S2CLobbyUserListAnswer = 0x1708;
 
+    public final static char C2SLobbyUserInfoRequest = 0x139C;
+    public final static char S2CLobbyUserInfoAnswer = 0x139D;
+    public final static char C2SLobbyUserInfoClothRequest = 0x1BDF;
+    public final static char S2CLobbyUserInfoClothAnswer = 0x1BE0;
+
     public final static char S2CRoomInformation = 0x177A;
 
     public final static char C2SRoomReadyChange = 0x1775;
     public final static char C2SRoomTriggerStartGame = 0x177B;
 
     // Not really sure what this does but it let the annoying "Starting game..." window disappear for room master
-    public final static char S2CRoomStartGameAck = 0x17e6;
-    public final static char S2CRoomStartGameCancelled = 0x17f3;
-    public final static char S2CRoomStartGame = 0x17de;
+    public final static char S2CRoomStartGameAck = 0x17E6;
+
+    public final static char S2CRoomStartGameCancelled = 0x17F3;
+    public final static char S2CRoomStartGame = 0x17DE;
     public final static char C2SGameAnimationSkipReady = 0x17DD;
     public final static char S2CGameAnimationAllowSkip = 0x17E0;
-    public final static char C2SGameAnimationSkipTriggered = 0x17e1;
-    public final static char S2CGameAnimationSkip = 0x17e2;
-    public final static char S2CGameTcpServerData = 0x3EA;
+    public final static char C2SGameAnimationSkipTriggered = 0x17E1;
+    public final static char S2CGameAnimationSkip = 0x17E2;
+    public final static char S2CGameEndLevelUpPlayerStats = 0x17E3;
+    public final static char S2CGameDisplayPlayerStats = 0x17E4;
+    public final static char S2CGameRemoveBlackBars = 0x183C;
+    public final static char S2CGameNetworkSettings = 0x3EA;
+    public final static char S2CGameSetNameColors = 0x183A;
+    public final static char C2SRelayPacketToAllClients = 0x414;
+    public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ED;
+    public final static char S2CMatchplayAckPlayerInformation = 0x3EF;
+    public final static char S2CMatchplayStartServe = 0x183E;
+    public final static char C2SMatchplayPoint = 0x183F;
+    public final static char S2CMatchplayTeamWinsPoint = 0x1840;
+    public final static char S2CMatchplayTeamWinsSet = 0x1842 ;
+    public final static char S2CMatchplayEndBasicGame = 0x26FC; // Not really sure if name really corresponds to packet.
+    public final static char S2CMatchPlaySetExperienceGainInfoData = 0x1846;
+    public final static char S2CMatchplaySetGameResultData = 0x1848;
+    public final static char S2CMatchplayBackToRoom = 0x1780;
+    public final static char C2SGameServerConnectionProblem = 0x3F1;
+    public final static char C2CBallAnimationPacket = 0x10E3;
+    public final static char C2CPlayerAnimationPacket = 0x32C9;
+
+    public final static char S2CSetHost = 0x177E;
+    public final static char S2CSetHostUnknown = 0x17DA;
+    public final static char S2CUnsetHost = 0x17D6;
 
     public final static char C2SRoomPositionChange = 0x1785;
+    public final static char C2SRoomKickPlayer = 0x178B;
     public final static char S2CRoomPositionChangeAnswer = 0x1786;
     public final static char C2SRoomMapChange = 0x1788;
     public final static char S2CRoomMapChangeAnswer = 0x1789;
@@ -139,4 +169,6 @@ public final class PacketID {
 
     public final static char C2SLobbyJoin = 0x237A;
     public final static char C2SLobbyLeave = 0x2379;
+
+    public final static char D2SDevPacket = 0x555;
 }

@@ -105,6 +105,11 @@ public class Packet {
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 1);
             this.dataLength += (char)1;
         }
+        else if (element instanceof Float) {
+            dataElement = BitKit.getBytes((float)element);
+            BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 4);
+            this.dataLength += (char)4;
+        }
     }
 
     public byte[] addByteToArray(byte[] byteArray, byte newByte) {
