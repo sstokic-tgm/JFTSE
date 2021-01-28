@@ -1,6 +1,5 @@
 package com.ft.emulator.server.game.core.game.handler;
 
-import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
@@ -9,8 +8,6 @@ import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
-import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomInformationPacket;
-import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;

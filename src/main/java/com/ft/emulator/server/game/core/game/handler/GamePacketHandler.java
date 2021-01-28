@@ -1014,9 +1014,10 @@ public class GamePacketHandler {
     }
 
     public void handleRoomJoinRequestPacket(Connection connection, Packet packet) {
-        C2SRoomJoinRequestPacket roomJoinRequestPacket = new C2SRoomJoinRequestPacket(packet);
+        List<Room> roomList = this.gameHandler.getRoomList();
+        C2SRoomJoinRequestPacket roomJoinRequestPacket = new C2SRoomJoinRequestPacket(packet, roomList);
 
-        Room room = this.gameHandler.getRoomList().stream()
+        Room room = roomList.stream()
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
                 .orElse(null);
