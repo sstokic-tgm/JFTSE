@@ -150,14 +150,19 @@ public class Packet {
 
     public String readUnicodeString() {
         String result = "";
-        int stringLength = indexOf(this.data, new byte[] {0x00, 0x00}, this.readPosition) + 1 - this.readPosition;
 
-        if (stringLength > 1) {
-            result = new String(this.data, this.readPosition, stringLength, StandardCharsets.UTF_16LE);
-            this.readPosition += stringLength + 2;
+        if (this.data[this.readPosition + 1] == 0x00) {
+            int stringLength = indexOf(this.data, new byte[]{0x00, 0x00}, this.readPosition) + 1 - this.readPosition;
+
+            if (stringLength > 1) {
+                result = new String(this.data, this.readPosition, stringLength, StandardCharsets.UTF_16LE);
+                this.readPosition += stringLength + 2;
+            } else {
+                this.readPosition += 2;
+            }
         }
         else {
-            this.readPosition += 2;
+            result = this.readString();
         }
 
         return result;
