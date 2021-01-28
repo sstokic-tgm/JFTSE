@@ -1591,8 +1591,10 @@ public class GamePacketHandler {
                 gameSession.getClients().forEach(c -> {
                     c.setActiveGameSession(null);
 
-                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                    c.getConnection().sendTCP(backToRoomPacket);
+                    if (c.getConnection() != null && c.getConnection().getId() != connection.getId()) {
+                        S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                        c.getConnection().sendTCP(backToRoomPacket);
+                    }
                 });
                 gameSession.getClients().clear();
                 this.gameSessionManager.removeGameSession(gameSession);

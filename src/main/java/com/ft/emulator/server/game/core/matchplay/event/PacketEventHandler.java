@@ -87,7 +87,7 @@ public class PacketEventHandler {
         // handle server packets in queue
         for (int i = 0; i < server_packetEventList.size(); i++) {
             PacketEvent packetEvent = server_packetEventList.get(i);
-            if (!packetEvent.isFired() && packetEvent.shouldFire(currentTime)) {
+            if (!packetEvent.isFired() && packetEvent.shouldFire(currentTime) && packetEvent.getSender().isConnected()) {
                 packetEvent.fire();
                 this.remove(i, PacketEventHandler.ServerClient.SERVER);
             }

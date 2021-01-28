@@ -58,12 +58,14 @@ public class MatchplayPacketHandler {
         GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(sessionId);
         if (gameSession != null) {
             Client playerClient = gameSession.getClientByPlayerId(playerId);
+            int playerClientIndex = gameSession.getClients().indexOf(playerClient);
             Client client = new Client();
             client.setActiveRoom(playerClient.getActiveRoom());
             client.setActivePlayer(playerClient.getActivePlayer());
             client.setActiveGameSession(gameSession);
             client.setConnection(playerClient.getConnection());
             client.setRelayConnection(connection);
+            gameSession.getClients().set(playerClientIndex, client);
 
             connection.setClient(client);
             this.relayHandler.addClient(client);
@@ -95,7 +97,7 @@ public class MatchplayPacketHandler {
                         .findAny()
                         .orElse(null);
 
-                if (roomPlayer != null) {
+                if (roomPlayer != null && c.getConnection().getId() != connection.getId()) {
                     Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
                     unsetHostPacket.write((byte) 0);
                     c.getConnection().sendTCP(unsetHostPacket);
@@ -103,16 +105,7 @@ public class MatchplayPacketHandler {
             });
         }
 
-        gameSession.getClients().forEach(c -> {
-            c.setActiveGameSession(null);
-
-            S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-            c.getConnection().sendTCP(backToRoomPacket);
-
-            Packet disconnectAnswerPacket = new Packet(PacketID.S2CDisconnectAnswer);
-            c.getConnection().sendTCP(disconnectAnswerPacket);
-        });
-
+        gameSession.getClients().forEach(c -> c.setActiveGameSession(null));
         gameSessionManager.removeGameSession(gameSession);
 
         for (int i = 0; i < this.relayHandler.getClientList().size(); i++) {
