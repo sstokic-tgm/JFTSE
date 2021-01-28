@@ -101,6 +101,9 @@ public class MatchplayPacketHandler {
                     c.getConnection().sendTCP(unsetHostPacket);
                 }
 
+                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                c.getConnection().sendTCP(backToRoomPacket);
+
                 c.getRelayConnection().setClient(null);
                 c.getRelayConnection().close();
             });
