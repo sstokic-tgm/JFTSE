@@ -108,6 +108,9 @@ public class MatchplayPacketHandler {
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
             c.getConnection().sendTCP(backToRoomPacket);
+
+            Packet disconnectAnswerPacket = new Packet(PacketID.S2CDisconnectAnswer);
+            c.getConnection().sendTCP(disconnectAnswerPacket);
         });
 
         gameSessionManager.removeGameSession(gameSession);

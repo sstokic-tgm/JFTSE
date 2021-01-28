@@ -1019,7 +1019,13 @@ public class GamePacketHandler {
         Room room = this.gameHandler.getRoomList().stream()
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
-                .get();
+                .orElse(null);
+
+        if (room == null) {
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -1, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+            return;
+        }
 
         if (room.isPrivate() && !roomJoinRequestPacket.getPassword().equals(room.getPassword())) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
@@ -1623,6 +1629,9 @@ public class GamePacketHandler {
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
         }
+        else if (unknownAnswer.getPacketId() == PacketID.S2CServerNotice) {
+            unknownAnswer.write("Please open and play only basic rooms and matches - JFTSE team"); // just to be sure
+        }
         else {
             unknownAnswer.write((short) 0);
         }
@@ -1707,7 +1716,7 @@ public class GamePacketHandler {
 
             final short playerPosition = roomPlayer.get().getPosition();
             boolean isMaster = roomPlayer.isPresent() && roomPlayer.get().isMaster();
-            roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+
             if (isMaster) {
                 roomPlayerList.stream()
                         .filter(rp -> !rp.isMaster())
@@ -1717,10 +1726,11 @@ public class GamePacketHandler {
                             rp.setReady(false);
                         });
             }
+
+            roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+            this.gameHandler.getRoomList().removeIf(r -> r.getRoomPlayerList().isEmpty());
             connection.getClient().getActiveRoom().setRoomPlayerList(roomPlayerList);
             connection.getClient().getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Free);
-
-            this.gameHandler.getRoomList().removeIf(r -> r.getRoomPlayerList().isEmpty());
 
             S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) 9);
             this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> {
