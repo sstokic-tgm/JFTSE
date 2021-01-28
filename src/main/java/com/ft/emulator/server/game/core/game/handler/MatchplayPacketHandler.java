@@ -88,7 +88,8 @@ public class MatchplayPacketHandler {
             room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
             room.getRoomPlayerList().forEach(x -> x.setReady(false));
 
-            this.relayHandler.getClientList().forEach(c -> {
+            this.relayHandler.getClientsInGameSession(gameSession.getSessionId()).forEach(c -> {
+
                 RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
                         .filter(rp -> rp.getPosition() == 0 && rp.getPlayer().getId().equals(c.getActivePlayer().getId()))
                         .findAny()
@@ -99,19 +100,14 @@ public class MatchplayPacketHandler {
                     unsetHostPacket.write((byte) 0);
                     c.getConnection().sendTCP(unsetHostPacket);
                 }
+
+                c.getRelayConnection().setClient(null);
+                c.getRelayConnection().close();
             });
         }
 
         gameSession.getClients().forEach(c -> c.setActiveGameSession(null));
         gameSessionManager.removeGameSession(gameSession);
-
-        for (int i = 0; i < this.relayHandler.getClientList().size(); i++) {
-            Connection relayConnection = this.relayHandler.getClientList().get(i).getRelayConnection();
-            relayConnection.setClient(null);
-            relayConnection.close();
-
-            this.relayHandler.removeClient(i);
-        }
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
