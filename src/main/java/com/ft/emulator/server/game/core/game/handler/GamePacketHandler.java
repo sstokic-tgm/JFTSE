@@ -135,9 +135,6 @@ public class GamePacketHandler {
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
             connection.sendTCP(gameServerLoginAnswerPacket);
-
-            S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket("Please open and play only basic rooms and matches - JFTSE team");
-            connection.sendTCP(serverNoticePacket);
         }
         else {
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) -1, (byte) 0);
@@ -1631,9 +1628,6 @@ public class GamePacketHandler {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
-        }
-        else if (unknownAnswer.getPacketId() == PacketID.S2CServerNotice) {
-            unknownAnswer.write("Please open and play only basic rooms and matches - JFTSE team"); // just to be sure
         }
         else {
             unknownAnswer.write((short) 0);
