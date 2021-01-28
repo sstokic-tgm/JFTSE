@@ -1706,6 +1706,13 @@ public class GamePacketHandler {
 
         this.refreshLobbyRoomListForAllClients(connection, getRoomMode(room));
         this.refreshLobbyPlayerListForAllClients();
+
+        // TODO: Temporarily. Delete these lines if spectators work
+        for (int i = 5; i < 9; i++) {
+            connection.getClient().getActiveRoom().getPositions().set(i, RoomPositionState.Locked);
+            S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomSlotCloseAnswerPacket));
+        }
     }
 
     private void refreshLobbyRoomListForAllClients(Connection connection, int gameMode) {
