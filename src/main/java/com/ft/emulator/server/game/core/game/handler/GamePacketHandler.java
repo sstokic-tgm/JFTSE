@@ -1380,7 +1380,16 @@ public class GamePacketHandler {
 
     public void handleRoomListRequestPacket(Connection connection, Packet packet) {
         C2SRoomListRequestPacket roomListRequestPacket = new C2SRoomListRequestPacket(packet);
-        char page = roomListRequestPacket.getPage();
+        short direction = roomListRequestPacket.getDirection() == 0 ? (short) -1 : (short) 1;
+        short clientLobbyCurrentPlayerListPage = connection.getClient().getLobbyCurrentRoomListPage();
+
+        boolean wantsToGoBackOnNegativePage = direction == -1 && clientLobbyCurrentPlayerListPage == 0;
+        if (wantsToGoBackOnNegativePage) {
+            direction = 0;
+        }
+
+        clientLobbyCurrentPlayerListPage += direction;
+
         int roomType = roomListRequestPacket.getRoomTypeTab();
         int gameMode;
         switch (roomType) {
@@ -1401,11 +1410,18 @@ public class GamePacketHandler {
                 break;
         }
 
+        int currentRoomType = connection.getClient().getLobbyGameModeTabFilter();
+        if (currentRoomType != gameMode) {
+            clientLobbyCurrentPlayerListPage = 0;
+        }
+
+        connection.getClient().setLobbyCurrentRoomListPage(clientLobbyCurrentPlayerListPage);
+
         connection.getClient().setLobbyGameModeTabFilter(gameMode);
         int finalGameMode = gameMode;
         List<Room> roomList = this.gameHandler.getRoomList().stream()
                 .filter(x -> finalGameMode == GameMode.ALL || getRoomMode(x) == finalGameMode)
-                .skip(page == 0 ? 0 : (page * 5) - 5)
+                .skip(clientLobbyCurrentPlayerListPage == 0 ? 0 : clientLobbyCurrentPlayerListPage * 5)
                 .limit(5)
                 .collect(Collectors.toList());
 

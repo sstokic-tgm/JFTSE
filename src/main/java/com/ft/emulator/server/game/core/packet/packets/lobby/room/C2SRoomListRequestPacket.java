@@ -8,16 +8,16 @@ import lombok.Setter;
 @Setter
 public class C2SRoomListRequestPacket extends Packet {
     private int roomTypeTab;
-    private char page;
+    private short roomOffset;
     private byte unk0;
-    private byte unk1;
+    private byte direction;
 
     public C2SRoomListRequestPacket(Packet packet) {
         super(packet);
 
         this.roomTypeTab = this.readInt();
-        this.page = this.readChar();
+        this.roomOffset = this.readShort();
         this.unk0 = this.readByte();
-        this.unk1 = this.readByte();
+        this.direction = this.readByte();
     }
 }
