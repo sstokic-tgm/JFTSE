@@ -16,7 +16,7 @@ public class RelayServerChecker extends ServerChecker implements Runnable {
     @Override
     public void run() {
         boolean isAlive = this.isAlive("0.0.0.0", 5896);
-        log.info("rleay server " + (isAlive ? "is" : "is not") + " online.");
+        log.info("relay server " + (isAlive ? "is" : "is not") + " online.");
 
         if (!isAlive) {
             log.info("Trying to restart the relay server...");
