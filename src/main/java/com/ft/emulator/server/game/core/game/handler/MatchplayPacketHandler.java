@@ -7,6 +7,7 @@ import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
+import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.networking.Connection;
@@ -74,6 +75,11 @@ public class MatchplayPacketHandler {
         else {
             // disconnect all clients maybe? put them back to the room maybe?
         }
+    }
+
+    public void handleDisconnectPacket(Connection connection, Packet packet) {
+        S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+        connection.sendTCP(disconnectAnswerPacket);
     }
 
     public void handleDisconnected(Connection connection) {

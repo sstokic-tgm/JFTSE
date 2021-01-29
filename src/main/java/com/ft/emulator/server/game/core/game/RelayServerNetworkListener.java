@@ -37,6 +37,10 @@ public class RelayServerNetworkListener implements ConnectionListener {
                 matchplayPacketHandler.handleRegisterPlayerForSession(connection, packet);
                 break;
 
+            case PacketID.C2SDisconnectRequest:
+                matchplayPacketHandler.handleDisconnectPacket(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..
