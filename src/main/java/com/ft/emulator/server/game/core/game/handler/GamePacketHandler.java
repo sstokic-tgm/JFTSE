@@ -1027,7 +1027,7 @@ public class GamePacketHandler {
             return;
         }
 
-        if (room.isPrivate() && !roomJoinRequestPacket.getPassword().equals(room.getPassword())) {
+        if (room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
             return;
