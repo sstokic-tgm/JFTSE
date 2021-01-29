@@ -35,7 +35,6 @@ public class GameHandler {
     }
 
     public List<Player> getPlayersInLobby() {
-
         return clientList.stream()
                 .filter(Client::isInLobby)
                 .map(Client::getActivePlayer)
@@ -43,16 +42,18 @@ public class GameHandler {
     }
 
     public List<Client> getClientsInLobby() {
-
         return clientList.stream()
                 .filter(Client::isInLobby)
                 .collect(Collectors.toList());
     }
 
     public List<Client> getClientsInRoom(short roomId) {
-
         return clientList.stream()
                 .filter(c -> c.getActiveRoom() != null && c.getActiveRoom().getRoomId() == roomId)
                 .collect(Collectors.toList());
+    }
+
+    public Client getClientOfPlayer(long playerId) {
+        return clientList.stream().filter(x -> x.getActivePlayer().getId() == playerId).findFirst().orElse(null);
     }
 }

@@ -2,6 +2,7 @@ package com.ft.emulator.server.shared.module;
 
 import com.ft.emulator.server.database.model.account.Account;
 import com.ft.emulator.server.database.model.player.Player;
+import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.singleplay.challenge.ChallengeGame;
 import com.ft.emulator.server.game.core.singleplay.tutorial.TutorialGame;
@@ -14,6 +15,7 @@ import lombok.Setter;
 public class Client {
 
     private Connection connection;
+    private Connection relayConnection;
 
     private Account account;
     private Player activePlayer;
@@ -24,6 +26,8 @@ public class Client {
     private boolean inLobby;
 
     private Room activeRoom;
+    private GameSession activeGameSession;
     private int lobbyGameModeTabFilter;
     private byte lobbyCurrentPlayerListPage = 1;
+    private short lobbyCurrentRoomListPage = -1;
 }

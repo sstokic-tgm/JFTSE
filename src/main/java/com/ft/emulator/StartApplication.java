@@ -2,9 +2,11 @@ package com.ft.emulator;
 
 import com.ft.emulator.server.game.core.auth.AuthenticationServerNetworkListener;
 import com.ft.emulator.server.game.core.game.GameServerNetworkListener;
+import com.ft.emulator.server.game.core.game.RelayServerNetworkListener;
 import com.ft.emulator.server.networking.Server;
 import com.ft.emulator.server.shared.module.checker.AuthServerChecker;
 import com.ft.emulator.server.shared.module.checker.GameServerChecker;
+import com.ft.emulator.server.shared.module.checker.RelayServerChecker;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -67,12 +69,35 @@ public class StartApplication {
         log.info("Successfully initialized!");
         log.info("--------------------------------------");
 
+        log.info("Initializing relay server...");
+        RelayServerNetworkListener relayServerNetworkListener = new RelayServerNetworkListener();
+        // post dependency injection for this class
+        ctx.getBeanFactory().autowireBean(relayServerNetworkListener);
+
+        Server relayServer = new Server();
+        relayServer.addListener(relayServerNetworkListener);
+
+        try {
+            relayServer.bind(5896);
+        }
+        catch (IOException ioe) {
+            log.error("Failed to start relay server!");
+            ioe.printStackTrace();
+            ctx.close();
+            System.exit(1);
+        }
+        relayServer.start("relay server");
+
+        log.info("Successfully initialized!");
+        log.info("--------------------------------------");
+
         log.info("Emulator successfully started!");
         log.info("Write exit and confirm with enter to stop the emulator!");
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
         executor.scheduleWithFixedDelay(new GameServerChecker(gameServer), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer), 0, 5, TimeUnit.MINUTES);
 
         Scanner scan = new Scanner(System.in);
         String input;
@@ -90,6 +115,7 @@ public class StartApplication {
         try {
             authenticationServer.dispose();
             gameServer.dispose();
+            relayServer.dispose();
         }
         catch (IOException ioe) {
             log.error(ioe.getMessage());

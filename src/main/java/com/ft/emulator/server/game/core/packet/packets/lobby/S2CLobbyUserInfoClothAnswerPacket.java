@@ -13,7 +13,7 @@ public class S2CLobbyUserInfoClothAnswerPacket extends Packet {
         if (player != null) {
             ClothEquipment clothEquipment = player.getClothEquipment();
 
-            this.write((byte) 0);
+            this.write(player.getPlayerType());
 
             this.write(clothEquipment.getHair());
             this.write(clothEquipment.getFace());

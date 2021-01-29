@@ -37,6 +37,13 @@ public class AuthPacketHandler {
 
     public void handleLoginPacket(Connection connection, Packet packet) {
         C2SLoginPacket loginPacket = new C2SLoginPacket(packet);
+
+        // version check
+        if (loginPacket.getVersion() != 21108180) {
+            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.INVAILD_VERSION);
+            connection.sendTCP(loginAnswerPacket);
+        }
+
         Account account = authenticationService.login(loginPacket.getUsername(), loginPacket.getPassword());
 
         if (account == null) {
@@ -213,10 +220,12 @@ public class AuthPacketHandler {
     }
 
     public void handleDisconnectPacket(Connection connection, Packet packet) {
-        // reset status
-        Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-        account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-        authenticationService.updateAccount(account);
+        if (connection.getClient().getAccount() != null) {
+            // reset status
+            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+            authenticationService.updateAccount(account);
+        }
 
         S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
         connection.sendTCP(disconnectAnswerPacket);

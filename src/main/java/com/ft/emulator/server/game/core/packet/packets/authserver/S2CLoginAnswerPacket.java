@@ -10,6 +10,7 @@ public class S2CLoginAnswerPacket extends Packet {
     public final static short ACCOUNT_EXPIRED_USER_ID = -3;
     public final static short ACCOUNT_INVALID_USER_ID = -4;
     public final static short ACCOUNT_BLOCKED_USER_ID = -6;
+    public final static short INVAILD_VERSION = -62;
 
     public S2CLoginAnswerPacket(short result) {
         super(PacketID.S2CLoginAnswerPacket);
