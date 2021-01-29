@@ -8,13 +8,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
-import java.util.Calendar;
+import java.util.*;
 import java.util.List;
-import java.util.TimeZone;
 
 @Getter
 @Setter
 public class MatchplayBasicGame extends MatchplayGame {
+    private Map<Integer, Integer> individualPointsMadeFromPlayers;
     private byte pointsRedTeam;
     private byte pointsBlueTeam;
     private byte setsRedTeam;
@@ -22,7 +22,7 @@ public class MatchplayBasicGame extends MatchplayGame {
     private RoomPlayer servePlayer;
     private RoomPlayer receiverPlayer;
 
-    public MatchplayBasicGame() {
+    public MatchplayBasicGame(byte players) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
 
@@ -31,6 +31,10 @@ public class MatchplayBasicGame extends MatchplayGame {
         this.setsRedTeam = 0;
         this.setsBlueTeam = 0;
         this.setFinished(false);
+        this.individualPointsMadeFromPlayers = new HashMap<>();
+        for (int i = 0; i < players; i++) {
+            this.individualPointsMadeFromPlayers.put(i, 0);
+        }
     }
 
     public void setPoints(byte pointsRedTeam, byte pointsBlueTeam) {
@@ -60,6 +64,19 @@ public class MatchplayBasicGame extends MatchplayGame {
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             this.setEndTime(cal.getTime());
         }
+    }
+
+    public void increasePerformancePointForPlayer(int playerPosition) {
+        int currentPoint = this.getIndividualPointsMadeFromPlayers().getOrDefault(playerPosition, 0);
+        this.getIndividualPointsMadeFromPlayers().put(playerPosition, currentPoint + 1);
+    }
+
+    public List<Integer> getPlayerPositionsOrderedByPerformance() {
+        List<Integer> playerPositions = new ArrayList<>();
+        this.getIndividualPointsMadeFromPlayers().entrySet().stream()
+                .sorted((k1, k2) -> -k1.getValue().compareTo(k2.getValue()))
+                .forEach(k -> playerPositions.add(k.getKey()));
+        return playerPositions;
     }
 
     private void resetPoints() {

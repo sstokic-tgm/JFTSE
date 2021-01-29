@@ -1232,7 +1232,7 @@ public class GamePacketHandler {
             GameSession gameSession = new GameSession();
             gameSession.setSessionId(room.getRoomId());
             // set specific matchplay game mode object, for now we only support basic single
-            gameSession.setActiveMatchplayGame(new MatchplayBasicGame());
+            gameSession.setActiveMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
             gameSession.setPlayers(room.getPlayers());
 
             clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
@@ -1455,6 +1455,10 @@ public class GamePacketHandler {
             byte setsTeamRead = game.getSetsRedTeam();
             byte setsTeamBlue = game.getSetsBlueTeam();
 
+            if (matchplayPointPacket.getPlayerPosition() < 4) {
+                game.increasePerformancePointForPlayer(matchplayPointPacket.getPlayerPosition());
+            }
+
             if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
                 game.setPoints((byte) (pointsTeamRed + 1), pointsTeamBlue);
             else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
@@ -1516,8 +1520,7 @@ public class GamePacketHandler {
                     S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000));
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
-                    // TODO Order players by performance
-                    S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(new int[] { 0, 1 });
+                    S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(game.getPlayerPositionsOrderedByPerformance());
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                     S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
