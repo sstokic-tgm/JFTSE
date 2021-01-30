@@ -251,8 +251,8 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleMatchplayPointPacket(connection, packet);
                 break;
 
-            case 0x1773:
-                gamePacketHandler.handle1773Packet(connection, packet);
+            case PacketID.C2SMatchplayClientBackInRoom:
+                gamePacketHandler.handleClientBackInRoomPacket(connection, packet);
                 break;
 
             case PacketID.C2SHeartbeat:

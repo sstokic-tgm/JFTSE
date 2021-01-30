@@ -1631,7 +1631,7 @@ public class GamePacketHandler {
         connection.close();
     }
 
-    public void handle1773Packet(Connection connection, Packet packet) {
+    public void handleClientBackInRoomPacket(Connection connection, Packet packet) {
         Room currentClientRoom = connection.getClient().getActiveRoom();
 
         short position = currentClientRoom.getRoomPlayerList().stream()
