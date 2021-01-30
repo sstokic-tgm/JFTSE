@@ -2,6 +2,7 @@ package com.ft.emulator.server.game.core.matchplay.basic;
 
 import com.ft.emulator.server.game.core.constants.ServeType;
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
+import com.ft.emulator.server.game.core.matchplay.PlayerReward;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import lombok.Getter;
@@ -77,6 +78,34 @@ public class MatchplayBasicGame extends MatchplayGame {
                 .sorted((k1, k2) -> -k1.getValue().compareTo(k2.getValue()))
                 .forEach(k -> playerPositions.add(k.getKey()));
         return playerPositions;
+    }
+
+    public List<PlayerReward> getPlayerRewards() {
+        List<PlayerReward> playerRewards = new ArrayList<>();
+        for (int playerPosition : this.getPlayerPositionsOrderedByPerformance()) {
+            boolean wonGame = false;
+            boolean isPlayerInRedTeam = this.isRedTeam(playerPosition);
+            if (isPlayerInRedTeam && this.getSetsRedTeam() == 2 || !isPlayerInRedTeam && this.getSetsBlueTeam() == 2) {
+                wonGame = true;
+            }
+
+            // Always going by 4 now so that players in 1v1 can ears as much as players in 2v2
+            int playerPositionIndex = this.getPlayerPositionsOrderedByPerformance().indexOf(playerPosition);
+            int performanceFactor = 4 - playerPositionIndex;
+            int defaultExpReward = 30;
+            int defaultGoldReward = 100;
+            int winFactorExp = wonGame ? defaultExpReward : 0;
+            int winFactorGold = wonGame ? defaultGoldReward : 0;
+            int rewardExp = (defaultExpReward * performanceFactor) + winFactorExp;
+            int rewardGold = (defaultGoldReward * performanceFactor) + winFactorGold;
+            PlayerReward playerReward = new PlayerReward();
+            playerReward.setPlayerPosition(playerPosition);
+            playerReward.setBasicRewardExp(rewardExp);
+            playerReward.setBasicRewardGold(rewardGold);
+            playerRewards.add(playerReward);
+        }
+
+        return playerRewards;
     }
 
     private void resetPoints() {

@@ -23,6 +23,7 @@ import com.ft.emulator.server.game.core.item.EItemCategory;
 import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
+import com.ft.emulator.server.game.core.matchplay.PlayerReward;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
@@ -98,6 +99,7 @@ public class GamePacketHandler {
     private final TutorialService tutorialService;
     private final ProductService productService;
     private final LotteryService lotteryService;
+    private final LevelService levelService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -1473,8 +1475,12 @@ public class GamePacketHandler {
             boolean isRedTeamServing = game.isRedTeamServing(gameSession.getTimesCourtChanged());
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
 
-            List<ServeInfo> serveInfo = new ArrayList<>();
+            List<PlayerReward> playerRewards = new ArrayList<>();
+            if (game.isFinished()) {
+                playerRewards = game.getPlayerRewards();
+            }
 
+            List<ServeInfo> serveInfo = new ArrayList<>();
             List<Client> clients = gameSession.getClients();
             for (Client client : clients) {
                 RoomPlayer rp = roomPlayerList.stream()
@@ -1515,12 +1521,26 @@ public class GamePacketHandler {
                         wonGame = true;
                     }
 
+                    PlayerReward playerReward = playerRewards.stream()
+                            .filter(x -> x.getPlayerPosition() == rp.getPosition())
+                            .findFirst()
+                            .orElse(null);
+                    if (playerReward != null) {
+                        byte level = levelService.getLevel(playerReward.getBasicRewardExp(), client.getActivePlayer().getExpPoints(), client.getActivePlayer().getLevel());
+                        Player player = client.getActivePlayer();
+                        player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
+                        player.setGold(player.getGold() + playerReward.getBasicRewardGold());
+                        player = levelService.setNewLevelStatusPoints(level, player);
+                        client.setActivePlayer(player);
+                    }
+
                     rp.setReady(false);
+                    byte playerLevel = client.getActivePlayer().getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);
-                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000));
+                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
-                    S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(game.getPlayerPositionsOrderedByPerformance());
+                    S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                     S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
