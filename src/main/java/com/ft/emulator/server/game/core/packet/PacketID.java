@@ -86,6 +86,7 @@ public final class PacketID {
     public final static char S2CMatchplayDamageToPlayer = 0x184E;
     public final static char S2CMatchplaySpawnBossBattle = 0x1D55;
     public final static char S2CMatchplayGivePlayerSkills = 0xC98;
+    public final static char S2CMatchplayPlaceSkillCrystal = 0x332C;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
     public final static char C2CPlayerAnimationPacket = 0x32C9;
