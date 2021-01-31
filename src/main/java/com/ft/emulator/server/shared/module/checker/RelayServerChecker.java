@@ -27,9 +27,7 @@ public class RelayServerChecker extends ServerChecker implements Runnable {
                 server.bind(5896);
             }
             catch (IOException ioe) {
-                log.error("Failed to start relay server!");
-                ioe.printStackTrace();
-                System.exit(1);
+                log.error("Failed to start relay server!", ioe);
             }
             server.start("relay server");
 

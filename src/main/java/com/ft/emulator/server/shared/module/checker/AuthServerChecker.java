@@ -27,9 +27,7 @@ public class AuthServerChecker extends ServerChecker implements Runnable {
                 server.bind(5894);
             }
             catch (IOException ioe) {
-                log.error("Failed to start authentication server!");
-                ioe.printStackTrace();
-                System.exit(1);
+                log.error("Failed to start authentication server!", ioe);
             }
             server.start("auth server");
 

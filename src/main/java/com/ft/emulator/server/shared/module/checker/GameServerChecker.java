@@ -27,9 +27,7 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 server.bind(5895);
             }
             catch (IOException ioe) {
-                log.error("Failed to start game server!");
-                ioe.printStackTrace();
-                System.exit(1);
+                log.error("Failed to start game server!", ioe);
             }
             server.start("game server");
 
