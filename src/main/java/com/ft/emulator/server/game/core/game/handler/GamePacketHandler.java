@@ -100,6 +100,7 @@ public class GamePacketHandler {
     private final ProductService productService;
     private final LotteryService lotteryService;
     private final LevelService levelService;
+    private final PlayerStatisticService playerStatisticService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -1333,7 +1334,12 @@ public class GamePacketHandler {
                     e.printStackTrace();
                 }
 
-                Room threadRoom = connection.getClient().getActiveRoom();
+                if (connection == null) return;
+
+                Client client = connection.getClient();
+                if (client == null) return;
+
+                Room threadRoom = client.getActiveRoom();
                 if (threadRoom == null || threadRoom.getStatus() != RoomStatus.Running) {
                     return;
                 }
@@ -1478,6 +1484,7 @@ public class GamePacketHandler {
             List<PlayerReward> playerRewards = new ArrayList<>();
             if (game.isFinished()) {
                 playerRewards = game.getPlayerRewards();
+                connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
             }
 
             List<ServeInfo> serveInfo = new ArrayList<>();
@@ -1534,6 +1541,18 @@ public class GamePacketHandler {
                         client.setActivePlayer(player);
                     }
 
+                    Player player = client.getActivePlayer();
+                    if (wonGame) {
+                        player.getPlayerStatistic().setBasicRecordWin(player.getPlayerStatistic().getBasicRecordWin() + 1);
+                        player.getPlayerStatistic().setConsecutiveWins(player.getPlayerStatistic().getConsecutiveWins() + 1);
+                        playerStatisticService.save(player.getPlayerStatistic());
+                    } else {
+                        player.getPlayerStatistic().setBasicRecordLoss(player.getPlayerStatistic().getBasicRecordLoss() + 1);
+                        player.getPlayerStatistic().setConsecutiveWins(0);
+                        playerStatisticService.save(player.getPlayerStatistic());
+                    }
+
+                    rp.setPlayer(player);
                     rp.setReady(false);
                     byte playerLevel = client.getActivePlayer().getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);
@@ -1627,6 +1646,13 @@ public class GamePacketHandler {
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
+                Room currentClientRoom = connection.getClient().getActiveRoom();
+                Player player = connection.getClient().getActivePlayer();
+                if (player != null && currentClientRoom != null && currentClientRoom.getStatus() == RoomStatus.Running) {
+                    player.getPlayerStatistic().setNumberOfDisconnects(player.getPlayerStatistic().getNumberOfDisconnects() + 1);
+                    playerStatisticService.save(player.getPlayerStatistic());
+                }
+
                 gameSession.getClients().forEach(c -> {
                     Room room = c.getActiveRoom();
                     if (room != null) {
