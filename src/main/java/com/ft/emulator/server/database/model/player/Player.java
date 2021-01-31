@@ -32,6 +32,10 @@ public class Player extends AbstractBaseModel {
     @JoinColumn(name = "quickSlotEquipment_id", referencedColumnName = "id")
     private QuickSlotEquipment quickSlotEquipment;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @JoinColumn(name = "playerStatistic_id", referencedColumnName = "id")
+    private PlayerStatistic playerStatistic;
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "player")
     private List<ChallengeProgress> challengeProgressList;
 

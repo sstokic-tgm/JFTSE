@@ -13,10 +13,10 @@ public class S2CPlayerInfoPlayStatsPacket extends Packet {
         this.write(0); // battle record loss
 
         this.write(0); // consecutive wins
-        this.write(0);
+        this.write(0); // ??
         this.write(0); // number of disconnects
         this.write(0); // games played in sum
-        this.write(0);
-        this.write(0);
+        this.write(0); // ??
+        this.write(0); // ??
     }
 }
