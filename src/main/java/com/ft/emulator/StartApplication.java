@@ -1,5 +1,6 @@
 package com.ft.emulator;
 
+import com.ft.emulator.common.discord.DiscordWebhook;
 import com.ft.emulator.server.game.core.auth.AuthenticationServerNetworkListener;
 import com.ft.emulator.server.game.core.game.GameServerNetworkListener;
 import com.ft.emulator.server.game.core.game.RelayServerNetworkListener;
@@ -93,6 +94,14 @@ public class StartApplication {
 
         log.info("Emulator successfully started!");
         log.info("Write exit and confirm with enter to stop the emulator!");
+
+        DiscordWebhook discordWebhook = new DiscordWebhook(""); // empty till global config table created
+        discordWebhook.setContent("Login Server is online.\n Game Server is online.\n Matchmaking Server is online.");
+        try {
+            discordWebhook.execute();
+        } catch (IOException e) {
+            log.error("DiscordWebhook error: " ,e);
+        }
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
