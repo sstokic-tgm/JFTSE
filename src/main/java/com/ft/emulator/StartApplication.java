@@ -96,7 +96,7 @@ public class StartApplication {
         log.info("Write exit and confirm with enter to stop the emulator!");
 
         DiscordWebhook discordWebhook = new DiscordWebhook(""); // empty till global config table created
-        discordWebhook.setContent("Login Server is online.\n Game Server is online.\n Matchmaking Server is online.");
+        discordWebhook.setContent("Login Server is online.\nGame Server is online.\nMatchmaking Server is online.");
         try {
             discordWebhook.execute();
         } catch (IOException e) {
