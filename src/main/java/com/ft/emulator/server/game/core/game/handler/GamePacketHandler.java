@@ -1544,7 +1544,13 @@ public class GamePacketHandler {
                     Player player = client.getActivePlayer();
                     if (wonGame) {
                         player.getPlayerStatistic().setBasicRecordWin(player.getPlayerStatistic().getBasicRecordWin() + 1);
-                        player.getPlayerStatistic().setConsecutiveWins(player.getPlayerStatistic().getConsecutiveWins() + 1);
+
+                        int newCurrentConsecutiveWins = player.getPlayerStatistic().getConsecutiveWins() + 1;
+                        if (newCurrentConsecutiveWins > player.getPlayerStatistic().getMaxConsecutiveWins()) {
+                            player.getPlayerStatistic().setMaxConsecutiveWins(newCurrentConsecutiveWins);
+                        }
+                        
+                        player.getPlayerStatistic().setConsecutiveWins(newCurrentConsecutiveWins);
                         playerStatisticService.save(player.getPlayerStatistic());
                     } else {
                         player.getPlayerStatistic().setBasicRecordLoss(player.getPlayerStatistic().getBasicRecordLoss() + 1);
