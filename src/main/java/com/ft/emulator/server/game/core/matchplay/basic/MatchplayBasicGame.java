@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Setter
 public class MatchplayBasicGame extends MatchplayGame {
     private Map<Integer, Integer> individualPointsMadeFromPlayers;
+    private List<Point> playerLocationsOnMap;
     private byte pointsRedTeam;
     private byte pointsBlueTeam;
     private byte setsRedTeam;
@@ -27,6 +28,12 @@ public class MatchplayBasicGame extends MatchplayGame {
     public MatchplayBasicGame(byte players) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
+        playerLocationsOnMap = Arrays.asList(
+                new Point(20, -125),
+                new Point(-20, 125),
+                new Point(-20, -75),
+                new Point(20, 75)
+        );
 
         this.pointsRedTeam = 0;
         this.pointsBlueTeam = 0;

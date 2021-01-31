@@ -4,11 +4,11 @@ import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 
 public class S2CMatchplayTriggerGuardianServe extends Packet {
-    public S2CMatchplayTriggerGuardianServe() {
+    public S2CMatchplayTriggerGuardianServe(byte teamSide, byte xOffset, byte ballAngle) {
         super(PacketID.S2CMatchplayStartGuardianServe);
 
-        this.write((byte) 0); //Teamside (0=Red, 1=Blue)
-        this.write((byte) 0); //X-Offset
-        this.write((byte) 0); //Ball angle(?)
+        this.write(teamSide);
+        this.write(xOffset);
+        this.write(ballAngle);
     }
 }

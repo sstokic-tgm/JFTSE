@@ -15,19 +15,12 @@ import java.util.List;
 public class GameSession {
     public GameSession() {
         clients = new ArrayList<>();
-        playerLocationsOnMap = Arrays.asList(
-                new Point(20, -125),
-                new Point(-20, 125),
-                new Point(-20, -75),
-                new Point(20, 75)
-        );
     }
 
     private int sessionId;
     private MatchplayGame activeMatchplayGame;
     private byte players;
 
-    private List<Point> playerLocationsOnMap;
     private int lastBallHitByPlayer = -1;
     private long timeLastBallWasHit = -1;
     private int timesCourtChanged = 0;
