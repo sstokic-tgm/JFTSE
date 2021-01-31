@@ -1792,16 +1792,18 @@ public class GamePacketHandler {
 
             S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
             this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
-                c.getActiveRoom().setRoomPlayerList(roomPlayerList);
-                c.getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Free);
+                if (c.getActiveRoom() != null) {
+                    c.getActiveRoom().setRoomPlayerList(roomPlayerList);
+                    c.getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Free);
+                }
 
-                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null)
                     c.getConnection().sendTCP(roomPlayerInformationPacket);
             });
 
             S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) 9);
             this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> {
-                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null)
                     c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
             });
 
@@ -1809,7 +1811,7 @@ public class GamePacketHandler {
                 Client client = c.getConnection().getClient();
                 if (client != null) {
                     S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.getFilteredRoomsForClient(client));
-                    if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null)
                         c.getConnection().sendTCP(roomListAnswerPacket);
                 }
             });

@@ -98,15 +98,15 @@ public class MatchplayPacketHandler {
                     .findAny()
                     .orElse(null);
 
+            S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+            if (c.getRelayConnection().getId() != connection.getId() && c.getConnection() != null)
+                c.getConnection().sendTCP(backToRoomPacket);
+
             if (roomPlayer != null && c.getRelayConnection().getId() != connection.getId()) {
                 Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
                 unsetHostPacket.write((byte) 0);
                 c.getConnection().sendTCP(unsetHostPacket);
             }
-
-            S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-            if (c.getRelayConnection().getId() != connection.getId() && c.getConnection() != null)
-                c.getConnection().sendTCP(backToRoomPacket);
 
             c.setActiveGameSession(null);
 
