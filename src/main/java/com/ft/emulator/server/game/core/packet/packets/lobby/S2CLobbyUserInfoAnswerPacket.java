@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.packet.packets.lobby;
 
 import com.ft.emulator.server.database.model.player.Player;
+import com.ft.emulator.server.database.model.player.PlayerStatistic;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 
@@ -10,17 +11,18 @@ public class S2CLobbyUserInfoAnswerPacket extends Packet {
 
         this.write(result);
         if (player != null) {
+            PlayerStatistic playerStatistic = player.getPlayerStatistic();
             this.write(Math.toIntExact(player.getId()));
             this.write(player.getLevel());
 
-            this.write(0); // basic record win
-            this.write(0); // basic record loss
-            this.write(0); // battle record win
-            this.write(0); // battle record loss
-            this.write(0); // consecutive wins
+            this.write(playerStatistic.getBasicRecordWin());
+            this.write(playerStatistic.getBasicRecordLoss());
+            this.write(playerStatistic.getBattleRecordWin());
+            this.write(playerStatistic.getBattleRecordLoss());
+            this.write(playerStatistic.getConsecutiveWins());
             this.write(0);
-            this.write(0); // number of disconnects
-            this.write(0); // games played in sum
+            this.write(playerStatistic.getNumberOfDisconnects());
+            this.write(playerStatistic.getTotalGames());
             this.write(0);
             this.write(0);
 
