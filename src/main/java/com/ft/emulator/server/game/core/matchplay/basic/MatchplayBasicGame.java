@@ -11,6 +11,7 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
@@ -81,6 +82,7 @@ public class MatchplayBasicGame extends MatchplayGame {
     }
 
     public List<PlayerReward> getPlayerRewards() {
+        int secondsPlayed = (int) Math.ceil((double) this.getTimeNeeded() / 1000);
         List<PlayerReward> playerRewards = new ArrayList<>();
         for (int playerPosition : this.getPlayerPositionsOrderedByPerformance()) {
             boolean wonGame = false;
@@ -89,15 +91,31 @@ public class MatchplayBasicGame extends MatchplayGame {
                 wonGame = true;
             }
 
-            // Always going by 4 now so that players in 1v1 can ears as much as players in 2v2
+            int basicExpReward;
+            if (secondsPlayed < TimeUnit.MINUTES.toSeconds(2)) {
+                basicExpReward = 1;
+            } else if (secondsPlayed > TimeUnit.MINUTES.toSeconds(15)) {
+                basicExpReward = 130;
+            } else {
+                basicExpReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
+            }
+
             int playerPositionIndex = this.getPlayerPositionsOrderedByPerformance().indexOf(playerPosition);
-            int performanceFactor = 4 - playerPositionIndex;
-            int defaultExpReward = 30;
-            int defaultGoldReward = 100;
-            int winFactorExp = wonGame ? defaultExpReward : 0;
-            int winFactorGold = wonGame ? defaultGoldReward : 0;
-            int rewardExp = (defaultExpReward * performanceFactor) + winFactorExp;
-            int rewardGold = (defaultGoldReward * performanceFactor) + winFactorGold;
+            switch (playerPositionIndex) {
+                case 0:
+                    basicExpReward += basicExpReward * 0.1;
+                    break;
+                case 1:
+                    basicExpReward += basicExpReward * 0.05;
+                    break;
+            }
+
+            if (wonGame) {
+                basicExpReward += basicExpReward * 0.2;
+            }
+
+            int rewardExp = basicExpReward;
+            int rewardGold = basicExpReward;
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(playerPosition);
             playerReward.setBasicRewardExp(rewardExp);
