@@ -187,6 +187,7 @@ public class AuthPacketHandler {
         Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
         if (player != null) {
 
+            connection.getClient().getAccount().getPlayerList().removeIf(pl -> pl.getId().equals(player.getId()));
             playerService.remove(player.getId());
 
             S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) 0);
