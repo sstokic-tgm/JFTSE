@@ -40,6 +40,9 @@ public class AuthPacketHandler {
         if (loginPacket.getVersion() != 21108180) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
+
+            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+            connection.sendTCP(disconnectAnswerPacket);
         }
 
         Account account = authenticationService.login(loginPacket.getUsername(), loginPacket.getPassword());
