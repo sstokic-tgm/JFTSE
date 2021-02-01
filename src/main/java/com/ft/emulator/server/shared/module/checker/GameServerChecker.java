@@ -8,10 +8,12 @@ import java.io.IOException;
 
 @Log4j2
 public class GameServerChecker extends ServerChecker implements Runnable {
-    private final Server server;
+    private final Server gameServer;
+    private final Server relayServer;
 
-    public GameServerChecker(Server server) {
-        this.server = server;
+    public GameServerChecker(Server gameServer, Server relayServer) {
+        this.gameServer = gameServer;
+        this.relayServer = relayServer;
     }
 
     @Override
@@ -27,9 +29,9 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 discordWebhook.execute();
                 log.info("Trying to restart the game server...");
 
-                server.dispose();
-                server.restart();
-                server.bind(5895);
+                gameServer.dispose();
+                gameServer.restart();
+                gameServer.bind(5895);
             }
             catch (IOException ioe) {
                 discordWebhook.setContent("Failed to start Game Server!");
@@ -41,11 +43,34 @@ public class GameServerChecker extends ServerChecker implements Runnable {
 
                 log.error("Failed to start game server!", ioe);
             }
-            server.start("game server");
+
+            discordWebhook.setContent("Shutting down Matchmaking Server. Trying to restart...");
+            try {
+                discordWebhook.execute();
+                log.info("Trying to restart the relay server...");
+
+                relayServer.dispose();
+                relayServer.restart();
+                relayServer.bind(5896);
+            }
+            catch (IOException ioe) {
+                discordWebhook.setContent("Failed to start Matchmaking Server!");
+                try {
+                    discordWebhook.execute();
+                } catch (IOException e) {
+                    log.error("DiscordWebhook error: " ,e);
+                }
+
+                log.error("Failed to start relay server!", ioe);
+            }
+
+            gameServer.start("game server");
+            relayServer.start("relay server");
 
             log.info("Game server has been restarted.");
+            log.info("Relay server has been restarted.");
 
-            discordWebhook.setContent("Game Server has been restarted.");
+            discordWebhook.setContent("Game Server has been restarted.\nMatchmaking Server has been restarted.");
             try {
                 discordWebhook.execute();
             } catch (IOException e) {

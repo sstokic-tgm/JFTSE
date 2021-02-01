@@ -105,8 +105,8 @@ public class StartApplication {
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
-        executor.scheduleWithFixedDelay(new GameServerChecker(gameServer), 0, 5, TimeUnit.MINUTES);
-        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new GameServerChecker(gameServer, relayServer), 0, 6, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer), 0, 7, TimeUnit.MINUTES);
 
         Scanner scan = new Scanner(System.in);
         String input;
