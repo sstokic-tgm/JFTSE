@@ -1719,10 +1719,15 @@ public class GamePacketHandler {
         connection.sendTCP(answer);
 
         Player player = connection.getClient().getActivePlayer();
+        PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+        player.setPlayerStatistic(playerStatistic);
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 
         S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
-        S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
+        S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(playerStatistic);
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
         connection.sendTCP(playerStatusPointChangePacket);

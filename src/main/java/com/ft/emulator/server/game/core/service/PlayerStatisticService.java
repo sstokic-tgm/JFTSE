@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -16,5 +18,10 @@ public class PlayerStatisticService {
 
     public PlayerStatistic save(PlayerStatistic playerStatistic) {
         return playerStatisticRepository.save(playerStatistic);
+    }
+
+    public PlayerStatistic findPlayerStatisticById(Long id) {
+        Optional<PlayerStatistic> playerStatistic = playerStatisticRepository.findById(id);
+        return playerStatistic.orElse(null);
     }
 }

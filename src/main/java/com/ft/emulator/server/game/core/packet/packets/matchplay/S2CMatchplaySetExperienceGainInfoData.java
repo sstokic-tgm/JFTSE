@@ -18,8 +18,8 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write(playerReward.getBasicRewardExp()); // EXP TOTAL -> current exp + won exp
         this.write(playerReward.getBasicRewardGold()); // GOLD TOTAL -> current gold + won gold
 
-        this.write((byte) 20); // Unk
-        this.write((byte) 30); // Unk
+        this.write((byte) 0); // perfects
+        this.write((byte) 0); // guards
 
         this.write(secondsNeeded); // Playtime in seconds
         this.write(0); // Ranking point reward
