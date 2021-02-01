@@ -1801,10 +1801,11 @@ public class GamePacketHandler {
     }
 
     private void refreshLobbyRoomListForAllClients(Connection connection) {
+        long playerIdOfCurrentConnection = connection.getClient().getActivePlayer().getId();
         this.gameHandler.getClientsInLobby().forEach(c -> {
             if (c != null && c.getConnection() != null) {
                 S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.getFilteredRoomsForClient(c));
-                boolean isNotActivePlayer = !c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
+                boolean isNotActivePlayer = !c.getActivePlayer().getId().equals(playerIdOfCurrentConnection);
                 if (isNotActivePlayer)
                     c.getConnection().sendTCP(roomListAnswerPacket);
             }
@@ -1813,13 +1814,15 @@ public class GamePacketHandler {
 
     private void refreshLobbyPlayerListForAllClients() {
         this.gameHandler.getClientsInLobby().forEach(c -> {
-            byte currentPage = c.getLobbyCurrentPlayerListPage();
-            List<Player> lobbyPlayerList = this.gameHandler.getPlayersInLobby().stream()
-                    .skip(currentPage == 1 ? 0 : (currentPage * 10) - 10)
-                    .limit(10)
-                    .collect(Collectors.toList());
-            S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
-            c.getConnection().sendTCP(lobbyUserListAnswerPacket);
+            if (c != null && c.getConnection() != null) {
+                byte currentPage = c.getLobbyCurrentPlayerListPage();
+                List<Player> lobbyPlayerList = this.gameHandler.getPlayersInLobby().stream()
+                        .skip(currentPage == 1 ? 0 : (currentPage * 10) - 10)
+                        .limit(10)
+                        .collect(Collectors.toList());
+                S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
+                c.getConnection().sendTCP(lobbyUserListAnswerPacket);
+            }
         });
     }
 
