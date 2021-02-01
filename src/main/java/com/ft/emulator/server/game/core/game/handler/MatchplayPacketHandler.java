@@ -101,6 +101,7 @@ public class MatchplayPacketHandler {
             Room room = c.getActiveRoom();
             room.setStatus(RoomStatus.NotRunning);
             room.getRoomPlayerList().forEach(x -> x.setReady(false));
+            c.setActiveRoom(room);
 
             RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
                     .filter(rp -> rp.getPosition() == 0 && rp.getPlayer().getId().equals(c.getActivePlayer().getId()))
@@ -108,7 +109,7 @@ public class MatchplayPacketHandler {
                     .orElse(null);
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-            if (c.getRelayConnection().getId() != connection.getId() && c.getConnection() != null)
+            if (c.getRelayConnection() != null && c.getConnection() != null && c.getRelayConnection().getId() != connection.getId())
                 c.getConnection().sendTCP(backToRoomPacket);
 
             if (roomPlayer != null && c.getRelayConnection().getId() != connection.getId()) {
