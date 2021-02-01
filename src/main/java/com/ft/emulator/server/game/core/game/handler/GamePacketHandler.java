@@ -1819,7 +1819,8 @@ public class GamePacketHandler {
                     .limit(10)
                     .collect(Collectors.toList());
             S2CLobbyUserListAnswerPacket lobbyUserListAnswerPacket = new S2CLobbyUserListAnswerPacket(lobbyPlayerList);
-            c.getConnection().sendTCP(lobbyUserListAnswerPacket);
+            if (c.getConnection() != null)
+                c.getConnection().sendTCP(lobbyUserListAnswerPacket);
         });
     }
 
