@@ -11,10 +11,7 @@ import com.ft.emulator.server.database.model.home.HomeInventory;
 import com.ft.emulator.server.database.model.item.ItemHouse;
 import com.ft.emulator.server.database.model.item.ItemHouseDeco;
 import com.ft.emulator.server.database.model.item.Product;
-import com.ft.emulator.server.database.model.player.ClothEquipment;
-import com.ft.emulator.server.database.model.player.Player;
-import com.ft.emulator.server.database.model.player.QuickSlotEquipment;
-import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
+import com.ft.emulator.server.database.model.player.*;
 import com.ft.emulator.server.database.model.pocket.PlayerPocket;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.database.model.tutorial.TutorialProgress;
@@ -51,10 +48,7 @@ import com.ft.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
-import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
-import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerLevelExpPacket;
-import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
-import com.ft.emulator.server.game.core.packet.packets.player.S2CShopMoneyAnswerPacket;
+import com.ft.emulator.server.game.core.packet.packets.player.*;
 import com.ft.emulator.server.game.core.packet.packets.shop.*;
 import com.ft.emulator.server.game.core.packet.packets.tutorial.C2STutorialBeginRequestPacket;
 import com.ft.emulator.server.game.core.packet.packets.tutorial.C2STutorialEndPacket;
@@ -187,6 +181,9 @@ public class GamePacketHandler {
 
             S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
             connection.sendTCP(playerStatusPointChangePacket);
+
+            S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
+            connection.sendTCP(playerInfoPlayStatsPacket);
 
             S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
             connection.sendTCP(inventoryWearClothAnswerPacket);
@@ -1532,36 +1529,49 @@ public class GamePacketHandler {
                             .filter(x -> x.getPlayerPosition() == rp.getPosition())
                             .findFirst()
                             .orElse(null);
+
+                    Player player = client.getActivePlayer();
+                    byte oldLevel = player.getLevel();
                     if (playerReward != null) {
-                        byte level = levelService.getLevel(playerReward.getBasicRewardExp(), client.getActivePlayer().getExpPoints(), client.getActivePlayer().getLevel());
-                        Player player = client.getActivePlayer();
+                        byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
                         player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
                         player.setGold(player.getGold() + playerReward.getBasicRewardGold());
                         player = levelService.setNewLevelStatusPoints(level, player);
                         client.setActivePlayer(player);
                     }
 
-                    Player player = client.getActivePlayer();
+                    PlayerStatistic playerStatistic = player.getPlayerStatistic();
                     if (wonGame) {
-                        player.getPlayerStatistic().setBasicRecordWin(player.getPlayerStatistic().getBasicRecordWin() + 1);
+                        playerStatistic.setBasicRecordWin(playerStatistic.getBasicRecordWin() + 1);
 
-                        int newCurrentConsecutiveWins = player.getPlayerStatistic().getConsecutiveWins() + 1;
-                        if (newCurrentConsecutiveWins > player.getPlayerStatistic().getMaxConsecutiveWins()) {
-                            player.getPlayerStatistic().setMaxConsecutiveWins(newCurrentConsecutiveWins);
+                        int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
+                        if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
+                            playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
                         }
-                        
-                        player.getPlayerStatistic().setConsecutiveWins(newCurrentConsecutiveWins);
-                        playerStatisticService.save(player.getPlayerStatistic());
+
+                        playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
                     } else {
-                        player.getPlayerStatistic().setBasicRecordLoss(player.getPlayerStatistic().getBasicRecordLoss() + 1);
-                        player.getPlayerStatistic().setConsecutiveWins(0);
-                        playerStatisticService.save(player.getPlayerStatistic());
+                        playerStatistic.setBasicRecordLoss(playerStatistic.getBasicRecordLoss() + 1);
+                        playerStatistic.setConsecutiveWins(0);
                     }
+                    playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+
+                    player.setPlayerStatistic(playerStatistic);
+                    player = playerService.save(player);
+                    client.setActivePlayer(player);
 
                     rp.setPlayer(player);
                     rp.setReady(false);
                     byte playerLevel = client.getActivePlayer().getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);
+                    if (playerLevel != oldLevel) {
+                        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                        rp.setStatusPointsAddedDto(statusPointsAddedDto);
+
+                        S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
+                        packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                    }
+
                     S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
@@ -1655,8 +1665,13 @@ public class GamePacketHandler {
                 Room currentClientRoom = connection.getClient().getActiveRoom();
                 Player player = connection.getClient().getActivePlayer();
                 if (player != null && currentClientRoom != null && currentClientRoom.getStatus() == RoomStatus.Running) {
-                    player.getPlayerStatistic().setNumberOfDisconnects(player.getPlayerStatistic().getNumberOfDisconnects() + 1);
-                    playerStatisticService.save(player.getPlayerStatistic());
+                    PlayerStatistic playerStatistic = player.getPlayerStatistic();
+                    playerStatistic.setNumberOfDisconnects(playerStatistic.getNumberOfDisconnects() + 1);
+                    playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+
+                    player.setPlayerStatistic(playerStatistic);
+                    player = playerService.save(player);
+                    connection.getClient().setActivePlayer(player);
                 }
 
                 gameSession.getClients().forEach(c -> {
@@ -1704,8 +1719,15 @@ public class GamePacketHandler {
         answer.write(position);
         connection.sendTCP(answer);
 
+        Player player = connection.getClient().getActivePlayer();
+        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+
+        S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
+        S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
+        connection.sendTCP(playerStatusPointChangePacket);
+        connection.sendTCP(playerInfoPlayStatsPacket);
         connection.sendTCP(roomInformationPacket);
         connection.sendTCP(roomPlayerInformationPacket);
     }
