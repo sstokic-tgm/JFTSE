@@ -4,6 +4,7 @@ import com.ft.emulator.server.database.model.account.Account;
 import com.ft.emulator.server.database.model.item.Product;
 import com.ft.emulator.server.database.model.player.ClothEquipment;
 import com.ft.emulator.server.database.model.player.Player;
+import com.ft.emulator.server.database.model.player.PlayerStatistic;
 import com.ft.emulator.server.database.model.player.QuickSlotEquipment;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.database.repository.item.*;
@@ -33,6 +34,7 @@ public class ProductService {
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final PocketService pocketService;
+    private final PlayerStatisticService playerStatisticService;
 
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {
         List<Integer> productIndexList = new ArrayList<>(itemList.keySet());
@@ -147,6 +149,10 @@ public class ProductService {
         Pocket pocket = new Pocket();
         pocket = pocketService.save(pocket);
         player.setPocket(pocket);
+
+        PlayerStatistic playerStatistic = new PlayerStatistic();
+        playerStatistic = playerStatisticService.save(playerStatistic);
+        player.setPlayerStatistic(playerStatistic);
 
         return playerService.save(player);
     }
