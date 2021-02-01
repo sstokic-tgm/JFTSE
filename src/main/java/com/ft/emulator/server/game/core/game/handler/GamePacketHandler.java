@@ -1287,9 +1287,6 @@ public class GamePacketHandler {
             Packet gameAnimationAllowSkipPacket = new Packet(PacketID.S2CGameAnimationAllowSkip);
             gameAnimationAllowSkipPacket.write((char) 0);
 
-            // TODO: Branch here later
-            // TODO: Spawn monster with different packet. Boss is the wrong one
-
             this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
                     .forEach(c -> {
                         c.getConnection().sendTCP(gameAnimationAllowSkipPacket);
