@@ -100,7 +100,7 @@ public class GamePacketHandler {
 
     @PostConstruct
     public void init() {
-        scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 1, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
     }
 
     public GameHandler getGameHandler() {
@@ -1802,7 +1802,7 @@ public class GamePacketHandler {
 
     private void refreshLobbyRoomListForAllClients(Connection connection) {
         this.gameHandler.getClientsInLobby().forEach(c -> {
-            if (c != null) {
+            if (c != null && c.getConnection() != null) {
                 S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.getFilteredRoomsForClient(c));
                 boolean isNotActivePlayer = !c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
                 if (isNotActivePlayer)
