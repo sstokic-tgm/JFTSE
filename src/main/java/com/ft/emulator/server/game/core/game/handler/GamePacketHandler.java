@@ -11,10 +11,7 @@ import com.ft.emulator.server.database.model.home.HomeInventory;
 import com.ft.emulator.server.database.model.item.ItemHouse;
 import com.ft.emulator.server.database.model.item.ItemHouseDeco;
 import com.ft.emulator.server.database.model.item.Product;
-import com.ft.emulator.server.database.model.player.ClothEquipment;
-import com.ft.emulator.server.database.model.player.Player;
-import com.ft.emulator.server.database.model.player.QuickSlotEquipment;
-import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
+import com.ft.emulator.server.database.model.player.*;
 import com.ft.emulator.server.database.model.pocket.PlayerPocket;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.database.model.tutorial.TutorialProgress;
@@ -55,10 +52,7 @@ import com.ft.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.ft.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.ft.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
-import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
-import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerLevelExpPacket;
-import com.ft.emulator.server.game.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
-import com.ft.emulator.server.game.core.packet.packets.player.S2CShopMoneyAnswerPacket;
+import com.ft.emulator.server.game.core.packet.packets.player.*;
 import com.ft.emulator.server.game.core.packet.packets.shop.*;
 import com.ft.emulator.server.game.core.packet.packets.tutorial.C2STutorialBeginRequestPacket;
 import com.ft.emulator.server.game.core.packet.packets.tutorial.C2STutorialEndPacket;
@@ -112,7 +106,7 @@ public class GamePacketHandler {
 
     @PostConstruct
     public void init() {
-        scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 1, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
     }
 
     public GameHandler getGameHandler() {
@@ -193,6 +187,9 @@ public class GamePacketHandler {
 
             S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
             connection.sendTCP(playerStatusPointChangePacket);
+
+            S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
+            connection.sendTCP(playerInfoPlayStatsPacket);
 
             S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
             connection.sendTCP(inventoryWearClothAnswerPacket);
@@ -1494,8 +1491,13 @@ public class GamePacketHandler {
                 Room currentClientRoom = connection.getClient().getActiveRoom();
                 Player player = connection.getClient().getActivePlayer();
                 if (player != null && currentClientRoom != null && currentClientRoom.getStatus() == RoomStatus.Running) {
-                    player.getPlayerStatistic().setNumberOfDisconnects(player.getPlayerStatistic().getNumberOfDisconnects() + 1);
-                    playerStatisticService.save(player.getPlayerStatistic());
+                    PlayerStatistic playerStatistic = player.getPlayerStatistic();
+                    playerStatistic.setNumberOfDisconnects(playerStatistic.getNumberOfDisconnects() + 1);
+                    playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+
+                    player.setPlayerStatistic(playerStatistic);
+                    player = playerService.save(player);
+                    connection.getClient().setActivePlayer(player);
                 }
 
                 gameSession.getClients().forEach(c -> {
@@ -1523,10 +1525,9 @@ public class GamePacketHandler {
                 });
             }
         }
-
+        connection.setClient(null);
         gameHandler.removeClient(connection.getClient());
 
-        connection.setClient(null);
         connection.close();
     }
 
@@ -1543,8 +1544,20 @@ public class GamePacketHandler {
         answer.write(position);
         connection.sendTCP(answer);
 
+        Player player = connection.getClient().getActivePlayer();
+        PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+        player.setPlayerStatistic(playerStatistic);
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
+        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+
+        S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
+        S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(playerStatistic);
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(currentClientRoom.getRoomPlayerList());
+        connection.sendTCP(playerStatusPointChangePacket);
+        connection.sendTCP(playerInfoPlayStatsPacket);
         connection.sendTCP(roomInformationPacket);
         connection.sendTCP(roomPlayerInformationPacket);
     }
@@ -1615,7 +1628,7 @@ public class GamePacketHandler {
 
     private void refreshLobbyRoomListForAllClients(Connection connection) {
         this.gameHandler.getClientsInLobby().forEach(c -> {
-            if (c != null) {
+            if (c != null && c.getConnection() != null) {
                 S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.getFilteredRoomsForClient(c));
                 boolean isNotActivePlayer = !c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
                 if (isNotActivePlayer)

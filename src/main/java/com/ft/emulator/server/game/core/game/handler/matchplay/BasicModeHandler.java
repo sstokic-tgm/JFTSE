@@ -1,6 +1,8 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
 import com.ft.emulator.server.database.model.player.Player;
+import com.ft.emulator.server.database.model.player.PlayerStatistic;
+import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.constants.ServeType;
@@ -13,7 +15,9 @@ import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
+import com.ft.emulator.server.game.core.service.ClothEquipmentService;
 import com.ft.emulator.server.game.core.service.LevelService;
+import com.ft.emulator.server.game.core.service.PlayerService;
 import com.ft.emulator.server.game.core.service.PlayerStatisticService;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
@@ -32,7 +36,9 @@ import java.util.concurrent.TimeUnit;
 public class BasicModeHandler {
     private final LevelService levelService;
     private final PlayerStatisticService playerStatisticService;
+    private final ClothEquipmentService clothEquipmentService;
     private final PacketEventHandler packetEventHandler;
+    private final PlayerService playerService;
     private final GameHandler gameHandler;
 
     public void handleBasicModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayBasicGame game) {
@@ -60,8 +66,6 @@ public class BasicModeHandler {
         boolean isRedTeamServing = game.isRedTeamServing(gameSession.getTimesCourtChanged());
         List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
 
-        game.setFinished(true);
-        game.setSetsBlueTeam((byte) 2);
         List<PlayerReward> playerRewards = new ArrayList<>();
         if (game.isFinished()) {
             playerRewards = game.getPlayerRewards();
@@ -113,36 +117,49 @@ public class BasicModeHandler {
                         .filter(x -> x.getPlayerPosition() == rp.getPosition())
                         .findFirst()
                         .orElse(null);
+
+                Player player = client.getActivePlayer();
+                byte oldLevel = player.getLevel();
                 if (playerReward != null) {
-                    byte level = levelService.getLevel(playerReward.getBasicRewardExp(), client.getActivePlayer().getExpPoints(), client.getActivePlayer().getLevel());
-                    Player player = client.getActivePlayer();
+                    byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
                     player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
                     player.setGold(player.getGold() + playerReward.getBasicRewardGold());
                     player = levelService.setNewLevelStatusPoints(level, player);
                     client.setActivePlayer(player);
                 }
 
-                Player player = client.getActivePlayer();
+                PlayerStatistic playerStatistic = player.getPlayerStatistic();
                 if (wonGame) {
-                    player.getPlayerStatistic().setBasicRecordWin(player.getPlayerStatistic().getBasicRecordWin() + 1);
+                    playerStatistic.setBasicRecordWin(playerStatistic.getBasicRecordWin() + 1);
 
-                    int newCurrentConsecutiveWins = player.getPlayerStatistic().getConsecutiveWins() + 1;
-                    if (newCurrentConsecutiveWins > player.getPlayerStatistic().getMaxConsecutiveWins()) {
-                        player.getPlayerStatistic().setMaxConsecutiveWins(newCurrentConsecutiveWins);
+                    int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
+                    if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
+                        playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
                     }
 
-                    player.getPlayerStatistic().setConsecutiveWins(newCurrentConsecutiveWins);
-                    playerStatisticService.save(player.getPlayerStatistic());
+                    playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
                 } else {
-                    player.getPlayerStatistic().setBasicRecordLoss(player.getPlayerStatistic().getBasicRecordLoss() + 1);
-                    player.getPlayerStatistic().setConsecutiveWins(0);
-                    playerStatisticService.save(player.getPlayerStatistic());
+                    playerStatistic.setBasicRecordLoss(playerStatistic.getBasicRecordLoss() + 1);
+                    playerStatistic.setConsecutiveWins(0);
                 }
+                playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+
+                player.setPlayerStatistic(playerStatistic);
+                player = playerService.save(player);
+                client.setActivePlayer(player);
 
                 rp.setPlayer(player);
                 rp.setReady(false);
                 byte playerLevel = client.getActivePlayer().getLevel();
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
+                if (playerLevel != oldLevel) {
+                    StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                    rp.setStatusPointsAddedDto(statusPointsAddedDto);
+
+                    S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                }
+
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
@@ -157,8 +174,7 @@ public class BasicModeHandler {
                     unsetHostPacket.write((byte) 0);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, unsetHostPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
                 }
-            }
-            else {
+            } else {
                 boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
                 byte serveType = ServeType.None;
                 if (shouldServeBall) {
