@@ -1699,10 +1699,9 @@ public class GamePacketHandler {
                 });
             }
         }
-
+        connection.setClient(null);
         gameHandler.removeClient(connection.getClient());
 
-        connection.setClient(null);
         connection.close();
     }
 
