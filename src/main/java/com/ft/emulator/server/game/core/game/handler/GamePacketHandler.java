@@ -454,10 +454,10 @@ public class GamePacketHandler {
                 byte option = data.getValue();
 
                 // prevent user from buying pet till it'simplemented
-                if (product.getCategory().equals(EItemCategory.PET_CHAR.getName())) {
-                    result += product.getPrice0();
-                    continue;
-                }
+//                if (product.getCategory().equals(EItemCategory.PET_CHAR.getName())) {
+//                    result += product.getPrice0();
+//                    continue;
+//                }
 
                 if (!product.getCategory().equals(EItemCategory.CHAR.getName())) {
                     if (product.getCategory().equals(EItemCategory.HOUSE.getName())) {
@@ -840,8 +840,44 @@ public class GamePacketHandler {
             S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getActivePlayer().getName(), chatRoomReqPacket.getMessage());
 
             Room room = connection.getClient().getActiveRoom();
-            if (room != null)
-                this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+            if (room != null) {
+
+                if (chatRoomReqPacket.getType() == 1) { // TEAM CHAT
+
+                    short senderPos = -1;
+                    for (RoomPlayer rp : room.getRoomPlayerList())
+                    {
+                        if (connection.getClient().getActivePlayer().getId().equals(rp.getPlayer().getId()))
+                        {
+                            senderPos = rp.getPosition();
+                            break;
+                        }
+                    }
+
+                    if (senderPos != -1)
+                    {
+                        for (Client c : this.gameHandler.getClientsInRoom(room.getRoomId()))
+                        {
+                            for (RoomPlayer rp : c.getActiveRoom().getRoomPlayerList())
+                            {
+                                if (c.getActivePlayer().getId().equals(rp.getPlayer().getId()) && (senderPos == 0 && rp.getPosition() == 2 || senderPos == 2 && rp.getPosition() == 0))
+                                {
+                                    c.getConnection().sendTCP(chatRoomAnswerPacket);
+                                } else if (c.getActivePlayer().getId().equals(rp.getPlayer().getId()) && (senderPos == 1 && rp.getPosition() == 3 || senderPos == 3 && rp.getPosition() == 1)) {
+                                    c.getConnection().sendTCP(chatRoomAnswerPacket);
+                                }
+                            }
+                        }
+                    }
+
+
+                } else { // ALL CHAT & OTHERS FOR NOW
+                    this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+                }
+
+                //this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+                //this.gameHandler.getClientsInRoom(room.getRoomId())
+            }
         } break;
         case PacketID.C2SWhisperReq: {
             C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
