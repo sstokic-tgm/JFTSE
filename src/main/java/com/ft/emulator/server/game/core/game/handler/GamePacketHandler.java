@@ -1131,41 +1131,43 @@ public class GamePacketHandler {
         short positionToClaim = roomPositionChangeRequestPacket.getPosition();
 
         Room room = connection.getClient().getActiveRoom();
-        RoomPlayer requestingSlotChangePlayer = room.getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
-                .findAny()
-                .orElse(null);
+        if (room != null) {
+            RoomPlayer requestingSlotChangePlayer = room.getRoomPlayerList().stream()
+                    .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    .findAny()
+                    .orElse(null);
 
-        if (requestingSlotChangePlayer != null) {
-            short requestingSlotChangePlayerOldPosition = requestingSlotChangePlayer.getPosition();
-            if (requestingSlotChangePlayerOldPosition == positionToClaim) {
-                return;
+            if (requestingSlotChangePlayer != null) {
+                short requestingSlotChangePlayerOldPosition = requestingSlotChangePlayer.getPosition();
+                if (requestingSlotChangePlayerOldPosition == positionToClaim) {
+                    return;
+                }
+
+                boolean requestingSlotChangePlayerIsMaster = requestingSlotChangePlayer.isMaster();
+                boolean slotIsInUse = connection.getClient().getActiveRoom().getPositions().get(positionToClaim) == RoomPositionState.InUse;
+                if (slotIsInUse && !requestingSlotChangePlayerIsMaster) {
+                    S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "You cannot claim this players slot");
+                    connection.sendTCP(chatRoomAnswerPacket);
+                    return;
+                }
+
+                boolean freeOldPosition = true;
+                RoomPlayer playerInSlotToClaim = room.getRoomPlayerList().stream().filter(x -> x.getPosition() == positionToClaim).findAny().orElse(null);
+                if (playerInSlotToClaim != null) {
+                    freeOldPosition = false;
+                    this.internalHandleRoomPositionChange(connection, playerInSlotToClaim, false,
+                            playerInSlotToClaim.getPosition(), requestingSlotChangePlayerOldPosition);
+                }
+
+                this.internalHandleRoomPositionChange(connection, requestingSlotChangePlayer, freeOldPosition,
+                        requestingSlotChangePlayerOldPosition, positionToClaim);
             }
 
-            boolean requestingSlotChangePlayerIsMaster = requestingSlotChangePlayer.isMaster();
-            boolean slotIsInUse = connection.getClient().getActiveRoom().getPositions().get(positionToClaim) == RoomPositionState.InUse;
-            if (slotIsInUse && !requestingSlotChangePlayerIsMaster) {
-                S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "You cannot claim this players slot");
-                connection.sendTCP(chatRoomAnswerPacket);
-                return;
-            }
-
-            boolean freeOldPosition = true;
-            RoomPlayer playerInSlotToClaim = room.getRoomPlayerList().stream().filter(x -> x.getPosition() == positionToClaim).findAny().orElse(null);
-            if (playerInSlotToClaim != null) {
-                freeOldPosition = false;
-                this.internalHandleRoomPositionChange(connection, playerInSlotToClaim, false,
-                        playerInSlotToClaim.getPosition(), requestingSlotChangePlayerOldPosition);
-            }
-
-            this.internalHandleRoomPositionChange(connection, requestingSlotChangePlayer, freeOldPosition,
-                    requestingSlotChangePlayerOldPosition, positionToClaim);
+            List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+            roomPlayerList.forEach(x -> x.setReady(false));
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
         }
-
-        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
-        roomPlayerList.forEach(x -> x.setReady(false));
-        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
     }
 
     public void handleRoomKickPlayerRequestPacket(Connection connection, Packet packet) {
