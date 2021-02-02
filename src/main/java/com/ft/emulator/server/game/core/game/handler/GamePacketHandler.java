@@ -29,7 +29,6 @@ import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
-import com.ft.emulator.server.game.core.packet.packets.S2CServerNoticePacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.authserver.gameserver.C2SGameServerLoginPacket;
@@ -350,7 +349,7 @@ public class GamePacketHandler {
             S2CInventorySellItemCheckAnswerPacket inventorySellItemCheckAnswerPacket = new S2CInventorySellItemCheckAnswerPacket(status);
             connection.sendTCP(inventorySellItemCheckAnswerPacket);
 
-            List<Integer> itemsCount = IntStream.range(0, playerPocket.getItemCount().intValue()).boxed().collect(Collectors.toList());
+            List<Integer> itemsCount = IntStream.range(0, playerPocket.getItemCount()).boxed().collect(Collectors.toList());
             StreamUtils.batches(itemsCount, 500)
                 .forEach(itemCount -> {
                     S2CInventorySellItemAnswerPacket inventorySellItemAnswerPacket = new S2CInventorySellItemAnswerPacket((char) itemCount.size(), itemPocketId);
@@ -386,6 +385,16 @@ public class GamePacketHandler {
         connection.getClient().setActivePlayer(player);
 
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+
+        Room room = connection.getClient().getActiveRoom();
+        if (room != null) {
+            room.getRoomPlayerList().forEach(rp -> {
+                if (rp.isFitting() && rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId())) {
+                    rp.setClothEquipment(clothEquipmentService.findClothEquipmentById(clothEquipment.getId()));
+                    rp.setStatusPointsAddedDto(statusPointsAddedDto);
+                }
+            });
+        }
 
         S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, inventoryWearClothReqPacket, player, statusPointsAddedDto);
         connection.sendTCP(inventoryWearClothAnswerPacket);
@@ -1194,6 +1203,25 @@ public class GamePacketHandler {
 
         S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket(slot, deactivate);
         this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomSlotCloseAnswerPacket));
+    }
+
+    public void handleRoomFittingRequestPacket(Connection connection, Packet packet) {
+        C2SRoomFittingRequestPacket roomFittingRequestPacket = new C2SRoomFittingRequestPacket(packet);
+        boolean fitting = roomFittingRequestPacket.isFitting();
+
+        Room room = connection.getClient().getActiveRoom();
+        if (room != null) {
+            room.getRoomPlayerList().forEach(rp -> {
+                if (rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    rp.setFitting(fitting);
+            });
+
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(room.getRoomPlayerList());
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
+                if (c.getConnection() != null)
+                    c.getConnection().sendTCP(roomPlayerInformationPacket);
+            });
+        }
     }
 
     public void handleRoomStartGamePacket(Connection connection, Packet packet) {
