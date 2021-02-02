@@ -1861,9 +1861,8 @@ public class GamePacketHandler {
     }
 
     // Handle Room Chat <TEAM,ALL USERS> @ <LEFT TO ADD CLUB && DOESNT WORK FOR GM>
-    public void HandleChat(Connection connection, Room room, C2SChatRoomReqPacket chatRoomReqPacket, S2CChatRoomAnswerPacket chatRoomAnswerPacket) {
+    private void HandleChat(Connection connection, Room room, C2SChatRoomReqPacket chatRoomReqPacket, S2CChatRoomAnswerPacket chatRoomAnswerPacket) {
         if (room == null) return;
-
 
         boolean isTeamChat = chatRoomReqPacket.getType() == 1;
         if (isTeamChat) {
@@ -1886,7 +1885,7 @@ public class GamePacketHandler {
             connection.sendTCP(chatRoomAnswerPacket); // Send to sender
             return;
         }
-        this.gameHandler.getClientsInRoom(getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
     }
 
     private boolean areInSameTeam(int playerPos1, int playerPos2) {
