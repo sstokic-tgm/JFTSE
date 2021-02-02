@@ -28,6 +28,8 @@ public class AuthServerChecker extends ServerChecker implements Runnable {
                 log.info("Trying to restart the authentication server...");
 
                 server.dispose();
+                while (server.getServerChannel() != null) { Thread.sleep(250); }
+
                 server.restart();
                 server.bind(5894);
             }
@@ -40,6 +42,8 @@ public class AuthServerChecker extends ServerChecker implements Runnable {
                 }
 
                 log.error("Failed to start authentication server!", ioe);
+            } catch (InterruptedException e) {
+                log.error("Error while waiting to close the auth server: ", e);
             }
             server.start("auth server");
 

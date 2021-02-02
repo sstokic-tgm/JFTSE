@@ -28,6 +28,8 @@ public class RelayServerChecker extends ServerChecker implements Runnable {
                 log.info("Trying to restart the relay server...");
 
                 server.dispose();
+                while (server.getServerChannel() != null) { Thread.sleep(250); }
+
                 server.restart();
                 server.bind(5896);
             }
@@ -40,6 +42,8 @@ public class RelayServerChecker extends ServerChecker implements Runnable {
                 }
 
                 log.error("Failed to start relay server!", ioe);
+            } catch (InterruptedException e) {
+                log.error("Error while waiting to close the relay server: ", e);
             }
             server.start("relay server");
 
