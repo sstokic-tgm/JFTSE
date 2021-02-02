@@ -21,9 +21,9 @@ public class S2CGameDisplayPlayerStatsPacket extends Packet {
             this.write(roomPlayer.getPosition());
             this.write(player.getName());
             this.write(player.getLevel());
-            this.write(323); // WINS
-            this.write(125); // LOSE
-            this.write(23); // SUCCESSIVE WINS
+            this.write(player.getPlayerStatistic().getBasicRecordWin());
+            this.write(player.getPlayerStatistic().getBasicRecordLoss());
+            this.write(player.getPlayerStatistic().getConsecutiveWins());
         }
     }
 }

@@ -2,10 +2,7 @@ package com.ft.emulator.server.game.core.auth.handler;
 
 import com.ft.emulator.server.database.model.account.Account;
 import com.ft.emulator.server.database.model.home.AccountHome;
-import com.ft.emulator.server.database.model.player.ClothEquipment;
-import com.ft.emulator.server.database.model.player.Player;
-import com.ft.emulator.server.database.model.player.QuickSlotEquipment;
-import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
+import com.ft.emulator.server.database.model.player.*;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
@@ -29,6 +26,7 @@ public class AuthPacketHandler {
     private final HomeService homeService;
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
+    private final PlayerStatisticService playerStatisticService;
 
     public void sendWelcomePacket(Connection connection) {
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
@@ -42,6 +40,9 @@ public class AuthPacketHandler {
         if (loginPacket.getVersion() != 21108180) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
+
+            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+            connection.sendTCP(disconnectAnswerPacket);
         }
 
         Account account = authenticationService.login(loginPacket.getUsername(), loginPacket.getPassword());
@@ -98,6 +99,10 @@ public class AuthPacketHandler {
             Pocket pocket = new Pocket();
             pocket = pocketService.save(pocket);
             player.setPocket(pocket);
+
+            PlayerStatistic playerStatistic = new PlayerStatistic();
+            playerStatistic = playerStatisticService.save(playerStatistic);
+            player.setPlayerStatistic(playerStatistic);
 
             player = playerService.save(player);
 
@@ -182,6 +187,7 @@ public class AuthPacketHandler {
         Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
         if (player != null) {
 
+            connection.getClient().getAccount().getPlayerList().removeIf(pl -> pl.getId().equals(player.getId()));
             playerService.remove(player.getId());
 
             S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) 0);

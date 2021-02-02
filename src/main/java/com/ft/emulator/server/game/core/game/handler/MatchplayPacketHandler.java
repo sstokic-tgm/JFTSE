@@ -1,5 +1,6 @@
 package com.ft.emulator.server.game.core.game.handler;
 
+import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
@@ -7,8 +8,10 @@ import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.PacketID;
+import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
+import com.ft.emulator.server.game.core.service.PlayerStatisticService;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
@@ -26,7 +29,7 @@ import java.util.List;
 public class MatchplayPacketHandler {
     private final GameSessionManager gameSessionManager;
     private final RelayHandler relayHandler;
-    private final PacketEventHandler packetEventHandler;
+    private final PlayerStatisticService playerStatisticService;
 
     @PostConstruct
     public void init() {
@@ -79,38 +82,54 @@ public class MatchplayPacketHandler {
     public void handleDisconnected(Connection connection) {
         Client client = connection.getClient();
         if (client == null) return;
+
         GameSession gameSession = client.getActiveGameSession();
-        if (gameSession == null) return;
+        if (gameSession == null) { // server checkers and other, we need to remove the client from relay handler otherwise floating connections
+            connection.setClient(null);
+            this.relayHandler.removeClient(connection.getClient());
 
-        Room room = client.getActiveRoom();
-        if (room != null) {
-            // TODO: Joining player should be able to join running game replacing the disconnected one
-            room.setStatus(RoomStatus.NotRunning); // reset status so joining players can join room.
-            room.getRoomPlayerList().forEach(x -> x.setReady(false));
+            connection.close();
+        }
+        else {
+            Room currentClientRoom = connection.getClient().getActiveRoom();
+            Player player = connection.getClient().getActivePlayer();
+            if (player != null && currentClientRoom != null && currentClientRoom.getStatus() == RoomStatus.Running) {
+                player.getPlayerStatistic().setNumberOfDisconnects(player.getPlayerStatistic().getNumberOfDisconnects() + 1);
+                playerStatisticService.save(player.getPlayerStatistic());
+            }
 
-            this.relayHandler.getClientsInGameSession(gameSession.getSessionId()).forEach(c -> {
+            gameSession.getClients().forEach(c -> {
+                Room room = c.getActiveRoom();
+                room.setStatus(RoomStatus.NotRunning);
+                room.getRoomPlayerList().forEach(x -> x.setReady(false));
+                c.setActiveRoom(room);
 
                 RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
                         .filter(rp -> rp.getPosition() == 0 && rp.getPlayer().getId().equals(c.getActivePlayer().getId()))
                         .findAny()
                         .orElse(null);
 
-                if (roomPlayer != null && c.getConnection().getId() != connection.getId()) {
+                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                if (c.getRelayConnection() != null && c.getConnection() != null && c.getRelayConnection().getId() != connection.getId())
+                    c.getConnection().sendTCP(backToRoomPacket);
+
+                if (roomPlayer != null && c.getRelayConnection().getId() != connection.getId()) {
                     Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
                     unsetHostPacket.write((byte) 0);
                     c.getConnection().sendTCP(unsetHostPacket);
                 }
 
-                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                c.getConnection().sendTCP(backToRoomPacket);
+                c.setActiveGameSession(null);
 
                 c.getRelayConnection().setClient(null);
+                this.relayHandler.removeClient(c);
+
                 c.getRelayConnection().close();
             });
-        }
 
-        gameSession.getClients().forEach(c -> c.setActiveGameSession(null));
-        gameSessionManager.removeGameSession(gameSession);
+            gameSession.getClients().clear();
+            gameSessionManager.removeGameSession(gameSession);
+        }
     }
 
     public void handleUnknown(Connection connection, Packet packet) {

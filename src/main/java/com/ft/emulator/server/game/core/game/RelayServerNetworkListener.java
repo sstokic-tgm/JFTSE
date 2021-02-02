@@ -43,7 +43,7 @@ public class RelayServerNetworkListener implements ConnectionListener {
                 break;
 
             default:
-                matchplayPacketHandler.handleUnknown(connection, packet);
+                // empty
                 break;
         }
     }

@@ -75,6 +75,7 @@ public final class PacketID {
     public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ED;
     public final static char S2CMatchplayAckPlayerInformation = 0x3EF;
     public final static char S2CMatchplayStartServe = 0x183E;
+    public final static char S2CMatchplayStartGuardianServe = 0x184C;
     public final static char C2SMatchplayPoint = 0x183F;
     public final static char S2CMatchplayTeamWinsPoint = 0x1840;
     public final static char S2CMatchplayTeamWinsSet = 0x1842 ;
@@ -82,6 +83,11 @@ public final class PacketID {
     public final static char S2CMatchPlaySetExperienceGainInfoData = 0x1846;
     public final static char S2CMatchplaySetGameResultData = 0x1848;
     public final static char S2CMatchplayBackToRoom = 0x1780;
+    public final static char C2SMatchplayClientBackInRoom = 0x1773;
+    public final static char S2CMatchplayDamageToPlayer = 0x184E;
+    public final static char S2CMatchplaySpawnBossBattle = 0x1D55;
+    public final static char S2CMatchplayGivePlayerSkills = 0xC98;
+    public final static char S2CMatchplayPlaceSkillCrystal = 0x332C;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
     public final static char C2CPlayerAnimationPacket = 0x32C9;
@@ -97,6 +103,7 @@ public final class PacketID {
     public final static char S2CRoomMapChangeAnswer = 0x1789;
     public final static char C2SRoomSlotCloseReq = 0x1D4C;
     public final static char S2CRoomSlotCloseAnswer = 0x1D4E;
+    public final static char C2SRoomFittingReq = 0x1D60;
 
     public final static char S2CUnknownRoomJoin = 0x189D;
 

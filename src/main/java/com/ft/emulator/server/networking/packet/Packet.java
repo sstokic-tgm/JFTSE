@@ -151,7 +151,7 @@ public class Packet {
     public String readUnicodeString() {
         String result = "";
 
-        if (this.data[this.readPosition + 1] == 0x00) {
+        if ((this.readPosition >= 0 && this.readPosition < this.data.length) && this.data[this.readPosition + 1] == 0x00) {
             int stringLength = indexOf(this.data, new byte[]{0x00, 0x00}, this.readPosition) + 1 - this.readPosition;
 
             if (stringLength > 1) {

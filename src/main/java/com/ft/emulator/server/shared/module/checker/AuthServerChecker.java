@@ -1,5 +1,6 @@
 package com.ft.emulator.server.shared.module.checker;
 
+import com.ft.emulator.common.discord.DiscordWebhook;
 import com.ft.emulator.server.networking.Server;
 import lombok.extern.log4j.Log4j2;
 
@@ -19,21 +20,41 @@ public class AuthServerChecker extends ServerChecker implements Runnable {
         log.info("auth server " + (isAlive ? "is" : "is not") + " online.");
 
         if (!isAlive) {
-            log.info("Trying to restart the authentication server...");
+            DiscordWebhook discordWebhook = new DiscordWebhook(""); // empty till global config table created
+            discordWebhook.setContent("Login Server is down. Trying to restart...");
 
             try {
+                discordWebhook.execute();
+                log.info("Trying to restart the authentication server...");
+
                 server.dispose();
+                while (server.getServerChannel() != null) { Thread.sleep(250); }
+
                 server.restart();
                 server.bind(5894);
             }
             catch (IOException ioe) {
-                log.error("Failed to start authentication server!");
-                ioe.printStackTrace();
-                System.exit(1);
+                discordWebhook.setContent("Failed to start Login Server!");
+                try {
+                    discordWebhook.execute();
+                } catch (IOException e) {
+                    log.error("DiscordWebhook error: " ,e);
+                }
+
+                log.error("Failed to start authentication server!", ioe);
+            } catch (InterruptedException e) {
+                log.error("Error while waiting to close the auth server: ", e);
             }
             server.start("auth server");
 
             log.info("Authentication server has been restarted.");
+
+            discordWebhook.setContent("Login Server has been restarted.");
+            try {
+                discordWebhook.execute();
+            } catch (IOException e) {
+                log.error("DiscordWebhook error: " ,e);
+            }
         }
     }
 }

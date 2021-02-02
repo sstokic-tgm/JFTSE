@@ -58,6 +58,7 @@ public class AuthenticationServerNetworkListener implements ConnectionListener {
 
         case PacketID.C2SHeartbeat:
         case PacketID.C2SLoginAliveClient:
+        case 0xE00E:
             break;
 
         default:

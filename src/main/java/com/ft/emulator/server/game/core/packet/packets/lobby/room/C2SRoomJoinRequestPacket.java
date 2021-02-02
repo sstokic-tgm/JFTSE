@@ -1,5 +1,6 @@
 package com.ft.emulator.server.game.core.packet.packets.lobby.room;
 
+import com.ft.emulator.common.utilities.StringUtils;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.networking.packet.Packet;
 import lombok.Getter;
@@ -24,7 +25,7 @@ public class C2SRoomJoinRequestPacket extends Packet {
                 .findAny()
                 .orElse(null);
 
-        if (room != null && room.isPrivate())
+        if (room != null && room.isPrivate() && !StringUtils.isEmpty(room.getPassword()))
             this.password = this.readUnicodeString();
     }
 }
