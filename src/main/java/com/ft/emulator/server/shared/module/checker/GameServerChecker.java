@@ -30,6 +30,8 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 log.info("Trying to restart the game server...");
 
                 gameServer.dispose();
+                while (gameServer.getServerChannel() != null) { Thread.sleep(250); }
+
                 gameServer.restart();
                 gameServer.bind(5895);
             }
@@ -38,10 +40,12 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 try {
                     discordWebhook.execute();
                 } catch (IOException e) {
-                    log.error("DiscordWebhook error: " ,e);
+                    log.error("DiscordWebhook error: " , e);
                 }
 
                 log.error("Failed to start game server!", ioe);
+            } catch (InterruptedException e) {
+                log.error("Error while waiting to close the game server: ", e);
             }
 
             discordWebhook.setContent("Shutting down Matchmaking Server. Trying to restart...");
@@ -50,6 +54,8 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 log.info("Trying to restart the relay server...");
 
                 relayServer.dispose();
+                while (relayServer.getServerChannel() != null) { Thread.sleep(250); }
+
                 relayServer.restart();
                 relayServer.bind(5896);
             }
@@ -62,6 +68,8 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 }
 
                 log.error("Failed to start relay server!", ioe);
+            } catch (InterruptedException e) {
+                log.error("Error while waiting to close the relay server: ", e);
             }
 
             gameServer.start("game server");
