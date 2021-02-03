@@ -1950,7 +1950,7 @@ public class GamePacketHandler {
     }
 
     private short getRoomId() {
-        List<Short> roomIds = this.gameHandler.getRoomList().stream().map(x -> x.getRoomId()).collect(Collectors.toList());
+        List<Short> roomIds = this.gameHandler.getRoomList().stream().map(Room::getRoomId).collect(Collectors.toList());
         List<Short> sortedRoomIds = roomIds.stream().sorted().collect(Collectors.toList());
         short currentRoomId = 0;
         for (Short roomId : sortedRoomIds) {
