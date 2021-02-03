@@ -11,7 +11,7 @@ public class S2CPlayerInfoPlayStatsPacket extends Packet {
         this.write(playerStatistic.getBasicRecordWin());
         this.write(playerStatistic.getBasicRecordLoss());
         this.write(playerStatistic.getBattleRecordWin());
-        this.write(playerStatistic.getBasicRecordLoss());
+        this.write(playerStatistic.getBattleRecordLoss());
 
         this.write(playerStatistic.getConsecutiveWins());
         this.write(0); // ??
