@@ -1680,8 +1680,6 @@ public class GamePacketHandler {
                 connection.sendTCP(inventoryItemRemoveAnswerPacket);
             });
 
-            handleRoomPlayerChanges(connection);
-
             // reset status
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
@@ -1698,8 +1696,6 @@ public class GamePacketHandler {
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
             authenticationService.updateAccount(account);
-
-            handleRoomPlayerChanges(connection);
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
@@ -1739,6 +1735,7 @@ public class GamePacketHandler {
                     }
                 });
             }
+            handleRoomPlayerChanges(connection);
         }
         connection.setClient(null);
         gameHandler.removeClient(connection.getClient());
