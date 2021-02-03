@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Getter
 @Setter
@@ -20,7 +22,6 @@ public class Server implements Runnable {
     private ServerSocketChannel serverChannel;
     private List<Connection> connections = Collections.synchronizedList(new ArrayList<>());
     private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
-    private int nextConnectionID = 1;
     private volatile boolean shutdown;
     private Object updateLock = new Object();
     private Thread updateThread;
@@ -31,8 +32,8 @@ public class Server implements Runnable {
             }
 
             public void disconnected(Connection connection) {
-                removeConnection(connection);
                 Server.this.connectionListeners.forEach(cl -> cl.disconnected(connection));
+                removeConnection(connection);
             }
 
             public void received(Connection connection, Packet packet) {
@@ -260,9 +261,7 @@ public class Server implements Runnable {
             SelectionKey selectionKey = connection.getTcpConnection().accept(selector, socketChannel);
             selectionKey.attach(connection);
 
-            int id = nextConnectionID++;
-            if(nextConnectionID == -1)
-                nextConnectionID = 1;
+            int id = getNextFreeConnectionId();
 
             connection.setId(id);
             connection.setConnected(true);
@@ -274,6 +273,16 @@ public class Server implements Runnable {
             log.error(ioe.getMessage());
             connection.close();
         }
+    }
+
+    private int getNextFreeConnectionId() {
+        Set<Integer> ids = connections.stream()
+                .map(Connection::getId)
+                .collect(Collectors.toSet());
+        return IntStream.iterate(1, n -> n + 1)
+                .filter(n -> !ids.contains(n))
+                .findFirst()
+                .getAsInt();
     }
 
     protected Connection newConnection() {
@@ -324,7 +333,6 @@ public class Server implements Runnable {
         for (int i = 0; i < this.connections.size(); i++)
             this.connections.get(i).close();
         this.connections = Collections.synchronizedList(new ArrayList<>());
-        this.nextConnectionID = 1;
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 
