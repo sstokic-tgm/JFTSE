@@ -64,10 +64,10 @@ public class MatchplayPacketHandler {
             client.setActivePlayer(playerClient.getActivePlayer());
             client.setActiveGameSession(gameSession);
             client.setConnection(playerClient.getConnection());
-            client.setRelayConnection(connection);
-            gameSession.getClients().set(playerClientIndex, client);
-
             connection.setClient(client);
+            client.setRelayConnection(connection);
+
+            gameSession.getClients().set(playerClientIndex, client);
             this.relayHandler.addClient(client);
 
             Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
@@ -81,7 +81,10 @@ public class MatchplayPacketHandler {
 
     public void handleDisconnected(Connection connection) {
         Client client = connection.getClient();
-        if (client == null) return;
+        if (client == null) {
+            connection.close();
+            return;
+        }
 
         GameSession gameSession = client.getActiveGameSession();
         if (gameSession == null) { // server checkers and other, we need to remove the client from relay handler otherwise floating connections
@@ -113,7 +116,7 @@ public class MatchplayPacketHandler {
                 if (c.getRelayConnection() != null && c.getConnection() != null && c.getRelayConnection().getId() != connection.getId())
                     c.getConnection().sendTCP(backToRoomPacket);
 
-                if (roomPlayer != null && c.getRelayConnection().getId() != connection.getId()) {
+                if (roomPlayer != null && (c.getRelayConnection() != null && c.getRelayConnection().getId() != connection.getId())) {
                     Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
                     unsetHostPacket.write((byte) 0);
                     c.getConnection().sendTCP(unsetHostPacket);
@@ -121,9 +124,8 @@ public class MatchplayPacketHandler {
 
                 c.setActiveGameSession(null);
 
-                c.getRelayConnection().setClient(null);
                 this.relayHandler.removeClient(c);
-
+                c.getRelayConnection().setClient(null);
                 c.getRelayConnection().close();
             });
 

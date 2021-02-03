@@ -1036,8 +1036,6 @@ public class GamePacketHandler {
         if (room == null) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -1, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
-
-            this.updateRoomForAllPlayersInMultiplayer(connection, room);
             return;
         }
 
@@ -1737,9 +1735,9 @@ public class GamePacketHandler {
             }
         }
         handleRoomPlayerChanges(connection);
-        connection.setClient(null);
-        gameHandler.removeClient(connection.getClient());
 
+        gameHandler.removeClient(connection.getClient());
+        connection.setClient(null);
         connection.close();
     }
 
@@ -1841,7 +1839,7 @@ public class GamePacketHandler {
     private void refreshLobbyRoomListForAllClients(Connection connection) {
         long playerIdOfCurrentConnection = connection.getClient().getActivePlayer().getId();
         this.gameHandler.getClientsInLobby().forEach(c -> {
-            if (c != null && c.getConnection() != null) {
+            if (c != null && c.getConnection() != null && c.getConnection().isConnected()) {
                 S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.getFilteredRoomsForClient(c));
                 boolean isNotActivePlayer = !c.getActivePlayer().getId().equals(playerIdOfCurrentConnection);
                 if (isNotActivePlayer)
@@ -1852,7 +1850,7 @@ public class GamePacketHandler {
 
     private void refreshLobbyPlayerListForAllClients() {
         this.gameHandler.getClientsInLobby().forEach(c -> {
-            if (c != null && c.getConnection() != null) {
+            if (c != null && c.getConnection() != null && c.getConnection().isConnected()) {
                 byte currentPage = c.getLobbyCurrentPlayerListPage();
                 List<Player> lobbyPlayerList = this.gameHandler.getPlayersInLobby().stream()
                         .skip(currentPage == 1 ? 0 : (currentPage * 10) - 10)
