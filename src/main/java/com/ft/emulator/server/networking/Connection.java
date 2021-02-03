@@ -70,11 +70,12 @@ public class Connection {
 
     public void close() {
         boolean wasConnected = isConnected;
-        isConnected = false;
-        tcpConnection.close();
 
         if(wasConnected)
             notifyDisconnected();
+
+        isConnected = false;
+        tcpConnection.close();
 
         setConnected(false);
     }
