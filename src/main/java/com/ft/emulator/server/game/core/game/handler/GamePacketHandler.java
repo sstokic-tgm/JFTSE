@@ -1735,8 +1735,8 @@ public class GamePacketHandler {
                     }
                 });
             }
-            handleRoomPlayerChanges(connection);
         }
+        handleRoomPlayerChanges(connection);
         connection.setClient(null);
         gameHandler.removeClient(connection.getClient());
 
