@@ -52,9 +52,11 @@ public class GuardianModeHandler {
         } else{
             // TODO: Deal 10% of max health to guardians whe guardians loose ball
             List<Short> guardianPositions = Arrays.asList((short) 10, (short) 11, (short) 12);
-            short newGuardianHealth = -1;
-            S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(guardianPositions.get(0), newGuardianHealth);
-            this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
+            guardianPositions.forEach(x -> {
+                short newGuardianHealth = -1;
+                S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x, newGuardianHealth);
+                this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
+            });
         }
 
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
@@ -111,16 +113,21 @@ public class GuardianModeHandler {
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {
+        S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(playerPicksUpCrystalPacket.getSkillIndex());
+        connection.sendTCP(letCrystalDisappearPacket);
         S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), playerPicksUpCrystalPacket.getSkillIndex(), -1);
         connection.sendTCP(givePlayerSkillsPacket);
     }
 
     private void placeCrystalRandomly(Connection connection) {
-        // TODO: Find all skill indices
-        short skillIndex = (short) (Math.random() * 20);
+        short skillIndex = (short) (Math.random() * 14);
         int negator = (int) (Math.random() * 2) == 0 ? -1 : 1;
         float xPos = (float) (Math.random() * 40) * negator;
         float yPos = (short) (Math.random() * 120) * -1;
+
+        // TODO: Skill index needs to be unique. Store them in game object and assign skills 1-14
+        // TODO: Store skills player have in game session and assign 1. 2. skill slot based on that.
+        // TODO: When picking up 3. skill, skill on the 2nd slot gets discarded and 1nd moves to 2nd
         S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillIndex, xPos, yPos);
         this.sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
     }
