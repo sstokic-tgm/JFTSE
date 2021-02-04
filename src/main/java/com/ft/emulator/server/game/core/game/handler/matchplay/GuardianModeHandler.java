@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -41,6 +42,8 @@ public class GuardianModeHandler {
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
+        // TODO: If player makes the point, guardian take dmg dependent on players will
+
         if (guardianMadePoint) {
             // TODO: Get player to damage (if guardian attacks dmg nearest player to net)
             gameSession.getClients().forEach(c -> {
@@ -54,6 +57,12 @@ public class GuardianModeHandler {
                 S2CMatchplayDamageToPlayer damageToPlayerPacket = new S2CMatchplayDamageToPlayer(roomPlayer.getPosition(), newPlayerHealth);
                 c.getConnection().sendTCP(damageToPlayerPacket);
             });
+        } else{
+            // TODO: Deal 10% of max health to guardians whe guardians loose ball
+            List<Short> guardianPositions = Arrays.asList((short) 10, (short) 11, (short) 12);
+            short newGuardianHealth = -1;
+            S2CMatchplayDamageToPlayer damageToPlayerPacket = new S2CMatchplayDamageToPlayer(guardianPositions.get(0), newGuardianHealth);
+            connection.sendTCP(damageToPlayerPacket);
         }
 
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
