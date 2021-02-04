@@ -6,6 +6,7 @@ import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.constants.ServeType;
+import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.game.core.matchplay.PlayerReward;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
@@ -216,8 +217,10 @@ public class BasicModeHandler {
         }
     }
 
-    public void handleStartBasicMode(Room room) {
-        List<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+    public void handleStartBasicMode(Connection connection, Room room, List<RoomPlayer> roomPlayerList) {
+        Packet removeBlackBarsPacket = new Packet(PacketID.S2CGameRemoveBlackBars);
+        sendPacketToAllInRoom(connection, removeBlackBarsPacket);
+
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
         List<ServeInfo> serveInfo = new ArrayList<>();
         clients.forEach(c -> {
@@ -227,8 +230,7 @@ public class BasicModeHandler {
 
             GameSession gameSession = c.getActiveGameSession();
             MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getActiveMatchplayGame();
-
-            Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
+            Point playerLocation =  game.getPlayerLocationsOnMap().get(rp.getPosition());
             byte serveType = ServeType.None;
             if (rp.getPosition() == 0) {
                 serveType = ServeType.ServeBall;
@@ -253,5 +255,10 @@ public class BasicModeHandler {
         clients.forEach(c -> {
             c.getConnection().sendTCP(matchplayTriggerServe);
         });
+    }
+
+    private void sendPacketToAllInRoom(Connection connection, Packet packet) {
+        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
+                .forEach(c -> c.getConnection().sendTCP(packet));
     }
 }
