@@ -71,6 +71,8 @@ public class GuardianModeHandler {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
             });
         }
+
+        this.placeCrystalRandomly(connection);
     }
 
     public void handleStartGuardianMode(Connection connection, Room room) {
@@ -82,6 +84,8 @@ public class GuardianModeHandler {
         clients.forEach(c -> {
             packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, 8), PacketEventHandler.ServerClient.SERVER);
         });
+
+        this.placeCrystalRandomly(connection);
     }
 
     public void handlePrepareGuardianMode(Connection connection, Room room) {
@@ -104,6 +108,29 @@ public class GuardianModeHandler {
         clients.forEach(c -> {
             c.getConnection().sendTCP(roomSetGuardians);
         });
+    }
+
+    public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {
+        S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), playerPicksUpCrystalPacket.getSkillIndex(), -1);
+        connection.sendTCP(givePlayerSkillsPacket);
+    }
+
+    private void placeCrystalRandomly(Connection connection) {
+        // TODO: Find all skill indices
+        short skillIndex = (short) (Math.random() * 20);
+        int negator = (int) (Math.random() * 2) == 0 ? -1 : 1;
+        float xPos = (float) (Math.random() * 40) * negator;
+        float yPos = (short) (Math.random() * 120) * -1;
+        S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillIndex, xPos, yPos);
+        this.sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
+    }
+
+    private RoomPlayer getRoomPlayerFromConnection(Connection connection) {
+        RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
+                .filter(x -> x.getPlayer().getId() == connection.getClient().getActivePlayer().getId())
+                .findFirst()
+                .orElse(null);
+        return roomPlayer;
     }
 
     private void sendPacketToAllClientsInSameGameSession(Packet packet, Connection connection) {

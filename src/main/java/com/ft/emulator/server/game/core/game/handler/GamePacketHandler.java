@@ -1639,7 +1639,21 @@ public class GamePacketHandler {
         connection.sendTCP(roomPlayerInformationPacket);
     }
 
+    public void handlePlayerPickingUpCrystal(Connection connection, Packet packet) {
+        C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket = new C2SMatchplayPlayerPicksUpCrystal(packet);
+        Room room = connection.getClient().getActiveRoom();
+        switch (room.getMode()) {
+            case GameMode.GUARDIAN:
+                this.guardianModeHandler.handlePlayerPickingUpCrystal(connection, playerPicksUpCrystalPacket);
+                break;
+            case GameMode.BATTLE:
+                break;
+        }
+    }
+
     public void handleUnknown(Connection connection, Packet packet) {
+        // TODO: REMOVE THIS LINE LATER
+        log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);

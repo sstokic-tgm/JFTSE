@@ -259,6 +259,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleClientBackInRoomPacket(connection, packet);
                 break;
 
+            case PacketID.C2SMatchplayPlayerPicksUpCrystal:
+                gamePacketHandler.handlePlayerPickingUpCrystal(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..
