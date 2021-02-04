@@ -903,7 +903,7 @@ public class GamePacketHandler {
         room.setRoomId(this.getRoomId());
         room.setRoomName(roomCreateRequestPacket.getRoomName());
         room.setAllowBattlemon(roomCreateRequestPacket.getAllowBattlemon());
-        room.setMode(roomCreateRequestPacket.getMode() != GameMode.BASIC ? (byte) GameMode.BASIC : roomCreateRequestPacket.getMode());
+        room.setMode(roomCreateRequestPacket.getMode());
         room.setRule(roomCreateRequestPacket.getRule());
         room.setPlayers(roomCreateRequestPacket.getPlayers());
         room.setPrivate(roomCreateRequestPacket.isPrivate());
@@ -930,7 +930,7 @@ public class GamePacketHandler {
         room.setRoomId(this.getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
         room.setAllowBattlemon(roomQuickCreateRequestPacket.getAllowBattlemon());
-        room.setMode(roomQuickCreateRequestPacket.getMode() != GameMode.BASIC ? (byte) GameMode.BASIC : roomQuickCreateRequestPacket.getMode());
+        room.setMode(roomQuickCreateRequestPacket.getMode());
         room.setRule((byte) 0);
         room.setPlayers(playerSize == 0 ? 2 : playerSize);
         room.setPrivate(false);
@@ -959,7 +959,7 @@ public class GamePacketHandler {
     public void handleGameModeChangePacket(Connection connection, Packet packet) {
         C2SRoomGameModeChangeRequestPacket changeRoomGameModeRequestPacket = new C2SRoomGameModeChangeRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
-        room.setMode(changeRoomGameModeRequestPacket.getMode() != GameMode.BASIC ? (byte) GameMode.BASIC : changeRoomGameModeRequestPacket.getMode());
+        room.setMode(changeRoomGameModeRequestPacket.getMode());
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
         connection.sendTCP(roomInformationPacket);
         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
@@ -1255,6 +1255,55 @@ public class GamePacketHandler {
 
         room.setStatus(RoomStatus.StartingGame);
 
+        List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId());
+
+        GameSession gameSession = new GameSession();
+        gameSession.setSessionId(room.getRoomId());
+        gameSession.setPlayers(room.getPlayers());
+        switch (room.getMode()) {
+            case GameMode.BASIC:
+                gameSession.setActiveMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
+                break;
+            case GameMode.GUARDIAN:
+                gameSession.setActiveMatchplayGame(new MatchplayGuardianGame());
+                break;
+        }
+
+        clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
+
+        gameSession.setClients(clientsInRoom);
+        this.gameSessionManager.addGameSession(gameSession);
+
+        List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
+        clientsInRoom.forEach(c -> {
+            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket("127.0.0.1", 5896, room, clientInRoomLeftShiftList);
+            c.getConnection().sendTCP(gameNetworkSettings);
+
+            // shift list to the left, so every client has his player id in the first place when doing session register
+            clientInRoomLeftShiftList.add(0, clientInRoomLeftShiftList.remove(clientInRoomLeftShiftList.size() - 1));
+        });
+
+        RoomPlayer playerInSlot0 = room.getRoomPlayerList().stream()
+                .filter(x -> x.getPosition() == 0)
+                .findFirst().orElse(null);
+        Client clientToHostGame = gameHandler.getClientsInRoom(room.getRoomId()).stream()
+                .filter(x -> playerInSlot0 != null && x.getActivePlayer().getId().equals(playerInSlot0.getPlayer().getId()))
+                .findFirst()
+                .orElse(connection.getClient());
+
+        Packet setHostPacket = new Packet(PacketID.S2CSetHost);
+        setHostPacket.write((byte) 1);
+        clientToHostGame.getConnection().sendTCP(setHostPacket);
+
+        Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
+        clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
+
+        switch (room.getMode()) {
+            case GameMode.GUARDIAN:
+                this.guardianModeHandler.handlePrepareGuardianMode(room);
+                break;
+        }
+
         Thread thread = new Thread(() -> {
             int secondsToCount = 5;
             for (int i = 0; i < secondsToCount; i++) {
@@ -1273,6 +1322,10 @@ public class GamePacketHandler {
                             .allMatch(RoomPlayer::isReady);
 
                     if (!allReady || threadRoom.getStatus() == RoomStatus.StartCancelled) {
+                        Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
+                        unsetHostPacket.write((byte) 0);
+                        clientToHostGame.getConnection().sendTCP(unsetHostPacket);
+
                         threadRoom.setStatus(RoomStatus.NotRunning);
                         Packet startGameCancelledPacket = new Packet(PacketID.S2CRoomStartGameCancelled);
                         startGameCancelledPacket.write((char) 0);
@@ -1290,28 +1343,6 @@ public class GamePacketHandler {
                     e.printStackTrace();
                 }
             }
-
-            List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId());
-
-            GameSession gameSession = new GameSession();
-            gameSession.setSessionId(room.getRoomId());
-            // set specific matchplay game mode object, for now we only support basic single
-            gameSession.setActiveMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
-            gameSession.setPlayers(room.getPlayers());
-
-            clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
-
-            gameSession.setClients(clientsInRoom);
-            this.gameSessionManager.addGameSession(gameSession);
-
-            List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
-            clientsInRoom.forEach(c -> {
-                S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket("127.0.0.1", 5896, room, clientInRoomLeftShiftList);
-                c.getConnection().sendTCP(gameNetworkSettings);
-
-                // shift list to the left, so every client has his player id in the first place when doing session register
-                clientInRoomLeftShiftList.add(0, clientInRoomLeftShiftList.remove(clientInRoomLeftShiftList.size() - 1));
-            });
 
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
@@ -1355,30 +1386,14 @@ public class GamePacketHandler {
                 .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
                 .findFirst();
 
-
-        RoomPlayer playerInSlot0 = roomPlayerList.stream()
-                .filter(x -> x.getPosition() == 0)
-                .findFirst().orElse(null);
-        Client clientToHostGame = gameHandler.getClientsInRoom(room.getRoomId()).stream()
-                .filter(x -> playerInSlot0 != null && x.getActivePlayer().getId().equals(playerInSlot0.getPlayer().getId()))
-                .findFirst()
-                .orElse(connection.getClient());
-
         if (room.getStatus() != RoomStatus.InitializingGame) {
             return;
         }
 
         if (roomPlayer.isPresent()) {
-            Packet setHostPacket = new Packet(PacketID.S2CSetHost);
-            setHostPacket.write((byte) 1);
-            clientToHostGame.getConnection().sendTCP(setHostPacket);
-
-            Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
-            clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
-
             Packet gameAnimationSkipPacket = new Packet(PacketID.S2CGameAnimationSkip);
             gameAnimationSkipPacket.write((char) 0);
-            sendPacketToAllInRoom(clientToHostGame.getConnection(), gameAnimationSkipPacket);
+            sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
 
             this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
 

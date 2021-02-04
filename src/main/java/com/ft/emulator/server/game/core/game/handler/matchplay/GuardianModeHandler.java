@@ -14,6 +14,7 @@ import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
+import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
@@ -53,31 +54,18 @@ public class GuardianModeHandler {
     }
 
     public void handleStartGuardianMode(Room room) {
-        List<ServeInfo> serveInfo = new ArrayList<>();
-        List<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
-        clients.forEach(c -> {
-            RoomPlayer rp = roomPlayerList.stream()
-                    .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
-                    .findFirst().orElse(null);
-
-            GameSession gameSession = c.getActiveGameSession();
-            MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
-
-            Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
-            byte serveType = ServeType.None;
-            ServeInfo playerServeInfo = new ServeInfo();
-            playerServeInfo.setPlayerPosition(rp.getPosition());
-            playerServeInfo.setPlayerStartLocation(playerLocation);
-            playerServeInfo.setServeType(serveType);
-            serveInfo.add(playerServeInfo);
-        });
-
-        S2CMatchplaySpawnBossBattle spawnBossBattle = new S2CMatchplaySpawnBossBattle((byte)0, (byte)1, (byte)0);
         S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
         clients.forEach(c -> {
-            c.getConnection().sendTCP(spawnBossBattle);
-            packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, 15), PacketEventHandler.ServerClient.SERVER);
+            packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, 8), PacketEventHandler.ServerClient.SERVER);
+        });
+    }
+
+    public void handlePrepareGuardianMode(Room room) {
+        S2CRoomSetGuardians roomSetGuardians = new S2CRoomSetGuardians((byte) 1, (byte) 0, (byte) 0);
+        List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
+        clients.forEach(c -> {
+            c.getConnection().sendTCP(roomSetGuardians);
         });
     }
 }
