@@ -16,6 +16,10 @@ public class RelayServerNetworkListener implements ConnectionListener {
     @Autowired
     private MatchplayPacketHandler matchplayPacketHandler;
 
+    public void cleanUp() {
+        matchplayPacketHandler.handleCleanUp();
+    }
+
     public void connected(Connection connection) {
         long timeout = TimeUnit.MINUTES.toMillis(5);
         connection.getTcpConnection().setTimeoutMillis((int) timeout);

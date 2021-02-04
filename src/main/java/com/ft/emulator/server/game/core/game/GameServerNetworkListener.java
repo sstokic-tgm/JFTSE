@@ -14,6 +14,10 @@ public class GameServerNetworkListener implements ConnectionListener {
     @Autowired
     private GamePacketHandler gamePacketHandler;
 
+    public void cleanUp() {
+        gamePacketHandler.handleCleanUp();
+    }
+
     public void connected(Connection connection) {
 
         Client client = new Client();
