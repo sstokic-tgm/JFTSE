@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PlayerHealth {
-    private int maxPlayerHealth;
-    private int currentPlayerHealth;
+    private short maxPlayerHealth;
+    private short currentPlayerHealth;
 }

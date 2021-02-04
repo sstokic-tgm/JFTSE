@@ -17,22 +17,17 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private List<PlayerHealth> playerHPs;
     private byte lastGuardianServeSide;
 
-    public MatchplayGuardianGame(List<PlayerHealth> playerHPs) {
+    public MatchplayGuardianGame() {
         this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -75),
                 new Point(-20, -75));
-        this.playerHPs = playerHPs;
     }
 
-    public int damagePlayer(int playerPos, int damage) {
+    public short damagePlayer(int playerPos, short damage) {
         PlayerHealth playerHealth = this.playerHPs.get(playerPos);
-        playerHealth.setCurrentPlayerHealth(playerHealth.getCurrentPlayerHealth() - damage);
-        if (playerHealth.getCurrentPlayerHealth() < 0) {
-            playerHealth.setCurrentPlayerHealth(0);
-        }
-
-        this.playerHPs.set(playerPos, playerHealth);
-        return playerHealth.getCurrentPlayerHealth() ;
+        short newPlayerHealth = (short) (playerHealth.getCurrentPlayerHealth() - damage);
+        playerHealth.setCurrentPlayerHealth(newPlayerHealth);
+        return newPlayerHealth;
     }
 
     @Override

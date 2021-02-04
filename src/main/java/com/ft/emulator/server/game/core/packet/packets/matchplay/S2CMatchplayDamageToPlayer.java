@@ -4,10 +4,10 @@ import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 
 public class S2CMatchplayDamageToPlayer extends Packet {
-    public S2CMatchplayDamageToPlayer(short playerHpToSet) {
+    public S2CMatchplayDamageToPlayer(short playerPosition, short playerHpToSet) {
         super(PacketID.S2CMatchplayDamageToPlayer);
 
-        this.write((short) 0); // Player position
+        this.write(playerPosition); // Player position
         this.write(playerHpToSet);
         this.write((short) 0); //Unk
         this.write((byte) 0); // Animations

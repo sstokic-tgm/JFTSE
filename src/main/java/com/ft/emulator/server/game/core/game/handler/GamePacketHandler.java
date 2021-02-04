@@ -1266,16 +1266,7 @@ public class GamePacketHandler {
                 gameSession.setActiveMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
                 break;
             case GameMode.GUARDIAN:
-                // Store HP for each player correctly
-                int defaultPlayerHealth = 500;
-                List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-                List<PlayerHealth> playerHealths = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
-                    PlayerHealth playerHealth = new PlayerHealth();
-                    playerHealth.setCurrentPlayerHealth(defaultPlayerHealth);
-                    playerHealth.setMaxPlayerHealth(defaultPlayerHealth);
-                    return playerHealth;
-                }).collect(Collectors.toList());
-                gameSession.setActiveMatchplayGame(new MatchplayGuardianGame(playerHealths));
+                gameSession.setActiveMatchplayGame(new MatchplayGuardianGame());
                 break;
         }
 
@@ -1310,7 +1301,7 @@ public class GamePacketHandler {
 
         switch (room.getMode()) {
             case GameMode.GUARDIAN:
-                this.guardianModeHandler.handlePrepareGuardianMode(room);
+                this.guardianModeHandler.handlePrepareGuardianMode(connection, room);
                 break;
         }
 

@@ -30,6 +30,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,13 +43,16 @@ public class GuardianModeHandler {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
         if (guardianMadePoint) {
             // TODO: Get player to damage (if guardian attacks dmg nearest player to net)
-            // TODO: Damage all players if players loose ball
-            PlayerHealth playerHealth = game.getPlayerHPs().get(0);
-            int lossBallDamage = (int) (playerHealth.getMaxPlayerHealth() * 0.1);
-            int newPlayerHealth = game.damagePlayer(0, lossBallDamage);
-            S2CMatchplayDamageToPlayer damageToPlayerPacket = new S2CMatchplayDamageToPlayer((short) newPlayerHealth);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(damageToPlayerPacket);
+            gameSession.getClients().forEach(c -> {
+                RoomPlayer roomPlayer = c.getActiveRoom().getRoomPlayerList().stream()
+                        .filter(x -> x.getPlayer().getId() == c.getActivePlayer().getId())
+                        .findFirst()
+                        .orElse(null);
+                PlayerHealth playerHealth = game.getPlayerHPs().get(roomPlayer.getPosition());
+                short lossBallDamage = (short) (playerHealth.getMaxPlayerHealth() * 0.1);
+                short newPlayerHealth = game.damagePlayer(roomPlayer.getPosition(), lossBallDamage);
+                S2CMatchplayDamageToPlayer damageToPlayerPacket = new S2CMatchplayDamageToPlayer(roomPlayer.getPosition(), newPlayerHealth);
+                c.getConnection().sendTCP(damageToPlayerPacket);
             });
         }
 
@@ -79,7 +83,21 @@ public class GuardianModeHandler {
         });
     }
 
-    public void handlePrepareGuardianMode(Room room) {
+    public void handlePrepareGuardianMode(Connection connection, Room room) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+
+        // TODO: Store HP for each player correctly
+        short defaultPlayerHealth = 200;
+        List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
+        List<PlayerHealth> playerHealths = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
+            PlayerHealth playerHealth = new PlayerHealth();
+            playerHealth.setCurrentPlayerHealth(defaultPlayerHealth);
+            playerHealth.setMaxPlayerHealth(defaultPlayerHealth);
+            return playerHealth;
+        }).collect(Collectors.toList());
+        game.setPlayerHPs(playerHealths);
+
         S2CRoomSetGuardians roomSetGuardians = new S2CRoomSetGuardians((byte) 1, (byte) 0, (byte) 0);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
         clients.forEach(c -> {
