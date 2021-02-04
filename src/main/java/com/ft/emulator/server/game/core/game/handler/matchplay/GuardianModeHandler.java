@@ -1,20 +1,13 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
-import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
-import com.ft.emulator.server.game.core.constants.RoomStatus;
-import com.ft.emulator.server.game.core.constants.ServeType;
 import com.ft.emulator.server.game.core.matchplay.PlayerHealth;
-import com.ft.emulator.server.game.core.matchplay.PlayerReward;
-import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
-import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
-import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.networking.Connection;
@@ -22,15 +15,12 @@ import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
 import com.ft.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +35,7 @@ public class GuardianModeHandler {
         // TODO: If player makes the point, guardian take dmg dependent on players will
 
         if (guardianMadePoint) {
+            List<Packet> dmgPackets = new ArrayList<>();
             // TODO: Get player to damage (if guardian attacks dmg nearest player to net)
             gameSession.getClients().forEach(c -> {
                 RoomPlayer roomPlayer = c.getActiveRoom().getRoomPlayerList().stream()
@@ -54,15 +45,16 @@ public class GuardianModeHandler {
                 PlayerHealth playerHealth = game.getPlayerHPs().get(roomPlayer.getPosition());
                 short lossBallDamage = (short) (playerHealth.getMaxPlayerHealth() * 0.1);
                 short newPlayerHealth = game.damagePlayer(roomPlayer.getPosition(), lossBallDamage);
-                S2CMatchplayDamageToPlayer damageToPlayerPacket = new S2CMatchplayDamageToPlayer(roomPlayer.getPosition(), newPlayerHealth);
-                c.getConnection().sendTCP(damageToPlayerPacket);
+                S2CMatchplayDealDamage damageToPlayerPacket = new S2CMatchplayDealDamage(roomPlayer.getPosition(), newPlayerHealth);
+                dmgPackets.add(damageToPlayerPacket);
             });
+            this.sendPacketsToAllClientsInSameGameSession(dmgPackets, connection);
         } else{
             // TODO: Deal 10% of max health to guardians whe guardians loose ball
             List<Short> guardianPositions = Arrays.asList((short) 10, (short) 11, (short) 12);
             short newGuardianHealth = -1;
-            S2CMatchplayDamageToPlayer damageToPlayerPacket = new S2CMatchplayDamageToPlayer(guardianPositions.get(0), newGuardianHealth);
-            connection.sendTCP(damageToPlayerPacket);
+            S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(guardianPositions.get(0), newGuardianHealth);
+            this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
         }
 
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
@@ -111,6 +103,18 @@ public class GuardianModeHandler {
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
         clients.forEach(c -> {
             c.getConnection().sendTCP(roomSetGuardians);
+        });
+    }
+
+    private void sendPacketToAllClientsInSameGameSession(Packet packet, Connection connection) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        gameSession.getClients().forEach(c -> c.getConnection().sendTCP(packet));
+    }
+
+    private void sendPacketsToAllClientsInSameGameSession(List<Packet> packets, Connection connection) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        gameSession.getClients().forEach(c -> {
+            packets.forEach(p -> c.getConnection().sendTCP(p));
         });
     }
 }
