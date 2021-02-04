@@ -1429,7 +1429,7 @@ public class GamePacketHandler {
                         this.basicModeHandler.handleStartBasicMode(connection, room, roomPlayerList);
                         break;
                     case GameMode.GUARDIAN:
-                        this.guardianModeHandler.handleStartGuardianMode(room);
+                        this.guardianModeHandler.handleStartGuardianMode(connection, room);
                         break;
                 }
             });

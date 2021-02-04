@@ -38,14 +38,17 @@ public class GuardianModeHandler {
     private final PacketEventHandler packetEventHandler;
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
-        // IMPLEMENT
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
-        if (guardianMadePoint) {
+
+        boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
+        if (!lastGuardianServeWasOnGuardianSide) {
+            game.setLastGuardianServeSide(GameFieldSide.Guardian);
             S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
             gameSession.getClients().forEach(x -> {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
             });
         } else {
+            game.setLastGuardianServeSide(GameFieldSide.Players);
             S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, (byte) 0, (byte) 0);
             gameSession.getClients().forEach(x -> {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
@@ -53,7 +56,10 @@ public class GuardianModeHandler {
         }
     }
 
-    public void handleStartGuardianMode(Room room) {
+    public void handleStartGuardianMode(Connection connection, Room room) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+        game.setLastGuardianServeSide(GameFieldSide.Guardian);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
         S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
         clients.forEach(c -> {

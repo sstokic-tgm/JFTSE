@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 public class MatchplayGuardianGame extends MatchplayGame {
     private List<Point> playerLocationsOnMap;
+    private byte lastGuardianServeSide;
 
     public MatchplayGuardianGame() {
         this.playerLocationsOnMap = Arrays.asList(
