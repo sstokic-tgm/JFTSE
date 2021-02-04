@@ -5,6 +5,7 @@ import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.constants.ServeType;
+import com.ft.emulator.server.game.core.matchplay.PlayerHealth;
 import com.ft.emulator.server.game.core.matchplay.PlayerReward;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
@@ -39,6 +40,17 @@ public class GuardianModeHandler {
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
+        if (guardianMadePoint) {
+            // TODO: Get player to damage (if guardian attacks dmg nearest player to net)
+            // TODO: Damage all players if players loose ball
+            PlayerHealth playerHealth = game.getPlayerHPs().get(0);
+            int lossBallDamage = (int) (playerHealth.getMaxPlayerHealth() * 0.1);
+            int newPlayerHealth = game.damagePlayer(0, lossBallDamage);
+            S2CMatchplayDamageToPlayer damageToPlayerPacket = new S2CMatchplayDamageToPlayer((short) newPlayerHealth);
+            gameSession.getClients().forEach(x -> {
+                x.getConnection().sendTCP(damageToPlayerPacket);
+            });
+        }
 
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
         if (!lastGuardianServeWasOnGuardianSide) {

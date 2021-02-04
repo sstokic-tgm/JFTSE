@@ -23,6 +23,7 @@ import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
+import com.ft.emulator.server.game.core.matchplay.PlayerHealth;
 import com.ft.emulator.server.game.core.matchplay.PlayerReward;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
@@ -1265,7 +1266,16 @@ public class GamePacketHandler {
                 gameSession.setActiveMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
                 break;
             case GameMode.GUARDIAN:
-                gameSession.setActiveMatchplayGame(new MatchplayGuardianGame());
+                // Store HP for each player correctly
+                int defaultPlayerHealth = 500;
+                List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
+                List<PlayerHealth> playerHealths = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
+                    PlayerHealth playerHealth = new PlayerHealth();
+                    playerHealth.setCurrentPlayerHealth(defaultPlayerHealth);
+                    playerHealth.setMaxPlayerHealth(defaultPlayerHealth);
+                    return playerHealth;
+                }).collect(Collectors.toList());
+                gameSession.setActiveMatchplayGame(new MatchplayGuardianGame(playerHealths));
                 break;
         }
 
