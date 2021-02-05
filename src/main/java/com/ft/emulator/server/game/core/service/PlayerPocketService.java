@@ -40,8 +40,17 @@ public class PlayerPocketService {
     }
 
     public PlayerPocket getItemAsPocketByItemIndexAndPocket(Integer itemIndex, Pocket pocket) {
-        Optional<PlayerPocket> playerPocket = playerPocketRepository.findByItemIndexAndPocket(itemIndex, pocket);
-        return playerPocket.orElse(null);
+        List<PlayerPocket> playerPocketList = playerPocketRepository.findAllByItemIndexAndPocket(itemIndex, pocket);
+        PlayerPocket playerPocket = null;
+        if (playerPocketList.size() > 1) {
+            playerPocket = playerPocketList.get(0);
+
+            for (int i = 1; i < playerPocketList.size(); i++) {
+                if (playerPocketList.get(i).getCategory().equals(EItemCategory.PARTS.getName()))
+                    this.remove(playerPocket.getId());
+            }
+        }
+        return playerPocket;
     }
 
     public PlayerPocket findById(Long id) {
