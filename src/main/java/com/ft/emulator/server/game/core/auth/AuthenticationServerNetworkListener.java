@@ -14,6 +14,10 @@ public class AuthenticationServerNetworkListener implements ConnectionListener {
     @Autowired
     private AuthPacketHandler authPacketHandler;
 
+    public void cleanUp() {
+        // empty..
+    }
+
     public void connected(Connection connection) {
         Client client = new Client();
         client.setConnection(connection);

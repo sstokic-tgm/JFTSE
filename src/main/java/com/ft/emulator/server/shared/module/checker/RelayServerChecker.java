@@ -1,6 +1,8 @@
 package com.ft.emulator.server.shared.module.checker;
 
 import com.ft.emulator.common.discord.DiscordWebhook;
+import com.ft.emulator.server.game.core.game.RelayServerNetworkListener;
+import com.ft.emulator.server.networking.ConnectionListener;
 import com.ft.emulator.server.networking.Server;
 import lombok.extern.log4j.Log4j2;
 
@@ -9,9 +11,11 @@ import java.io.IOException;
 @Log4j2
 public class RelayServerChecker extends ServerChecker implements Runnable {
     private final Server server;
+    private final RelayServerNetworkListener relayServerNetworkListener;
 
-    public RelayServerChecker(Server server) {
+    public RelayServerChecker(Server server, ConnectionListener connectionListener) {
         this.server = server;
+        this.relayServerNetworkListener = (RelayServerNetworkListener) connectionListener;
     }
 
     @Override
@@ -28,6 +32,7 @@ public class RelayServerChecker extends ServerChecker implements Runnable {
                 log.info("Trying to restart the relay server...");
 
                 server.dispose();
+                relayServerNetworkListener.cleanUp();
                 while (server.getServerChannel() != null) { Thread.sleep(250); }
 
                 server.restart();

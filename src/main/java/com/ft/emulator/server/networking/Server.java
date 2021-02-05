@@ -47,6 +47,10 @@ public class Server implements Runnable {
             public void onException(Connection connection, Exception exception) {
                 Server.this.connectionListeners.forEach(cl -> cl.onException(connection, exception));
             }
+
+            public void cleanUp() {
+                // empty..
+            }
         };
 
     public Server() {

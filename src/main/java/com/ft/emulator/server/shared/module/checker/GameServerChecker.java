@@ -1,6 +1,9 @@
 package com.ft.emulator.server.shared.module.checker;
 
 import com.ft.emulator.common.discord.DiscordWebhook;
+import com.ft.emulator.server.game.core.game.GameServerNetworkListener;
+import com.ft.emulator.server.game.core.game.RelayServerNetworkListener;
+import com.ft.emulator.server.networking.ConnectionListener;
 import com.ft.emulator.server.networking.Server;
 import lombok.extern.log4j.Log4j2;
 
@@ -10,10 +13,14 @@ import java.io.IOException;
 public class GameServerChecker extends ServerChecker implements Runnable {
     private final Server gameServer;
     private final Server relayServer;
+    private final GameServerNetworkListener gameServerNetworkListener;
+    private final RelayServerNetworkListener relayServerNetworkListener;
 
-    public GameServerChecker(Server gameServer, Server relayServer) {
+    public GameServerChecker(Server gameServer, Server relayServer, ConnectionListener... connectionListener) {
         this.gameServer = gameServer;
         this.relayServer = relayServer;
+        this.gameServerNetworkListener = (GameServerNetworkListener) connectionListener[0];
+        this.relayServerNetworkListener = (RelayServerNetworkListener) connectionListener[1];
     }
 
     @Override
@@ -30,6 +37,7 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 log.info("Trying to restart the game server...");
 
                 gameServer.dispose();
+                gameServerNetworkListener.cleanUp();
                 while (gameServer.getServerChannel() != null) { Thread.sleep(250); }
 
                 gameServer.restart();
@@ -54,6 +62,7 @@ public class GameServerChecker extends ServerChecker implements Runnable {
                 log.info("Trying to restart the relay server...");
 
                 relayServer.dispose();
+                relayServerNetworkListener.cleanUp();
                 while (relayServer.getServerChannel() != null) { Thread.sleep(250); }
 
                 relayServer.restart();

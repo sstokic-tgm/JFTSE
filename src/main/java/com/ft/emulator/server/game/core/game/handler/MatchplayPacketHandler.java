@@ -39,6 +39,11 @@ public class MatchplayPacketHandler {
         return relayHandler;
     }
 
+    public void handleCleanUp() {
+        this.relayHandler.getClientList().clear();
+        gameSessionManager.getGameSessionList().clear();
+    }
+
     public void sendWelcomePacket(Connection connection) {
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
         connection.sendTCP(welcomePacket);

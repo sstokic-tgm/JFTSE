@@ -112,6 +112,12 @@ public class GamePacketHandler {
         return gameHandler;
     }
 
+    public void handleCleanUp() {
+        this.getGameHandler().getRoomList().clear();
+        this.getGameHandler().getClientList().clear();
+        gameSessionManager.getGameSessionList().clear();
+    }
+
     public void sendWelcomePacket(Connection connection) {
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
         connection.sendTCP(welcomePacket);
