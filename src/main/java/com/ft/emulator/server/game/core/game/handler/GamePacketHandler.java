@@ -1292,7 +1292,7 @@ public class GamePacketHandler {
                 }
             }
 
-            List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId());
+            List<Client> clientsInRoom = new ArrayList<>(Collections.unmodifiableList(this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())));
 
             GameSession gameSession = new GameSession();
             gameSession.setSessionId(room.getRoomId());
@@ -1372,7 +1372,7 @@ public class GamePacketHandler {
         if (roomPlayer.isPresent()) {
             Packet setHostPacket = new Packet(PacketID.S2CSetHost);
             setHostPacket.write((byte) 1);
-            clientToHostGame.getConnection().sendTCP(setHostPacket);
+            connection.sendTCP(setHostPacket);
 
             Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
             clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
@@ -1554,7 +1554,7 @@ public class GamePacketHandler {
             }
 
             List<ServeInfo> serveInfo = new ArrayList<>();
-            List<Client> clients = gameSession.getClients();
+            List<Client> clients = new ArrayList<>(Collections.unmodifiableList(gameSession.getClients()));
             for (Client client : clients) {
                 RoomPlayer rp = roomPlayerList.stream()
                         .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
@@ -1647,14 +1647,13 @@ public class GamePacketHandler {
                     S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
-                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+                    gameSession.getClients().forEach(c -> {
+                        S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                        packetEventHandler.push(packetEventHandler.createPacketEvent(c, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
 
-                    if (rp.getPosition() == 0) {
-                        Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
-                        unsetHostPacket.write((byte) 0);
-                        packetEventHandler.push(packetEventHandler.createPacketEvent(client, unsetHostPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
-                    }
+                        c.setActiveGameSession(null);
+                    });
+                    gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
                 }
                 else {
                     boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
@@ -1695,6 +1694,9 @@ public class GamePacketHandler {
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
                 for (Client client : clients)
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
+            }
+            if (game.isFinished() && gameSession.getClients().isEmpty()) {
+                this.gameSessionManager.removeGameSession(gameSession);
             }
         }
     }
@@ -1749,23 +1751,17 @@ public class GamePacketHandler {
                             room.setStatus(RoomStatus.NotRunning);
                             room.getRoomPlayerList().forEach(x -> x.setReady(false));
 
-                            RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                                    .filter(rp -> rp.getPosition() == 0 && rp.getPlayer().getId().equals(c.getActivePlayer().getId()))
-                                    .findAny()
-                                    .orElse(null);
+                            if (c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                                c.setActiveGameSession(null);
 
                             if (c.getConnection().getId() != connection.getId()) {
                                 S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                                 c.getConnection().sendTCP(backToRoomPacket);
                             }
-
-                            if (roomPlayer != null && c.getConnection().getId() == connection.getId()) {
-                                Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
-                                unsetHostPacket.write((byte) 0);
-                                c.getConnection().sendTCP(unsetHostPacket);
-                            }
                         }
                     });
+                    gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
+                    this.gameSessionManager.removeGameSession(gameSession);
 
                     Room room = this.gameHandler.getRoomList().stream()
                             .filter(r -> r.getRoomId() == currentClientRoom.getRoomId())
@@ -1798,6 +1794,14 @@ public class GamePacketHandler {
         answer.write(position);
         connection.sendTCP(answer);
 
+        Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
+        unsetHostPacket.write((byte) 0);
+        connection.sendTCP(unsetHostPacket);
+
+        this.gameHandler.getRoomList().stream()
+                .filter(r -> r.getRoomId() == currentClientRoom.getRoomId())
+                .findAny()
+                .ifPresent(r -> r.getRoomPlayerList().forEach(rp -> rp.setReady(false)));
         this.gameHandler.getRoomList().stream()
                 .filter(r -> r.getRoomId() == currentClientRoom.getRoomId())
                 .findAny()
