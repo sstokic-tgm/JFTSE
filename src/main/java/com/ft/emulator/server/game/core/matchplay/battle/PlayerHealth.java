@@ -1,4 +1,4 @@
-package com.ft.emulator.server.game.core.matchplay;
+package com.ft.emulator.server.game.core.matchplay.battle;
 
 import lombok.Getter;
 import lombok.Setter;

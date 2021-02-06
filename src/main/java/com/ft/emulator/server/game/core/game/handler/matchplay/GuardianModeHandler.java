@@ -2,9 +2,12 @@ package com.ft.emulator.server.game.core.game.handler.matchplay;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
-import com.ft.emulator.server.game.core.matchplay.PlayerHealth;
+import com.ft.emulator.server.game.core.matchplay.battle.PlayerHealth;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
+import com.ft.emulator.server.game.core.matchplay.battle.SkillCrystal;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
+import com.ft.emulator.server.game.core.matchplay.event.RunnableEvent;
+import com.ft.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +33,7 @@ import java.util.stream.Collectors;
 public class GuardianModeHandler {
     private final GameHandler gameHandler;
     private final PacketEventHandler packetEventHandler;
+    private final RunnableEventHandler runnableEventHandler;
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
@@ -73,8 +78,6 @@ public class GuardianModeHandler {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
             });
         }
-
-        this.placeCrystalRandomly(connection);
     }
 
     public void handleStartGuardianMode(Connection connection, Room room) {
@@ -87,7 +90,7 @@ public class GuardianModeHandler {
             packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, 8), PacketEventHandler.ServerClient.SERVER);
         });
 
-        this.placeCrystalRandomly(connection);
+        this.placeCrystalRandomly(connection, game);
     }
 
     public void handlePrepareGuardianMode(Connection connection, Room room) {
@@ -113,23 +116,55 @@ public class GuardianModeHandler {
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {
-        S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(playerPicksUpCrystalPacket.getSkillIndex());
-        connection.sendTCP(letCrystalDisappearPacket);
-        S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), playerPicksUpCrystalPacket.getSkillIndex(), -1);
-        connection.sendTCP(givePlayerSkillsPacket);
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+        SkillCrystal skillCrystal = game.getSkillCrystals().stream()
+                .filter(x -> x.getId() == playerPicksUpCrystalPacket.getSkillIndex())
+                .findFirst()
+                .orElse(null);
+
+        if (skillCrystal != null) {
+            S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
+            this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
+            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), skillCrystal.getSkillId(), -1);
+            connection.sendTCP(givePlayerSkillsPacket);
+            game.getSkillCrystals().remove(skillCrystal);
+            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), TimeUnit.SECONDS.toMillis(15));
+            this.runnableEventHandler.push(runnableEvent);
+        }
     }
 
-    private void placeCrystalRandomly(Connection connection) {
+    private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {
         short skillIndex = (short) (Math.random() * 14);
         int negator = (int) (Math.random() * 2) == 0 ? -1 : 1;
         float xPos = (float) (Math.random() * 40) * negator;
         float yPos = (short) (Math.random() * 120) * -1;
 
-        // TODO: Skill index needs to be unique. Store them in game object and assign skills 1-14
+        short crystalId = (short) (game.getLastCrystalId() + 1);
+        game.setLastCrystalId(crystalId);
+        SkillCrystal skillCrystal = new SkillCrystal();
+        skillCrystal.setId(crystalId);
+        skillCrystal.setSkillId(skillIndex);
+        game.getSkillCrystals().add(skillCrystal);
+
         // TODO: Store skills player have in game session and assign 1. 2. skill slot based on that.
         // TODO: When picking up 3. skill, skill on the 2nd slot gets discarded and 1nd moves to 2nd
-        S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillIndex, xPos, yPos);
+        S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), xPos, yPos);
         this.sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
+
+        Runnable despawnCrystalRunnable = () -> {
+            boolean isCrystalStillAvailable = game.getSkillCrystals().stream().anyMatch(x -> x.getId() == skillCrystal.getId());
+            if (isCrystalStillAvailable) {
+                S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
+                this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
+                game.getSkillCrystals().remove(skillCrystal);
+                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), TimeUnit.SECONDS.toMillis(15));
+                this.runnableEventHandler.push(runnableEvent);
+            }
+        };
+
+        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(despawnCrystalRunnable, TimeUnit.SECONDS.toMillis(5));
+        this.runnableEventHandler.push(runnableEvent);
     }
 
     private RoomPlayer getRoomPlayerFromConnection(Connection connection) {

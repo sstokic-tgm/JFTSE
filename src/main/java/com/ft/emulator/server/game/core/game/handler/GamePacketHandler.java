@@ -23,15 +23,13 @@ import com.ft.emulator.server.game.core.item.EItemHouseDeco;
 import com.ft.emulator.server.game.core.item.EItemUseType;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
-import com.ft.emulator.server.game.core.matchplay.PlayerHealth;
-import com.ft.emulator.server.game.core.matchplay.PlayerReward;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
+import com.ft.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
-import com.ft.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
@@ -70,7 +68,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -85,6 +82,7 @@ public class GamePacketHandler {
     private final GameSessionManager gameSessionManager;
     private final GameHandler gameHandler;
     private final PacketEventHandler packetEventHandler;
+    private final RunnableEventHandler runnableEventHandler;
 
     private final AuthenticationService authenticationService;
     private final PlayerService playerService;
@@ -106,6 +104,7 @@ public class GamePacketHandler {
     @PostConstruct
     public void init() {
         scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(runnableEventHandler::handleQueuedRunnableEvents, 0, 5, TimeUnit.MILLISECONDS);
     }
 
     public GameHandler getGameHandler() {
