@@ -37,6 +37,8 @@ public class GuardianModeHandler {
     private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(15);
     private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
 
+    // HUGE BIG TODO: Clean up/Cancel all pending runnables when game ends. They interfer with a new running gamesession of same id
+
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
         // TODO: If player makes the point, guardian take dmg dependent on players will
