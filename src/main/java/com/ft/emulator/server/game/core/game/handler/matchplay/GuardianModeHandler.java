@@ -52,17 +52,19 @@ public class GuardianModeHandler {
                         .findFirst()
                         .orElse(null);
                 PlayerBattleState playerBattleState = game.getPlayerBattleStates().get(roomPlayer.getPosition());
-                short lossBallDamage = (short) (playerBattleState.getMaxPlayerHealth() * 0.1);
+                short lossBallDamage = (short) (playerBattleState.getMaxHealth() * 0.1);
                 short newPlayerHealth = game.damagePlayer(roomPlayer.getPosition(), lossBallDamage);
                 S2CMatchplayDealDamage damageToPlayerPacket = new S2CMatchplayDealDamage(roomPlayer.getPosition(), newPlayerHealth);
                 dmgPackets.add(damageToPlayerPacket);
             });
             this.sendPacketsToAllClientsInSameGameSession(dmgPackets, connection);
-        } else{
-            // TODO: Deal 2% of max health to guardians when guardians loose ball
+        } else {
             List<Short> guardianPositions = Arrays.asList((short) 10, (short) 11, (short) 12);
             guardianPositions.forEach(x -> {
-                short newGuardianHealth = -1;
+                GuardianBattleState guardianBattleState = game.getGuardianBattleStates().get(x);
+                if (guardianBattleState == null) return;
+                short lossBallDamage = (short) (guardianBattleState.getMaxHealth() * 0.02);
+                short newGuardianHealth = game.damageGuardian(x, lossBallDamage);
                 S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x, newGuardianHealth);
                 this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
             });
@@ -101,21 +103,38 @@ public class GuardianModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
-        // TODO: Store HP for each player correctly
+        // TODO: Store HP for each player and guardian correctly
         short defaultPlayerHealth = 200;
-        List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-        List<PlayerBattleState> playerHealths = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
-            PlayerBattleState playerHealth = new PlayerBattleState();
-            playerHealth.setCurrentPlayerHealth(defaultPlayerHealth);
-            playerHealth.setMaxPlayerHealth(defaultPlayerHealth);
-            return playerHealth;
-        }).collect(Collectors.toList());
-        game.setPlayerBattleStates(playerHealths);
+        short defaultGuardianHealth = 500;
 
-        S2CRoomSetGuardians roomSetGuardians = new S2CRoomSetGuardians((byte) 1, (byte) 0, (byte) 0);
+        List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
+        List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
+            PlayerBattleState playerBattleState = new PlayerBattleState();
+            playerBattleState.setCurrentHealth(defaultPlayerHealth);
+            playerBattleState.setMaxHealth(defaultPlayerHealth);
+            return playerBattleState;
+        }).collect(Collectors.toList());
+        game.setPlayerBattleStates(playerBattleStates);
+
+        byte guardianStartPosition = 10;
+        List<Byte> guardians = Arrays.asList((byte) 1, (byte) 0, (byte) 0);
+        HashMap<Short, GuardianBattleState> guardianBattleStates = new HashMap<>();
+        guardians.stream().forEach(x -> {
+            int indexOfArray = guardians.get(x);
+            GuardianBattleState guardianBattleState = new GuardianBattleState();
+            guardianBattleState.setCurrentHealth(defaultGuardianHealth);
+            guardianBattleState.setMaxHealth(defaultGuardianHealth);
+            guardianBattleStates.put((short) (indexOfArray + guardianStartPosition), guardianBattleState);
+        });
+        game.setGuardianBattleStates(guardianBattleStates);
+
+        byte amountOfGuardians = (byte) guardians.stream().filter(x -> x > 0).count();
+        S2CRoomSetGuardians roomSetGuardians = new S2CRoomSetGuardians(guardians.get(0), guardians.get(1), guardians.get(2));
+        S2CRoomSetGuardianStats roomSetGuardianStats = new S2CRoomSetGuardianStats(amountOfGuardians, defaultGuardianHealth);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
         clients.forEach(c -> {
             c.getConnection().sendTCP(roomSetGuardians);
+            c.getConnection().sendTCP(roomSetGuardianStats);
         });
     }
 
@@ -152,14 +171,26 @@ public class GuardianModeHandler {
     }
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
-        if (skillHitsTarget.getTargetPosition() < 10) {
-            // HACK TO MAKE PLAYER INVINCIBLE
+        byte skillIndex = skillHitsTarget.getSkillIndex();
+
+        // Lets ignore ball damage here for now
+        if (skillIndex == 0) {
             return;
         }
-        short newGuardianHealth = -1;
+
         // TODO: FIND OUT HOW MUCH DAMAGE TO TRULY DEAL
-        S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newGuardianHealth);
-        this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
+        short defaultSkillDamage = 50;
+
+        short targetPosition = skillHitsTarget.getTargetPosition();
+        if (targetPosition < 4) {
+            // IMPLEMENT DMG TO PLAYER BY GUARDIAN SKILLS
+        } else {
+            GameSession gameSession = connection.getClient().getActiveGameSession();
+            MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+            short newGuardianHealth = game.damageGuardian(targetPosition, defaultSkillDamage);
+            S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(targetPosition, newGuardianHealth);
+            this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
+        }
     }
 
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {

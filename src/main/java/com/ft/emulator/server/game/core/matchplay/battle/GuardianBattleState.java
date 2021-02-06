@@ -8,12 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class PlayerBattleState {
+public class GuardianBattleState {
     private short maxHealth;
     private short currentHealth;
-    private List<Short> skillsStack;
-
-    public PlayerBattleState() {
-        this.skillsStack = Arrays.asList((short) -1, (short) -1);
-    }
 }
