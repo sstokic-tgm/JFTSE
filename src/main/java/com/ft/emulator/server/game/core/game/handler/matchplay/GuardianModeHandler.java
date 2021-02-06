@@ -50,7 +50,7 @@ public class GuardianModeHandler {
             });
             this.sendPacketsToAllClientsInSameGameSession(dmgPackets, connection);
         } else{
-            // TODO: Deal 10% of max health to guardians whe guardians loose ball
+            // TODO: Deal 2% of max health to guardians when guardians loose ball
             List<Short> guardianPositions = Arrays.asList((short) 10, (short) 11, (short) 12);
             guardianPositions.forEach(x -> {
                 short newGuardianHealth = -1;

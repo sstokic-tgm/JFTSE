@@ -9,6 +9,8 @@ import com.ft.emulator.server.shared.module.Client;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.concurrent.TimeUnit;
+
 @Log4j2
 public class GameServerNetworkListener implements ConnectionListener {
     @Autowired
@@ -19,6 +21,8 @@ public class GameServerNetworkListener implements ConnectionListener {
     }
 
     public void connected(Connection connection) {
+        long timeout = TimeUnit.MINUTES.toMillis(2);
+        connection.getTcpConnection().setTimeoutMillis((int) timeout);
 
         Client client = new Client();
         client.setConnection(connection);

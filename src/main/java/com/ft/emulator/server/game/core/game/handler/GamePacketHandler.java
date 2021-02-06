@@ -1262,8 +1262,7 @@ public class GamePacketHandler {
 
         room.setStatus(RoomStatus.StartingGame);
 
-        List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId());
-
+        List<Client> clientsInRoom = new ArrayList<>(Collections.unmodifiableList(this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())));
         GameSession gameSession = new GameSession();
         gameSession.setSessionId(room.getRoomId());
         gameSession.setPlayers(room.getPlayers());
@@ -1290,6 +1289,7 @@ public class GamePacketHandler {
             clientInRoomLeftShiftList.add(0, clientInRoomLeftShiftList.remove(clientInRoomLeftShiftList.size() - 1));
         });
 
+
         RoomPlayer playerInSlot0 = room.getRoomPlayerList().stream()
                 .filter(x -> x.getPosition() == 0)
                 .findFirst().orElse(null);
@@ -1298,6 +1298,7 @@ public class GamePacketHandler {
                 .findFirst()
                 .orElse(connection.getClient());
 
+        // TODO: Clarify with stefan what his intention was with newest commits. For now lets redo it this way
         Packet setHostPacket = new Packet(PacketID.S2CSetHost);
         setHostPacket.write((byte) 1);
         clientToHostGame.getConnection().sendTCP(setHostPacket);
@@ -1573,23 +1574,17 @@ public class GamePacketHandler {
                             room.setStatus(RoomStatus.NotRunning);
                             room.getRoomPlayerList().forEach(x -> x.setReady(false));
 
-                            RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                                    .filter(rp -> rp.getPosition() == 0 && rp.getPlayer().getId().equals(c.getActivePlayer().getId()))
-                                    .findAny()
-                                    .orElse(null);
+                            if (c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                                c.setActiveGameSession(null);
 
                             if (c.getConnection().getId() != connection.getId()) {
                                 S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                                 c.getConnection().sendTCP(backToRoomPacket);
                             }
-
-                            if (roomPlayer != null && c.getConnection().getId() == connection.getId()) {
-                                Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
-                                unsetHostPacket.write((byte) 0);
-                                c.getConnection().sendTCP(unsetHostPacket);
-                            }
                         }
                     });
+                    gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
+                    this.gameSessionManager.removeGameSession(gameSession);
 
                     Room room = this.gameHandler.getRoomList().stream()
                             .filter(r -> r.getRoomId() == currentClientRoom.getRoomId())
@@ -1618,10 +1613,19 @@ public class GamePacketHandler {
                 .get()
                 .getPosition();
 
+        // TODO: What is 1774? Lets try to document those things as soon as we have them otherwise we'll get crazy
         Packet answer = new Packet((char) 0x1774);
         answer.write(position);
         connection.sendTCP(answer);
 
+        Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
+        unsetHostPacket.write((byte) 0);
+        connection.sendTCP(unsetHostPacket);
+
+        this.gameHandler.getRoomList().stream()
+                .filter(r -> r.getRoomId() == currentClientRoom.getRoomId())
+                .findAny()
+                .ifPresent(r -> r.getRoomPlayerList().forEach(rp -> rp.setReady(false)));
         this.gameHandler.getRoomList().stream()
                 .filter(r -> r.getRoomId() == currentClientRoom.getRoomId())
                 .findAny()
@@ -1659,7 +1663,7 @@ public class GamePacketHandler {
 
     public void handleUnknown(Connection connection, Packet packet) {
         // TODO: REMOVE THIS LINE LATER
-        log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+//        log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);

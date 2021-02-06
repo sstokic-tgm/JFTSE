@@ -6,6 +6,7 @@ import com.ft.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.constants.ServeType;
+import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.game.core.matchplay.PlayerReward;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +43,7 @@ public class BasicModeHandler {
     private final PacketEventHandler packetEventHandler;
     private final PlayerService playerService;
     private final GameHandler gameHandler;
+    private final GameSessionManager gameSessionManager;
 
     public void handleBasicModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayBasicGame game) {
         boolean isSingles = gameSession.getPlayers() == 2;
@@ -74,7 +77,7 @@ public class BasicModeHandler {
         }
 
         List<ServeInfo> serveInfo = new ArrayList<>();
-        List<Client> clients = gameSession.getClients();
+        List<Client> clients = new ArrayList<>(Collections.unmodifiableList(gameSession.getClients()));
         for (Client client : clients) {
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
@@ -167,14 +170,13 @@ public class BasicModeHandler {
                 S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
-                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+                gameSession.getClients().forEach(c -> {
+                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(c, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
 
-                if (rp.getPosition() == 0) {
-                    Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
-                    unsetHostPacket.write((byte) 0);
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, unsetHostPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
-                }
+                    c.setActiveGameSession(null);
+                });
+                gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
             } else {
                 boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
                 byte serveType = ServeType.None;
@@ -215,6 +217,10 @@ public class BasicModeHandler {
             for (Client client : clients)
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
         }
+
+        if (game.isFinished() && gameSession.getClients().isEmpty()) {
+            this.gameSessionManager.removeGameSession(gameSession);
+        }
     }
 
     public void handleStartBasicMode(Connection connection, Room room, List<RoomPlayer> roomPlayerList) {
@@ -230,7 +236,7 @@ public class BasicModeHandler {
 
             GameSession gameSession = c.getActiveGameSession();
             MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getActiveMatchplayGame();
-            Point playerLocation =  game.getPlayerLocationsOnMap().get(rp.getPosition());
+            Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
             byte serveType = ServeType.None;
             if (rp.getPosition() == 0) {
                 serveType = ServeType.ServeBall;
