@@ -137,8 +137,9 @@ public class GuardianModeHandler {
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {
         short skillIndex = (short) (Math.random() * 14);
         int negator = (int) (Math.random() * 2) == 0 ? -1 : 1;
-        float xPos = (float) (Math.random() * 40) * negator;
+        float xPos = (float) (Math.random() * 60) * negator;
         float yPos = (short) (Math.random() * 120) * -1;
+        yPos = Math.abs(yPos) < 5 ? -5 : yPos;
 
         short crystalId = (short) (game.getLastCrystalId() + 1);
         game.setLastCrystalId(crystalId);
