@@ -188,7 +188,8 @@ public class GuardianModeHandler {
             GameSession gameSession = connection.getClient().getActiveGameSession();
             MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
             short newGuardianHealth = game.damageGuardian(targetPosition, defaultSkillDamage);
-            S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(targetPosition, newGuardianHealth, skillHitAnimation);
+            S2CMatchplayDealDamage damageToGuardianPacket =
+                    new S2CMatchplayDealDamage(targetPosition, newGuardianHealth, skillHitAnimation, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
             this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
         }
     }
