@@ -1,7 +1,7 @@
 package com.ft.emulator.server.game.core.matchplay.basic;
 
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
-import com.ft.emulator.server.game.core.matchplay.battle.PlayerHealth;
+import com.ft.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.ft.emulator.server.game.core.matchplay.battle.SkillCrystal;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 public class MatchplayGuardianGame extends MatchplayGame {
     private List<Point> playerLocationsOnMap;
-    private List<PlayerHealth> playerHPs;
+    private List<PlayerBattleState> playerBattleStates;
     private List<SkillCrystal> skillCrystals;
     private short lastCrystalId = -1;
 
@@ -30,10 +30,27 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public short damagePlayer(int playerPos, short damage) {
-        PlayerHealth playerHealth = this.playerHPs.get(playerPos);
-        short newPlayerHealth = (short) (playerHealth.getCurrentPlayerHealth() - damage);
-        playerHealth.setCurrentPlayerHealth(newPlayerHealth);
+        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
+        short newPlayerHealth = (short) (playerBattleState.getCurrentPlayerHealth() - damage);
+        playerBattleState.setCurrentPlayerHealth(newPlayerHealth);
         return newPlayerHealth;
+    }
+
+    public List<Short> assignSkill(int playerPos, short skillIndex) {
+        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
+        List<Short> playerSkills = playerBattleState.getPlayerSkills();
+        boolean skillSlotAvailable = playerSkills.stream().anyMatch(x -> x < 0);
+        if (skillSlotAvailable) {
+            int indexInArray = playerSkills.indexOf(playerSkills.stream().filter(x -> x < 0).findFirst().get());
+            playerSkills.set(indexInArray, skillIndex);
+            return playerSkills;
+        }
+
+        List<Short> playerSkillsCopy = new ArrayList<>(playerSkills);
+        playerSkillsCopy.add(0, playerSkillsCopy.remove(playerSkillsCopy.size() - 1));
+        playerSkillsCopy.set(1, skillIndex);
+        playerBattleState.setPlayerSkills(playerSkillsCopy);
+        return playerSkillsCopy;
     }
 
     @Override

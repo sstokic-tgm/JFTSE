@@ -2,7 +2,7 @@ package com.ft.emulator.server.game.core.game.handler.matchplay;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
-import com.ft.emulator.server.game.core.matchplay.battle.PlayerHealth;
+import com.ft.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.ft.emulator.server.game.core.matchplay.battle.SkillCrystal;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
@@ -100,13 +100,13 @@ public class GuardianModeHandler {
         // TODO: Store HP for each player correctly
         short defaultPlayerHealth = 200;
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-        List<PlayerHealth> playerHealths = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
-            PlayerHealth playerHealth = new PlayerHealth();
+        List<PlayerBattleState> playerHealths = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
+            PlayerBattleState playerHealth = new PlayerBattleState();
             playerHealth.setCurrentPlayerHealth(defaultPlayerHealth);
             playerHealth.setMaxPlayerHealth(defaultPlayerHealth);
             return playerHealth;
         }).collect(Collectors.toList());
-        game.setPlayerHPs(playerHealths);
+        game.setPlayerBattleStates(playerHealths);
 
         S2CRoomSetGuardians roomSetGuardians = new S2CRoomSetGuardians((byte) 1, (byte) 0, (byte) 0);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
@@ -126,7 +126,9 @@ public class GuardianModeHandler {
         if (skillCrystal != null) {
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
-            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), skillCrystal.getSkillId(), -1);
+
+            List<Short> playerSkills = game.assignSkill(playerPicksUpCrystalPacket.getPlayerPosition(), playerPicksUpCrystalPacket.getSkillIndex());
+            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), playerSkills.get(0), playerSkills.get(1));
             connection.sendTCP(givePlayerSkillsPacket);
             game.getSkillCrystals().remove(skillCrystal);
             RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), TimeUnit.SECONDS.toMillis(15));
@@ -148,8 +150,6 @@ public class GuardianModeHandler {
         skillCrystal.setSkillId(skillIndex);
         game.getSkillCrystals().add(skillCrystal);
 
-        // TODO: Store skills player have in game session and assign 1. 2. skill slot based on that.
-        // TODO: When picking up 3. skill, skill on the 2nd slot gets discarded and 1nd moves to 2nd
         S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), xPos, yPos);
         this.sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
 
