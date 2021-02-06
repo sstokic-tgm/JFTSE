@@ -6,12 +6,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class C2SMatchplayUseSkill extends Packet {
+public class C2SMatchplayUsesSkill extends Packet {
     private byte playerPosition;
     private byte targetPosition;
     private byte skillIndex;
 
-    public C2SMatchplayUseSkill(Packet packet) {
+    public C2SMatchplayUsesSkill(Packet packet) {
         super(packet);
 
         this.playerPosition = packet.readByte();

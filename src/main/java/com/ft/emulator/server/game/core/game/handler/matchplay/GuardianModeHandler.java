@@ -140,13 +140,24 @@ public class GuardianModeHandler {
         }
     }
 
-    public void handlePlayerUseSkill(Connection connection, C2SMatchplayUseSkill playerUseSkill) {
+    public void handlePlayerUseSkill(Connection connection, C2SMatchplayUsesSkill playerUseSkill) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         List<Short> playerSkills = game.removeSkillFromTopOfStackFromPlayer(playerUseSkill.getPlayerPosition());
         S2CMatchplayGivePlayerSkills givePlayerSkillsPacket =
                 new S2CMatchplayGivePlayerSkills(playerUseSkill.getPlayerPosition(), playerSkills.get(0), playerSkills.get(1));
         this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
+    }
+
+    public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
+        if (skillHitsTarget.getTargetPosition() < 10) {
+            // HACK TO MAKE PLAYER INVINCIBLE
+            return;
+        }
+        short newGuardianHealth = -1;
+        // TODO: FIND OUT HOW MUCH DAMAGE TO TRULY DEAL
+        S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newGuardianHealth);
+        this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
     }
 
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {

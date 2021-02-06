@@ -1661,7 +1661,7 @@ public class GamePacketHandler {
     }
 
     public void handlePlayerUseSkill(Connection connection, Packet packet) {
-        C2SMatchplayUseSkill playerUseSkill = new C2SMatchplayUseSkill(packet);
+        C2SMatchplayUsesSkill playerUseSkill = new C2SMatchplayUsesSkill(packet);
         Room room = connection.getClient().getActiveRoom();
         switch (room.getMode()) {
             case GameMode.GUARDIAN:
@@ -1673,7 +1673,16 @@ public class GamePacketHandler {
     }
 
     public void handleSkillHitsTarget(Connection connection, Packet packet) {
-        // TODO: IMPLEMENT
+        log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+        C2SMatchplaySkillHitsTarget skillHitsTarget = new C2SMatchplaySkillHitsTarget(packet);
+        Room room = connection.getClient().getActiveRoom();
+        switch (room.getMode()) {
+            case GameMode.GUARDIAN:
+                this.guardianModeHandler.handleSkillHitsTarget(connection, skillHitsTarget);
+                break;
+            case GameMode.BATTLE:
+                break;
+        }
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
