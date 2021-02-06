@@ -2,6 +2,7 @@ package com.ft.emulator.server.game.core.game.handler.matchplay;
 
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
+import com.ft.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.ft.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.ft.emulator.server.game.core.matchplay.battle.SkillCrystal;
@@ -11,6 +12,7 @@ import com.ft.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
 import com.ft.emulator.server.networking.Connection;
@@ -21,9 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -34,7 +34,7 @@ public class GuardianModeHandler {
     private final GameHandler gameHandler;
     private final PacketEventHandler packetEventHandler;
     private final RunnableEventHandler runnableEventHandler;
-    private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(15);
+    private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(5);
     private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
 
     // HUGE BIG TODO: Clean up/Cancel all pending runnables when game ends. They interfer with a new running gamesession of same id
@@ -45,7 +45,6 @@ public class GuardianModeHandler {
 
         if (guardianMadePoint) {
             List<Packet> dmgPackets = new ArrayList<>();
-            // TODO: Get player to damage (if guardian attacks dmg nearest player to net)
             gameSession.getClients().forEach(c -> {
                 RoomPlayer roomPlayer = c.getActiveRoom().getRoomPlayerList().stream()
                         .filter(x -> x.getPlayer().getId() == c.getActivePlayer().getId())
@@ -54,7 +53,7 @@ public class GuardianModeHandler {
                 PlayerBattleState playerBattleState = game.getPlayerBattleStates().get(roomPlayer.getPosition());
                 short lossBallDamage = (short) (playerBattleState.getMaxHealth() * 0.1);
                 short newPlayerHealth = game.damagePlayer(roomPlayer.getPosition(), lossBallDamage);
-                S2CMatchplayDealDamage damageToPlayerPacket = new S2CMatchplayDealDamage(roomPlayer.getPosition(), newPlayerHealth);
+                S2CMatchplayDealDamage damageToPlayerPacket = new S2CMatchplayDealDamage(roomPlayer.getPosition(), newPlayerHealth, (byte) 0, 0, 0);
                 dmgPackets.add(damageToPlayerPacket);
             });
             this.sendPacketsToAllClientsInSameGameSession(dmgPackets, connection);
@@ -65,7 +64,7 @@ public class GuardianModeHandler {
                 if (guardianBattleState == null) return;
                 short lossBallDamage = (short) (guardianBattleState.getMaxHealth() * 0.02);
                 short newGuardianHealth = game.damageGuardian(x, lossBallDamage);
-                S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x, newGuardianHealth);
+                S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x, newGuardianHealth, (byte) 0, 0, 0);
                 this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
             });
         }
@@ -183,7 +182,7 @@ public class GuardianModeHandler {
 
         short targetPosition = skillHitsTarget.getTargetPosition();
         if (targetPosition < 4) {
-            // IMPLEMENT DMG TO PLAYER BY GUARDIAN SKILLS
+            // IMPLEMENT DMG/HEAL TO PLAYER BY GUARDIAN SKILLS
         } else {
             GameSession gameSession = connection.getClient().getActiveGameSession();
             MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
