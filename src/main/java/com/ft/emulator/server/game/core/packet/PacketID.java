@@ -91,6 +91,8 @@ public final class PacketID {
     public final static char S2CMatchplayLetCrystalDisappear = 0x332D;
     public final static char C2SMatchplayPlayerPicksUpCrystal = 0x18E7;
     public final static char S2CMatchplayPlaceSkillCrystal = 0x332C;
+    public final static char C2SMatchplaySkillHitsTarget = 0x22F1;
+    public final static char C2SMatchplayPlayerUseSkill = 0x18E9;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
     public final static char C2CPlayerAnimationPacket = 0x32C9;

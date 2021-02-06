@@ -36,7 +36,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public List<Short> assignSkill(int playerPos, short skillIndex) {
+    public List<Short> assignSkillToPlayer(int playerPos, short skillIndex) {
         PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
         List<Short> playerSkills = playerBattleState.getPlayerSkills();
         boolean skillSlotAvailable = playerSkills.stream().anyMatch(x -> x < 0);
@@ -49,6 +49,16 @@ public class MatchplayGuardianGame extends MatchplayGame {
         List<Short> playerSkillsCopy = new ArrayList<>(playerSkills);
         playerSkillsCopy.add(0, playerSkillsCopy.remove(playerSkillsCopy.size() - 1));
         playerSkillsCopy.set(1, skillIndex);
+        playerBattleState.setPlayerSkills(playerSkillsCopy);
+        return playerSkillsCopy;
+    }
+
+    public List<Short> removeSkillFromTopOfStackFromPlayer(byte playerPos) {
+        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
+        List<Short> playerSkills = playerBattleState.getPlayerSkills();
+        List<Short> playerSkillsCopy = new ArrayList<>(playerSkills);
+        playerSkillsCopy.add(0, playerSkillsCopy.remove(playerSkillsCopy.size() - 1));
+        playerSkillsCopy.set(1, (short) -1);
         playerBattleState.setPlayerSkills(playerSkillsCopy);
         return playerSkillsCopy;
     }

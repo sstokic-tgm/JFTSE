@@ -118,6 +118,8 @@ public class GuardianModeHandler {
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {
+        RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
+        short playerPosition = roomPlayer.getPosition();
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         SkillCrystal skillCrystal = game.getSkillCrystals().stream()
@@ -129,13 +131,22 @@ public class GuardianModeHandler {
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
-            List<Short> playerSkills = game.assignSkill(playerPicksUpCrystalPacket.getPlayerPosition(), skillCrystal.getSkillId());
-            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), playerSkills.get(0), playerSkills.get(1));
-            connection.sendTCP(givePlayerSkillsPacket);
+            List<Short> playerSkills = game.assignSkillToPlayer(playerPosition, skillCrystal.getSkillId());
+            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPosition, playerSkills.get(0), playerSkills.get(1));
+            this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
             game.getSkillCrystals().remove(skillCrystal);
             RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
             this.runnableEventHandler.push(runnableEvent);
         }
+    }
+
+    public void handlePlayerUseSkill(Connection connection, C2SMatchplayUseSkill playerUseSkill) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+        List<Short> playerSkills = game.removeSkillFromTopOfStackFromPlayer(playerUseSkill.getPlayerPosition());
+        S2CMatchplayGivePlayerSkills givePlayerSkillsPacket =
+                new S2CMatchplayGivePlayerSkills(playerUseSkill.getPlayerPosition(), playerSkills.get(0), playerSkills.get(1));
+        this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
     }
 
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {

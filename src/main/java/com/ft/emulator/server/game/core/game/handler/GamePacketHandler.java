@@ -1660,9 +1660,25 @@ public class GamePacketHandler {
         }
     }
 
+    public void handlePlayerUseSkill(Connection connection, Packet packet) {
+        C2SMatchplayUseSkill playerUseSkill = new C2SMatchplayUseSkill(packet);
+        Room room = connection.getClient().getActiveRoom();
+        switch (room.getMode()) {
+            case GameMode.GUARDIAN:
+                this.guardianModeHandler.handlePlayerUseSkill(connection, playerUseSkill);
+                break;
+            case GameMode.BATTLE:
+                break;
+        }
+    }
+
+    public void handleSkillHitsTarget(Connection connection, Packet packet) {
+        // TODO: IMPLEMENT
+    }
+
     public void handleUnknown(Connection connection, Packet packet) {
         // TODO: REMOVE THIS LINE LATER
-//        log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+        log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
