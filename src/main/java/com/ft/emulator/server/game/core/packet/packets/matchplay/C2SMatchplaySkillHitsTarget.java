@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class C2SMatchplaySkillHitsTarget extends Packet {
     private byte targetPosition;
-    private byte skillIndex;
+    private byte skillHitAnimation;
 
     public C2SMatchplaySkillHitsTarget(Packet packet) {
         super(packet);
@@ -17,8 +17,8 @@ public class C2SMatchplaySkillHitsTarget extends Packet {
         packet.readByte(); // Unk
         packet.readByte(); // Unk
         this.targetPosition = packet.readByte();
-        this.readShort(); // Unk
-        this.skillIndex = (byte) (this.readByte() - 1);
+        packet.readShort(); // Unk
+        this.skillHitAnimation = packet.readByte();
         // 19 unknown bytes follow here
     }
 }

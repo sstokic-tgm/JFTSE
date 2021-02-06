@@ -171,10 +171,10 @@ public class GuardianModeHandler {
     }
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
-        byte skillIndex = skillHitsTarget.getSkillIndex();
+        byte skillHitAnimation = skillHitsTarget.getSkillHitAnimation();
 
         // Lets ignore ball damage here for now
-        if (skillIndex == 0) {
+        if (skillHitAnimation == 0) {
             return;
         }
 
@@ -188,7 +188,7 @@ public class GuardianModeHandler {
             GameSession gameSession = connection.getClient().getActiveGameSession();
             MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
             short newGuardianHealth = game.damageGuardian(targetPosition, defaultSkillDamage);
-            S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(targetPosition, newGuardianHealth);
+            S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(targetPosition, newGuardianHealth, skillHitAnimation);
             this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
         }
     }

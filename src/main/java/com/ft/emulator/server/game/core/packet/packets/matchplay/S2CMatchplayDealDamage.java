@@ -4,13 +4,13 @@ import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 
 public class S2CMatchplayDealDamage extends Packet {
-    public S2CMatchplayDealDamage(short playerPosition, short playerHpToSet) {
+    public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, byte skillAnimation) {
         super(PacketID.S2CMatchplayDamageToPlayer);
 
-        this.write(playerPosition); // Player position
-        this.write(playerHpToSet);
+        this.write(entityPosition); // Entity position
+        this.write(entityHpToSet);
         this.write((short) 0); //Unk
-        this.write((byte) 0); // Animations
+        this.write(skillAnimation); // Animations
         this.write(0); //Unk
         this.write(0); //Unk
     }
