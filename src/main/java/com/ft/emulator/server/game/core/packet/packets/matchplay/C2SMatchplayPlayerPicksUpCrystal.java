@@ -8,12 +8,12 @@ import lombok.Setter;
 @Setter
 public class C2SMatchplayPlayerPicksUpCrystal extends Packet {
     private byte playerPosition;
-    private short skillIndex;
+    private short crystalId;
 
     public C2SMatchplayPlayerPicksUpCrystal(Packet packet) {
         super(packet);
 
         this.playerPosition = this.readByte();
-        this.skillIndex = this.readShort();
+        this.crystalId = this.readShort();
     }
 }

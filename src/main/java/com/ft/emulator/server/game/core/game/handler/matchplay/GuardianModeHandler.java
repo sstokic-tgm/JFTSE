@@ -34,6 +34,8 @@ public class GuardianModeHandler {
     private final GameHandler gameHandler;
     private final PacketEventHandler packetEventHandler;
     private final RunnableEventHandler runnableEventHandler;
+    private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(15);
+    private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
@@ -47,8 +49,8 @@ public class GuardianModeHandler {
                         .filter(x -> x.getPlayer().getId() == c.getActivePlayer().getId())
                         .findFirst()
                         .orElse(null);
-                PlayerHealth playerHealth = game.getPlayerHPs().get(roomPlayer.getPosition());
-                short lossBallDamage = (short) (playerHealth.getMaxPlayerHealth() * 0.1);
+                PlayerBattleState playerBattleState = game.getPlayerBattleStates().get(roomPlayer.getPosition());
+                short lossBallDamage = (short) (playerBattleState.getMaxPlayerHealth() * 0.1);
                 short newPlayerHealth = game.damagePlayer(roomPlayer.getPosition(), lossBallDamage);
                 S2CMatchplayDealDamage damageToPlayerPacket = new S2CMatchplayDealDamage(roomPlayer.getPosition(), newPlayerHealth);
                 dmgPackets.add(damageToPlayerPacket);
@@ -119,7 +121,7 @@ public class GuardianModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         SkillCrystal skillCrystal = game.getSkillCrystals().stream()
-                .filter(x -> x.getId() == playerPicksUpCrystalPacket.getSkillIndex())
+                .filter(x -> x.getId() == playerPicksUpCrystalPacket.getCrystalId())
                 .findFirst()
                 .orElse(null);
 
@@ -127,11 +129,11 @@ public class GuardianModeHandler {
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
-            List<Short> playerSkills = game.assignSkill(playerPicksUpCrystalPacket.getPlayerPosition(), playerPicksUpCrystalPacket.getSkillIndex());
+            List<Short> playerSkills = game.assignSkill(playerPicksUpCrystalPacket.getPlayerPosition(), skillCrystal.getSkillId());
             S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPicksUpCrystalPacket.getPlayerPosition(), playerSkills.get(0), playerSkills.get(1));
             connection.sendTCP(givePlayerSkillsPacket);
             game.getSkillCrystals().remove(skillCrystal);
-            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), TimeUnit.SECONDS.toMillis(15));
+            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
             this.runnableEventHandler.push(runnableEvent);
         }
     }
@@ -159,12 +161,12 @@ public class GuardianModeHandler {
                 S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
                 this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
                 game.getSkillCrystals().remove(skillCrystal);
-                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), TimeUnit.SECONDS.toMillis(15));
+                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
                 this.runnableEventHandler.push(runnableEvent);
             }
         };
 
-        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(despawnCrystalRunnable, TimeUnit.SECONDS.toMillis(5));
+        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(despawnCrystalRunnable, this.crystalDefaultDespawnTime);
         this.runnableEventHandler.push(runnableEvent);
     }
 
