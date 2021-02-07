@@ -2,6 +2,8 @@ package com.ft.emulator.server.shared.module;
 
 import com.ft.emulator.common.utilities.BitKit;
 import com.ft.emulator.common.utilities.ResourceUtil;
+import com.ft.emulator.server.database.model.battle.Skill;
+import com.ft.emulator.server.database.model.battle.SkillDropRate;
 import com.ft.emulator.server.database.model.challenge.Challenge;
 import com.ft.emulator.server.database.model.item.*;
 import com.ft.emulator.server.database.model.level.LevelExp;
@@ -53,6 +55,10 @@ public class DbDataLoader implements CommandLineRunner {
     private ItemMaterialRepository itemMaterialRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private SkillRepository skillRepository;
+    @Autowired
+    private SkillDropRateRepository skillDropRateRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -76,6 +82,8 @@ public class DbDataLoader implements CommandLineRunner {
         boolean itemRecipeInitialized = itemRecipeRepository.count() != 0;
         boolean itemMaterialInitialized = itemMaterialRepository.count() != 0;
         boolean productInitialized = productRepository.count() != 0;
+        boolean skillInitialized = skillRepository.count() != 0;
+        boolean skillDropRateInitialized = skillDropRateRepository.count() != 0;
 
         if (!levelExpInitialized) {
 
@@ -166,10 +174,115 @@ public class DbDataLoader implements CommandLineRunner {
         else
             dataLoaded = false;
 
+        if (!skillInitialized) {
+            log.info("Initializing Skill...");
+            if (loadSkill())
+                log.info("Skill successfully initialized!");
+        }
+        else
+            dataLoaded = false;
+
+        if (!skillDropRateInitialized) {
+            log.info("Initializing SkillDropRate...");
+            if (loadSkillDropRate())
+                log.info("SkillDropRate successfully initialized!");
+        }
+        else
+            dataLoaded = false;
+
         if (!dataLoaded)
             log.info("Data is up to date!");
 
         log.info("--------------------------------------");
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean loadSkillDropRate() {
+        try {
+            InputStream itemPartFile = ResourceUtil.getResource("res/FieldItem_DropRates_Ini3.xml");
+            SAXReader reader = new SAXReader();
+            reader.setEncoding("UTF-8");
+            Document document = reader.read(itemPartFile);
+
+            List<Node> skillDropRateList = document.selectNodes("/SkillDropRates/SkillDropRate");
+
+            for (Node node : skillDropRateList) {
+                SkillDropRate skillDropRate = new SkillDropRate();
+                skillDropRate.setFromLevel(Integer.valueOf(node.valueOf("FromLevel")));
+                skillDropRate.setToLevel(Integer.valueOf(node.valueOf("ToLevel")));
+
+                StringBuilder dropRates = new StringBuilder();
+                dropRates.append(node.valueOf("ItemDrop0"));
+                for (int i = 1; i < 64; i++) {
+                    dropRates.append(String.format(",%s", node.valueOf(String.format("ItemDrop%s", i))));
+                }
+
+                skillDropRate.setDropRates(dropRates.toString());
+                skillDropRateRepository.save(skillDropRate);
+            }
+        }
+        catch (DocumentException de) {
+
+            de.printStackTrace();
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean loadSkill() {
+        try {
+            InputStream itemPartFile = ResourceUtil.getResource("res/FieldItem_Skills_Ini3.xml");
+            SAXReader reader = new SAXReader();
+            reader.setEncoding("UTF-8");
+            Document document = reader.read(itemPartFile);
+
+            List<Node> skillList = document.selectNodes("/Skills/Skill");
+
+            for (Node skillNode : skillList) {
+                Skill skill = new Skill();
+                skill.setName(String.valueOf(skillNode.valueOf("Name")));
+                skill.setTexID(Integer.valueOf(skillNode.valueOf("TexID")));
+                skill.setIconID(Integer.valueOf(skillNode.valueOf("IconID")));
+                skill.setElemental(Integer.valueOf(skillNode.valueOf("Elemental")));
+                skill.setShotType(Integer.valueOf(skillNode.valueOf("ShotType")));
+                skill.setShotCnt(Integer.valueOf(skillNode.valueOf("ShotCnt")));
+                skill.setChantTime(Double.valueOf(skillNode.valueOf("ChantTime")));
+                skill.setRandMaxTime(Double.valueOf(skillNode.valueOf("RandMaxTime")));
+                skill.setPlayTime(Double.valueOf(skillNode.valueOf("PlayTime")));
+                skill.setVibration(String.valueOf(skillNode.valueOf("Vibration")));
+                skill.setSoundShotID(Integer.valueOf(skillNode.valueOf("SoundShotID")));
+                skill.setSoundHitID(Integer.valueOf(skillNode.valueOf("SoundHitID")));
+                skill.setDamage(Integer.valueOf(skillNode.valueOf("Damage")));
+                skill.setDamageRate(Integer.valueOf(skillNode.valueOf("DamageRate")));
+                skill.setDamageInfo(String.valueOf(skillNode.valueOf("DamageInfo")));
+                skill.setProperty(Integer.valueOf(skillNode.valueOf("Property")));
+                skill.setTargeting(Integer.valueOf(skillNode.valueOf("Targeting")));
+                skill.setTPosition(String.valueOf(skillNode.valueOf("TPosition")));
+                skill.setRadius(Double.valueOf(skillNode.valueOf("Radius")));
+                skill.setShotSpeed(Double.valueOf(skillNode.valueOf("ShotSpeed")));
+                skill.setShotRot(Double.valueOf(skillNode.valueOf("ShotRot")));
+                skill.setExplosion(Integer.valueOf(skillNode.valueOf("Explosion")));
+                skill.setCoolingTime(Double.valueOf(skillNode.valueOf("CoolingTime")));
+                skill.setGdCoolingTime(Double.valueOf(skillNode.valueOf("GdCoolingTime")));
+                skill.setAddEftTime0(Double.valueOf(this.valueOf(skillNode, "AddEftTime_0", "0")));
+                skill.setAddEftTime1(Double.valueOf( this.valueOf(skillNode, "AddEftTime_1", "0")));
+                skill.setAddSspAttTime0(Double.valueOf(this.valueOf(skillNode, "AddSspAttTime_0", "0")));
+                skill.setAddSspAttTime1(Double.valueOf(this.valueOf(skillNode, "AddSspAttTime_1", "0")));
+
+                skillRepository.save(skill);
+            }
+        }
+        catch (DocumentException de) {
+
+            de.printStackTrace();
+
+            return false;
+        }
+
+        return true;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -672,5 +785,14 @@ public class DbDataLoader implements CommandLineRunner {
         }
 
         return true;
+    }
+
+    private String valueOf(Node node, String propName, String defaultValue) {
+        String value = node.valueOf(propName);
+        if (value.isEmpty()) {
+            return defaultValue;
+        }
+
+        return value;
     }
 }
