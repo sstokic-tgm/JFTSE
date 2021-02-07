@@ -41,6 +41,11 @@ public class PlayerService {
         return playerList.size() != 0 ? playerList.get(0) : null;
     }
 
+    public Player findByNameFetched(String name) {
+        Optional<Player> player = playerRepository.findAllByNameFetched(name);
+        return player.orElse(null);
+    }
+
     public Player updateMoney(Player player, int gold) {
         player.setGold(player.getGold() + gold);
         return save(player);
