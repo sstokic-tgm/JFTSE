@@ -21,9 +21,6 @@ public class GameServerNetworkListener implements ConnectionListener {
     }
 
     public void connected(Connection connection) {
-        long timeout = TimeUnit.MILLISECONDS.toMillis(500);
-        connection.getTcpConnection().setTimeoutMillis((int) timeout);
-
         Client client = new Client();
         client.setConnection(connection);
 
