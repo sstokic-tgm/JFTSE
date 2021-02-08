@@ -49,10 +49,6 @@ public class MatchplayPacketHandler {
     }
 
     public void handleRelayPacketToClientsInGameSessionRequest(Connection connection, Packet packet) {
-        if (connection.getClient() != null && connection.getClient().getActiveGameSession() == null) {
-            handleDisconnected(connection);
-        }
-
         Packet relayPacket = new Packet(packet.getData());
         sendPacketToAllClientInSameGameSession(connection, relayPacket);
     }
