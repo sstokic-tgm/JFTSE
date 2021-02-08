@@ -21,7 +21,7 @@ public class GameServerNetworkListener implements ConnectionListener {
     }
 
     public void connected(Connection connection) {
-        long timeout = TimeUnit.MINUTES.toMillis(1);
+        long timeout = TimeUnit.MILLISECONDS.toMillis(500);
         connection.getTcpConnection().setTimeoutMillis((int) timeout);
 
         Client client = new Client();
@@ -283,6 +283,13 @@ public class GameServerNetworkListener implements ConnectionListener {
     }
 
     public void onException(Connection connection, Exception exception) {
-        log.error(exception.getMessage(), exception);
+        switch ("" + exception.getMessage()) {
+            case "Connection is closed.":
+            case "Connection reset by peer":
+            case "Broken pipe":
+                break;
+            default:
+                log.error(exception.getMessage(), exception);
+        }
     }
 }

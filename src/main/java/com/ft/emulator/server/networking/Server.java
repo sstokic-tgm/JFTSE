@@ -32,8 +32,8 @@ public class Server implements Runnable {
             }
 
             public void disconnected(Connection connection) {
-                Server.this.connectionListeners.forEach(cl -> cl.disconnected(connection));
                 removeConnection(connection);
+                Server.this.connectionListeners.forEach(cl -> cl.disconnected(connection));
             }
 
             public void received(Connection connection, Packet packet) {
@@ -90,7 +90,7 @@ public class Server implements Runnable {
             try {
                 serverChannel = selector.provider().openServerSocketChannel();
                 serverChannel.socket().setReuseAddress(true);
-                serverChannel.socket().bind(tcpPort);
+                serverChannel.socket().bind(tcpPort, 1000);
                 serverChannel.configureBlocking(false);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
             } catch (IOException ioe) {
