@@ -3,6 +3,7 @@ package com.ft.emulator.server.game.core.game.handler;
 import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
+import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
@@ -48,6 +49,10 @@ public class MatchplayPacketHandler {
     }
 
     public void handleRelayPacketToClientsInGameSessionRequest(Connection connection, Packet packet) {
+        if (connection.getClient() != null && connection.getClient().getActiveGameSession() == null) {
+            handleDisconnected(connection);
+        }
+
         Packet relayPacket = new Packet(packet.getData());
         sendPacketToAllClientInSameGameSession(connection, relayPacket);
     }
