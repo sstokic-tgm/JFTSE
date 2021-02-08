@@ -111,7 +111,7 @@ public class MatchplayPacketHandler {
                 // connection.setClient(null);
                 connection.close();
             }
-            this.gameSessionManager.removeGameSession(gameSession);
+            this.gameSessionManager.getGameSessionList().removeIf(gs -> gs.getSessionId() == gameSession.getSessionId());
         }
     }
 
@@ -126,7 +126,7 @@ public class MatchplayPacketHandler {
         if (gameSession != null) {
             List<Client> clientList = relayHandler.getClientsInGameSession(gameSession.getSessionId());
             for (Client client : clientList) {
-                if (client.getRelayConnection() == null) {
+                if (client.getRelayConnection() == null || !client.getRelayConnection().isConnected() || !client.getConnection().isConnected()) {
                     gameSession.getClients().forEach(c -> {
                         if (c.getConnection().getId() != client.getConnection().getId()) {
                             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
