@@ -227,7 +227,14 @@ public class Server implements Runnable {
     }
 
     public void start(String name) {
-        new Thread(this, name).start();
+        Thread t = new Thread(this, name);
+        t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                log.error("Uncaught exception in " + name + " thread. ", e);
+            }
+        });
+        t.start();
     }
 
     public void stop() {
