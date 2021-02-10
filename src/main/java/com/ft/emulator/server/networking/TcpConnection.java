@@ -162,6 +162,7 @@ public class TcpConnection {
         byte[] data = new byte[bytesRead];
 
         BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
+        log.debug("payload - RECV " + BitKit.toString(data, 0, bytesRead) + " bytesRead: " + bytesRead);
 
         // a read tcp packet may contain multiple nested packets, so we handle that properly
         while (true) {
@@ -184,10 +185,14 @@ public class TcpConnection {
                 break;
             }
         }
-        packet = new Packet(data);
+        if (currentObjectLength + 8 <= data.length) {
+            packet = new Packet(data);
+            log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+        }
+        else {
+            packet = null;
+        }
         currentObjectLength = 0;
-
-        log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
         return packet;
     }
