@@ -94,19 +94,9 @@ public class MatchplayPacketHandler {
             connection.close();
         }
         else {
-            Room currentClientRoom = connection.getClient().getActiveRoom();
-            Player player = connection.getClient().getActivePlayer();
-
-            if (currentClientRoom != null) {
-                if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
-                    player.getPlayerStatistic().setNumberOfDisconnects(player.getPlayerStatistic().getNumberOfDisconnects() + 1);
-                    playerStatisticService.save(player.getPlayerStatistic());
-                }
-
-                gameSession.getClientsInRelay().removeIf(c -> c.getConnection().getId() == connection.getId());
-                this.relayHandler.removeClient(client);
-                connection.close();
-            }
+            gameSession.getClientsInRelay().removeIf(c -> c.getConnection().getId() == connection.getId());
+            this.relayHandler.removeClient(client);
+            connection.close();
         }
     }
 
