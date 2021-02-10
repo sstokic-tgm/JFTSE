@@ -1941,10 +1941,6 @@ public class GamePacketHandler {
                     .findAny()
                     .ifPresent(r -> r.setRoomPlayerList(roomPlayerList));
             this.gameHandler.getRoomList().removeIf(r -> r.getRoomPlayerList().isEmpty());
-            this.gameHandler.getClientList().stream()
-                    .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
-                    .findAny()
-                    .ifPresent(c -> c.setActiveRoom(null));
 
             if (connection.getClient().getActiveGameSession() == null) {
                 S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
@@ -1967,6 +1963,10 @@ public class GamePacketHandler {
                 });
             }
             connection.getClient().setActiveRoom(null);
+            this.gameHandler.getClientList().stream()
+                    .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    .findAny()
+                    .ifPresent(c -> c.setActiveRoom(null));
         }
     }
 
