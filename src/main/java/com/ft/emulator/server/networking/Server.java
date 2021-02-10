@@ -18,12 +18,11 @@ import java.util.stream.IntStream;
 public class Server implements Runnable {
     private final int writeBufferSize, objectBufferSize;
     private Selector selector;
-    private int emptySelects;
     private ServerSocketChannel serverChannel;
     private List<Connection> connections = Collections.synchronizedList(new ArrayList<>());
     private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean shutdown;
-    private Object updateLock = new Object();
+    private final Object updateLock = new Object();
     private Thread updateThread;
 
     private ConnectionListener dispatchListener = new ConnectionListener() {
@@ -108,8 +107,7 @@ public class Server implements Runnable {
         synchronized (updateLock) {
         }
 
-        long startTime = System.currentTimeMillis();
-        int select = 0;
+        int select;
 
         if (timeout > 0) {
             select = selector.select(timeout);
@@ -118,29 +116,11 @@ public class Server implements Runnable {
             select = selector.selectNow();
         }
 
-        if (select == 0) {
-            ++emptySelects;
-            if (emptySelects == 100) {
-
-                emptySelects = 0;
-                long elapsedTime = System.currentTimeMillis() - startTime;
-
-                try {
-                    if (elapsedTime < 25)
-                        Thread.sleep(25 - elapsedTime);
-                } catch (InterruptedException ie) {
-                    log.error(ie.getMessage());
-                }
-            }
-        } else {
-
-            emptySelects = 0;
+        if (select != 0) {
             Set<SelectionKey> keys = selector.selectedKeys();
 
             synchronized (keys) {
                 for (Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext();) {
-
-                    // keepAlive();
                     SelectionKey selectionKey = iter.next();
                     iter.remove();
                     Connection fromConnection = (Connection) selectionKey.attachment();

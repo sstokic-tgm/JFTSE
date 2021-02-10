@@ -297,9 +297,6 @@ public class TcpConnection {
             if(socketChannel != null) {
                 socketChannel.close();
                 socketChannel = null;
-
-                if(selectionKey != null)
-                    selectionKey.selector().wakeup();
             }
         } catch (IOException ioe) {
             // empty..
