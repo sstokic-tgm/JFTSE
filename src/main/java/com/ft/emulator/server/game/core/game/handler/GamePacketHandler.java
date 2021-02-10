@@ -70,6 +70,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -1259,7 +1260,8 @@ public class GamePacketHandler {
 
         room.setStatus(RoomStatus.StartingGame);
 
-        Thread thread = new Thread(() -> {
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+        executor.schedule(() -> {
             int secondsToCount = 5;
             for (int i = 0; i < secondsToCount; i++) {
                 Room threadRoom = connection.getClient().getActiveRoom();
@@ -1289,7 +1291,7 @@ public class GamePacketHandler {
                 S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", message);
                 this.gameHandler.getClientsInRoom(threadRoom.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
                 try {
-                    Thread.sleep(1500);
+                    TimeUnit.MILLISECONDS.sleep(1500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -1321,10 +1323,12 @@ public class GamePacketHandler {
             startGamePacket.write((char) 0);
             room.setStatus(RoomStatus.InitializingGame);
             this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())
-                .forEach(c -> c.getConnection().sendTCP(startGamePacket));
-        });
-        thread.start();
+                    .forEach(c -> c.getConnection().sendTCP(startGamePacket));
+
+        }, 0, TimeUnit.SECONDS);
+
         connection.sendTCP(roomStartGameAck);
+        executor.shutdown();
     }
 
     public void handleGameAnimationReadyToSkipPacket(Connection connection, Packet packet) {
@@ -1398,13 +1402,8 @@ public class GamePacketHandler {
             sendPacketToAllInRoom(connection, playerStatsPacket);
             room.setStatus(RoomStatus.Running);
 
-            Thread thread = new Thread(() -> {
-                try {
-                    TimeUnit.SECONDS.sleep(8);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+            executor.schedule(() -> {
                 Client client = connection.getClient();
                 if (client == null) return;
 
@@ -1446,11 +1445,10 @@ public class GamePacketHandler {
                 });
 
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
-                clients.forEach(c -> {
-                    c.getConnection().sendTCP(matchplayTriggerServe);
-                });
-            });
-            thread.start();
+                clients.forEach(c -> c.getConnection().sendTCP(matchplayTriggerServe));
+
+            }, 8, TimeUnit.SECONDS);
+            executor.shutdown();
         }
     }
 
@@ -1696,7 +1694,7 @@ public class GamePacketHandler {
 
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
                 for (Client client : clients)
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(6)), PacketEventHandler.ServerClient.SERVER);
             }
             if (game.isFinished() && gameSession.getClients().isEmpty()) {
                 this.gameSessionManager.removeGameSession(gameSession);
