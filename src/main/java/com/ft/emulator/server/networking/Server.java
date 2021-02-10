@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.channels.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,6 +92,7 @@ public class Server implements Runnable {
                 serverChannel.socket().setReuseAddress(true);
                 serverChannel.socket().bind(tcpPort, 1000);
                 serverChannel.configureBlocking(false);
+                serverChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
             } catch (IOException ioe) {
 

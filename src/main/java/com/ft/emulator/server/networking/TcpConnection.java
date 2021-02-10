@@ -121,8 +121,6 @@ public class TcpConnection {
             socketChannel.configureBlocking(false);
             Socket socket = socketChannel.socket();
             socket.setTcpNoDelay(true);
-            socket.setKeepAlive(true);
-            socket.setReuseAddress(true);
 
             selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
@@ -295,6 +293,8 @@ public class TcpConnection {
     public void close() {
         try {
             if(socketChannel != null) {
+                socketChannel.socket().shutdownInput();
+                socketChannel.socket().shutdownOutput();
                 socketChannel.close();
                 socketChannel = null;
             }
