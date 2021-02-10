@@ -92,7 +92,6 @@ public class Server implements Runnable {
                 serverChannel.socket().setReuseAddress(true);
                 serverChannel.socket().bind(tcpPort, 1000);
                 serverChannel.configureBlocking(false);
-                serverChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
             } catch (IOException ioe) {
 
