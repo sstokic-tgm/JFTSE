@@ -861,7 +861,7 @@ public class GamePacketHandler {
             C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
             S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
-            this.getGameHandler().getClientList().stream()
+            this.gameHandler.getClientList().stream()
                 .filter(cl -> cl.getActivePlayer() != null && cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
                 .findAny()
                 .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
@@ -1042,6 +1042,9 @@ public class GamePacketHandler {
         if (room == null) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
+
+            S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(roomList);
+            connection.sendTCP(roomListAnswerPacket);
             return;
         }
 
@@ -1687,7 +1690,7 @@ public class GamePacketHandler {
                         roomPlayerList.stream()
                                 .filter(x -> x.getPosition() == receiver.getPlayerPosition())
                                 .findFirst()
-                                .ifPresent(x -> game.setReceiverPlayer(x));
+                                .ifPresent(game::setReceiverPlayer);
                     }
                 }
 
@@ -1748,19 +1751,12 @@ public class GamePacketHandler {
                     gameSession.getClients().forEach(c -> {
                         Room room = c.getActiveRoom();
                         if (room != null) {
-                            room.setStatus(RoomStatus.NotRunning);
-                            room.getRoomPlayerList().forEach(x -> x.setReady(false));
-
-                            if (c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
-                                c.setActiveGameSession(null);
-
                             if (c.getConnection().getId() != connection.getId()) {
                                 S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                                 c.getConnection().sendTCP(backToRoomPacket);
                             }
                         }
                     });
-                    gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
                     this.gameSessionManager.getGameSessionList().removeIf(gs -> gs.getSessionId() == gameSession.getSessionId());
 
                     connection.getClient().setActiveGameSession(null);
@@ -1779,7 +1775,6 @@ public class GamePacketHandler {
         }
 
         gameHandler.removeClient(connection.getClient());
-        connection.setClient(null);
         connection.close();
     }
 
@@ -1940,7 +1935,16 @@ public class GamePacketHandler {
             }
 
             roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+
+            this.gameHandler.getRoomList().stream()
+                    .filter(r -> r.getRoomId() == room.getRoomId())
+                    .findAny()
+                    .ifPresent(r -> r.setRoomPlayerList(roomPlayerList));
             this.gameHandler.getRoomList().removeIf(r -> r.getRoomPlayerList().isEmpty());
+            this.gameHandler.getClientList().stream()
+                    .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    .findAny()
+                    .ifPresent(c -> c.setActiveRoom(null));
 
             if (connection.getClient().getActiveGameSession() == null) {
                 S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
@@ -1962,7 +1966,6 @@ public class GamePacketHandler {
                         c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
                 });
             }
-
             connection.getClient().setActiveRoom(null);
         }
     }

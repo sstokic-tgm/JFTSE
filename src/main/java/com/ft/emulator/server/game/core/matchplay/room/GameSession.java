@@ -15,6 +15,7 @@ import java.util.List;
 public class GameSession {
     public GameSession() {
         clients = new ArrayList<>();
+        clientsInRelay = new ArrayList<>();
         playerLocationsOnMap = Arrays.asList(
                 new Point(20, -125),
                 new Point(-20, 125),
@@ -32,6 +33,7 @@ public class GameSession {
     private long timeLastBallWasHit = -1;
     private int timesCourtChanged = 0;
     private List<Client> clients; // holds everything from game server
+    private List<Client> clientsInRelay;
 
     public Client getClientByPlayerId(long playerId) {
         return clients.stream()
