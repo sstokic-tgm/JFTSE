@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Getter
@@ -29,5 +30,11 @@ public class RelayHandler {
 
     public void removeClient(int index) {
         clientList.remove(index);
+    }
+
+    public List<Client> getClientsInGameSession(int sessionId) {
+        return clientList.stream()
+                .filter(c -> c.getActiveGameSession() != null && c.getActiveGameSession().getSessionId() == sessionId)
+                .collect(Collectors.toList());
     }
 }

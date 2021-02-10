@@ -1,10 +1,7 @@
 package com.ft.emulator.server.game.core.game.handler;
 
-import com.ft.emulator.server.database.model.player.Player;
-import com.ft.emulator.server.game.core.constants.RoomStatus;
 import com.ft.emulator.server.game.core.matchplay.GameSessionManager;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
-import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
@@ -19,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -87,17 +85,8 @@ public class MatchplayPacketHandler {
             connection.close();
             return;
         }
-
-        GameSession gameSession = client.getActiveGameSession();
-        if (gameSession == null) {
-            this.relayHandler.removeClient(connection.getClient());
-            connection.close();
-        }
-        else {
-            gameSession.getClientsInRelay().removeIf(c -> c.getConnection().getId() == connection.getId());
-            this.relayHandler.removeClient(client);
-            connection.close();
-        }
+        this.relayHandler.removeClient(client);
+        connection.close();
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
@@ -109,7 +98,7 @@ public class MatchplayPacketHandler {
     private void sendPacketToAllClientInSameGameSession(Connection connection, Packet packet) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
-            List<Client> clientList = gameSession.getClientsInRelay();
+            List<Client> clientList = this.relayHandler.getClientsInGameSession(gameSession.getSessionId());
             for (Client client : clientList) {
                 if (client.getConnection() != null && client.getConnection().isConnected()) {
                     client.getConnection().sendTCP(packet);

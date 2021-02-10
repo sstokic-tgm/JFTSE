@@ -220,7 +220,7 @@ public class Server implements Runnable {
             try {
                 update(10000);
             } catch (IOException ioe) {
-                log.error(ioe.getMessage());
+                log.error("Thread exception " + ioe.getMessage(), ioe);
                 close();
             }
         }
