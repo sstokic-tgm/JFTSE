@@ -296,11 +296,20 @@ public class TcpConnection {
                 socketChannel.socket().shutdownInput();
                 socketChannel.socket().shutdownOutput();
                 socketChannel.close();
-                socketChannel = null;
             }
         } catch (IOException ioe) {
-            // empty..
+            log.error("Couldn't close socket channel.", ioe);
         }
+        finally {
+            try {
+                if(socketChannel != null) {
+                    socketChannel.close();
+                }
+            } catch (IOException ioe) {
+                log.error("Failed to close socket channel in finally block.", ioe);
+            }
+        }
+        socketChannel = null;
     }
 
     public boolean needsKeepAlive(long time) {
