@@ -1123,14 +1123,17 @@ public class GamePacketHandler {
     public void handleRoomReadyChangeRequestPacket(Connection connection, Packet packet) {
         C2SRoomReadyChangeRequestPacket roomReadyChangeRequestPacket = new C2SRoomReadyChangeRequestPacket(packet);
 
-        connection.getClient().getActiveRoom().getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
-                .findAny()
-                .ifPresent(rp -> rp.setReady(roomReadyChangeRequestPacket.isReady()));
+        Room room = connection.getClient().getActiveRoom();
+        if (room != null) {
+            room.getRoomPlayerList().stream()
+                    .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    .findAny()
+                    .ifPresent(rp -> rp.setReady(roomReadyChangeRequestPacket.isReady()));
 
-        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
-        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+            List<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+        }
     }
 
     public void handleRoomMapChangeRequestPacket(Connection connection, Packet packet) {

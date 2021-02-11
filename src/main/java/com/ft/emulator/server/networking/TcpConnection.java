@@ -1,7 +1,6 @@
 package com.ft.emulator.server.networking;
 
 import com.ft.emulator.common.utilities.BitKit;
-import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,14 +8,13 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
+import java.util.function.BiPredicate;
 
 @Getter
 @Setter
@@ -36,7 +34,8 @@ public class TcpConnection {
     private final Object writeLock = new Object();
 
     private int header1Key = 0;
-    private int indicator;
+    private int sendIndicator = 0;
+    private int receiveIndicator = 0;
     private byte[] decryptKey = new byte[4];
     private final byte[] serialTable = {
         (byte)0xF2, (byte)0x30, (byte)0x75, (byte)0x86, (byte)0xD4, (byte)0x7D, (byte)0x57, (byte)0x38, (byte)0x6E, (byte)0x68,
@@ -166,6 +165,14 @@ public class TcpConnection {
 
         // a read tcp packet may contain multiple nested packets, so we handle that properly
         while (true) {
+            BiPredicate<Integer, Integer> packetSizePosRangeCheck = (l, r) -> l >= r;
+            if (packetSizePosRangeCheck.test(6, data.length))
+                throw new IOException("Invalid packet size position");
+
+            if (!this.isValidChecksum(data)) {
+                throw new IOException("Invalid packet header");
+            }
+
             int packetSize = BitKit.bytesToShort(data, 6);
             currentObjectLength = packetSize;
 
@@ -180,6 +187,9 @@ public class TcpConnection {
                 BitKit.blockCopy(data, packetSize + 8, tmp, 0, tmp.length);
                 data = new byte[tmp.length];
                 BitKit.blockCopy(tmp, 0, data, 0, data.length);
+
+                this.receiveIndicator++;
+                this.receiveIndicator %= 60;
             }
             else {
                 break;
@@ -187,6 +197,9 @@ public class TcpConnection {
         }
         if (currentObjectLength + 8 <= data.length) {
             packet = new Packet(data);
+            this.receiveIndicator++;
+            this.receiveIndicator %= 60;
+
             log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         }
         else {
@@ -263,35 +276,41 @@ public class TcpConnection {
     }
 
     private void createSerial(byte[] data) {
-        int pos = (((this.header1Key << 4) - this.header1Key * 4 + this.indicator) * 2);
+        int pos = (((this.header1Key << 4) - this.header1Key * 4 + this.sendIndicator) * 2);
         short header = BitKit.bytesToShort(serialTable, pos);
 
         data[0] = BitKit.getBytes(header)[0];
         data[1] = BitKit.getBytes(header)[1];
 
-        this.indicator += 1;
-        this.indicator = this.indicator % 60;
+        this.sendIndicator += 1;
+        this.sendIndicator %= 60;
+    }
+
+    private boolean isValidChecksum(byte[] data) {
+        int pos = (((this.header1Key << 4) - this.header1Key * 4 + this.receiveIndicator) * 2);
+        short serverSerial = BitKit.bytesToShort(serialTable, pos);
+
+        byte[] serverSerialData = new byte[] {BitKit.getBytes(serverSerial)[0], BitKit.getBytes(serverSerial)[1]};
+        short clientChecksum = (short)((data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
+        short serverChecksum = (short)((serverSerialData[0] & 0xFF) + (serverSerialData[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
+
+        return clientChecksum == serverChecksum;
     }
 
     private void createCheckSum(byte[] data) {
-        short v2 = (short)((data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
-        long tempV2 = v2 & 0x80000001L;
+        short checksum = (short)((data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
 
-        boolean v1 = tempV2 == 0;
+        if(checksum % 2 == 0) {
+            checksum += (short) 1587;
 
-        short result = 0;
-
-        if(v1) {
-            result = (short)(v2 + 1587);
-
-            data[2] = BitKit.getBytes(result)[0];
-            data[3] = BitKit.getBytes(result)[1];
+            data[2] = BitKit.getBytes(checksum)[0];
+            data[3] = BitKit.getBytes(checksum)[1];
         }
         else {
-            result = (short)(v2 + 1568);
+            checksum += (short) 1568;
 
-            data[2] = BitKit.getBytes(result)[0];
-            data[3] = BitKit.getBytes(result)[1];
+            data[2] = BitKit.getBytes(checksum)[0];
+            data[3] = BitKit.getBytes(checksum)[1];
         }
     }
 
