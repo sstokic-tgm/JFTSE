@@ -15,7 +15,6 @@ import lombok.Setter;
 public class Client {
 
     private Connection connection;
-    private Connection relayConnection;
 
     private Account account;
     private Player activePlayer;

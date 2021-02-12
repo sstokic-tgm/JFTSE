@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.channels.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,12 +19,11 @@ import java.util.stream.IntStream;
 public class Server implements Runnable {
     private final int writeBufferSize, objectBufferSize;
     private Selector selector;
-    private int emptySelects;
     private ServerSocketChannel serverChannel;
     private List<Connection> connections = Collections.synchronizedList(new ArrayList<>());
     private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean shutdown;
-    private Object updateLock = new Object();
+    private final Object updateLock = new Object();
     private Thread updateThread;
 
     private ConnectionListener dispatchListener = new ConnectionListener() {
@@ -32,8 +32,8 @@ public class Server implements Runnable {
             }
 
             public void disconnected(Connection connection) {
-                Server.this.connectionListeners.forEach(cl -> cl.disconnected(connection));
                 removeConnection(connection);
+                Server.this.connectionListeners.forEach(cl -> cl.disconnected(connection));
             }
 
             public void received(Connection connection, Packet packet) {
@@ -90,7 +90,7 @@ public class Server implements Runnable {
             try {
                 serverChannel = selector.provider().openServerSocketChannel();
                 serverChannel.socket().setReuseAddress(true);
-                serverChannel.socket().bind(tcpPort);
+                serverChannel.socket().bind(tcpPort, 1000);
                 serverChannel.configureBlocking(false);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
             } catch (IOException ioe) {
@@ -108,8 +108,7 @@ public class Server implements Runnable {
         synchronized (updateLock) {
         }
 
-        long startTime = System.currentTimeMillis();
-        int select = 0;
+        int select;
 
         if (timeout > 0) {
             select = selector.select(timeout);
@@ -118,29 +117,11 @@ public class Server implements Runnable {
             select = selector.selectNow();
         }
 
-        if (select == 0) {
-            ++emptySelects;
-            if (emptySelects == 100) {
-
-                emptySelects = 0;
-                long elapsedTime = System.currentTimeMillis() - startTime;
-
-                try {
-                    if (elapsedTime < 25)
-                        Thread.sleep(25 - elapsedTime);
-                } catch (InterruptedException ie) {
-                    log.error(ie.getMessage());
-                }
-            }
-        } else {
-
-            emptySelects = 0;
+        if (select != 0) {
             Set<SelectionKey> keys = selector.selectedKeys();
 
             synchronized (keys) {
                 for (Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext();) {
-
-                    keepAlive();
                     SelectionKey selectionKey = iter.next();
                     iter.remove();
                     Connection fromConnection = (Connection) selectionKey.attachment();
@@ -239,14 +220,21 @@ public class Server implements Runnable {
             try {
                 update(10000);
             } catch (IOException ioe) {
-                log.error(ioe.getMessage());
+                log.error("Thread exception " + ioe.getMessage(), ioe);
                 close();
             }
         }
     }
 
     public void start(String name) {
-        new Thread(this, name).start();
+        Thread t = new Thread(this, name);
+        t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                log.error("Uncaught exception in " + name + " thread. ", e);
+            }
+        });
+        t.start();
     }
 
     public void stop() {

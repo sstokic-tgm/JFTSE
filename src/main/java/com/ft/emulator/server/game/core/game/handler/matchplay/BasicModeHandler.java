@@ -209,13 +209,13 @@ public class BasicModeHandler {
                     roomPlayerList.stream()
                             .filter(x -> x.getPosition() == receiver.getPlayerPosition())
                             .findFirst()
-                            .ifPresent(x -> game.setReceiverPlayer(x));
+                            .ifPresent(game::setReceiverPlayer);
                 }
             }
 
             S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
             for (Client client : clients)
-                packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(8)), PacketEventHandler.ServerClient.SERVER);
+                packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(6)), PacketEventHandler.ServerClient.SERVER);
         }
 
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
@@ -258,9 +258,7 @@ public class BasicModeHandler {
         });
 
         S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
-        clients.forEach(c -> {
-            c.getConnection().sendTCP(matchplayTriggerServe);
-        });
+        clients.forEach(c -> c.getConnection().sendTCP(matchplayTriggerServe));
     }
 
     private void sendPacketToAllInRoom(Connection connection, Packet packet) {

@@ -21,7 +21,7 @@ public class RelayServerNetworkListener implements ConnectionListener {
     }
 
     public void connected(Connection connection) {
-        long timeout = TimeUnit.MINUTES.toMillis(2);
+        long timeout = TimeUnit.MINUTES.toMillis(1);
         connection.getTcpConnection().setTimeoutMillis((int) timeout);
 
         matchplayPacketHandler.sendWelcomePacket(connection);
@@ -57,6 +57,13 @@ public class RelayServerNetworkListener implements ConnectionListener {
     }
 
     public void onException(Connection connection, Exception exception) {
-        log.error(exception.getMessage(), exception);
+        switch ("" + exception.getMessage()) {
+            case "Connection is closed.":
+            case "Connection reset by peer":
+            case "Broken pipe":
+                break;
+            default:
+                log.error(exception.getMessage(), exception);
+        }
     }
 }

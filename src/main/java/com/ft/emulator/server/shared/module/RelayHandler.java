@@ -1,6 +1,5 @@
 package com.ft.emulator.server.shared.module;
 
-import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -35,8 +34,7 @@ public class RelayHandler {
 
     public List<Client> getClientsInGameSession(int sessionId) {
         return clientList.stream()
-                .filter(c -> c.getActiveGameSession() != null
-                          && c.getActiveGameSession().getSessionId() == sessionId)
+                .filter(c -> c.getActiveGameSession() != null && c.getActiveGameSession().getSessionId() == sessionId)
                 .collect(Collectors.toList());
     }
 }

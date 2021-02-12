@@ -14,5 +14,6 @@ public interface PlayerPocketRepository extends JpaRepository<PlayerPocket, Long
     Optional<PlayerPocket> findByItemIndexAndPocket(Integer itemIndex, Pocket pocket);
     List<PlayerPocket> findAllByItemIndexAndPocket(Integer itemIndex, Pocket pocket);
     Optional<PlayerPocket> findByItemIndexAndCategoryAndPocket(Integer itemIndex, String category, Pocket pocket);
+    List<PlayerPocket> findAllByItemIndexAndCategoryAndPocket(Integer itemIndex, String category, Pocket pocket);
     List<PlayerPocket> findAllByPocket(Pocket pocket);
 }

@@ -35,19 +35,23 @@ public class PlayerPocketService {
     }
 
     public PlayerPocket getItemAsPocketByItemIndexAndCategoryAndPocket(Integer itemIndex, String category, Pocket pocket) {
-        Optional<PlayerPocket> playerPocket = playerPocketRepository.findByItemIndexAndCategoryAndPocket(itemIndex, category, pocket);
-        return playerPocket.orElse(null);
+        List<PlayerPocket> playerPocketList = playerPocketRepository.findAllByItemIndexAndCategoryAndPocket(itemIndex, category, pocket);
+        return getPlayerPocketAndHandleDuplicates(playerPocketList);
     }
 
     public PlayerPocket getItemAsPocketByItemIndexAndPocket(Integer itemIndex, Pocket pocket) {
         List<PlayerPocket> playerPocketList = playerPocketRepository.findAllByItemIndexAndPocket(itemIndex, pocket);
+        return getPlayerPocketAndHandleDuplicates(playerPocketList);
+    }
+
+    private PlayerPocket getPlayerPocketAndHandleDuplicates(List<PlayerPocket> playerPocketList) {
         PlayerPocket playerPocket = null;
         if (playerPocketList.size() >= 1) {
             playerPocket = playerPocketList.get(0);
 
             for (int i = 1; i < playerPocketList.size(); i++) {
                 if (playerPocketList.get(i).getCategory().equals(EItemCategory.PARTS.getName()))
-                    this.remove(playerPocket.getId());
+                    this.remove(playerPocketList.get(i).getId());
             }
         }
         return playerPocket;
