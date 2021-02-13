@@ -33,7 +33,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     public short damageGuardian(short guardianPos, short damage) {
         GuardianBattleState guardianBattleState = this.guardianBattleStates.get(guardianPos);
-        short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() - damage);
+        short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + damage);
         guardianBattleState.setCurrentHealth(newGuardianHealth);
         return newGuardianHealth;
     }

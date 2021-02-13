@@ -65,7 +65,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write((byte) 0);
             this.write((byte) 0);
             // add hp
-            this.write(200);
+            this.write(200 + (3 * (player.getLevel() - 1)));
             // cloth added status points for shop
             this.write((byte) 0);
             this.write((byte) 0);

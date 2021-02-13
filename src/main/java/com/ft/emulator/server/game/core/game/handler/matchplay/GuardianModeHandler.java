@@ -1,5 +1,6 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
+import com.ft.emulator.server.database.model.battle.Skill;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.matchplay.battle.GuardianBattleState;
@@ -15,6 +16,7 @@ import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
+import com.ft.emulator.server.game.core.service.SkillService;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
@@ -31,12 +33,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Log4j2
 public class GuardianModeHandler {
-    private final GameHandler gameHandler;
-    private final PacketEventHandler packetEventHandler;
-    private final RunnableEventHandler runnableEventHandler;
     private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(5);
     private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
 
+    private final GameHandler gameHandler;
+    private final PacketEventHandler packetEventHandler;
+    private final RunnableEventHandler runnableEventHandler;
+    private final SkillService skillService;
     // HUGE BIG TODO: Clean up/Cancel all pending runnables when game ends. They interfer with a new running gamesession of same id
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
@@ -170,15 +173,15 @@ public class GuardianModeHandler {
     }
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
-        byte skillHitAnimation = skillHitsTarget.getSkillHitAnimation();
+        byte skillId = skillHitsTarget.getSkillId();
 
         // Lets ignore ball damage here for now
-        if (skillHitAnimation == 0) {
+        if (skillId == 0) {
             return;
         }
 
-        // TODO: FIND OUT HOW MUCH DAMAGE TO TRULY DEAL
-        short defaultSkillDamage = 50;
+        Skill skill = skillService.findSkillById((long)skillId);
+        short skillDamage = skill.getDamage().shortValue();
 
         short targetPosition = skillHitsTarget.getTargetPosition();
         if (targetPosition < 4) {
@@ -186,9 +189,9 @@ public class GuardianModeHandler {
         } else {
             GameSession gameSession = connection.getClient().getActiveGameSession();
             MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
-            short newGuardianHealth = game.damageGuardian(targetPosition, defaultSkillDamage);
+            short newGuardianHealth = game.damageGuardian(targetPosition, skillDamage);
             S2CMatchplayDealDamage damageToGuardianPacket =
-                    new S2CMatchplayDealDamage(targetPosition, newGuardianHealth, skillHitAnimation, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                    new S2CMatchplayDealDamage(targetPosition, newGuardianHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
             this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
         }
     }
