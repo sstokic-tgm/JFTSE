@@ -40,7 +40,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     public short damagePlayer(int playerPos, short damage) {
         PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
-        short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() - damage);
+        short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + damage);
         playerBattleState.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
     }

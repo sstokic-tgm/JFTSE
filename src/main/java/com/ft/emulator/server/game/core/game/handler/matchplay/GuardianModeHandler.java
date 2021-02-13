@@ -55,7 +55,7 @@ public class GuardianModeHandler {
                         .findFirst()
                         .orElse(null);
                 PlayerBattleState playerBattleState = game.getPlayerBattleStates().get(roomPlayer.getPosition());
-                short lossBallDamage = (short) (playerBattleState.getMaxHealth() * 0.1);
+                short lossBallDamage = (short) -(playerBattleState.getMaxHealth() * 0.1);
                 short newPlayerHealth = game.damagePlayer(roomPlayer.getPosition(), lossBallDamage);
                 S2CMatchplayDealDamage damageToPlayerPacket = new S2CMatchplayDealDamage(roomPlayer.getPosition(), newPlayerHealth, (byte) 0, 0, 0);
                 dmgPackets.add(damageToPlayerPacket);
@@ -66,7 +66,7 @@ public class GuardianModeHandler {
             guardianPositions.forEach(x -> {
                 GuardianBattleState guardianBattleState = game.getGuardianBattleStates().get(x);
                 if (guardianBattleState == null) return;
-                short lossBallDamage = (short) (guardianBattleState.getMaxHealth() * 0.02);
+                short lossBallDamage = (short) -(guardianBattleState.getMaxHealth() * 0.02);
                 short newGuardianHealth = game.damageGuardian(x, lossBallDamage);
                 S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x, newGuardianHealth, (byte) 0, 0, 0);
                 this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
