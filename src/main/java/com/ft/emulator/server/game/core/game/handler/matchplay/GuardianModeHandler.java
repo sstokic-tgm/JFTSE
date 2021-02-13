@@ -123,13 +123,12 @@ public class GuardianModeHandler {
         byte guardianStartPosition = 10;
         List<Byte> guardians = Arrays.asList((byte) 1, (byte) 0, (byte) 0);
         HashMap<Short, GuardianBattleState> guardianBattleStates = new HashMap<>();
-        guardians.stream().forEach(x -> {
-            int indexOfArray = guardians.get(x);
+        for (int i = 0; i < guardians.stream().count(); i++) {
             GuardianBattleState guardianBattleState = new GuardianBattleState();
             guardianBattleState.setCurrentHealth(defaultGuardianHealth);
             guardianBattleState.setMaxHealth(defaultGuardianHealth);
-            guardianBattleStates.put((short) (indexOfArray + guardianStartPosition), guardianBattleState);
-        });
+            guardianBattleStates.put((short) (i + guardianStartPosition), guardianBattleState);
+        }
         game.setGuardianBattleStates(guardianBattleStates);
 
         byte amountOfGuardians = (byte) guardians.stream().filter(x -> x > 0).count();
@@ -166,6 +165,9 @@ public class GuardianModeHandler {
     }
 
     public void handlePlayerUseSkill(Connection connection, C2SMatchplayUsesSkill playerUseSkill) {
+        byte playerPos = playerUseSkill.getPlayerPosition();
+        if (playerPos > 3) return;
+
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         List<Short> playerSkills = game.removeSkillFromTopOfStackFromPlayer(playerUseSkill.getPlayerPosition());
