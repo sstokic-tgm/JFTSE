@@ -45,6 +45,18 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
+    public short healPlayer(int playerPos, short percentage) {
+        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
+        short healthToHeal = (short) (playerBattleState.getMaxHealth() * (percentage / 100f));
+        short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + healthToHeal);
+        if (newPlayerHealth > playerBattleState.getMaxHealth()) {
+            newPlayerHealth = playerBattleState.getMaxHealth();
+        }
+
+        playerBattleState.setCurrentHealth(newPlayerHealth);
+        return newPlayerHealth;
+    }
+
     public List<Short> assignSkillToPlayer(int playerPos, short skillIndex) {
         PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
         List<Short> playerSkills = playerBattleState.getSkillsStack();

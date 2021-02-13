@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
 import com.ft.emulator.server.database.model.battle.Skill;
+import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
 import com.ft.emulator.server.game.core.matchplay.battle.GuardianBattleState;
@@ -106,14 +107,15 @@ public class GuardianModeHandler {
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
         // TODO: Store HP for each player and guardian correctly
-        short defaultPlayerHealth = 200;
         short defaultGuardianHealth = 500;
 
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-        List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(x -> {
+        List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(rp -> {
+            Player player = rp.getPlayer();
+            short baseHp = (short) (200 + (3 * (player.getLevel() - 1)));
             PlayerBattleState playerBattleState = new PlayerBattleState();
-            playerBattleState.setCurrentHealth(defaultPlayerHealth);
-            playerBattleState.setMaxHealth(defaultPlayerHealth);
+            playerBattleState.setCurrentHealth(baseHp);
+            playerBattleState.setMaxHealth(baseHp);
             return playerBattleState;
         }).collect(Collectors.toList());
         game.setPlayerBattleStates(playerBattleStates);
@@ -180,20 +182,26 @@ public class GuardianModeHandler {
             return;
         }
 
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
         short skillDamage = skill.getDamage().shortValue();
 
         short targetPosition = skillHitsTarget.getTargetPosition();
+        short newHealth;
         if (targetPosition < 4) {
-            // IMPLEMENT DMG/HEAL TO PLAYER BY GUARDIAN SKILLS
+            if (skillDamage > 1) {
+                newHealth = game.healPlayer(targetPosition, skillDamage);
+            } else {
+                newHealth = game.damagePlayer(targetPosition, skillDamage);
+            }
         } else {
-            GameSession gameSession = connection.getClient().getActiveGameSession();
-            MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
-            short newGuardianHealth = game.damageGuardian(targetPosition, skillDamage);
-            S2CMatchplayDealDamage damageToGuardianPacket =
-                    new S2CMatchplayDealDamage(targetPosition, newGuardianHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
-            this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
+            newHealth = game.damageGuardian(targetPosition, skillDamage);
         }
+
+        S2CMatchplayDealDamage damageToPlayerPacket =
+                new S2CMatchplayDealDamage(targetPosition, newHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+        this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
     }
 
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {

@@ -130,8 +130,8 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>218</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>23</Damage>
-        <DamageRate>15</DamageRate>
+        <Damage>10</Damage>
+        <DamageRate>10</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>1</Property>
         <Targeting>14</Targeting>
@@ -449,7 +449,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>10</Damage>
         <DamageRate>10</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
@@ -476,7 +476,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>15</Damage>
         <DamageRate>15</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
@@ -503,7 +503,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>20</Damage>
         <DamageRate>20</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
@@ -530,7 +530,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>27</Damage>
         <DamageRate>27</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
@@ -643,7 +643,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>15</Damage>
         <DamageRate>15</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
@@ -670,7 +670,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>15</Damage>
         <DamageRate>15</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
@@ -819,8 +819,8 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>218</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>23</Damage>
-        <DamageRate>15</DamageRate>
+        <Damage>50</Damage>
+        <DamageRate>50</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>1</Property>
         <Targeting>3</Targeting>
@@ -846,7 +846,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>15</Damage>
         <DamageRate>15</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
@@ -929,7 +929,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>-1</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>1</Damage>
+        <Damage>50</Damage>
         <DamageRate>50</DamageRate>
         <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
         <Property>0</Property>
