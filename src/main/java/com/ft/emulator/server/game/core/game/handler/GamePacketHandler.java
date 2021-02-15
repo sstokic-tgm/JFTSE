@@ -105,7 +105,12 @@ public class GamePacketHandler {
     @PostConstruct
     public void init() {
         scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
-        scheduledExecutorService.scheduleAtFixedRate(runnableEventHandler::handleQueuedRunnableEvents, 0, 5, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            this.gameSessionManager.getGameSessionList().forEach(gameSession -> {
+                if (gameSession == null) return;
+                runnableEventHandler.handleQueuedRunnableEvents(gameSession);
+            });
+        }, 0, 5, TimeUnit.MILLISECONDS);
     }
 
     public GameHandler getGameHandler() {
@@ -1305,7 +1310,7 @@ public class GamePacketHandler {
                 .orElse(connection.getClient());
         Packet setHostPacket = new Packet(PacketID.S2CSetHost);
         setHostPacket.write((byte) 1);
-        connection.sendTCP(setHostPacket);
+        clientToHostGame.getConnection().sendTCP(setHostPacket);
 
         Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
         clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
@@ -1642,6 +1647,11 @@ public class GamePacketHandler {
         connection.sendTCP(playerInfoPlayStatsPacket);
         connection.sendTCP(roomInformationPacket);
         connection.sendTCP(roomPlayerInformationPacket);
+
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession != null) {
+            this.gameSessionManager.removeGameSession(gameSession);
+        }
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, Packet packet) {

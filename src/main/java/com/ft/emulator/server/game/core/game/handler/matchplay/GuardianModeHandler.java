@@ -26,7 +26,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -100,6 +103,28 @@ public class GuardianModeHandler {
         });
 
         this.placeCrystalRandomly(connection, game);
+        this.triggerGuardianAttackLoop(connection);
+    }
+
+    private void triggerGuardianAttackLoop(Connection connection) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession == null) return;
+
+        List<Integer> guardianSkills = Arrays.asList(2, 3, 5, 6, 7, 10, 11, 12);
+        byte randIndex = (byte) (Math.random() * guardianSkills.size());
+        byte skillId = guardianSkills.get(randIndex).byteValue();
+        Point2D point = new Point2D.Float();
+
+        // Crab, Small inferno, Big inferno
+        if (skillId == 11 || skillId == 27 || skillId == 35) point = this.getRandomPoint();
+
+        Point2D finalPoint = point;
+        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
+            S2CMatchplayUseSkill packet = new S2CMatchplayUseSkill((byte) 10, (byte) 0, skillId, finalPoint);
+            this.sendPacketToAllClientsInSameGameSession(packet, connection);
+            this.triggerGuardianAttackLoop(connection);
+        }, TimeUnit.SECONDS.toMillis(7));
+        gameSession.getRunnableEvents().add(runnableEvent);
     }
 
     public void handlePrepareGuardianMode(Connection connection, Room room) {
@@ -152,6 +177,7 @@ public class GuardianModeHandler {
                 .orElse(null);
 
         if (skillCrystal != null) {
+            if (gameSession == null) return;
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
@@ -160,7 +186,7 @@ public class GuardianModeHandler {
             this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
             game.getSkillCrystals().remove(skillCrystal);
             RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
-            this.runnableEventHandler.push(runnableEvent);
+            gameSession.getRunnableEvents().add(runnableEvent);
         }
     }
 
@@ -207,11 +233,11 @@ public class GuardianModeHandler {
     }
 
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession == null) return;
+
         short skillIndex = (short) (Math.random() * 14);
-        int negator = (int) (Math.random() * 2) == 0 ? -1 : 1;
-        float xPos = (float) (Math.random() * 60) * negator;
-        float yPos = (short) (Math.random() * 120) * -1;
-        yPos = Math.abs(yPos) < 5 ? -5 : yPos;
+        Point2D point = this.getRandomPoint();
 
         short crystalId = (short) (game.getLastCrystalId() + 1);
         game.setLastCrystalId(crystalId);
@@ -220,22 +246,31 @@ public class GuardianModeHandler {
         skillCrystal.setSkillId(skillIndex);
         game.getSkillCrystals().add(skillCrystal);
 
-        S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), xPos, yPos);
+        S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), point);
         this.sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
 
         Runnable despawnCrystalRunnable = () -> {
+            if (gameSession == null) return;
             boolean isCrystalStillAvailable = game.getSkillCrystals().stream().anyMatch(x -> x.getId() == skillCrystal.getId());
             if (isCrystalStillAvailable) {
                 S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
                 this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
                 game.getSkillCrystals().remove(skillCrystal);
                 RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
-                this.runnableEventHandler.push(runnableEvent);
+                gameSession.getRunnableEvents().add(runnableEvent);
             }
         };
 
         RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(despawnCrystalRunnable, this.crystalDefaultDespawnTime);
-        this.runnableEventHandler.push(runnableEvent);
+        gameSession.getRunnableEvents().add(runnableEvent);
+    }
+
+    private Point2D getRandomPoint() {
+        int negator = (int) (Math.random() * 2) == 0 ? -1 : 1;
+        float xPos = (float) (Math.random() * 60) * negator;
+        float yPos = (short) (Math.random() * 120) * -1;
+        yPos = Math.abs(yPos) < 5 ? -5 : yPos;
+        return new Point2D.Float(xPos, yPos);
     }
 
     private RoomPlayer getRoomPlayerFromConnection(Connection connection) {

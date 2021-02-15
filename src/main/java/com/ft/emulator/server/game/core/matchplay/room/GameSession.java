@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.matchplay.room;
 
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
+import com.ft.emulator.server.game.core.matchplay.event.RunnableEvent;
 import com.ft.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class GameSession {
     public GameSession() {
         clients = new ArrayList<>();
         clientsInRelay = new ArrayList<>();
+        runnableEvents = new ArrayList<>();
     }
 
     private int sessionId;
@@ -27,6 +29,7 @@ public class GameSession {
     private int timesCourtChanged = 0;
     private List<Client> clients; // holds everything from game server
     private List<Client> clientsInRelay;
+    private List<RunnableEvent> runnableEvents;
 
     public Client getClientByPlayerId(long playerId) {
         return clients.stream()
