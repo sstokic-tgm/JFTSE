@@ -1,5 +1,6 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
+import com.ft.emulator.server.database.model.battle.Guardian;
 import com.ft.emulator.server.database.model.battle.Skill;
 import com.ft.emulator.server.database.model.battle.SkillDropRate;
 import com.ft.emulator.server.database.model.player.Player;
@@ -19,6 +20,7 @@ import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
+import com.ft.emulator.server.game.core.service.GuardianService;
 import com.ft.emulator.server.game.core.service.SkillDropRateService;
 import com.ft.emulator.server.game.core.service.SkillService;
 import com.ft.emulator.server.networking.Connection;
@@ -47,6 +49,7 @@ public class GuardianModeHandler {
     private final RunnableEventHandler runnableEventHandler;
     private final SkillService skillService;
     private final SkillDropRateService skillDropRateService;
+    private final GuardianService guardianService;
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
@@ -67,13 +70,10 @@ public class GuardianModeHandler {
             });
             this.sendPacketsToAllClientsInSameGameSession(dmgPackets, connection);
         } else {
-            List<Short> guardianPositions = Arrays.asList((short) 10, (short) 11, (short) 12);
-            guardianPositions.forEach(x -> {
-                GuardianBattleState guardianBattleState = game.getGuardianBattleStates().get(x);
-                if (guardianBattleState == null) return;
-                short lossBallDamage = (short) -(guardianBattleState.getMaxHealth() * 0.02);
-                short newGuardianHealth = game.damageGuardian(x, lossBallDamage);
-                S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x, newGuardianHealth, (byte) 0, 0, 0);
+            game.getGuardianBattleStates().forEach(x -> {
+                short lossBallDamage = (short) -(x.getMaxHealth() * 0.02);
+                short newGuardianHealth = game.damageGuardian(x.getPosition(), lossBallDamage);
+                S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x.getPosition(), newGuardianHealth, (byte) 0, 0, 0);
                 this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
             });
         }
@@ -133,9 +133,6 @@ public class GuardianModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
-        // TODO: Store HP for each player and guardian correctly
-        short defaultGuardianHealth = 500;
-
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
         List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(rp -> {
             Player player = rp.getPlayer();
@@ -150,18 +147,22 @@ public class GuardianModeHandler {
 
         byte guardianStartPosition = 10;
         List<Byte> guardians = Arrays.asList((byte) 1, (byte) 0, (byte) 0);
-        HashMap<Short, GuardianBattleState> guardianBattleStates = new HashMap<>();
         for (int i = 0; i < guardians.stream().count(); i++) {
-            GuardianBattleState guardianBattleState = new GuardianBattleState();
-            guardianBattleState.setCurrentHealth(defaultGuardianHealth);
-            guardianBattleState.setMaxHealth(defaultGuardianHealth);
-            guardianBattleStates.put((short) (i + guardianStartPosition), guardianBattleState);
-        }
-        game.setGuardianBattleStates(guardianBattleStates);
+            int guardianId = guardians.get(i);
+            if (guardianId == 0) continue;
 
-        byte amountOfGuardians = (byte) guardians.stream().filter(x -> x > 0).count();
+            short guardianPosition = (short) (i + guardianStartPosition);
+            Guardian guardian = guardianService.findGuardianById((long) guardianId);
+            GuardianBattleState guardianBattleState = new GuardianBattleState();
+            guardianBattleState.setGuardian(guardian);
+            guardianBattleState.setCurrentHealth(guardian.getHpBase().shortValue());
+            guardianBattleState.setMaxHealth(guardian.getHpBase().shortValue());
+            guardianBattleState.setPosition(guardianPosition);
+            game.getGuardianBattleStates().add(guardianBattleState);
+        }
+
         S2CRoomSetGuardians roomSetGuardians = new S2CRoomSetGuardians(guardians.get(0), guardians.get(1), guardians.get(2));
-        S2CRoomSetGuardianStats roomSetGuardianStats = new S2CRoomSetGuardianStats(amountOfGuardians, defaultGuardianHealth);
+        S2CRoomSetGuardianStats roomSetGuardianStats = new S2CRoomSetGuardianStats(game.getGuardianBattleStates());
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
         clients.forEach(c -> {
             c.getConnection().sendTCP(roomSetGuardians);

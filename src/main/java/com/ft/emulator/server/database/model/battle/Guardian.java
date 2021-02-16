@@ -13,15 +13,15 @@ public class Guardian extends AbstractIdBaseModel {
     private String name;
     private Integer hpBase;
     private Integer hpPer;
-    private Integer level;
-    private Integer baseStr;
-    private Integer baseSta;
-    private Integer baseDex;
-    private Integer baseWill;
-    private Integer addStr;
-    private Integer addSta;
-    private Integer addDex;
-    private Integer addWill;
+    private Byte level;
+    private Byte baseStr;
+    private Byte baseSta;
+    private Byte baseDex;
+    private Byte baseWill;
+    private Byte addStr;
+    private Byte addSta;
+    private Byte addDex;
+    private Byte addWill;
     private Integer rewardExp;
     private Integer rewardGold;
 }

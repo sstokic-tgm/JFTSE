@@ -1,21 +1,28 @@
 package com.ft.emulator.server.game.core.packet.packets.lobby.room;
 
+import com.ft.emulator.server.database.model.battle.Guardian;
+import com.ft.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.ft.emulator.server.game.core.packet.PacketID;
 import com.ft.emulator.server.networking.packet.Packet;
 
+import java.util.List;
+
 public class S2CRoomSetGuardianStats extends Packet {
-    public S2CRoomSetGuardianStats(byte amountOfGuardians, short guardianHealth) {
+    public S2CRoomSetGuardianStats(List<GuardianBattleState> guardianBattleStates) {
         super(PacketID.S2CRoomSetGuardianStats);
 
-        this.write(amountOfGuardians);
-        for (byte i = 0; i < amountOfGuardians; i++)
+        this.write((byte) guardianBattleStates.size());
+        for (byte i = 0; i < guardianBattleStates.size(); i++)
         {
-            this.write(i); // GuardianPosition
-            this.write(guardianHealth); // HP
-            this.write((byte)10); // STR?
-            this.write((byte)10); // STA?
-            this.write((byte)10); // DEX?
-            this.write((byte)10); // WIL?
+            GuardianBattleState guardianBattleState = guardianBattleStates.get(i);
+            Guardian guardian = guardianBattleState.getGuardian();
+
+            this.write(i);
+            this.write(guardian.getHpBase().shortValue());
+            this.write(guardian.getBaseStr());
+            this.write(guardian.getBaseSta());
+            this.write(guardian.getBaseDex());
+            this.write(guardian.getBaseWill());
         }
     }
 }

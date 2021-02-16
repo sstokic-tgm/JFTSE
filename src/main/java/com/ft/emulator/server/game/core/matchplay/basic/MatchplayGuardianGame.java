@@ -16,7 +16,7 @@ import java.util.List;
 public class MatchplayGuardianGame extends MatchplayGame {
     private List<Point> playerLocationsOnMap;
     private List<PlayerBattleState> playerBattleStates;
-    private HashMap<Short, GuardianBattleState> guardianBattleStates;
+    private List<GuardianBattleState> guardianBattleStates;
     private List<SkillCrystal> skillCrystals;
     private short lastCrystalId = -1;
 
@@ -25,6 +25,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
     public MatchplayGuardianGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
+        this.playerBattleStates = new ArrayList<>();
+        this.guardianBattleStates = new ArrayList<>();
         this.skillCrystals = new ArrayList<>();
         this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -75),
@@ -32,7 +34,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public short damageGuardian(short guardianPos, short damage) {
-        GuardianBattleState guardianBattleState = this.guardianBattleStates.get(guardianPos);
+        GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
+                .filter(x -> x.getPosition() == guardianPos)
+                .findFirst()
+                .orElse(null);
         short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + damage);
         guardianBattleState.setCurrentHealth(newGuardianHealth);
         return newGuardianHealth;
