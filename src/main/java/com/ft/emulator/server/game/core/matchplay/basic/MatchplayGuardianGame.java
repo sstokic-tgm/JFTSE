@@ -57,6 +57,19 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
+    public PlayerBattleState reviveAnyPlayer(short revivePercentage) {
+        PlayerBattleState playerBattleState = getPlayerBattleStates().stream()
+                .filter(x -> x.getCurrentHealth() < 1)
+                .findFirst()
+                .orElse(null);
+        if (playerBattleState != null) {
+            short newPlayerHealth = healPlayer(playerBattleState.getPosition(), revivePercentage);
+            playerBattleState.setCurrentHealth(newPlayerHealth);
+        }
+
+        return playerBattleState;
+    }
+
     public List<Short> assignSkillToPlayer(int playerPos, short skillIndex) {
         PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
         List<Short> playerSkills = playerBattleState.getSkillsStack();

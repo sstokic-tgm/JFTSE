@@ -47,7 +47,6 @@ public class GuardianModeHandler {
     private final RunnableEventHandler runnableEventHandler;
     private final SkillService skillService;
     private final SkillDropRateService skillDropRateService;
-    // HUGE BIG TODO: Clean up/Cancel all pending runnables when game ends. They interfer with a new running gamesession of same id
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
@@ -142,6 +141,7 @@ public class GuardianModeHandler {
             Player player = rp.getPlayer();
             short baseHp = (short) (200 + (3 * (player.getLevel() - 1)));
             PlayerBattleState playerBattleState = new PlayerBattleState();
+            playerBattleState.setPosition(rp.getPosition());
             playerBattleState.setCurrentHealth(baseHp);
             playerBattleState.setMaxHealth(baseHp);
             return playerBattleState;
@@ -217,8 +217,11 @@ public class GuardianModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
+        if (skill.getId() == 5) {
+            this.handleRevivePlayer(connection, game, skill, skillHitsTarget);
+            return;
+        }
         short skillDamage = skill.getDamage().shortValue();
-
         short targetPosition = skillHitsTarget.getTargetPosition();
         short newHealth;
         if (targetPosition < 4) {
@@ -234,6 +237,15 @@ public class GuardianModeHandler {
         S2CMatchplayDealDamage damageToPlayerPacket =
                 new S2CMatchplayDealDamage(targetPosition, newHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+    }
+
+    private void handleRevivePlayer(Connection connection, MatchplayGuardianGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
+        PlayerBattleState playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue());
+        if (playerBattleState != null) {
+            S2CMatchplayDealDamage damageToPlayerPacket =
+                    new S2CMatchplayDealDamage(playerBattleState.getPosition(), playerBattleState.getCurrentHealth(), skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+            this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+        }
     }
 
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {
@@ -274,7 +286,7 @@ public class GuardianModeHandler {
         return new Point2D.Float(xPos, yPos);
     }
 
-    public int getRandomSkillBasedOnProbability(Player player) {
+    private int getRandomSkillBasedOnProbability(Player player) {
         SkillDropRate skillDropRate = skillDropRateService.findSkillDropRateByPlayer(player);
         String dropRates = skillDropRate.getDropRates();
         List<Integer> dropRatesInt = Arrays.stream(dropRates.split(",")).map(x -> Integer.parseInt(x)).collect(Collectors.toList());

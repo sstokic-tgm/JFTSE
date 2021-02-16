@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class PlayerBattleState {
+    private short position;
     private short maxHealth;
     private short currentHealth;
     private List<Short> skillsStack;
