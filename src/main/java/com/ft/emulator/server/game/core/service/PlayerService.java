@@ -2,6 +2,7 @@ package com.ft.emulator.server.game.core.service;
 
 import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.database.repository.player.PlayerRepository;
+import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerCreatePacket;
 import com.ft.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,21 @@ public class PlayerService {
         byte stamina = (byte) (playerStatusPointChangePacket.getStamina() - player.getStamina());
         byte dexterity = (byte) (playerStatusPointChangePacket.getDexterity() - player.getDexterity());
         byte willpower = (byte) (playerStatusPointChangePacket.getWillpower() - player.getWillpower());
+
+        byte newStatusPoints = (byte) (strength + stamina + dexterity + willpower + clientStatusPoints);
+
+        return (serverStatusPoints - newStatusPoints) != 0;
+    }
+
+    public boolean isStatusPointHack(C2SPlayerCreatePacket playerCreatePacket, Player player) {
+        // checking them so we are not 'hacked'
+        byte serverStatusPoints = player.getStatusPoints();
+        byte clientStatusPoints = playerCreatePacket.getStatusPoints();
+
+        byte strength = (byte) (playerCreatePacket.getStrength() - player.getStrength());
+        byte stamina = (byte) (playerCreatePacket.getStamina() - player.getStamina());
+        byte dexterity = (byte) (playerCreatePacket.getDexterity() - player.getDexterity());
+        byte willpower = (byte) (playerCreatePacket.getWillpower() - player.getWillpower());
 
         byte newStatusPoints = (byte) (strength + stamina + dexterity + willpower + clientStatusPoints);
 

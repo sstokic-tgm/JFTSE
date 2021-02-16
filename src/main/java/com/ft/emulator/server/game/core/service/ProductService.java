@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.service;
 
 import com.ft.emulator.server.database.model.account.Account;
+import com.ft.emulator.server.database.model.item.ItemChar;
 import com.ft.emulator.server.database.model.item.Product;
 import com.ft.emulator.server.database.model.player.ClothEquipment;
 import com.ft.emulator.server.database.model.player.Player;
@@ -35,6 +36,7 @@ public class ProductService {
     private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
+    private final ItemCharService itemCharService;
 
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {
         List<Integer> productIndexList = new ArrayList<>(itemList.keySet());
@@ -132,10 +134,17 @@ public class ProductService {
     }
 
     public Player createNewPlayer(Account account, byte forPlayer) {
+        ItemChar itemChar = itemCharService.findByPlayerType(forPlayer);
+
         Player player = new Player();
         player.setAccount(account);
         player.setPlayerType(forPlayer);
         player.setFirstPlayer(false);
+        player.setStrength(itemChar.getStrength());
+        player.setStamina(itemChar.getStamina());
+        player.setDexterity(itemChar.getDexterity());
+        player.setWillpower(itemChar.getWillpower());
+        player.setStatusPoints((byte) 5);
 
         ClothEquipment clothEquipment = new ClothEquipment();
         clothEquipment = clothEquipmentService.save(clothEquipment);

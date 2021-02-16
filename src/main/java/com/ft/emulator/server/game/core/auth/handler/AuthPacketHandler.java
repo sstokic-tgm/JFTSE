@@ -2,6 +2,7 @@ package com.ft.emulator.server.game.core.auth.handler;
 
 import com.ft.emulator.server.database.model.account.Account;
 import com.ft.emulator.server.database.model.home.AccountHome;
+import com.ft.emulator.server.database.model.item.ItemChar;
 import com.ft.emulator.server.database.model.player.*;
 import com.ft.emulator.server.database.model.pocket.Pocket;
 import com.ft.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
@@ -27,6 +28,7 @@ public class AuthPacketHandler {
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final PlayerStatisticService playerStatisticService;
+    private final ItemCharService itemCharService;
 
     public void sendWelcomePacket(Connection connection) {
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
@@ -150,13 +152,27 @@ public class AuthPacketHandler {
             else {
                 player.setName(playerCreatePacket.getNickname());
                 player.setAlreadyCreated(true);
-                player.setStrength(playerCreatePacket.getStrength());
-                player.setStamina(playerCreatePacket.getStamina());
-                player.setDexterity(playerCreatePacket.getDexterity());
-                player.setWillpower(playerCreatePacket.getWillpower());
+
+                if (playerService.isStatusPointHack(playerCreatePacket, player)) {
+                    ItemChar itemChar = itemCharService.findByPlayerType(player.getPlayerType());
+
+                    player.setStrength(itemChar.getStrength());
+                    player.setStamina(itemChar.getStamina());
+                    player.setDexterity(itemChar.getDexterity());
+                    player.setWillpower(itemChar.getWillpower());
+
+                    player.setStatusPoints((byte) (player.getStatusPoints() + 20));
+                }
+                else {
+                    player.setStrength(playerCreatePacket.getStrength());
+                    player.setStamina(playerCreatePacket.getStamina());
+                    player.setDexterity(playerCreatePacket.getDexterity());
+                    player.setWillpower(playerCreatePacket.getWillpower());
+
+                    player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 20));
+                }
 
                 // make every new char level 20 - only temporary
-                player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 20));
                 player.setLevel((byte) 20);
                 player.setExpPoints(15623);
                 player.setGold(100000);

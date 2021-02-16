@@ -53,6 +53,8 @@ public class DbDataLoader implements CommandLineRunner {
     private ItemMaterialRepository itemMaterialRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private ItemCharRepository itemCharRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -75,6 +77,7 @@ public class DbDataLoader implements CommandLineRunner {
         boolean itemEnchantInitialized = itemEnchantRepository.count() != 0;
         boolean itemRecipeInitialized = itemRecipeRepository.count() != 0;
         boolean itemMaterialInitialized = itemMaterialRepository.count() != 0;
+        boolean itemCharInitialized = itemCharRepository.count() != 0;
         boolean productInitialized = productRepository.count() != 0;
 
         if (!levelExpInitialized) {
@@ -154,6 +157,14 @@ public class DbDataLoader implements CommandLineRunner {
             log.info("Initializing ItemMaterial...");
             if (loadItemMaterial())
                 log.info("ItemMaterial successfully initialized!");
+        }
+        else
+            dataLoaded = false;
+
+        if (!itemCharInitialized) {
+            log.info("Initializing ItemChar...");
+            if (loadItemChar())
+                log.info("ItemChar successfully initialized!");
         }
         else
             dataLoaded = false;
@@ -601,6 +612,41 @@ public class DbDataLoader implements CommandLineRunner {
                 itemMaterial.setName(itemNode.valueOf("@Name_en"));
 
                 itemMaterialRepository.save(itemMaterial);
+            }
+        }
+        catch (DocumentException de) {
+
+            de.printStackTrace();
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean loadItemChar() {
+
+        try {
+
+            InputStream itemCharFile = ResourceUtil.getResource("res/Item_Char.xml");
+            SAXReader reader = new SAXReader();
+            reader.setEncoding("UTF-8");
+            Document document = reader.read(itemCharFile);
+
+            List<Node> itemList = document.selectNodes("/ItemList/Item");
+
+            for (Node itemNode : itemList) {
+
+                ItemChar itemChar = new ItemChar();
+
+                itemChar.setPlayerType(BitKit.fromUnsignedInt(Integer.parseInt(itemNode.valueOf("@Char"))));
+                itemChar.setStrength(BitKit.fromUnsignedInt(Integer.parseInt(itemNode.valueOf("@STR"))));
+                itemChar.setStamina(BitKit.fromUnsignedInt(Integer.parseInt(itemNode.valueOf("@STA"))));
+                itemChar.setDexterity(BitKit.fromUnsignedInt(Integer.parseInt(itemNode.valueOf("@DEX"))));
+                itemChar.setWillpower(BitKit.fromUnsignedInt(Integer.parseInt(itemNode.valueOf("@WIL"))));
+
+                itemCharRepository.save(itemChar);
             }
         }
         catch (DocumentException de) {
