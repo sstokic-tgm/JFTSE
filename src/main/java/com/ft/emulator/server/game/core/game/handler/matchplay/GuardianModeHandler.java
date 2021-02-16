@@ -184,7 +184,9 @@ public class GuardianModeHandler {
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
-            int skillId = this.getRandomSkillBasedOnProbability(roomPlayer.getPlayer());
+            short explicitSkillId = skillCrystal.getExplicitSkillId();
+            int skillId = explicitSkillId != -1 ? explicitSkillId: this.getRandomSkillBasedOnProbability(roomPlayer.getPlayer());
+
             List<Short> playerSkills = game.assignSkillToPlayer(playerPosition, (short) skillId);
             S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPosition, playerSkills.get(0), playerSkills.get(1));
             this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
@@ -230,6 +232,10 @@ public class GuardianModeHandler {
             } else {
                 newHealth = game.damagePlayer(targetPosition, skillDamage);
             }
+
+            if (newHealth < 1) {
+                this.handleSpawnReviveCrystalBasedOnProbability(connection, game);
+            }
         } else {
             newHealth = game.damageGuardian(targetPosition, skillDamage);
         }
@@ -237,6 +243,22 @@ public class GuardianModeHandler {
         S2CMatchplayDealDamage damageToPlayerPacket =
                 new S2CMatchplayDealDamage(targetPosition, newHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+    }
+
+    private void handleSpawnReviveCrystalBasedOnProbability(Connection connection, MatchplayGuardianGame game) {
+        Random random = new Random();
+        int proba = random.nextInt(101);
+        if (proba < 36) {
+            short crystalId = (short) (game.getLastCrystalId() + 1);
+            game.setLastCrystalId(crystalId);
+            SkillCrystal skillCrystal = new SkillCrystal();
+            skillCrystal.setId(crystalId);
+            skillCrystal.setExplicitSkillId((short) 4);
+            game.getSkillCrystals().add(skillCrystal);
+
+            S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), this.getRandomPoint());
+            this.sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
+        }
     }
 
     private void handleRevivePlayer(Connection connection, MatchplayGuardianGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
