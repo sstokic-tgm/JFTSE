@@ -2,12 +2,16 @@ package com.ft.emulator.server.shared.module;
 
 import com.ft.emulator.common.utilities.BitKit;
 import com.ft.emulator.common.utilities.ResourceUtil;
+import com.ft.emulator.server.database.model.battle.Guardian;
 import com.ft.emulator.server.database.model.battle.Skill;
 import com.ft.emulator.server.database.model.battle.SkillDropRate;
 import com.ft.emulator.server.database.model.challenge.Challenge;
 import com.ft.emulator.server.database.model.item.*;
 import com.ft.emulator.server.database.model.level.LevelExp;
 import com.ft.emulator.server.database.model.tutorial.Tutorial;
+import com.ft.emulator.server.database.repository.battle.GuardianRepository;
+import com.ft.emulator.server.database.repository.battle.SkillDropRateRepository;
+import com.ft.emulator.server.database.repository.battle.SkillRepository;
 import com.ft.emulator.server.database.repository.challenge.ChallengeRepository;
 import com.ft.emulator.server.database.repository.item.*;
 import com.ft.emulator.server.database.repository.level.LevelExpRepository;
@@ -59,6 +63,8 @@ public class DbDataLoader implements CommandLineRunner {
     private SkillRepository skillRepository;
     @Autowired
     private SkillDropRateRepository skillDropRateRepository;
+    @Autowired
+    private GuardianRepository guardianRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -84,6 +90,7 @@ public class DbDataLoader implements CommandLineRunner {
         boolean productInitialized = productRepository.count() != 0;
         boolean skillInitialized = skillRepository.count() != 0;
         boolean skillDropRateInitialized = skillDropRateRepository.count() != 0;
+        boolean guardianInitialized = guardianRepository.count() != 0;
 
         if (!levelExpInitialized) {
 
@@ -190,10 +197,58 @@ public class DbDataLoader implements CommandLineRunner {
         else
             dataLoaded = false;
 
+        if (!guardianInitialized) {
+            log.info("Initializing Guardian...");
+            if (loadGuardian())
+                log.info("Guardian successfully initialized!");
+        }
+        else
+            dataLoaded = false;
+
         if (!dataLoaded)
             log.info("Data is up to date!");
 
         log.info("--------------------------------------");
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private boolean loadGuardian() {
+        try {
+            InputStream itemPartFile = ResourceUtil.getResource("res/GuardianInfo.xml");
+            SAXReader reader = new SAXReader();
+            reader.setEncoding("UTF-8");
+            Document document = reader.read(itemPartFile);
+
+            List<Node> guardianList = document.selectNodes("/GuardianList/Guardian");
+
+            for (Node skillNode : guardianList) {
+                Guardian guardian = new Guardian();
+                guardian.setName(String.valueOf(skillNode.valueOf("@Name_en")));
+                guardian.setHpBase(Integer.valueOf(skillNode.valueOf("@HPBase")));
+                guardian.setHpPer(Integer.valueOf(skillNode.valueOf("@HPPer")));
+                guardian.setLevel(Integer.valueOf(skillNode.valueOf("@GdLevel")));
+                guardian.setBaseStr(Integer.valueOf(skillNode.valueOf("@BaseSTR")));
+                guardian.setBaseSta(Integer.valueOf(skillNode.valueOf("@BaseSTA")));
+                guardian.setBaseDex(Integer.valueOf(skillNode.valueOf("@BaseDEX")));
+                guardian.setBaseWill(Integer.valueOf(skillNode.valueOf("@BaseWILL")));
+                guardian.setAddStr(Integer.valueOf(skillNode.valueOf("@AddSTR")));
+                guardian.setAddSta(Integer.valueOf(skillNode.valueOf("@AddSTA")));
+                guardian.setAddDex(Integer.valueOf(skillNode.valueOf("@AddDEX")));
+                guardian.setAddWill(Integer.valueOf(skillNode.valueOf("@AddWILL")));
+                guardian.setRewardExp(Integer.valueOf(skillNode.valueOf("@RewardEXP")));
+                guardian.setRewardGold(Integer.valueOf(skillNode.valueOf("@RewardGOLD")));
+
+                guardianRepository.save(guardian);
+            }
+        }
+        catch (DocumentException de) {
+
+            de.printStackTrace();
+
+            return false;
+        }
+
+        return true;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

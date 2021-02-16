@@ -1,7 +1,7 @@
 package com.ft.emulator.server.game.core.service;
 
 import com.ft.emulator.server.database.model.battle.Skill;
-import com.ft.emulator.server.database.repository.item.SkillRepository;
+import com.ft.emulator.server.database.repository.battle.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
