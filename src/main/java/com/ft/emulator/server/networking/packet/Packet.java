@@ -45,19 +45,22 @@ public class Packet {
         this.data = new byte[4096];
     }
 
-    private int indexOf(byte[] array, byte[] pattern, int offset) {
-        int success = 0;
-
-        for(int i = offset; i < array.length; ++i) {
-            if(array[i] == pattern[success])
-                success++;
-            else
-                success = 0;
-
-            if(pattern.length == success)
-                return i - pattern.length + 1;
+    private int indexOf(byte[] data, byte[] pattern, int offset) {
+        for (int i = offset; i < data.length; i += pattern.length) {
+            boolean found = false;
+            for (int j = 0; j < pattern.length; j++) {
+                if (data[i + j] != pattern[j])
+                    break;
+                found = true;
+            }
+            if (found)
+                return i;
         }
-        return - 1;
+        return -1;
+    }
+
+    private boolean isAscii(String text) {
+        return text.chars().allMatch(c -> c >= 0x20 && c < 0x7F);
     }
 
     public void write(Object... data) {
@@ -150,19 +153,21 @@ public class Packet {
 
     public String readUnicodeString() {
         String result = "";
+        if (this.readPosition >= 0 && this.readPosition < this.data.length) {
+            String text = new String(new byte[]{this.data[this.readPosition], this.data[this.readPosition + 1]});
+            if (!this.isAscii(text)) {
+                int stringLength = indexOf(this.data, new byte[]{0x00, 0x00}, this.readPosition) - this.readPosition;
 
-        if ((this.readPosition >= 0 && this.readPosition < this.data.length) && this.data[this.readPosition + 1] == 0x00) {
-            int stringLength = indexOf(this.data, new byte[]{0x00, 0x00}, this.readPosition) + 1 - this.readPosition;
-
-            if (stringLength > 1) {
-                result = new String(this.data, this.readPosition, stringLength, StandardCharsets.UTF_16LE);
-                this.readPosition += stringLength + 2;
-            } else {
-                this.readPosition += 2;
+                if (stringLength > 1) {
+                    result = new String(this.data, this.readPosition, stringLength, StandardCharsets.UTF_16LE);
+                    this.readPosition += stringLength + 2;
+                } else {
+                    this.readPosition += 2;
+                }
             }
-        }
-        else {
-            result = this.readString();
+            else {
+                result = this.readString();
+            }
         }
 
         return result;
