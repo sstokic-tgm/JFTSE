@@ -11,7 +11,6 @@ import java.util.TimeZone;
 @Setter
 public class SkillCrystal {
     private short id;
-    private short skillId;
     private Date timeSpawned;
 
     public SkillCrystal() {

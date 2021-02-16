@@ -9,6 +9,7 @@ import lombok.Setter;
 public class C2SMatchplaySkillHitsTarget extends Packet {
     private byte targetPosition;
     private byte skillId;
+    private byte damageType;
     private int xKnockbackPosition;
     private int yKnockbackPosition;
 
@@ -24,7 +25,11 @@ public class C2SMatchplaySkillHitsTarget extends Packet {
 
         // Unknown 10 bytes (types are wrong to probably)
         packet.readInt();
-        packet.readInt();
+
+        packet.readShort();
+        this.damageType = packet.readByte();
+        packet.readByte();
+
         packet.readShort();
 
         this.xKnockbackPosition = packet.readInt();

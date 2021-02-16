@@ -1,6 +1,7 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
 import com.ft.emulator.server.database.model.battle.Skill;
+import com.ft.emulator.server.database.model.battle.SkillDropRate;
 import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
@@ -8,6 +9,7 @@ import com.ft.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.ft.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.ft.emulator.server.game.core.matchplay.battle.SkillCrystal;
+import com.ft.emulator.server.game.core.matchplay.battle.SkillDrop;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.ft.emulator.server.game.core.matchplay.event.RunnableEvent;
 import com.ft.emulator.server.game.core.matchplay.event.RunnableEventHandler;
@@ -17,6 +19,7 @@ import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
+import com.ft.emulator.server.game.core.service.SkillDropRateService;
 import com.ft.emulator.server.game.core.service.SkillService;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
@@ -26,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
@@ -44,6 +46,7 @@ public class GuardianModeHandler {
     private final PacketEventHandler packetEventHandler;
     private final RunnableEventHandler runnableEventHandler;
     private final SkillService skillService;
+    private final SkillDropRateService skillDropRateService;
     // HUGE BIG TODO: Clean up/Cancel all pending runnables when game ends. They interfer with a new running gamesession of same id
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
@@ -181,7 +184,8 @@ public class GuardianModeHandler {
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
-            List<Short> playerSkills = game.assignSkillToPlayer(playerPosition, skillCrystal.getSkillId());
+            int skillId = this.getRandomSkillBasedOnProbability(roomPlayer.getPlayer());
+            List<Short> playerSkills = game.assignSkillToPlayer(playerPosition, (short) skillId);
             S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPosition, playerSkills.get(0), playerSkills.get(1));
             this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
             game.getSkillCrystals().remove(skillCrystal);
@@ -206,7 +210,7 @@ public class GuardianModeHandler {
         byte skillId = skillHitsTarget.getSkillId();
 
         // Lets ignore ball damage here for now
-        if (skillId == 0) {
+        if (skillId == 0 || skillHitsTarget.getDamageType() == 1) {
             return;
         }
 
@@ -235,15 +239,12 @@ public class GuardianModeHandler {
     private void placeCrystalRandomly(Connection connection, MatchplayGuardianGame game) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession == null) return;
-
-        short skillIndex = (short) (Math.random() * 14);
         Point2D point = this.getRandomPoint();
 
         short crystalId = (short) (game.getLastCrystalId() + 1);
         game.setLastCrystalId(crystalId);
         SkillCrystal skillCrystal = new SkillCrystal();
         skillCrystal.setId(crystalId);
-        skillCrystal.setSkillId(skillIndex);
         game.getSkillCrystals().add(skillCrystal);
 
         S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), point);
@@ -271,6 +272,31 @@ public class GuardianModeHandler {
         float yPos = (short) (Math.random() * 120) * -1;
         yPos = Math.abs(yPos) < 5 ? -5 : yPos;
         return new Point2D.Float(xPos, yPos);
+    }
+
+    public int getRandomSkillBasedOnProbability(Player player) {
+        SkillDropRate skillDropRate = skillDropRateService.findSkillDropRateByPlayer(player);
+        String dropRates = skillDropRate.getDropRates();
+        List<Integer> dropRatesInt = Arrays.stream(dropRates.split(",")).map(x -> Integer.parseInt(x)).collect(Collectors.toList());
+
+        List<SkillDrop> skillDrops = new ArrayList<>();
+        int currentPercentage = 0;
+        for (int i = 0; i < dropRatesInt.size(); i++) {
+            int item = dropRatesInt.get(i);
+            if (item != 0) {
+                SkillDrop skillDrop = new SkillDrop();
+                skillDrop.setId(i);
+                skillDrop.setFrom(currentPercentage);
+                skillDrop.setTo(currentPercentage + item);
+                skillDrops.add(skillDrop);
+                currentPercentage += item;
+            }
+        }
+
+        Random random = new Random();
+        int randValue = random.nextInt(101);
+        SkillDrop skillDrop = skillDrops.stream().filter(x -> x.getFrom() <= randValue && x.getTo() >= randValue).findFirst().orElse(null);
+        return skillDrop.getId();
     }
 
     private RoomPlayer getRoomPlayerFromConnection(Connection connection) {
