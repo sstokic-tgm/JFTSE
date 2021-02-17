@@ -300,7 +300,13 @@ public class GuardianModeHandler {
         byte leftGuardian = this.getRandomGuardian(guardiansLeft, new ArrayList<>());
         byte rightGuardian = this.getRandomGuardian(guardiansRight, Arrays.asList(leftGuardian));
         byte middleGuardian = this.getRandomGuardian(guardiansMiddle, Arrays.asList(leftGuardian, rightGuardian));
-        return Arrays.asList(leftGuardian, rightGuardian, middleGuardian);
+        if (middleGuardian != 0) {
+            return Arrays.asList(middleGuardian, leftGuardian, rightGuardian);
+        } else if (rightGuardian != 0) {
+            return Arrays.asList(leftGuardian, rightGuardian, (byte) 0);
+        }
+
+        return Arrays.asList(leftGuardian, (byte) 0, (byte) 0);
     }
 
     private byte getRandomGuardian(List<Guardian> guardians, List<Byte> idsToIgnore) {
