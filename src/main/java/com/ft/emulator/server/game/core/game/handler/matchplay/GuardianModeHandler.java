@@ -1,6 +1,8 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
+import com.ft.emulator.common.utilities.ResourceUtil;
 import com.ft.emulator.server.database.model.battle.Guardian;
+import com.ft.emulator.server.database.model.battle.GuardianStage;
 import com.ft.emulator.server.database.model.battle.Skill;
 import com.ft.emulator.server.database.model.battle.SkillDropRate;
 import com.ft.emulator.server.database.model.player.Player;
@@ -27,11 +29,18 @@ import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
 import com.ft.emulator.server.shared.module.GameHandler;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.awt.geom.Point2D;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +52,7 @@ import java.util.stream.Collectors;
 public class GuardianModeHandler {
     private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(5);
     private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
+    private List<GuardianStage> guardianStages;
 
     private final GameHandler gameHandler;
     private final PacketEventHandler packetEventHandler;
@@ -50,6 +60,15 @@ public class GuardianModeHandler {
     private final SkillService skillService;
     private final SkillDropRateService skillDropRateService;
     private final GuardianService guardianService;
+
+    @PostConstruct
+    public void init() {
+        InputStream inputStream = ResourceUtil.getResource("res/GuardianStages.json");
+        final Reader reader = new InputStreamReader(inputStream);
+        Type collectionType = new TypeToken<List<GuardianStage>>(){}.getType();
+        Gson gson = new Gson();
+        guardianStages = gson.fromJson(reader, collectionType);
+    }
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
@@ -134,6 +153,11 @@ public class GuardianModeHandler {
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
+        GuardianStage guardianStage = this.guardianStages.stream().filter(x -> x.MapId == room.getMap()).findFirst().orElse(null);
+        game.setGuardianStage(guardianStage);
+        int guardianLevelLimit = this.getGuardianLevelLimit(roomPlayers);
+        game.setGuardianLevelLimit(guardianLevelLimit);
+
         List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(rp -> {
             Player player = rp.getPlayer();
             short baseHp = (short) (200 + (3 * (player.getLevel() - 1)));
@@ -146,7 +170,7 @@ public class GuardianModeHandler {
         game.setPlayerBattleStates(playerBattleStates);
 
         byte guardianStartPosition = 10;
-        List<Byte> guardians = Arrays.asList((byte) 1, (byte) 0, (byte) 0);
+        List<Byte> guardians = this.determineGuardians(game);
         for (int i = 0; i < guardians.stream().count(); i++) {
             int guardianId = guardians.get(i);
             if (guardianId == 0) continue;
@@ -244,6 +268,71 @@ public class GuardianModeHandler {
         S2CMatchplayDealDamage damageToPlayerPacket =
                 new S2CMatchplayDealDamage(targetPosition, newHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+    }
+
+    private List<Byte> determineGuardians(MatchplayGuardianGame game) {
+        GuardianStage guardianStage = game.getGuardianStage();
+        int guardianLevelLimit = game.getGuardianLevelLimit();
+        List<Guardian> guardiansLeft = this.getFilteredGuardians(guardianStage.GuardiansLeft, guardianLevelLimit);
+        List<Guardian> guardiansRight = this.getFilteredGuardians(guardianStage.GuardiansRight, guardianLevelLimit);
+        List<Guardian> guardiansMiddle = this.getFilteredGuardians(guardianStage.GuardiansMiddle, guardianLevelLimit);
+
+        byte leftGuardian = this.getRandomGuardian(guardiansLeft, new ArrayList<>());
+        byte rightGuardian = this.getRandomGuardian(guardiansRight, Arrays.asList(leftGuardian));
+        byte middleGuardian = this.getRandomGuardian(guardiansMiddle, Arrays.asList(leftGuardian, rightGuardian));
+        return Arrays.asList(leftGuardian, rightGuardian, middleGuardian);
+    }
+
+    private byte getRandomGuardian(List<Guardian> guardians, List<Byte> idsToIgnore) {
+        byte guardianId = 0;
+        if (guardians.size() > 0) {
+            int amountsOfGuardiansToChooseFrom = guardians.size();
+            if (amountsOfGuardiansToChooseFrom == 1) {
+                return guardians.get(0).getId().byteValue();
+            }
+
+            Random r = new Random();
+            int guardianIndex = r.nextInt(amountsOfGuardiansToChooseFrom);
+            guardianId = guardians.get(guardianIndex).getId().byteValue();
+            if (idsToIgnore.contains(guardianId)) {
+                return getRandomGuardian(guardians, idsToIgnore);
+            }
+        }
+
+        return guardianId;
+    }
+
+    private List<Guardian> getFilteredGuardians(List<Integer> ids, int guardianLevelLimit) {
+        if (ids == null) {
+            return new ArrayList<>();
+        }
+
+        List<Guardian> guardians = this.guardianService.findGuardiansByIds(ids);
+        int lowestGuardianLevel = guardians.stream().min(Comparator.comparingInt(x -> x.getLevel())).get().getLevel();
+        if (guardianLevelLimit < lowestGuardianLevel) {
+            guardianLevelLimit = lowestGuardianLevel;
+        }
+
+        final int finalGuardianLevelLimit = guardianLevelLimit;
+        return this.guardianService.findGuardiansByIds(ids).stream()
+                .filter(x -> x.getLevel() <= finalGuardianLevelLimit)
+                .collect(Collectors.toList());
+    }
+
+    private int getGuardianLevelLimit(List<RoomPlayer> roomPlayers) {
+        int minGuardianLevelLimit = 10;
+        List<RoomPlayer> activePlayingPlayers = roomPlayers.stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
+        List<Integer> playerLevels = activePlayingPlayers.stream().map(x -> (int) x.getPlayer().getLevel()).collect(Collectors.toList());
+        int levelSum = playerLevels.stream().reduce(0, Integer::sum);
+        float averagePlayerLevel = levelSum / activePlayingPlayers.size();
+        int roundLevel = 5 * (Math.round(averagePlayerLevel / 5));
+        if (roundLevel < averagePlayerLevel) {
+            if (averagePlayerLevel < minGuardianLevelLimit) return minGuardianLevelLimit;
+            return (int) averagePlayerLevel;
+        }
+
+        if (roundLevel < minGuardianLevelLimit) return minGuardianLevelLimit;
+        return roundLevel;
     }
 
     private void handleSpawnReviveCrystalBasedOnProbability(Connection connection, MatchplayGuardianGame game) {

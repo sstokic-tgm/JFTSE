@@ -1,5 +1,6 @@
 package com.ft.emulator.server.game.core.matchplay.basic;
 
+import com.ft.emulator.server.database.model.battle.GuardianStage;
 import com.ft.emulator.server.game.core.matchplay.MatchplayGame;
 import com.ft.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.ft.emulator.server.game.core.matchplay.battle.PlayerBattleState;
@@ -19,8 +20,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private List<GuardianBattleState> guardianBattleStates;
     private List<SkillCrystal> skillCrystals;
     private short lastCrystalId = -1;
-
+    private GuardianStage guardianStage;
     private byte lastGuardianServeSide;
+    private int guardianLevelLimit;
 
     public MatchplayGuardianGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

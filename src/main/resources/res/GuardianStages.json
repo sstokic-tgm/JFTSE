@@ -1,0 +1,448 @@
+[
+  {
+    "MapId": 0,
+    "GuardiansLeft": [
+      1,
+      2,
+      3
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 1,
+    "GuardiansLeft": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 2,
+    "GuardiansLeft": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 3,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 5,
+    "GuardiansLeft": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "GuardiansRight": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 6,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 6,
+    "GuardiansLeft": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansRight": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 1
+  },
+  {
+    "MapId": 7,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 8,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 9,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansRight": [
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 9,
+    "GuardiansLeft": [
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "GuardiansRight": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 3
+  },
+  {
+    "MapId": 10,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "GuardiansMiddle": [
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+    ],
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 10,
+    "GuardiansLeft": [
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+    ],
+    "GuardiansRight": [
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 4
+  },
+  {
+    "MapId": 11,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+    ],
+    "GuardiansRight": [
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 11,
+    "GuardiansLeft": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansRight": [
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 5
+  },
+  {
+    "MapId": 12,
+    "GuardiansLeft": [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "GuardiansRight": [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 13,
+    "GuardiansLeft": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansRight": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 13,
+    "GuardiansLeft": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansRight": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 6
+  },
+  {
+    "MapId": 14,
+    "GuardiansLeft": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansRight": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0
+  },
+  {
+    "MapId": 14,
+    "GuardiansLeft": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansRight": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 7
+  }
+]
