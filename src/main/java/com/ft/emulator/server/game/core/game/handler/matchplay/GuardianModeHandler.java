@@ -19,6 +19,7 @@ import com.ft.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
@@ -153,9 +154,13 @@ public class GuardianModeHandler {
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
+
+        float averagePlayerLevel = this.getAveragePlayerLevel(roomPlayers);
+        this.handleMonsLavaMap(connection, room, averagePlayerLevel);
+
         GuardianStage guardianStage = this.guardianStages.stream().filter(x -> x.MapId == room.getMap()).findFirst().orElse(null);
         game.setGuardianStage(guardianStage);
-        int guardianLevelLimit = this.getGuardianLevelLimit(roomPlayers);
+        int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
         game.setGuardianLevelLimit(guardianLevelLimit);
 
         List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(rp -> {
@@ -270,6 +275,21 @@ public class GuardianModeHandler {
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
     }
 
+    private void handleMonsLavaMap(Connection connection, Room room, float averagePlayerLevel) {
+        boolean isMonsLava = room.getMap() == 7 || room.getMap() == 8;
+        Random random = new Random();
+        int monsLavaBProbability = random.nextInt(101);
+        if (isMonsLava && averagePlayerLevel >= 40 && monsLavaBProbability <= 26) {
+            room.setMap((byte) 8); // MonsLavaB
+            S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(room.getMap());
+            this.sendPacketToAllClientsInSameGameSession(roomMapChangeAnswerPacket, connection);
+        } else if (room.getMap() == 8) {
+            room.setMap((byte) 7); // MonsLava
+            S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(room.getMap());
+            this.sendPacketToAllClientsInSameGameSession(roomMapChangeAnswerPacket, connection);
+        }
+    }
+
     private List<Byte> determineGuardians(MatchplayGuardianGame game) {
         GuardianStage guardianStage = game.getGuardianStage();
         int guardianLevelLimit = game.getGuardianLevelLimit();
@@ -319,12 +339,16 @@ public class GuardianModeHandler {
                 .collect(Collectors.toList());
     }
 
-    private int getGuardianLevelLimit(List<RoomPlayer> roomPlayers) {
-        int minGuardianLevelLimit = 10;
+    private float getAveragePlayerLevel(List<RoomPlayer> roomPlayers) {
         List<RoomPlayer> activePlayingPlayers = roomPlayers.stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
         List<Integer> playerLevels = activePlayingPlayers.stream().map(x -> (int) x.getPlayer().getLevel()).collect(Collectors.toList());
         int levelSum = playerLevels.stream().reduce(0, Integer::sum);
         float averagePlayerLevel = levelSum / activePlayingPlayers.size();
+        return averagePlayerLevel;
+    }
+
+    private int getGuardianLevelLimit(float averagePlayerLevel) {
+        int minGuardianLevelLimit = 10;
         int roundLevel = 5 * (Math.round(averagePlayerLevel / 5));
         if (roundLevel < averagePlayerLevel) {
             if (averagePlayerLevel < minGuardianLevelLimit) return minGuardianLevelLimit;
