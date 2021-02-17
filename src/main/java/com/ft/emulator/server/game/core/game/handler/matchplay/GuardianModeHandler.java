@@ -64,6 +64,8 @@ public class GuardianModeHandler {
 
     @PostConstruct
     public void init() {
+        // TODO: Initialize guardian mode handler and basic mode handler normally and pass GameHandler
+        // TODO: Create singleton service for loading and providing GuardianStages.json
         InputStream inputStream = ResourceUtil.getResource("res/GuardianStages.json");
         final Reader reader = new InputStreamReader(inputStream);
         Type collectionType = new TypeToken<List<GuardianStage>>(){}.getType();
@@ -334,6 +336,8 @@ public class GuardianModeHandler {
         }
 
         List<Guardian> guardians = this.guardianService.findGuardiansByIds(ids);
+
+        // TODO: Get second lowest guardian level because this could cause crashes or same name guardians when playing one of the last 3 maps with low level
         int lowestGuardianLevel = guardians.stream().min(Comparator.comparingInt(x -> x.getLevel())).get().getLevel();
         if (guardianLevelLimit < lowestGuardianLevel) {
             guardianLevelLimit = lowestGuardianLevel;
