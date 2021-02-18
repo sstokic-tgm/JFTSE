@@ -8,8 +8,6 @@ import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
-import com.ft.emulator.server.database.repository.item.*;
-import com.ft.emulator.server.game.core.item.*;
 import com.jftse.emulator.server.database.repository.item.*;
 import com.jftse.emulator.server.game.core.item.*;
 import lombok.RequiredArgsConstructor;

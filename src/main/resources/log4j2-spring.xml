@@ -28,7 +28,7 @@
         </Root>
 
         <!-- LOG "com.ft.emulator*" at TRACE level -->
-        <Logger name="com.ft.emulator" level="trace"></Logger>
+        <Logger name="com.jftse.emulator" level="trace"></Logger>
     </Loggers>
 
 </Configuration>
