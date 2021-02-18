@@ -15,14 +15,13 @@ public class S2CRoomSetBossGuardiansStats extends Packet {
         for (byte i = 0; i < guardianBattleStates.size(); i++)
         {
             GuardianBattleState guardianBattleState = guardianBattleStates.get(i);
-            Guardian guardian = guardianBattleState.getGuardian();
 
             this.write(i);
-            this.write(guardian.getHpBase().shortValue());
-            this.write(guardian.getBaseStr());
-            this.write(guardian.getBaseSta());
-            this.write(guardian.getBaseDex());
-            this.write(guardian.getBaseWill());
+            this.write(guardianBattleState.getMaxHealth());
+            this.write(guardianBattleState.getStr());
+            this.write(guardianBattleState.getSta());
+            this.write(guardianBattleState.getDex());
+            this.write(guardianBattleState.getWill());
         }
     }
 }

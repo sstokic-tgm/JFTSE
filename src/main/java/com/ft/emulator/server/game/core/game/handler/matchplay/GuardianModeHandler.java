@@ -182,6 +182,7 @@ public class GuardianModeHandler {
         }).collect(Collectors.toList());
         game.setPlayerBattleStates(playerBattleStates);
 
+        int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
         byte guardianStartPosition = 10;
         List<Byte> guardians = this.determineGuardians(game.getGuardianStage(), game.getGuardianLevelLimit());
         for (int i = 0; i < guardians.stream().count(); i++) {
@@ -190,11 +191,7 @@ public class GuardianModeHandler {
 
             short guardianPosition = (short) (i + guardianStartPosition);
             Guardian guardian = guardianService.findGuardianById((long) guardianId);
-            GuardianBattleState guardianBattleState = new GuardianBattleState();
-            guardianBattleState.setGuardian(guardian);
-            guardianBattleState.setCurrentHealth(guardian.getHpBase().shortValue());
-            guardianBattleState.setMaxHealth(guardian.getHpBase().shortValue());
-            guardianBattleState.setPosition(guardianPosition);
+            GuardianBattleState guardianBattleState = createGuardianBattleState(guardian, guardianPosition, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(guardianBattleState);
         }
 
@@ -285,6 +282,21 @@ public class GuardianModeHandler {
         this.handleAllGuardiansDead(connection, game);
     }
 
+    private GuardianBattleState createGuardianBattleState(Guardian guardian, short guardianPosition, int activePlayingPlayersCount) {
+        short extraHp = (short) (guardian.getHpPer() * activePlayingPlayersCount);
+        byte extraStr = (byte) (guardian.getAddStr() * activePlayingPlayersCount);
+        byte extraSta = (byte) (guardian.getAddSta() * activePlayingPlayersCount);
+        byte extraDex = (byte) (guardian.getAddDex() * activePlayingPlayersCount);
+        byte extraWill = (byte) (guardian.getAddWill() * activePlayingPlayersCount);
+        short totalHp = (short) (guardian.getHpBase().shortValue() + extraHp);
+        byte totalStr = (byte) (guardian.getBaseStr() + extraStr);
+        byte totalSta = (byte) (guardian.getBaseSta() + extraSta);
+        byte totalDex = (byte) (guardian.getBaseDex() + extraDex);
+        byte totalWill = (byte) (guardian.getBaseWill() + extraWill);
+        GuardianBattleState guardianBattleState = new GuardianBattleState(guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill);
+        return guardianBattleState;
+    }
+
     private void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
         boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
         if(!hasBossGuardianStage) return;
@@ -293,17 +305,14 @@ public class GuardianModeHandler {
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
         boolean triggerBossBattle = timePlayingInSeconds < 301;
         if (allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
+            int activePlayingPlayersCount = game.getPlayerBattleStates().size();
             List<Byte> guardians = this.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
             byte bossGuardianIndex = game.getBossGuardianStage().BossGuardian.byteValue();
             game.setBossBattleActive(true);
             game.getGuardianBattleStates().clear();
 
             BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
-            GuardianBattleState bossGuardianBattleState = new GuardianBattleState();
-            bossGuardianBattleState.setGuardian(bossGuardian.transformToGuardian());
-            bossGuardianBattleState.setCurrentHealth(bossGuardian.getHpBase().shortValue());
-            bossGuardianBattleState.setMaxHealth(bossGuardian.getHpBase().shortValue());
-            bossGuardianBattleState.setPosition((byte) 10);
+            GuardianBattleState bossGuardianBattleState = this.createGuardianBattleState(bossGuardian.transformToGuardian(), (byte) 10, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(bossGuardianBattleState);
 
             byte guardianStartPosition = 11;
@@ -313,11 +322,7 @@ public class GuardianModeHandler {
 
                 short guardianPosition = (short) (i + guardianStartPosition);
                 Guardian guardian = guardianService.findGuardianById((long) guardianId);
-                GuardianBattleState guardianBattleState = new GuardianBattleState();
-                guardianBattleState.setGuardian(guardian);
-                guardianBattleState.setCurrentHealth(guardian.getHpBase().shortValue());
-                guardianBattleState.setMaxHealth(guardian.getHpBase().shortValue());
-                guardianBattleState.setPosition(guardianPosition);
+                GuardianBattleState guardianBattleState = this.createGuardianBattleState(guardian, guardianPosition, activePlayingPlayersCount);
                 game.getGuardianBattleStates().add(guardianBattleState);
             }
 
