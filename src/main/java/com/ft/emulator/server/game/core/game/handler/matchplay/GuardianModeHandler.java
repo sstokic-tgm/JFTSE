@@ -1,10 +1,7 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
 import com.ft.emulator.common.utilities.ResourceUtil;
-import com.ft.emulator.server.database.model.battle.Guardian;
-import com.ft.emulator.server.database.model.battle.GuardianStage;
-import com.ft.emulator.server.database.model.battle.Skill;
-import com.ft.emulator.server.database.model.battle.SkillDropRate;
+import com.ft.emulator.server.database.model.battle.*;
 import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
@@ -20,9 +17,11 @@ import com.ft.emulator.server.game.core.matchplay.room.GameSession;
 import com.ft.emulator.server.game.core.matchplay.room.Room;
 import com.ft.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
+import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetBossGuardiansStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
+import com.ft.emulator.server.game.core.service.BossGuardianService;
 import com.ft.emulator.server.game.core.service.GuardianService;
 import com.ft.emulator.server.game.core.service.SkillDropRateService;
 import com.ft.emulator.server.game.core.service.SkillService;
@@ -61,6 +60,7 @@ public class GuardianModeHandler {
     private final SkillService skillService;
     private final SkillDropRateService skillDropRateService;
     private final GuardianService guardianService;
+    private final BossGuardianService bossGuardianService;
 
     @PostConstruct
     public void init() {
@@ -114,6 +114,8 @@ public class GuardianModeHandler {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
             });
         }
+
+        this.handleAllGuardiansDead(connection, game);
     }
 
     public void handleStartGuardianMode(Connection connection, Room room) {
@@ -160,8 +162,12 @@ public class GuardianModeHandler {
         float averagePlayerLevel = this.getAveragePlayerLevel(roomPlayers);
         this.handleMonsLavaMap(connection, room, averagePlayerLevel);
 
-        GuardianStage guardianStage = this.guardianStages.stream().filter(x -> x.MapId == room.getMap()).findFirst().orElse(null);
+        GuardianStage guardianStage = this.guardianStages.stream().filter(x -> x.MapId == room.getMap() && !x.IsBossStage).findFirst().orElse(null);
         game.setGuardianStage(guardianStage);
+
+        GuardianStage bossGuardianStage = this.guardianStages.stream().filter(x -> x.MapId == room.getMap() && x.IsBossStage).findFirst().orElse(null);
+        game.setBossGuardianStage(bossGuardianStage);
+
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
         game.setGuardianLevelLimit(guardianLevelLimit);
 
@@ -177,7 +183,7 @@ public class GuardianModeHandler {
         game.setPlayerBattleStates(playerBattleStates);
 
         byte guardianStartPosition = 10;
-        List<Byte> guardians = this.determineGuardians(game);
+        List<Byte> guardians = this.determineGuardians(game.getGuardianStage(), game.getGuardianLevelLimit());
         for (int i = 0; i < guardians.stream().count(); i++) {
             int guardianId = guardians.get(i);
             if (guardianId == 0) continue;
@@ -275,6 +281,62 @@ public class GuardianModeHandler {
         S2CMatchplayDealDamage damageToPlayerPacket =
                 new S2CMatchplayDealDamage(targetPosition, newHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+
+        this.handleAllGuardiansDead(connection, game);
+    }
+
+    private void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
+        boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
+        if(!hasBossGuardianStage) return;
+
+        boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
+        long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
+        boolean triggerBossBattle = timePlayingInSeconds < 301;
+        if (allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
+            List<Byte> guardians = this.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
+            byte bossGuardianIndex = game.getBossGuardianStage().BossGuardian.byteValue();
+            game.setBossBattleActive(true);
+            game.getGuardianBattleStates().clear();
+
+            BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
+            GuardianBattleState bossGuardianBattleState = new GuardianBattleState();
+            bossGuardianBattleState.setGuardian(bossGuardian.transformToGuardian());
+            bossGuardianBattleState.setCurrentHealth(bossGuardian.getHpBase().shortValue());
+            bossGuardianBattleState.setMaxHealth(bossGuardian.getHpBase().shortValue());
+            bossGuardianBattleState.setPosition((byte) 10);
+            game.getGuardianBattleStates().add(bossGuardianBattleState);
+
+            byte guardianStartPosition = 11;
+            for (int i = 0; i < guardians.stream().count(); i++) {
+                int guardianId = guardians.get(i);
+                if (guardianId == 0) continue;
+
+                short guardianPosition = (short) (i + guardianStartPosition);
+                Guardian guardian = guardianService.findGuardianById((long) guardianId);
+                GuardianBattleState guardianBattleState = new GuardianBattleState();
+                guardianBattleState.setGuardian(guardian);
+                guardianBattleState.setCurrentHealth(guardian.getHpBase().shortValue());
+                guardianBattleState.setMaxHealth(guardian.getHpBase().shortValue());
+                guardianBattleState.setPosition(guardianPosition);
+                game.getGuardianBattleStates().add(guardianBattleState);
+            }
+
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            game.setStageStartTime(cal.getTime());
+
+            S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates());
+            this.sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
+
+            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
+            this.sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
+        } else if (allGuardiansDead) {
+            boolean neededTooMuchTime = timePlayingInSeconds > 480;
+            if (neededTooMuchTime) {
+                // TODO: LOOSE GAME RESULT WINDOW
+            } else {
+                // TODO: WIN GAME RESULT WINDOW
+            }
+        }
     }
 
     private void handleMonsLavaMap(Connection connection, Room room, float averagePlayerLevel) {
@@ -292,9 +354,7 @@ public class GuardianModeHandler {
         }
     }
 
-    private List<Byte> determineGuardians(MatchplayGuardianGame game) {
-        GuardianStage guardianStage = game.getGuardianStage();
-        int guardianLevelLimit = game.getGuardianLevelLimit();
+    private List<Byte> determineGuardians(GuardianStage guardianStage, int guardianLevelLimit) {
         List<Guardian> guardiansLeft = this.getFilteredGuardians(guardianStage.GuardiansLeft, guardianLevelLimit);
         List<Guardian> guardiansRight = this.getFilteredGuardians(guardianStage.GuardiansRight, guardianLevelLimit);
         List<Guardian> guardiansMiddle = this.getFilteredGuardians(guardianStage.GuardiansMiddle, guardianLevelLimit);
@@ -336,8 +396,6 @@ public class GuardianModeHandler {
         }
 
         List<Guardian> guardians = this.guardianService.findGuardiansByIds(ids);
-
-        // TODO: Get second lowest guardian level because this could cause crashes or same name guardians when playing one of the last 3 maps with low level
         int lowestGuardianLevel = guardians.stream().min(Comparator.comparingInt(x -> x.getLevel())).get().getLevel();
         if (guardianLevelLimit < lowestGuardianLevel) {
             guardianLevelLimit = lowestGuardianLevel;

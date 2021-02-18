@@ -45,6 +45,7 @@ public final class PacketID {
     public final static char C2SRoomListReq = 0x13EC;
     public final static char S2CRoomSetGuardians = 0x1D4F;
     public final static char S2CRoomSetGuardianStats = 0x1D50;
+    public final static char S2CRoomSetBossGuardiansStats = 0x1D58;
 
     public final static char C2SLobbyUserListRequest = 0x1707;
     public final static char S2CLobbyUserListAnswer = 0x1708;

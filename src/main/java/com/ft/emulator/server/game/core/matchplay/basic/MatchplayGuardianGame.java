@@ -11,6 +11,7 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
@@ -21,12 +22,16 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private List<SkillCrystal> skillCrystals;
     private short lastCrystalId = -1;
     private GuardianStage guardianStage;
+    private GuardianStage bossGuardianStage;
+    private boolean bossBattleActive;
     private byte lastGuardianServeSide;
     private int guardianLevelLimit;
+    private Date stageStartTime;
 
     public MatchplayGuardianGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
+        this.setStageStartTime(cal.getTime());
         this.playerBattleStates = new ArrayList<>();
         this.guardianBattleStates = new ArrayList<>();
         this.skillCrystals = new ArrayList<>();
@@ -102,6 +107,12 @@ public class MatchplayGuardianGame extends MatchplayGame {
         playerSkillsCopy.set(1, (short) -1);
         playerBattleState.setSkillsStack(playerSkillsCopy);
         return playerSkillsCopy;
+    }
+
+    public long getStageTimePlayingInSeconds() {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        long duration = cal.getTime().getTime() - this.getStageStartTime().getTime();
+        return TimeUnit.MILLISECONDS.toSeconds(duration);
     }
 
     @Override

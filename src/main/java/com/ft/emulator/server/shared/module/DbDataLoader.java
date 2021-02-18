@@ -2,6 +2,7 @@ package com.ft.emulator.server.shared.module;
 
 import com.ft.emulator.common.utilities.BitKit;
 import com.ft.emulator.common.utilities.ResourceUtil;
+import com.ft.emulator.server.database.model.battle.BossGuardian;
 import com.ft.emulator.server.database.model.battle.Guardian;
 import com.ft.emulator.server.database.model.battle.Skill;
 import com.ft.emulator.server.database.model.battle.SkillDropRate;
@@ -9,6 +10,7 @@ import com.ft.emulator.server.database.model.challenge.Challenge;
 import com.ft.emulator.server.database.model.item.*;
 import com.ft.emulator.server.database.model.level.LevelExp;
 import com.ft.emulator.server.database.model.tutorial.Tutorial;
+import com.ft.emulator.server.database.repository.battle.BossGuardianRepository;
 import com.ft.emulator.server.database.repository.battle.GuardianRepository;
 import com.ft.emulator.server.database.repository.battle.SkillDropRateRepository;
 import com.ft.emulator.server.database.repository.battle.SkillRepository;
@@ -65,6 +67,8 @@ public class DbDataLoader implements CommandLineRunner {
     private SkillDropRateRepository skillDropRateRepository;
     @Autowired
     private GuardianRepository guardianRepository;
+    @Autowired
+    private BossGuardianRepository bossGuardianRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -91,6 +95,7 @@ public class DbDataLoader implements CommandLineRunner {
         boolean skillInitialized = skillRepository.count() != 0;
         boolean skillDropRateInitialized = skillDropRateRepository.count() != 0;
         boolean guardianInitialized = guardianRepository.count() != 0;
+        boolean bossGuardianInitialized = bossGuardianRepository.count() != 0;
 
         if (!levelExpInitialized) {
 
@@ -205,10 +210,57 @@ public class DbDataLoader implements CommandLineRunner {
         else
             dataLoaded = false;
 
+        if (!bossGuardianInitialized) {
+            log.info("Initializing BossGuardian...");
+            if (loadBossGuardian())
+                log.info("BossGuardian successfully initialized!");
+        }
+        else
+            dataLoaded = false;
+
         if (!dataLoaded)
             log.info("Data is up to date!");
 
         log.info("--------------------------------------");
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private boolean loadBossGuardian() {
+        try {
+            InputStream itemPartFile = ResourceUtil.getResource("res/BossGuardianInfo_Ini3.xml");
+            SAXReader reader = new SAXReader();
+            reader.setEncoding("UTF-8");
+            Document document = reader.read(itemPartFile);
+
+            List<Node> bossGuardianList = document.selectNodes("/GuardianList/Guardian");
+
+            for (Node skillNode : bossGuardianList) {
+                BossGuardian guardian = new BossGuardian();
+                guardian.setName(String.valueOf(skillNode.valueOf("@Name_en")));
+                guardian.setHpBase(Integer.valueOf(skillNode.valueOf("@HPBase")));
+                guardian.setHpPer(Integer.valueOf(skillNode.valueOf("@HPPer")));
+                guardian.setLevel(Integer.valueOf(skillNode.valueOf("@GdLevel")).byteValue());
+                guardian.setBaseStr(Integer.valueOf(skillNode.valueOf("@BaseSTR")).byteValue());
+                guardian.setBaseSta(Integer.valueOf(skillNode.valueOf("@BaseSTA")).byteValue());
+                guardian.setBaseDex(Integer.valueOf(skillNode.valueOf("@BaseDEX")).byteValue());
+                guardian.setBaseWill(Integer.valueOf(skillNode.valueOf("@BaseWILL")).byteValue());
+                guardian.setAddStr(Integer.valueOf(skillNode.valueOf("@AddSTR")).byteValue());
+                guardian.setAddSta(Integer.valueOf(skillNode.valueOf("@AddSTA")).byteValue());
+                guardian.setAddDex(Integer.valueOf(skillNode.valueOf("@AddDEX")).byteValue());
+                guardian.setAddWill(Integer.valueOf(skillNode.valueOf("@AddWILL")).byteValue());
+                guardian.setRewardExp(Integer.valueOf(skillNode.valueOf("@RewardEXP")));
+                guardian.setRewardGold(Integer.valueOf(skillNode.valueOf("@RewardGOLD")));
+                bossGuardianRepository.save(guardian);
+            }
+        }
+        catch (DocumentException de) {
+
+            de.printStackTrace();
+
+            return false;
+        }
+
+        return true;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -237,7 +289,6 @@ public class DbDataLoader implements CommandLineRunner {
                 guardian.setAddWill(Integer.valueOf(skillNode.valueOf("@AddWILL")).byteValue());
                 guardian.setRewardExp(Integer.valueOf(skillNode.valueOf("@RewardEXP")));
                 guardian.setRewardGold(Integer.valueOf(skillNode.valueOf("@RewardGOLD")));
-
                 guardianRepository.save(guardian);
             }
         }
