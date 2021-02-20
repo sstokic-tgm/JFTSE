@@ -97,6 +97,19 @@ public class PlayerPocketService {
         return sellPrice;
     }
 
+    public PlayerPocket decrementPocketItemCount(PlayerPocket playerPocket) {
+        Optional<PlayerPocket> tmpPocket = playerPocketRepository.findById(playerPocket.getId());
+        if (tmpPocket.isPresent()) {
+            playerPocket = tmpPocket.get();
+
+            playerPocket.setItemCount(playerPocket.getItemCount() - 1);
+            return save(playerPocket);
+        }
+        else {
+            return playerPocket;
+        }
+    }
+
     public PlayerPocket save(PlayerPocket playerPocket) {
         return playerPocketRepository.save(playerPocket);
     }

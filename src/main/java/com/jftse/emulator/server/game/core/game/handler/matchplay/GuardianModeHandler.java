@@ -2,6 +2,8 @@ package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
+import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
@@ -49,6 +51,7 @@ public class GuardianModeHandler {
     private final GuardianService guardianService;
     private final BossGuardianService bossGuardianService;
     private final GuardianStageService guardianStageService;
+    private final PlayerPocketService playerPocketService;
 
     private GameHandler gameHandler;
 
@@ -220,6 +223,10 @@ public class GuardianModeHandler {
     public void handlePlayerUseSkill(Connection connection, C2SMatchplayUsesSkill playerUseSkill) {
         byte playerPos = playerUseSkill.getPlayerPosition();
         if (playerPos > 3) return;
+
+        if (playerUseSkill.isQuickSlot()) {
+            this.handleQuickSlotItemUse(connection, playerUseSkill);
+        }
 
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
@@ -505,6 +512,34 @@ public class GuardianModeHandler {
 
         RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(despawnCrystalRunnable, this.crystalDefaultDespawnTime);
         gameSession.getRunnableEvents().add(runnableEvent);
+    }
+
+    private void handleQuickSlotItemUse(Connection connection, C2SMatchplayUsesSkill playerUseSkill) {
+        Player player = connection.getClient().getActivePlayer();
+        QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
+        int itemId = -1;
+        switch (playerUseSkill.getQuickSlotIndex()) {
+            case 0:
+                itemId = quickSlotEquipment.getSlot1();
+                break;
+            case 1:
+                itemId = quickSlotEquipment.getSlot2();
+                break;
+            case 2:
+                itemId = quickSlotEquipment.getSlot3();
+                break;
+            case 3:
+                itemId = quickSlotEquipment.getSlot4();
+                break;
+            case 4:
+                itemId = quickSlotEquipment.getSlot5();
+                break;
+        }
+
+        if (itemId > -1) {
+            PlayerPocket playerPocket = this.playerPocketService.findById((long) itemId);
+            this.playerPocketService.decrementPocketItemCount(playerPocket);
+        }
     }
 
     private Point2D getRandomPoint() {
