@@ -104,6 +104,8 @@ public class GamePacketHandler {
 
     @PostConstruct
     public void init() {
+        this.basicModeHandler.init(this.gameHandler);
+        this.guardianModeHandler.init(this.gameHandler);
         scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             this.gameSessionManager.getGameSessionList().forEach(gameSession -> {

@@ -42,8 +42,13 @@ public class BasicModeHandler {
     private final ClothEquipmentService clothEquipmentService;
     private final PacketEventHandler packetEventHandler;
     private final PlayerService playerService;
-    private final GameHandler gameHandler;
     private final GameSessionManager gameSessionManager;
+
+    private GameHandler gameHandler;
+
+    public void init(GameHandler gameHandler) {
+        this.gameHandler = gameHandler;
+    }
 
     public void handleBasicModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayBasicGame game) {
         boolean isSingles = gameSession.getPlayers() == 2;

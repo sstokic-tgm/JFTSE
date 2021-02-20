@@ -34,8 +34,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-// TODO: Initialize guardian mode handler and basic mode handler normally and pass GameHandler
-
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -43,7 +41,6 @@ public class GuardianModeHandler {
     private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(5);
     private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
 
-    private final GameHandler gameHandler;
     private final PacketEventHandler packetEventHandler;
     private final RunnableEventHandler runnableEventHandler;
     private final SkillService skillService;
@@ -52,10 +49,14 @@ public class GuardianModeHandler {
     private final BossGuardianService bossGuardianService;
     private final GuardianStageService guardianStageService;
 
+    private GameHandler gameHandler;
+
+    public void init(GameHandler gameHandler) {
+        this.gameHandler = gameHandler;
+    }
+
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
-        // TODO: If player makes the point, guardian take dmg dependent on players will
-
         if (guardianMadePoint) {
             List<Packet> dmgPackets = new ArrayList<>();
             gameSession.getClients().forEach(c -> {
