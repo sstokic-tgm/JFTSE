@@ -17,11 +17,11 @@ public class S2CRoomSetGuardianStats extends Packet {
             GuardianBattleState guardianBattleState = guardianBattleStates.get(i);
 
             this.write(i);
-            this.write(guardianBattleState.getMaxHealth());
-            this.write(guardianBattleState.getStr());
-            this.write(guardianBattleState.getSta());
-            this.write(guardianBattleState.getDex());
-            this.write(guardianBattleState.getWill());
+            this.write((short) guardianBattleState.getMaxHealth());
+            this.write((byte) guardianBattleState.getStr());
+            this.write((byte) guardianBattleState.getSta());
+            this.write((byte) guardianBattleState.getDex());
+            this.write((byte) guardianBattleState.getWill());
         }
     }
 }

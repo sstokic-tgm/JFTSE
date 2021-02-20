@@ -9,19 +9,5 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 @Entity
-public class Guardian extends AbstractIdBaseModel {
-    private String name;
-    private Integer hpBase;
-    private Integer hpPer;
-    private Byte level;
-    private Byte baseStr;
-    private Byte baseSta;
-    private Byte baseDex;
-    private Byte baseWill;
-    private Byte addStr;
-    private Byte addSta;
-    private Byte addDex;
-    private Byte addWill;
-    private Integer rewardExp;
-    private Integer rewardGold;
+public class Guardian extends GuardianBase {
 }

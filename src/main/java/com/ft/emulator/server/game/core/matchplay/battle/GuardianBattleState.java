@@ -1,24 +1,20 @@
 package com.ft.emulator.server.game.core.matchplay.battle;
 
-import com.ft.emulator.server.database.model.battle.Guardian;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Getter
 @Setter
 public class GuardianBattleState {
     private short position;
-    private short maxHealth;
-    private short currentHealth;
-    private byte str;
-    private byte sta;
-    private byte dex;
-    private byte will;
+    private int maxHealth;
+    private int currentHealth;
+    private int str;
+    private int sta;
+    private int dex;
+    private int will;
 
-    public GuardianBattleState(short position, short hp, byte str, byte sta, byte dex, byte will) {
+    public GuardianBattleState(short position, int hp, int str, int sta, int dex, int will) {
         this.position = position;
         this.maxHealth = hp;
         this.currentHealth = hp;

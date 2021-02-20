@@ -1,13 +1,12 @@
 package com.ft.emulator.server.game.core.game.handler.matchplay;
 
-import com.ft.emulator.common.utilities.ResourceUtil;
 import com.ft.emulator.server.database.model.battle.*;
 import com.ft.emulator.server.database.model.player.Player;
 import com.ft.emulator.server.game.core.constants.GameFieldSide;
 import com.ft.emulator.server.game.core.constants.PacketEventType;
+import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.ft.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.ft.emulator.server.game.core.matchplay.battle.PlayerBattleState;
-import com.ft.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.ft.emulator.server.game.core.matchplay.battle.SkillCrystal;
 import com.ft.emulator.server.game.core.matchplay.battle.SkillDrop;
 import com.ft.emulator.server.game.core.matchplay.event.PacketEventHandler;
@@ -21,30 +20,21 @@ import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetBoss
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.ft.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.ft.emulator.server.game.core.packet.packets.matchplay.*;
-import com.ft.emulator.server.game.core.service.BossGuardianService;
-import com.ft.emulator.server.game.core.service.GuardianService;
-import com.ft.emulator.server.game.core.service.SkillDropRateService;
-import com.ft.emulator.server.game.core.service.SkillService;
+import com.ft.emulator.server.game.core.service.*;
 import com.ft.emulator.server.networking.Connection;
 import com.ft.emulator.server.networking.packet.Packet;
 import com.ft.emulator.server.shared.module.Client;
 import com.ft.emulator.server.shared.module.GameHandler;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.awt.geom.Point2D;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.lang.reflect.Type;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+// TODO: Initialize guardian mode handler and basic mode handler normally and pass GameHandler
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +42,6 @@ import java.util.stream.Collectors;
 public class GuardianModeHandler {
     private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(5);
     private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
-    private List<GuardianStage> guardianStages;
 
     private final GameHandler gameHandler;
     private final PacketEventHandler packetEventHandler;
@@ -61,17 +50,7 @@ public class GuardianModeHandler {
     private final SkillDropRateService skillDropRateService;
     private final GuardianService guardianService;
     private final BossGuardianService bossGuardianService;
-
-    @PostConstruct
-    public void init() {
-        // TODO: Initialize guardian mode handler and basic mode handler normally and pass GameHandler
-        // TODO: Create singleton service for loading and providing GuardianStages.json
-        InputStream inputStream = ResourceUtil.getResource("res/GuardianStages.json");
-        final Reader reader = new InputStreamReader(inputStream);
-        Type collectionType = new TypeToken<List<GuardianStage>>(){}.getType();
-        Gson gson = new Gson();
-        guardianStages = gson.fromJson(reader, collectionType);
-    }
+    private final GuardianStageService guardianStageService;
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
@@ -162,10 +141,10 @@ public class GuardianModeHandler {
         float averagePlayerLevel = this.getAveragePlayerLevel(roomPlayers);
         this.handleMonsLavaMap(connection, room, averagePlayerLevel);
 
-        GuardianStage guardianStage = this.guardianStages.stream().filter(x -> x.MapId == room.getMap() && !x.IsBossStage).findFirst().orElse(null);
+        GuardianStage guardianStage = this.guardianStageService.getGuardianStages().stream().filter(x -> x.MapId == room.getMap() && !x.IsBossStage).findFirst().orElse(null);
         game.setGuardianStage(guardianStage);
 
-        GuardianStage bossGuardianStage = this.guardianStages.stream().filter(x -> x.MapId == room.getMap() && x.IsBossStage).findFirst().orElse(null);
+        GuardianStage bossGuardianStage = this.guardianStageService.getGuardianStages().stream().filter(x -> x.MapId == room.getMap() && x.IsBossStage).findFirst().orElse(null);
         game.setBossGuardianStage(bossGuardianStage);
 
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
@@ -191,7 +170,7 @@ public class GuardianModeHandler {
 
             short guardianPosition = (short) (i + guardianStartPosition);
             Guardian guardian = guardianService.findGuardianById((long) guardianId);
-            GuardianBattleState guardianBattleState = createGuardianBattleState(guardian, guardianPosition, activePlayingPlayersCount);
+            GuardianBattleState guardianBattleState = this.createGuardianBattleState(guardian, guardianPosition, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(guardianBattleState);
         }
 
@@ -282,17 +261,17 @@ public class GuardianModeHandler {
         this.handleAllGuardiansDead(connection, game);
     }
 
-    private GuardianBattleState createGuardianBattleState(Guardian guardian, short guardianPosition, int activePlayingPlayersCount) {
-        short extraHp = (short) (guardian.getHpPer() * activePlayingPlayersCount);
-        byte extraStr = (byte) (guardian.getAddStr() * activePlayingPlayersCount);
-        byte extraSta = (byte) (guardian.getAddSta() * activePlayingPlayersCount);
-        byte extraDex = (byte) (guardian.getAddDex() * activePlayingPlayersCount);
-        byte extraWill = (byte) (guardian.getAddWill() * activePlayingPlayersCount);
-        short totalHp = (short) (guardian.getHpBase().shortValue() + extraHp);
-        byte totalStr = (byte) (guardian.getBaseStr() + extraStr);
-        byte totalSta = (byte) (guardian.getBaseSta() + extraSta);
-        byte totalDex = (byte) (guardian.getBaseDex() + extraDex);
-        byte totalWill = (byte) (guardian.getBaseWill() + extraWill);
+    private GuardianBattleState createGuardianBattleState(GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
+        int extraHp = guardian.getHpPer() * activePlayingPlayersCount;
+        int extraStr = guardian.getAddStr() * activePlayingPlayersCount;
+        int extraSta = guardian.getAddSta() * activePlayingPlayersCount;
+        int extraDex = guardian.getAddDex() * activePlayingPlayersCount;
+        int extraWill = guardian.getAddWill() * activePlayingPlayersCount;
+        int totalHp = guardian.getHpBase().shortValue() + extraHp;
+        int totalStr = guardian.getBaseStr() + extraStr;
+        int totalSta = guardian.getBaseSta() + extraSta;
+        int totalDex = guardian.getBaseDex() + extraDex;
+        int totalWill = guardian.getBaseWill() + extraWill;
         GuardianBattleState guardianBattleState = new GuardianBattleState(guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill);
         return guardianBattleState;
     }
@@ -312,7 +291,7 @@ public class GuardianModeHandler {
             game.getGuardianBattleStates().clear();
 
             BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
-            GuardianBattleState bossGuardianBattleState = this.createGuardianBattleState(bossGuardian.transformToGuardian(), (byte) 10, activePlayingPlayersCount);
+            GuardianBattleState bossGuardianBattleState = this.createGuardianBattleState(bossGuardian, (short) 10, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(bossGuardianBattleState);
 
             byte guardianStartPosition = 11;
