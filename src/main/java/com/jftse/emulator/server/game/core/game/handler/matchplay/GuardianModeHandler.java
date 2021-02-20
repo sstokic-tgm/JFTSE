@@ -159,7 +159,7 @@ public class GuardianModeHandler {
 
         List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(rp -> {
             Player player = rp.getPlayer();
-            short baseHp = (short) (200 + (3 * (player.getLevel() - 1)));
+            short baseHp = (short) BattleUtils.calculatePlayerHp(player);
             PlayerBattleState playerBattleState = new PlayerBattleState();
             playerBattleState.setPosition(rp.getPosition());
             playerBattleState.setCurrentHealth(baseHp);
