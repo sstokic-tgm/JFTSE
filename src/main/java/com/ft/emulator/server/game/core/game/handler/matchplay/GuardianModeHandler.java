@@ -141,10 +141,16 @@ public class GuardianModeHandler {
         float averagePlayerLevel = this.getAveragePlayerLevel(roomPlayers);
         this.handleMonsLavaMap(connection, room, averagePlayerLevel);
 
-        GuardianStage guardianStage = this.guardianStageService.getGuardianStages().stream().filter(x -> x.MapId == room.getMap() && !x.IsBossStage).findFirst().orElse(null);
+        GuardianStage guardianStage = this.guardianStageService.getGuardianStages().stream()
+                .filter(x -> x.getMapId() == room.getMap() && !x.getIsBossStage())
+                .findFirst()
+                .orElse(null);
         game.setGuardianStage(guardianStage);
 
-        GuardianStage bossGuardianStage = this.guardianStageService.getGuardianStages().stream().filter(x -> x.MapId == room.getMap() && x.IsBossStage).findFirst().orElse(null);
+        GuardianStage bossGuardianStage = this.guardianStageService.getGuardianStages().stream()
+                .filter(x -> x.getMapId() == room.getMap() && x.getIsBossStage())
+                .findFirst()
+                .orElse(null);
         game.setBossGuardianStage(bossGuardianStage);
 
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
@@ -286,7 +292,7 @@ public class GuardianModeHandler {
         if (allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
             int activePlayingPlayersCount = game.getPlayerBattleStates().size();
             List<Byte> guardians = this.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
-            byte bossGuardianIndex = game.getBossGuardianStage().BossGuardian.byteValue();
+            byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
             game.setBossBattleActive(true);
             game.getGuardianBattleStates().clear();
 
@@ -339,9 +345,9 @@ public class GuardianModeHandler {
     }
 
     private List<Byte> determineGuardians(GuardianStage guardianStage, int guardianLevelLimit) {
-        List<Guardian> guardiansLeft = this.getFilteredGuardians(guardianStage.GuardiansLeft, guardianLevelLimit);
-        List<Guardian> guardiansRight = this.getFilteredGuardians(guardianStage.GuardiansRight, guardianLevelLimit);
-        List<Guardian> guardiansMiddle = this.getFilteredGuardians(guardianStage.GuardiansMiddle, guardianLevelLimit);
+        List<Guardian> guardiansLeft = this.getFilteredGuardians(guardianStage.getGuardiansLeft(), guardianLevelLimit);
+        List<Guardian> guardiansRight = this.getFilteredGuardians(guardianStage.getGuardiansRight(), guardianLevelLimit);
+        List<Guardian> guardiansMiddle = this.getFilteredGuardians(guardianStage.getGuardiansMiddle(), guardianLevelLimit);
 
         byte leftGuardian = this.getRandomGuardian(guardiansLeft, new ArrayList<>());
         byte rightGuardian = this.getRandomGuardian(guardiansRight, Arrays.asList(leftGuardian));
