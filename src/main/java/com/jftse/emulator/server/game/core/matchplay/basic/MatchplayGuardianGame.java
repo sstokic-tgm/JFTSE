@@ -115,6 +115,11 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return TimeUnit.MILLISECONDS.toSeconds(duration);
     }
 
+    public void resetStageStartTime() {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        setStageStartTime(cal.getTime());
+    }
+
     @Override
     public long getTimeNeeded() {
         return 0;

@@ -21,6 +21,7 @@ import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetG
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -207,7 +208,6 @@ public class GuardianModeHandler {
 
             short explicitSkillId = skillCrystal.getExplicitSkillId();
             int skillId = explicitSkillId != -1 ? explicitSkillId: this.getRandomSkillBasedOnProbability(roomPlayer.getPlayer());
-
             List<Short> playerSkills = game.assignSkillToPlayer(playerPosition, (short) skillId);
             S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPosition, playerSkills.get(0), playerSkills.get(1));
             this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
@@ -240,12 +240,32 @@ public class GuardianModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
-        if (skill.getId() == 5) {
-            this.handleRevivePlayer(connection, game, skill, skillHitsTarget);
+
+        if (this.isUniqueSkill(skill)) {
+            this.handleUniqueSkill(connection, game, skill, skillHitsTarget);
             return;
         }
+
+        boolean isAoeSkill = skill.getTargeting() == 14;
+        if (isAoeSkill) {
+            this.handleAoeSkillDamage(connection, skillHitsTarget, game, skill);
+        } else {
+            this.handleSkillDamage(connection, skillHitsTarget.getTargetPosition(), skillHitsTarget, game, skill);
+        }
+
+        this.handleAllGuardiansDead(connection, game);
+    }
+
+    private void handleAoeSkillDamage(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayGuardianGame game, Skill skill) {
+        Room room = connection.getClient().getActiveRoom();
+        List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream()
+                .filter(x -> x.getPosition() < 4)
+                .collect(Collectors.toList());
+        activePlayingPlayers.forEach(x -> this.handleSkillDamage(connection, x.getPosition(), skillHitsTarget, game, skill));
+    }
+
+    private void handleSkillDamage(Connection connection, short targetPosition, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayGuardianGame game, Skill skill) {
         short skillDamage = skill.getDamage().shortValue();
-        short targetPosition = skillHitsTarget.getTargetPosition();
         short newHealth;
         if (targetPosition < 4) {
             if (skillDamage > 1) {
@@ -262,10 +282,25 @@ public class GuardianModeHandler {
         }
 
         S2CMatchplayDealDamage damageToPlayerPacket =
-                new S2CMatchplayDealDamage(targetPosition, newHealth, skillId, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                new S2CMatchplayDealDamage(targetPosition, newHealth, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+    }
 
-        this.handleAllGuardiansDead(connection, game);
+    private boolean isUniqueSkill(Skill skill) {
+        int skillId = skill.getId().intValue();
+        return skillId == 5 || skillId == 38;
+    }
+
+    private void handleUniqueSkill(Connection connection, MatchplayGuardianGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
+        int skillId = skill.getId().intValue();
+        switch (skillId) {
+            case 5: // Revive
+                this.handleRevivePlayer(connection, game, skill, skillHitsTarget);
+                break;
+            case 38: // Sandglass
+                game.resetStageStartTime();
+                break;
+        }
     }
 
     private GuardianBattleState createGuardianBattleState(GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
@@ -312,8 +347,7 @@ public class GuardianModeHandler {
                 game.getGuardianBattleStates().add(guardianBattleState);
             }
 
-            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            game.setStageStartTime(cal.getTime());
+            game.resetStageStartTime();
 
             S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates());
             this.sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
