@@ -13,14 +13,17 @@ public class GuardianBattleState {
     private int sta;
     private int dex;
     private int will;
+    private int exp;
+    private int gold;
 
-    public GuardianBattleState(short position, int hp, int str, int sta, int dex, int will) {
+    public GuardianBattleState(short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
         this.position = position;
         this.maxHealth = hp;
         this.currentHealth = hp;
         this.str = str;
         this.sta = sta;
         this.dex = dex;
-        this.will = will;
+        this.exp = exp;
+        this.gold = gold;
     }
 }

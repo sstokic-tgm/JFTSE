@@ -3,9 +3,12 @@ package com.jftse.emulator.server.game.core.game.handler.matchplay;
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
+import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
+import com.jftse.emulator.server.game.core.constants.RoomStatus;
+import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
@@ -53,6 +56,8 @@ public class GuardianModeHandler {
     private final GuardianStageService guardianStageService;
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
+    private final LevelService levelService;
+    private final ClothEquipmentService clothEquipmentService;
 
     private GameHandler gameHandler;
 
@@ -227,6 +232,7 @@ public class GuardianModeHandler {
         }
 
         this.handleAllGuardiansDead(connection, game);
+        this.handleAllPlayersDead(connection, game);
     }
 
     private void handleBallLossDamage(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
@@ -283,11 +289,26 @@ public class GuardianModeHandler {
             } else {
                 newHealth = game.damageGuardian(targetPosition, attackerPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
             }
+
+            if (newHealth < 1) {
+                this.increasePotsFromGuardiansDeath(game, targetPosition);
+            }
         }
 
         S2CMatchplayDealDamage damageToPlayerPacket =
                 new S2CMatchplayDealDamage(targetPosition, newHealth, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+    }
+
+    private void increasePotsFromGuardiansDeath(MatchplayGuardianGame game, int guardianPos) {
+        GuardianBattleState guardianBattleState = game.getGuardianBattleStates().stream()
+                .filter(x -> x.getPosition() == guardianPos)
+                .findFirst()
+                .orElse(null);
+        if (guardianBattleState != null) {
+            game.setExpPot(game.getExpPot() + guardianBattleState.getExp());
+            game.setGoldPot(game.getGoldPot() + guardianBattleState.getGold());
+        }
     }
 
     private boolean isUniqueSkill(Skill skill) {
@@ -333,18 +354,24 @@ public class GuardianModeHandler {
         int totalSta = guardian.getBaseSta() + extraSta;
         int totalDex = guardian.getBaseDex() + extraDex;
         int totalWill = guardian.getBaseWill() + extraWill;
-        GuardianBattleState guardianBattleState = new GuardianBattleState(guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill);
+        GuardianBattleState guardianBattleState =
+                new GuardianBattleState(guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
         return guardianBattleState;
+    }
+
+    private void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
+        boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
+        if (allPlayersDead && !game.isGameFinished()) {
+            this.handleFinishGame(connection, game, false);
+        }
     }
 
     private void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
         boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
-        if(!hasBossGuardianStage) return;
-
         boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
         boolean triggerBossBattle = timePlayingInSeconds < 301;
-        if (allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
+        if (hasBossGuardianStage && allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
             int activePlayingPlayersCount = game.getPlayerBattleStates().size();
             List<Byte> guardians = this.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
             byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
@@ -373,14 +400,58 @@ public class GuardianModeHandler {
 
             S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
             this.sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
-        } else if (allGuardiansDead) {
-            boolean neededTooMuchTime = timePlayingInSeconds > 480;
-            if (neededTooMuchTime) {
-                // TODO: LOOSE GAME RESULT WINDOW
-            } else {
-                // TODO: WIN GAME RESULT WINDOW
-            }
+        } else if (allGuardiansDead && !game.isGameFinished()) {
+            this.handleFinishGame(connection, game, true);
         }
+    }
+
+    private void handleFinishGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
+        game.setGameFinished(true);
+        List<PlayerReward> playerRewards = game.getPlayerRewards();
+        connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        gameSession.getRunnableEvents().clear();
+        gameSession.getClients().forEach(client -> {
+            List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+            RoomPlayer rp = roomPlayerList.stream()
+                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .findFirst().orElse(null);
+
+            PlayerReward playerReward = playerRewards.stream()
+                    .filter(x -> x.getPlayerPosition() == rp.getPosition())
+                    .findFirst()
+                    .orElse(null);
+
+            Player player = client.getActivePlayer();
+            byte oldLevel = player.getLevel();
+            if (playerReward != null) {
+                byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
+                player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
+                player.setGold(player.getGold() + playerReward.getBasicRewardGold());
+                player = levelService.setNewLevelStatusPoints(level, player);
+                client.setActivePlayer(player);
+            }
+
+            byte playerLevel = client.getActivePlayer().getLevel();
+            if (playerLevel != oldLevel) {
+                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                rp.setStatusPointsAddedDto(statusPointsAddedDto);
+
+                S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
+                packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+            }
+
+            byte resultTitle = (byte) (wonGame ? 1 : 0);
+            S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
+            client.getConnection().sendTCP(setExperienceGainInfoData);
+
+            S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
+            client.getConnection().sendTCP(setGameResultData);
+
+            S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+            packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+            client.setActiveGameSession(null);
+        });
     }
 
     private void handleMonsLavaMap(Connection connection, Room room, float averagePlayerLevel) {
@@ -553,7 +624,7 @@ public class GuardianModeHandler {
             playerPocket = this.playerPocketService.decrementPocketItemCount(playerPocket);
             if (playerPocket.getItemCount() == 0) {
                 playerPocketService.remove(playerPocket.getId());
-                pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
+                pocketService.decrementPocketBelongings(player.getPocket());
             }
         }
     }

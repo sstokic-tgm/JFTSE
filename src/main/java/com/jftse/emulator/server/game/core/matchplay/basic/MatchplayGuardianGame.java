@@ -2,6 +2,7 @@ package com.jftse.emulator.server.game.core.matchplay.basic;
 
 import com.jftse.emulator.server.database.model.battle.GuardianStage;
 import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
+import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.SkillCrystal;
@@ -28,6 +29,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private byte lastGuardianServeSide;
     private int guardianLevelLimit;
     private Date stageStartTime;
+    private boolean gameFinished;
+    private int expPot;
+    private int goldPot;
 
     public MatchplayGuardianGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -229,6 +233,19 @@ public class MatchplayGuardianGame extends MatchplayGame {
     public void resetStageStartTime() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         setStageStartTime(cal.getTime());
+    }
+
+    public List<PlayerReward> getPlayerRewards() {
+        List<PlayerReward> playerRewards = new ArrayList<>();
+        this.playerBattleStates.forEach(x -> {
+            PlayerReward playerReward = new PlayerReward();
+            playerReward.setPlayerPosition(x.getPosition());
+            playerReward.setBasicRewardExp(this.getExpPot());
+            playerReward.setBasicRewardGold(this.getGoldPot());
+            playerRewards.add(playerReward);
+        });
+
+        return playerRewards;
     }
 
     @Override
