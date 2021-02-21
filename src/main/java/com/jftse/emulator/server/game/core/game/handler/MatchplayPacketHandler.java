@@ -4,6 +4,7 @@ import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.S2CWelcomePacket;
+import com.jftse.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayBackToRoom;
 import com.jftse.emulator.server.game.core.service.PlayerStatisticService;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
@@ -79,12 +80,27 @@ public class MatchplayPacketHandler {
     }
 
     public void handleDisconnected(Connection connection) {
-        Client client = connection.getClient();
-        if (client == null) {
+        if (connection.getClient() == null) {
             connection.close();
             return;
         }
-        this.relayHandler.removeClient(client);
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession != null) {
+            List<Client> clientsInGameSession = gameSession.getClients();
+            for (Client client : clientsInGameSession) {
+                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                if (client.getConnection() != null && client.getConnection().isConnected())
+                    client.getConnection().sendTCP(backToRoomPacket);
+            }
+            List<Client> relayClients = this.relayHandler.getClientsInGameSession(gameSession.getSessionId());
+            for (Client client : relayClients) {
+                if (client.getConnection() != null && client.getConnection().isConnected() && client.getConnection().getId() != connection.getId()) {
+                    this.relayHandler.removeClient(client);
+                    client.getConnection().close();
+                }
+            }
+        }
+        this.relayHandler.removeClient(connection.getClient());
         connection.close();
     }
 
@@ -95,12 +111,14 @@ public class MatchplayPacketHandler {
     }
 
     private void sendPacketToAllClientInSameGameSession(Connection connection, Packet packet) {
-        GameSession gameSession = connection.getClient().getActiveGameSession();
-        if (gameSession != null) {
-            List<Client> clientList = this.relayHandler.getClientsInGameSession(gameSession.getSessionId());
-            for (Client client : clientList) {
-                if (client.getConnection() != null && client.getConnection().isConnected()) {
-                    client.getConnection().sendTCP(packet);
+        if (connection.getClient() != null) {
+            GameSession gameSession = connection.getClient().getActiveGameSession();
+            if (gameSession != null) {
+                List<Client> clientList = this.relayHandler.getClientsInGameSession(gameSession.getSessionId());
+                for (Client client : clientList) {
+                    if (client.getConnection() != null && client.getConnection().isConnected()) {
+                        client.getConnection().sendTCP(packet);
+                    }
                 }
             }
         }

@@ -170,7 +170,15 @@ public class TcpConnection {
                 throw new IOException("Invalid packet size position");
 
             if (!this.isValidChecksum(data)) {
-                throw new IOException("Invalid packet header");
+                log.error("Invalid packet header lets try not to disconnect him...");
+                try {
+
+                    this.send(new Packet((char) 0xFA3));
+                } catch (IOException ioe) {
+                    throw new IOException("Remote disconnected. This was caused by the last received invalid packet header");
+                }
+                log.debug("Should be still connected, don't disconnect him");
+                return null;
             }
 
             int packetSize = BitKit.bytesToShort(data, 6);

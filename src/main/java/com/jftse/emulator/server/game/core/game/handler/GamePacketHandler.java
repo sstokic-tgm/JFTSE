@@ -912,6 +912,10 @@ public class GamePacketHandler {
     }
 
     public void handleRoomCreateRequestPacket(Connection connection, Packet packet) {
+        // prevent multiple room creations, this might have to be adjusted into a "room join answer"
+        if (connection.getClient() != null && connection.getClient().getActiveRoom() != null)
+            return;
+
         C2SRoomCreateRequestPacket roomCreateRequestPacket = new C2SRoomCreateRequestPacket(packet);
 
         Room room = new Room();
@@ -937,6 +941,10 @@ public class GamePacketHandler {
     }
 
     public void handleRoomCreateQuickRequestPacket(Connection connection, Packet packet) {
+        // prevent multiple room creations, this might have to be adjusted into a "room join answer"
+        if (connection.getClient() != null && connection.getClient().getActiveRoom() != null)
+            return;
+
         C2SRoomCreateQuickRequestPacket roomQuickCreateRequestPacket = new C2SRoomCreateQuickRequestPacket(packet);
         Player player = connection.getClient().getActivePlayer();
         byte playerSize = roomQuickCreateRequestPacket.getPlayers();
@@ -1052,6 +1060,34 @@ public class GamePacketHandler {
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
                 .orElse(null);
+
+        // prevent abusive room joins
+        if (room != null && connection.getClient() != null && connection.getClient().getActiveRoom() != null) {
+            Room clientRoom = connection.getClient().getActiveRoom();
+
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) 0, (byte) 0, (byte) 0, (byte) 0);
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(clientRoom);
+
+            connection.sendTCP(roomJoinAnswerPacket);
+            connection.sendTCP(roomInformationPacket);
+
+            List<Short> positions = clientRoom.getPositions();
+            for (int i = 0; i < positions.size(); i++) {
+                short positionState = clientRoom.getPositions().get(i);
+                if (positionState == RoomPositionState.Locked) {
+                    S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
+                    connection.sendTCP(roomSlotCloseAnswerPacket);
+                }
+            }
+
+            List<RoomPlayer> roomPlayerList = clientRoom.getRoomPlayerList();
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+            this.gameHandler.getClientsInRoom(clientRoom.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+            this.updateRoomForAllPlayersInMultiplayer(connection, clientRoom);
+            this.refreshLobbyPlayerListForAllClients();
+
+            return;
+        }
 
         if (room == null) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
@@ -1617,9 +1653,9 @@ public class GamePacketHandler {
                 .get()
                 .getPosition();
 
-        Packet answer = new Packet((char) 0x1774);
-        answer.write(position);
-        connection.sendTCP(answer);
+        Packet backInRoomAckPacket = new Packet(PacketID.S2CMatchplayClientBackInRoomAck);
+        backInRoomAckPacket.write(position);
+        connection.sendTCP(backInRoomAckPacket);
 
         Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
         unsetHostPacket.write((byte) 0);
