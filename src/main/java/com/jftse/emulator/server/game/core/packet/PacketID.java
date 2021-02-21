@@ -83,6 +83,7 @@ public final class PacketID {
     public final static char S2CMatchplayTeamWinsPoint = 0x1840;
     public final static char S2CMatchplayTeamWinsSet = 0x1842 ;
     public final static char S2CMatchplayEndBasicGame = 0x26FC; // Not really sure if name really corresponds to packet.
+    public final static char S2CMatchplayDisplayItemRewards = 0x1DB6;
     public final static char S2CMatchPlaySetExperienceGainInfoData = 0x1846;
     public final static char S2CMatchplaySetGameResultData = 0x1848;
     public final static char S2CMatchplayBackToRoom = 0x1780;
