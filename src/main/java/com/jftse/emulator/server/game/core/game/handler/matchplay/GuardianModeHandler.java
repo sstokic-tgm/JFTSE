@@ -52,6 +52,7 @@ public class GuardianModeHandler {
     private final BossGuardianService bossGuardianService;
     private final GuardianStageService guardianStageService;
     private final PlayerPocketService playerPocketService;
+    private final PocketService pocketService;
 
     private GameHandler gameHandler;
 
@@ -549,7 +550,11 @@ public class GuardianModeHandler {
 
         if (itemId > -1) {
             PlayerPocket playerPocket = this.playerPocketService.findById((long) itemId);
-            this.playerPocketService.decrementPocketItemCount(playerPocket);
+            playerPocket = this.playerPocketService.decrementPocketItemCount(playerPocket);
+            if (playerPocket.getItemCount() == 0) {
+                playerPocketService.remove(playerPocket.getId());
+                pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
+            }
         }
     }
 
