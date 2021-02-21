@@ -84,6 +84,7 @@ public final class PacketID {
     public final static char S2CMatchplaySetGameResultData = 0x1848;
     public final static char S2CMatchplayBackToRoom = 0x1780;
     public final static char C2SMatchplayClientBackInRoom = 0x1773;
+    public final static char S2CMatchplayClientBackInRoomAck = 0x1774;
     public final static char S2CMatchplayDamageToPlayer = 0x184E;
     public final static char S2CMatchplaySpawnBossBattle = 0x1D55;
     public final static char S2CMatchplayGivePlayerSkills = 0xC98;
