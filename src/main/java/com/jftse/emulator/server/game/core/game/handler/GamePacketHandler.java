@@ -572,6 +572,7 @@ public class GamePacketHandler {
                             else if (option == 2)
                                 playerPocket.setItemCount(product.getUse2());
 
+                            // no idea how itemCount can be null here, but ok
                             playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
 
                             if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
