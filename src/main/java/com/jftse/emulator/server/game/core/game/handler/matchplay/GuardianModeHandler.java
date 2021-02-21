@@ -8,6 +8,7 @@ import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
+import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
@@ -58,6 +59,7 @@ public class GuardianModeHandler {
     private final PocketService pocketService;
     private final LevelService levelService;
     private final ClothEquipmentService clothEquipmentService;
+    private final GameSessionManager gameSessionManager;
 
     private GameHandler gameHandler;
 
@@ -361,7 +363,7 @@ public class GuardianModeHandler {
 
     private void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
         boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
-        if (allPlayersDead && !game.isGameFinished()) {
+        if (allPlayersDead && !game.isFinished()) {
             this.handleFinishGame(connection, game, false);
         }
     }
@@ -400,13 +402,13 @@ public class GuardianModeHandler {
 
             S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
             this.sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
-        } else if (allGuardiansDead && !game.isGameFinished()) {
+        } else if (allGuardiansDead && !game.isFinished()) {
             this.handleFinishGame(connection, game, true);
         }
     }
 
     private void handleFinishGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
-        game.setGameFinished(true);
+        game.setFinished(true);
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
@@ -452,6 +454,11 @@ public class GuardianModeHandler {
             packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
             client.setActiveGameSession(null);
         });
+
+        gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
+        if (game.isFinished() && gameSession.getClients().isEmpty()) {
+            this.gameSessionManager.removeGameSession(gameSession);
+        }
     }
 
     private void handleMonsLavaMap(Connection connection, Room room, float averagePlayerLevel) {

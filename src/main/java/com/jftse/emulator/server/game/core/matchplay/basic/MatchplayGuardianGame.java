@@ -29,7 +29,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private byte lastGuardianServeSide;
     private int guardianLevelLimit;
     private Date stageStartTime;
-    private boolean gameFinished;
     private int expPot;
     private int goldPot;
 
@@ -64,7 +63,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         if (isNormalDamageSkill) {
             int damageToDeny = BattleUtils.calculateDef(guardianBattleState.getSta(), totalDamageToDeal, hasReceiverDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
-                totalDamageToDeal = 0;
+                totalDamageToDeal = -1;
             } else {
                 totalDamageToDeal += damageToDeny;
             }
@@ -95,7 +94,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         if (isNormalDamageSkill) {
             int damageToDeny = BattleUtils.calculateDef(playerBattleState.getSta(), totalDamageToDeal, hasReceiverDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
-                totalDamageToDeal = 0;
+                totalDamageToDeal = -1;
             } else {
                 totalDamageToDeal += damageToDeny;
             }
