@@ -60,30 +60,6 @@ public class GuardianModeHandler {
     }
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
-        boolean guardianMadePoint = matchplayPointPacket.getPointsTeam() == 1;
-        if (guardianMadePoint) {
-            List<Packet> dmgPackets = new ArrayList<>();
-            gameSession.getClients().forEach(c -> {
-                RoomPlayer roomPlayer = c.getActiveRoom().getRoomPlayerList().stream()
-                        .filter(x -> x.getPlayer().getId() == c.getActivePlayer().getId())
-                        .findFirst()
-                        .orElse(null);
-                PlayerBattleState playerBattleState = game.getPlayerBattleStates().get(roomPlayer.getPosition());
-                short lossBallDamage = (short) -(playerBattleState.getMaxHealth() * 0.1);
-                short newPlayerHealth = game.damagePlayer(roomPlayer.getPosition(), lossBallDamage);
-                S2CMatchplayDealDamage damageToPlayerPacket = new S2CMatchplayDealDamage(roomPlayer.getPosition(), newPlayerHealth, (byte) 0, 0, 0);
-                dmgPackets.add(damageToPlayerPacket);
-            });
-            this.sendPacketsToAllClientsInSameGameSession(dmgPackets, connection);
-        } else {
-            game.getGuardianBattleStates().forEach(x -> {
-                short lossBallDamage = (short) -(x.getMaxHealth() * 0.02);
-                short newGuardianHealth = game.damageGuardian(x.getPosition(), lossBallDamage);
-                S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(x.getPosition(), newGuardianHealth, (byte) 0, 0, 0);
-                this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
-            });
-        }
-
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
         if (!lastGuardianServeWasOnGuardianSide) {
             game.setLastGuardianServeSide(GameFieldSide.Guardian);
@@ -98,8 +74,6 @@ public class GuardianModeHandler {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
             });
         }
-
-        this.handleAllGuardiansDead(connection, game);
     }
 
     public void handleStartGuardianMode(Connection connection, Room room) {
@@ -161,15 +135,10 @@ public class GuardianModeHandler {
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
         game.setGuardianLevelLimit(guardianLevelLimit);
 
-        List<PlayerBattleState> playerBattleStates = roomPlayers.stream().filter(x -> x.getPosition() < 4).map(rp -> {
-            Player player = rp.getPlayer();
-            short baseHp = (short) BattleUtils.calculatePlayerHp(player);
-            PlayerBattleState playerBattleState = new PlayerBattleState();
-            playerBattleState.setPosition(rp.getPosition());
-            playerBattleState.setCurrentHealth(baseHp);
-            playerBattleState.setMaxHealth(baseHp);
-            return playerBattleState;
-        }).collect(Collectors.toList());
+        List<PlayerBattleState> playerBattleStates = roomPlayers.stream()
+                .filter(x -> x.getPosition() < 4)
+                .map(rp -> this.createPlayerBattleState(rp))
+                .collect(Collectors.toList());
         game.setPlayerBattleStates(playerBattleStates);
 
         int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
@@ -238,29 +207,45 @@ public class GuardianModeHandler {
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         byte skillId = skillHitsTarget.getSkillId();
-
-        // Lets ignore ball damage here for now
-        if (skillId == 0 || skillHitsTarget.getDamageType() == 1) {
-            return;
-        }
-
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
 
-        if (this.isUniqueSkill(skill)) {
+        if (skill != null && this.isUniqueSkill(skill)) {
             this.handleUniqueSkill(connection, game, skill, skillHitsTarget);
             return;
         }
 
-        boolean isAoeSkill = skill.getTargeting() == 14;
-        if (isAoeSkill) {
+        boolean isAoeSkill = skill != null && skill.getTargeting() == 14;
+        if (skillId == 0) {
+            this.handleBallLossDamage(connection, skillHitsTarget);
+        } else if (isAoeSkill) {
             this.handleAoeSkillDamage(connection, skillHitsTarget, game, skill);
         } else {
             this.handleSkillDamage(connection, skillHitsTarget.getTargetPosition(), skillHitsTarget, game, skill);
         }
 
         this.handleAllGuardiansDead(connection, game);
+    }
+
+    private void handleBallLossDamage(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
+        short receiverPosition = skillHitsTarget.getTargetPosition();
+        short attackerPosition = skillHitsTarget.getAttackerPosition();
+        boolean attackerHasWillBuff = skillHitsTarget.getAttackerBuffId() == 3;
+
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+
+        boolean guardianMadePoint = skillHitsTarget.getTargetPosition() < 4;
+        short newHealth;
+        if (guardianMadePoint) {
+            newHealth = game.damagePlayerOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
+        } else {
+            newHealth = game.damageGuardianOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
+        }
+
+        S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (byte) 0, 0, 0);
+        this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
     }
 
     private void handleAoeSkillDamage(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayGuardianGame game, Skill skill) {
@@ -272,20 +257,31 @@ public class GuardianModeHandler {
     }
 
     private void handleSkillDamage(Connection connection, short targetPosition, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayGuardianGame game, Skill skill) {
+        boolean denyDamage = skillHitsTarget.getDamageType() == 1;
+        short attackerPosition = skillHitsTarget.getAttackerPosition();
+        boolean attackerHasStrBuff = skillHitsTarget.getAttackerPosition() == 0;
+        boolean receiverHasDefBuff = skillHitsTarget.getReceiverBuffId() == 1;
+
         short skillDamage = skill.getDamage().shortValue();
         short newHealth;
         if (targetPosition < 4) {
             if (skillDamage > 1) {
                 newHealth = game.healPlayer(targetPosition, skillDamage);
+            } else if (denyDamage) {
+                newHealth = game.getPlayerHealth(targetPosition);
             } else {
-                newHealth = game.damagePlayer(targetPosition, skillDamage);
+                newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
             }
 
             if (newHealth < 1) {
                 this.handleSpawnReviveCrystalBasedOnProbability(connection, game);
             }
         } else {
-            newHealth = game.damageGuardian(targetPosition, skillDamage);
+            if (denyDamage) {
+                newHealth = game.getGuardianHealth(targetPosition);
+            } else {
+                newHealth = game.damageGuardian(targetPosition, attackerPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+            }
         }
 
         S2CMatchplayDealDamage damageToPlayerPacket =
@@ -308,6 +304,21 @@ public class GuardianModeHandler {
                 game.resetStageStartTime();
                 break;
         }
+    }
+
+    private PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
+        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer());
+        short baseStr = roomPlayer.getPlayer().getStrength();
+        short baseSta = roomPlayer.getPlayer().getStamina();
+        short baseDex = roomPlayer.getPlayer().getDexterity();
+        short baseWill = roomPlayer.getPlayer().getWillpower();
+        short totalHp = (short) (baseHp + roomPlayer.getStatusPointsAddedDto().getAddHp());
+        short totalStr = (short) (baseStr + roomPlayer.getStatusPointsAddedDto().getStrength());
+        short totalSta = (short) (baseSta + roomPlayer.getStatusPointsAddedDto().getStamina());
+        short totalDex = (short) (baseDex + roomPlayer.getStatusPointsAddedDto().getDexterity());
+        short totalWill = (short) (baseWill + roomPlayer.getStatusPointsAddedDto().getWillpower());
+        PlayerBattleState playerBattleState = new PlayerBattleState(roomPlayer.getPosition(), totalHp, totalStr, totalSta, totalDex, totalWill);
+        return playerBattleState;
     }
 
     private GuardianBattleState createGuardianBattleState(GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
@@ -586,12 +597,5 @@ public class GuardianModeHandler {
     private void sendPacketToAllClientsInSameGameSession(Packet packet, Connection connection) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         gameSession.getClients().forEach(c -> c.getConnection().sendTCP(packet));
-    }
-
-    private void sendPacketsToAllClientsInSameGameSession(List<Packet> packets, Connection connection) {
-        GameSession gameSession = connection.getClient().getActiveGameSession();
-        gameSession.getClients().forEach(c -> {
-            packets.forEach(p -> c.getConnection().sendTCP(p));
-        });
     }
 }

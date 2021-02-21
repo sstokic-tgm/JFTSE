@@ -13,8 +13,19 @@ public class PlayerBattleState {
     private short maxHealth;
     private short currentHealth;
     private List<Short> skillsStack;
+    private int str;
+    private int sta;
+    private int dex;
+    private int will;
 
-    public PlayerBattleState() {
+    public PlayerBattleState(short position, short hp, int str, int sta, int dex, int will) {
+        this.position = position;
+        this.maxHealth = hp;
+        this.currentHealth = hp;
+        this.str = str;
+        this.sta = sta;
+        this.dex = dex;
+        this.will = will;
         this.skillsStack = Arrays.asList((short) -1, (short) -1);
     }
 }

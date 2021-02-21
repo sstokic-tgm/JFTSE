@@ -5,6 +5,7 @@ import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.SkillCrystal;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -40,19 +41,113 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 new Point(-20, -75));
     }
 
-    public short damageGuardian(short guardianPos, short damage) {
+    public short damageGuardian(short guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) {
+        int totalDamageToDeal = damage;
+        PlayerBattleState playerBattleState = this.playerBattleStates.stream()
+                .filter(x -> x.getPosition() == playerPos)
+                .findFirst()
+                .orElse(null);
+        boolean isNormalDamageSkill = Math.abs(damage) != 1;
+        if (playerBattleState != null && isNormalDamageSkill) {
+            totalDamageToDeal = BattleUtils.calculateDmg(playerBattleState.getStr(), damage, hasAttackerDmgBuff);
+        }
+
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
                 .filter(x -> x.getPosition() == guardianPos)
                 .findFirst()
                 .orElse(null);
-        short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + damage);
+
+        if (isNormalDamageSkill) {
+            int damageToDeny = BattleUtils.calculateDef(guardianBattleState.getSta(), totalDamageToDeal, hasReceiverDefBuff);
+            if (damageToDeny > Math.abs(totalDamageToDeal)) {
+                totalDamageToDeal = 0;
+            } else {
+                totalDamageToDeal += damageToDeny;
+            }
+        }
+
+        short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + totalDamageToDeal);
         guardianBattleState.setCurrentHealth(newGuardianHealth);
         return newGuardianHealth;
     }
 
-    public short damagePlayer(int playerPos, short damage) {
-        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
-        short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + damage);
+    public short damagePlayer(int guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) {
+        int totalDamageToDeal = damage;
+        GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
+                .filter(x -> x.getPosition() == guardianPos)
+                .findFirst()
+                .orElse(null);
+
+        boolean isNormalDamageSkill = Math.abs(damage) != 1;
+        if (guardianBattleState != null && isNormalDamageSkill) {
+            totalDamageToDeal = BattleUtils.calculateDmg(guardianBattleState.getStr(), damage, hasAttackerDmgBuff);
+        }
+
+        PlayerBattleState playerBattleState = this.playerBattleStates.stream()
+                .filter(x -> x.getPosition() == playerPos)
+                .findFirst()
+                .orElse(null);
+
+        if (isNormalDamageSkill) {
+            int damageToDeny = BattleUtils.calculateDef(playerBattleState.getSta(), totalDamageToDeal, hasReceiverDefBuff);
+            if (damageToDeny > Math.abs(totalDamageToDeal)) {
+                totalDamageToDeal = 0;
+            } else {
+                totalDamageToDeal += damageToDeny;
+            }
+        }
+
+        short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + totalDamageToDeal);
+        playerBattleState.setCurrentHealth(newPlayerHealth);
+        return newPlayerHealth;
+    }
+
+    public short damageGuardianOnBallLoss(int guardianPos, int attackerPos, boolean hasAttackerWillBuff) {
+        GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
+                .filter(x -> x.getPosition() == guardianPos)
+                .findFirst()
+                .orElse(null);
+
+        int lossBallDamage = 0;
+        boolean servingGuardianScored = attackerPos == 4;
+        if (servingGuardianScored) {
+            lossBallDamage = (short) -(guardianBattleState.getMaxHealth() * 0.02);
+        } else {
+            PlayerBattleState playerBattleState = this.playerBattleStates.stream()
+                    .filter(x -> x.getPosition() == attackerPos)
+                    .findFirst()
+                    .orElse(null);
+            if (playerBattleState != null) {
+                lossBallDamage = -BattleUtils.calculateBallDamageByWill(playerBattleState.getWill(), hasAttackerWillBuff);
+            }
+        }
+
+        short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + lossBallDamage);
+        guardianBattleState.setCurrentHealth(newGuardianHealth);
+        return newGuardianHealth;
+    }
+
+    public short damagePlayerOnBallLoss(int playerPos, int attackerPos, boolean hasAttackerWillBuff) {
+        PlayerBattleState playerBattleState = this.playerBattleStates.stream()
+                .filter(x -> x.getPosition() == playerPos)
+                .findFirst()
+                .orElse(null);
+
+        int lossBallDamage = 0;
+        boolean servingGuardianScored = attackerPos == 4;
+        if (servingGuardianScored) {
+            lossBallDamage = (short) -(playerBattleState.getMaxHealth() * 0.1);
+        } else {
+            GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
+                    .filter(x -> x.getPosition() == attackerPos)
+                    .findFirst()
+                    .orElse(null);
+            if (guardianBattleState != null) {
+                lossBallDamage = -BattleUtils.calculateBallDamageByWill(guardianBattleState.getWill(), hasAttackerWillBuff);
+            }
+        }
+
+        short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + lossBallDamage);
         playerBattleState.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
     }
@@ -80,6 +175,22 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         return playerBattleState;
+    }
+
+    public short getPlayerHealth(int playerPos) {
+        PlayerBattleState playerBattleState = this.playerBattleStates.stream()
+                .filter(x -> x.getPosition() == playerPos)
+                .findFirst()
+                .orElse(null);
+        return playerBattleState.getCurrentHealth();
+    }
+
+    public short getGuardianHealth(int guardianPos) {
+        GuardianBattleState guardianBattleState = this.getGuardianBattleStates().stream()
+                .filter(x -> x.getPosition() == guardianPos)
+                .findFirst()
+                .orElse(null);
+        return (short) guardianBattleState.getCurrentHealth();
     }
 
     public List<Short> assignSkillToPlayer(int playerPos, short skillIndex) {

@@ -9,4 +9,32 @@ public class BattleUtils {
     public static int calculatePlayerHp(Player player) {
         return 200 + (3 * (player.getLevel() - 1));
     }
+
+    public static int calculateDmg(int str, int baseDmg, boolean hasStrBuff) {
+        int additionalDmg = str / 3;
+        int totalDmg = baseDmg - additionalDmg;
+        if (hasStrBuff) {
+            totalDmg -= Math.abs(totalDmg) * 0.2;
+        }
+
+        return totalDmg;
+    }
+
+    public static int calculateDef(int sta, int dmg, boolean hasDefBuff) {
+        int dmgToDeny = sta / 3;
+        if (hasDefBuff) {
+            dmgToDeny += dmg * 0.2;
+        }
+
+        return dmgToDeny;
+    }
+
+    public static int calculateBallDamageByWill(int will, boolean hasWillBuff) {
+        int additionalBallDamage = will / 3;
+        if (hasWillBuff) {
+            additionalBallDamage += additionalBallDamage * 0.2;
+        }
+
+        return additionalBallDamage;
+    }
 }
