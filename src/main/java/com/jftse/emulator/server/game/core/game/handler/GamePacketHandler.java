@@ -121,6 +121,12 @@ public class GamePacketHandler {
     }
 
     public void handleCleanUp() {
+        // reset status
+        this.getGameHandler().getClientList().forEach(c -> {
+            Account account = c.getAccount();
+            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+            authenticationService.updateAccount(account);
+        });
         this.getGameHandler().getRoomList().clear();
         this.getGameHandler().getClientList().clear();
         gameSessionManager.getGameSessionList().clear();
@@ -585,7 +591,8 @@ public class GamePacketHandler {
                             else if (option == 2)
                                 playerPocket.setItemCount(product.getUse2());
 
-                            playerPocket.setItemCount(playerPocket.getItemCount() + existingItemCount);
+                            // no idea how itemCount can be null here, but ok
+                            playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
 
                             if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
                                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -1646,6 +1653,11 @@ public class GamePacketHandler {
 
     public void handleClientBackInRoomPacket(Connection connection, Packet packet) {
         Room currentClientRoom = connection.getClient().getActiveRoom();
+        if (currentClientRoom == null) { // shouldn't happen
+            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+            connection.sendTCP(disconnectAnswerPacket);
+            return;
+        }
 
         short position = currentClientRoom.getRoomPlayerList().stream()
                 .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))

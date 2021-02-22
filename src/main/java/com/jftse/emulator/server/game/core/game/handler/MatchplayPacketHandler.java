@@ -59,19 +59,24 @@ public class MatchplayPacketHandler {
         if (gameSession != null) {
             if (playerId != -1) {
                 Client playerClient = gameSession.getClientByPlayerId(playerId);
-                Client client = new Client();
-                client.setActiveRoom(playerClient.getActiveRoom());
-                client.setActivePlayer(playerClient.getActivePlayer());
-                client.setActiveGameSession(gameSession);
-                client.setConnection(connection);
+                if (playerClient != null) {
+                    Client client = new Client();
+                    client.setActiveRoom(playerClient.getActiveRoom());
+                    client.setActivePlayer(playerClient.getActivePlayer());
+                    client.setActiveGameSession(gameSession);
+                    client.setConnection(connection);
 
-                connection.setClient(client);
-                gameSession.getClientsInRelay().add(client);
-                this.relayHandler.addClient(client);
+                    connection.setClient(client);
+                    gameSession.getClientsInRelay().add(client);
+                    this.relayHandler.addClient(client);
 
-                Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
-                answer.write((byte) 0);
-                connection.sendTCP(answer);
+                    Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
+                    answer.write((byte) 0);
+                    connection.sendTCP(answer);
+                }
+                else {
+                    connection.close();
+                }
             }
         }
         else {
