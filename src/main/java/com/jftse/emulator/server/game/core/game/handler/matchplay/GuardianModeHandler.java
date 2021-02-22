@@ -62,6 +62,7 @@ public class GuardianModeHandler {
     private final LevelService levelService;
     private final ClothEquipmentService clothEquipmentService;
     private final GameSessionManager gameSessionManager;
+    private final WillDamageService willDamageService;
 
     private GameHandler gameHandler;
 
@@ -119,6 +120,7 @@ public class GuardianModeHandler {
     public void handlePrepareGuardianMode(Connection connection, Room room) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+        game.setWillDamages(this.willDamageService.getWillDamages());
 
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
 
@@ -287,7 +289,7 @@ public class GuardianModeHandler {
             if (skillDamage > 1) {
                 newHealth = game.healPlayer(targetPosition, skillDamage);
             } else if (denyDamage) {
-                newHealth = game.getPlayerHealth(targetPosition);
+                newHealth = game.damagePlayer(attackerPosition, targetPosition, (short) -1, false, false);
             } else {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
             }

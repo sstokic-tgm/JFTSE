@@ -23,6 +23,7 @@ public class GuardianBattleState {
         this.str = str;
         this.sta = sta;
         this.dex = dex;
+        this.will = will;
         this.exp = exp;
         this.gold = gold;
     }

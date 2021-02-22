@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.utils;
 
+import com.jftse.emulator.server.database.model.battle.WillDamage;
 import com.jftse.emulator.server.database.model.player.Player;
 
 public class BattleUtils {
@@ -29,12 +30,12 @@ public class BattleUtils {
         return dmgToDeny;
     }
 
-    public static int calculateBallDamageByWill(int will, boolean hasWillBuff) {
-        int additionalBallDamage = will / 3;
+    public static int calculateBallDamageByWill(WillDamage willDamage, boolean hasWillBuff) {
+        int ballDamage = willDamage.getDamage();
         if (hasWillBuff) {
-            additionalBallDamage += additionalBallDamage * 0.2;
+            ballDamage += ballDamage * 0.2;
         }
 
-        return additionalBallDamage;
+        return ballDamage;
     }
 }

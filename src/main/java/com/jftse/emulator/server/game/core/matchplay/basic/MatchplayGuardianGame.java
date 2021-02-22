@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.game.core.matchplay.basic;
 
 import com.jftse.emulator.server.database.model.battle.GuardianStage;
+import com.jftse.emulator.server.database.model.battle.WillDamage;
 import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
@@ -22,6 +23,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private List<PlayerBattleState> playerBattleStates;
     private List<GuardianBattleState> guardianBattleStates;
     private List<SkillCrystal> skillCrystals;
+    private List<WillDamage> willDamages;
     private short lastCrystalId = -1;
     private GuardianStage guardianStage;
     private GuardianStage bossGuardianStage;
@@ -42,6 +44,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -75),
                 new Point(-20, -75));
+        this.willDamages = new ArrayList<>();
     }
 
     public short damageGuardian(short guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) {
@@ -121,7 +124,11 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     .findFirst()
                     .orElse(null);
             if (playerBattleState != null) {
-                lossBallDamage = -BattleUtils.calculateBallDamageByWill(playerBattleState.getWill(), hasAttackerWillBuff);
+                WillDamage willDamage = this.getWillDamages().stream()
+                        .filter(x -> x.getWill() == playerBattleState.getWill())
+                        .findFirst()
+                        .orElse(this.getWillDamages().get(0));
+                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
             }
         }
 
@@ -146,7 +153,11 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     .findFirst()
                     .orElse(null);
             if (guardianBattleState != null) {
-                lossBallDamage = -BattleUtils.calculateBallDamageByWill(guardianBattleState.getWill(), hasAttackerWillBuff);
+                WillDamage willDamage = this.getWillDamages().stream()
+                        .filter(x -> x.getWill() == guardianBattleState.getWill())
+                        .findFirst()
+                        .orElse(this.getWillDamages().get(0));
+                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
             }
         }
 
