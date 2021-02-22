@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SMatchplayUsesSkill extends Packet {
-    private byte playerPosition;
+    private byte attackerPosition;
     private byte targetPosition;
     private byte skillIndex;
     private boolean isQuickSlot;
@@ -16,7 +16,7 @@ public class C2SMatchplayUsesSkill extends Packet {
     public C2SMatchplayUsesSkill(Packet packet) {
         super(packet);
 
-        this.playerPosition = packet.readByte();
+        this.attackerPosition = packet.readByte();
         this.targetPosition = packet.readByte();
         this.isQuickSlot = packet.readByte() == 1;
         this.quickSlotIndex = packet.readByte();

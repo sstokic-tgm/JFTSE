@@ -36,8 +36,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -101,21 +103,16 @@ public class GuardianModeHandler {
     private void triggerGuardianAttackLoop(Connection connection) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession == null) return;
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
-        List<Integer> guardianSkills = Arrays.asList(2, 3, 5, 6, 7, 10, 11, 12);
-        byte randIndex = (byte) (Math.random() * guardianSkills.size());
-        byte skillId = guardianSkills.get(randIndex).byteValue();
-        Point2D point = new Point2D.Float();
-
-        // Crab, Small inferno, Big inferno
-        if (skillId == 11 || skillId == 27 || skillId == 35) point = this.getRandomPoint();
-
-        Point2D finalPoint = point;
         RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
-            S2CMatchplayUseSkill packet = new S2CMatchplayUseSkill((byte) 10, (byte) 0, skillId, finalPoint);
-            this.sendPacketToAllClientsInSameGameSession(packet, connection);
+            game.getGuardianBattleStates().forEach(x -> {
+                S2CMatchplayTriggerRandomGuardianSkill packet = new S2CMatchplayTriggerRandomGuardianSkill((byte) x.getPosition());
+                this.sendPacketToAllClientsInSameGameSession(packet, connection);
+            });
+
             this.triggerGuardianAttackLoop(connection);
-        }, TimeUnit.SECONDS.toMillis(7));
+        }, TimeUnit.SECONDS.toMillis(5));
         gameSession.getRunnableEvents().add(runnableEvent);
     }
 
@@ -197,20 +194,33 @@ public class GuardianModeHandler {
         }
     }
 
-    public void handlePlayerUseSkill(Connection connection, C2SMatchplayUsesSkill playerUseSkill) {
-        byte playerPos = playerUseSkill.getPlayerPosition();
-        if (playerPos > 3) return;
-
-        if (playerUseSkill.isQuickSlot()) {
-            this.handleQuickSlotItemUse(connection, playerUseSkill);
-        }
-
+    public void handleUseOfSkill(Connection connection, C2SMatchplayUsesSkill anyoneUsesSkill) {
+        byte position = anyoneUsesSkill.getAttackerPosition();
+        boolean attackerIsGuardian = position > 9;
         GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession == null) return;
+
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
-        List<Short> playerSkills = game.removeSkillFromTopOfStackFromPlayer(playerUseSkill.getPlayerPosition());
-        S2CMatchplayGivePlayerSkills givePlayerSkillsPacket =
-                new S2CMatchplayGivePlayerSkills(playerUseSkill.getPlayerPosition(), playerSkills.get(0), playerSkills.get(1));
-        this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
+        if (game == null) return;
+
+        Room room = connection.getClient().getActiveRoom();
+        List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
+
+        if (attackerIsGuardian) {
+            Skill skill = skillService.findSkillById((long)anyoneUsesSkill.getSkillIndex() + 1);
+            if (skill != null) {
+                this.handleSpecialSkillsUseOfGuardians(connection, anyoneUsesSkill, position, game, roomPlayers, skill);
+            }
+        } else {
+            if (anyoneUsesSkill.isQuickSlot()) {
+                this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
+            }
+
+            List<Short> playerSkills = game.removeSkillFromTopOfStackFromPlayer(anyoneUsesSkill.getAttackerPosition());
+            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket =
+                    new S2CMatchplayGivePlayerSkills(anyoneUsesSkill.getAttackerPosition(), playerSkills.get(0), playerSkills.get(1));
+            this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
+        }
     }
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
@@ -316,6 +326,23 @@ public class GuardianModeHandler {
     private boolean isUniqueSkill(Skill skill) {
         int skillId = skill.getId().intValue();
         return skillId == 5 || skillId == 38;
+    }
+
+    private void handleSpecialSkillsUseOfGuardians(Connection connection, C2SMatchplayUsesSkill playerUseSkill, byte guardianPos, MatchplayGuardianGame game, List<RoomPlayer> roomPlayers, Skill skill) {
+        // There could be more special skills which need to be handled here
+        if (skill.getDamage() > 1) {
+            short newHealth = game.healGuardian(guardianPos, skill.getDamage().shortValue());
+            S2CMatchplayDealDamage damagePacket =
+                    new S2CMatchplayDealDamage(guardianPos, newHealth, playerUseSkill.getSkillIndex(), 0, 0);
+            this.sendPacketToAllClientsInSameGameSession(damagePacket, connection);
+        } else if (skill.getId() == 9) { // Miniam needs to be treated individually
+            roomPlayers.forEach(rp -> {
+                short newHealth = game.damagePlayer(guardianPos, rp.getPosition(), skill.getDamage().shortValue(), false, false);
+                S2CMatchplayDealDamage damagePacket =
+                        new S2CMatchplayDealDamage(rp.getPosition(), newHealth, skill.getId().byteValue(), 0, 0);
+                this.sendPacketToAllClientsInSameGameSession(damagePacket, connection);
+            });
+        }
     }
 
     private void handleUniqueSkill(Connection connection, MatchplayGuardianGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {

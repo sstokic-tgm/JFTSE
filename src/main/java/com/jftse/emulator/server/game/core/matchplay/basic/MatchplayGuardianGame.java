@@ -167,6 +167,21 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
+    public short healGuardian(int guardianPos, short percentage) {
+        GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
+                .filter(x -> x.getPosition() == guardianPos)
+                .findFirst()
+                .orElse(null);
+        short healthToHeal = (short) (guardianBattleState.getMaxHealth() * (percentage / 100f));
+        short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + healthToHeal);
+        if (newGuardianHealth > guardianBattleState.getMaxHealth()) {
+            newGuardianHealth = (short) guardianBattleState.getMaxHealth();
+        }
+
+        guardianBattleState.setCurrentHealth(newGuardianHealth);
+        return newGuardianHealth;
+    }
+
     public PlayerBattleState reviveAnyPlayer(short revivePercentage) {
         PlayerBattleState playerBattleState = getPlayerBattleStates().stream()
                 .filter(x -> x.getCurrentHealth() < 1)
