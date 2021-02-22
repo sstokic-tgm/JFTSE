@@ -108,6 +108,12 @@ public class GamePacketHandler {
     }
 
     public void handleCleanUp() {
+        // reset status
+        this.getGameHandler().getClientList().forEach(c -> {
+            Account account = c.getAccount();
+            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+            authenticationService.updateAccount(account);
+        });
         this.getGameHandler().getRoomList().clear();
         this.getGameHandler().getClientList().clear();
         gameSessionManager.getGameSessionList().clear();
