@@ -1818,6 +1818,11 @@ public class GamePacketHandler {
 
     public void handleClientBackInRoomPacket(Connection connection, Packet packet) {
         Room currentClientRoom = connection.getClient().getActiveRoom();
+        if (currentClientRoom == null) { // shouldn't happen
+            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+            connection.sendTCP(disconnectAnswerPacket);
+            return;
+        }
 
         short position = currentClientRoom.getRoomPlayerList().stream()
                 .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
