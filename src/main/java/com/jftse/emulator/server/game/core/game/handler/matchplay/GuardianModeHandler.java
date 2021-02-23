@@ -94,7 +94,7 @@ public class GuardianModeHandler {
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
         S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
         clients.forEach(c -> {
-            packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, 8), PacketEventHandler.ServerClient.SERVER);
+            c.getConnection().sendTCP(triggerGuardianServePacket);
         });
 
         this.placeCrystalRandomly(connection, game);
@@ -199,6 +199,7 @@ public class GuardianModeHandler {
     public void handleUseOfSkill(Connection connection, C2SMatchplayUsesSkill anyoneUsesSkill) {
         byte position = anyoneUsesSkill.getAttackerPosition();
         boolean attackerIsGuardian = position > 9;
+        boolean attackerIsPlayer = position < 4;
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession == null) return;
 
@@ -213,7 +214,7 @@ public class GuardianModeHandler {
             if (skill != null) {
                 this.handleSpecialSkillsUseOfGuardians(connection, anyoneUsesSkill, position, game, roomPlayers, skill);
             }
-        } else {
+        } else if (attackerIsPlayer) {
             if (anyoneUsesSkill.isQuickSlot()) {
                 this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
             }
@@ -236,8 +237,9 @@ public class GuardianModeHandler {
             return;
         }
 
+        boolean denyDamage = skillHitsTarget.getDamageType() == 1;
         boolean isAoeSkill = skill != null && skill.getTargeting() == 14;
-        if (skillId == 0) {
+        if (skillId == 0 && !denyDamage) {
             this.handleBallLossDamage(connection, skillHitsTarget);
         } else if (isAoeSkill) {
             this.handleAoeSkillDamage(connection, skillHitsTarget, game, skill);
@@ -283,7 +285,7 @@ public class GuardianModeHandler {
         boolean attackerHasStrBuff = skillHitsTarget.getAttackerPosition() == 0;
         boolean receiverHasDefBuff = skillHitsTarget.getReceiverBuffId() == 1;
 
-        short skillDamage = skill.getDamage().shortValue();
+        short skillDamage = skill != null ? skill.getDamage().shortValue() : -1;
         short newHealth;
         if (targetPosition < 4) {
             if (skillDamage > 1) {
@@ -431,6 +433,12 @@ public class GuardianModeHandler {
 
             S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
             this.sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
+
+            GameSession gameSession = connection.getClient().getActiveGameSession();
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
+            gameSession.getClients().forEach(c -> {
+                packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(18)), PacketEventHandler.ServerClient.SERVER);
+            });
         } else if (allGuardiansDead && !game.isFinished()) {
             this.handleFinishGame(connection, game, true);
         }

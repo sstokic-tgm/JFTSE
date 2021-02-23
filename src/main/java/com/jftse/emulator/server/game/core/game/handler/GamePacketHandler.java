@@ -1722,7 +1722,7 @@ public class GamePacketHandler {
         Room room = connection.getClient().getActiveRoom();
         switch (room.getMode()) {
             case GameMode.GUARDIAN:
-                this.guardianModeHandler.handlePlayerUseSkill(connection, playerUseSkill);
+                this.guardianModeHandler.handleUseOfSkill(connection, playerUseSkill);
                 break;
             case GameMode.BATTLE:
                 break;
