@@ -12,6 +12,10 @@ public class C2SMatchplayUsesSkill extends Packet {
     private byte skillIndex;
     private boolean isQuickSlot;
     private byte quickSlotIndex;
+    private byte seed;
+    private float xTarget;
+    private float zTarget;
+    private float yTarget;
 
     public C2SMatchplayUsesSkill(Packet packet) {
         super(packet);
@@ -23,7 +27,11 @@ public class C2SMatchplayUsesSkill extends Packet {
         this.skillIndex = packet.readByte();
         packet.readInt(); // Unk
         packet.readInt(); // Unk
-        packet.readShort(); // Damage?
+        this.seed = packet.readByte(); // Unk
+        this.xTarget = packet.readFloat();
+        this.zTarget = packet.readFloat();
+        this.yTarget = packet.readFloat();
+
         // 12 more unknown bytes follow (Contains maybe positions)
     }
 }

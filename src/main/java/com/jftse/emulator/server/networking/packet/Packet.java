@@ -122,6 +122,12 @@ public class Packet {
         return newArray;
     }
 
+    public float readFloat() {
+        float result = BitKit.bytesToFloat(this.data, readPosition);
+        this.readPosition += 4;
+        return result;
+    }
+
     public int readInt() {
         int result = BitKit.bytesToInt(this.data, readPosition);
         this.readPosition += 4;

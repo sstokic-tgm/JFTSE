@@ -224,6 +224,14 @@ public class GuardianModeHandler {
                     new S2CMatchplayGivePlayerSkills(anyoneUsesSkill.getAttackerPosition(), playerSkills.get(0), playerSkills.get(1));
             this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
         }
+
+        S2CMatchplayUseSkill packet =
+                new S2CMatchplayUseSkill(position, anyoneUsesSkill.getTargetPosition(), anyoneUsesSkill.getSkillIndex(), anyoneUsesSkill.getSeed(), anyoneUsesSkill.getXTarget(), anyoneUsesSkill.getZTarget(), anyoneUsesSkill.getYTarget());
+        gameSession.getClients().forEach(c -> {
+            if (c.getConnection().getId() != connection.getId()) {
+                c.getConnection().sendTCP(packet);
+            }
+        });
     }
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
