@@ -1741,6 +1741,18 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleSwapQuickSlotItems(Connection connection, Packet packet) {
+        C2SMatchplaySwapQuickSlotItems swapQuickSlotItems = new C2SMatchplaySwapQuickSlotItems(packet);
+        Room room = connection.getClient().getActiveRoom();
+        switch (room.getMode()) {
+            case GameMode.GUARDIAN:
+                this.guardianModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
+                break;
+            case GameMode.BATTLE:
+                break;
+        }
+    }
+
     public void handleUnknown(Connection connection, Packet packet) {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {

@@ -36,7 +36,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
@@ -108,7 +107,7 @@ public class GuardianModeHandler {
 
         RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
             game.getGuardianBattleStates().forEach(x -> {
-                S2CMatchplayTriggerRandomGuardianSkill packet = new S2CMatchplayTriggerRandomGuardianSkill((byte) x.getPosition());
+                S2CMatchplayGiveRandomSkill packet = new S2CMatchplayGiveRandomSkill((short) 0, (byte) x.getPosition());
                 this.sendPacketToAllClientsInSameGameSession(packet, connection);
             });
 
@@ -182,14 +181,10 @@ public class GuardianModeHandler {
 
         if (skillCrystal != null) {
             if (gameSession == null) return;
-            S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
-            this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
+            S2CMatchplayGiveRandomSkill randomGuardianSkill =
+                    new S2CMatchplayGiveRandomSkill(playerPicksUpCrystalPacket.getCrystalId(), (byte) playerPosition);
+            this.sendPacketToAllClientsInSameGameSession(randomGuardianSkill, connection);
 
-            short explicitSkillId = skillCrystal.getExplicitSkillId();
-            int skillId = explicitSkillId != -1 ? explicitSkillId: this.getRandomSkillBasedOnProbability(roomPlayer.getPlayer());
-            List<Short> playerSkills = game.assignSkillToPlayer(playerPosition, (short) skillId);
-            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket = new S2CMatchplayGivePlayerSkills(playerPosition, playerSkills.get(0), playerSkills.get(1));
-            this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
             game.getSkillCrystals().remove(skillCrystal);
             RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
             gameSession.getRunnableEvents().add(runnableEvent);
@@ -218,11 +213,6 @@ public class GuardianModeHandler {
             if (anyoneUsesSkill.isQuickSlot()) {
                 this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
             }
-
-            List<Short> playerSkills = game.removeSkillFromTopOfStackFromPlayer(anyoneUsesSkill.getAttackerPosition());
-            S2CMatchplayGivePlayerSkills givePlayerSkillsPacket =
-                    new S2CMatchplayGivePlayerSkills(anyoneUsesSkill.getAttackerPosition(), playerSkills.get(0), playerSkills.get(1));
-            this.sendPacketToAllClientsInSameGameSession(givePlayerSkillsPacket, connection);
         }
 
         S2CMatchplayUseSkill packet =
@@ -257,6 +247,14 @@ public class GuardianModeHandler {
 
         this.handleAllGuardiansDead(connection, game);
         this.handleAllPlayersDead(connection, game);
+    }
+
+    public void handleSwapQuickSlotItems(Connection connection, C2SMatchplaySwapQuickSlotItems swapQuickSlotItems) {
+        // TODO: REMOVE ONE QUICKSLOT CHANGER FROM DB FOR PLAYER
+        RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
+        S2CMatchplayGivePlayerSkills givePlayerSkills
+                = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), swapQuickSlotItems.getTargetLeftSlotSkill(), swapQuickSlotItems.getTargetRightSlotSkill());
+        this.sendPacketToAllClientsInSameGameSession(givePlayerSkills, connection);
     }
 
     private void handleBallLossDamage(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
@@ -302,10 +300,6 @@ public class GuardianModeHandler {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, (short) -1, false, false);
             } else {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
-            }
-
-            if (newHealth < 1) {
-                this.handleSpawnReviveCrystalBasedOnProbability(connection, game);
             }
         } else {
             if (denyDamage) {
@@ -592,22 +586,6 @@ public class GuardianModeHandler {
 
         if (roundLevel < minGuardianLevelLimit) return minGuardianLevelLimit;
         return roundLevel;
-    }
-
-    private void handleSpawnReviveCrystalBasedOnProbability(Connection connection, MatchplayGuardianGame game) {
-        Random random = new Random();
-        int proba = random.nextInt(101);
-        if (proba < 36) {
-            short crystalId = (short) (game.getLastCrystalId() + 1);
-            game.setLastCrystalId(crystalId);
-            SkillCrystal skillCrystal = new SkillCrystal();
-            skillCrystal.setId(crystalId);
-            skillCrystal.setExplicitSkillId((short) 4);
-            game.getSkillCrystals().add(skillCrystal);
-
-            S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), this.getRandomPoint());
-            this.sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
-        }
     }
 
     private void handleRevivePlayer(Connection connection, MatchplayGuardianGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {

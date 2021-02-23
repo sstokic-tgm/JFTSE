@@ -274,6 +274,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleSkillHitsTarget(connection, packet);
                 break;
 
+            case PacketID.C2SMatchplaySwapQuickSlotItems:
+                gamePacketHandler.handleSwapQuickSlotItems(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..

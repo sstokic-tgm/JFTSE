@@ -222,33 +222,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return (short) guardianBattleState.getCurrentHealth();
     }
 
-    public List<Short> assignSkillToPlayer(int playerPos, short skillIndex) {
-        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
-        List<Short> playerSkills = playerBattleState.getSkillsStack();
-        boolean skillSlotAvailable = playerSkills.stream().anyMatch(x -> x < 0);
-        if (skillSlotAvailable) {
-            int indexInArray = playerSkills.indexOf(playerSkills.stream().filter(x -> x < 0).findFirst().get());
-            playerSkills.set(indexInArray, skillIndex);
-            return playerSkills;
-        }
-
-        List<Short> playerSkillsCopy = new ArrayList<>(playerSkills);
-        playerSkillsCopy.add(0, playerSkillsCopy.remove(playerSkillsCopy.size() - 1));
-        playerSkillsCopy.set(1, skillIndex);
-        playerBattleState.setSkillsStack(playerSkillsCopy);
-        return playerSkillsCopy;
-    }
-
-    public List<Short> removeSkillFromTopOfStackFromPlayer(byte playerPos) {
-        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
-        List<Short> playerSkills = playerBattleState.getSkillsStack();
-        List<Short> playerSkillsCopy = new ArrayList<>(playerSkills);
-        playerSkillsCopy.add(0, playerSkillsCopy.remove(playerSkillsCopy.size() - 1));
-        playerSkillsCopy.set(1, (short) -1);
-        playerBattleState.setSkillsStack(playerSkillsCopy);
-        return playerSkillsCopy;
-    }
-
     public long getStageTimePlayingInSeconds() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         long duration = cal.getTime().getTime() - this.getStageStartTime().getTime();
