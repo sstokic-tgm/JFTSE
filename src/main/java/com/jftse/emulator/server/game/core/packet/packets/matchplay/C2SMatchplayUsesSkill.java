@@ -27,11 +27,9 @@ public class C2SMatchplayUsesSkill extends Packet {
         this.skillIndex = packet.readByte();
         packet.readInt(); // Unk
         packet.readInt(); // Unk
-        this.seed = packet.readByte(); // Unk
+        this.seed = packet.readByte();
         this.xTarget = packet.readFloat();
         this.zTarget = packet.readFloat();
         this.yTarget = packet.readFloat();
-
-        // 12 more unknown bytes follow (Contains maybe positions)
     }
 }
