@@ -245,11 +245,8 @@ public class GuardianModeHandler {
         }
 
         boolean denyDamage = skillHitsTarget.getDamageType() == 1;
-        boolean isAoeSkill = skill != null && skill.getTargeting() == 14;
         if (skillId == 0 && !denyDamage) {
             this.handleBallLossDamage(connection, skillHitsTarget);
-        } else if (isAoeSkill) {
-            this.handleAoeSkillDamage(connection, skillHitsTarget, game, skill);
         } else {
             this.handleSkillDamage(connection, skillHitsTarget.getTargetPosition(), skillHitsTarget, game, skill);
         }
@@ -284,14 +281,6 @@ public class GuardianModeHandler {
 
         S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (byte) 0, 0, 0);
         this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
-    }
-
-    private void handleAoeSkillDamage(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayGuardianGame game, Skill skill) {
-        Room room = connection.getClient().getActiveRoom();
-        List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream()
-                .filter(x -> x.getPosition() < 4)
-                .collect(Collectors.toList());
-        activePlayingPlayers.forEach(x -> this.handleSkillDamage(connection, x.getPosition(), skillHitsTarget, game, skill));
     }
 
     private void handleSkillDamage(Connection connection, short targetPosition, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayGuardianGame game, Skill skill) {
