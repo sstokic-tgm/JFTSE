@@ -437,6 +437,11 @@ public class GuardianModeHandler {
             S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
             gameSession.getClients().forEach(c -> {
                 packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(18)), PacketEventHandler.ServerClient.SERVER);
+                RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(c.getConnection());
+                if (roomPlayer != null) {
+                    S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(roomPlayer);
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(c, setNameColorPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(18)), PacketEventHandler.ServerClient.SERVER);
+                }
             });
         } else if (allGuardiansDead && !game.isFinished()) {
             this.handleFinishGame(connection, game, true);
