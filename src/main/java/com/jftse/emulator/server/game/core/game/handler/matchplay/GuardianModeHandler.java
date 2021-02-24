@@ -170,6 +170,10 @@ public class GuardianModeHandler {
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {
+        // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
+        if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null)
+            return;
+        
         RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
         short playerPosition = roomPlayer.getPosition();
         GameSession gameSession = connection.getClient().getActiveGameSession();
@@ -225,6 +229,11 @@ public class GuardianModeHandler {
     }
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
+        // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
+        // TODO: FIND OUT OTHER PLACES WHERE DATA INSIDE A MATCH IS STILL SENT EVEN THOUGH MATCH IS FINISHED
+        if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null)
+            return;
+
         byte skillId = skillHitsTarget.getSkillId();
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
@@ -374,8 +383,7 @@ public class GuardianModeHandler {
         short totalSta = (short) (baseSta + roomPlayer.getStatusPointsAddedDto().getStamina());
         short totalDex = (short) (baseDex + roomPlayer.getStatusPointsAddedDto().getDexterity());
         short totalWill = (short) (baseWill + roomPlayer.getStatusPointsAddedDto().getWillpower());
-        PlayerBattleState playerBattleState = new PlayerBattleState(roomPlayer.getPosition(), totalHp, totalStr, totalSta, totalDex, totalWill);
-        return playerBattleState;
+        return new PlayerBattleState(roomPlayer.getPosition(), totalHp, totalStr, totalSta, totalDex, totalWill);
     }
 
     private GuardianBattleState createGuardianBattleState(GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
@@ -389,9 +397,7 @@ public class GuardianModeHandler {
         int totalSta = guardian.getBaseSta() + extraSta;
         int totalDex = guardian.getBaseDex() + extraDex;
         int totalWill = guardian.getBaseWill() + extraWill;
-        GuardianBattleState guardianBattleState =
-                new GuardianBattleState(guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
-        return guardianBattleState;
+        return new GuardianBattleState(guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
     }
 
     private void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
