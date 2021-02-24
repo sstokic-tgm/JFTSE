@@ -104,6 +104,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + totalDamageToDeal);
+        newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
         playerBattleState.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
     }
@@ -162,6 +163,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + lossBallDamage);
+        newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
         playerBattleState.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
     }
@@ -184,7 +186,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .findFirst()
                 .orElse(null);
         short healthToHeal = (short) (guardianBattleState.getMaxHealth() * (percentage / 100f));
-        short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + healthToHeal);
+        short currentHealth = (short) (guardianBattleState.getCurrentHealth() < 0 ? 0 : guardianBattleState.getCurrentHealth());
+        short newGuardianHealth = (short) (currentHealth + healthToHeal);
         if (newGuardianHealth > guardianBattleState.getMaxHealth()) {
             newGuardianHealth = (short) guardianBattleState.getMaxHealth();
         }
@@ -204,22 +207,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         return playerBattleState;
-    }
-
-    public short getPlayerHealth(int playerPos) {
-        PlayerBattleState playerBattleState = this.playerBattleStates.stream()
-                .filter(x -> x.getPosition() == playerPos)
-                .findFirst()
-                .orElse(null);
-        return playerBattleState.getCurrentHealth();
-    }
-
-    public short getGuardianHealth(int guardianPos) {
-        GuardianBattleState guardianBattleState = this.getGuardianBattleStates().stream()
-                .filter(x -> x.getPosition() == guardianPos)
-                .findFirst()
-                .orElse(null);
-        return (short) guardianBattleState.getCurrentHealth();
     }
 
     public long getStageTimePlayingInSeconds() {
