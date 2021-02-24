@@ -73,6 +73,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + totalDamageToDeal);
+        newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
         guardianBattleState.setCurrentHealth(newGuardianHealth);
         return newGuardianHealth;
     }
@@ -134,6 +135,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         short newGuardianHealth = (short) (guardianBattleState.getCurrentHealth() + lossBallDamage);
+        newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
         guardianBattleState.setCurrentHealth(newGuardianHealth);
         return newGuardianHealth;
     }
@@ -171,7 +173,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
     public short healPlayer(int playerPos, short percentage) {
         PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
         short healthToHeal = (short) (playerBattleState.getMaxHealth() * (percentage / 100f));
-        short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + healthToHeal);
+        short currentHealth = (short) (playerBattleState.getCurrentHealth() < 0 ? 0 : playerBattleState.getCurrentHealth());
+        short newPlayerHealth = (short) (currentHealth + healthToHeal);
         if (newPlayerHealth > playerBattleState.getMaxHealth()) {
             newPlayerHealth = playerBattleState.getMaxHealth();
         }

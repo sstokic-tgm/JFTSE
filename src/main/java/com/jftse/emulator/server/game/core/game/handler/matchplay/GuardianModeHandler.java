@@ -300,7 +300,9 @@ public class GuardianModeHandler {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
             }
         } else {
-            if (denyDamage) {
+            if (skillDamage > 1) {
+                newHealth = game.healGuardian(targetPosition, skillDamage);
+            } else if (denyDamage) {
                 newHealth = game.damageGuardian(attackerPosition, targetPosition, (short) -1, false, false);
             } else {
                 newHealth = game.damageGuardian(targetPosition, attackerPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
