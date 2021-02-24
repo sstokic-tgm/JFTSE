@@ -521,9 +521,9 @@ public class GuardianModeHandler {
         byte rightGuardian = this.getRandomGuardian(guardiansRight, Arrays.asList(leftGuardian));
         byte middleGuardian = this.getRandomGuardian(guardiansMiddle, Arrays.asList(leftGuardian, rightGuardian));
         if (middleGuardian != 0) {
-            return Arrays.asList(middleGuardian, leftGuardian, rightGuardian);
+            return Arrays.asList(middleGuardian, rightGuardian, leftGuardian);
         } else if (rightGuardian != 0) {
-            return Arrays.asList(leftGuardian, rightGuardian, (byte) 0);
+            return Arrays.asList(rightGuardian, leftGuardian, (byte) 0);
         }
 
         return Arrays.asList(leftGuardian, (byte) 0, (byte) 0);
