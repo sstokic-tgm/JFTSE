@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GuardianBattleState {
+    private int btItemId;
     private short position;
     private int maxHealth;
     private int currentHealth;
@@ -16,7 +17,8 @@ public class GuardianBattleState {
     private int exp;
     private int gold;
 
-    public GuardianBattleState(short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
+    public GuardianBattleState(int btItemId, short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
+        this.btItemId = btItemId;
         this.position = position;
         this.maxHealth = hp;
         this.currentHealth = hp;

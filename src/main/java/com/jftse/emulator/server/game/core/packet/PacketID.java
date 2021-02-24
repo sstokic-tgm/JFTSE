@@ -101,8 +101,8 @@ public final class PacketID {
     public final static char C2SMatchplayPlayerUseSkill = 0x18E9;
     public final static char S2CMatchplayUseSkill = 0x18EA;
     public final static char S2CMatchplayIncreaseBreathTimerBy60Seconds = 0xC96;
-    public final static char S2CMatchplayTriggerGuardianCastRandomSkill = 0x332E;
-    public final static char S2CMatchplayTriggerGuardianCastAnimation = 0x18E8;
+    public final static char S2CMatchplayGiveRandomSkill = 0x332E;
+    public final static char S2CMatchplayGiveSpecificSkill = 0x18E8;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
     public final static char C2CPlayerAnimationPacket = 0x32C9;

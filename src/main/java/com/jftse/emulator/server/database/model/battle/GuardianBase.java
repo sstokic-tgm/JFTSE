@@ -24,4 +24,5 @@ public class GuardianBase extends AbstractIdBaseModel {
     private Integer addWill;
     private Integer rewardExp;
     private Integer rewardGold;
+    private Integer btItemID;
 }

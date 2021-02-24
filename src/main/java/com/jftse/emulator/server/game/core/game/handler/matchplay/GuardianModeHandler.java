@@ -11,10 +11,7 @@ import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
-import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
-import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
-import com.jftse.emulator.server.game.core.matchplay.battle.SkillCrystal;
-import com.jftse.emulator.server.game.core.matchplay.battle.SkillDrop;
+import com.jftse.emulator.server.game.core.matchplay.battle.*;
 import com.jftse.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
@@ -62,6 +59,7 @@ public class GuardianModeHandler {
     private final ClothEquipmentService clothEquipmentService;
     private final GameSessionManager gameSessionManager;
     private final WillDamageService willDamageService;
+    private final GuardianSkillsService guardianSkillsService;
 
     private GameHandler gameHandler;
 
@@ -107,7 +105,8 @@ public class GuardianModeHandler {
 
         RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
             game.getGuardianBattleStates().forEach(x -> {
-                S2CMatchplayGiveRandomSkill packet = new S2CMatchplayGiveRandomSkill((short) 0, (byte) x.getPosition());
+                int skillIndex = this.getRandomGuardianSkillBasedOnProbability(x.getBtItemId());
+                S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill((short) 0, x.getPosition(), skillIndex);
                 this.sendPacketToAllClientsInSameGameSession(packet, connection);
             });
 
@@ -388,7 +387,7 @@ public class GuardianModeHandler {
         int totalSta = guardian.getBaseSta() + extraSta;
         int totalDex = guardian.getBaseDex() + extraDex;
         int totalWill = guardian.getBaseWill() + extraWill;
-        return new GuardianBattleState(guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
+        return new GuardianBattleState(guardian.getBtItemID(), guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
     }
 
     private void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
@@ -669,10 +668,9 @@ public class GuardianModeHandler {
         return new Point2D.Float(xPos, yPos);
     }
 
-    private int getRandomSkillBasedOnProbability(Player player) {
-        SkillDropRate skillDropRate = skillDropRateService.findSkillDropRateByPlayer(player);
-        String dropRates = skillDropRate.getDropRates();
-        List<Integer> dropRatesInt = Arrays.stream(dropRates.split(",")).map(x -> Integer.parseInt(x)).collect(Collectors.toList());
+    private int getRandomGuardianSkillBasedOnProbability(int btItemId) {
+        GuardianBtItemList guardianBtItemList = this.guardianSkillsService.findGuardianBtItemListById(btItemId);
+        List<Integer> dropRatesInt = guardianBtItemList.getGuardianBtItems().stream().map(x -> x.getChance()).collect(Collectors.toList());
 
         List<SkillDrop> skillDrops = new ArrayList<>();
         int currentPercentage = 0;
@@ -691,7 +689,8 @@ public class GuardianModeHandler {
         Random random = new Random();
         int randValue = random.nextInt(101);
         SkillDrop skillDrop = skillDrops.stream().filter(x -> x.getFrom() <= randValue && x.getTo() >= randValue).findFirst().orElse(null);
-        return skillDrop.getId();
+        GuardianBtItem guardianBtItem = guardianBtItemList.getGuardianBtItems().get(skillDrop.getId());
+        return guardianBtItem.getSkillIndex();
     }
 
     private RoomPlayer getRoomPlayerFromConnection(Connection connection) {

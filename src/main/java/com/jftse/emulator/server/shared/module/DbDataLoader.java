@@ -261,6 +261,7 @@ public class DbDataLoader implements CommandLineRunner {
                 guardian.setAddWill(Integer.valueOf(skillNode.valueOf("@AddWILL")));
                 guardian.setRewardExp(Integer.valueOf(skillNode.valueOf("@RewardEXP")));
                 guardian.setRewardGold(Integer.valueOf(skillNode.valueOf("@RewardGOLD")));
+                guardian.setBtItemID(Integer.valueOf(skillNode.valueOf("@BtItemID")));
                 bossGuardianRepository.save(guardian);
             }
         }
@@ -300,6 +301,7 @@ public class DbDataLoader implements CommandLineRunner {
                 guardian.setAddWill(Integer.valueOf(skillNode.valueOf("@AddWILL")));
                 guardian.setRewardExp(Integer.valueOf(skillNode.valueOf("@RewardEXP")));
                 guardian.setRewardGold(Integer.valueOf(skillNode.valueOf("@RewardGOLD")));
+                guardian.setBtItemID(Integer.valueOf(skillNode.valueOf("@BtItemID")));
                 guardianRepository.save(guardian);
             }
         }
