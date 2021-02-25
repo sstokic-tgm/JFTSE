@@ -485,19 +485,20 @@ public class GuardianModeHandler {
 
     private void startDefeatTimer(Connection connection, MatchplayGuardianGame game, GameSession gameSession, GuardianStage guardianStage) {
         // TODO: Deactivated. Causes runnableventhandler thread to crash because we are mutating objects both threads are accessing
-//        if (guardianStage.getDefeatTimerInSeconds() > -1) {
-//            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
-//                if (game != null && !game.isFinished()) {
-//                    this.handleFinishGame(connection, game, false);
-//                }
-//            }, TimeUnit.SECONDS.toMillis(guardianStage.getDefeatTimerInSeconds()));
-//
-//            gameSession.getRunnableEvents().add(runnableEvent);
-//            gameSession.setCountDownRunnable(runnableEvent);
-//        }
+        // TODO: Testing push
+        if (guardianStage.getDefeatTimerInSeconds() > -1) {
+            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
+                if (game != null && !game.isFinished()) {
+                    this.handleFinishGame(connection, game, false);
+                }
+            }, TimeUnit.SECONDS.toMillis(guardianStage.getDefeatTimerInSeconds()));
+
+            gameSession.getRunnableEvents().add(runnableEvent);
+            gameSession.setCountDownRunnable(runnableEvent);
+        }
     }
 
-    private void handleFinishGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
+    private synchronized void handleFinishGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
         game.setFinished(true);
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
