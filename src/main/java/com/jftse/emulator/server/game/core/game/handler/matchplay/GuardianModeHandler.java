@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -94,25 +95,10 @@ public class GuardianModeHandler {
             c.getConnection().sendTCP(triggerGuardianServePacket);
         });
 
+        game.resetStageStartTime();
         this.placeCrystalRandomly(connection, game);
         this.triggerGuardianAttackLoop(connection);
-    }
-
-    private void triggerGuardianAttackLoop(Connection connection) {
-        GameSession gameSession = connection.getClient().getActiveGameSession();
-        if (gameSession == null) return;
-        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
-
-        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
-            game.getGuardianBattleStates().forEach(x -> {
-                int skillIndex = this.getRandomGuardianSkillBasedOnProbability(x.getBtItemId());
-                S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill((short) 0, x.getPosition(), skillIndex);
-                this.sendPacketToAllClientsInSameGameSession(packet, connection);
-            });
-
-            this.triggerGuardianAttackLoop(connection);
-        }, TimeUnit.SECONDS.toMillis(5));
-        gameSession.getRunnableEvents().add(runnableEvent);
+        this.startDefeatTimer(connection, game, gameSession, game.getGuardianStage());
     }
 
     public void handlePrepareGuardianMode(Connection connection, Room room) {
@@ -262,6 +248,23 @@ public class GuardianModeHandler {
         this.sendPacketToAllClientsInSameGameSession(givePlayerSkills, connection);
     }
 
+    private void triggerGuardianAttackLoop(Connection connection) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession == null) return;
+        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+
+        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
+            game.getGuardianBattleStates().forEach(x -> {
+                int skillIndex = this.getRandomGuardianSkillBasedOnProbability(x.getBtItemId());
+                S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill((short) 0, x.getPosition(), skillIndex);
+                this.sendPacketToAllClientsInSameGameSession(packet, connection);
+            });
+
+            this.triggerGuardianAttackLoop(connection);
+        }, TimeUnit.SECONDS.toMillis(5));
+        gameSession.getRunnableEvents().add(runnableEvent);
+    }
+
     private void handleBallLossDamage(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         short receiverPosition = skillHitsTarget.getTargetPosition();
         short attackerPosition = skillHitsTarget.getAttackerPosition();
@@ -371,7 +374,14 @@ public class GuardianModeHandler {
                 this.handleRevivePlayer(connection, game, skill, skillHitsTarget);
                 break;
             case 38: // Sandglass
-                game.resetStageStartTime();
+                GameSession gameSession = connection.getClient().getActiveGameSession();
+                if (gameSession != null) {
+                    RunnableEvent countDownRunnable = gameSession.getCountDownRunnable();
+                    countDownRunnable.setEventFireTime(countDownRunnable.getEventFireTime() + TimeUnit.SECONDS.toMillis(60));
+                    gameSession.getClients().forEach(c -> {
+                        c.getConnection().sendTCP(new S2CMatchplayIncreaseBreathTimerBy60Seconds());
+                    });
+                }
                 break;
         }
     }
@@ -415,8 +425,11 @@ public class GuardianModeHandler {
         boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
         boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
-        boolean triggerBossBattle = timePlayingInSeconds < 301;
+        boolean triggerBossBattle = timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
         if (hasBossGuardianStage && allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
+            GameSession gameSession = connection.getClient().getActiveGameSession();
+            gameSession.clearCountDownRunnable();
+
             int activePlayingPlayersCount = game.getPlayerBattleStates().size();
             List<Byte> guardians = this.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
             byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
@@ -446,19 +459,42 @@ public class GuardianModeHandler {
             S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
             this.sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
 
-            GameSession gameSession = connection.getClient().getActiveGameSession();
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(c -> {
-                packetEventHandler.push(packetEventHandler.createPacketEvent(c, triggerGuardianServePacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(18)), PacketEventHandler.ServerClient.SERVER);
-                RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(c.getConnection());
-                if (roomPlayer != null) {
-                    S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(roomPlayer);
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(c, setNameColorPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(18)), PacketEventHandler.ServerClient.SERVER);
-                }
-            });
+            Runnable triggerGuardianServeRunnable = () -> {
+                if (gameSession == null) return;
+                S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
+                gameSession.getClients().forEach(c -> {
+                    if (c != null && c.getConnection() != null) {
+                        c.getConnection().sendTCP(triggerGuardianServePacket);
+                        RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(c.getConnection());
+                        if (roomPlayer != null) {
+                            S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(roomPlayer);
+                            c.getConnection().sendTCP(setNameColorPacket);
+                        }
+                    }
+
+                    this.startDefeatTimer(connection, game, gameSession, game.getBossGuardianStage());
+                });
+            };
+
+            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(triggerGuardianServeRunnable, TimeUnit.SECONDS.toMillis(18));
+            gameSession.getRunnableEvents().add(runnableEvent);
         } else if (allGuardiansDead && !game.isFinished()) {
             this.handleFinishGame(connection, game, true);
         }
+    }
+
+    private void startDefeatTimer(Connection connection, MatchplayGuardianGame game, GameSession gameSession, GuardianStage guardianStage) {
+        // TODO: Deactivated. Causes runnableventhandler thread to crash because we are mutating objects both threads are accessing
+//        if (guardianStage.getDefeatTimerInSeconds() > -1) {
+//            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> {
+//                if (game != null && !game.isFinished()) {
+//                    this.handleFinishGame(connection, game, false);
+//                }
+//            }, TimeUnit.SECONDS.toMillis(guardianStage.getDefeatTimerInSeconds()));
+//
+//            gameSession.getRunnableEvents().add(runnableEvent);
+//            gameSession.setCountDownRunnable(runnableEvent);
+//        }
     }
 
     private void handleFinishGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
@@ -466,6 +502,7 @@ public class GuardianModeHandler {
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
+        gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
         gameSession.getClients().forEach(client -> {
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();

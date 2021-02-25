@@ -28,11 +28,19 @@ public class GameSession {
     private List<Client> clients; // holds everything from game server
     private List<Client> clientsInRelay;
     private List<RunnableEvent> runnableEvents;
+    private RunnableEvent countDownRunnable;
 
     public Client getClientByPlayerId(long playerId) {
         return clients.stream()
                 .filter(c -> c.getActivePlayer().getId().equals(playerId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void clearCountDownRunnable() {
+        if (this.getCountDownRunnable() != null) {
+            this.getRunnableEvents().remove(this.getCountDownRunnable());
+            this.setCountDownRunnable(null);
+        }
     }
 }

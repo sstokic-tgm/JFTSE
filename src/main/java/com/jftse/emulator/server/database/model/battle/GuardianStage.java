@@ -15,4 +15,6 @@ public class GuardianStage {
     private List<Integer> GuardiansMiddle = new ArrayList<>();
     private Boolean IsBossStage = false;
     private Integer BossGuardian = 0;
+    private Integer DefeatTimerInSeconds = -1;
+    private Integer BossTriggerTimerInSeconds = -1;
 }
