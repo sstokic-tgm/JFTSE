@@ -293,7 +293,7 @@ public class GuardianModeHandler {
         if (targetPosition < 4) {
             if (skillDamage > 1) {
                 newHealth = game.healPlayer(targetPosition, skillDamage);
-            } else if (denyDamage || !skillHitsTarget.isApplySkillEffect()) {
+            } else if (denyDamage) {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, (short) -1, false, false);
             } else {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
@@ -301,7 +301,7 @@ public class GuardianModeHandler {
         } else {
             if (skillDamage > 1) {
                 newHealth = game.healGuardian(targetPosition, skillDamage);
-            } else if (denyDamage || !skillHitsTarget.isApplySkillEffect()) {
+            } else if (denyDamage) {
                 newHealth = game.damageGuardian(attackerPosition, targetPosition, (short) -1, false, false);
             } else {
                 newHealth = game.damageGuardian(targetPosition, attackerPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
@@ -321,11 +321,11 @@ public class GuardianModeHandler {
     private byte getSkillToApply(Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         boolean targetHittingHimself = skillHitsTarget.getAttackerPosition() == skillHitsTarget.getTargetPosition();
         if (skill.getId() == 64 && targetHittingHimself) {
-            return 0;
+            return 3;
         }
 
         if (!skillHitsTarget.isApplySkillEffect()) {
-            return 0;
+            return 3;
         }
 
         return skillHitsTarget.getSkillId();
