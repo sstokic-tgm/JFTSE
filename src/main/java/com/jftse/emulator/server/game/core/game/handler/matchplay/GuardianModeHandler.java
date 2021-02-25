@@ -355,7 +355,7 @@ public class GuardianModeHandler {
         if (skill.getDamage() > 1) {
             short newHealth = game.healGuardian(guardianPos, skill.getDamage().shortValue());
             S2CMatchplayDealDamage damagePacket =
-                    new S2CMatchplayDealDamage(guardianPos, newHealth, (short) playerUseSkill.getSomeKindOfTargeting(), playerUseSkill.getSkillIndex(), 0, 0);
+                    new S2CMatchplayDealDamage(guardianPos, newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
             this.sendPacketToAllClientsInSameGameSession(damagePacket, connection);
         } else if (skill.getId() == 9) { // Miniam needs to be treated individually
             roomPlayers.forEach(rp -> {
