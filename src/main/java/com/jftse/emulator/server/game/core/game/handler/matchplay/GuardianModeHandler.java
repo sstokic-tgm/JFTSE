@@ -293,7 +293,7 @@ public class GuardianModeHandler {
         if (targetPosition < 4) {
             if (skillDamage > 1) {
                 newHealth = game.healPlayer(targetPosition, skillDamage);
-            } else if (denyDamage) {
+            } else if (denyDamage || !skillHitsTarget.isApplySkillEffect()) {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, (short) -1, false, false);
             } else {
                 newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
@@ -301,7 +301,7 @@ public class GuardianModeHandler {
         } else {
             if (skillDamage > 1) {
                 newHealth = game.healGuardian(targetPosition, skillDamage);
-            } else if (denyDamage) {
+            } else if (denyDamage || !skillHitsTarget.isApplySkillEffect()) {
                 newHealth = game.damageGuardian(attackerPosition, targetPosition, (short) -1, false, false);
             } else {
                 newHealth = game.damageGuardian(targetPosition, attackerPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
@@ -312,9 +312,23 @@ public class GuardianModeHandler {
             }
         }
 
+        byte skillToApply = this.getSkillToApply(skill, skillHitsTarget);
         S2CMatchplayDealDamage damageToPlayerPacket =
-                new S2CMatchplayDealDamage(targetPosition, newHealth, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+    }
+
+    private byte getSkillToApply(Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
+        boolean targetHittingHimself = skillHitsTarget.getAttackerPosition() == skillHitsTarget.getTargetPosition();
+        if (skill.getId() == 64 && targetHittingHimself) {
+            return 0;
+        }
+
+        if (!skillHitsTarget.isApplySkillEffect()) {
+            return 0;
+        }
+
+        return skillHitsTarget.getSkillId();
     }
 
     private void increasePotsFromGuardiansDeath(MatchplayGuardianGame game, int guardianPos) {
