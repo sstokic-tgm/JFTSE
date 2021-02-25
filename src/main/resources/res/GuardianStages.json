@@ -9,7 +9,9 @@
     "GuardiansRight": null,
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 1,
@@ -24,7 +26,9 @@
     "GuardiansRight": null,
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 2,
@@ -39,7 +43,9 @@
     "GuardiansRight": null,
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 3,
@@ -54,7 +60,9 @@
     "GuardiansRight": null,
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 5,
@@ -76,7 +84,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 6,
@@ -98,7 +108,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180
   },
   {
     "MapId": 6,
@@ -120,7 +132,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": true,
-    "BossGuardian": 1
+    "BossGuardian": 1,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 7,
@@ -142,7 +156,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 8,
@@ -164,7 +180,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 9,
@@ -192,7 +210,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180
   },
   {
     "MapId": 9,
@@ -214,7 +234,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": true,
-    "BossGuardian": 3
+    "BossGuardian": 3,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 10,
@@ -243,7 +265,9 @@
       48
     ],
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": 480,
+    "BossTriggerTimerInSeconds": 240
   },
   {
     "MapId": 10,
@@ -265,7 +289,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": true,
-    "BossGuardian": 4
+    "BossGuardian": 4,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 11,
@@ -311,7 +337,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180
   },
   {
     "MapId": 11,
@@ -333,7 +361,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": true,
-    "BossGuardian": 5
+    "BossGuardian": 5,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 12,
@@ -355,7 +385,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 13,
@@ -377,7 +409,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180
   },
   {
     "MapId": 13,
@@ -399,7 +433,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": true,
-    "BossGuardian": 6
+    "BossGuardian": 6,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1
   },
   {
     "MapId": 14,
@@ -421,7 +457,9 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": false,
-    "BossGuardian": 0
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180
   },
   {
     "MapId": 14,
@@ -443,6 +481,8 @@
     ],
     "GuardiansMiddle": null,
     "IsBossStage": true,
-    "BossGuardian": 7
+    "BossGuardian": 7,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1
   }
 ]
