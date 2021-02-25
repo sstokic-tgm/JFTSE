@@ -278,7 +278,7 @@ public class GuardianModeHandler {
             newHealth = game.damageGuardianOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
         }
 
-        S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (byte) 0, 0, 0);
+        S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
         this.sendPacketToAllClientsInSameGameSession(damageToGuardianPacket, connection);
     }
 
@@ -314,13 +314,13 @@ public class GuardianModeHandler {
 
         byte skillToApply = this.getSkillToApply(skill, skillHitsTarget);
         S2CMatchplayDealDamage damageToPlayerPacket =
-                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                new S2CMatchplayDealDamage(targetPosition, newHealth, skill == null ? 0 : skill.getTargeting().shortValue(), skillToApply, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
     }
 
     private byte getSkillToApply(Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         boolean targetHittingHimself = skillHitsTarget.getAttackerPosition() == skillHitsTarget.getTargetPosition();
-        if (skill.getId() == 64 && targetHittingHimself) {
+        if (skill != null && skill.getId() == 64 && targetHittingHimself) {
             return 3;
         }
 
@@ -352,13 +352,13 @@ public class GuardianModeHandler {
         if (skill.getDamage() > 1) {
             short newHealth = game.healGuardian(guardianPos, skill.getDamage().shortValue());
             S2CMatchplayDealDamage damagePacket =
-                    new S2CMatchplayDealDamage(guardianPos, newHealth, playerUseSkill.getSkillIndex(), 0, 0);
+                    new S2CMatchplayDealDamage(guardianPos, newHealth, (short) playerUseSkill.getSomeKindOfTargeting(), playerUseSkill.getSkillIndex(), 0, 0);
             this.sendPacketToAllClientsInSameGameSession(damagePacket, connection);
         } else if (skill.getId() == 9) { // Miniam needs to be treated individually
             roomPlayers.forEach(rp -> {
                 short newHealth = game.damagePlayer(guardianPos, rp.getPosition(), skill.getDamage().shortValue(), false, false);
                 S2CMatchplayDealDamage damagePacket =
-                        new S2CMatchplayDealDamage(rp.getPosition(), newHealth, skill.getId().byteValue(), 0, 0);
+                        new S2CMatchplayDealDamage(rp.getPosition(), newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
                 this.sendPacketToAllClientsInSameGameSession(damagePacket, connection);
             });
         }
@@ -607,7 +607,7 @@ public class GuardianModeHandler {
         PlayerBattleState playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue());
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage(playerBattleState.getPosition(), playerBattleState.getCurrentHealth(), skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                    new S2CMatchplayDealDamage(playerBattleState.getPosition(), playerBattleState.getCurrentHealth(), (short) 0, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
             this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }

@@ -4,12 +4,12 @@ import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CMatchplayDealDamage extends Packet {
-    public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, byte skillAnimation, int xKnockbackPosition, int yKnockbackPosition) {
+    public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, short targeting, byte skillAnimation, int xKnockbackPosition, int yKnockbackPosition) {
         super(PacketID.S2CMatchplayDamageToPlayer);
 
         this.write(entityPosition);
         this.write(entityHpToSet);
-        this.write((short) 0); //Unk
+        this.write(targeting);
         this.write(skillAnimation);
         this.write(xKnockbackPosition);
         this.write(yKnockbackPosition);

@@ -171,7 +171,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public short healPlayer(int playerPos, short percentage) {
-        PlayerBattleState playerBattleState = this.playerBattleStates.get(playerPos);
+        PlayerBattleState playerBattleState = this.playerBattleStates.stream()
+                .filter(x -> x.getPosition() == playerPos)
+                .findFirst()
+                .orElse(null);
         short healthToHeal = (short) (playerBattleState.getMaxHealth() * (percentage / 100f));
         short currentHealth = (short) (playerBattleState.getCurrentHealth() < 0 ? 0 : playerBattleState.getCurrentHealth());
         short newPlayerHealth = (short) (currentHealth + healthToHeal);
