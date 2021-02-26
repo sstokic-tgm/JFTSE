@@ -5,6 +5,7 @@ import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
@@ -241,8 +242,17 @@ public class GuardianModeHandler {
     }
 
     public void handleSwapQuickSlotItems(Connection connection, C2SMatchplaySwapQuickSlotItems swapQuickSlotItems) {
-        // TODO: REMOVE ONE QUICKSLOT CHANGER FROM DB FOR PLAYER
         RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
+        Pocket pocket = roomPlayer.getPlayer().getPocket();
+        PlayerPocket playerPocket = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(21, pocket);
+        if (playerPocket != null) {
+            playerPocket = this.playerPocketService.decrementPocketItemCount(playerPocket);
+            if (playerPocket.getItemCount() == 0) {
+                playerPocketService.remove(playerPocket.getId());
+                pocketService.decrementPocketBelongings(pocket);
+            }
+        }
+
         S2CMatchplayGivePlayerSkills givePlayerSkills
                 = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), swapQuickSlotItems.getTargetLeftSlotSkill(), swapQuickSlotItems.getTargetRightSlotSkill());
         this.sendPacketToAllClientsInSameGameSession(givePlayerSkills, connection);
