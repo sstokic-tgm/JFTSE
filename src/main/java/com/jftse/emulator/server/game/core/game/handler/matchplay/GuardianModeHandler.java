@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -45,8 +44,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Log4j2
 public class GuardianModeHandler {
-    private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(5);
-    private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(5);
+    private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(15);
+    private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(7);
 
     private final PacketEventHandler packetEventHandler;
     private final RunnableEventHandler runnableEventHandler;
