@@ -215,6 +215,14 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return playerBattleState;
     }
 
+    public short getPlayerCurrentHealth(short playerPos) {
+        PlayerBattleState playerBattleState = this.playerBattleStates.stream()
+                .filter(x -> x.getPosition() == playerPos)
+                .findFirst()
+                .orElse(null);
+        return playerBattleState.getCurrentHealth();
+    }
+
     public long getStageTimePlayingInSeconds() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         long duration = cal.getTime().getTime() - this.getStageStartTime().getTime();
