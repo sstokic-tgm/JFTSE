@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Scope("singleton")
@@ -17,11 +19,12 @@ public class RunnableEventHandler {
         long currentTime = Instant.now().toEpochMilli();
 
         // handle runnable events in queue
-        for (int i = 0; i < gameSession.getRunnableEvents().size(); i++) {
-            RunnableEvent runnableEvent = gameSession.getRunnableEvents().get(i);
+        List<RunnableEvent> runnableEventList = new ArrayList<>(gameSession.getRunnableEvents());
+        for (int i = 0; i < runnableEventList.size(); i++) {
+            RunnableEvent runnableEvent = runnableEventList.get(i);
             if (!runnableEvent.isFired() && runnableEvent.shouldFire(currentTime)) {
                 runnableEvent.fire();
-                gameSession.getRunnableEvents().remove(i);
+                gameSession.getRunnableEvents().remove(runnableEvent);
             }
         }
     }
