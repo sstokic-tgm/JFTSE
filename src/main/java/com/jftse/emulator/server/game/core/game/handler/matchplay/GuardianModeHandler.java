@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
+import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
@@ -288,10 +289,15 @@ public class GuardianModeHandler {
 
         boolean guardianMadePoint = skillHitsTarget.getTargetPosition() < 4;
         short newHealth;
-        if (guardianMadePoint) {
-            newHealth = game.damagePlayerOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
-        } else {
-            newHealth = game.damageGuardianOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
+        try {
+            if (guardianMadePoint) {
+                newHealth = game.damagePlayerOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
+            } else {
+                newHealth = game.damageGuardianOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
+            }
+        } catch (ValidationException ve) {
+            log.warn(ve.getMessage());
+            return;
         }
 
         S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
@@ -307,22 +313,32 @@ public class GuardianModeHandler {
         short skillDamage = skill != null ? skill.getDamage().shortValue() : -1;
         short newHealth;
         if (targetPosition < 4) {
-            if (skillDamage > 1) {
-                newHealth = game.healPlayer(targetPosition, skillDamage);
-            } else if (denyDamage) {
-                newHealth = game.damagePlayer(attackerPosition, targetPosition, (short) -1, false, false);
-            } else if (skillDamage == 0) {
-                newHealth = game.getPlayerCurrentHealth(targetPosition);
-            } else {
-                newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+            try {
+                if (skillDamage > 1) {
+                    newHealth = game.healPlayer(targetPosition, skillDamage);
+                } else if (denyDamage) {
+                    newHealth = game.damagePlayer(attackerPosition, targetPosition, (short) -1, false, false);
+                } else if (skillDamage == 0) {
+                    newHealth = game.getPlayerCurrentHealth(targetPosition);
+                } else {
+                    newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+                }
+            } catch (ValidationException ve) {
+                log.warn(ve.getMessage());
+                return;
             }
         } else {
-            if (skillDamage > 1) {
-                newHealth = game.healGuardian(targetPosition, skillDamage);
-            } else if (denyDamage) {
-                newHealth = game.damageGuardian(attackerPosition, targetPosition, (short) -1, false, false);
-            } else {
-                newHealth = game.damageGuardian(targetPosition, attackerPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+            try {
+                if (skillDamage > 1) {
+                    newHealth = game.healGuardian(targetPosition, skillDamage);
+                } else if (denyDamage) {
+                    newHealth = game.damageGuardian(attackerPosition, targetPosition, (short) -1, false, false);
+                } else {
+                    newHealth = game.damageGuardian(targetPosition, attackerPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+                }
+            } catch (ValidationException ve) {
+                log.warn(ve.getMessage());
+                return;
             }
 
             if (newHealth < 1) {
@@ -368,13 +384,27 @@ public class GuardianModeHandler {
     private void handleSpecialSkillsUseOfGuardians(Connection connection, C2SMatchplayUsesSkill playerUseSkill, byte guardianPos, MatchplayGuardianGame game, List<RoomPlayer> roomPlayers, Skill skill) {
         // There could be more special skills which need to be handled here
         if (skill.getDamage() > 1) {
-            short newHealth = game.healGuardian(guardianPos, skill.getDamage().shortValue());
+            Short newHealth;
+            try {
+                newHealth = game.healGuardian(guardianPos, skill.getDamage().shortValue());
+            } catch (ValidationException ve) {
+                log.warn(ve.getMessage());
+                return;
+            }
+
             S2CMatchplayDealDamage damagePacket =
                     new S2CMatchplayDealDamage(guardianPos, newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
             this.sendPacketToAllClientsInSameGameSession(damagePacket, connection);
         } else if (skill.getId() == 9) { // Miniam needs to be treated individually
             roomPlayers.forEach(rp -> {
-                short newHealth = game.damagePlayer(guardianPos, rp.getPosition(), skill.getDamage().shortValue(), false, false);
+                Short newHealth;
+                try {
+                    newHealth = game.damagePlayer(guardianPos, rp.getPosition(), skill.getDamage().shortValue(), false, false);
+                } catch (ValidationException ve) {
+                    log.warn(ve.getMessage());
+                    return;
+                }
+
                 S2CMatchplayDealDamage damagePacket =
                         new S2CMatchplayDealDamage(rp.getPosition(), newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
                 this.sendPacketToAllClientsInSameGameSession(damagePacket, connection);
@@ -661,7 +691,13 @@ public class GuardianModeHandler {
     }
 
     private void handleRevivePlayer(Connection connection, MatchplayGuardianGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
-        PlayerBattleState playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue());
+        PlayerBattleState playerBattleState = null;
+        try {
+            playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue());
+        } catch (ValidationException ve) {
+            log.warn(ve.getMessage());
+            return;
+        }
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
                     new S2CMatchplayDealDamage(playerBattleState.getPosition(), playerBattleState.getCurrentHealth(), (short) 0, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
