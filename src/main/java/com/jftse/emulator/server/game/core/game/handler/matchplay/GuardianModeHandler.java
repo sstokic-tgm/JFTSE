@@ -532,6 +532,9 @@ public class GuardianModeHandler {
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst().orElse(null);
+            if (rp == null) {
+                return;
+            }
 
             PlayerReward playerReward = playerRewards.stream()
                     .filter(x -> x.getPlayerPosition() == rp.getPosition())
