@@ -294,6 +294,9 @@ public class GuardianModeHandler {
                 newHealth = game.damagePlayerOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
             } else {
                 newHealth = game.damageGuardianOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
+                if (newHealth < 1) {
+                    this.increasePotsFromGuardiansDeath(game, receiverPosition);
+                }
             }
         } catch (ValidationException ve) {
             log.warn(ve.getMessage());
@@ -559,6 +562,9 @@ public class GuardianModeHandler {
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst().orElse(null);
+            if (rp == null) {
+                return;
+            }
 
             PlayerReward playerReward = playerRewards.stream()
                     .filter(x -> x.getPlayerPosition() == rp.getPosition())
