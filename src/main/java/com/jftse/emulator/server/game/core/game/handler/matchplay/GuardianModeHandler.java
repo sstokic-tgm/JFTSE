@@ -290,6 +290,9 @@ public class GuardianModeHandler {
             newHealth = game.damagePlayerOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
         } else {
             newHealth = game.damageGuardianOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
+            if (newHealth < 1) {
+                this.increasePotsFromGuardiansDeath(game, receiverPosition);
+            }
         }
 
         S2CMatchplayDealDamage damageToGuardianPacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
