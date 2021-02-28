@@ -743,6 +743,8 @@ public class GuardianModeHandler {
 
     private void handleQuickSlotItemUse(Connection connection, C2SMatchplayUsesSkill playerUseSkill) {
         Player player = connection.getClient().getActivePlayer();
+        Pocket pocket = player.getPocket();
+
         QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
         int itemId = -1;
         switch (playerUseSkill.getQuickSlotIndex()) {
@@ -764,11 +766,14 @@ public class GuardianModeHandler {
         }
 
         if (itemId > -1) {
-            PlayerPocket playerPocket = this.playerPocketService.findById((long) itemId);
-            playerPocket = this.playerPocketService.decrementPocketItemCount(playerPocket);
-            if (playerPocket.getItemCount() <= 0) {
+            PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemId, pocket);
+            int itemCount = playerPocket.getItemCount() - 1;
+
+            if (itemCount <= 0) {
+
                 playerPocketService.remove(playerPocket.getId());
-                pocketService.decrementPocketBelongings(player.getPocket());
+                pocket = pocketService.decrementPocketBelongings(pocket);
+                connection.getClient().getActivePlayer().setPocket(pocket);
 
                 quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, itemId);
                 player.setQuickSlotEquipment(quickSlotEquipment);
@@ -778,6 +783,9 @@ public class GuardianModeHandler {
 
                 S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(itemId);
                 connection.sendTCP(inventoryItemRemoveAnswerPacket);
+            } else {
+                playerPocket.setItemCount(itemCount);
+                playerPocketService.save(playerPocket);
             }
         }
     }
