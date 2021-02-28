@@ -390,10 +390,12 @@ public class GuardianModeHandler {
                 GameSession gameSession = connection.getClient().getActiveGameSession();
                 if (gameSession != null) {
                     RunnableEvent countDownRunnable = gameSession.getCountDownRunnable();
-                    countDownRunnable.setEventFireTime(countDownRunnable.getEventFireTime() + TimeUnit.SECONDS.toMillis(60));
-                    gameSession.getClients().forEach(c -> {
-                        c.getConnection().sendTCP(new S2CMatchplayIncreaseBreathTimerBy60Seconds());
-                    });
+                    if (countDownRunnable != null) {
+                        countDownRunnable.setEventFireTime(countDownRunnable.getEventFireTime() + TimeUnit.SECONDS.toMillis(60));
+                        gameSession.getClients().forEach(c -> {
+                            c.getConnection().sendTCP(new S2CMatchplayIncreaseBreathTimerBy60Seconds());
+                        });
+                    }
                 }
                 break;
         }
