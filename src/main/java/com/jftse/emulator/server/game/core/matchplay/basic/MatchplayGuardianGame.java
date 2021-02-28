@@ -45,6 +45,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 new Point(20, -75),
                 new Point(-20, -75));
         this.willDamages = new ArrayList<>();
+        this.setFinished(false);
     }
 
     public short damageGuardian(short guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) {
@@ -249,7 +250,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     @Override
     public long getTimeNeeded() {
-        return 0;
+        return getEndTime().getTime() - getStartTime().getTime();
     }
 
     @Override

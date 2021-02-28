@@ -508,7 +508,11 @@ public class GuardianModeHandler {
     }
 
     private void handleFinishGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        game.setEndTime(cal.getTime());
+
         game.setFinished(true);
+
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
