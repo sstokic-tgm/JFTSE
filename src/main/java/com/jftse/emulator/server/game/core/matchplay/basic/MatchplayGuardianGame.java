@@ -65,7 +65,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .orElse(null);
 
         if (isNormalDamageSkill) {
-            int damageToDeny = BattleUtils.calculateDef(guardianBattleState.getSta(), totalDamageToDeal, hasReceiverDefBuff);
+            int damageToDeny = BattleUtils.calculateDef(guardianBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
@@ -97,7 +97,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .orElse(null);
 
         if (isNormalDamageSkill) {
-            int damageToDeny = BattleUtils.calculateDef(playerBattleState.getSta(), totalDamageToDeal, hasReceiverDefBuff);
+            int damageToDeny = BattleUtils.calculateDef(playerBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
