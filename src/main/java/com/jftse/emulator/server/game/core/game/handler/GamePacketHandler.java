@@ -1731,6 +1731,8 @@ public class GamePacketHandler {
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, Packet packet) {
+        if (connection.getClient() == null) return;
+
         C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket = new C2SMatchplayPlayerPicksUpCrystal(packet);
         Room room = connection.getClient().getActiveRoom();
         switch (room.getMode()) {
@@ -1743,6 +1745,8 @@ public class GamePacketHandler {
     }
 
     public void handlePlayerUseSkill(Connection connection, Packet packet) {
+        if (connection.getClient() == null) return;
+
         C2SMatchplayUsesSkill playerUseSkill = new C2SMatchplayUsesSkill(packet);
         Room room = connection.getClient().getActiveRoom();
         switch (room.getMode()) {
@@ -1755,6 +1759,8 @@ public class GamePacketHandler {
     }
 
     public void handleSkillHitsTarget(Connection connection, Packet packet) {
+        if (connection.getClient() == null) return;
+
         C2SMatchplaySkillHitsTarget skillHitsTarget = new C2SMatchplaySkillHitsTarget(packet);
         Room room = connection.getClient().getActiveRoom();
         switch (room.getMode()) {
@@ -1767,6 +1773,8 @@ public class GamePacketHandler {
     }
 
     public void handleSwapQuickSlotItems(Connection connection, Packet packet) {
+        if (connection.getClient() == null) return;
+
         C2SMatchplaySwapQuickSlotItems swapQuickSlotItems = new C2SMatchplaySwapQuickSlotItems(packet);
         Room room = connection.getClient().getActiveRoom();
         switch (room.getMode()) {

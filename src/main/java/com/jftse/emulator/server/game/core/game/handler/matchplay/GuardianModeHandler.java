@@ -159,8 +159,7 @@ public class GuardianModeHandler {
 
     public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {
         // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
-        if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null)
-            return;
+        if (connection.getClient().getActiveGameSession() == null) return;
         
         RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
         short playerPosition = roomPlayer.getPosition();
@@ -188,6 +187,7 @@ public class GuardianModeHandler {
         boolean attackerIsGuardian = position > 9;
         boolean attackerIsPlayer = position < 4;
         GameSession gameSession = connection.getClient().getActiveGameSession();
+        // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
         if (gameSession == null) return;
 
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
@@ -218,8 +218,7 @@ public class GuardianModeHandler {
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
-        if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null)
-            return;
+        if (connection.getClient().getActiveGameSession() == null) return;
 
         byte skillId = skillHitsTarget.getSkillId();
         GameSession gameSession = connection.getClient().getActiveGameSession();
@@ -243,6 +242,9 @@ public class GuardianModeHandler {
     }
 
     public void handleSwapQuickSlotItems(Connection connection, C2SMatchplaySwapQuickSlotItems swapQuickSlotItems) {
+        // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
+        if (connection.getClient().getActiveGameSession() == null) return;
+
         RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
         Pocket pocket = roomPlayer.getPlayer().getPocket();
         PlayerPocket playerPocket = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(21, pocket);
