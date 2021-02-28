@@ -767,25 +767,27 @@ public class GuardianModeHandler {
 
         if (itemId > -1) {
             PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemId, pocket);
-            int itemCount = playerPocket.getItemCount() - 1;
+            if (playerPocket != null) {
+                int itemCount = playerPocket.getItemCount() - 1;
 
-            if (itemCount <= 0) {
+                if (itemCount <= 0) {
 
-                playerPocketService.remove(playerPocket.getId());
-                pocket = pocketService.decrementPocketBelongings(pocket);
-                connection.getClient().getActivePlayer().setPocket(pocket);
+                    playerPocketService.remove(playerPocket.getId());
+                    pocket = pocketService.decrementPocketBelongings(pocket);
+                    connection.getClient().getActivePlayer().setPocket(pocket);
 
-                quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, itemId);
-                player.setQuickSlotEquipment(quickSlotEquipment);
+                    quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, itemId);
+                    player.setQuickSlotEquipment(quickSlotEquipment);
 
-                player = playerService.save(player);
-                connection.getClient().setActivePlayer(player);
+                    player = playerService.save(player);
+                    connection.getClient().setActivePlayer(player);
 
-                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(itemId);
-                connection.sendTCP(inventoryItemRemoveAnswerPacket);
-            } else {
-                playerPocket.setItemCount(itemCount);
-                playerPocketService.save(playerPocket);
+                    S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(itemId);
+                    connection.sendTCP(inventoryItemRemoveAnswerPacket);
+                } else {
+                    playerPocket.setItemCount(itemCount);
+                    playerPocketService.save(playerPocket);
+                }
             }
         }
     }
