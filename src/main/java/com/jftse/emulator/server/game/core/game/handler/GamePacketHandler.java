@@ -929,7 +929,13 @@ public class GamePacketHandler {
         Room room = new Room();
         room.setRoomId(this.getRoomId());
         room.setRoomName(roomCreateRequestPacket.getRoomName());
-        room.setAllowBattlemon(roomCreateRequestPacket.getAllowBattlemon());
+        room.setAllowBattlemon((byte) 0);
+
+        if (roomCreateRequestPacket.getMode() == GameMode.BATTLE) {
+            roomCreateRequestPacket.setMode((byte) GameMode.GUARDIAN);
+            roomCreateRequestPacket.setPlayers((byte) 4);
+        }
+
         room.setMode(roomCreateRequestPacket.getMode());
         room.setRule(roomCreateRequestPacket.getRule());
         room.setPlayers(roomCreateRequestPacket.getPlayers());
@@ -954,6 +960,9 @@ public class GamePacketHandler {
             return;
 
         C2SRoomCreateQuickRequestPacket roomQuickCreateRequestPacket = new C2SRoomCreateQuickRequestPacket(packet);
+        if (roomQuickCreateRequestPacket.getMode() == GameMode.BATTLEMON)
+            return;
+
         Player player = connection.getClient().getActivePlayer();
         byte playerSize = roomQuickCreateRequestPacket.getPlayers();
 
@@ -961,9 +970,18 @@ public class GamePacketHandler {
         room.setRoomId(this.getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
         room.setAllowBattlemon(roomQuickCreateRequestPacket.getAllowBattlemon());
+
+        if (roomQuickCreateRequestPacket.getMode() == GameMode.BATTLE)
+            roomQuickCreateRequestPacket.setMode((byte) GameMode.GUARDIAN);
+
         room.setMode(roomQuickCreateRequestPacket.getMode());
         room.setRule((byte) 0);
-        room.setPlayers(playerSize == 0 ? 2 : playerSize);
+
+        if (roomQuickCreateRequestPacket.getMode() == GameMode.GUARDIAN)
+            room.setPlayers((byte) 4);
+        else
+            room.setPlayers(playerSize == 0 ? 2 : playerSize);
+
         room.setPrivate(false);
         room.setUnk1((byte) 0);
         room.setSkillFree(false);
@@ -990,6 +1008,11 @@ public class GamePacketHandler {
     public void handleGameModeChangePacket(Connection connection, Packet packet) {
         C2SRoomGameModeChangeRequestPacket changeRoomGameModeRequestPacket = new C2SRoomGameModeChangeRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
+
+        if (changeRoomGameModeRequestPacket.getMode() == GameMode.BATTLE) {
+            changeRoomGameModeRequestPacket.setMode((byte) GameMode.GUARDIAN);
+        }
+
         room.setMode(changeRoomGameModeRequestPacket.getMode());
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
         connection.sendTCP(roomInformationPacket);
@@ -1045,7 +1068,8 @@ public class GamePacketHandler {
         Room room = connection.getClient().getActiveRoom();
 
         byte allowBattlemon = changeRoomAllowBattlemonRequestPacket.getAllowBattlemon() == 1 ? (byte) 2 : (byte) 0;
-        room.setAllowBattlemon(allowBattlemon);
+        // disable battlemon
+        room.setAllowBattlemon((byte) 0);
 
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
