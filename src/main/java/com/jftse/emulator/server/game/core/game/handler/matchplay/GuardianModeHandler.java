@@ -19,6 +19,7 @@ import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetBossGuardiansStats;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardianStats;
@@ -55,6 +56,8 @@ public class GuardianModeHandler {
     private final BossGuardianService bossGuardianService;
     private final GuardianStageService guardianStageService;
     private final PlayerPocketService playerPocketService;
+    private final PlayerService playerService;
+    private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final PocketService pocketService;
     private final LevelService levelService;
     private final ClothEquipmentService clothEquipmentService;
@@ -215,7 +218,6 @@ public class GuardianModeHandler {
 
     public void handleSkillHitsTarget(Connection connection, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
-        // TODO: FIND OUT OTHER PLACES WHERE DATA INSIDE A MATCH IS STILL SENT EVEN THOUGH MATCH IS FINISHED
         if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null)
             return;
 
@@ -718,9 +720,18 @@ public class GuardianModeHandler {
         if (itemId > -1) {
             PlayerPocket playerPocket = this.playerPocketService.findById((long) itemId);
             playerPocket = this.playerPocketService.decrementPocketItemCount(playerPocket);
-            if (playerPocket.getItemCount() == 0) {
+            if (playerPocket.getItemCount() <= 0) {
                 playerPocketService.remove(playerPocket.getId());
                 pocketService.decrementPocketBelongings(player.getPocket());
+
+                quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, itemId);
+                player.setQuickSlotEquipment(quickSlotEquipment);
+
+                player = playerService.save(player);
+                connection.getClient().setActivePlayer(player);
+
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(itemId);
+                connection.sendTCP(inventoryItemRemoveAnswerPacket);
             }
         }
     }
