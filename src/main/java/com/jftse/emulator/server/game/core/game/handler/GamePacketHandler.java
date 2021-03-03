@@ -6,6 +6,7 @@ import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.challenge.Challenge;
 import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
+import com.jftse.emulator.server.database.model.gameserver.GameServer;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.home.HomeInventory;
 import com.jftse.emulator.server.database.model.item.ItemHouse;
@@ -1344,6 +1345,8 @@ public class GamePacketHandler {
 
         room.setStatus(RoomStatus.StartingGame);
 
+        GameServer relayServer = authenticationService.getGameServerByPort(connection.getServer().getTcpPort() + 1);
+
         List<Client> clientsInRoom = new ArrayList<>(Collections.unmodifiableList(this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId())));
 
         GameSession gameSession = new GameSession();
@@ -1365,7 +1368,7 @@ public class GamePacketHandler {
 
         List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
         clientsInRoom.forEach(c -> {
-            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket("127.0.0.1", 5896, room, clientInRoomLeftShiftList);
+            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(relayServer.getHost(), relayServer.getPort(), room, clientInRoomLeftShiftList);
             c.getConnection().sendTCP(gameNetworkSettings);
 
             // shift list to the left, so every client has his player id in the first place when doing session register
@@ -1432,7 +1435,7 @@ public class GamePacketHandler {
                     e.printStackTrace();
                 }
             }
-
+            
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
             room.setStatus(RoomStatus.InitializingGame);

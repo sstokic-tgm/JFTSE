@@ -20,9 +20,8 @@ public class S2CGameServerListPacket extends Packet {
             this.write(gameServer.getHost());
             this.write((short) gameServer.getPort().intValue());
             this.write((short) 0);  // players online
-            this.write((byte) 0);  // boolean for custom channel name
-            this.write("Custom Name");
-            this.write((char) 0);
+            this.write(gameServer.getIsCustomChannel());
+            this.write(gameServer.getName());
         }
     }
 }

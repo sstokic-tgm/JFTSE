@@ -4,10 +4,7 @@ import com.jftse.emulator.common.model.AbstractIdBaseModel;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -19,4 +16,6 @@ public class GameServer extends AbstractIdBaseModel {
     private String host;
     // char
     private Integer port;
+    private Boolean isCustomChannel = false;
+    private String name;
 }
