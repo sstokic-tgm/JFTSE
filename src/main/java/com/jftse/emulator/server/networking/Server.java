@@ -24,6 +24,7 @@ public class Server implements Runnable {
     private volatile boolean shutdown;
     private final Object updateLock = new Object();
     private Thread updateThread;
+    private int tcpPort;
 
     private ConnectionListener dispatchListener = new ConnectionListener() {
             public void connected(Connection connection) {
@@ -77,6 +78,7 @@ public class Server implements Runnable {
     }
 
     public void bind(int tcpPort) throws IOException {
+        this.tcpPort = tcpPort;
         bind(new InetSocketAddress("0.0.0.0", tcpPort), null);
     }
 

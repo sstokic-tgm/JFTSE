@@ -42,4 +42,9 @@ public class AuthenticationService {
     public List<GameServer> getGameServerList() {
         return gameServerRepository.findAllFetched();
     }
+
+    public GameServer getGameServerByPort(Integer port) {
+        Optional<GameServer> gameServer = gameServerRepository.findGameServerByPort(port);
+        return gameServer.orElse(null);
+    }
 }
