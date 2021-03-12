@@ -100,8 +100,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .findFirst()
                 .orElse(null);
 
-        if (guardianBattleState == null || playerBattleState == null)
-            throw new ValidationException("guardianBattleState or playerBattleState is null");
+        if (playerBattleState == null)
+            throw new ValidationException("playerBattleState is null");
 
         if (isNormalDamageSkill) {
             int damageToDeny = BattleUtils.calculateDef(playerBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
