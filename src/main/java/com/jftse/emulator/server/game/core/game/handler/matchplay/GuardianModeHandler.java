@@ -224,6 +224,10 @@ public class GuardianModeHandler {
 
         byte skillId = skillHitsTarget.getSkillId();
         GameSession gameSession = connection.getClient().getActiveGameSession();
+
+        // Until speed hack detection is not active do nothing here. This means we are in animations and the actual game is currently not started yet
+        if (!gameSession.isSpeedHackCheckActive()) return;
+
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
 
@@ -480,6 +484,7 @@ public class GuardianModeHandler {
         boolean triggerBossBattle = timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
         if (hasBossGuardianStage && allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
             GameSession gameSession = connection.getClient().getActiveGameSession();
+            gameSession.stopSpeedHackDetection();
             gameSession.clearCountDownRunnable();
 
             int activePlayingPlayersCount = game.getPlayerBattleStates().size();
@@ -523,9 +528,10 @@ public class GuardianModeHandler {
                             c.getConnection().sendTCP(setNameColorPacket);
                         }
                     }
-
-                    this.startDefeatTimer(connection, game, gameSession, game.getBossGuardianStage());
                 });
+
+                gameSession.setSpeedHackCheckActive(true);
+                this.startDefeatTimer(connection, game, gameSession, game.getBossGuardianStage());
             };
 
             RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(triggerGuardianServeRunnable, TimeUnit.SECONDS.toMillis(18));
@@ -557,6 +563,7 @@ public class GuardianModeHandler {
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
+        gameSession.stopSpeedHackDetection();
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
         gameSession.getClients().forEach(client -> {

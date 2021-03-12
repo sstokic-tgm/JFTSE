@@ -1804,7 +1804,7 @@ public class GamePacketHandler {
         if (activeGameSession != null && activeGameSession.isSpeedHackCheckActive() && room != null && room.getStatus() == RoomStatus.Running) {
             long lastKeepAliveTime = connection.getClient().getLastHearBeatTime();
             long delta = time - lastKeepAliveTime;
-            boolean maybeSpeedHack = lastKeepAliveTime > 0 && delta < TimeUnit.SECONDS.toMillis(6);
+            boolean maybeSpeedHack = lastKeepAliveTime > 0 && delta < TimeUnit.MILLISECONDS.toMillis(9500);
             if (maybeSpeedHack) {
                 boolean wasFirstRecognitionIgnoredForCurrentClient = activeGameSession.getFirstSpeedHackRecognitionIgnoredForClients().stream()
                         .filter(c -> c == connection.getClient())

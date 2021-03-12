@@ -46,4 +46,9 @@ public class GameSession {
             this.setCountDownRunnable(null);
         }
     }
+
+    public void stopSpeedHackDetection() {
+        this.setSpeedHackCheckActive(false);
+        this.getFirstSpeedHackRecognitionIgnoredForClients().clear();
+    }
 }
