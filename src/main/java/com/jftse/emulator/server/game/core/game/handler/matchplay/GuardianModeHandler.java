@@ -103,6 +103,7 @@ public class GuardianModeHandler {
         this.placeCrystalRandomly(connection, game);
         this.triggerGuardianAttackLoop(connection);
         this.startDefeatTimer(connection, game, gameSession, game.getGuardianStage());
+        gameSession.setSpeedHackCheckActive(true);
     }
 
     public void handlePrepareGuardianMode(Connection connection, Room room) {

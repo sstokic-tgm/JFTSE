@@ -1793,6 +1793,37 @@ public class GamePacketHandler {
         }
     }
 
+    public void tryDetectSpeedHack(Connection connection) {
+        if (connection == null || connection.getClient() == null) return;
+
+        long time = System.currentTimeMillis();
+        GameSession activeGameSession = connection.getClient().getActiveGameSession();
+        Room room = connection.getClient().getActiveRoom();
+        if (activeGameSession != null && activeGameSession.isSpeedHackCheckActive() && room != null && room.getStatus() == RoomStatus.Running) {
+            long lastKeepAliveTime = connection.getClient().getLastHearBeatTime();
+            long delta = time - lastKeepAliveTime;
+            boolean maybeSpeedHack = lastKeepAliveTime > 0 && delta < TimeUnit.SECONDS.toMillis(6);
+            if (maybeSpeedHack) {
+                boolean wasFirstRecognitionIgnoredForCurrentClient = activeGameSession.getFirstSpeedHackRecognitionIgnoredForClients().stream()
+                        .filter(c -> c == connection.getClient())
+                        .findFirst()
+                        .isPresent();
+
+                // With this if we avoid a possible false negative
+                if (wasFirstRecognitionIgnoredForCurrentClient) {
+                    String message = "ARE YOU HACKING? PLEASE STOP OTHERWISE WE'LL PUNISH YOU!";
+                    S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", message);
+                    connection.sendTCP(chatRoomAnswerPacket);
+                    log.warn(String.format("Player %s is maybe hacking", connection.getClient().getActivePlayer().getName()));
+                } else {
+                    activeGameSession.getFirstSpeedHackRecognitionIgnoredForClients().add(connection.getClient());
+                }
+            }
+        }
+
+        connection.getClient().setLastHearBeatTime(time);
+    }
+
     public void handleUnknown(Connection connection, Packet packet) {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {

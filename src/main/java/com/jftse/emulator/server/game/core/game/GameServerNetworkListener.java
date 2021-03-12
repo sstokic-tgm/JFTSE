@@ -284,6 +284,9 @@ public class GameServerNetworkListener implements ConnectionListener {
                 break;
 
             case PacketID.C2SHeartbeat:
+                gamePacketHandler.tryDetectSpeedHack(connection);
+                break;
+
             case PacketID.C2SLoginAliveClient:
                 // empty..
                 break;

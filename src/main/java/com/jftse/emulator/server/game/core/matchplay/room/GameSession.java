@@ -16,6 +16,7 @@ public class GameSession {
         clients = new ArrayList<>();
         clientsInRelay = new ArrayList<>();
         runnableEvents = new ArrayList<>();
+        firstSpeedHackRecognitionIgnoredForClients = new ArrayList<>();
     }
 
     private int sessionId;
@@ -29,6 +30,8 @@ public class GameSession {
     private List<Client> clientsInRelay;
     private List<RunnableEvent> runnableEvents;
     private RunnableEvent countDownRunnable;
+    private boolean speedHackCheckActive;
+    private List<Client> firstSpeedHackRecognitionIgnoredForClients;
 
     public Client getClientByPlayerId(long playerId) {
         return clients.stream()
