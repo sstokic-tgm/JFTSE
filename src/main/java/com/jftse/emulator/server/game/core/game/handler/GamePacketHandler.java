@@ -110,11 +110,15 @@ public class GamePacketHandler {
         this.guardianModeHandler.init(this.gameHandler);
         scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
         scheduledExecutorService.scheduleAtFixedRate(() -> {
-            List<GameSession> gameSessions = new ArrayList<>(this.gameSessionManager.getGameSessionList());
-            gameSessions.forEach(gameSession -> {
-                if (gameSession == null) return;
-                runnableEventHandler.handleQueuedRunnableEvents(gameSession);
-            });
+            try {
+                List<GameSession> gameSessions = new ArrayList<>(this.gameSessionManager.getGameSessionList());
+                gameSessions.forEach(gameSession -> {
+                    if (gameSession == null) return;
+                    runnableEventHandler.handleQueuedRunnableEvents(gameSession);
+                });
+            } catch (Exception ex) {
+                log.error(String.format("Exception in runnable thread: %s", ex.getMessage()));
+            }
         }, 0, 5, TimeUnit.MILLISECONDS);
     }
 
