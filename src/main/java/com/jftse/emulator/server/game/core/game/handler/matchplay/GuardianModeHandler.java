@@ -373,7 +373,8 @@ public class GuardianModeHandler {
                 .filter(x -> x.getPosition() == guardianPos)
                 .findFirst()
                 .orElse(null);
-        if (guardianBattleState != null) {
+        if (guardianBattleState != null && !guardianBattleState.isLooted()) {
+            guardianBattleState.setLooted(true);
             game.setExpPot(game.getExpPot() + guardianBattleState.getExp());
             game.setGoldPot(game.getGoldPot() + guardianBattleState.getGold());
         }

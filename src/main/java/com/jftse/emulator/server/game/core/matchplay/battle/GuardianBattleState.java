@@ -16,6 +16,7 @@ public class GuardianBattleState {
     private int will;
     private int exp;
     private int gold;
+    private boolean looted;
 
     public GuardianBattleState(int btItemId, short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
         this.btItemId = btItemId;
