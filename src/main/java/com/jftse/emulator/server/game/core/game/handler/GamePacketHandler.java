@@ -67,6 +67,7 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 import com.jftse.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -79,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class GamePacketHandler {
