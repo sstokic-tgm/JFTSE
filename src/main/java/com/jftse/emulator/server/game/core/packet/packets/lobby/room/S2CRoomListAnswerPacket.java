@@ -14,11 +14,10 @@ public class S2CRoomListAnswerPacket extends Packet {
 
         this.write((char) roomList.size());
         for (Room room : roomList) {
-            int nonSpectatorPlayerCount = (int) room.getRoomPlayerList()
-                    .stream()
+            int nonSpectatorPlayerCount = (int) room.getRoomPlayerList().stream()
                     .filter(x -> x.getPosition() < 4)
                     .count();
-            int maxPositionsAvailable = (int) room.getPositions().stream()
+            byte maxPositionsAvailable = (byte) room.getPositions().stream()
                     .limit(4)
                     .filter(x -> x != RoomPositionState.Locked)
                     .count();
