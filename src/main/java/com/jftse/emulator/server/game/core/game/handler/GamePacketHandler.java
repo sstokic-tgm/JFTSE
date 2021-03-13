@@ -1599,9 +1599,12 @@ public class GamePacketHandler {
     }
 
     public void handleDevPacket(Connection connection, Packet packet) {
-        byte[] data = packet.getData();
-        Packet packetToRelay = new Packet(data);
-        this.getGameHandler().getClientList().forEach(x -> x.getConnection().sendTCP(packetToRelay));
+        boolean active = false; // Never change this to true for deployed versions
+        if (active) {
+            byte[] data = packet.getData();
+            Packet packetToRelay = new Packet(data);
+            this.getGameHandler().getClientList().forEach(x -> x.getConnection().sendTCP(packetToRelay));
+        }
     }
 
     public void handleMatchplayPointPacket(Connection connection, Packet packet) {
