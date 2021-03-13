@@ -1226,10 +1226,12 @@ public class GamePacketHandler {
 
     public void handleRoomMapChangeRequestPacket(Connection connection, Packet packet) {
         C2SRoomMapChangeRequestPacket roomMapChangeRequestPacket = new C2SRoomMapChangeRequestPacket(packet);
-        connection.getClient().getActiveRoom().setMap(roomMapChangeRequestPacket.getMap());
         Room room = connection.getClient().getActiveRoom();
-        S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(roomMapChangeRequestPacket.getMap());
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomMapChangeAnswerPacket));
+        if (room != null) {
+            room.setMap(roomMapChangeRequestPacket.getMap());
+            S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(roomMapChangeRequestPacket.getMap());
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomMapChangeAnswerPacket));
+        }
     }
 
     public void handleRoomPositionChangeRequestPacket(Connection connection, Packet packet) {
@@ -1338,6 +1340,11 @@ public class GamePacketHandler {
         roomStartGameAck.write((char) 0);
 
         Room room = connection.getClient().getActiveRoom();
+        if (room == null) {
+            connection.sendTCP(roomStartGameAck);
+            return;
+        }
+
         if (room.getStatus() == RoomStatus.StartingGame) {
             connection.sendTCP(roomStartGameAck);
             room.setStatus(RoomStatus.StartCancelled);
@@ -1804,7 +1811,7 @@ public class GamePacketHandler {
         if (activeGameSession != null && activeGameSession.isSpeedHackCheckActive() && room != null && room.getStatus() == RoomStatus.Running) {
             long lastKeepAliveTime = connection.getClient().getLastHearBeatTime();
             long delta = time - lastKeepAliveTime;
-            boolean maybeSpeedHack = lastKeepAliveTime > 0 && delta < TimeUnit.MILLISECONDS.toMillis(9500);
+            boolean maybeSpeedHack = lastKeepAliveTime > 0 && delta < 9500;
             if (maybeSpeedHack) {
                 boolean wasFirstRecognitionIgnoredForCurrentClient = activeGameSession.getFirstSpeedHackRecognitionIgnoredForClients().stream()
                         .filter(c -> c == connection.getClient())

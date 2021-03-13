@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 public class GuardianModeHandler {
     private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(15);
     private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(7);
+    private final static long guardianAttackLoopTime = TimeUnit.SECONDS.toMillis(8);
 
     private final PacketEventHandler packetEventHandler;
     private final RunnableEventHandler runnableEventHandler;
@@ -280,7 +281,7 @@ public class GuardianModeHandler {
             });
 
             this.triggerGuardianAttackLoop(connection);
-        }, TimeUnit.SECONDS.toMillis(5));
+        }, this.guardianAttackLoopTime);
         gameSession.getRunnableEvents().add(runnableEvent);
     }
 
@@ -578,7 +579,7 @@ public class GuardianModeHandler {
             PlayerReward playerReward = playerRewards.stream()
                     .filter(x -> x.getPlayerPosition() == rp.getPosition())
                     .findFirst()
-                    .orElse(null);
+                    .orElse(this.createEmptyPlayerReward());
 
             Player player = client.getActivePlayer();
             byte oldLevel = player.getLevel();
@@ -615,6 +616,13 @@ public class GuardianModeHandler {
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
             this.gameSessionManager.removeGameSession(gameSession);
         }
+    }
+
+    private PlayerReward createEmptyPlayerReward() {
+        PlayerReward playerReward = new PlayerReward();
+        playerReward.setBasicRewardExp(1);
+        playerReward.setBasicRewardGold(1);
+        return playerReward;
     }
 
     private void handleMonsLavaMap(Connection connection, Room room, float averagePlayerLevel) {
