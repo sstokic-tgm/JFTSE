@@ -237,6 +237,19 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return playerBattleState;
     }
 
+    public GuardianBattleState reviveAnyGuardian(short revivePercentage) throws ValidationException {
+        GuardianBattleState guardianBattleState = getGuardianBattleStates().stream()
+                .filter(x -> x.getCurrentHealth() < 1)
+                .findFirst()
+                .orElse(null);
+        if (guardianBattleState != null) {
+            short newGuardianHealth = healGuardian(guardianBattleState.getPosition(), revivePercentage);
+            guardianBattleState.setCurrentHealth(newGuardianHealth);
+        }
+
+        return guardianBattleState;
+    }
+
     public short getPlayerCurrentHealth(short playerPos) throws ValidationException {
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)

@@ -202,7 +202,7 @@ public class GuardianModeHandler {
         if (attackerIsGuardian) {
             Skill skill = skillService.findSkillById((long)anyoneUsesSkill.getSkillIndex() + 1);
             if (skill != null) {
-                this.handleSpecialSkillsUseOfGuardians(connection, anyoneUsesSkill, position, game, roomPlayers, skill);
+                this.handleSpecialSkillsUseOfGuardians(connection, position, game, roomPlayers, skill);
             }
         } else if (attackerIsPlayer) {
             if (anyoneUsesSkill.isQuickSlot()) {
@@ -391,9 +391,11 @@ public class GuardianModeHandler {
         return skillId == 5 || skillId == 38;
     }
 
-    private void handleSpecialSkillsUseOfGuardians(Connection connection, C2SMatchplayUsesSkill playerUseSkill, byte guardianPos, MatchplayGuardianGame game, List<RoomPlayer> roomPlayers, Skill skill) {
+    private void handleSpecialSkillsUseOfGuardians(Connection connection, byte guardianPos, MatchplayGuardianGame game, List<RoomPlayer> roomPlayers, Skill skill) {
         // There could be more special skills which need to be handled here
-        if (skill.getDamage() > 1) {
+        if (skill.getId() == 29) { // RebirthOne
+            this.handleReviveGuardian(connection, game, skill);
+        } else if (skill.getDamage() > 1) {
             Short newHealth;
             try {
                 newHealth = game.healGuardian(guardianPos, skill.getDamage().shortValue());
@@ -724,6 +726,21 @@ public class GuardianModeHandler {
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
                     new S2CMatchplayDealDamage(playerBattleState.getPosition(), playerBattleState.getCurrentHealth(), (short) 0, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+            this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+        }
+    }
+
+    private void handleReviveGuardian(Connection connection, MatchplayGuardianGame game, Skill skill) {
+        GuardianBattleState guardianBattleState = null;
+        try {
+            guardianBattleState = game.reviveAnyGuardian(skill.getDamage().shortValue());
+        } catch (ValidationException ve) {
+            log.warn(ve.getMessage());
+            return;
+        }
+        if (guardianBattleState != null) {
+            S2CMatchplayDealDamage damageToPlayerPacket =
+                    new S2CMatchplayDealDamage(guardianBattleState.getPosition(), (short) guardianBattleState.getCurrentHealth(), (short) 0, skill.getId().byteValue(), 0, 0);
             this.sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }
