@@ -434,7 +434,7 @@
     "btItemId": 20,
     "guardianBtItems": [
       {
-        "skillIndex": 4,
+        "skillIndex": 2,
         "chance": 20
       },
       {
@@ -581,7 +581,7 @@
         "chance": 5
       },
       {
-        "skillIndex": 11,
+        "skillIndex": 7,
         "chance": 5
       },
       {
