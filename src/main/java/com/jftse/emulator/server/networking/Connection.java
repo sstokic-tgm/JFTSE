@@ -102,6 +102,10 @@ public class Connection {
         connectionListeners.forEach(cl -> cl.onException(this, exception));
     }
 
+    public void notifyTimeout() {
+        connectionListeners.forEach(cl -> cl.onTimeout(this));
+    }
+
     public InetSocketAddress getRemoteAddressTCP() {
         SocketChannel socketChannel = tcpConnection.getSocketChannel();
 

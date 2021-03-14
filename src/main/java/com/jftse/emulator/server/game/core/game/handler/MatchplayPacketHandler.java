@@ -1,7 +1,15 @@
 package com.jftse.emulator.server.game.core.game.handler;
 
+import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
+import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
+import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
+import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
+import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
+import com.jftse.emulator.server.game.core.matchplay.room.Room;
+import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayBackToRoom;
@@ -107,6 +115,65 @@ public class MatchplayPacketHandler {
         }
         this.relayHandler.removeClient(connection.getClient());
         connection.close();
+    }
+
+    public void handleTimeout(Connection connection) {
+        Client client = connection.getClient();
+        if (client == null) {
+            connection.close();
+            return;
+        }
+
+        Room room = client.getActiveRoom();
+        if (room == null || room.getStatus() != RoomStatus.Running) {
+            connection.close();
+            return;
+        }
+
+        GameSession gameSession = client.getActiveGameSession();
+        if (gameSession == null) {
+            connection.close();
+            return;
+        }
+
+        MatchplayGame game = gameSession.getActiveMatchplayGame();
+        if (game == null) {
+            connection.close();
+            return;
+        }
+
+        if (game instanceof MatchplayGuardianGame) {
+            boolean success = this.tryHandleTimeoutForGuardianGameMatch(connection, client, room, (MatchplayGuardianGame) game);
+            if (success) {
+                return;
+            }
+        }
+
+        connection.close();
+    }
+
+    private boolean tryHandleTimeoutForGuardianGameMatch(Connection connection, Client client, Room room, MatchplayGuardianGame game) {
+        Player player = client.getActivePlayer();
+        if (player == null) return false;
+
+        RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
+                .filter(x -> x.getPlayer() == player)
+                .findFirst()
+                .orElse(null);
+        if (roomPlayer == null) return false;
+
+        PlayerBattleState playerBattleState = game.getPlayerBattleStates().stream()
+                .filter(x -> x.getPosition() == roomPlayer.getPosition())
+                .findFirst()
+                .orElse(null);
+        if (playerBattleState == null) return false;
+
+        if (playerBattleState.getCurrentHealth() < 1) {
+            connection.getTcpConnection().setLastReadTime(System.currentTimeMillis());
+            return true;
+        }
+
+        return false;
     }
 
     public void handleUnknown(Connection connection, Packet packet) {

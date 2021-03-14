@@ -65,4 +65,8 @@ public class RelayServerNetworkListener implements ConnectionListener {
                 log.error(exception.getMessage(), exception);
         }
     }
+
+    public void onTimeout(Connection connection) {
+        matchplayPacketHandler.handleTimeout(connection);
+    }
 }
