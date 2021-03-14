@@ -3,10 +3,12 @@ package com.jftse.emulator.server.database.model.player;
 import com.jftse.emulator.common.model.AbstractBaseModel;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
+import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.database.model.tutorial.TutorialProgress;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
@@ -41,6 +43,9 @@ public class Player extends AbstractBaseModel {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "player")
     private List<TutorialProgress> tutorialProgressList;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "player")
+    private GuildMember guildMember;
 
     private Boolean firstPlayer = false;
     private Boolean alreadyCreated = false;
