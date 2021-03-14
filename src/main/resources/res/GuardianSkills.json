@@ -142,7 +142,7 @@
       },
       {
         "skillIndex": 5,
-        "chance": 25
+        "chance": 45
       },
       {
         "skillIndex": 24,
@@ -150,7 +150,7 @@
       },
       {
         "skillIndex": 15,
-        "chance": 25
+        "chance": 5
       }
     ]
   },
@@ -184,7 +184,7 @@
     "guardianBtItems": [
       {
         "skillIndex": 5,
-        "chance": 20
+        "chance": 35
       },
       {
         "skillIndex": 3,
@@ -200,7 +200,7 @@
       },
       {
         "skillIndex": 16,
-        "chance": 20
+        "chance": 5
       }
     ]
   },
@@ -280,7 +280,7 @@
       },
       {
         "skillIndex": 5,
-        "chance": 25
+        "chance": 45
       },
       {
         "skillIndex": 24,
@@ -288,7 +288,7 @@
       },
       {
         "skillIndex": 15,
-        "chance": 25
+        "chance": 5
       }
     ]
   },
@@ -322,11 +322,11 @@
     "guardianBtItems": [
       {
         "skillIndex": 27,
-        "chance": 20
+        "chance": 25
       },
       {
         "skillIndex": 3,
-        "chance": 20
+        "chance": 30
       },
       {
         "skillIndex": 10,
@@ -338,7 +338,7 @@
       },
       {
         "skillIndex": 16,
-        "chance": 20
+        "chance": 5
       }
     ]
   },

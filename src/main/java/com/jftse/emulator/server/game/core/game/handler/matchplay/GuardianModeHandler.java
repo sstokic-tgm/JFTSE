@@ -46,14 +46,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Log4j2
 public class GuardianModeHandler {
-    private final static long crystalDefaultRespawnTime = TimeUnit.SECONDS.toMillis(15);
-    private final static long crystalDefaultDespawnTime = TimeUnit.SECONDS.toMillis(7);
     private final static long guardianAttackLoopTime = TimeUnit.SECONDS.toMillis(8);
 
     private final PacketEventHandler packetEventHandler;
     private final RunnableEventHandler runnableEventHandler;
     private final SkillService skillService;
-    private final SkillDropRateService skillDropRateService;
     private final GuardianService guardianService;
     private final BossGuardianService bossGuardianService;
     private final GuardianStageService guardianStageService;
@@ -101,7 +98,24 @@ public class GuardianModeHandler {
         });
 
         game.resetStageStartTime();
-        this.placeCrystalRandomly(connection, game);
+
+        int activePlayers = (int) game.getPlayerBattleStates().stream().count();
+        switch (activePlayers) {
+            case 1:
+            case 2:
+                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
+                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(8));
+                this.placeCrystalRandomly(connection, game);
+                break;
+            case 3:
+            case 4:
+                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
+                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(7));
+                this.placeCrystalRandomly(connection, game);
+                this.placeCrystalRandomly(connection, game);
+                break;
+        }
+
         this.triggerGuardianAttackLoop(connection);
         this.startDefeatTimer(connection, game, gameSession, game.getGuardianStage());
         gameSession.setSpeedHackCheckActive(true);
@@ -180,7 +194,7 @@ public class GuardianModeHandler {
             this.sendPacketToAllClientsInSameGameSession(randomGuardianSkill, connection);
 
             game.getSkillCrystals().remove(skillCrystal);
-            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
+            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), game.getCrystalSpawnInterval());
             gameSession.getRunnableEvents().add(runnableEvent);
         }
     }
@@ -766,12 +780,12 @@ public class GuardianModeHandler {
                 S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
                 this.sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
                 game.getSkillCrystals().remove(skillCrystal);
-                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), this.crystalDefaultRespawnTime);
+                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(() -> this.placeCrystalRandomly(connection, game), game.getCrystalSpawnInterval());
                 gameSession.getRunnableEvents().add(runnableEvent);
             }
         };
 
-        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(despawnCrystalRunnable, this.crystalDefaultDespawnTime);
+        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(despawnCrystalRunnable, game.getCrystalDeSpawnInterval());
         gameSession.getRunnableEvents().add(runnableEvent);
     }
 

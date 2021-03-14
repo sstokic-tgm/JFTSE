@@ -20,6 +20,9 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Setter
 public class MatchplayGuardianGame extends MatchplayGame {
+    private final short guardianHealPercentage = 5; // Balancing purposes. Only ever heal 5% of guardians hp.
+    private long crystalSpawnInterval;
+    private long crystalDeSpawnInterval;
     private List<Point> playerLocationsOnMap;
     private List<PlayerBattleState> playerBattleStates;
     private List<GuardianBattleState> guardianBattleStates;
@@ -213,6 +216,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         if (guardianBattleState == null)
             throw new ValidationException("guardianBattleState is null");
 
+        percentage = this.guardianHealPercentage;
         short healthToHeal = (short) (guardianBattleState.getMaxHealth() * (percentage / 100f));
         short currentHealth = (short) (guardianBattleState.getCurrentHealth() < 0 ? 0 : guardianBattleState.getCurrentHealth());
         short newGuardianHealth = (short) (currentHealth + healthToHeal);
@@ -243,6 +247,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .findFirst()
                 .orElse(null);
         if (guardianBattleState != null) {
+            revivePercentage = this.guardianHealPercentage;
             short newGuardianHealth = healGuardian(guardianBattleState.getPosition(), revivePercentage);
             guardianBattleState.setCurrentHealth(newGuardianHealth);
         }
