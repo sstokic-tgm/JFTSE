@@ -1388,26 +1388,6 @@ public class GamePacketHandler {
             clientInRoomLeftShiftList.add(0, clientInRoomLeftShiftList.remove(clientInRoomLeftShiftList.size() - 1));
         });
 
-        RoomPlayer playerInSlot0 = room.getRoomPlayerList().stream()
-                .filter(x -> x.getPosition() == 0)
-                .findFirst().orElse(null);
-        Client clientToHostGame = gameHandler.getClientsInRoom(room.getRoomId()).stream()
-                .filter(x -> playerInSlot0 != null && x.getActivePlayer().getId().equals(playerInSlot0.getPlayer().getId()))
-                .findFirst()
-                .orElse(connection.getClient());
-        Packet setHostPacket = new Packet(PacketID.S2CSetHost);
-        setHostPacket.write((byte) 1);
-        clientToHostGame.getConnection().sendTCP(setHostPacket);
-
-        Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
-        clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
-
-        switch (room.getMode()) {
-            case GameMode.GUARDIAN:
-                this.guardianModeHandler.handlePrepareGuardianMode(connection, room);
-                break;
-        }
-
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
         executor.schedule(() -> {
             int secondsToCount = 5;
@@ -1427,10 +1407,6 @@ public class GamePacketHandler {
                             .allMatch(RoomPlayer::isReady);
 
                     if (!allReady || threadRoom.getStatus() == RoomStatus.StartCancelled) {
-                        Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
-                        unsetHostPacket.write((byte) 0);
-                        clientToHostGame.getConnection().sendTCP(unsetHostPacket);
-
                         threadRoom.setStatus(RoomStatus.NotRunning);
                         Packet startGameCancelledPacket = new Packet(PacketID.S2CRoomStartGameCancelled);
                         startGameCancelledPacket.write((char) 0);
@@ -1447,6 +1423,26 @@ public class GamePacketHandler {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+
+            RoomPlayer playerInSlot0 = room.getRoomPlayerList().stream()
+                    .filter(x -> x.getPosition() == 0)
+                    .findFirst().orElse(null);
+            Client clientToHostGame = gameHandler.getClientsInRoom(room.getRoomId()).stream()
+                    .filter(x -> playerInSlot0 != null && x.getActivePlayer().getId().equals(playerInSlot0.getPlayer().getId()))
+                    .findFirst()
+                    .orElse(connection.getClient());
+            Packet setHostPacket = new Packet(PacketID.S2CSetHost);
+            setHostPacket.write((byte) 1);
+            clientToHostGame.getConnection().sendTCP(setHostPacket);
+
+            Packet setHostUnknownPacket = new Packet(PacketID.S2CSetHostUnknown);
+            clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
+
+            switch (room.getMode()) {
+                case GameMode.GUARDIAN:
+                    this.guardianModeHandler.handlePrepareGuardianMode(connection, room);
+                    break;
             }
             
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
