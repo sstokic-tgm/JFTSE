@@ -846,7 +846,7 @@ public class GuardianModeHandler {
         int negator = (int) (Math.random() * 2) == 0 ? -1 : 1;
         float xPos = (float) (Math.random() * 60) * negator;
         float yPos = (short) (Math.random() * 120) * -1;
-        yPos = Math.abs(yPos) < 5 ? -5 : yPos;
+        yPos = Math.abs(yPos) < 10 ? -10 : yPos;
         return new Point2D.Float(xPos, yPos);
     }
 
