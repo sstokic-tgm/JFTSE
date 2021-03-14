@@ -7,6 +7,8 @@ import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.challenge.Challenge;
 import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
 import com.jftse.emulator.server.database.model.gameserver.GameServer;
+import com.jftse.emulator.server.database.model.guild.Guild;
+import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.home.HomeInventory;
 import com.jftse.emulator.server.database.model.item.ItemHouse;
@@ -39,6 +41,7 @@ import com.jftse.emulator.server.game.core.packet.packets.authserver.gameserver.
 import com.jftse.emulator.server.game.core.packet.packets.battle.C2SQuickSlotUseRequestPacket;
 import com.jftse.emulator.server.game.core.packet.packets.challenge.*;
 import com.jftse.emulator.server.game.core.packet.packets.chat.*;
+import com.jftse.emulator.server.game.core.packet.packets.guild.*;
 import com.jftse.emulator.server.game.core.packet.packets.home.C2SHomeItemsPlaceReqPacket;
 import com.jftse.emulator.server.game.core.packet.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.home.S2CHomeItemsLoadAnswerPacket;
@@ -99,6 +102,8 @@ public class GamePacketHandler {
     private final LotteryService lotteryService;
     private final LevelService levelService;
     private final PlayerStatisticService playerStatisticService;
+    private final GuildMemberService guildMemberService;
+    private final GuildService guildService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -1815,6 +1820,315 @@ public class GamePacketHandler {
                 this.gameSessionManager.removeGameSession(gameSession);
             }
         }
+    }
+
+    public void handleGuildNoticeRequestPacket(Connection connection, Packet packet) {
+        Player activePlayer = connection.getClient().getActivePlayer();
+
+        if (activePlayer.getGuildMember() != null)
+            connection.sendTCP(new S2CGuildNoticeAnswerPacket(activePlayer.getGuildMember().getGuild().getNotice()));
+    }
+
+    public void handleGuildNameCheckRequestPacket(Connection connection, Packet packet) {
+        C2SGuildNameCheckRequestPacket guildNameCheckRequestPacket = new C2SGuildNameCheckRequestPacket(packet);
+
+        if (guildService.findByName(guildNameCheckRequestPacket.getName()) != null)
+            connection.sendTCP(new S2CGuildNameCheckAnswerPacket((short)-1));
+        else
+            connection.sendTCP(new S2CGuildNameCheckAnswerPacket((short)0));
+    }
+
+    public void handleGuildCreateRequestPacket(Connection connection, Packet packet) {
+        C2SGuildCreateRequestPacket guildCreateRequestPacket = new C2SGuildCreateRequestPacket(packet);
+
+        String guildName = guildCreateRequestPacket.getName();
+        if (guildName.length() < 2 || guildName.length() > 12 ||  this.guildService.findByName(guildName) != null) {
+            connection.sendTCP(new S2CGuildCreateAnswerPacket((char) -1)); // This name cannot be used as a Club name.
+            return;
+        }
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        if (activePlayer.getGuildMember() != null) {
+            connection.sendTCP(new S2CGuildCreateAnswerPacket((char) -2)); // You already have a Club.
+            return;
+        }
+        else if (activePlayer.getGold() < 5000) {
+            connection.sendTCP(new S2CGuildCreateAnswerPacket((char) -3)); // You do not have enough gold to create a new Club
+            return;
+        }
+        else if (activePlayer.getLevel() < 10) {
+            connection.sendTCP(new S2CGuildCreateAnswerPacket((char) -4)); // Your level is too low to create a new Club.
+            return;
+        }
+
+        Guild guild = new Guild();
+        guild.setName(guildName);
+        guild.setIntroduction(guildCreateRequestPacket.getIntroduction());
+        guild.setIsPublic(guildCreateRequestPacket.isPublic());
+        guild.setLevelRestriction(guildCreateRequestPacket.getLevelRestriction());
+        guild.setAllowedCharacterType(guildCreateRequestPacket.getAllowedCharacterType());
+        this.guildService.save(guild);
+
+        GuildMember guildMember = new GuildMember();
+        guildMember.setGuild(guild);
+        guildMember.setPlayer(connection.getClient().getActivePlayer());
+        guildMember.setMemberRank((byte) 3); // ClubMaster
+        guildMember.setRequestDate(new Date());
+        guildMember.setWaitingForApproval(false);
+        this.guildMemberService.save(guildMember);
+
+        activePlayer.setGold(activePlayer.getGold() - 5000);
+        activePlayer.setGuildMember(guildMember);
+        this.playerService.save(activePlayer);
+
+        guild.setMemberList(Arrays.asList(guildMember));
+        connection.sendTCP(new S2CGuildCreateAnswerPacket((char) 0));
+    }
+
+    public void handleGuildDataRequestPacket(Connection connection, Packet packet) {
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember == null)
+            connection.sendTCP(new S2CGuildDataAnswerPacket((short)1, null));
+        else if (guildMember.getWaitingForApproval())
+            connection.sendTCP(new S2CGuildDataAnswerPacket((short)-1, null));
+        else
+            connection.sendTCP(new S2CGuildDataAnswerPacket((short)0, guildMember.getGuild()));
+    }
+
+    public void handleGuildListRequestPacket(Connection connection, Packet packet) {
+        C2SGuildListRequestPacket guildListRequestPacket = new C2SGuildListRequestPacket(packet);
+
+        List<Guild> guildList = this.guildService.findAll();
+        connection.sendTCP(new S2CGuildListAnswerPacket(guildList));
+    }
+
+    public void handleGuildJoinRequestPacket(Connection connection, Packet packet) {
+        C2SGuildJoinRequestPacket guildJoinRequestPacket = new C2SGuildJoinRequestPacket(packet);
+        Player activePlayer = connection.getClient().getActivePlayer();
+
+        Guild guild = guildService.findById((long)guildJoinRequestPacket.getGuildId());
+        if (guild == null
+                || activePlayer.getGuildMember() != null
+                || guild.getMemberList().size() == guild.getMaxMemberCount()) {
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -1));
+            return;
+        }
+
+        GuildMember guildMember = new GuildMember();
+        guildMember.setGuild(guild);
+        guildMember.setPlayer(activePlayer);
+        guildMember.setRequestDate(new Date());
+        guildMember.setWaitingForApproval(!guild.getIsPublic());
+        guildMemberService.save(guildMember);
+
+        if (guild.getIsPublic()) {
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short)0));
+            connection.sendTCP(new S2CGuildDataAnswerPacket((short)0, guild));
+        }
+        else
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short)1));
+    }
+
+    public void handleGuildLeaveRequestPacket(Connection connection, Packet packet) {
+        Player activePlayer = connection.getClient().getActivePlayer();
+        guildMemberService.remove(activePlayer.getGuildMember().getId());
+
+        activePlayer.setGuildMember(null);
+        playerService.save(activePlayer);
+    }
+
+    public void handleGuildChangeInformationRequestPacket(Connection connection, Packet packet) {
+        C2SGuildChangeInformationRequestPacket guildChangeInformationRequestPacket =
+                new C2SGuildChangeInformationRequestPacket(packet);
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember != null && guildMember.getMemberRank() > 1) {
+            Guild guild = guildMember.getGuild();
+
+            guild.setIntroduction(guildChangeInformationRequestPacket.getIntroduction());
+            guild.setLevelRestriction(guildChangeInformationRequestPacket.getMinLevel());
+            guild.setIsPublic(guildChangeInformationRequestPacket.isPublic());
+            guild.setAllowedCharacterType(guildChangeInformationRequestPacket.getAllowedCharacterType());
+            guildService.save(guild);
+        }
+
+        connection.sendTCP(new S2CGuildDataAnswerPacket((byte)0, guildMember.getGuild()));
+    }
+
+    public void handleGuildReverseMemberDataRequestPacket(Connection connection, Packet packet) {
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        List<GuildMember> reverseMemberList = guildMember.getGuild()
+                .getMemberList().stream().filter(GuildMember::getWaitingForApproval).collect(Collectors.toList());
+
+        connection.sendTCP(new S2CGuildReverseMemberAnswerPacket(reverseMemberList));
+    }
+
+    public void handleGuildMemberDataRequestPacket(Connection connection, Packet packet) {
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember != null)
+            connection.sendTCP(new S2CGuildMemberDataAnswerPacket(guildMember.getGuild().getMemberList()));
+    }
+
+    public void handleGuildChangeMasterRequestPacket(Connection connection, Packet packet) {
+        C2SGuildChangeMasterRequestPacket guildChangeMasterRequestPacket
+                = new C2SGuildChangeMasterRequestPacket(packet);
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember != null && guildMember.getMemberRank() == 3) {
+            GuildMember newClubMaster = guildMember.getGuild()
+                    .getMemberList().stream()
+                    .filter(gm -> gm.getPlayer().getId() == guildChangeMasterRequestPacket.getPlayerId())
+                    .findFirst().orElse(null);
+
+            if (newClubMaster != null) {
+                guildMember.setMemberRank((byte)2);
+                guildMemberService.save(guildMember);
+
+                newClubMaster.setMemberRank((byte)3);
+                guildMemberService.save(newClubMaster);
+
+                connection.sendTCP(new S2CGuildChangeMasterAnswerPacket((short)0));
+            }
+        }
+        else
+            connection.sendTCP(new S2CGuildChangeMasterAnswerPacket((short)-1));
+    }
+
+    public void handleGuildChangeSubMasterRequestPacket(Connection connection, Packet packet) {
+        C2SGuildChangeSubMasterRequestPacket guildChangeSubMasterRequestPacket
+                = new C2SGuildChangeSubMasterRequestPacket(packet);
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember != null && guildMember.getMemberRank() == 3) {
+            GuildMember subClubMaster = guildMember.getGuild()
+                    .getMemberList().stream()
+                    .filter(gm -> gm.getPlayer().getId() == guildChangeSubMasterRequestPacket.getPlayerId())
+                    .findFirst().orElse(null);
+
+            if (subClubMaster != null) {
+                if (guildChangeSubMasterRequestPacket.getStatus() == 1) {
+                    subClubMaster.setMemberRank((byte)2);
+                    guildMemberService.save((subClubMaster));
+                    connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 1));
+                }
+                else {
+                    subClubMaster.setMemberRank((byte)1);
+                    guildMemberService.save((subClubMaster));
+                    connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 0));
+                }
+            }
+        }
+        else
+            connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) -1));
+    }
+
+    public void handleGuildDismissMemberRequestPacket(Connection connection, Packet packet) {
+        C2SGuildDismissMemberRequestPacket guildDismissMemberRequestPacket
+                = new C2SGuildDismissMemberRequestPacket(packet);
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember != null && guildMember.getMemberRank() > 1) {
+            GuildMember dismissMember = guildMember.getGuild()
+                    .getMemberList().stream()
+                    .filter(gm -> gm.getPlayer().getId() == guildDismissMemberRequestPacket.getPlayerId())
+                    .findFirst().orElse(null);
+
+            if (dismissMember != null) {
+                Player dismissPlayer = dismissMember.getPlayer();
+                dismissPlayer.setGuildMember(null);
+                playerService.save(dismissPlayer);
+
+                guildMemberService.remove(dismissMember.getId());
+            }
+        }
+    }
+
+    public void handleGuildDeleteRequestPacket(Connection connection, Packet packet) {
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+        Guild guild = guildMember.getGuild();
+
+        if (guildMember != null && guildMember.getMemberRank() == 3) {
+            List<GuildMember> memberList = guild.getMemberList();
+            for (GuildMember gm : memberList) {
+                guildMemberService.remove(gm.getId());
+
+                Player gmPlayer = gm.getPlayer();
+                gmPlayer.setGuildMember(null);
+                playerService.save(gmPlayer);
+            }
+            guildService.remove(guild.getId());
+            connection.sendTCP(new S2CGuildDeleteAnswerPacket((short)0));
+        }
+    }
+
+    public void handleGuildChangeNoticeRequestPacket(Connection connection, Packet packet) {
+        C2SGuildChangeNoticeRequestPacket guildChangeNoticeRequestPacket
+                = new C2SGuildChangeNoticeRequestPacket(packet);
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember != null && guildMember.getMemberRank() > 1) {
+            Guild guild = guildMember.getGuild();
+            guild.setNotice(guildChangeNoticeRequestPacket.getNotice());
+            guildService.save(guild);
+        }
+    }
+
+    public void handleGuildChatRequestPacket(Connection connection, Packet packet) {
+        C2SGuildChatRequestPacket guildChatRequestPacket = new C2SGuildChatRequestPacket(packet);
+
+        // ToDo: Broadcast
+        Player activePlayer = connection.getClient().getActivePlayer();
+
+        connection.sendTCP(new S2CGuildChatAnswerPacket(activePlayer.getName(), guildChatRequestPacket.getMessage()));
+    }
+
+    public void handleGuildSearchRequestPacket(Connection connection, Packet packet) {
+        // ToDo:
+    }
+
+    public void handleGuildChangeReverseMemberRequest(Connection connection, Packet packet) {
+        C2SGuildChangeReverseMemberRequestPacket guildChangeReverseMemberRequestPacket
+                = new C2SGuildChangeReverseMemberRequestPacket(packet);
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        GuildMember guildMember = activePlayer.getGuildMember();
+
+        if (guildMember != null && guildMember.getMemberRank() > 1) {
+            GuildMember reverseMember = guildMember.getGuild()
+                    .getMemberList().stream()
+                    .filter(gm -> gm.getPlayer().getId() == guildChangeReverseMemberRequestPacket.getPlayerId())
+                    .findFirst().orElse(null);
+
+            if (reverseMember != null) {
+                if (guildChangeReverseMemberRequestPacket.getStatus() == 1) {
+                    reverseMember.setWaitingForApproval(false);
+                    guildMemberService.save((reverseMember));
+                    connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 1));
+                }
+                else {
+                    guildMemberService.remove(reverseMember.getId());
+                }
+            }
+        }
+        else
+            connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 0));
     }
 
     public void handleDisconnectPacket(Connection connection, Packet packet) {

@@ -56,7 +56,7 @@ public class Player extends AbstractBaseModel {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "player")
     private List<TutorialProgress> tutorialProgressList;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "player")
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "player")
     private GuildMember guildMember;
 
     private Boolean firstPlayer = false;

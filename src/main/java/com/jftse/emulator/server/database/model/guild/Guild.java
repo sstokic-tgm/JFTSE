@@ -16,9 +16,12 @@ import javax.persistence.*;
 @Audited
 @Entity
 public class Guild extends AbstractBaseModel {
-    @OneToMany(fetch = FetchType.LAZY,  cascade = CascadeType.ALL, mappedBy = "guild")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guild")
     private List<GuildMember> memberList;
-    @OneToMany(fetch = FetchType.LAZY,  cascade = CascadeType.ALL, mappedBy = "guild")
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guild")
     private List<GuildGoldUsage> goldUsageList;
 
     @Column(unique = true)

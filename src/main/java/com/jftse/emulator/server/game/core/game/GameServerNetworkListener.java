@@ -274,6 +274,78 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleClientBackInRoomPacket(connection, packet);
                 break;
 
+            case PacketID.C2SGuildNoticeRequest:
+                gamePacketHandler.handleGuildNoticeRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildNameCheckRequest:
+                gamePacketHandler.handleGuildNameCheckRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildCreateRequest:
+                gamePacketHandler.handleGuildCreateRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildDataRequest:
+                gamePacketHandler.handleGuildDataRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildListRequest:
+                gamePacketHandler.handleGuildListRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildJoinRequest:
+                gamePacketHandler.handleGuildJoinRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildLeaveRequest:
+                gamePacketHandler.handleGuildLeaveRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildChangeInformationRequest:
+                gamePacketHandler.handleGuildChangeInformationRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildReserveMemberDataRequest:
+                gamePacketHandler.handleGuildReverseMemberDataRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildMemberDataRequest:
+                gamePacketHandler.handleGuildMemberDataRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildChangeMasterRequest:
+                gamePacketHandler.handleGuildChangeMasterRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildChangeSubMasterRequest:
+                gamePacketHandler.handleGuildChangeSubMasterRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildDismissMemberRequest:
+                gamePacketHandler.handleGuildDismissMemberRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildDeleteRequest:
+                gamePacketHandler.handleGuildDeleteRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildChangeNoticeRequest:
+                gamePacketHandler.handleGuildChangeNoticeRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildChatRequest:
+                gamePacketHandler.handleGuildChatRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildSearchRequest:
+                gamePacketHandler.handleGuildSearchRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SGuildChangeReverseMemberRequest:
+                gamePacketHandler.handleGuildChangeReverseMemberRequest(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
             case PacketID.C2SLoginAliveClient:
                 // empty..
