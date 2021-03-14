@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -113,6 +114,11 @@ public class Packet {
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 4);
             this.dataLength += (char)4;
         }
+        else if (element instanceof Date) {
+            dataElement = BitKit.getBytes((((Date) element).getTime() + 11644473600000L) * 10000L);
+            BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 8);
+            this.dataLength += (char) 8;
+        }
     }
 
     public byte[] addByteToArray(byte[] byteArray, byte newByte) {
@@ -137,6 +143,12 @@ public class Packet {
     public void readByte(byte element) {
         element = this.data[this.readPosition];
         this.readPosition += 1;
+    }
+
+    public boolean readBoolean() {
+        boolean result = this.data[this.readPosition] != 0;
+        this.readPosition += 1;
+        return result;
     }
 
     public char readChar() {
