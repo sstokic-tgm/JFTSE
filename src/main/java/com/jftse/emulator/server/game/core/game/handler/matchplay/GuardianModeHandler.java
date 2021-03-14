@@ -343,6 +343,8 @@ public class GuardianModeHandler {
                     newHealth = game.damagePlayer(attackerPosition, targetPosition, (short) -1, false, false);
                 } else if (skillDamage == 0) {
                     newHealth = game.getPlayerCurrentHealth(targetPosition);
+                } else if (!skillHitsTarget.isApplySkillEffect()) {
+                    return;
                 } else {
                     newHealth = game.damagePlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
                 }
