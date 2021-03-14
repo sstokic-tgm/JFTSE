@@ -87,6 +87,9 @@ public class GamePacketHandler {
     private final PlayerService playerService;
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
+    private final ToolSlotEquipmentService toolSlotEquipmentService;
+    private final SpecialSlotEquipmentService specialSlotEquipmentService;
+    private final CardSlotEquipmentService cardSlotEquipmentService;
     private final PocketService pocketService;
     private final HomeService homeService;
     private final PlayerPocketService playerPocketService;
@@ -191,6 +194,9 @@ public class GamePacketHandler {
             StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
             Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
             List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+            List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
+            List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+            List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
 
             S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
             connection.sendTCP(playerStatusPointChangePacket);
@@ -203,6 +209,15 @@ public class GamePacketHandler {
 
             S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
             connection.sendTCP(inventoryWearQuickAnswerPacket);
+
+            S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
+            connection.sendTCP(inventoryWearToolAnswerPacket);
+
+            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
+            connection.sendTCP(inventoryWearSpecialAnswerPacket);
+
+            S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+            connection.sendTCP(inventoryWearCardAnswerPacket);
         }
         else {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
@@ -414,6 +429,23 @@ public class GamePacketHandler {
         connection.sendTCP(inventoryWearClothAnswerPacket);
     }
 
+    public void handleInventoryWearToolPacket(Connection connection, Packet packet) {
+        C2SInventoryWearToolRequestPacket inventoryWearToolRequestPacket = new C2SInventoryWearToolRequestPacket(packet);
+
+        Player player = connection.getClient().getActivePlayer();
+        ToolSlotEquipment toolSlotEquipment = player.getToolSlotEquipment();
+
+        toolSlotEquipmentService.updateToolSlots(toolSlotEquipment, inventoryWearToolRequestPacket.getToolSlotList());
+        player.setToolSlotEquipment(toolSlotEquipment);
+
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
+        S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket
+                = new S2CInventoryWearToolAnswerPacket(inventoryWearToolRequestPacket.getToolSlotList());
+        connection.sendTCP(inventoryWearToolAnswerPacket);
+    }
+
     public void handleInventoryWearQuickPacket(Connection connection, Packet packet) {
         C2SInventoryWearQuickReqPacket inventoryWearQuickReqPacket = new C2SInventoryWearQuickReqPacket(packet);
 
@@ -428,6 +460,40 @@ public class GamePacketHandler {
 
         S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(inventoryWearQuickReqPacket.getQuickSlotList());
         connection.sendTCP(inventoryWearQuickAnswerPacket);
+    }
+
+    public void handleInventoryWearSpecialPacket(Connection connection, Packet packet) {
+        C2SInventoryWearSpecialRequestPacket inventoryWearSpecialRequestPacket = new C2SInventoryWearSpecialRequestPacket(packet);
+
+        Player player = connection.getClient().getActivePlayer();
+        SpecialSlotEquipment specialSlotEquipment = player.getSpecialSlotEquipment();
+
+        specialSlotEquipmentService.updateSpecialSlots(specialSlotEquipment, inventoryWearSpecialRequestPacket.getSpecialSlotList());
+        player.setSpecialSlotEquipment(specialSlotEquipment);
+
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
+        S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket
+                = new S2CInventoryWearSpecialAnswerPacket(inventoryWearSpecialRequestPacket.getSpecialSlotList());
+        connection.sendTCP(inventoryWearSpecialAnswerPacket);
+    }
+
+    public void handleInventoryWearCardPacket(Connection connection, Packet packet) {
+        C2SInventoryWearCardRequestPacket inventoryWearCardRequestPacket = new C2SInventoryWearCardRequestPacket(packet);
+
+        Player player = connection.getClient().getActivePlayer();
+        CardSlotEquipment cardSlotEquipment = player.getCardSlotEquipment();
+
+        cardSlotEquipmentService.updateCardSlots(cardSlotEquipment, inventoryWearCardRequestPacket.getCardSlotList());
+        player.setCardSlotEquipment(cardSlotEquipment);
+
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
+        S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket
+                = new S2CInventoryWearCardAnswerPacket(inventoryWearCardRequestPacket.getCardSlotList());
+        connection.sendTCP(inventoryWearCardAnswerPacket);
     }
 
     public void handleInventoryItemTimeExpiredPacket(Connection connection, Packet packet) {

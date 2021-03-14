@@ -121,6 +121,12 @@ public final class PacketID {
     public final static char S2CInventoryWearClothAnswer = 0x1B64;
     public final static char C2SInventoryWearQuickRequest = 0x1BD8;
     public final static char S2CInventoryWearQuickAnswer = 0x1BD9;
+    public final static char C2SInventoryWearToolRequest = 0x1D04;
+    public final static char S2CInventoryWearToolAnswer = 0x1D05;
+    public final static char C2SInventoryWearSpecialRequest = 0x1B70;
+    public final static char S2CInventoryWearSpecialAnswer = 0x1B71;
+    public final static char C2SInventoryWearCardRequest = 0x1C21;
+    public final static char S2CInventoryWearCardAnswer = 0x1C22;
     public final static char S2CInventoryData = 0x1B69;
     public final static char C2SInventoryItemTimeExpiredRequest = 0x1BBC;
     public final static char S2CInventoryItemRemoveAnswer = 0x1B74;

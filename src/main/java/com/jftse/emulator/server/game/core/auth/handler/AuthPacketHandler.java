@@ -27,6 +27,9 @@ public class AuthPacketHandler {
     private final HomeService homeService;
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
+    private final SpecialSlotEquipmentService specialSlotEquipmentService;
+    private final ToolSlotEquipmentService toolSlotEquipmentService;
+    private final CardSlotEquipmentService cardSlotEquipmentService;
     private final PlayerStatisticService playerStatisticService;
     private final ItemCharService itemCharService;
 
@@ -97,6 +100,18 @@ public class AuthPacketHandler {
             QuickSlotEquipment quickSlotEquipment = new QuickSlotEquipment();
             quickSlotEquipment = quickSlotEquipmentService.save(quickSlotEquipment);
             player.setQuickSlotEquipment(quickSlotEquipment);
+
+            SpecialSlotEquipment specialSlotEquipment = new SpecialSlotEquipment();
+            specialSlotEquipment = specialSlotEquipmentService.save(specialSlotEquipment);
+            player.setSpecialSlotEquipment(specialSlotEquipment);
+
+            ToolSlotEquipment toolSlotEquipment = new ToolSlotEquipment();
+            toolSlotEquipment = toolSlotEquipmentService.save(toolSlotEquipment);
+            player.setToolSlotEquipment(toolSlotEquipment);
+
+            CardSlotEquipment cardSlotEquipment = new CardSlotEquipment();
+            cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
+            player.setCardSlotEquipment(cardSlotEquipment);
 
             Pocket pocket = new Pocket();
             pocket = pocketService.save(pocket);
