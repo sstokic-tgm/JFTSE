@@ -311,6 +311,10 @@ public class GuardianModeHandler {
         short newHealth;
         try {
             if (guardianMadePoint) {
+                if (!skillHitsTarget.isApplySkillEffect()) {
+                    return;
+                }
+
                 newHealth = game.damagePlayerOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
             } else {
                 newHealth = game.damageGuardianOnBallLoss(receiverPosition, attackerPosition, attackerHasWillBuff);
