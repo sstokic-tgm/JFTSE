@@ -240,8 +240,9 @@ public class GamePacketHandler {
         AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
 
         homeItemDataList.forEach(hidl -> {
-                int inventoryItemId = (int)hidl.get("inventoryItemId");
+            int inventoryItemId = (int)hidl.get("inventoryItemId");
 
+            if (inventoryItemId > 0) {
                 PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) inventoryItemId, connection.getClient().getActivePlayer().getPocket());
                 if (playerPocket != null) {
                     int itemCount = playerPocket.getItemCount();
@@ -258,15 +259,14 @@ public class GamePacketHandler {
 
                         S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
                         connection.sendTCP(inventoryItemRemoveAnswerPacket);
-                    }
-                    else {
+                    } else {
                         playerPocket.setItemCount(itemCount);
                         playerPocketService.save(playerPocket);
                     }
 
                     int itemIndex = (int) hidl.get("itemIndex");
-                    byte unk0 = (byte) hidl.get("unk4");
-                    byte unk1 = (byte) hidl.get("unk5");
+                    byte unk0 = (byte) hidl.get("unk0");
+                    byte rotation = (byte) hidl.get("rotation");
                     byte xPos = (byte) hidl.get("xPos");
                     byte yPos = (byte) hidl.get("yPos");
 
@@ -275,7 +275,7 @@ public class GamePacketHandler {
                     homeInventory.setAccountHome(accountHome);
                     homeInventory.setItemIndex(itemIndex);
                     homeInventory.setUnk0(unk0);
-                    homeInventory.setUnk1(unk1);
+                    homeInventory.setRotation(rotation);
                     homeInventory.setXPos(xPos);
                     homeInventory.setYPos(yPos);
 
@@ -283,7 +283,28 @@ public class GamePacketHandler {
 
                     homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
                 }
-            });
+            }
+            else if (inventoryItemId == -1) {
+                // Not placed from player inventory but repositioned from home inventory
+                int homeInventoryId = (int) hidl.get("homeInventoryId");
+                int itemIndex = (int) hidl.get("itemIndex");
+                byte unk0 = (byte) hidl.get("unk0");
+                byte rotation = (byte) hidl.get("rotation");
+                byte xPos = (byte) hidl.get("xPos");
+                byte yPos = (byte) hidl.get("yPos");
+
+                HomeInventory homeInventory = homeService.findById(homeInventoryId);
+                if (homeInventory != null) {
+                    homeInventory.setUnk0(unk0);
+                    homeInventory.setRotation(rotation);
+                    homeInventory.setXPos(xPos);
+                    homeInventory.setYPos(yPos);
+                    homeInventory = homeService.save(homeInventory);
+
+                    homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
+                }
+            }
+        });
 
         S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
         connection.sendTCP(homeDataPacket);

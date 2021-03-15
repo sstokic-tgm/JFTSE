@@ -34,6 +34,11 @@ public class HomeService {
         return homeInventoryRepository.save(homeInventory);
     }
 
+    public HomeInventory findById(long homeInventoryId) {
+        Optional<HomeInventory> homeInventory = homeInventoryRepository.findById(homeInventoryId);
+        return homeInventory.orElse(null);
+    }
+
     public AccountHome findById(Long accountHomeId) {
         Optional<AccountHome> accountHome = accountHomeRepository.findById(accountHomeId);
         return accountHome.orElse(null);

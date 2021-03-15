@@ -134,6 +134,8 @@ public final class PacketID {
 
     public final static char C2SHomeItemsClearReq = 0x2552;
     public final static char C2SHomeItemsPlaceReq = 0x2550;
+    public final static char C2SHomeItemsRemoveReq = 0x2551;
+    public final static char S2CHomeItemsRemoveAnswer = 0x2552;
     public final static char C2SHomeItemsLoadReq = 0x254E;
     public final static char S2CHomeItemsLoadAnswer = 0x254F;
     public final static char S2CHomeData = 0x1519;
