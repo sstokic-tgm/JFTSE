@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.game.core.auth.handler;
 
 import com.jftse.emulator.server.database.model.account.Account;
+import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.item.ItemChar;
 import com.jftse.emulator.server.database.model.player.*;
@@ -16,6 +17,7 @@ import com.jftse.emulator.server.game.core.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.net.InetSocketAddress;
 import java.util.Date;
 
 @Service
@@ -32,6 +34,7 @@ public class AuthPacketHandler {
     private final CardSlotEquipmentService cardSlotEquipmentService;
     private final PlayerStatisticService playerStatisticService;
     private final ItemCharService itemCharService;
+    private final ClientWhitelistService clientWhitelistService;
 
     public void sendWelcomePacket(Connection connection) {
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
@@ -39,6 +42,15 @@ public class AuthPacketHandler {
     }
 
     public void handleLoginPacket(Connection connection, Packet packet) {
+        if (!isClientValid(connection.getRemoteAddressTCP())) {
+            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.INVAILD_VERSION);
+            connection.sendTCP(loginAnswerPacket);
+
+            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+            connection.sendTCP(disconnectAnswerPacket);
+            return;
+        }
+
         C2SLoginPacket loginPacket = new C2SLoginPacket(packet);
 
         // version check
@@ -48,6 +60,7 @@ public class AuthPacketHandler {
 
             S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
             connection.sendTCP(disconnectAnswerPacket);
+            return;
         }
 
         Account account = authenticationService.login(loginPacket.getUsername(), loginPacket.getPassword());
@@ -284,5 +297,11 @@ public class AuthPacketHandler {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         unknownAnswer.write((short) 0);
         connection.sendTCP(unknownAnswer);
+    }
+
+    private boolean isClientValid(InetSocketAddress inetSocketAddress) {
+        String hostAddress = inetSocketAddress.getAddress().getHostAddress();
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
+        return clientWhitelist != null;
     }
 }

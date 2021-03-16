@@ -4,6 +4,7 @@ import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.database.model.account.Account;
+import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.database.model.challenge.Challenge;
 import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
 import com.jftse.emulator.server.database.model.gameserver.GameServer;
@@ -99,6 +100,7 @@ public class GamePacketHandler {
     private final LotteryService lotteryService;
     private final LevelService levelService;
     private final PlayerStatisticService playerStatisticService;
+    private final ClientWhitelistService clientWhitelistService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -118,6 +120,12 @@ public class GamePacketHandler {
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
             authenticationService.updateAccount(account);
         });
+        List<ClientWhitelist> clientWhiteList = clientWhitelistService.findAll();
+        for (int i = 0; i < clientWhiteList.size(); i++) {
+            Long id = clientWhiteList.get(i).getId();
+            clientWhitelistService.remove(id);
+        }
+
         this.getGameHandler().getRoomList().clear();
         this.getGameHandler().getClientList().clear();
         gameSessionManager.getGameSessionList().clear();
@@ -1907,6 +1915,12 @@ public class GamePacketHandler {
             }
             handleRoomPlayerChanges(connection);
         }
+
+        try {
+            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+            ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
+            clientWhitelistService.remove(clientWhitelist.getId());
+        } catch (NullPointerException npe) {}
 
         gameHandler.removeClient(connection.getClient());
         connection.close();
