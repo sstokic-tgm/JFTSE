@@ -44,7 +44,10 @@ public class ProductService {
         List<Product> productList = productRepository.findProductsByProductIndexIn(productIndexList);
 
         Map<Product, Byte> result = new HashMap<>();
-        productList.forEach(p -> result.put(p, itemList.get(p.getProductIndex())));
+        productList.forEach(p -> {
+            if (p.getEnabled())
+                result.put(p, itemList.get(p.getProductIndex()));
+        });
 
         return result;
     }
