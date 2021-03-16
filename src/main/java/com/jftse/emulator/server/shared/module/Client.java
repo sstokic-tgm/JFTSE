@@ -30,4 +30,7 @@ public class Client {
     private byte lobbyCurrentPlayerListPage = 1;
     private short lobbyCurrentRoomListPage = -1;
     private long lastHearBeatTime;
+
+    private String ip;
+    private int port;
 }

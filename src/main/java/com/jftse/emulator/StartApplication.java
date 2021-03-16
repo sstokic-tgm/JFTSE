@@ -1,6 +1,7 @@
 package com.jftse.emulator;
 
 import com.jftse.emulator.common.discord.DiscordWebhook;
+import com.jftse.emulator.server.game.core.anticheat.AntiCheatHeartBeatNetworkListener;
 import com.jftse.emulator.server.game.core.auth.AuthenticationServerNetworkListener;
 import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
 import com.jftse.emulator.server.game.core.game.RelayServerNetworkListener;
@@ -88,6 +89,28 @@ public class StartApplication {
             System.exit(1);
         }
         relayServer.start("relay server");
+
+        log.info("Successfully initialized!");
+        log.info("--------------------------------------");
+
+        log.info("Initializing anti cheat heartbeat server...");
+        AntiCheatHeartBeatNetworkListener antiCheatHeartBeatNetworkListener = new AntiCheatHeartBeatNetworkListener();
+        // post dependency injection for this class
+        ctx.getBeanFactory().autowireBean(antiCheatHeartBeatNetworkListener);
+
+        Server antiCheatServer = new Server();
+        antiCheatServer.addListener(antiCheatHeartBeatNetworkListener);
+
+        try {
+            antiCheatServer.bind(1337); // adjustable
+        }
+        catch (IOException ioe) {
+            log.error("Failed to start relay server!");
+            ioe.printStackTrace();
+            ctx.close();
+            System.exit(1);
+        }
+        antiCheatServer.start("anti cheat server");
 
         log.info("Successfully initialized!");
         log.info("--------------------------------------");

@@ -72,8 +72,20 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleInventoryWearClothPacket(connection, packet);
                 break;
 
+            case PacketID.C2SInventoryWearToolRequest:
+                gamePacketHandler.handleInventoryWearToolPacket(connection, packet);
+                break;
+
             case PacketID.C2SInventoryWearQuickRequest:
                 gamePacketHandler.handleInventoryWearQuickPacket(connection, packet);
+                break;
+
+            case PacketID.C2SInventoryWearSpecialRequest:
+                gamePacketHandler.handleInventoryWearSpecialPacket(connection, packet);
+                break;
+
+            case PacketID.C2SInventoryWearCardRequest:
+                gamePacketHandler.handleInventoryWearCardPacket(connection, packet);
                 break;
 
             case PacketID.C2SInventoryItemTimeExpiredRequest:
@@ -285,6 +297,7 @@ public class GameServerNetworkListener implements ConnectionListener {
 
             case PacketID.C2SHeartbeat:
                 gamePacketHandler.tryDetectSpeedHack(connection);
+                gamePacketHandler.handleHeartBeatPacket(connection, packet);
                 break;
 
             case PacketID.C2SLoginAliveClient:

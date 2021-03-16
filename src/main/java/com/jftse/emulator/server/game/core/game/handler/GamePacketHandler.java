@@ -4,6 +4,7 @@ import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.database.model.account.Account;
+import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.database.model.challenge.Challenge;
 import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
 import com.jftse.emulator.server.database.model.gameserver.GameServer;
@@ -93,6 +94,9 @@ public class GamePacketHandler {
     private final PlayerService playerService;
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
+    private final ToolSlotEquipmentService toolSlotEquipmentService;
+    private final SpecialSlotEquipmentService specialSlotEquipmentService;
+    private final CardSlotEquipmentService cardSlotEquipmentService;
     private final PocketService pocketService;
     private final HomeService homeService;
     private final PlayerPocketService playerPocketService;
@@ -103,6 +107,7 @@ public class GamePacketHandler {
     private final PlayerStatisticService playerStatisticService;
     private final GuardianModeHandler guardianModeHandler;
     private final BasicModeHandler basicModeHandler;
+    private final ClientWhitelistService clientWhitelistService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -135,12 +140,24 @@ public class GamePacketHandler {
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
             authenticationService.updateAccount(account);
         });
+        List<ClientWhitelist> clientWhiteList = clientWhitelistService.findAll();
+        for (int i = 0; i < clientWhiteList.size(); i++) {
+            Long id = clientWhiteList.get(i).getId();
+            clientWhitelistService.remove(id);
+        }
+
         this.getGameHandler().getRoomList().clear();
         this.getGameHandler().getClientList().clear();
         gameSessionManager.getGameSessionList().clear();
     }
 
     public void sendWelcomePacket(Connection connection) {
+        String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+        int port = connection.getRemoteAddressTCP().getPort();
+
+        connection.getClient().setIp(hostAddress);
+        connection.getClient().setPort(port);
+
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
         connection.sendTCP(welcomePacket);
     }
@@ -211,6 +228,9 @@ public class GamePacketHandler {
             StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
             Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
             List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+            List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
+            List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+            List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
 
             S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
             connection.sendTCP(playerStatusPointChangePacket);
@@ -223,6 +243,15 @@ public class GamePacketHandler {
 
             S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
             connection.sendTCP(inventoryWearQuickAnswerPacket);
+
+            S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
+            connection.sendTCP(inventoryWearToolAnswerPacket);
+
+            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
+            connection.sendTCP(inventoryWearSpecialAnswerPacket);
+
+            S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+            connection.sendTCP(inventoryWearCardAnswerPacket);
         }
         else {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
@@ -245,8 +274,9 @@ public class GamePacketHandler {
         AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
 
         homeItemDataList.forEach(hidl -> {
-                int inventoryItemId = (int)hidl.get("inventoryItemId");
+            int inventoryItemId = (int)hidl.get("inventoryItemId");
 
+            if (inventoryItemId > 0) {
                 PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) inventoryItemId, connection.getClient().getActivePlayer().getPocket());
                 if (playerPocket != null) {
                     int itemCount = playerPocket.getItemCount();
@@ -263,15 +293,14 @@ public class GamePacketHandler {
 
                         S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
                         connection.sendTCP(inventoryItemRemoveAnswerPacket);
-                    }
-                    else {
+                    } else {
                         playerPocket.setItemCount(itemCount);
                         playerPocketService.save(playerPocket);
                     }
 
                     int itemIndex = (int) hidl.get("itemIndex");
-                    byte unk0 = (byte) hidl.get("unk4");
-                    byte unk1 = (byte) hidl.get("unk5");
+                    byte unk0 = (byte) hidl.get("unk0");
+                    byte rotation = (byte) hidl.get("rotation");
                     byte xPos = (byte) hidl.get("xPos");
                     byte yPos = (byte) hidl.get("yPos");
 
@@ -280,7 +309,7 @@ public class GamePacketHandler {
                     homeInventory.setAccountHome(accountHome);
                     homeInventory.setItemIndex(itemIndex);
                     homeInventory.setUnk0(unk0);
-                    homeInventory.setUnk1(unk1);
+                    homeInventory.setRotation(rotation);
                     homeInventory.setXPos(xPos);
                     homeInventory.setYPos(yPos);
 
@@ -288,7 +317,28 @@ public class GamePacketHandler {
 
                     homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
                 }
-            });
+            }
+            else if (inventoryItemId == -1) {
+                // Not placed from player inventory but repositioned from home inventory
+                int homeInventoryId = (int) hidl.get("homeInventoryId");
+                int itemIndex = (int) hidl.get("itemIndex");
+                byte unk0 = (byte) hidl.get("unk0");
+                byte rotation = (byte) hidl.get("rotation");
+                byte xPos = (byte) hidl.get("xPos");
+                byte yPos = (byte) hidl.get("yPos");
+
+                HomeInventory homeInventory = homeService.findById(homeInventoryId);
+                if (homeInventory != null) {
+                    homeInventory.setUnk0(unk0);
+                    homeInventory.setRotation(rotation);
+                    homeInventory.setXPos(xPos);
+                    homeInventory.setYPos(yPos);
+                    homeInventory = homeService.save(homeInventory);
+
+                    homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
+                }
+            }
+        });
 
         S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
         connection.sendTCP(homeDataPacket);
@@ -434,6 +484,23 @@ public class GamePacketHandler {
         connection.sendTCP(inventoryWearClothAnswerPacket);
     }
 
+    public void handleInventoryWearToolPacket(Connection connection, Packet packet) {
+        C2SInventoryWearToolRequestPacket inventoryWearToolRequestPacket = new C2SInventoryWearToolRequestPacket(packet);
+
+        Player player = connection.getClient().getActivePlayer();
+        ToolSlotEquipment toolSlotEquipment = player.getToolSlotEquipment();
+
+        toolSlotEquipmentService.updateToolSlots(toolSlotEquipment, inventoryWearToolRequestPacket.getToolSlotList());
+        player.setToolSlotEquipment(toolSlotEquipment);
+
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
+        S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket
+                = new S2CInventoryWearToolAnswerPacket(inventoryWearToolRequestPacket.getToolSlotList());
+        connection.sendTCP(inventoryWearToolAnswerPacket);
+    }
+
     public void handleInventoryWearQuickPacket(Connection connection, Packet packet) {
         C2SInventoryWearQuickReqPacket inventoryWearQuickReqPacket = new C2SInventoryWearQuickReqPacket(packet);
 
@@ -448,6 +515,40 @@ public class GamePacketHandler {
 
         S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(inventoryWearQuickReqPacket.getQuickSlotList());
         connection.sendTCP(inventoryWearQuickAnswerPacket);
+    }
+
+    public void handleInventoryWearSpecialPacket(Connection connection, Packet packet) {
+        C2SInventoryWearSpecialRequestPacket inventoryWearSpecialRequestPacket = new C2SInventoryWearSpecialRequestPacket(packet);
+
+        Player player = connection.getClient().getActivePlayer();
+        SpecialSlotEquipment specialSlotEquipment = player.getSpecialSlotEquipment();
+
+        specialSlotEquipmentService.updateSpecialSlots(specialSlotEquipment, inventoryWearSpecialRequestPacket.getSpecialSlotList());
+        player.setSpecialSlotEquipment(specialSlotEquipment);
+
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
+        S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket
+                = new S2CInventoryWearSpecialAnswerPacket(inventoryWearSpecialRequestPacket.getSpecialSlotList());
+        connection.sendTCP(inventoryWearSpecialAnswerPacket);
+    }
+
+    public void handleInventoryWearCardPacket(Connection connection, Packet packet) {
+        C2SInventoryWearCardRequestPacket inventoryWearCardRequestPacket = new C2SInventoryWearCardRequestPacket(packet);
+
+        Player player = connection.getClient().getActivePlayer();
+        CardSlotEquipment cardSlotEquipment = player.getCardSlotEquipment();
+
+        cardSlotEquipmentService.updateCardSlots(cardSlotEquipment, inventoryWearCardRequestPacket.getCardSlotList());
+        player.setCardSlotEquipment(cardSlotEquipment);
+
+        player = playerService.save(player);
+        connection.getClient().setActivePlayer(player);
+
+        S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket
+                = new S2CInventoryWearCardAnswerPacket(inventoryWearCardRequestPacket.getCardSlotList());
+        connection.sendTCP(inventoryWearCardAnswerPacket);
     }
 
     public void handleInventoryItemTimeExpiredPacket(Connection connection, Packet packet) {
@@ -1687,6 +1788,12 @@ public class GamePacketHandler {
             handleRoomPlayerChanges(connection);
         }
 
+        try {
+            String hostAddress = connection.getClient().getIp();
+            ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
+            clientWhitelistService.remove(clientWhitelist.getId());
+        } catch (NullPointerException npe) {}
+
         gameHandler.removeClient(connection.getClient());
         connection.close();
     }
@@ -1830,6 +1937,13 @@ public class GamePacketHandler {
         }
 
         connection.getClient().setLastHearBeatTime(time);
+    }
+
+    public void handleHeartBeatPacket(Connection connection, Packet packet) {
+        String hostAddress = connection.getClient().getIp();
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
+        if (clientWhitelist == null)
+            handleDisconnected(connection);
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
