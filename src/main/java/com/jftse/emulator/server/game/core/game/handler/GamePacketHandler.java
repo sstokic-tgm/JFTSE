@@ -132,6 +132,12 @@ public class GamePacketHandler {
     }
 
     public void sendWelcomePacket(Connection connection) {
+        String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+        int port = connection.getRemoteAddressTCP().getPort();
+
+        connection.getClient().setIp(hostAddress);
+        connection.getClient().setPort(port);
+
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
         connection.sendTCP(welcomePacket);
     }
@@ -1917,7 +1923,7 @@ public class GamePacketHandler {
         }
 
         try {
-            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+            String hostAddress = connection.getClient().getIp();
             ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
             clientWhitelistService.remove(clientWhitelist.getId());
         } catch (NullPointerException npe) {}
@@ -1973,6 +1979,13 @@ public class GamePacketHandler {
         connection.sendTCP(playerInfoPlayStatsPacket);
         connection.sendTCP(roomInformationPacket);
         connection.sendTCP(roomPlayerInformationPacket);
+    }
+
+    public void handleHeartBeatPacket(Connection connection, Packet packet) {
+        String hostAddress = connection.getClient().getIp();
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
+        if (clientWhitelist == null)
+            handleDisconnected(connection);
     }
 
     public void handleUnknown(Connection connection, Packet packet) {
