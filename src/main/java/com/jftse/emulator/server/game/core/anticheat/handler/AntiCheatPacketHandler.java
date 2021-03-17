@@ -37,11 +37,15 @@ public class AntiCheatPacketHandler {
         connection.getClient().setIp(hostAddress);
         connection.getClient().setPort(port);
 
-        ClientWhitelist clientWhitelist = new ClientWhitelist();
-        clientWhitelist.setIp(hostAddress);
-        clientWhitelist.setPort(port);
-        clientWhitelist.setFlagged(false);
-        clientWhitelistService.save(clientWhitelist);
+        // dunno why we get duplicate entries so check and only whitelist a client if no entry exists, if this handles multiple clients, stays open..
+        ClientWhitelist existingClientWhitelist = clientWhitelistService.findByIp(hostAddress);
+        if (existingClientWhitelist == null) {
+            ClientWhitelist clientWhitelist = new ClientWhitelist();
+            clientWhitelist.setIp(hostAddress);
+            clientWhitelist.setPort(port);
+            clientWhitelist.setFlagged(false);
+            clientWhitelistService.save(clientWhitelist);
+        }
 
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
         connection.sendTCP(welcomePacket);
