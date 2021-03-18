@@ -105,7 +105,7 @@ public class StartApplication {
             antiCheatServer.bind(1337); // adjustable
         }
         catch (IOException ioe) {
-            log.error("Failed to start relay server!");
+            log.error("Failed to start anti cheat heartbeat server!");
             ioe.printStackTrace();
             ctx.close();
             System.exit(1);
