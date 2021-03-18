@@ -1788,12 +1788,6 @@ public class GamePacketHandler {
             handleRoomPlayerChanges(connection);
         }
 
-        try {
-            String hostAddress = connection.getClient().getIp();
-            ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
-            clientWhitelistService.remove(clientWhitelist.getId());
-        } catch (NullPointerException npe) {}
-
         gameHandler.removeClient(connection.getClient());
         connection.close();
     }
