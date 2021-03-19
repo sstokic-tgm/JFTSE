@@ -1107,10 +1107,11 @@ public class GamePacketHandler {
     public void handleRoomNameChangePacket(Connection connection, Packet packet) {
         C2SRoomNameChangeRequestPacket changeRoomNameRequestPacket = new C2SRoomNameChangeRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
-        room.setRoomName(changeRoomNameRequestPacket.getRoomName());
-        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        connection.sendTCP(roomInformationPacket);
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        if (room != null) {
+            room.setRoomName(changeRoomNameRequestPacket.getRoomName());
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        }
     }
 
     public void handleGameModeChangePacket(Connection connection, Packet packet) {
@@ -1121,75 +1122,84 @@ public class GamePacketHandler {
             changeRoomGameModeRequestPacket.setMode((byte) GameMode.GUARDIAN);
         }
 
-        room.setMode(changeRoomGameModeRequestPacket.getMode());
-        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        connection.sendTCP(roomInformationPacket);
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        if (room != null) {
+            room.setMode(changeRoomGameModeRequestPacket.getMode());
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
 
-        this.gameHandler.getClientsInLobby().forEach(c -> {
-            boolean isActivePlayer = c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
-            if (isActivePlayer)
-                return;
+            this.gameHandler.getClientsInLobby().forEach(c -> {
+                boolean isActivePlayer = c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
+                if (isActivePlayer)
+                    return;
 
-            S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.getFilteredRoomsForClient(c));
-            c.getConnection().sendTCP(roomListAnswerPacket);
-        });
+                S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(this.getFilteredRoomsForClient(c));
+                c.getConnection().sendTCP(roomListAnswerPacket);
+            });
+        }
     }
 
     public void handleRoomIsPrivateChangePacket(Connection connection, Packet packet) {
         C2SRoomIsPrivateChangeRequestPacket changeRoomIsPrivateRequestPacket = new C2SRoomIsPrivateChangeRequestPacket(packet);
         String password = changeRoomIsPrivateRequestPacket.getPassword();
         Room room = connection.getClient().getActiveRoom();
-        if (StringUtils.isEmpty(password)) {
-            room.setPassword(null);
-            room.setPrivate(false);
-        }
-        else {
-            room.setPassword(password);
-            room.setPrivate(true);
-        }
+        if (room != null) {
+            if (StringUtils.isEmpty(password)) {
+                room.setPassword(null);
+                room.setPrivate(false);
+            } else {
+                room.setPassword(password);
+                room.setPrivate(true);
+            }
 
-        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        }
     }
 
     public void handleRoomLevelRangeChangePacket(Connection connection, Packet packet) {
         C2SRoomLevelRangeChangeRequestPacket changeRoomLevelRangeRequestPacket = new C2SRoomLevelRangeChangeRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
-        room.setLevelRange(changeRoomLevelRangeRequestPacket.getLevelRange());
+        if (room != null) {
+            room.setLevelRange(changeRoomLevelRangeRequestPacket.getLevelRange());
 
-        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        }
     }
 
     public void handleRoomSkillFreeChangePacket(Connection connection, Packet packet) {
         C2SRoomSkillFreeChangeRequestPacket changeRoomSkillFreeRequestPacket = new C2SRoomSkillFreeChangeRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
-        room.setSkillFree(changeRoomSkillFreeRequestPacket.isSkillFree());
+        if (room != null) {
+            room.setSkillFree(changeRoomSkillFreeRequestPacket.isSkillFree());
 
-        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        }
     }
 
     public void handleRoomAllowBattlemonChangePacket(Connection connection, Packet packet) {
         C2SRoomAllowBattlemonChangeRequestPacket changeRoomAllowBattlemonRequestPacket = new C2SRoomAllowBattlemonChangeRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
+        if (room != null) {
+            byte allowBattlemon = changeRoomAllowBattlemonRequestPacket.getAllowBattlemon() == 1 ? (byte) 2 : (byte) 0;
+            // disable battlemon
+            room.setAllowBattlemon((byte) 0);
 
-        byte allowBattlemon = changeRoomAllowBattlemonRequestPacket.getAllowBattlemon() == 1 ? (byte) 2 : (byte) 0;
-        // disable battlemon
-        room.setAllowBattlemon((byte) 0);
-
-        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        }
     }
 
     public void handleRoomQuickSlotChangePacket(Connection connection, Packet packet) {
         C2SRoomQuickSlotChangeRequestPacket changeRoomQuickSlotRequestPacket = new C2SRoomQuickSlotChangeRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
-        room.setQuickSlot(changeRoomQuickSlotRequestPacket.isQuickSlot());
+        if (room != null) {
+            room.setQuickSlot(changeRoomQuickSlotRequestPacket.isQuickSlot());
 
-        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomInformationPacket));
+        }
     }
 
     public void handleRoomJoinRequestPacket(Connection connection, Packet packet) {
@@ -1383,25 +1393,27 @@ public class GamePacketHandler {
         C2SRoomKickPlayerRequestPacket roomKickPlayerRequestPacket = new C2SRoomKickPlayerRequestPacket(packet);
         Room room = connection.getClient().getActiveRoom();
 
-        List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(room.getRoomId());
-        RoomPlayer playerToKick = room.getRoomPlayerList().stream()
-                .filter(rp -> rp.getPosition() == roomKickPlayerRequestPacket.getPosition())
-                .findAny()
-                .orElse(null);
+        if (room != null) {
+            List<Client> clientsInRoom = this.gameHandler.getClientsInRoom(room.getRoomId());
+            RoomPlayer playerToKick = room.getRoomPlayerList().stream()
+                    .filter(rp -> rp.getPosition() == roomKickPlayerRequestPacket.getPosition())
+                    .findAny()
+                    .orElse(null);
 
-        if (playerToKick != null) {
-            Client client = clientsInRoom.stream()
-                    .filter(x -> x.getActivePlayer().getId().equals(playerToKick.getPlayer().getId()))
-                    .findFirst().orElse(null);
-            if (client != null) {
-                Packet answerPacket = new Packet(PacketID.S2CRoomLeaveAnswer);
-                answerPacket.write(0);
-                client.getConnection().sendTCP(answerPacket);
+            if (playerToKick != null) {
+                Client client = clientsInRoom.stream()
+                        .filter(x -> x.getActivePlayer().getId().equals(playerToKick.getPlayer().getId()))
+                        .findFirst().orElse(null);
+                if (client != null) {
+                    Packet answerPacket = new Packet(PacketID.S2CRoomLeaveAnswer);
+                    answerPacket.write(0);
+                    client.getConnection().sendTCP(answerPacket);
 
-                handleRoomPlayerChanges(client.getConnection());
+                    handleRoomPlayerChanges(client.getConnection());
 
-                S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
-                client.getConnection().sendTCP(roomJoinAnswerPacket);
+                    S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
+                    client.getConnection().sendTCP(roomJoinAnswerPacket);
+                }
             }
         }
     }
@@ -1411,10 +1423,13 @@ public class GamePacketHandler {
         boolean deactivate = roomSlotCloseRequestPacket.isDeactivate();
 
         byte slot = roomSlotCloseRequestPacket.getSlot();
-        connection.getClient().getActiveRoom().getPositions().set(slot, deactivate ? RoomPositionState.Locked : RoomPositionState.Free);
+        Room room = connection.getClient().getActiveRoom();
+        if (room != null) {
+            room.getPositions().set(slot, deactivate ? RoomPositionState.Locked : RoomPositionState.Free);
 
-        S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket(slot, deactivate);
-        this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomSlotCloseAnswerPacket));
+            S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket(slot, deactivate);
+            this.gameHandler.getClientsInRoom(connection.getClient().getActiveRoom().getRoomId()).forEach(c -> c.getConnection().sendTCP(roomSlotCloseAnswerPacket));
+        }
     }
 
     public void handleRoomFittingRequestPacket(Connection connection, Packet packet) {
