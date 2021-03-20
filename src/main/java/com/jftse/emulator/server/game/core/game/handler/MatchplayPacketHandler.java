@@ -128,7 +128,10 @@ public class MatchplayPacketHandler {
 
         Room room = client.getActiveRoom();
         if (room == null || room.getStatus() != RoomStatus.Running) {
-            log.warn(String.format("Room does not exist or state is %s", room.getStatus()));
+            if (room != null) {
+                log.warn(String.format("Room  state is %s . Close connection", room.getStatus()));
+            }
+
             connection.close();
             return;
         }
