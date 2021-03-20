@@ -78,7 +78,8 @@ void Main()
 		BossGuardian = 1,
 		DefeatTimerInSeconds = 300,
 		BossTriggerTimerInSeconds = -1,
-		ExpMultiplier = 3
+		ExpMultiplier = 3,
+		Rewards = new List<int> { 20048, 20049, 20050, 20051 } // Dragon set
 	};
 
 	var monsLava = new GuardianStage
@@ -129,7 +130,8 @@ void Main()
 		BossGuardian = 3,
 		DefeatTimerInSeconds = 300,
 		BossTriggerTimerInSeconds = -1,
-		ExpMultiplier = 3
+		ExpMultiplier = 3,
+		Rewards = new List<int> { 20081, 20082, 20083, 20084 } // Divinity set
 	};
 
 	var atlantis = new GuardianStage
@@ -155,7 +157,8 @@ void Main()
 		BossGuardian = 4,
 		DefeatTimerInSeconds = 300,
 		BossTriggerTimerInSeconds = -1,
-		ExpMultiplier = 4
+		ExpMultiplier = 4,
+		Rewards = new List<int> { 20081, 20082, 20083, 20084, 20048, 20049, 20050, 20051 } // Divinity and Dragon set
 	};
 
 	var temple = new GuardianStage
@@ -167,7 +170,8 @@ void Main()
 		GuardiansRight = GetRange(49, 54),
 		DefeatTimerInSeconds = -1,
 		BossTriggerTimerInSeconds = 180,
-		ExpMultiplier = 5
+		ExpMultiplier = 5,
+		Rewards = new List<int> { 20076 } // Tossakan coin
 	};
 
 	var templeBoss = new GuardianStage
@@ -180,7 +184,8 @@ void Main()
 		BossGuardian = 5,
 		DefeatTimerInSeconds = 300,
 		BossTriggerTimerInSeconds = -1,
-		ExpMultiplier = 5
+		ExpMultiplier = 5,
+		Rewards = new List<int> { 20076, 20080 } // Tossakan coin and boss coin
 	};
 
 	var roomOfShadow = new GuardianStage
@@ -204,7 +209,8 @@ void Main()
 		GuardiansRight = GetRange(61, 66),
 		DefeatTimerInSeconds = -1,
 		BossTriggerTimerInSeconds = 180,
-		ExpMultiplier = 6
+		ExpMultiplier = 6,
+		Rewards = new List<int> { 20088 } // Black coin
 	};
 
 	var machineCityBoss = new GuardianStage
@@ -217,7 +223,8 @@ void Main()
 		BossGuardian = 6,
 		DefeatTimerInSeconds = 300,
 		BossTriggerTimerInSeconds = -1,
-		ExpMultiplier = 6
+		ExpMultiplier = 6,
+		Rewards = new List<int> { 20088, 20086 } // Black coin or black scale set
 	};
 
 	var danceTime = new GuardianStage
@@ -229,7 +236,8 @@ void Main()
 		GuardiansRight = GetRange(67, 72),
 		DefeatTimerInSeconds = -1,
 		BossTriggerTimerInSeconds = 180,
-		ExpMultiplier = 7
+		ExpMultiplier = 7,
+		Rewards = new List<int> { 20092 } // Dance time box
 	};
 
 	var danceTimeBoss = new GuardianStage
@@ -242,7 +250,8 @@ void Main()
 		BossGuardian = 7,
 		DefeatTimerInSeconds = 300,
 		BossTriggerTimerInSeconds = -1,
-		ExpMultiplier = 7
+		ExpMultiplier = 7,
+		Rewards = new List<int> { 20092, 20086 } // Dance time box or black scale set
 	};
 
 	var guardianStages = new List<GuardianStage>
@@ -294,6 +303,8 @@ public class GuardianStage
 	public int BossTriggerTimerInSeconds { get; set; }
 
 	public int ExpMultiplier { get; set; }
+
+	public List<int> Rewards { get; set; }
 }
 
 private List<int> GetRange(int from, int to)

@@ -31,6 +31,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private short lastCrystalId = -1;
     private GuardianStage guardianStage;
     private GuardianStage bossGuardianStage;
+    private GuardianStage currentStage;
     private boolean bossBattleActive;
     private byte lastGuardianServeSide;
     private int guardianLevelLimit;
@@ -288,12 +289,26 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public List<PlayerReward> getPlayerRewards() {
+        List<Integer> stageRewards = this.getCurrentStage().getRewards();
         List<PlayerReward> playerRewards = new ArrayList<>();
         this.playerBattleStates.forEach(x -> {
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(x.getPosition());
             playerReward.setBasicRewardExp(this.getExpPot());
             playerReward.setBasicRewardGold(this.getGoldPot());
+            playerReward.setRewardProductIndex(-1);
+
+            if (stageRewards != null)
+            {
+                int rewardsCount = (int) stageRewards.stream().count();
+                if (rewardsCount > 0) {
+                    Random r = new Random();
+                    int itemRewardToGive = stageRewards.get(r.nextInt(rewardsCount));
+                    playerReward.setRewardProductIndex(itemRewardToGive);
+                    playerReward.setProductRewardAmount(1);
+                }
+            }
+
             playerRewards.add(playerReward);
         });
 

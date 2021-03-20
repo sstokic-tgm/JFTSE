@@ -2,6 +2,7 @@ package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.database.model.battle.*;
+import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
@@ -10,6 +11,7 @@ import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
+import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
@@ -63,6 +65,7 @@ public class GuardianModeHandler {
     private final GameSessionManager gameSessionManager;
     private final WillDamageService willDamageService;
     private final GuardianSkillsService guardianSkillsService;
+    private final ProductService productService;
 
     private GameHandler gameHandler;
 
@@ -136,6 +139,7 @@ public class GuardianModeHandler {
                 .findFirst()
                 .orElse(null);
         game.setGuardianStage(guardianStage);
+        game.setCurrentStage(guardianStage);
 
         GuardianStage bossGuardianStage = this.guardianStageService.getGuardianStages().stream()
                 .filter(x -> x.getMapId() == room.getMap() && x.getIsBossStage())
@@ -510,6 +514,8 @@ public class GuardianModeHandler {
             gameSession.stopSpeedHackDetection();
             gameSession.clearCountDownRunnable();
 
+            game.setCurrentStage(game.getBossGuardianStage());
+
             int activePlayingPlayersCount = game.getPlayerBattleStates().size();
             List<Byte> guardians = this.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
             byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
@@ -613,6 +619,7 @@ public class GuardianModeHandler {
                 player.setGold(player.getGold() + playerReward.getBasicRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.setActivePlayer(player);
+                this.handleRewardItem(client.getConnection(), playerReward);
             }
 
             byte playerLevel = client.getActivePlayer().getLevel();
@@ -623,6 +630,9 @@ public class GuardianModeHandler {
                 S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
             }
+
+            S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+            client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
             byte resultTitle = (byte) (wonGame ? 1 : 0);
             S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
@@ -640,6 +650,54 @@ public class GuardianModeHandler {
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
             this.gameSessionManager.removeGameSession(gameSession);
         }
+    }
+
+    private void handleRewardItem(Connection connection, PlayerReward playerReward) {
+        if (playerReward.getRewardProductIndex() < 0) {
+            return;
+        }
+
+        Product product = this.productService.findProductByProductItemIndex(playerReward.getRewardProductIndex());
+        if (product == null) {
+            return;
+        }
+
+        Player player = connection.getClient().getActivePlayer();
+        Pocket pocket = player.getPocket();
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(product.getItem0(), pocket);
+        int existingItemCount = 0;
+        boolean existingItem = false;
+
+        if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
+            existingItemCount = playerPocket.getItemCount();
+            existingItem = true;
+        } else {
+            playerPocket = new PlayerPocket();
+        }
+
+        playerPocket.setCategory(product.getCategory());
+        playerPocket.setItemIndex(product.getItem0());
+        playerPocket.setUseType(product.getUseType());
+
+        playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
+
+        // no idea how itemCount can be null here, but ok
+        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
+
+        if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
+
+            playerPocket.setCreated(cal.getTime());
+        }
+        playerPocket.setPocket(pocket);
+
+        playerPocketService.save(playerPocket);
+        if (!existingItem)
+            pocket = pocketService.incrementPocketBelongings(pocket);
+
+        // add item to result
+        connection.getClient().getActivePlayer().setPocket(pocket);
     }
 
     private PlayerReward createEmptyPlayerReward() {

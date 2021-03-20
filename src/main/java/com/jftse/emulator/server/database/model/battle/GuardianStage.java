@@ -18,4 +18,5 @@ public class GuardianStage {
     private Integer DefeatTimerInSeconds = -1;
     private Integer BossTriggerTimerInSeconds = -1;
     private Integer ExpMultiplier = 1;
+    private List<Integer> Rewards = new ArrayList<>();
 }
