@@ -590,6 +590,11 @@ public class GuardianModeHandler {
         game.setFinished(true);
 
         List<PlayerReward> playerRewards = game.getPlayerRewards();
+        playerRewards.forEach(x -> {
+            int expMultiplier = game.getGuardianStage().getExpMultiplier();
+            x.setBasicRewardExp(x.getBasicRewardExp() * expMultiplier);
+        });
+
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
         gameSession.stopSpeedHackDetection();
@@ -612,14 +617,15 @@ public class GuardianModeHandler {
             Player player = client.getActivePlayer();
             byte oldLevel = player.getLevel();
             if (playerReward != null) {
-                int expMultiplier = game.getGuardianStage().getExpMultiplier();
-                playerReward.setBasicRewardExp(playerReward.getBasicRewardExp() * expMultiplier);
                 byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
                 player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
                 player.setGold(player.getGold() + playerReward.getBasicRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.setActivePlayer(player);
-                this.handleRewardItem(client.getConnection(), playerReward);
+
+                if (wonGame) {
+                    this.handleRewardItem(client.getConnection(), playerReward);
+                }
             }
 
             byte playerLevel = client.getActivePlayer().getLevel();
@@ -631,8 +637,10 @@ public class GuardianModeHandler {
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
             }
 
-            S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-            client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
+            if (wonGame) {
+                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
+            }
 
             byte resultTitle = (byte) (wonGame ? 1 : 0);
             S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
