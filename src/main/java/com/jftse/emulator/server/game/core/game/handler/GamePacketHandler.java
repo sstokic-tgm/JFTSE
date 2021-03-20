@@ -1497,6 +1497,10 @@ public class GamePacketHandler {
 
         List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
         clientsInRoom.forEach(c -> {
+            Packet unsetHostPacket = new Packet(PacketID.S2CUnsetHost);
+            unsetHostPacket.write((byte) 0);
+            c.getConnection().sendTCP(unsetHostPacket);
+
             S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(relayServer.getHost(), relayServer.getPort(), room, clientInRoomLeftShiftList);
             c.getConnection().sendTCP(gameNetworkSettings);
 

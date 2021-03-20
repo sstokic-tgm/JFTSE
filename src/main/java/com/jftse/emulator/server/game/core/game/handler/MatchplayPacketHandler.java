@@ -83,11 +83,13 @@ public class MatchplayPacketHandler {
                     connection.sendTCP(answer);
                 }
                 else {
+                    log.warn("Couldn't find client for player. Cancel connection to relay server");
                     connection.close();
                 }
             }
         }
         else {
+            log.warn("Couldn't find gamesession. Cancel connection to relay server");
             connection.close();
         }
     }
@@ -126,6 +128,7 @@ public class MatchplayPacketHandler {
 
         Room room = client.getActiveRoom();
         if (room == null || room.getStatus() != RoomStatus.Running) {
+            log.warn(String.format("Room does not exist or state is %s", room.getStatus()));
             connection.close();
             return;
         }
@@ -143,6 +146,12 @@ public class MatchplayPacketHandler {
         }
 
         if (game instanceof MatchplayGuardianGame) {
+            if (room.getStatus() == RoomStatus.Running) {
+                // Test if people won't back thrown back to room during guardian game if we do it this way.
+                // If no bug reports come anymore delete the tryHandleTimeoutForGuardianGameMatch method.
+                return;
+            }
+
             boolean success = this.tryHandleTimeoutForGuardianGameMatch(connection, client, room, (MatchplayGuardianGame) game);
             if (success) {
                 return;

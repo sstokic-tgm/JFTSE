@@ -17,4 +17,5 @@ public class GuardianStage {
     private Integer BossGuardian = 0;
     private Integer DefeatTimerInSeconds = -1;
     private Integer BossTriggerTimerInSeconds = -1;
+    private Integer ExpMultiplier = 1;
 }

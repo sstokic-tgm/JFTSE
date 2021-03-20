@@ -606,6 +606,8 @@ public class GuardianModeHandler {
             Player player = client.getActivePlayer();
             byte oldLevel = player.getLevel();
             if (playerReward != null) {
+                int expMultiplier = game.getGuardianStage().getExpMultiplier();
+                playerReward.setBasicRewardExp(playerReward.getBasicRewardExp() * expMultiplier);
                 byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
                 player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
                 player.setGold(player.getGold() + playerReward.getBasicRewardGold());
