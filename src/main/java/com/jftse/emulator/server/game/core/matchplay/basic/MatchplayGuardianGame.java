@@ -116,6 +116,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + totalDamageToDeal);
+        if (newPlayerHealth < 1) {
+            playerBattleState.setDead(true);
+        }
+
         newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
         playerBattleState.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
@@ -182,6 +186,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         short newPlayerHealth = (short) (playerBattleState.getCurrentHealth() + lossBallDamage);
+        if (newPlayerHealth < 1) {
+            playerBattleState.setDead(true);
+        }
+
         newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
         playerBattleState.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
@@ -230,12 +238,13 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     public PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
         PlayerBattleState playerBattleState = getPlayerBattleStates().stream()
-                .filter(x -> x.getCurrentHealth() < 1)
+                .filter(x -> x.isDead())
                 .findFirst()
                 .orElse(null);
         if (playerBattleState != null) {
             short newPlayerHealth = healPlayer(playerBattleState.getPosition(), revivePercentage);
             playerBattleState.setCurrentHealth(newPlayerHealth);
+            playerBattleState.setDead(false);
         }
 
         return playerBattleState;

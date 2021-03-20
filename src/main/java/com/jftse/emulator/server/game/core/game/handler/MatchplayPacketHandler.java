@@ -177,7 +177,7 @@ public class MatchplayPacketHandler {
                 .orElse(null);
         if (playerBattleState == null) return false;
 
-        if (playerBattleState.getCurrentHealth() < 1) {
+        if (playerBattleState.isDead()) {
             connection.getTcpConnection().setLastReadTime(System.currentTimeMillis());
             return true;
         }

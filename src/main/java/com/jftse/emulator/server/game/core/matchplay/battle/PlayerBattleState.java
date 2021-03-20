@@ -16,6 +16,7 @@ public class PlayerBattleState {
     private int sta;
     private int dex;
     private int will;
+    private boolean dead;
 
     public PlayerBattleState(short position, short hp, int str, int sta, int dex, int will) {
         this.position = position;
