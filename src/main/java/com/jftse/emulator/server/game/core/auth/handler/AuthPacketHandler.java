@@ -42,7 +42,9 @@ public class AuthPacketHandler {
     }
 
     public void handleLoginPacket(Connection connection, Packet packet) {
-        if (!isClientValid(connection.getRemoteAddressTCP())) {
+        C2SLoginPacket loginPacket = new C2SLoginPacket(packet);
+
+        if (!isClientValid(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
 
@@ -50,8 +52,6 @@ public class AuthPacketHandler {
             connection.sendTCP(disconnectAnswerPacket);
             return;
         }
-
-        C2SLoginPacket loginPacket = new C2SLoginPacket(packet);
 
         // version check
         if (loginPacket.getVersion() != 21108180) {
@@ -299,9 +299,9 @@ public class AuthPacketHandler {
         connection.sendTCP(unknownAnswer);
     }
 
-    private boolean isClientValid(InetSocketAddress inetSocketAddress) {
+    private boolean isClientValid(InetSocketAddress inetSocketAddress, String hwid) {
         String hostAddress = inetSocketAddress.getAddress().getHostAddress();
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, hwid);
         return clientWhitelist != null;
     }
 }

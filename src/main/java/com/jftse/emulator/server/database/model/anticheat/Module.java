@@ -9,10 +9,7 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 @Entity
-public class ClientWhitelist extends AbstractBaseModel {
-    private String ip;
-    private Integer port;
-    private Boolean flagged;
-    private Boolean isAuthenticated;
-    private String hwid;
+public class Module extends AbstractBaseModel {
+    private String name;
+    private Boolean block;
 }
