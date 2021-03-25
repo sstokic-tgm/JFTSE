@@ -8,9 +8,11 @@ import lombok.Setter;
 @Setter
 public class C2SGameServerLoginPacket extends Packet {
     private int playerId;
+    private String hwid;
 
     public C2SGameServerLoginPacket(Packet packet) {
         super(packet);
         this.playerId = this.readInt();
+        this.hwid = this.readString();
     }
 }

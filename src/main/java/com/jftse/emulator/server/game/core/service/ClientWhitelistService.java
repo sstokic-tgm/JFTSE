@@ -20,9 +20,14 @@ public class ClientWhitelistService {
         return clientWhitelistRepository.save(clientWhitelist);
     }
 
-    public ClientWhitelist findByIp(String ip) {
-        Optional<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findByIp(ip);
-        return clientWhitelist.orElse(null);
+    public ClientWhitelist findByIpAndHwid(String ip, String hwid) {
+        try {
+            Optional<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findByIpAndHwid(ip, hwid);
+            return clientWhitelist.orElse(null);
+        } catch (Exception e) {
+            List<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findAllByIpAndHwid(ip, hwid);
+            return clientWhitelist.get(0);
+        }
     }
 
     public List<ClientWhitelist> findAll() {

@@ -26,7 +26,16 @@ public class AntiCheatHeartBeatNetworkListener implements ConnectionListener {
     }
 
     public void received(Connection connection, Packet packet) {
-        antiCheatPacketHandler.handleUnknown(connection, packet);
+
+        switch (packet.getPacketId()) {
+
+            case 0x9791:
+                antiCheatPacketHandler.handleRegister(connection, packet);
+                break;
+
+            default:
+                antiCheatPacketHandler.handleUnknown(connection, packet);
+        }
     }
 
     public void idle(Connection connection) {

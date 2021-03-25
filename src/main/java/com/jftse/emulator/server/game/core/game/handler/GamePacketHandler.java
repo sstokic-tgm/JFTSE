@@ -179,6 +179,7 @@ public class GamePacketHandler {
             client.setAccount(account);
             client.setActivePlayer(player);
             connection.setClient(client);
+            connection.setHwid(gameServerLoginPacket.getHwid());
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
             connection.sendTCP(gameServerLoginAnswerPacket);
@@ -1954,7 +1955,7 @@ public class GamePacketHandler {
 
     public void handleHeartBeatPacket(Connection connection, Packet packet) {
         String hostAddress = connection.getClient().getIp();
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByIp(hostAddress);
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, connection.getHwid());
         if (clientWhitelist == null)
             handleDisconnected(connection);
     }
