@@ -142,12 +142,18 @@ public class StartApplication {
 
         log.info("Stopping the emulator...");
 
+        gameServerNetworkListener.cleanUp();
+        relayServerNetworkListener.cleanUp();
+        relayServerNetworkListener.cleanUp();
+        antiCheatHeartBeatNetworkListener.cleanUp();
+
         executor.shutdown();
 
         try {
             authenticationServer.dispose();
             gameServer.dispose();
             relayServer.dispose();
+            antiCheatServer.dispose();
         }
         catch (IOException ioe) {
             log.error(ioe.getMessage());
