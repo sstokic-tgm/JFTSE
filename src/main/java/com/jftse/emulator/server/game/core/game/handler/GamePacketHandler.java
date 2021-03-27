@@ -22,6 +22,7 @@ import com.jftse.emulator.server.game.core.constants.GameMode;
 import com.jftse.emulator.server.game.core.constants.RoomPositionState;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.game.handler.matchplay.BasicModeHandler;
+import com.jftse.emulator.server.game.core.game.handler.matchplay.BattleModeHandler;
 import com.jftse.emulator.server.game.core.game.handler.matchplay.GuardianModeHandler;
 import com.jftse.emulator.server.game.core.item.EItemCategory;
 import com.jftse.emulator.server.game.core.item.EItemHouseDeco;
@@ -29,6 +30,7 @@ import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
+import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBattleGame;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.jftse.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
@@ -108,6 +110,7 @@ public class GamePacketHandler {
     private final PlayerStatisticService playerStatisticService;
     private final GuardianModeHandler guardianModeHandler;
     private final BasicModeHandler basicModeHandler;
+    private final BattleModeHandler battleModeHandler;
     private final ClientWhitelistService clientWhitelistService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -116,6 +119,7 @@ public class GamePacketHandler {
     public void init() {
         this.basicModeHandler.init(this.gameHandler);
         this.guardianModeHandler.init(this.gameHandler);
+        this.battleModeHandler.init(this.gameHandler);
         scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             try {
@@ -1490,6 +1494,9 @@ public class GamePacketHandler {
             case GameMode.BASIC:
                 gameSession.setActiveMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
                 break;
+            case GameMode.BATTLE:
+                gameSession.setActiveMatchplayGame(new MatchplayBattleGame());
+                break;
             case GameMode.GUARDIAN:
                 gameSession.setActiveMatchplayGame(new MatchplayGuardianGame());
                 break;
@@ -1565,6 +1572,9 @@ public class GamePacketHandler {
             clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
 
             switch (room.getMode()) {
+                case GameMode.BATTLE:
+                    this.battleModeHandler.handlePrepareBattleMode(connection, room);
+                    break;
                 case GameMode.GUARDIAN:
                     this.guardianModeHandler.handlePrepareGuardianMode(connection, room);
                     break;
@@ -1650,6 +1660,9 @@ public class GamePacketHandler {
                 switch (room.getMode()) {
                     case GameMode.BASIC:
                         this.basicModeHandler.handleStartBasicMode(connection, room, roomPlayerList);
+                        break;
+                    case GameMode.BATTLE:
+                        this.battleModeHandler.handleStartBattleMode(connection, room);
                         break;
                     case GameMode.GUARDIAN:
                         this.guardianModeHandler.handleStartGuardianMode(connection, room);
@@ -1737,6 +1750,8 @@ public class GamePacketHandler {
                 this.basicModeHandler.handleBasicModeMatchplayPointPacket(connection, matchplayPointPacket, gameSession, (MatchplayBasicGame) game);
             } else if (game instanceof MatchplayGuardianGame) {
                 this.guardianModeHandler.handleGuardianModeMatchplayPointPacket(connection, matchplayPointPacket, gameSession, (MatchplayGuardianGame) game);
+            } else if (game instanceof MatchplayBattleGame) {
+                this.battleModeHandler.handleBattleModeMatchplayPointPacket(connection, matchplayPointPacket, gameSession, (MatchplayBattleGame) game);
             }
         }
     }
@@ -1879,6 +1894,7 @@ public class GamePacketHandler {
                 this.guardianModeHandler.handlePlayerPickingUpCrystal(connection, playerPicksUpCrystalPacket);
                 break;
             case GameMode.BATTLE:
+                this.battleModeHandler.handlePlayerPickingUpCrystal(connection, playerPicksUpCrystalPacket);
                 break;
         }
     }
@@ -1893,6 +1909,7 @@ public class GamePacketHandler {
                 this.guardianModeHandler.handleUseOfSkill(connection, playerUseSkill);
                 break;
             case GameMode.BATTLE:
+                this.battleModeHandler.handleUseOfSkill(connection, playerUseSkill);
                 break;
         }
     }
@@ -1907,6 +1924,7 @@ public class GamePacketHandler {
                 this.guardianModeHandler.handleSkillHitsTarget(connection, skillHitsTarget);
                 break;
             case GameMode.BATTLE:
+                this.battleModeHandler.handleSkillHitsTarget(connection, skillHitsTarget);
                 break;
         }
     }
@@ -1921,6 +1939,7 @@ public class GamePacketHandler {
                 this.guardianModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
                 break;
             case GameMode.BATTLE:
+                this.battleModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
                 break;
         }
     }

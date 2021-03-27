@@ -5,6 +5,7 @@ import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
+import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBattleGame;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
 import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
@@ -148,7 +149,7 @@ public class MatchplayPacketHandler {
             return;
         }
 
-        if (game instanceof MatchplayGuardianGame) {
+        if (game instanceof MatchplayGuardianGame || game instanceof MatchplayBattleGame) {
             if (room.getStatus() == RoomStatus.Running) {
                 // Test if people won't back thrown back to room during guardian game if we do it this way.
                 // If no bug reports come anymore delete the tryHandleTimeoutForGuardianGameMatch method.
