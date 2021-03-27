@@ -1,5 +1,6 @@
 package com.jftse.emulator;
 
+import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.discord.DiscordWebhook;
 import com.jftse.emulator.server.game.core.anticheat.AntiCheatHeartBeatNetworkListener;
 import com.jftse.emulator.server.game.core.auth.AuthenticationServerNetworkListener;
@@ -93,27 +94,31 @@ public class StartApplication {
         log.info("Successfully initialized!");
         log.info("--------------------------------------");
 
-        log.info("Initializing anti cheat heartbeat server...");
-        AntiCheatHeartBeatNetworkListener antiCheatHeartBeatNetworkListener = new AntiCheatHeartBeatNetworkListener();
-        // post dependency injection for this class
-        ctx.getBeanFactory().autowireBean(antiCheatHeartBeatNetworkListener);
+        AntiCheatHeartBeatNetworkListener antiCheatHeartBeatNetworkListener;
+        Server antiCheatServer;
+        if (GlobalSettings.IsAntiCheatEnabled) {
+            log.info("Initializing anti cheat heartbeat server...");
+            antiCheatHeartBeatNetworkListener = new AntiCheatHeartBeatNetworkListener();
 
-        Server antiCheatServer = new Server();
-        antiCheatServer.addListener(antiCheatHeartBeatNetworkListener);
+            // post dependency injection for this class
+            ctx.getBeanFactory().autowireBean(antiCheatHeartBeatNetworkListener);
 
-        try {
-            antiCheatServer.bind(1337); // adjustable
+            antiCheatServer = new Server();
+            antiCheatServer.addListener(antiCheatHeartBeatNetworkListener);
+
+            try {
+                antiCheatServer.bind(1337); // adjustable
+            }
+            catch (IOException ioe) {
+                log.error("Failed to start anti cheat heartbeat server!");
+                ioe.printStackTrace();
+                ctx.close();
+                System.exit(1);
+            }
+            antiCheatServer.start("anti cheat server");
+            log.info("Successfully initialized!");
+            log.info("--------------------------------------");
         }
-        catch (IOException ioe) {
-            log.error("Failed to start anti cheat heartbeat server!");
-            ioe.printStackTrace();
-            ctx.close();
-            System.exit(1);
-        }
-        antiCheatServer.start("anti cheat server");
-
-        log.info("Successfully initialized!");
-        log.info("--------------------------------------");
 
         log.info("Emulator successfully started!");
         log.info("Write exit and confirm with enter to stop the emulator!");
@@ -145,7 +150,10 @@ public class StartApplication {
         gameServerNetworkListener.cleanUp();
         relayServerNetworkListener.cleanUp();
         relayServerNetworkListener.cleanUp();
-        antiCheatHeartBeatNetworkListener.cleanUp();
+
+        if (GlobalSettings.IsAntiCheatEnabled) {
+            antiCheatHeartBeatNetworkListener.cleanUp();
+        }
 
         executor.shutdown();
 
@@ -153,7 +161,10 @@ public class StartApplication {
             authenticationServer.dispose();
             gameServer.dispose();
             relayServer.dispose();
-            antiCheatServer.dispose();
+
+            if (GlobalSettings.IsAntiCheatEnabled) {
+                antiCheatServer.dispose();
+            }
         }
         catch (IOException ioe) {
             log.error(ioe.getMessage());
