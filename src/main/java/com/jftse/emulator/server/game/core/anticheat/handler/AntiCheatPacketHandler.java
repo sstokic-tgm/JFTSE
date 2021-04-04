@@ -13,7 +13,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -61,26 +64,69 @@ public class AntiCheatPacketHandler {
     }
 
     public void handleDisconnected(Connection connection) {
-        String hostAddress = connection.getClient().getIp();
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, connection.getHwid());
-        if (clientWhitelist != null)
-            clientWhitelistService.remove(clientWhitelist.getId());
+        if (connection.getClient() != null) {
+            String hostAddress = connection.getClient().getIp();
+            ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, connection.getHwid());
+            if (clientWhitelist != null)
+                clientWhitelistService.remove(clientWhitelist.getId());
 
-        connection.setClient(null);
+            this.antiCheatHandler.getClientList().remove(connection.getClient());
+            connection.setClient(null);
+        }
         connection.close();
     }
 
     public void handleRegister(Connection connection, Packet packet) {
         String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
 
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, null);
-        if (clientWhitelist != null && !clientWhitelist.getIsAuthenticated()) {
-            String hwid = packet.readString();
-            connection.setHwid(hwid);
+        if (connection.getClient() != null) {
+            Map<String, Boolean> files = this.antiCheatHandler.getFilesByClient(connection.getClient());
 
-            clientWhitelist.setHwid(hwid);
-            clientWhitelist.setIsAuthenticated(true);
-            clientWhitelistService.save(clientWhitelist);
+            String str = packet.readString();
+            List<String> result = Arrays.asList(str.split(";"));
+
+            if (result.size() == 3) {
+                files.entrySet().stream()
+                        .filter(f -> result.containsAll(Arrays.asList(f.getKey().split(";"))))
+                        .findFirst()
+                        .ifPresent(f -> f.setValue(true));
+                boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
+
+                if (valid) {
+                    Packet unknownAnswer = new Packet((char) 0x9791);
+                    unknownAnswer.write((byte) 0);
+                    connection.sendTCP(unknownAnswer);
+                }
+                else {
+                    Packet unknownAnswer = new Packet((char) 0x9791);
+                    unknownAnswer.write((byte) 2);
+                    connection.sendTCP(unknownAnswer);
+                }
+            }
+            else {
+                boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
+                if (valid) {
+                    ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, null);
+                    if (clientWhitelist != null && !clientWhitelist.getIsAuthenticated()) {
+                        String hwid = result.get(0);
+                        connection.setHwid(hwid);
+
+                        clientWhitelist.setHwid(hwid);
+                        clientWhitelist.setIsAuthenticated(true);
+                        clientWhitelistService.save(clientWhitelist);
+
+                        Packet unknownAnswer = new Packet((char) 0x9791);
+                        unknownAnswer.write((byte) 0);
+                        connection.sendTCP(unknownAnswer);
+                    }
+                }
+                else {
+                    Packet unknownAnswer = new Packet((char) 0x9791);
+                    unknownAnswer.write((byte) 2);
+                    connection.sendTCP(unknownAnswer);
+                    handleDisconnected(connection);
+                }
+            }
         }
     }
 

@@ -149,7 +149,6 @@ public class StartApplication {
 
         gameServerNetworkListener.cleanUp();
         relayServerNetworkListener.cleanUp();
-        relayServerNetworkListener.cleanUp();
 
         if (GlobalSettings.IsAntiCheatEnabled) {
             antiCheatHeartBeatNetworkListener.cleanUp();
