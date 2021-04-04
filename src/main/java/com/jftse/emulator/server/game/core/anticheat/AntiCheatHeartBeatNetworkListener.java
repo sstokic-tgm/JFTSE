@@ -18,6 +18,7 @@ public class AntiCheatHeartBeatNetworkListener implements ConnectionListener {
         client.setConnection(connection);
 
         connection.setClient(client);
+        antiCheatPacketHandler.getAntiCheatHandler().addClient(client);
         antiCheatPacketHandler.sendWelcomePacket(connection);
     }
 

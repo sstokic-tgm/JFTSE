@@ -144,7 +144,6 @@ public class StartApplication {
 
         gameServerNetworkListener.cleanUp();
         relayServerNetworkListener.cleanUp();
-        relayServerNetworkListener.cleanUp();
         antiCheatHeartBeatNetworkListener.cleanUp();
 
         executor.shutdown();
