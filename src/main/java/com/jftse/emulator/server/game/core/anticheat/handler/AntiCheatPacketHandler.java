@@ -8,6 +8,7 @@ import com.jftse.emulator.server.game.core.service.ModuleService;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.AntiCheatHandler;
+import com.jftse.emulator.server.shared.module.Client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -43,24 +44,26 @@ public class AntiCheatPacketHandler {
     }
 
     public void sendWelcomePacket(Connection connection) {
-        String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
-        int port = connection.getRemoteAddressTCP().getPort();
+        if (connection.getRemoteAddressTCP() != null) {
+            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+            int port = connection.getRemoteAddressTCP().getPort();
 
-        connection.getClient().setIp(hostAddress);
-        connection.getClient().setPort(port);
+            connection.getClient().setIp(hostAddress);
+            connection.getClient().setPort(port);
 
-        ClientWhitelist existingClientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, null);
-        if (existingClientWhitelist == null) {
-            ClientWhitelist clientWhitelist = new ClientWhitelist();
-            clientWhitelist.setIp(hostAddress);
-            clientWhitelist.setPort(port);
-            clientWhitelist.setFlagged(false);
-            clientWhitelist.setIsAuthenticated(false);
-            clientWhitelistService.save(clientWhitelist);
+            ClientWhitelist existingClientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, null);
+            if (existingClientWhitelist == null) {
+                ClientWhitelist clientWhitelist = new ClientWhitelist();
+                clientWhitelist.setIp(hostAddress);
+                clientWhitelist.setPort(port);
+                clientWhitelist.setFlagged(false);
+                clientWhitelist.setIsAuthenticated(false);
+                clientWhitelistService.save(clientWhitelist);
+            }
+
+            S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
+            connection.sendTCP(welcomePacket);
         }
-
-        S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
-        connection.sendTCP(welcomePacket);
     }
 
     public void handleDisconnected(Connection connection) {
@@ -70,61 +73,56 @@ public class AntiCheatPacketHandler {
             if (clientWhitelist != null)
                 clientWhitelistService.remove(clientWhitelist.getId());
 
-            this.antiCheatHandler.getClientList().remove(connection.getClient());
+            this.antiCheatHandler.removeClient(connection.getClient());
             connection.setClient(null);
         }
         connection.close();
     }
 
     public void handleRegister(Connection connection, Packet packet) {
-        String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+        if (connection.getRemoteAddressTCP() != null) {
+            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
 
-        if (connection.getClient() != null) {
-            Map<String, Boolean> files = this.antiCheatHandler.getFilesByClient(connection.getClient());
+            if (connection.getClient() != null) {
+                Client client = connection.getClient();
+                Map<String, Boolean> files = this.antiCheatHandler.getFilesByClient(client);
 
-            String str = packet.readString();
-            List<String> result = Arrays.asList(str.split(";"));
+                String str = packet.readString();
+                List<String> result = Arrays.asList(str.split(";"));
 
-            if (result.size() == 3) {
-                files.entrySet().stream()
-                        .filter(f -> result.containsAll(Arrays.asList(f.getKey().split(";"))))
-                        .findFirst()
-                        .ifPresent(f -> f.setValue(true));
-                boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
+                if (result.size() == 3) {
+                    files.entrySet().stream()
+                            .filter(f -> result.containsAll(Arrays.asList(f.getKey().split(";"))))
+                            .findFirst()
+                            .ifPresent(f -> f.setValue(true));
+                    boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
 
-                if (valid) {
-                    Packet unknownAnswer = new Packet((char) 0x9791);
-                    unknownAnswer.write((byte) 0);
-                    connection.sendTCP(unknownAnswer);
-                }
-                else {
-                    Packet unknownAnswer = new Packet((char) 0x9791);
-                    unknownAnswer.write((byte) 2);
-                    connection.sendTCP(unknownAnswer);
-                }
-            }
-            else {
-                boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
-                if (valid) {
-                    ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, null);
-                    if (clientWhitelist != null && !clientWhitelist.getIsAuthenticated()) {
-                        String hwid = result.get(0);
-                        connection.setHwid(hwid);
-
-                        clientWhitelist.setHwid(hwid);
-                        clientWhitelist.setIsAuthenticated(true);
-                        clientWhitelistService.save(clientWhitelist);
-
+                    if (valid) {
                         Packet unknownAnswer = new Packet((char) 0x9791);
                         unknownAnswer.write((byte) 0);
                         connection.sendTCP(unknownAnswer);
                     }
-                }
-                else {
-                    Packet unknownAnswer = new Packet((char) 0x9791);
-                    unknownAnswer.write((byte) 2);
-                    connection.sendTCP(unknownAnswer);
-                    handleDisconnected(connection);
+                } else {
+                    boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
+                    if (valid) {
+                        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, null);
+                        if (clientWhitelist != null && !clientWhitelist.getIsAuthenticated()) {
+                            String hwid = result.get(0);
+                            connection.setHwid(hwid);
+
+                            clientWhitelist.setHwid(hwid);
+                            clientWhitelist.setIsAuthenticated(true);
+                            clientWhitelistService.save(clientWhitelist);
+
+                            Packet unknownAnswer = new Packet((char) 0x9791);
+                            unknownAnswer.write((byte) 0);
+                            connection.sendTCP(unknownAnswer);
+                        }
+                    } else {
+                        Packet unknownAnswer = new Packet((char) 0x9791);
+                        unknownAnswer.write((byte) 2);
+                        connection.sendTCP(unknownAnswer);
+                    }
                 }
             }
         }

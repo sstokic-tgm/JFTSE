@@ -160,14 +160,16 @@ public class GamePacketHandler {
     }
 
     public void sendWelcomePacket(Connection connection) {
-        String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
-        int port = connection.getRemoteAddressTCP().getPort();
+        if (connection.getRemoteAddressTCP() != null) {
+            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+            int port = connection.getRemoteAddressTCP().getPort();
 
-        connection.getClient().setIp(hostAddress);
-        connection.getClient().setPort(port);
+            connection.getClient().setIp(hostAddress);
+            connection.getClient().setPort(port);
 
-        S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
-        connection.sendTCP(welcomePacket);
+            S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
+            connection.sendTCP(welcomePacket);
+        }
     }
 
     public void handleGameServerLoginPacket(Connection connection, Packet packet) {
