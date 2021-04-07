@@ -300,6 +300,8 @@ public class AuthPacketHandler {
     }
 
     private boolean isClientValid(InetSocketAddress inetSocketAddress, String hwid) {
+        if (inetSocketAddress == null)
+            return false;
         String hostAddress = inetSocketAddress.getAddress().getHostAddress();
         ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, hwid);
         return clientWhitelist != null;
