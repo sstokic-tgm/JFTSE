@@ -1891,13 +1891,15 @@ public class GamePacketHandler {
 
         C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket = new C2SMatchplayPlayerPicksUpCrystal(packet);
         Room room = connection.getClient().getActiveRoom();
-        switch (room.getMode()) {
-            case GameMode.GUARDIAN:
-                this.guardianModeHandler.handlePlayerPickingUpCrystal(connection, playerPicksUpCrystalPacket);
-                break;
-            case GameMode.BATTLE:
-                this.battleModeHandler.handlePlayerPickingUpCrystal(connection, playerPicksUpCrystalPacket);
-                break;
+        if (room != null) { // shouldn't happen
+            switch (room.getMode()) {
+                case GameMode.GUARDIAN:
+                    this.guardianModeHandler.handlePlayerPickingUpCrystal(connection, playerPicksUpCrystalPacket);
+                    break;
+                case GameMode.BATTLE:
+                    this.battleModeHandler.handlePlayerPickingUpCrystal(connection, playerPicksUpCrystalPacket);
+                    break;
+            }
         }
     }
 
@@ -1906,13 +1908,15 @@ public class GamePacketHandler {
 
         C2SMatchplayUsesSkill playerUseSkill = new C2SMatchplayUsesSkill(packet);
         Room room = connection.getClient().getActiveRoom();
-        switch (room.getMode()) {
-            case GameMode.GUARDIAN:
-                this.guardianModeHandler.handleUseOfSkill(connection, playerUseSkill);
-                break;
-            case GameMode.BATTLE:
-                this.battleModeHandler.handleUseOfSkill(connection, playerUseSkill);
-                break;
+        if (room != null) { // shouldn't happen
+            switch (room.getMode()) {
+                case GameMode.GUARDIAN:
+                    this.guardianModeHandler.handleUseOfSkill(connection, playerUseSkill);
+                    break;
+                case GameMode.BATTLE:
+                    this.battleModeHandler.handleUseOfSkill(connection, playerUseSkill);
+                    break;
+            }
         }
     }
 
@@ -1921,13 +1925,15 @@ public class GamePacketHandler {
 
         C2SMatchplaySkillHitsTarget skillHitsTarget = new C2SMatchplaySkillHitsTarget(packet);
         Room room = connection.getClient().getActiveRoom();
-        switch (room.getMode()) {
-            case GameMode.GUARDIAN:
-                this.guardianModeHandler.handleSkillHitsTarget(connection, skillHitsTarget);
-                break;
-            case GameMode.BATTLE:
-                this.battleModeHandler.handleSkillHitsTarget(connection, skillHitsTarget);
-                break;
+        if (room != null) { // shouldn't happen
+            switch (room.getMode()) {
+                case GameMode.GUARDIAN:
+                    this.guardianModeHandler.handleSkillHitsTarget(connection, skillHitsTarget);
+                    break;
+                case GameMode.BATTLE:
+                    this.battleModeHandler.handleSkillHitsTarget(connection, skillHitsTarget);
+                    break;
+            }
         }
     }
 
@@ -1936,13 +1942,15 @@ public class GamePacketHandler {
 
         C2SMatchplaySwapQuickSlotItems swapQuickSlotItems = new C2SMatchplaySwapQuickSlotItems(packet);
         Room room = connection.getClient().getActiveRoom();
-        switch (room.getMode()) {
-            case GameMode.GUARDIAN:
-                this.guardianModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
-                break;
-            case GameMode.BATTLE:
-                this.battleModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
-                break;
+        if (room != null) { // shouldn't happen
+            switch (room.getMode()) {
+                case GameMode.GUARDIAN:
+                    this.guardianModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
+                    break;
+                case GameMode.BATTLE:
+                    this.battleModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
+                    break;
+            }
         }
     }
 
