@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.game.handler;
 
+import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.common.utilities.StringUtils;
@@ -120,10 +121,13 @@ public class GamePacketHandler {
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
             authenticationService.updateAccount(account);
         });
-        List<ClientWhitelist> clientWhiteList = clientWhitelistService.findAll();
-        for (int i = 0; i < clientWhiteList.size(); i++) {
-            Long id = clientWhiteList.get(i).getId();
-            clientWhitelistService.remove(id);
+
+        if (GlobalSettings.IsAntiCheatEnabled) {
+            List<ClientWhitelist> clientWhiteList = clientWhitelistService.findAll();
+            for (int i = 0; i < clientWhiteList.size(); i++) {
+                Long id = clientWhiteList.get(i).getId();
+                clientWhitelistService.remove(id);
+            }
         }
 
         this.getGameHandler().getRoomList().clear();
@@ -1997,6 +2001,7 @@ public class GamePacketHandler {
     }
 
     public void handleHeartBeatPacket(Connection connection, Packet packet) {
+        if (!GlobalSettings.IsAntiCheatEnabled) return;
         String hostAddress = connection.getClient().getIp();
         ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, connection.getHwid());
         if (clientWhitelist == null)

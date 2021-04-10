@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.auth.handler;
 
+import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.database.model.home.AccountHome;
@@ -44,7 +45,7 @@ public class AuthPacketHandler {
     public void handleLoginPacket(Connection connection, Packet packet) {
         C2SLoginPacket loginPacket = new C2SLoginPacket(packet);
 
-        if (!isClientValid(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
+        if (GlobalSettings.IsAntiCheatEnabled && !isClientValid(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
 
