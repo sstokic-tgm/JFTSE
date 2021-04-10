@@ -979,7 +979,7 @@ public class GamePacketHandler {
             S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
             this.gameHandler.getClientList().stream()
-                .filter(cl -> cl.getActivePlayer() != null && cl.getActivePlayer().getName().equals(whisperReqPacket.getReceiverName()))
+                .filter(cl -> cl.getActivePlayer() != null && cl.getActivePlayer().getName().equalsIgnoreCase(whisperReqPacket.getReceiverName()))
                 .findAny()
                 .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
 
