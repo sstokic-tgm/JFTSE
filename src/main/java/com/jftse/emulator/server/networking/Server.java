@@ -28,24 +28,55 @@ public class Server implements Runnable {
 
     private ConnectionListener dispatchListener = new ConnectionListener() {
             public void connected(Connection connection) {
-                Server.this.connectionListeners.forEach(cl -> cl.connected(connection));
+                Server.this.connectionListeners.forEach(cl -> {
+                    try {
+                        cl.connected(connection);
+                    } catch (Exception ex) {
+                        log.error("OnConnected exception " + ex.getMessage(), ex);
+                    }
+                });
             }
 
             public void disconnected(Connection connection) {
                 removeConnection(connection);
-                Server.this.connectionListeners.forEach(cl -> cl.disconnected(connection));
+                Server.this.connectionListeners.forEach(cl -> {
+                    try {
+                        cl.disconnected(connection);
+                    } catch (Exception ex) {
+                        log.error("OnDisconnected exception " + ex.getMessage(), ex);
+                    }
+                });
             }
 
             public void received(Connection connection, Packet packet) {
-                Server.this.connectionListeners.forEach(cl -> cl.received(connection, packet));
+                Server.this.connectionListeners.forEach(cl -> {
+                    try {
+                        cl.received(connection, packet);
+                    } catch (Exception ex) {
+                        log.error("OnReceived exception " + ex.getMessage(), ex);
+                    }
+                });
+
             }
 
             public void idle(Connection connection) {
-                Server.this.connectionListeners.forEach(cl -> cl.idle(connection));
+                Server.this.connectionListeners.forEach(cl -> {
+                    try {
+                        cl.idle(connection);
+                    } catch (Exception ex) {
+                        log.error("OnIdle exception " + ex.getMessage(), ex);
+                    }
+                });
             }
 
             public void onException(Connection connection, Exception exception) {
-                Server.this.connectionListeners.forEach(cl -> cl.onException(connection, exception));
+                Server.this.connectionListeners.forEach(cl -> {
+                    try {
+                        cl.onException(connection, exception);
+                    } catch (Exception ex) {
+                        log.error("OnException exception " + ex.getMessage(), ex);
+                    }
+                });
             }
 
             public void onTimeout(Connection connection) {
