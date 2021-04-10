@@ -116,6 +116,7 @@ public class StartApplication {
                 System.exit(1);
             }
             antiCheatServer.start("anti cheat server");
+
             log.info("Successfully initialized!");
             log.info("--------------------------------------");
         }

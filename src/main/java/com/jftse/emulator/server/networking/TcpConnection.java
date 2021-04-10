@@ -2,6 +2,7 @@ package com.jftse.emulator.server.networking;
 
 import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.utilities.BitKit;
+import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
@@ -191,7 +192,7 @@ public class TcpConnection {
                 packet = new Packet(data);
 
                 if (GlobalSettings.LogAllPackets)
-                    log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                    log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
                 connection.notifyReceived(packet);
 
@@ -213,7 +214,7 @@ public class TcpConnection {
             this.receiveIndicator %= 60;
 
             if (GlobalSettings.LogAllPackets)
-                log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         }
         else {
             packet = null;
@@ -264,10 +265,9 @@ public class TcpConnection {
             writeBuffer.put(data);
 
             if (GlobalSettings.LogAllPackets)
-                log.info("SEND [" + String.format("0x%x", (int)packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
             if(!writeToSocket()) {
-
                 selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
             } else {
                 selectionKey.selector().wakeup();
