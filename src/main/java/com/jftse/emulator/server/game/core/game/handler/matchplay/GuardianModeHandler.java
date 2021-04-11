@@ -957,6 +957,10 @@ public class GuardianModeHandler {
 
     private void sendPacketToAllClientsInSameGameSession(Packet packet, Connection connection) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
-        gameSession.getClients().forEach(c -> c.getConnection().sendTCP(packet));
+        if (gameSession != null) {
+            List<Client> clientsInGameSession = new ArrayList<>();
+            clientsInGameSession.addAll(gameSession.getClients()); // deep copy
+            clientsInGameSession.forEach(c -> c.getConnection().sendTCP(packet));
+        }
     }
 }

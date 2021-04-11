@@ -123,7 +123,8 @@ public class GamePacketHandler {
         scheduledExecutorService.scheduleAtFixedRate(packetEventHandler::handleQueuedPackets, 0, 5, TimeUnit.MILLISECONDS);
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             try {
-                List<GameSession> gameSessions = new ArrayList<>(this.gameSessionManager.getGameSessionList());
+                List<GameSession> gameSessions = new ArrayList<>();
+                gameSessions.addAll(this.gameSessionManager.getGameSessionList()); // deep copy
                 gameSessions.forEach(gameSession -> {
                     if (gameSession == null) return;
                     runnableEventHandler.handleQueuedRunnableEvents(gameSession);

@@ -25,6 +25,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -102,7 +103,8 @@ public class MatchplayPacketHandler {
         }
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
-            List<Client> clientsInGameSession = gameSession.getClients();
+            List<Client> clientsInGameSession = new ArrayList<>();
+            clientsInGameSession.addAll(gameSession.getClients()); // deep copy
             for (Client client : clientsInGameSession) {
                 S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                 if (client.getConnection() != null && client.getConnection().isConnected())
