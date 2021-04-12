@@ -4,7 +4,10 @@ CREATE TABLE fantasytennis.GameServer  (
     port INT,
     gameServerType_id BIGINT,
     FOREIGN KEY (gameServerType_id) REFERENCES GameServerType(id),
+    isCustomChannel BIT,
+    name VARCHAR(255),
     PRIMARY KEY (id)
 );
 
-INSERT INTO `fantasytennis`.`GameServer`(`host`, `port`, `gameServerType_id`) VALUES ('127.0.0.1', 5895, 2);
+INSERT INTO `fantasytennis`.`GameServer`(`host`, `port`, `gameServerType_id`, `isCustomChannel`) VALUES ('127.0.0.1', 5895, 2, b'0');
+INSERT INTO `fantasytennis`.`GameServer`(`host`, `port`, `gameServerType_id`, `isCustomChannel`) VALUES ('127.0.0.1', 5896, 4, b'0');

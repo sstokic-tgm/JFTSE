@@ -1,7 +1,16 @@
 package com.jftse.emulator.server.game.core.game.handler;
 
+import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
+import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
+import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
+import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBattleGame;
+import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayGuardianGame;
+import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
+import com.jftse.emulator.server.game.core.matchplay.room.Room;
+import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayBackToRoom;
@@ -16,6 +25,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -75,11 +85,13 @@ public class MatchplayPacketHandler {
                     connection.sendTCP(answer);
                 }
                 else {
+                    log.warn("Couldn't find client for player. Cancel connection to relay server");
                     connection.close();
                 }
             }
         }
         else {
+            log.warn("Couldn't find gamesession. Cancel connection to relay server");
             connection.close();
         }
     }
@@ -91,7 +103,8 @@ public class MatchplayPacketHandler {
         }
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
-            List<Client> clientsInGameSession = gameSession.getClients();
+            List<Client> clientsInGameSession = new ArrayList<>();
+            clientsInGameSession.addAll(gameSession.getClients()); // deep copy
             for (Client client : clientsInGameSession) {
                 S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
                 if (client.getConnection() != null && client.getConnection().isConnected())
@@ -107,6 +120,75 @@ public class MatchplayPacketHandler {
         }
         this.relayHandler.removeClient(connection.getClient());
         connection.close();
+    }
+
+    public void handleTimeout(Connection connection) {
+        Client client = connection.getClient();
+        if (client == null) {
+            connection.close();
+            return;
+        }
+
+        Room room = client.getActiveRoom();
+        if (room == null || room.getStatus() != RoomStatus.Running) {
+            if (room != null) {
+                log.warn(String.format("Room  state is %s . Close connection", room.getStatus()));
+            }
+
+            connection.close();
+            return;
+        }
+
+        GameSession gameSession = client.getActiveGameSession();
+        if (gameSession == null) {
+            connection.close();
+            return;
+        }
+
+        MatchplayGame game = gameSession.getActiveMatchplayGame();
+        if (game == null) {
+            connection.close();
+            return;
+        }
+
+        if (game instanceof MatchplayGuardianGame || game instanceof MatchplayBattleGame) {
+            if (room.getStatus() == RoomStatus.Running) {
+                // Test if people won't back thrown back to room during guardian game if we do it this way.
+                // If no bug reports come anymore delete the tryHandleTimeoutForGuardianGameMatch method.
+                return;
+            }
+
+            boolean success = this.tryHandleTimeoutForGuardianGameMatch(connection, client, room, (MatchplayGuardianGame) game);
+            if (success) {
+                return;
+            }
+        }
+
+        connection.close();
+    }
+
+    private boolean tryHandleTimeoutForGuardianGameMatch(Connection connection, Client client, Room room, MatchplayGuardianGame game) {
+        Player player = client.getActivePlayer();
+        if (player == null) return false;
+
+        RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
+                .filter(x -> x.getPlayer() == player)
+                .findFirst()
+                .orElse(null);
+        if (roomPlayer == null) return false;
+
+        PlayerBattleState playerBattleState = game.getPlayerBattleStates().stream()
+                .filter(x -> x.getPosition() == roomPlayer.getPosition())
+                .findFirst()
+                .orElse(null);
+        if (playerBattleState == null) return false;
+
+        if (playerBattleState.isDead()) {
+            connection.getTcpConnection().setLastReadTime(System.currentTimeMillis());
+            return true;
+        }
+
+        return false;
     }
 
     public void handleUnknown(Connection connection, Packet packet) {

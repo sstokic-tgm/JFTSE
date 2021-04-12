@@ -1,0 +1,450 @@
+[
+  {
+    "Will": 15,
+    "Damage": 20
+  },
+  {
+    "Will": 16,
+    "Damage": 20
+  },
+  {
+    "Will": 17,
+    "Damage": 20
+  },
+  {
+    "Will": 18,
+    "Damage": 20
+  },
+  {
+    "Will": 19,
+    "Damage": 20
+  },
+  {
+    "Will": 20,
+    "Damage": 20
+  },
+  {
+    "Will": 21,
+    "Damage": 20
+  },
+  {
+    "Will": 22,
+    "Damage": 21
+  },
+  {
+    "Will": 23,
+    "Damage": 21
+  },
+  {
+    "Will": 24,
+    "Damage": 22
+  },
+  {
+    "Will": 25,
+    "Damage": 23
+  },
+  {
+    "Will": 26,
+    "Damage": 23
+  },
+  {
+    "Will": 27,
+    "Damage": 24
+  },
+  {
+    "Will": 28,
+    "Damage": 24
+  },
+  {
+    "Will": 29,
+    "Damage": 25
+  },
+  {
+    "Will": 30,
+    "Damage": 25
+  },
+  {
+    "Will": 31,
+    "Damage": 26
+  },
+  {
+    "Will": 32,
+    "Damage": 26
+  },
+  {
+    "Will": 33,
+    "Damage": 27
+  },
+  {
+    "Will": 34,
+    "Damage": 27
+  },
+  {
+    "Will": 35,
+    "Damage": 28
+  },
+  {
+    "Will": 36,
+    "Damage": 28
+  },
+  {
+    "Will": 37,
+    "Damage": 29
+  },
+  {
+    "Will": 38,
+    "Damage": 29
+  },
+  {
+    "Will": 39,
+    "Damage": 30
+  },
+  {
+    "Will": 40,
+    "Damage": 30
+  },
+  {
+    "Will": 41,
+    "Damage": 31
+  },
+  {
+    "Will": 42,
+    "Damage": 31
+  },
+  {
+    "Will": 43,
+    "Damage": 32
+  },
+  {
+    "Will": 44,
+    "Damage": 32
+  },
+  {
+    "Will": 45,
+    "Damage": 33
+  },
+  {
+    "Will": 46,
+    "Damage": 33
+  },
+  {
+    "Will": 47,
+    "Damage": 34
+  },
+  {
+    "Will": 48,
+    "Damage": 34
+  },
+  {
+    "Will": 49,
+    "Damage": 35
+  },
+  {
+    "Will": 50,
+    "Damage": 36
+  },
+  {
+    "Will": 51,
+    "Damage": 36
+  },
+  {
+    "Will": 52,
+    "Damage": 37
+  },
+  {
+    "Will": 53,
+    "Damage": 37
+  },
+  {
+    "Will": 54,
+    "Damage": 38
+  },
+  {
+    "Will": 55,
+    "Damage": 38
+  },
+  {
+    "Will": 56,
+    "Damage": 39
+  },
+  {
+    "Will": 57,
+    "Damage": 39
+  },
+  {
+    "Will": 58,
+    "Damage": 40
+  },
+  {
+    "Will": 59,
+    "Damage": 40
+  },
+  {
+    "Will": 60,
+    "Damage": 41
+  },
+  {
+    "Will": 61,
+    "Damage": 41
+  },
+  {
+    "Will": 62,
+    "Damage": 42
+  },
+  {
+    "Will": 63,
+    "Damage": 42
+  },
+  {
+    "Will": 64,
+    "Damage": 43
+  },
+  {
+    "Will": 65,
+    "Damage": 43
+  },
+  {
+    "Will": 66,
+    "Damage": 44
+  },
+  {
+    "Will": 67,
+    "Damage": 44
+  },
+  {
+    "Will": 68,
+    "Damage": 45
+  },
+  {
+    "Will": 69,
+    "Damage": 45
+  },
+  {
+    "Will": 70,
+    "Damage": 46
+  },
+  {
+    "Will": 71,
+    "Damage": 46
+  },
+  {
+    "Will": 72,
+    "Damage": 47
+  },
+  {
+    "Will": 73,
+    "Damage": 47
+  },
+  {
+    "Will": 74,
+    "Damage": 48
+  },
+  {
+    "Will": 75,
+    "Damage": 49
+  },
+  {
+    "Will": 76,
+    "Damage": 49
+  },
+  {
+    "Will": 77,
+    "Damage": 50
+  },
+  {
+    "Will": 78,
+    "Damage": 50
+  },
+  {
+    "Will": 79,
+    "Damage": 51
+  },
+  {
+    "Will": 80,
+    "Damage": 51
+  },
+  {
+    "Will": 81,
+    "Damage": 52
+  },
+  {
+    "Will": 82,
+    "Damage": 52
+  },
+  {
+    "Will": 83,
+    "Damage": 53
+  },
+  {
+    "Will": 84,
+    "Damage": 53
+  },
+  {
+    "Will": 85,
+    "Damage": 54
+  },
+  {
+    "Will": 86,
+    "Damage": 54
+  },
+  {
+    "Will": 87,
+    "Damage": 55
+  },
+  {
+    "Will": 88,
+    "Damage": 55
+  },
+  {
+    "Will": 89,
+    "Damage": 56
+  },
+  {
+    "Will": 90,
+    "Damage": 56
+  },
+  {
+    "Will": 91,
+    "Damage": 57
+  },
+  {
+    "Will": 92,
+    "Damage": 57
+  },
+  {
+    "Will": 93,
+    "Damage": 58
+  },
+  {
+    "Will": 94,
+    "Damage": 58
+  },
+  {
+    "Will": 95,
+    "Damage": 59
+  },
+  {
+    "Will": 96,
+    "Damage": 59
+  },
+  {
+    "Will": 97,
+    "Damage": 60
+  },
+  {
+    "Will": 98,
+    "Damage": 60
+  },
+  {
+    "Will": 99,
+    "Damage": 61
+  },
+  {
+    "Will": 100,
+    "Damage": 62
+  },
+  {
+    "Will": 101,
+    "Damage": 62
+  },
+  {
+    "Will": 102,
+    "Damage": 63
+  },
+  {
+    "Will": 103,
+    "Damage": 63
+  },
+  {
+    "Will": 104,
+    "Damage": 64
+  },
+  {
+    "Will": 105,
+    "Damage": 64
+  },
+  {
+    "Will": 106,
+    "Damage": 65
+  },
+  {
+    "Will": 107,
+    "Damage": 65
+  },
+  {
+    "Will": 108,
+    "Damage": 66
+  },
+  {
+    "Will": 109,
+    "Damage": 66
+  },
+  {
+    "Will": 110,
+    "Damage": 67
+  },
+  {
+    "Will": 111,
+    "Damage": 67
+  },
+  {
+    "Will": 112,
+    "Damage": 68
+  },
+  {
+    "Will": 113,
+    "Damage": 68
+  },
+  {
+    "Will": 114,
+    "Damage": 69
+  },
+  {
+    "Will": 115,
+    "Damage": 69
+  },
+  {
+    "Will": 116,
+    "Damage": 70
+  },
+  {
+    "Will": 117,
+    "Damage": 70
+  },
+  {
+    "Will": 118,
+    "Damage": 71
+  },
+  {
+    "Will": 119,
+    "Damage": 71
+  },
+  {
+    "Will": 120,
+    "Damage": 72
+  },
+  {
+    "Will": 121,
+    "Damage": 72
+  },
+  {
+    "Will": 122,
+    "Damage": 73
+  },
+  {
+    "Will": 123,
+    "Damage": 73
+  },
+  {
+    "Will": 124,
+    "Damage": 74
+  },
+  {
+    "Will": 125,
+    "Damage": 74
+  },
+  {
+    "Will": 126,
+    "Damage": 75
+  }
+]

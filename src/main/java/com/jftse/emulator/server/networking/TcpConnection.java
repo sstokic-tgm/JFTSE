@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.networking;
 
+import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
@@ -162,7 +163,9 @@ public class TcpConnection {
         byte[] data = new byte[bytesRead];
 
         BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
-        log.debug("payload - RECV " + BitKit.toString(data, 0, bytesRead) + " bytesRead: " + bytesRead);
+
+        if (GlobalSettings.LogAllPackets)
+            log.debug("payload - RECV " + BitKit.toString(data, 0, bytesRead) + " bytesRead: " + bytesRead);
 
         // a read tcp packet may contain multiple nested packets, so we handle that properly
         while (true) {
@@ -188,7 +191,8 @@ public class TcpConnection {
             if (packetSize + 8 < data.length) {
                 packet = new Packet(data);
 
-                log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                if (GlobalSettings.LogAllPackets)
+                    log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
                 connection.notifyReceived(packet);
 
@@ -209,7 +213,8 @@ public class TcpConnection {
             this.receiveIndicator++;
             this.receiveIndicator %= 60;
 
-            log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+            if (GlobalSettings.LogAllPackets)
+                log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         }
         else {
             packet = null;
@@ -259,7 +264,8 @@ public class TcpConnection {
             createCheckSum(data);
             writeBuffer.put(data);
 
-            log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+            if (GlobalSettings.LogAllPackets)
+                log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
             if(!writeToSocket()) {
                 selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
