@@ -47,6 +47,9 @@ public final class PacketID {
     public final static char S2CRoomListAnswer = 0x138E;
     public final static char S2CRoomPlayerInformation = 0x1394;
     public final static char C2SRoomListReq = 0x13EC;
+    public final static char S2CRoomSetGuardians = 0x1D4F;
+    public final static char S2CRoomSetGuardianStats = 0x1D50;
+    public final static char S2CRoomSetBossGuardiansStats = 0x1D58;
 
     public final static char C2SLobbyUserListRequest = 0x1707;
     public final static char S2CLobbyUserListAnswer = 0x1708;
@@ -84,6 +87,7 @@ public final class PacketID {
     public final static char S2CMatchplayTeamWinsPoint = 0x1840;
     public final static char S2CMatchplayTeamWinsSet = 0x1842 ;
     public final static char S2CMatchplayEndBasicGame = 0x26FC; // Not really sure if name really corresponds to packet.
+    public final static char S2CMatchplayDisplayItemRewards = 0x1DB6;
     public final static char S2CMatchPlaySetExperienceGainInfoData = 0x1846;
     public final static char S2CMatchplaySetGameResultData = 0x1848;
     public final static char S2CMatchplayBackToRoom = 0x1780;
@@ -92,7 +96,17 @@ public final class PacketID {
     public final static char S2CMatchplayDamageToPlayer = 0x184E;
     public final static char S2CMatchplaySpawnBossBattle = 0x1D55;
     public final static char S2CMatchplayGivePlayerSkills = 0xC98;
+    public final static char S2CMatchplayLetCrystalDisappear = 0x332D;
+    public final static char C2SMatchplayPlayerPicksUpCrystal = 0x18E7;
     public final static char S2CMatchplayPlaceSkillCrystal = 0x332C;
+    public final static char C2SMatchplaySwapQuickSlotItems = 0xc97;
+    public final static char C2SMatchplayClientSkillHitsTarget = 0x2619;
+    public final static char C2SMatchplaySkillHitsTarget = 0x22F1;
+    public final static char C2SMatchplayPlayerUseSkill = 0x18E9;
+    public final static char S2CMatchplayUseSkill = 0x18EA;
+    public final static char S2CMatchplayIncreaseBreathTimerBy60Seconds = 0xC96;
+    public final static char S2CMatchplayGiveRandomSkill = 0x332E;
+    public final static char S2CMatchplayGiveSpecificSkill = 0x18E8;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
     public final static char C2CPlayerAnimationPacket = 0x32C9;

@@ -79,6 +79,10 @@ public class Server implements Runnable {
                 });
             }
 
+            public void onTimeout(Connection connection) {
+                Server.this.connectionListeners.forEach(cl -> cl.onTimeout(connection));
+            }
+
             public void cleanUp() {
                 // empty..
             }
@@ -224,7 +228,7 @@ public class Server implements Runnable {
             Connection connection = this.connections.get(i);
 
             if (connection.getTcpConnection().isTimedOut(time)) {
-                connection.close();
+                connection.notifyTimeout();
             }
             /* else {
 

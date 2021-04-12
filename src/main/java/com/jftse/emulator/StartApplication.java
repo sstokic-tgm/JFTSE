@@ -99,6 +99,7 @@ public class StartApplication {
         if (GlobalSettings.IsAntiCheatEnabled) {
             log.info("Initializing anti cheat heartbeat server...");
             antiCheatHeartBeatNetworkListener = new AntiCheatHeartBeatNetworkListener();
+
             // post dependency injection for this class
             ctx.getBeanFactory().autowireBean(antiCheatHeartBeatNetworkListener);
 

@@ -38,6 +38,10 @@ public class ProductService {
     private final PlayerStatisticService playerStatisticService;
     private final ItemCharService itemCharService;
 
+    public Product findProductByProductItemIndex(int productItemIndex) {
+        return this.productRepository.findProductByProductIndex(productItemIndex);
+    }
+
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {
         List<Integer> productIndexList = new ArrayList<>(itemList.keySet());
 

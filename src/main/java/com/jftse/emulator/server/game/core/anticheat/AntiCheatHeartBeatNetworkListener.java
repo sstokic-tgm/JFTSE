@@ -54,6 +54,10 @@ public class AntiCheatHeartBeatNetworkListener implements ConnectionListener {
         }
     }
 
+    public void onTimeout(Connection connection) {
+        connection.close();
+    }
+
     public void cleanUp() {
         antiCheatPacketHandler.handleCleanUp();
     }

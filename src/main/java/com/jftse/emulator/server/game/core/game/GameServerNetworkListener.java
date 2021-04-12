@@ -9,6 +9,8 @@ import com.jftse.emulator.server.shared.module.Client;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.concurrent.TimeUnit;
+
 @Log4j2
 public class GameServerNetworkListener implements ConnectionListener {
     @Autowired
@@ -19,6 +21,9 @@ public class GameServerNetworkListener implements ConnectionListener {
     }
 
     public void connected(Connection connection) {
+        long timeout = TimeUnit.SECONDS.toMillis(30);
+        connection.getTcpConnection().setTimeoutMillis((int) timeout);
+        
         Client client = new Client();
         client.setConnection(connection);
 
@@ -346,9 +351,27 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleGuildChangeReverseMemberRequest(connection, packet);
                 break;
 
+            case PacketID.C2SMatchplayPlayerPicksUpCrystal:
+                gamePacketHandler.handlePlayerPickingUpCrystal(connection, packet);
+                break;
+
+            case PacketID.C2SMatchplayPlayerUseSkill:
+                gamePacketHandler.handlePlayerUseSkill(connection, packet);
+                break;
+
+            case PacketID.C2SMatchplaySkillHitsTarget:
+                gamePacketHandler.handleSkillHitsTarget(connection, packet);
+                break;
+
+            case PacketID.C2SMatchplaySwapQuickSlotItems:
+                gamePacketHandler.handleSwapQuickSlotItems(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
+                gamePacketHandler.tryDetectSpeedHack(connection);
                 gamePacketHandler.handleHeartBeatPacket(connection, packet);
                 break;
+
             case PacketID.C2SLoginAliveClient:
                 // empty..
                 break;
@@ -372,5 +395,9 @@ public class GameServerNetworkListener implements ConnectionListener {
             default:
                 log.error(exception.getMessage(), exception);
         }
+    }
+
+    public void onTimeout(Connection connection) {
+        connection.close();
     }
 }
