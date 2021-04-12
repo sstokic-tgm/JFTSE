@@ -1,0 +1,582 @@
+[
+  {
+    "Name": "RubyCrab",
+    "MapId": 0,
+    "GuardiansLeft": [
+      1,
+      2,
+      3
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 1,
+    "Rewards": null
+  },
+  {
+    "Name": "EmeraldBeach",
+    "MapId": 1,
+    "GuardiansLeft": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 1,
+    "Rewards": null
+  },
+  {
+    "Name": "TwinkleTown",
+    "MapId": 2,
+    "GuardiansLeft": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 1,
+    "Rewards": null
+  },
+  {
+    "Name": "Aeolos",
+    "MapId": 3,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": null,
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 1,
+    "Rewards": null
+  },
+  {
+    "Name": "LifeWood",
+    "MapId": 5,
+    "GuardiansLeft": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "GuardiansRight": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 1,
+    "Rewards": null
+  },
+  {
+    "Name": "Arena",
+    "MapId": 6,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180,
+    "ExpMultiplier": 3,
+    "Rewards": null
+  },
+  {
+    "Name": "ArenaBoss",
+    "MapId": 6,
+    "GuardiansLeft": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansRight": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 1,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 3,
+    "Rewards": [
+      20048,
+      20049,
+      20050,
+      20051
+    ]
+  },
+  {
+    "Name": "MonsLava",
+    "MapId": 7,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 3,
+    "Rewards": null
+  },
+  {
+    "Name": "MonsLavaB",
+    "MapId": 8,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 3,
+    "Rewards": null
+  },
+  {
+    "Name": "DevaBerg",
+    "MapId": 9,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansRight": [
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180,
+    "ExpMultiplier": 3,
+    "Rewards": null
+  },
+  {
+    "Name": "DevaBergBoss",
+    "MapId": 9,
+    "GuardiansLeft": [
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "GuardiansRight": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 3,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 3,
+    "Rewards": [
+      20081,
+      20082,
+      20083,
+      20084
+    ]
+  },
+  {
+    "Name": "Atlantis",
+    "MapId": 10,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "GuardiansRight": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "GuardiansMiddle": [
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+    ],
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": 480,
+    "BossTriggerTimerInSeconds": 240,
+    "ExpMultiplier": 4,
+    "Rewards": null
+  },
+  {
+    "Name": "AtlantisBoss",
+    "MapId": 10,
+    "GuardiansLeft": [
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+    ],
+    "GuardiansRight": [
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 4,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 4,
+    "Rewards": [
+      20081,
+      20082,
+      20083,
+      20084,
+      20048,
+      20049,
+      20050,
+      20051
+    ]
+  },
+  {
+    "Name": "Temple",
+    "MapId": 11,
+    "GuardiansLeft": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+    ],
+    "GuardiansRight": [
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180,
+    "ExpMultiplier": 5,
+    "Rewards": [
+      20076
+    ]
+  },
+  {
+    "Name": "TempleBoss",
+    "MapId": 11,
+    "GuardiansLeft": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "GuardiansRight": [
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 5,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 5,
+    "Rewards": [
+      20076,
+      20080
+    ]
+  },
+  {
+    "Name": "RoomOfShadow",
+    "MapId": 12,
+    "GuardiansLeft": [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "GuardiansRight": [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 1,
+    "Rewards": null
+  },
+  {
+    "Name": "MachineCity",
+    "MapId": 13,
+    "GuardiansLeft": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansRight": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180,
+    "ExpMultiplier": 6,
+    "Rewards": [
+      20088
+    ]
+  },
+  {
+    "Name": "MachineCityBoss",
+    "MapId": 13,
+    "GuardiansLeft": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansRight": [
+      61,
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 6,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 6,
+    "Rewards": [
+      20088,
+      20086
+    ]
+  },
+  {
+    "Name": "DanceTime",
+    "MapId": 14,
+    "GuardiansLeft": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansRight": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": false,
+    "BossGuardian": 0,
+    "DefeatTimerInSeconds": -1,
+    "BossTriggerTimerInSeconds": 180,
+    "ExpMultiplier": 7,
+    "Rewards": [
+      20092
+    ]
+  },
+  {
+    "Name": "DanceTimeBoss",
+    "MapId": 14,
+    "GuardiansLeft": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansRight": [
+      67,
+      68,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GuardiansMiddle": null,
+    "IsBossStage": true,
+    "BossGuardian": 7,
+    "DefeatTimerInSeconds": 300,
+    "BossTriggerTimerInSeconds": -1,
+    "ExpMultiplier": 7,
+    "Rewards": [
+      20092,
+      20086
+    ]
+  }
+]

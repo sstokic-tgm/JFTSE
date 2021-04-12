@@ -1,0 +1,1841 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Skills>
+    <Skill>
+        <ID>0</ID>
+        <Name>SmallHeal</Name>
+        <TexID>0</TexID>
+        <IconID>0</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>1.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>190</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>10</Damage>
+        <DamageRate>8</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>1</ID>
+        <Name>BigHeal</Name>
+        <TexID>0</TexID>
+        <IconID>4</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>1.2</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>190</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>15</Damage>
+        <DamageRate>10</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>18000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>2</ID>
+        <Name>BigMeteo</Name>
+        <TexID>0</TexID>
+        <IconID>1</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>5</ShotCnt>
+        <ChantTime>4.2</ChantTime>
+        <RandMaxTime>5</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>189</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-40</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftA/EF_Meteor.Eft</AddEftPath_0>
+        <AddEftTime_1>0.0</AddEftTime_1>
+        <AddEftPath_1>Res/Effect/EftC/EF_Meteor_Ice.Eft</AddEftPath_1>
+    </Skill>
+    <Skill>
+        <ID>3</ID>
+        <Name>SmallMeteo</Name>
+        <TexID>0</TexID>
+        <IconID>3</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>3</ShotCnt>
+        <ChantTime>2.2</ChantTime>
+        <RandMaxTime>5</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>189</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-40</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>40000.0</CoolingTime>
+        <GdCoolingTime>8000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftA/EF_Meteor.Eft</AddEftPath_0>
+        <AddEftTime_1>0.0</AddEftTime_1>
+        <AddEftPath_1>Res/Effect/EftC/EF_Meteor_Ice.Eft</AddEftPath_1>
+    </Skill>
+    <Skill>
+        <ID>4</ID>
+        <Name>Rebirth</Name>
+        <TexID>0</TexID>
+        <IconID>5</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>218</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>10</Damage>
+        <DamageRate>10</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>1</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>40.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>20000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>5</ID>
+        <Name>HomingBall</Name>
+        <TexID>0</TexID>
+        <IconID>6</IconID>
+        <Elemental>2</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>2.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>220</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-10</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>100.0</ShotSpeed>
+        <ShotRot>190.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>9000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_011.ssp</AddSspPath_0>
+    </Skill>
+    <Skill>
+        <ID>6</ID>
+        <Name>Polymorph</Name>
+        <TexID>0</TexID>
+        <IconID>2</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>2.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>17</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>249</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-1</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>23.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>40000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_012.ssp</AddSspPath_0>
+    </Skill>
+    <Skill>
+        <ID>7</ID>
+        <Name>FireBall</Name>
+        <TexID>0</TexID>
+        <IconID>7</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.5</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>248</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-15</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>220.0</ShotSpeed>
+        <ShotRot>160.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>7000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_013.ssp</AddSspPath_0>
+        <AddSspAttTime_1>0.0</AddSspAttTime_1>
+        <AddSspPath_1>Res/Effect/Particle/Att_014.ssp</AddSspPath_1>
+    </Skill>
+    <Skill>
+        <ID>8</ID>
+        <Name>Miniam</Name>
+        <TexID>0</TexID>
+        <IconID>8</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>2.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>4.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>231</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-1</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>3</Property>
+        <Targeting>16</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>9</ID>
+        <Name>Shield</Name>
+        <TexID>0</TexID>
+        <IconID>9</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.01</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>3.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>220</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>1</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>4</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>5500.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>10</ID>
+        <Name>Apollon_flash</Name>
+        <TexID>0</TexID>
+        <IconID>11</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>1.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>9999.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>249</SoundShotID>
+        <SoundHitID>250</SoundHitID>
+        <Damage>-1</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 10.0</DamageInfo>
+        <Property>5</Property>
+        <Targeting>12</Targeting>
+        <TPosition>0.0, 15.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>65.0</ShotSpeed>
+        <ShotRot>360.0</ShotRot>
+        <Explosion>2</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_015.ssp</AddSspPath_0>
+        <AddSspAttTime_1>0.0</AddSspAttTime_1>
+        <AddSspPath_1>Res/Effect/Particle/Att_016.ssp</AddSspPath_1>
+    </Skill>
+    <Skill>
+        <ID>11</ID>
+        <Name>SpiderMine</Name>
+        <TexID>0</TexID>
+        <IconID>12</IconID>
+        <Elemental>1</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.5</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>9999.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>252</SoundShotID>
+        <SoundHitID>253</SoundHitID>
+        <Damage>-35</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.8</DamageInfo>
+        <Property>0</Property>
+        <Targeting>13</Targeting>
+        <TPosition>0.0, -0.3, 120.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>120.0</ShotSpeed>
+        <ShotRot>360.0</ShotRot>
+        <Explosion>1</Explosion>
+        <CoolingTime>30000.0</CoolingTime>
+        <GdCoolingTime>5000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftB/EF_SpiderMine.Eft</AddEftPath_0>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_015.ssp</AddSspPath_0>
+        <AddSspAttTime_1>0.0</AddSspAttTime_1>
+        <AddSspPath_1>Res/Effect/Particle/Att_016.ssp</AddSspPath_1>
+    </Skill>
+    <Skill>
+        <ID>12</ID>
+        <Name>blizzard</Name>
+        <TexID>0</TexID>
+        <IconID>13</IconID>
+        <Elemental>4</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>25</ShotCnt>
+        <ChantTime>5.0</ChantTime>
+        <RandMaxTime>5.0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>257</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-8</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>13000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftB/EF_Blizzard.Eft</AddEftPath_0>
+    </Skill>
+    <Skill>
+        <ID>13</ID>
+        <Name>MagicCircle</Name>
+        <TexID>0</TexID>
+        <IconID>15</IconID>
+        <Elemental>2</Elemental>
+        <ShotType>4</ShotType>
+        <ShotCnt>5</ShotCnt>
+        <ChantTime>0.3</ChantTime>
+        <RandMaxTime>2.0</RandMaxTime>
+        <PlayTime>10.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>257</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-35</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>20000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>14</ID>
+        <Name>Moaico</Name>
+        <TexID>0</TexID>
+        <IconID>16</IconID>
+        <Elemental>1</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>1.2</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>23</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>249</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-8</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>7</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>100.0</ShotSpeed>
+        <ShotRot>90.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>8000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_012.ssp</AddSspPath_0>
+    </Skill>
+    <Skill>
+        <ID>15</ID>
+        <Name>RangeHeal1</Name>
+        <TexID>0</TexID>
+        <IconID>17</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>10</Damage>
+        <DamageRate>10</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>13000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>16</ID>
+        <Name>RangeHeal2</Name>
+        <TexID>0</TexID>
+        <IconID>18</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>15</Damage>
+        <DamageRate>15</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>14000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>17</ID>
+        <Name>RangeHeal3</Name>
+        <TexID>0</TexID>
+        <IconID>19</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>20</Damage>
+        <DamageRate>20</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>18</ID>
+        <Name>RangeHeal4</Name>
+        <TexID>0</TexID>
+        <IconID>20</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>27</Damage>
+        <DamageRate>27</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>16000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>19</ID>
+        <Name>RangeShild</Name>
+        <TexID>0</TexID>
+        <IconID>21</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.01</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>3.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>1</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>4</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>7000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>20</ID>
+        <Name>Inferno</Name>
+        <TexID>0</TexID>
+        <IconID>22</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>5</ShotType>
+        <ShotCnt>3</ShotCnt>
+        <ChantTime>1.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>3.5</PlayTime>
+        <Vibration>2.0, 0.2, 0.2</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-60</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>2.0, 0.5, 25.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>40000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftF/EF_Inferno.Eft</AddEftPath_0>
+    </Skill>
+
+    <Skill>
+        <ID>21</ID>
+        <Name>Earth</Name>
+        <TexID>0</TexID>
+        <IconID>23</IconID>
+        <Elemental>1</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>2.5</ChantTime>
+        <RandMaxTime>2</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-35</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>2.0, 0.5, 25.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>40000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftE/EF_Bottom_Tunnel_Out_Ice.Eft</AddEftPath_0>
+    </Skill>
+    <Skill>
+        <ID>22</ID>
+        <Name>Cookie</Name>
+        <TexID>0</TexID>
+        <IconID>23</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>15</Damage>
+        <DamageRate>15</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>14000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>23</ID>
+        <Name>Pie</Name>
+        <TexID>0</TexID>
+        <IconID>24</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>15</Damage>
+        <DamageRate>15</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>14000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>24</ID>
+        <Name>Chaos</Name>
+        <TexID>0</TexID>
+        <IconID>25</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>2.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>23</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>249</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-8</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>100.0</ShotSpeed>
+        <ShotRot>90.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>8000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_012.ssp</AddSspPath_0>
+    </Skill>
+    <Skill>
+        <ID>25</ID>
+        <Name>MegaFireBall</Name>
+        <TexID>0</TexID>
+        <IconID>27</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.5</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>248</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-37</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>85.0</ShotSpeed>
+        <ShotRot>160.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>7000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_013.ssp</AddSspPath_0>
+        <AddSspAttTime_1>0.0</AddSspAttTime_1>
+        <AddSspPath_1>Res/Effect/Particle/Att_014.ssp</AddSspPath_1>
+    </Skill>
+    <Skill>
+        <ID>26</ID>
+        <Name>ThunderBolt</Name>
+        <TexID>0</TexID>
+        <IconID>1</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>20</ShotCnt>
+        <ChantTime>4.5</ChantTime>
+        <RandMaxTime>5</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>231</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-30</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftA/EF_Minimum.Eft</AddEftPath_0>
+        <AddEftTime_1>0.0</AddEftTime_1>
+        <AddEftPath_1>Res/Effect/EftA/EF_Minimum.Eft</AddEftPath_1>
+    </Skill>
+    <Skill>
+        <ID>27</ID>
+        <Name>SeaWave</Name>
+        <TexID>0</TexID>
+        <IconID>1</IconID>
+        <Elemental>4</Elemental>
+        <ShotType>6</ShotType>
+        <ShotCnt>11</ShotCnt>
+        <ChantTime>1.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>2.0, 0.2, 0.2</Vibration>
+        <SoundShotID>503</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-80</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>13</Targeting>
+        <TPosition>0.0, 0.0, 150.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>100.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftK/EF_Lizard_Magic.Eft</AddEftPath_0>
+        <AddEftTime_1>0.0</AddEftTime_1>
+        <AddEftPath_1>Res/Effect/EftK/EF_Lizard_Magic.Eft</AddEftPath_1>
+    </Skill>
+    <Skill>
+        <ID>28</ID>
+        <Name>RebirthOne</Name>
+        <TexID>0</TexID>
+        <IconID>5</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>218</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>50</Damage>
+        <DamageRate>50</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>1</Property>
+        <Targeting>3</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>40.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>20000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>29</ID>
+        <Name>RiceCake</Name>
+        <TexID>0</TexID>
+        <IconID>25</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>15</Damage>
+        <DamageRate>15</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>14000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>30</ID>
+        <Name>FullHeal</Name>
+        <TexID>0</TexID>
+        <IconID>26</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>1.2</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>190</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>100</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>18000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>31</ID>
+        <Name>Earth</Name>
+        <TexID>0</TexID>
+        <IconID>23</IconID>
+        <Elemental>1</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>10</ShotCnt>
+        <ChantTime>2.5</ChantTime>
+        <RandMaxTime>2</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-35</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>2.0, 0.5, 25.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>40000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftE/EF_Bottom_Tunnel_Out_Ice.Eft</AddEftPath_0>
+    </Skill>
+    <Skill>
+        <ID>32</ID>
+        <Name>Juice</Name>
+        <TexID>0</TexID>
+        <IconID>27</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>50</Damage>
+        <DamageRate>50</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>14000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>33</ID>
+        <Name>Water bang</Name>
+        <TexID>0</TexID>
+        <IconID>28</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>3</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>1.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>9999.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>249</SoundShotID>
+        <SoundHitID>250</SoundHitID>
+        <Damage>-1</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 10.0</DamageInfo>
+        <Property>5</Property>
+        <Targeting>12</Targeting>
+        <TPosition>0.0, 15.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>65.0</ShotSpeed>
+        <ShotRot>360.0</ShotRot>
+        <Explosion>2</Explosion>
+        <CoolingTime>35000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_023.ssp</AddSspPath_0>
+    </Skill>
+    <Skill>
+        <ID>34</ID>
+        <Name>Inferno</Name>
+        <TexID>0</TexID>
+        <IconID>22</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>5</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>1.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>3.5</PlayTime>
+        <Vibration>2.0, 0.2, 0.2</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-100</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>2.0, 0.5, 50.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>12</Targeting>
+        <TPosition>0.0, 0.0, 80.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>40000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftL/EF_Inferno_Big.Eft</AddEftPath_0>
+    </Skill>
+    <Skill>
+        <ID>35</ID>
+        <Name>Magma</Name>
+        <TexID>0</TexID>
+        <IconID>13</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>7</ShotCnt>
+        <ChantTime>5.0</ChantTime>
+        <RandMaxTime>5.0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>257</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-40</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>2.0, 0.5, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>13000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftL/EF_FlameStrike.Eft</AddEftPath_0>
+    </Skill>
+    <Skill>
+        <ID>36</ID>
+        <Name>MeteoBall</Name>
+        <TexID>0</TexID>
+        <IconID>7</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>7</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.5</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>248</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-50</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>160.0</ShotSpeed>
+        <ShotRot>160.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>20000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftL/EF_FireBall_Bigrock.Eft</AddEftPath_0>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_024.ssp</AddSspPath_0>
+        <AddSspAttTime_1>0.0</AddSspAttTime_1>
+        <AddSspPath_1>Res/Effect/Particle/Att_025.ssp</AddSspPath_1>
+    </Skill>
+    <Skill>
+        <ID>37</ID>
+        <Name>Sandglass</Name>
+        <TexID>0</TexID>
+        <IconID>29</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>20000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>38</ID>
+        <Name>Fast SmallHeal</Name>
+        <TexID>0</TexID>
+        <IconID>30</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>1.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>190</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>10</Damage>
+        <DamageRate>8</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>5000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>39</ID>
+        <Name>STR Buff</Name>
+        <TexID>0</TexID>
+        <IconID>31</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>40</ID>
+        <Name>DEF Buff</Name>
+        <TexID>0</TexID>
+        <IconID>35</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>41</ID>
+        <Name>Increase speed of projectiles</Name>
+        <TexID>0</TexID>
+        <IconID>38</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>42</ID>
+        <Name>Increase ball damage</Name>
+        <TexID>0</TexID>
+        <IconID>32</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>43</ID>
+        <Name>Increase strenght and ball speed</Name>
+        <TexID>0</TexID>
+        <IconID>34</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>44</ID>
+        <Name>Increase charge shot speed</Name>
+        <TexID>0</TexID>
+        <IconID>33</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>45</ID>
+        <Name>Increase movement speed</Name>
+        <TexID>0</TexID>
+        <IconID>37</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>46</ID>
+        <Name>Increase ball spin</Name>
+        <TexID>0</TexID>
+        <IconID>36</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>20000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>47</ID>
+        <Name>Range STR Buff</Name>
+        <TexID>0</TexID>
+        <IconID>39</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>48</ID>
+        <Name>Dange DEF Buff</Name>
+        <TexID>0</TexID>
+        <IconID>43</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>49</ID>
+        <Name>Range increase speed of projectiles</Name>
+        <TexID>0</TexID>
+        <IconID>46</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>50</ID>
+        <Name>Range increase ball damage</Name>
+        <TexID>0</TexID>
+        <IconID>40</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>51</ID>
+        <Name>Range increase strenght and ball speed</Name>
+        <TexID>0</TexID>
+        <IconID>42</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>52</ID>
+        <Name>Range increase charge shot speed</Name>
+        <TexID>0</TexID>
+        <IconID>41</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>53</ID>
+        <Name>Range increase movement speed</Name>
+        <TexID>0</TexID>
+        <IconID>45</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>54</ID>
+        <Name>Range increase ball spin</Name>
+        <TexID>0</TexID>
+        <IconID>44</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>20.0</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>14</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>25.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>25000.0</CoolingTime>
+        <GdCoolingTime>15000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>55</ID>
+        <Name>GreenMeteo</Name>
+        <TexID>0</TexID>
+        <IconID>1</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>5</ShotCnt>
+        <ChantTime>4.2</ChantTime>
+        <RandMaxTime>5</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>189</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-60</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftL/EF_Meteor_G.Eft</AddEftPath_0>
+        <AddEftTime_1>0.0</AddEftTime_1>
+        <AddEftPath_1>Res/Effect/EftL/EF_Meteor_IceG.Eft</AddEftPath_1>
+    </Skill>
+    <Skill>
+        <ID>56</ID>
+        <Name>Silence</Name>
+        <TexID>0</TexID>
+        <IconID>7</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>7</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.5</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>248</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-1</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>200.0</ShotSpeed>
+        <ShotRot>160.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>7000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Att_012.ssp</AddSspPath_0>
+    </Skill>
+    <Skill>
+        <ID>57</ID>
+        <Name>Rhythm Star</Name>
+        <TexID>0</TexID>
+        <IconID>15</IconID>
+        <Elemental>2</Elemental>
+        <ShotType>4</ShotType>
+        <ShotCnt>5</ShotCnt>
+        <ChantTime>0.3</ChantTime>
+        <RandMaxTime>2.0</RandMaxTime>
+        <PlayTime>20.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>257</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-100</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>20000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>58</ID>
+        <Name>Firework</Name>
+        <TexID>0</TexID>
+        <IconID>49</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>3000.0</CoolingTime>
+        <GdCoolingTime>3000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>59</ID>
+        <Name>Firework2</Name>
+        <TexID>0</TexID>
+        <IconID>50</IconID>
+        <Elemental>0</Elemental>
+        <ShotType>0</ShotType>
+        <ShotCnt>0</ShotCnt>
+        <ChantTime>0.1</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>0.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>-1</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>0</Damage>
+        <DamageRate>0</DamageRate>
+        <DamageInfo>0.0, 0.0, 0.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>0</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>3000.0</CoolingTime>
+        <GdCoolingTime>3000.0</GdCoolingTime>
+    </Skill>
+    <Skill>
+        <ID>60</ID>
+        <Name>Water_Pillar</Name>
+        <TexID>0</TexID>
+        <IconID>13</IconID>
+        <Elemental>4</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>5</ShotCnt>
+        <ChantTime>5.0</ChantTime>
+        <RandMaxTime>5.0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>257</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-80</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>1.5, 3.0, 20.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>0.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>13000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftN/EF_Water_Pillar01.Eft</AddEftPath_0>
+    </Skill>
+    <Skill>
+        <ID>61</ID>
+        <Name>Storm</Name>
+        <TexID>0</TexID>
+        <IconID>13</IconID>
+        <Elemental>4</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>10</ShotCnt>
+        <ChantTime>5.0</ChantTime>
+        <RandMaxTime>5.0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>257</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-8</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>13000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftM/EF_Blizzard_Big.Eft</AddEftPath_0>
+    </Skill>
+    <Skill>
+        <ID>62</ID>
+        <Name>MoaicoThunderBolt</Name>
+        <TexID>0</TexID>
+        <IconID>1</IconID>
+        <Elemental>1</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>20</ShotCnt>
+        <ChantTime>5.0</ChantTime>
+        <RandMaxTime>5</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>231</SoundShotID>
+        <SoundHitID>-1</SoundHitID>
+        <Damage>-25</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>10000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftN/EF_Tossakan_Thunderbolt.Eft</AddEftPath_0>
+        <AddEftTime_1>0.0</AddEftTime_1>
+        <AddEftPath_1>Res/Effect/EftN/EF_Tossakan_Thunderbolt.Eft</AddEftPath_1>
+    </Skill>
+    <Skill>
+        <ID>63</ID>
+        <Name>FireBall</Name>
+        <TexID>0</TexID>
+        <IconID>7</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>7</ShotType>
+        <ShotCnt>1</ShotCnt>
+        <ChantTime>0.5</ChantTime>
+        <RandMaxTime>0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>248</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-10</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.0, 0.0, 3.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>220.0</ShotSpeed>
+        <ShotRot>160.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>45000.0</CoolingTime>
+        <GdCoolingTime>7000.0</GdCoolingTime>
+        <AddSspAttTime_0>0.0</AddSspAttTime_0>
+        <AddSspPath_0>Res/Effect/Particle/Missile_Fire.ssp</AddSspPath_0>
+        <AddSspAttTime_1>0.0</AddSspAttTime_1>
+        <AddSspPath_1>Res/Effect/Particle/Missile_Smoke.ssp</AddSspPath_1>
+    </Skill>
+    <Skill>
+        <ID>64</ID>
+        <Name>Laser</Name>
+        <TexID>0</TexID>
+        <IconID>0</IconID>
+        <Elemental>3</Elemental>
+        <ShotType>2</ShotType>
+        <ShotCnt>25</ShotCnt>
+        <ChantTime>3.0</ChantTime>
+        <RandMaxTime>3.0</RandMaxTime>
+        <PlayTime>5.0</PlayTime>
+        <Vibration>0.0, 0.0, 0.0</Vibration>
+        <SoundShotID>324</SoundShotID>
+        <SoundHitID>221</SoundHitID>
+        <Damage>-20</Damage>
+        <DamageRate>100</DamageRate>
+        <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
+        <Property>0</Property>
+        <Targeting>1</Targeting>
+        <TPosition>0.0, 0.0, 0.0</TPosition>
+        <Radius>0.0</Radius>
+        <ShotSpeed>0.0</ShotSpeed>
+        <ShotRot>85.0</ShotRot>
+        <Explosion>0</Explosion>
+        <CoolingTime>50000.0</CoolingTime>
+        <GdCoolingTime>13000.0</GdCoolingTime>
+        <AddEftTime_0>0.0</AddEftTime_0>
+        <AddEftPath_0>Res/Effect/EftP/Niki_Laser_Effect_1.Eft</AddEftPath_0>
+    </Skill>
+</Skills>

@@ -3,10 +3,7 @@ package com.jftse.emulator.server.game.core.service;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.item.ItemChar;
 import com.jftse.emulator.server.database.model.item.Product;
-import com.jftse.emulator.server.database.model.player.ClothEquipment;
-import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.database.model.player.PlayerStatistic;
-import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
+import com.jftse.emulator.server.database.model.player.*;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.database.repository.item.*;
 import com.jftse.emulator.server.game.core.item.*;
@@ -34,9 +31,16 @@ public class ProductService {
     private final PlayerService playerService;
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
+    private final SpecialSlotEquipmentService specialSlotEquipmentService;
+    private final ToolSlotEquipmentService toolSlotEquipmentService;
+    private final CardSlotEquipmentService cardSlotEquipmentService;
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
     private final ItemCharService itemCharService;
+
+    public Product findProductByProductItemIndex(int productItemIndex) {
+        return this.productRepository.findProductByProductIndex(productItemIndex);
+    }
 
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {
         List<Integer> productIndexList = new ArrayList<>(itemList.keySet());
@@ -44,7 +48,10 @@ public class ProductService {
         List<Product> productList = productRepository.findProductsByProductIndexIn(productIndexList);
 
         Map<Product, Byte> result = new HashMap<>();
-        productList.forEach(p -> result.put(p, itemList.get(p.getProductIndex())));
+        productList.forEach(p -> {
+            if (p.getEnabled())
+                result.put(p, itemList.get(p.getProductIndex()));
+        });
 
         return result;
     }
@@ -152,8 +159,20 @@ public class ProductService {
         QuickSlotEquipment quickSlotEquipment = new QuickSlotEquipment();
         quickSlotEquipment = quickSlotEquipmentService.save(quickSlotEquipment);
 
+        SpecialSlotEquipment specialSlotEquipment = new SpecialSlotEquipment();
+        specialSlotEquipment = specialSlotEquipmentService.save(specialSlotEquipment);
+
+        ToolSlotEquipment toolSlotEquipment = new ToolSlotEquipment();
+        toolSlotEquipment = toolSlotEquipmentService.save(toolSlotEquipment);
+
+        CardSlotEquipment cardSlotEquipment = new CardSlotEquipment();
+        cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
+
         player.setClothEquipment(clothEquipment);
         player.setQuickSlotEquipment(quickSlotEquipment);
+        player.setSpecialSlotEquipment(specialSlotEquipment);
+        player.setToolSlotEquipment(toolSlotEquipment);
+        player.setCardSlotEquipment(cardSlotEquipment);
 
         Pocket pocket = new Pocket();
         pocket = pocketService.save(pocket);

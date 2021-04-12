@@ -9,6 +9,7 @@ public interface ConnectionListener {
     void received(Connection connection, Packet packet);
     void idle(Connection connection);
     void onException(Connection connection, Exception exception);
+    void onTimeout(Connection connection);
 
     void cleanUp();
 }

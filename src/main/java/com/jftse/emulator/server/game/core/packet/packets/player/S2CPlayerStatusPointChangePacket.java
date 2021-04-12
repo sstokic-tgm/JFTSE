@@ -3,6 +3,7 @@ package com.jftse.emulator.server.game.core.packet.packets.player;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.game.core.packet.PacketID;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CPlayerStatusPointChangePacket extends Packet {
@@ -12,7 +13,7 @@ public class S2CPlayerStatusPointChangePacket extends Packet {
     public S2CPlayerStatusPointChangePacket(Player player, StatusPointsAddedDto statusPointsAddedDto) {
         super(PacketID.S2CPlayerStatusPointChange);
 
-        this.write(200 + (3 * (player.getLevel() - 1))); // hp = base hp + 3hp for each level; level - 1 because at level 1 we have the base hp
+        this.write(BattleUtils.calculatePlayerHp(player));
 
         // status points
         this.write(player.getStrength());

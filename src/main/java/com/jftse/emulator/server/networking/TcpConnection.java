@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.networking;
 
+import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.utilities.BitKit;
+import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
@@ -161,7 +163,9 @@ public class TcpConnection {
         byte[] data = new byte[bytesRead];
 
         BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
-        log.debug("payload - RECV " + BitKit.toString(data, 0, bytesRead) + " bytesRead: " + bytesRead);
+
+        if (GlobalSettings.LogAllPackets)
+            log.debug("payload - RECV " + BitKit.toString(data, 0, bytesRead) + " bytesRead: " + bytesRead);
 
         // a read tcp packet may contain multiple nested packets, so we handle that properly
         while (true) {
@@ -187,7 +191,8 @@ public class TcpConnection {
             if (packetSize + 8 < data.length) {
                 packet = new Packet(data);
 
-                log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                if (GlobalSettings.LogAllPackets)
+                    log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
                 connection.notifyReceived(packet);
 
@@ -208,7 +213,8 @@ public class TcpConnection {
             this.receiveIndicator++;
             this.receiveIndicator %= 60;
 
-            log.info("RECV [" + String.format("0x%x", (int) packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+            if (GlobalSettings.LogAllPackets)
+                log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         }
         else {
             packet = null;
@@ -258,10 +264,10 @@ public class TcpConnection {
             createCheckSum(data);
             writeBuffer.put(data);
 
-            log.info("SEND [" + String.format("0x%x", (int)packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+            if (GlobalSettings.LogAllPackets)
+                log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
             if(!writeToSocket()) {
-
                 selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
             } else {
                 selectionKey.selector().wakeup();
@@ -299,10 +305,14 @@ public class TcpConnection {
         short serverSerial = BitKit.bytesToShort(serialTable, pos);
 
         byte[] serverSerialData = new byte[] {BitKit.getBytes(serverSerial)[0], BitKit.getBytes(serverSerial)[1]};
-        short clientChecksum = (short)((data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
-        short serverChecksum = (short)((serverSerialData[0] & 0xFF) + (serverSerialData[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
+        try {
+            short clientChecksum = (short)((data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
+            short serverChecksum = (short)((serverSerialData[0] & 0xFF) + (serverSerialData[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
 
-        return clientChecksum == serverChecksum;
+            return clientChecksum == serverChecksum;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
     }
 
     private void createCheckSum(byte[] data) {

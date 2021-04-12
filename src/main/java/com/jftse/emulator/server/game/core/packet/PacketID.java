@@ -1,5 +1,9 @@
 package com.jftse.emulator.server.game.core.packet;
 
+import com.jftse.emulator.common.GlobalSettings;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+
 public final class PacketID {
     public final static char S2CLoginWelcomePacket = 0xFF9A;
     public final static char C2SLoginRequest = 0x0FA1;
@@ -43,6 +47,9 @@ public final class PacketID {
     public final static char S2CRoomListAnswer = 0x138E;
     public final static char S2CRoomPlayerInformation = 0x1394;
     public final static char C2SRoomListReq = 0x13EC;
+    public final static char S2CRoomSetGuardians = 0x1D4F;
+    public final static char S2CRoomSetGuardianStats = 0x1D50;
+    public final static char S2CRoomSetBossGuardiansStats = 0x1D58;
 
     public final static char C2SLobbyUserListRequest = 0x1707;
     public final static char S2CLobbyUserListAnswer = 0x1708;
@@ -80,6 +87,7 @@ public final class PacketID {
     public final static char S2CMatchplayTeamWinsPoint = 0x1840;
     public final static char S2CMatchplayTeamWinsSet = 0x1842 ;
     public final static char S2CMatchplayEndBasicGame = 0x26FC; // Not really sure if name really corresponds to packet.
+    public final static char S2CMatchplayDisplayItemRewards = 0x1DB6;
     public final static char S2CMatchPlaySetExperienceGainInfoData = 0x1846;
     public final static char S2CMatchplaySetGameResultData = 0x1848;
     public final static char S2CMatchplayBackToRoom = 0x1780;
@@ -88,7 +96,17 @@ public final class PacketID {
     public final static char S2CMatchplayDamageToPlayer = 0x184E;
     public final static char S2CMatchplaySpawnBossBattle = 0x1D55;
     public final static char S2CMatchplayGivePlayerSkills = 0xC98;
+    public final static char S2CMatchplayLetCrystalDisappear = 0x332D;
+    public final static char C2SMatchplayPlayerPicksUpCrystal = 0x18E7;
     public final static char S2CMatchplayPlaceSkillCrystal = 0x332C;
+    public final static char C2SMatchplaySwapQuickSlotItems = 0xc97;
+    public final static char C2SMatchplayClientSkillHitsTarget = 0x2619;
+    public final static char C2SMatchplaySkillHitsTarget = 0x22F1;
+    public final static char C2SMatchplayPlayerUseSkill = 0x18E9;
+    public final static char S2CMatchplayUseSkill = 0x18EA;
+    public final static char S2CMatchplayIncreaseBreathTimerBy60Seconds = 0xC96;
+    public final static char S2CMatchplayGiveRandomSkill = 0x332E;
+    public final static char S2CMatchplayGiveSpecificSkill = 0x18E8;
     public final static char C2SGameServerConnectionProblem = 0x3F1;
     public final static char C2CBallAnimationPacket = 0x10E3;
     public final static char C2CPlayerAnimationPacket = 0x32C9;
@@ -121,6 +139,12 @@ public final class PacketID {
     public final static char S2CInventoryWearClothAnswer = 0x1B64;
     public final static char C2SInventoryWearQuickRequest = 0x1BD8;
     public final static char S2CInventoryWearQuickAnswer = 0x1BD9;
+    public final static char C2SInventoryWearToolRequest = 0x1D04;
+    public final static char S2CInventoryWearToolAnswer = 0x1D05;
+    public final static char C2SInventoryWearSpecialRequest = 0x1B70;
+    public final static char S2CInventoryWearSpecialAnswer = 0x1B71;
+    public final static char C2SInventoryWearCardRequest = 0x1C21;
+    public final static char S2CInventoryWearCardAnswer = 0x1C22;
     public final static char S2CInventoryData = 0x1B69;
     public final static char C2SInventoryItemTimeExpiredRequest = 0x1BBC;
     public final static char S2CInventoryItemRemoveAnswer = 0x1B74;
@@ -128,6 +152,8 @@ public final class PacketID {
 
     public final static char C2SHomeItemsClearReq = 0x2552;
     public final static char C2SHomeItemsPlaceReq = 0x2550;
+    public final static char C2SHomeItemsRemoveReq = 0x2551;
+    public final static char S2CHomeItemsRemoveAnswer = 0x2552;
     public final static char C2SHomeItemsLoadReq = 0x254E;
     public final static char S2CHomeItemsLoadAnswer = 0x254F;
     public final static char S2CHomeData = 0x1519;
@@ -158,6 +184,54 @@ public final class PacketID {
     public final static char C2SPlayerStatusPointChange = 0x1B6D;
     public final static char S2CPlayerStatusPointChange = 0x1B6E;
 
+    public final static char C2SGuildNoticeRequest = 0x1FFE;
+    public final static char S2CGuildNoticeAnswer = 0x1FFF;
+    public final static char C2SGuildNameCheckRequest = 0x2009;
+    public final static char S2CGuildNameCheckAnswer = 0x200A;
+    public final static char C2SGuildCreateRequest = 0x200B;
+    public final static char S2CGuildCreateAnswer = 0x200C;
+    public final static char C2SGuildDataRequest = 0x200D;
+    public final static char S2CGuildDataAnswer = 0x200E;
+    public final static char C2SGuildListRequest = 0x200F;
+    public final static char S2CGuildListAnswer = 0x2010;
+    public final static char C2SGuildJoinRequest = 0x2011;
+    public final static char S2CGuildJoinAnswer = 0x2012;
+    public final static char C2SGuildLeaveRequest = 0x2014;
+    public final static char S2CGuildLeaveAnswer = 0x2015; // ?
+    public final static char C2SGuildChangeInformationRequest = 0x2017;
+    public final static char C2SGuildReserveMemberDataRequest = 0x2018;
+    public final static char S2CGuildReserveMemberDataAnswer = 0x2019;
+    public final static char C2SGuildMemberDataRequest = 0x201A;
+    public final static char S2CGuildMemberDataAnswer = 0x201B;
+    public final static char C2SGuildChangeMasterRequest = 0x201F;
+    public final static char S2CGuildChangeMasterAnswer = 0x2020;
+    public final static char C2SGuildChangeSubMasterRequest = 0x2021;
+    public final static char S2CGuildChangeSubMasterAnswer = 0x2022;
+    public final static char C2SGuildDismissMemberRequest = 0x2023;
+    public final static char S2CGuildDismissMemberAnswer = 0x2024;
+    public final static char S2CGuildDismissInfo = 0x2025; // ?
+    public final static char C2SGuildDeleteRequest = 0x2026;
+    public final static char S2CGuildDeleteAnswer = 0x2027;
+    public final static char C2SGuildGoldWithdrawalRequest = 0x2029; // ?
+    public final static char S2CGuildGoldWithdrawalAnswer = 0x202A; // ?
+    public final static char C2SGuildGoldDataRequest = 0x202C;
+    public final static char S2CGuildGoldDataAnswer = 0x202D;
+    public final static char C2SGuildChangeNoticeRequest = 0x202E;
+    public final static char S2CGuildChangeNoticeAnswer = 0x202F;
+    public final static char C2SGuildChatRequest = 0x2030;
+    public final static char S2CGuildChatAnswer = 0x2031;
+    public final static char C2SGuildChangeLogoRequest = 0x2034;
+    public final static char S2CGuildChangeLogoAnswer = 0x2035;
+    public final static char C2SGuildChangeLogoInfo = 0x2036;
+    public final static char C2SGuildSearchRequest = 0x203A;
+    public final static char S2CGuildSearchAnswer = 0x203B;
+    public final static char C2SGuildChangeReverseMemberRequest = 0x203F;
+    public final static char S2CGuildChangeReverseMemberAnswer = 0x2040;
+    public final static char C2SGuildCastleInfoRequest = 0x2044;
+    public final static char S2CGuildCastleInfoAnswer = 0x2045;
+    public final static char C2SGuildCastleChangeInfoRequest = 0x2046;
+    public final static char S2CGuildCastleChangeInfoAnswer = 0x2047;
+
     public final static char C2SChallengeProgressReq = 0x2206;
     public final static char S2CChallengeProgressAck = 0x2207;
     public final static char C2SChallengeBeginReq = 0x2208;
@@ -179,4 +253,31 @@ public final class PacketID {
     public final static char C2SLobbyLeave = 0x2379;
 
     public final static char D2SDevPacket = 0x555;
+
+    private static HashMap<Character, String> packetIdNames = new HashMap<>();
+
+    static {
+        // create a list of all char constants of this class for method getPacketIdName()
+        if (GlobalSettings.TranslatePacketIds) {
+            Field[] fields = PacketID.class.getFields();
+            for (Field field : fields) {
+                if (field.getType().equals(char.class)) {
+                    try {
+                        packetIdNames.put(field.getChar(null), field.getName());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public static String getName(char packetId) {
+        String name = packetIdNames.get(packetId);
+        if (name != null) {
+            return name;
+        } else {
+            return String.format("0x%x", (int)packetId);
+        }
+    }
 }

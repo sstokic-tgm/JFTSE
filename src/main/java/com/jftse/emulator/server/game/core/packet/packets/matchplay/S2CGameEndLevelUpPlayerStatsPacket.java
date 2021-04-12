@@ -3,6 +3,7 @@ package com.jftse.emulator.server.game.core.packet.packets.matchplay;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.game.core.packet.PacketID;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
@@ -11,7 +12,7 @@ public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
 
         this.write(playerPosition); // not sure if it's the pos
         this.write(player.getLevel());
-        this.write(200 + (3 * (player.getLevel() - 1)));
+        this.write(BattleUtils.calculatePlayerHp(player));
 
         // status points
         this.write(player.getStrength());

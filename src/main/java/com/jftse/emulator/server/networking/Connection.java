@@ -24,6 +24,7 @@ public class Connection {
     private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean isConnected;
 
+    private String hwid;
     private Client client;
 
     protected Connection() { }
@@ -100,6 +101,10 @@ public class Connection {
 
     public void notifyException(Exception exception) {
         connectionListeners.forEach(cl -> cl.onException(this, exception));
+    }
+
+    public void notifyTimeout() {
+        connectionListeners.forEach(cl -> cl.onTimeout(this));
     }
 
     public InetSocketAddress getRemoteAddressTCP() {

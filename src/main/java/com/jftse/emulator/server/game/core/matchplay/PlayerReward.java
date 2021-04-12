@@ -9,4 +9,6 @@ public class PlayerReward {
     private int playerPosition;
     private int basicRewardExp;
     private int basicRewardGold;
+    private int rewardProductIndex;
+    private int productRewardAmount;
 }
