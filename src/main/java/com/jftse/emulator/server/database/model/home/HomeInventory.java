@@ -21,7 +21,7 @@ public class HomeInventory extends AbstractBaseModel {
     private Integer itemIndex;
 
     private Byte unk0;
-    private Byte unk1;
+    private Byte rotation;
     private Byte xPos;
     private Byte yPos;
 }

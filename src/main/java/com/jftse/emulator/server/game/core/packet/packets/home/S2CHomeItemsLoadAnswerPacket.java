@@ -16,7 +16,7 @@ public class S2CHomeItemsLoadAnswerPacket extends Packet {
             this.write((int) homeInventory.getId().longValue());
             this.write(homeInventory.getItemIndex());
             this.write(homeInventory.getUnk0());
-            this.write(homeInventory.getUnk1());
+            this.write(homeInventory.getRotation());
             this.write(homeInventory.getXPos());
             this.write(homeInventory.getYPos());
         }

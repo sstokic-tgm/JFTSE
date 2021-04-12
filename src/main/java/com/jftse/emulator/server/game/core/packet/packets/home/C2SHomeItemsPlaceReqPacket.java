@@ -23,13 +23,10 @@ public class C2SHomeItemsPlaceReqPacket extends Packet {
         for (char i = 0; i < size; ++i) {
             Map<String, Object> homeItemData = new HashMap<>();
             homeItemData.put("inventoryItemId", this.readInt());
-            homeItemData.put("unk0", this.readByte());
-            homeItemData.put("unk1", this.readByte());
-            homeItemData.put("unk2", this.readByte());
-            homeItemData.put("unk3", this.readByte());
+            homeItemData.put("homeInventoryId", this.readInt());
             homeItemData.put("itemIndex", this.readInt());
-            homeItemData.put("unk4", this.readByte());
-            homeItemData.put("unk5", this.readByte());
+            homeItemData.put("unk0", this.readByte());
+            homeItemData.put("rotation", this.readByte());
             homeItemData.put("xPos", this.readByte());
             homeItemData.put("yPos", this.readByte());
             homeItemDataList.add(homeItemData);

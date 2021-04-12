@@ -1,5 +1,9 @@
 package com.jftse.emulator.server.game.core.packet;
 
+import com.jftse.emulator.common.GlobalSettings;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+
 public final class PacketID {
     public final static char S2CLoginWelcomePacket = 0xFF9A;
     public final static char C2SLoginRequest = 0x0FA1;
@@ -134,6 +138,8 @@ public final class PacketID {
 
     public final static char C2SHomeItemsClearReq = 0x2552;
     public final static char C2SHomeItemsPlaceReq = 0x2550;
+    public final static char C2SHomeItemsRemoveReq = 0x2551;
+    public final static char S2CHomeItemsRemoveAnswer = 0x2552;
     public final static char C2SHomeItemsLoadReq = 0x254E;
     public final static char S2CHomeItemsLoadAnswer = 0x254F;
     public final static char S2CHomeData = 0x1519;
@@ -233,4 +239,31 @@ public final class PacketID {
     public final static char C2SLobbyLeave = 0x2379;
 
     public final static char D2SDevPacket = 0x555;
+
+    private static HashMap<Character, String> packetIdNames = new HashMap<>();
+
+    static {
+        // create a list of all char constants of this class for method getPacketIdName()
+        if (GlobalSettings.TranslatePacketIds) {
+            Field[] fields = PacketID.class.getFields();
+            for (Field field : fields) {
+                if (field.getType().equals(char.class)) {
+                    try {
+                        packetIdNames.put(field.getChar(null), field.getName());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public static String getName(char packetId) {
+        String name = packetIdNames.get(packetId);
+        if (name != null) {
+            return name;
+        } else {
+            return String.format("0x%x", (int)packetId);
+        }
+    }
 }
