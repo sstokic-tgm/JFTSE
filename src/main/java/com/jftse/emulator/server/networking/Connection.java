@@ -4,24 +4,24 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
 @Setter
+@Log4j2
 public class Connection {
 
     private int id = -1;
     private String name;
     private Server server;
     private TcpConnection tcpConnection;
-    private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
+    private ConcurrentLinkedDeque<ConnectionListener> connectionListeners = new ConcurrentLinkedDeque<>();
     private volatile boolean isConnected;
 
     private String hwid;
@@ -49,7 +49,14 @@ public class Connection {
 
             return tcpConnection.send(packet);
         } catch (IOException ioe) {
-            notifyException(ioe);
+            switch ("" + ioe.getMessage()) {
+                case "Connection is closed.":
+                case "Connection reset by peer":
+                case "Broken pipe":
+                    break;
+                default:
+                    log.error("Unable to send packet " + ioe.getMessage(), ioe);
+            }
             close();
             return 0;
         }
