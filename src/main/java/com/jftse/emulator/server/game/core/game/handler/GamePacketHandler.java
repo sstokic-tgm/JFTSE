@@ -1861,6 +1861,7 @@ public class GamePacketHandler {
         GuildMember guildMember = new GuildMember();
         guildMember.setGuild(guild);
         guildMember.setPlayer(activePlayer);
+        guildMember.setMemberRank((byte) 1);
         guildMember.setRequestDate(new Date());
         guildMember.setWaitingForApproval(!guild.getIsPublic());
         guildMemberService.save(guildMember);
