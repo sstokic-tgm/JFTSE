@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,8 +20,8 @@ public class Server implements Runnable {
     private final int writeBufferSize, objectBufferSize;
     private Selector selector;
     private ServerSocketChannel serverChannel;
-    private List<Connection> connections = Collections.synchronizedList(new ArrayList<>());
-    private List<ConnectionListener> connectionListeners = Collections.synchronizedList(new ArrayList<>());
+    private ConcurrentLinkedDeque<Connection> connections = new ConcurrentLinkedDeque<>();
+    private ConcurrentLinkedDeque<ConnectionListener> connectionListeners = new ConcurrentLinkedDeque<>();
     private volatile boolean shutdown;
     private final Object updateLock = new Object();
     private Thread updateThread;
@@ -224,8 +225,8 @@ public class Server implements Runnable {
         }
 
         long time = System.currentTimeMillis();
-        for (int i = 0; i < this.connections.size(); i++) {
-            Connection connection = this.connections.get(i);
+        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
+            Connection connection = it.next();
 
             if (connection.getTcpConnection().isTimedOut(time)) {
                 connection.notifyTimeout();
@@ -242,8 +243,8 @@ public class Server implements Runnable {
 
     private void keepAlive() {
         long time = System.currentTimeMillis();
-        for (int i = 0; i < this.connections.size(); i++) {
-            Connection connection = this.connections.get(i);
+        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
+            Connection connection = it.next();
 
             if (connection.getTcpConnection().needsKeepAlive(time))
                 connection.sendTCP(new Packet((char) 0x0FA3));
@@ -264,12 +265,7 @@ public class Server implements Runnable {
 
     public void start(String name) {
         Thread t = new Thread(this, name);
-        t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                log.error("Uncaught exception in " + name + " thread. ", e);
-            }
-        });
+        t.setUncaughtExceptionHandler((t1, e) -> log.error("Uncaught exception in " + name + " thread. ", e));
         t.start();
     }
 
@@ -326,15 +322,15 @@ public class Server implements Runnable {
     }
 
     public void sendToAllTcp(Packet packet) {
-        for (int i = 0; i < this.connections.size(); i++) {
-            Connection connection = this.connections.get(i);
+        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
+            Connection connection = it.next();
             connection.sendTCP(packet);
         }
     }
 
     public void sendToTcp(int connectionId, Packet packet) {
-        for (int i = 0; i < this.connections.size(); i++) {
-            Connection connection = this.connections.get(i);
+        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
+            Connection connection = it.next();
 
             if (connection.getId() == connectionId) {
                 connection.sendTCP(packet);
@@ -358,9 +354,9 @@ public class Server implements Runnable {
     }
 
     private void close() {
-        for (int i = 0; i < this.connections.size(); i++)
-            this.connections.get(i).close();
-        this.connections = Collections.synchronizedList(new ArrayList<>());
+        for (Connection connection = this.connections.poll(); connection != null; connection = this.connections.poll())
+            connection.close();
+        this.connections.clear();
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 
