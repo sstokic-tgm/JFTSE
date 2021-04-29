@@ -24,6 +24,7 @@ public class Account extends AbstractBaseModel {
     @Column(unique = true)
     private String username;
     private String password;
+    private String email;
     // char
     private Integer status;
     private Boolean gameMaster;
