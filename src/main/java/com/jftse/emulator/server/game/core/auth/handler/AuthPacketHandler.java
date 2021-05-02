@@ -190,7 +190,7 @@ public class AuthPacketHandler {
                     player.setDexterity(itemChar.getDexterity());
                     player.setWillpower(itemChar.getWillpower());
 
-                    player.setStatusPoints((byte) (player.getStatusPoints() + 20));
+                    player.setStatusPoints((byte) (player.getStatusPoints() + 19));
                 }
                 else {
                     player.setStrength(playerCreatePacket.getStrength());
@@ -198,7 +198,7 @@ public class AuthPacketHandler {
                     player.setDexterity(playerCreatePacket.getDexterity());
                     player.setWillpower(playerCreatePacket.getWillpower());
 
-                    player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 20));
+                    player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 19));
                 }
 
                 // make every new char level 20 - only temporary
