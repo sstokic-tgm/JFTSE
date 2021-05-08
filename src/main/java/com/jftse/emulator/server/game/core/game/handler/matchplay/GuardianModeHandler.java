@@ -618,7 +618,8 @@ public class GuardianModeHandler {
             byte oldLevel = player.getLevel();
             if (playerReward != null) {
                 byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
-                player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
+                if (level != 60)
+                    player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
                 player.setGold(player.getGold() + playerReward.getBasicRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.setActivePlayer(player);
