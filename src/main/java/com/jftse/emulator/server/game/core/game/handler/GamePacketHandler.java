@@ -735,6 +735,13 @@ public class GamePacketHandler {
                         }
 
                         connection.getClient().getActivePlayer().setPocket(pocket);
+
+                        List<PlayerPocket> playerPocketListInventory = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
+                        StreamUtils.batches(playerPocketListInventory, 10)
+                                .forEach(pocketList -> {
+                                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+                                    connection.sendTCP(inventoryDataPacket);
+                                });
                     }
                 }
                 else {
