@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -22,6 +23,7 @@ import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetBossGuardiansStats;
@@ -707,6 +709,13 @@ public class GuardianModeHandler {
 
         // add item to result
         connection.getClient().getActivePlayer().setPocket(pocket);
+
+        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
+        StreamUtils.batches(playerPocketList, 10)
+                .forEach(pocketList -> {
+                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+                    connection.sendTCP(inventoryDataPacket);
+                });
     }
 
     private PlayerReward createEmptyPlayerReward() {
