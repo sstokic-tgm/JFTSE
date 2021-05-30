@@ -71,24 +71,24 @@ public class GuardianModeHandler {
 
     private GameHandler gameHandler;
 
+    private Random random;
+
     public void init(GameHandler gameHandler) {
         this.gameHandler = gameHandler;
+        this.random = new Random();
     }
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
+        int servingPositionXOffset = random.nextInt(7);
         if (!lastGuardianServeWasOnGuardianSide) {
             game.setLastGuardianServeSide(GameFieldSide.Guardian);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         } else {
             game.setLastGuardianServeSide(GameFieldSide.Players);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         }
     }
 
@@ -97,7 +97,9 @@ public class GuardianModeHandler {
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         game.setLastGuardianServeSide(GameFieldSide.Guardian);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
-        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
+
+        int servingPositionXOffset = random.nextInt(7);
+        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
         clients.forEach(c -> {
             c.getConnection().sendTCP(triggerGuardianServePacket);
         });
@@ -549,11 +551,12 @@ public class GuardianModeHandler {
 
             Runnable triggerGuardianServeRunnable = () -> {
                 if (gameSession == null) return;
-                S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
-                S2CGameSetNameColorAndRemoveBlackBar setNameColorPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
+                int servingPositionXOffset = random.nextInt(7);
+                S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
                 gameSession.getClients().forEach(c -> {
                     if (c != null && c.getConnection() != null) {
-                        c.getConnection().sendTCP(setNameColorPacket);
+                        c.getConnection().sendTCP(setNameColorAndRemoveBlackBarPacket);
                         c.getConnection().sendTCP(triggerGuardianServePacket);
                     }
                 });

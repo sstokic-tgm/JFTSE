@@ -78,6 +78,7 @@ public final class PacketID {
     public final static char S2CGameRemoveBlackBars = 0x183C;
     public final static char S2CGameNetworkSettings = 0x3EA;
     public final static char S2CGameSetNameColorAndRemoveBlackBar = 0x183A;
+    public final static char S2CMatchplaySetPlayerPosition = 0x184A;
     public final static char C2SRelayPacketToAllClients = 0x414;
     public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ED;
     public final static char S2CMatchplayAckPlayerInformation = 0x3EF;

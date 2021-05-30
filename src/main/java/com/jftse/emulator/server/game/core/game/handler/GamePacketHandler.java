@@ -1070,11 +1070,6 @@ public class GamePacketHandler {
         room.setRoomName(roomCreateRequestPacket.getRoomName());
         room.setAllowBattlemon((byte) 0);
 
-        if (roomCreateRequestPacket.getMode() == GameMode.BATTLE) {
-            roomCreateRequestPacket.setMode((byte) GameMode.GUARDIAN);
-            roomCreateRequestPacket.setPlayers((byte) 4);
-        }
-
         room.setMode(roomCreateRequestPacket.getMode());
         room.setRule(roomCreateRequestPacket.getRule());
         room.setPlayers(roomCreateRequestPacket.getPlayers());
@@ -1109,9 +1104,6 @@ public class GamePacketHandler {
         room.setRoomId(this.getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
         room.setAllowBattlemon(roomQuickCreateRequestPacket.getAllowBattlemon());
-
-        if (roomQuickCreateRequestPacket.getMode() == GameMode.BATTLE)
-            roomQuickCreateRequestPacket.setMode((byte) GameMode.GUARDIAN);
 
         room.setMode(roomQuickCreateRequestPacket.getMode());
         room.setRule((byte) 0);
@@ -1669,8 +1661,8 @@ public class GamePacketHandler {
                     return;
                 }
 
-                S2CGameSetNameColorAndRemoveBlackBar setNameColorPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
-                sendPacketToAllInRoom(connection, setNameColorPacket);
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
+                sendPacketToAllInRoom(connection, setNameColorAndRemoveBlackBarPacket);
 
                 switch (room.getMode()) {
                     case GameMode.BASIC:
@@ -2031,6 +2023,7 @@ public class GamePacketHandler {
 
     private void internalHandleRoomCreate(Connection connection, Room room) {
         room.getPositions().set(0, RoomPositionState.InUse);
+        room.setAllowBattlemon((byte) 0);
 
         byte players = room.getPlayers();
         if (players == 2) {
