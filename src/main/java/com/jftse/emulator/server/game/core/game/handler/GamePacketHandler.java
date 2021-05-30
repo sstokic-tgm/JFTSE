@@ -1661,8 +1661,8 @@ public class GamePacketHandler {
                     return;
                 }
 
-                S2CGameSetNameColorAndRemoveBlackBar setNameColorPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
-                sendPacketToAllInRoom(connection, setNameColorPacket);
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
+                sendPacketToAllInRoom(connection, setNameColorAndRemoveBlackBarPacket);
 
                 switch (room.getMode()) {
                     case GameMode.BASIC:
