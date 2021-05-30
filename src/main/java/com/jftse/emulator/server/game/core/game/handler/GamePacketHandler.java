@@ -11,6 +11,7 @@ import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
 import com.jftse.emulator.server.database.model.gameserver.GameServer;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.home.HomeInventory;
+import com.jftse.emulator.server.database.model.item.ItemChar;
 import com.jftse.emulator.server.database.model.item.ItemHouse;
 import com.jftse.emulator.server.database.model.item.ItemHouseDeco;
 import com.jftse.emulator.server.database.model.item.Product;
@@ -63,6 +64,7 @@ import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialBe
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialEndPacket;
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.S2CTutorialProgressAnswerPacket;
 import com.jftse.emulator.server.game.core.service.*;
+import com.jftse.emulator.server.game.core.service.ItemCharService;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
 import com.jftse.emulator.server.game.core.singleplay.tutorial.TutorialGame;
@@ -107,6 +109,7 @@ public class GamePacketHandler {
     private final TutorialService tutorialService;
     private final ProductService productService;
     private final LotteryService lotteryService;
+    private final ItemCharService itemCharService;
     private final PlayerStatisticService playerStatisticService;
     private final GuardianModeHandler guardianModeHandler;
     private final BasicModeHandler basicModeHandler;
@@ -362,7 +365,7 @@ public class GamePacketHandler {
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 
         homeInventoryList.forEach(hil -> {
-                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(hil.getItemIndex(), connection.getClient().getActivePlayer().getPocket());
+                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hil.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), connection.getClient().getActivePlayer().getPocket());
                 ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
 
                 // create a new one if null, null indicates that all items are placed
@@ -690,7 +693,7 @@ public class GamePacketHandler {
                                 }
                             }
                         } else {
-                            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(product.getItem0(), player.getPocket());
+                            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), player.getPocket());
                             int existingItemCount = 0;
                             boolean existingItem = false;
 
@@ -893,6 +896,22 @@ public class GamePacketHandler {
         Pocket pocket = player.getPocket();
 
         PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) quickSlotUseRequestPacket.getQuickSlotId(), pocket);
+        String category = playerPocket.getCategory();
+        int itemIndex = playerPocket.getItemIndex();
+
+        if(category.equals("SPECIAL")  && itemIndex == 6 ){
+            ItemChar itemChar = itemCharService.findByPlayerType(player.getPlayerType());
+            player.setStrength(itemChar.getStrength());
+            player.setStamina(itemChar.getStamina());
+            player.setDexterity(itemChar.getDexterity());
+            player.setWillpower(itemChar.getWillpower());
+            player.setStatusPoints((byte) (player.getLevel() + 5 -1));
+            StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+            S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
+            connection.sendTCP(playerStatusPointChangePacket);
+            S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
+            connection.sendTCP(playerInfoPlayStatsPacket);
+        }
         int itemCount = playerPocket.getItemCount() - 1;
 
         if (itemCount <= 0) {

@@ -1,11 +1,16 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
+import com.jftse.emulator.common.utilities.StreamUtils;
+import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
+import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.constants.ServeType;
+import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
@@ -16,11 +21,9 @@ import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.matchplay.room.ServeInfo;
 import com.jftse.emulator.server.game.core.packet.PacketID;
+import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
-import com.jftse.emulator.server.game.core.service.ClothEquipmentService;
-import com.jftse.emulator.server.game.core.service.LevelService;
-import com.jftse.emulator.server.game.core.service.PlayerService;
-import com.jftse.emulator.server.game.core.service.PlayerStatisticService;
+import com.jftse.emulator.server.game.core.service.*;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -29,8 +32,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -42,6 +44,9 @@ public class BasicModeHandler {
     private final ClothEquipmentService clothEquipmentService;
     private final PacketEventHandler packetEventHandler;
     private final PlayerService playerService;
+    private final PlayerPocketService playerPocketService;
+    private final ProductService productService;
+    private final PocketService pocketService;
     private final GameSessionManager gameSessionManager;
 
     private GameHandler gameHandler;
@@ -131,10 +136,15 @@ public class BasicModeHandler {
                 byte oldLevel = player.getLevel();
                 if (playerReward != null) {
                     byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
-                    player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
+                    if (level != 60)
+                        player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
                     player.setGold(player.getGold() + playerReward.getBasicRewardGold());
                     player = levelService.setNewLevelStatusPoints(level, player);
                     client.setActivePlayer(player);
+
+                    if (wonGame) {
+                        this.handleRewardItem(client.getConnection(), playerReward);
+                    }
                 }
 
                 PlayerStatistic playerStatistic = player.getPlayerStatistic();
@@ -167,6 +177,11 @@ public class BasicModeHandler {
 
                     S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                }
+
+                if (wonGame) {
+                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
                 }
 
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
@@ -264,6 +279,60 @@ public class BasicModeHandler {
 
         S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
         clients.forEach(c -> c.getConnection().sendTCP(matchplayTriggerServe));
+    }
+
+    private void handleRewardItem(Connection connection, PlayerReward playerReward) {
+        if (playerReward.getRewardProductIndex() < 0) {
+            return;
+        }
+
+        Product product = this.productService.findProductByProductItemIndex(playerReward.getRewardProductIndex());
+        if (product == null) {
+            return;
+        }
+
+        Player player = connection.getClient().getActivePlayer();
+        Pocket pocket = player.getPocket();
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
+        int existingItemCount = 0;
+        boolean existingItem = false;
+
+        if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
+            existingItemCount = playerPocket.getItemCount();
+            existingItem = true;
+        } else {
+            playerPocket = new PlayerPocket();
+        }
+
+        playerPocket.setCategory(product.getCategory());
+        playerPocket.setItemIndex(product.getItem0());
+        playerPocket.setUseType(product.getUseType());
+
+        playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
+
+        // no idea how itemCount can be null here, but ok
+        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
+
+        if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
+
+            playerPocket.setCreated(cal.getTime());
+        }
+        playerPocket.setPocket(pocket);
+
+        playerPocketService.save(playerPocket);
+        if (!existingItem)
+            pocket = pocketService.incrementPocketBelongings(pocket);
+
+        // add item to result
+        connection.getClient().getActivePlayer().setPocket(pocket);
+
+        List<PlayerPocket> playerPocketList = new ArrayList<>();
+        playerPocketList.add(playerPocket);
+
+        S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+        connection.sendTCP(inventoryDataPacket);
     }
 
     private void sendPacketToAllInRoom(Connection connection, Packet packet) {
