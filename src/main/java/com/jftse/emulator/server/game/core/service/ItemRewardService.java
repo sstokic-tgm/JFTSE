@@ -90,7 +90,7 @@ public class ItemRewardService {
         List<Map<String, Object>> rewardItemList = new ArrayList<>();
 
         for (Product reward : rewardProductList) {
-            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(reward.getItem0(), player.getPocket());
+            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(reward.getItem0(), reward.getCategory(), player.getPocket());
 
             if (playerPocket == null) {
                 playerPocket = new PlayerPocket();

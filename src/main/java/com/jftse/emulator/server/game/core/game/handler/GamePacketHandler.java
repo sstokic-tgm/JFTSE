@@ -365,7 +365,7 @@ public class GamePacketHandler {
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 
         homeInventoryList.forEach(hil -> {
-                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(hil.getItemIndex(), connection.getClient().getActivePlayer().getPocket());
+                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hil.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), connection.getClient().getActivePlayer().getPocket());
                 ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
 
                 // create a new one if null, null indicates that all items are placed
@@ -693,7 +693,7 @@ public class GamePacketHandler {
                                 }
                             }
                         } else {
-                            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(product.getItem0(), player.getPocket());
+                            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), player.getPocket());
                             int existingItemCount = 0;
                             boolean existingItem = false;
 
@@ -735,13 +735,6 @@ public class GamePacketHandler {
                         }
 
                         connection.getClient().getActivePlayer().setPocket(pocket);
-
-                        List<PlayerPocket> playerPocketListInventory = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
-                        StreamUtils.batches(playerPocketListInventory, 10)
-                                .forEach(pocketList -> {
-                                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
-                                    connection.sendTCP(inventoryDataPacket);
-                                });
                     }
                 }
                 else {

@@ -293,7 +293,7 @@ public class BasicModeHandler {
 
         Player player = connection.getClient().getActivePlayer();
         Pocket pocket = player.getPocket();
-        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(product.getItem0(), pocket);
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
         int existingItemCount = 0;
         boolean existingItem = false;
 
@@ -328,12 +328,11 @@ public class BasicModeHandler {
         // add item to result
         connection.getClient().getActivePlayer().setPocket(pocket);
 
-        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
-        StreamUtils.batches(playerPocketList, 10)
-                .forEach(pocketList -> {
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
-                    connection.sendTCP(inventoryDataPacket);
-                });
+        List<PlayerPocket> playerPocketList = new ArrayList<>();
+        playerPocketList.add(playerPocket);
+
+        S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+        connection.sendTCP(inventoryDataPacket);
     }
 
     private void sendPacketToAllInRoom(Connection connection, Packet packet) {

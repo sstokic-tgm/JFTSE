@@ -10,6 +10,7 @@ import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
+import com.jftse.emulator.server.game.core.item.EItemCategory;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBattleGame;
@@ -213,7 +214,7 @@ public class BattleModeHandler {
 
         RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
         Pocket pocket = roomPlayer.getPlayer().getPocket();
-        PlayerPocket playerPocket = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(21, pocket);
+        PlayerPocket playerPocket = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(21, EItemCategory.SPECIAL.getName(), pocket);
         if (playerPocket != null) {
             playerPocket = this.playerPocketService.decrementPocketItemCount(playerPocket);
             if (playerPocket.getItemCount() == 0) {

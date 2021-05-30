@@ -149,7 +149,7 @@ public class LotteryService {
     }
 
     private PlayerPocket saveWinningItem(Product winningItem, LotteryItemDto lotteryItem, Pocket pocket) {
-        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(winningItem.getItem0(), pocket);
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(winningItem.getItem0(), winningItem.getCategory(), pocket);
 
         int existingItemCount = 0;
         boolean existingItem = false;
