@@ -127,6 +127,11 @@ public class MatchplayBasicGame extends MatchplayGame {
             playerReward.setPlayerPosition(playerPosition);
             playerReward.setBasicRewardExp(rewardExp);
             playerReward.setBasicRewardGold(rewardGold);
+            if (wonGame) { // TODO: temporarily only
+                playerReward.setRewardProductIndex(57592);
+                playerReward.setProductRewardAmount(1);
+            }
+
             playerRewards.add(playerReward);
         }
 

@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -11,6 +12,7 @@ import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
+import com.jftse.emulator.server.game.core.item.EItemCategory;
 import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
@@ -22,6 +24,7 @@ import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetBossGuardiansStats;
@@ -272,7 +275,7 @@ public class GuardianModeHandler {
 
         RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(connection);
         Pocket pocket = roomPlayer.getPlayer().getPocket();
-        PlayerPocket playerPocket = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(21, pocket);
+        PlayerPocket playerPocket = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(21, EItemCategory.SPECIAL.getName(), pocket);
         if (playerPocket != null) {
             playerPocket = this.playerPocketService.decrementPocketItemCount(playerPocket);
             if (playerPocket.getItemCount() == 0) {
@@ -618,7 +621,8 @@ public class GuardianModeHandler {
             byte oldLevel = player.getLevel();
             if (playerReward != null) {
                 byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
-                player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
+                if (level != 60)
+                    player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
                 player.setGold(player.getGold() + playerReward.getBasicRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.setActivePlayer(player);
@@ -672,7 +676,7 @@ public class GuardianModeHandler {
 
         Player player = connection.getClient().getActivePlayer();
         Pocket pocket = player.getPocket();
-        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndPocket(product.getItem0(), pocket);
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
         int existingItemCount = 0;
         boolean existingItem = false;
 
@@ -706,6 +710,12 @@ public class GuardianModeHandler {
 
         // add item to result
         connection.getClient().getActivePlayer().setPocket(pocket);
+
+        List<PlayerPocket> playerPocketList = new ArrayList<>();
+        playerPocketList.add(playerPocket);
+
+        S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+        connection.sendTCP(inventoryDataPacket);
     }
 
     private PlayerReward createEmptyPlayerReward() {
