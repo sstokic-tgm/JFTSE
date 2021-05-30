@@ -28,7 +28,7 @@ public class MatchplayBasicGame extends MatchplayGame {
     public MatchplayBasicGame(byte players) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
-        playerLocationsOnMap = Arrays.asList(
+        this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -125),
                 new Point(-20, 125),
                 new Point(-20, -75),
