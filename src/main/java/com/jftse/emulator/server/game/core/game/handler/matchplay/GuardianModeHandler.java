@@ -550,10 +550,10 @@ public class GuardianModeHandler {
             Runnable triggerGuardianServeRunnable = () -> {
                 if (gameSession == null) return;
                 S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
-                S2CGameSetNameColorAndRemoveBlackBar setNameColorPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
                 gameSession.getClients().forEach(c -> {
                     if (c != null && c.getConnection() != null) {
-                        c.getConnection().sendTCP(setNameColorPacket);
+                        c.getConnection().sendTCP(setNameColorAndRemoveBlackBarPacket);
                         c.getConnection().sendTCP(triggerGuardianServePacket);
                     }
                 });
