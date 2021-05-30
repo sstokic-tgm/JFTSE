@@ -20,6 +20,7 @@ import com.jftse.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
+import com.jftse.emulator.server.game.core.matchplay.room.PlayerPositionInfo;
 import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.packet.PacketID;
@@ -35,10 +36,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
-import java.util.Calendar;
+import java.util.*;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -60,25 +61,24 @@ public class BattleModeHandler {
 
     private GameHandler gameHandler;
 
+    private Random random;
+
     public void init(GameHandler gameHandler) {
         this.gameHandler = gameHandler;
+        this.random = new Random();
     }
 
     public void handleBattleModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayBattleGame game) {
         boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide() == GameFieldSide.BlueTeam;
+        int servingPositionXOffset = random.nextInt(7);
         if (!lastGuardianServeWasOnBlueTeamsSide) {
-            // TODO: Why doesn't guardian spawn on the other end of the gamefield?
             game.setLastGuardianServeSide(GameFieldSide.BlueTeam);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 1, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.BlueTeam, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         } else {
             game.setLastGuardianServeSide(GameFieldSide.RedTeam);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         }
     }
 
@@ -87,8 +87,26 @@ public class BattleModeHandler {
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
         game.setLastGuardianServeSide(GameFieldSide.RedTeam);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
-        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 0, (byte) 5, (byte) 0);
+
+        List<PlayerPositionInfo> positionInfo = new ArrayList<>();
         clients.forEach(c -> {
+            RoomPlayer rp = room.getRoomPlayerList().stream()
+                    .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
+                    .findFirst().orElse(null);
+
+            Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
+            PlayerPositionInfo playerPositionInfo = new PlayerPositionInfo();
+            playerPositionInfo.setPlayerPosition(rp.getPosition());
+            playerPositionInfo.setPlayerStartLocation(playerLocation);
+            positionInfo.add(playerPositionInfo);
+        });
+
+        int servingPositionXOffset = random.nextInt(7);
+
+        S2CMatchplaySetPlayerPosition setPlayerPositionPacket = new S2CMatchplaySetPlayerPosition(positionInfo);
+        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) servingPositionXOffset, (byte) 0);
+        clients.forEach(c -> {
+            c.getConnection().sendTCP(setPlayerPositionPacket);
             c.getConnection().sendTCP(triggerGuardianServePacket);
         });
 
@@ -201,11 +219,16 @@ public class BattleModeHandler {
             this.handleSkillDamage(connection, skillHitsTarget.getTargetPosition(), skillHitsTarget, game, skill);
         }
 
-        this.handleAnyTeamDead();
+        this.handleAnyTeamDead(connection, game);
     }
 
-    private void handleAnyTeamDead() {
-//        TODO: IMPLEMENT
+    private void handleAnyTeamDead(Connection connection, MatchplayBattleGame game) {
+        boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+        boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+
+        if ((allPlayersTeamRedDead || allPlayersTeamBlueDead) && !game.isFinished()) {
+            this.handleFinishGame(connection, game);
+        }
     }
 
     public void handleSwapQuickSlotItems(Connection connection, C2SMatchplaySwapQuickSlotItems swapQuickSlotItems) {
@@ -332,7 +355,7 @@ public class BattleModeHandler {
         return new PlayerBattleState(roomPlayer.getPosition(), totalHp, totalStr, totalSta, totalDex, totalWill);
     }
     
-    private void handleFinishGame(Connection connection, MatchplayBattleGame game, boolean wonGame) {
+    private void handleFinishGame(Connection connection, MatchplayBattleGame game) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
@@ -351,6 +374,14 @@ public class BattleModeHandler {
                     .findFirst().orElse(null);
             if (rp == null) {
                 return;
+            }
+
+            boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
+            boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+            boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+            boolean wonGame = false;
+            if (isCurrentPlayerInRedTeam && allPlayersTeamBlueDead || !isCurrentPlayerInRedTeam && allPlayersTeamRedDead) {
+                wonGame = true;
             }
 
             PlayerReward playerReward = playerRewards.stream()
@@ -417,8 +448,13 @@ public class BattleModeHandler {
 
     private void handleRevivePlayer(Connection connection, MatchplayBattleGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         PlayerBattleState playerBattleState = null;
+
+        Optional<RoomPlayer> rp = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
+                .filter(p -> p.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findFirst();
+
         try {
-            playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue());
+            playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue(), rp);
         } catch (ValidationException ve) {
             log.warn(ve.getMessage());
             return;
