@@ -68,7 +68,7 @@ public class BattleModeHandler {
         if (!lastGuardianServeWasOnBlueTeamsSide) {
             // TODO: Why doesn't guardian spawn on the other end of the gamefield?
             game.setLastGuardianServeSide(GameFieldSide.BlueTeam);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 2, (byte) 0, (byte) 0);
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 1, (byte) 0, (byte) 0);
             gameSession.getClients().forEach(x -> {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
             });
@@ -84,12 +84,12 @@ public class BattleModeHandler {
     public void handleStartBattleMode(Connection connection, Room room) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
-        game.setLastGuardianServeSide(GameFieldSide.BlueTeam);
+        game.setLastGuardianServeSide(GameFieldSide.RedTeam);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
-//        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 2, (byte) 0, (byte) 0);
-//        clients.forEach(c -> {
-//            c.getConnection().sendTCP(triggerGuardianServePacket);
-//        });
+        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 0, (byte) 5, (byte) 0);
+        clients.forEach(c -> {
+            c.getConnection().sendTCP(triggerGuardianServePacket);
+        });
 
         int activePlayers = (int) game.getPlayerBattleStates().stream().count();
         switch (activePlayers) {
