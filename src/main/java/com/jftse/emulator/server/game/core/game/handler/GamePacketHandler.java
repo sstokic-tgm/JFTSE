@@ -1647,16 +1647,6 @@ public class GamePacketHandler {
             gameAnimationSkipPacket.write((char) 0);
             sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
 
-            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
-
-                RoomPlayer rp = roomPlayerList.stream()
-                        .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
-                        .findFirst().orElse(null);
-
-                S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(rp);
-                c.getConnection().sendTCP(setNameColorPacket);
-            });
-
             S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
             sendPacketToAllInRoom(connection, playerStatsPacket);
             room.setStatus(RoomStatus.Running);
@@ -1670,6 +1660,9 @@ public class GamePacketHandler {
                 if (threadRoom == null || threadRoom.getStatus() != RoomStatus.Running) {
                     return;
                 }
+
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
+                sendPacketToAllInRoom(connection, setNameColorPacket);
 
                 switch (room.getMode()) {
                     case GameMode.BASIC:

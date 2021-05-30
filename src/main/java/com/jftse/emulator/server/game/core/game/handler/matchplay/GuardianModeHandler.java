@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -551,14 +550,11 @@ public class GuardianModeHandler {
             Runnable triggerGuardianServeRunnable = () -> {
                 if (gameSession == null) return;
                 S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
                 gameSession.getClients().forEach(c -> {
                     if (c != null && c.getConnection() != null) {
+                        c.getConnection().sendTCP(setNameColorPacket);
                         c.getConnection().sendTCP(triggerGuardianServePacket);
-                        RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(c.getConnection());
-                        if (roomPlayer != null) {
-                            S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(roomPlayer);
-                            c.getConnection().sendTCP(setNameColorPacket);
-                        }
                     }
                 });
 
