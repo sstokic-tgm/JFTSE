@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class PocketService {
     private final PocketRepository pocketRepository;
 
