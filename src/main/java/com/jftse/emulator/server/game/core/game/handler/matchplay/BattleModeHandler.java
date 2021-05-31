@@ -3,6 +3,7 @@ package com.jftse.emulator.server.game.core.game.handler.matchplay;
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.database.model.battle.Skill;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
@@ -58,6 +59,7 @@ public class BattleModeHandler {
     private final ClothEquipmentService clothEquipmentService;
     private final GameSessionManager gameSessionManager;
     private final WillDamageService willDamageService;
+    private final PlayerStatisticService playerStatisticService;
 
     private GameHandler gameHandler;
 
@@ -403,6 +405,26 @@ public class BattleModeHandler {
                     this.handleRewardItem(client.getConnection(), playerReward);
                 }
             }
+
+            PlayerStatistic playerStatistic = player.getPlayerStatistic();
+            if (wonGame) {
+                playerStatistic.setBattleRecordWin(playerStatistic.getBattleRecordWin() + 1);
+
+                int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
+                if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
+                    playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
+                }
+
+                playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
+            } else {
+                playerStatistic.setBattleRecordLoss(playerStatistic.getBattleRecordLoss() + 1);
+                playerStatistic.setConsecutiveWins(0);
+            }
+            playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+
+            player.setPlayerStatistic(playerStatistic);
+            player = playerService.save(player);
+            client.setActivePlayer(player);
 
             byte playerLevel = client.getActivePlayer().getLevel();
             if (playerLevel != oldLevel) {
