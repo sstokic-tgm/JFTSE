@@ -274,7 +274,7 @@ public class BattleModeHandler {
     private void handleSkillDamage(Connection connection, short targetPosition, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayBattleGame game, Skill skill) {
         boolean denyDamage = skillHitsTarget.getDamageType() == 1;
         short attackerPosition = skillHitsTarget.getAttackerPosition();
-        boolean attackerHasStrBuff = skillHitsTarget.getAttackerPosition() == 0;
+        boolean attackerHasStrBuff = skillHitsTarget.getAttackerBuffId() == 0;
         boolean receiverHasDefBuff = skillHitsTarget.getReceiverBuffId() == 1;
 
         short skillDamage = skill != null ? skill.getDamage().shortValue() : -1;
