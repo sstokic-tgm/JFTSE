@@ -227,8 +227,8 @@ public class MatchplayBattleGame extends MatchplayGame {
             int rewardGold = basicExpReward;
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(playerPosition);
-            playerReward.setBasicRewardExp(rewardExp);
-            playerReward.setBasicRewardGold(rewardGold);
+            playerReward.setRewardExp(rewardExp);
+            playerReward.setRewardGold(rewardGold);
             playerRewards.add(playerReward);
 
             iteration++;

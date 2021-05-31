@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
@@ -12,7 +11,6 @@ import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.constants.ServeType;
 import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.jftse.emulator.server.game.core.matchplay.event.PacketEventHandler;
@@ -135,10 +133,10 @@ public class BasicModeHandler {
                 Player player = client.getActivePlayer();
                 byte oldLevel = player.getLevel();
                 if (playerReward != null) {
-                    byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
+                    byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                     if (level != 60)
-                        player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
-                    player.setGold(player.getGold() + playerReward.getBasicRewardGold());
+                        player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                    player.setGold(player.getGold() + playerReward.getRewardGold());
                     player = levelService.setNewLevelStatusPoints(level, player);
                     client.setActivePlayer(player);
 

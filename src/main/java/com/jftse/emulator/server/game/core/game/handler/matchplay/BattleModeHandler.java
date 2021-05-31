@@ -24,7 +24,6 @@ import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.game.core.matchplay.room.PlayerPositionInfo;
 import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
@@ -394,10 +393,10 @@ public class BattleModeHandler {
             Player player = client.getActivePlayer();
             byte oldLevel = player.getLevel();
             if (playerReward != null) {
-                byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
+                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                 if (level != 60)
-                    player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
-                player.setGold(player.getGold() + playerReward.getBasicRewardGold());
+                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.setActivePlayer(player);
 
@@ -463,8 +462,8 @@ public class BattleModeHandler {
 
     private PlayerReward createEmptyPlayerReward() {
         PlayerReward playerReward = new PlayerReward();
-        playerReward.setBasicRewardExp(1);
-        playerReward.setBasicRewardGold(1);
+        playerReward.setRewardExp(1);
+        playerReward.setRewardGold(1);
         return playerReward;
     }
 

@@ -294,8 +294,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.playerBattleStates.forEach(x -> {
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(x.getPosition());
-            playerReward.setBasicRewardExp(this.getExpPot());
-            playerReward.setBasicRewardGold(this.getGoldPot());
+            playerReward.setRewardExp(this.getExpPot());
+            playerReward.setRewardGold(this.getGoldPot());
             playerReward.setRewardProductIndex(-1);
 
             if (stageRewards != null)
