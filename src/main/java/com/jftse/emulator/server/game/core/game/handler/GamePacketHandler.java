@@ -2138,7 +2138,17 @@ public class GamePacketHandler {
                     if (c != null && !c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null && c.getConnection().isConnected())
                         c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
                 });
+            } else {
+                this.gameSessionManager.getGameSessionBySessionId(connection.getClient().getActiveGameSession().getSessionId()).getClients()
+                        .removeIf(c -> c.getActivePlayer() != null && connection.getClient().getActivePlayer() != null
+                                && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+                connection.getClient().setActiveGameSession(null);
             }
+
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+            this.updateRoomForAllPlayersInMultiplayer(connection, room);
+
             connection.getClient().setActiveRoom(null);
             this.gameHandler.getClientList().stream()
                     .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
