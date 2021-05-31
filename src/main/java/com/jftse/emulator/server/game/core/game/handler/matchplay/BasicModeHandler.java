@@ -190,13 +190,9 @@ public class BasicModeHandler {
                 S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
-                gameSession.getClients().forEach(c -> {
-                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(c, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
-
-                    c.setActiveGameSession(null);
-                });
-                gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
+                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+                client.setActiveGameSession(null);
             } else {
                 boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
                 byte serveType = ServeType.None;
@@ -238,6 +234,7 @@ public class BasicModeHandler {
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(6)), PacketEventHandler.ServerClient.SERVER);
         }
 
+        gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
             this.gameSessionManager.removeGameSession(gameSession);
         }
