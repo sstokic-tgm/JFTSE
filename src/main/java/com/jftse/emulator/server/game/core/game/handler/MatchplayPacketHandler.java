@@ -92,7 +92,8 @@ public class MatchplayPacketHandler {
                     List<Client> clientsInGameSession = new ArrayList<>();
                     clientsInGameSession.addAll(gameSession.getClients()); // deep copy
                     for (Client client : clientsInGameSession) {
-                        client.getActiveRoom().setStatus(RoomStatus.StartCancelled);
+                        if (client.getActiveRoom() != null)
+                            client.getActiveRoom().setStatus(RoomStatus.StartCancelled);
                     }
                     for (Client client : clientsInGameSession) {
                         Room room = client.getActiveRoom();
@@ -104,7 +105,10 @@ public class MatchplayPacketHandler {
                             if (roomPlayer != null) {
                                 String message = roomPlayer.getPlayer().getName() + " has to relog.";
                                 S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", message);
-                                clientsInGameSession.forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+                                clientsInGameSession.forEach(c -> {
+                                    if (c.getConnection() != null && c.getConnection().isConnected())
+                                        c.getConnection().sendTCP(chatRoomAnswerPacket);
+                                });
                                 break;
                             }
                         }

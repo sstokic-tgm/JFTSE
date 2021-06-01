@@ -2139,9 +2139,12 @@ public class GamePacketHandler {
                         c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
                 });
             } else {
-                this.gameSessionManager.getGameSessionBySessionId(connection.getClient().getActiveGameSession().getSessionId()).getClients()
-                        .removeIf(c -> c.getActivePlayer() != null && connection.getClient().getActivePlayer() != null
-                                && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+                GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(connection.getClient().getActiveGameSession().getSessionId());
+                if (gameSession != null) {
+                    List<Client> clientList = gameSession.getClients();
+                    clientList.removeIf(c -> c.getActivePlayer() != null && connection.getClient().getActivePlayer() != null
+                                    && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+                }
                 connection.getClient().setActiveGameSession(null);
             }
 
