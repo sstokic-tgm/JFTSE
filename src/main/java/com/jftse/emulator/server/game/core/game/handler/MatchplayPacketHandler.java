@@ -104,7 +104,7 @@ public class MatchplayPacketHandler {
                             if (roomPlayer != null) {
                                 String message = roomPlayer.getPlayer().getName() + " has to relog.";
                                 S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", message);
-                                this.relayHandler.getClientsInGameSession(gameSession.getSessionId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+                                clientsInGameSession.forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
                                 break;
                             }
                         }
