@@ -1518,7 +1518,7 @@ public class GamePacketHandler {
 
         clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
 
-        gameSession.setClients(clientsInRoom);
+        gameSession.setClients(new ArrayList<>(clientsInRoom));
         this.gameSessionManager.addGameSession(gameSession);
 
         List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
@@ -1556,6 +1556,17 @@ public class GamePacketHandler {
                         threadRoom.setStatus(RoomStatus.NotRunning);
                         Packet startGameCancelledPacket = new Packet(PacketID.S2CRoomStartGameCancelled);
                         startGameCancelledPacket.write((char) 0);
+
+                        allPlayerRoom.getRoomPlayerList().stream()
+                                .filter(rp -> !rp.isMaster())
+                                .forEach(rp -> rp.setReady(false));
+                        clientsInRoom.forEach(c -> c.setActiveGameSession(null));
+
+                        this.gameSessionManager.removeGameSession(gameSession);
+
+                        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(allPlayerRoom.getRoomPlayerList());
+                        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+                        this.updateRoomForAllPlayersInMultiplayer(connection, room);
                         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(startGameCancelledPacket));
                         return;
                     }
@@ -2146,17 +2157,21 @@ public class GamePacketHandler {
                                     && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
                 }
                 connection.getClient().setActiveGameSession(null);
+                this.gameHandler.getClientList().stream()
+                        .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                        .findAny()
+                        .ifPresent(c -> c.setActiveGameSession(null));
             }
-
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
-            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
-            this.updateRoomForAllPlayersInMultiplayer(connection, room);
 
             connection.getClient().setActiveRoom(null);
             this.gameHandler.getClientList().stream()
                     .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
                     .findAny()
                     .ifPresent(c -> c.setActiveRoom(null));
+
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+            this.updateRoomForAllPlayersInMultiplayer(connection, room);
         }
     }
 

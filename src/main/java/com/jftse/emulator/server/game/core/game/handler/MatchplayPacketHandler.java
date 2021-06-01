@@ -94,6 +94,7 @@ public class MatchplayPacketHandler {
                     for (Client client : clientsInGameSession) {
                         if (client.getActiveRoom() != null)
                             client.getActiveRoom().setStatus(RoomStatus.StartCancelled);
+                        client.setActiveGameSession(null);
                     }
                     for (Client client : clientsInGameSession) {
                         Room room = client.getActiveRoom();
