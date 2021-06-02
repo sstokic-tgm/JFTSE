@@ -7,6 +7,7 @@ import com.jftse.emulator.server.game.core.auth.AuthenticationServerNetworkListe
 import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
 import com.jftse.emulator.server.game.core.game.RelayServerNetworkListener;
 import com.jftse.emulator.server.networking.Server;
+import com.jftse.emulator.server.networking.ThreadedConnectionListener;
 import com.jftse.emulator.server.shared.module.checker.AuthServerChecker;
 import com.jftse.emulator.server.shared.module.checker.GameServerChecker;
 import com.jftse.emulator.server.shared.module.checker.RelayServerChecker;
@@ -78,7 +79,7 @@ public class StartApplication {
         ctx.getBeanFactory().autowireBean(relayServerNetworkListener);
 
         Server relayServer = new Server();
-        relayServer.addListener(relayServerNetworkListener);
+        relayServer.addListener(new ThreadedConnectionListener(relayServerNetworkListener, Executors.newFixedThreadPool(2)));
 
         try {
             relayServer.bind(5896);
