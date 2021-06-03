@@ -26,15 +26,15 @@ public abstract class QueuedConnectionListener implements ConnectionListener {
     }
 
     public void onException(Connection connection, Exception exception) {
-        queue(() -> connectionListener.onException(connection, exception));
+        connectionListener.onException(connection, exception);
     }
 
     public void onTimeout(Connection connection) {
-        queue(() -> connectionListener.onTimeout(connection));
+        connectionListener.onTimeout(connection);
     }
 
     public void cleanUp() {
-        queue(connectionListener::cleanUp);
+        connectionListener.cleanUp();
     }
 
     abstract protected void queue(Runnable runnable);
