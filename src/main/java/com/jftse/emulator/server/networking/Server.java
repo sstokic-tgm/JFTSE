@@ -255,7 +255,7 @@ public class Server implements Runnable {
         shutdown = false;
         while(!shutdown) {
             try {
-                update(10000);
+                update(150);
             } catch (IOException ioe) {
                 log.error("Thread exception " + ioe.getMessage(), ioe);
                 close();
