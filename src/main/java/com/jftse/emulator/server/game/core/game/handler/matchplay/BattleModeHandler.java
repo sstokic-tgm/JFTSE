@@ -111,26 +111,22 @@ public class BattleModeHandler {
             c.getConnection().sendTCP(triggerGuardianServePacket);
         });
 
-        int activePlayers = (int) game.getPlayerBattleStates().stream().count();
-        switch (activePlayers) {
-            case 1:
-            case 2:
-                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
-                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(8));
-                this.placeCrystalRandomly(connection, game, GameFieldSide.RedTeam);
-                this.placeCrystalRandomly(connection, game, GameFieldSide.BlueTeam);
-                break;
-            case 3:
-            case 4:
-                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
-                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(7));
-                this.placeCrystalRandomly(connection, game, GameFieldSide.RedTeam);
-                this.placeCrystalRandomly(connection, game, GameFieldSide.RedTeam);
-                this.placeCrystalRandomly(connection, game, GameFieldSide.BlueTeam);
-                this.placeCrystalRandomly(connection, game, GameFieldSide.BlueTeam);
-                break;
-        }
+        long crystalSpawnInterval = TimeUnit.SECONDS.toMillis(8);
+        long crystalDeSpawnInterval = TimeUnit.SECONDS.toMillis(10);
+        game.setCrystalSpawnInterval(crystalSpawnInterval);
+        game.setCrystalDeSpawnInterval(crystalDeSpawnInterval);
 
+        int activePlayers = (int) game.getPlayerBattleStates().stream().count();
+        int amountOfCrystalsToSpawnPerSide = activePlayers > 2 ? 2 : 1;
+        Runnable initializeCrystalsRunnable = () -> {
+            for (int i = 0; i < amountOfCrystalsToSpawnPerSide; i++) {
+                this.placeCrystalRandomly(connection, game, GameFieldSide.RedTeam);
+                this.placeCrystalRandomly(connection, game, GameFieldSide.BlueTeam);
+            }
+        };
+        
+        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(initializeCrystalsRunnable, crystalSpawnInterval);
+        gameSession.getRunnableEvents().add(runnableEvent);
         gameSession.setSpeedHackCheckActive(true);
     }
 
