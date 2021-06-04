@@ -489,6 +489,7 @@ public class BattleModeHandler {
         Point2D point = this.getRandomPoint(gameFieldSide);
 
         short crystalId = (short) (game.getLastCrystalId() + 1);
+        if (crystalId > 100) crystalId = 0;
         game.setLastCrystalId(crystalId);
         SkillCrystal skillCrystal = new SkillCrystal();
         skillCrystal.setId(crystalId);

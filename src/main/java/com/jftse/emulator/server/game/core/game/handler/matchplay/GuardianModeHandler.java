@@ -848,6 +848,7 @@ public class GuardianModeHandler {
         Point2D point = this.getRandomPoint();
 
         short crystalId = (short) (game.getLastCrystalId() + 1);
+        if (crystalId > 100) crystalId = 0;
         game.setLastCrystalId(crystalId);
         SkillCrystal skillCrystal = new SkillCrystal();
         skillCrystal.setId(crystalId);
