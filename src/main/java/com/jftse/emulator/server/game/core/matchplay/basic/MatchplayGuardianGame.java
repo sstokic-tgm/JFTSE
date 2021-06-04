@@ -145,11 +145,15 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     .findFirst()
                     .orElse(null);
             if (playerBattleState != null) {
+                int playerWill = playerBattleState.getWill();
                 WillDamage willDamage = this.getWillDamages().stream()
-                        .filter(x -> x.getWill() == playerBattleState.getWill())
+                        .filter(x -> x.getWill() == playerWill)
                         .findFirst()
                         .orElse(this.getWillDamages().get(0));
                 lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+
+                int additionalWillDmg = (int) (guardianBattleState.getMaxHealth() * (playerWill / 10000d));
+                lossBallDamage -= additionalWillDmg;
             }
         }
 
