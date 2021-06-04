@@ -7,17 +7,18 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 @Service
 @Getter
 @Setter
 public class RelayHandler {
-    private List<Client> clientList;
+    private ConcurrentLinkedDeque<Client> clientList;
 
     @PostConstruct
     public void init() {
-        clientList = new ArrayList<>();
+        clientList = new ConcurrentLinkedDeque<>();
     }
 
     public void addClient(Client client) {

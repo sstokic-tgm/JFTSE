@@ -80,10 +80,7 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -1228,7 +1225,7 @@ public class GamePacketHandler {
     }
 
     public void handleRoomJoinRequestPacket(Connection connection, Packet packet) {
-        List<Room> roomList = this.gameHandler.getRoomList();
+        List<Room> roomList = new ArrayList<>(this.gameHandler.getRoomList());
         C2SRoomJoinRequestPacket roomJoinRequestPacket = new C2SRoomJoinRequestPacket(packet, roomList);
 
         Room room = roomList.stream()
@@ -1520,7 +1517,7 @@ public class GamePacketHandler {
 
         clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
 
-        gameSession.setClients(new ArrayList<>(clientsInRoom));
+        gameSession.setClients(new ConcurrentLinkedDeque<>(clientsInRoom));
         this.gameSessionManager.addGameSession(gameSession);
 
         List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
@@ -1541,7 +1538,7 @@ public class GamePacketHandler {
             int secondsToCount = 5;
             for (int i = 0; i < secondsToCount; i++) {
                 Room threadRoom = connection.getClient().getActiveRoom();
-                List<Room> roomList = this.gameHandler.getRoomList();
+                List<Room> roomList = new ArrayList<>(this.gameHandler.getRoomList());
                 Room allPlayerRoom = roomList.stream()
                         .filter(r -> r.getRoomId() == room.getRoomId())
                         .findAny()
@@ -1838,8 +1835,8 @@ public class GamePacketHandler {
                             .findAny()
                             .orElse(null);
                     if (room != null) {
-                        int roomIndex = this.gameHandler.getRoomList().indexOf(room);
-                        this.gameHandler.getRoomList().set(roomIndex, currentClientRoom);
+                        this.gameHandler.getRoomList().removeFirstOccurrence(room);
+                        this.gameHandler.getRoomList().add(currentClientRoom);
                     }
                 }
             }
@@ -2154,8 +2151,7 @@ public class GamePacketHandler {
             } else {
                 GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(connection.getClient().getActiveGameSession().getSessionId());
                 if (gameSession != null) {
-                    List<Client> clientList = gameSession.getClients();
-                    clientList.removeIf(c -> c.getActivePlayer() != null && connection.getClient().getActivePlayer() != null
+                    gameSession.getClients().removeIf(c -> c.getActivePlayer() != null && connection.getClient().getActivePlayer() != null
                                     && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
                 }
                 connection.getClient().setActiveGameSession(null);
