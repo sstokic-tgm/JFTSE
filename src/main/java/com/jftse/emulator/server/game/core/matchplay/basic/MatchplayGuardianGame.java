@@ -8,7 +8,7 @@ import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.SkillCrystal;
-import com.jftse.emulator.server.game.core.utils.BattleUtils;
+import com.jftse.emulator.server.game.core.utils.BattleUtilsService;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,8 +38,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private Date stageStartTime;
     private int expPot;
     private int goldPot;
+    private BattleUtilsService battleUtilsService;
 
-    public MatchplayGuardianGame() {
+    public MatchplayGuardianGame(BattleUtilsService battleUtilsService) {
+        this.battleUtilsService = battleUtilsService;
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
         this.setStageStartTime(cal.getTime());
@@ -61,7 +63,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .orElse(null);
         boolean isNormalDamageSkill = Math.abs(damage) != 1;
         if (playerBattleState != null && isNormalDamageSkill) {
-            totalDamageToDeal = BattleUtils.calculateDmg(playerBattleState.getStr(), damage, hasAttackerDmgBuff);
+            totalDamageToDeal = battleUtilsService.calculateDmg(playerBattleState.getStr(), damage, hasAttackerDmgBuff);
         }
 
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
@@ -73,7 +75,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
             throw new ValidationException("guardianBattleState is null");
 
         if (isNormalDamageSkill) {
-            int damageToDeny = BattleUtils.calculateDef(guardianBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
+            int damageToDeny = battleUtilsService.calculateDef(guardianBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
@@ -96,7 +98,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
         boolean isNormalDamageSkill = Math.abs(damage) != 1;
         if (guardianBattleState != null && isNormalDamageSkill) {
-            totalDamageToDeal = BattleUtils.calculateDmg(guardianBattleState.getStr(), damage, hasAttackerDmgBuff);
+            totalDamageToDeal = battleUtilsService.calculateDmg(guardianBattleState.getStr(), damage, hasAttackerDmgBuff);
         }
 
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
@@ -108,7 +110,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
             throw new ValidationException("playerBattleState is null");
 
         if (isNormalDamageSkill) {
-            int damageToDeny = BattleUtils.calculateDef(playerBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
+            int damageToDeny = battleUtilsService.calculateDef(playerBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
@@ -150,7 +152,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                         .filter(x -> x.getWill() == playerWill)
                         .findFirst()
                         .orElse(this.getWillDamages().get(0));
-                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+                lossBallDamage = -battleUtilsService.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
 
                 int additionalWillDmg = (int) (guardianBattleState.getMaxHealth() * (playerWill / 10000d));
                 lossBallDamage -= additionalWillDmg;
@@ -186,7 +188,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                         .filter(x -> x.getWill() == guardianBattleState.getWill())
                         .findFirst()
                         .orElse(this.getWillDamages().get(0));
-                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+                lossBallDamage = -battleUtilsService.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
             }
         }
 

@@ -27,7 +27,7 @@ import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
-import com.jftse.emulator.server.game.core.utils.BattleUtils;
+import com.jftse.emulator.server.game.core.utils.BattleUtilsService;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -339,7 +339,7 @@ public class BattleModeHandler {
     }
 
     private PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
-        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer());
+        short baseHp = (short) BattleUtilsService.calculatePlayerHp(roomPlayer.getPlayer());
         short baseStr = roomPlayer.getPlayer().getStrength();
         short baseSta = roomPlayer.getPlayer().getStamina();
         short baseDex = roomPlayer.getPlayer().getDexterity();

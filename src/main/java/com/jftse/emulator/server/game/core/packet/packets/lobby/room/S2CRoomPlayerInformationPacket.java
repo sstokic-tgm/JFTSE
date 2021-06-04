@@ -5,7 +5,7 @@ import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.packet.PacketID;
-import com.jftse.emulator.server.game.core.utils.BattleUtils;
+import com.jftse.emulator.server.game.core.utils.BattleUtilsService;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write((byte) 0);
             this.write((byte) 0);
             // add hp
-            this.write(BattleUtils.calculatePlayerHp(player));
+            this.write(BattleUtilsService.calculatePlayerHp(player));
             // cloth added status points for shop
             this.write((byte) 0);
             this.write((byte) 0);
