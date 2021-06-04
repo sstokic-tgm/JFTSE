@@ -30,7 +30,7 @@ public class BattleUtilsService {
 
     public int calculateDmg(int str, int baseDmg, boolean hasStrBuff) {
         List<StrValue> strValues = this.strTableService.getStrValues();
-        int additionalDmg = (int) strValues.stream().filter(x -> x.getStr() < str).count();
+        int additionalDmg = (int) strValues.stream().filter(x -> x.getStr() <= str).count();
         int totalDmg = baseDmg - additionalDmg;
         if (hasStrBuff) {
             totalDmg -= Math.abs(totalDmg) * 0.2;
@@ -41,7 +41,7 @@ public class BattleUtilsService {
 
     public int calculateDef(int sta, int dmg, boolean hasDefBuff) {
         List<StaValue> staValues = this.staTableService.getStaValues();
-        int dmgToDeny = (int) staValues.stream().filter(x -> x.getSta() < sta).count();
+        int dmgToDeny = (int) staValues.stream().filter(x -> x.getSta() <= sta).count();
         if (hasDefBuff) {
             dmgToDeny += dmg * 0.2;
         }
