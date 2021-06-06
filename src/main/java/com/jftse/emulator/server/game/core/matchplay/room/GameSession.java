@@ -8,15 +8,16 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
 @Setter
 public class GameSession {
     public GameSession() {
-        clients = new ArrayList<>();
-        clientsInRelay = new ArrayList<>();
-        runnableEvents = new ArrayList<>();
-        firstSpeedHackRecognitionIgnoredForClients = new ArrayList<>();
+        clients = new ConcurrentLinkedDeque<>();
+        clientsInRelay = new ConcurrentLinkedDeque<>();
+        runnableEvents = new ConcurrentLinkedDeque<>();
+        firstSpeedHackRecognitionIgnoredForClients = new ConcurrentLinkedDeque<>();
     }
 
     private int sessionId;
@@ -26,12 +27,12 @@ public class GameSession {
     private int lastBallHitByPlayer = -1;
     private long timeLastBallWasHit = -1;
     private int timesCourtChanged = 0;
-    private List<Client> clients; // holds everything from game server
-    private List<Client> clientsInRelay;
-    private List<RunnableEvent> runnableEvents;
+    private ConcurrentLinkedDeque<Client> clients; // holds everything from game server
+    private ConcurrentLinkedDeque<Client> clientsInRelay;
+    private ConcurrentLinkedDeque<RunnableEvent> runnableEvents;
     private RunnableEvent countDownRunnable;
     private boolean speedHackCheckActive;
-    private List<Client> firstSpeedHackRecognitionIgnoredForClients;
+    private ConcurrentLinkedDeque<Client> firstSpeedHackRecognitionIgnoredForClients;
 
     public Client getClientByPlayerId(long playerId) {
         return clients.stream()

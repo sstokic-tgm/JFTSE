@@ -85,7 +85,7 @@ public class BasicModeHandler {
         }
 
         List<ServeInfo> serveInfo = new ArrayList<>();
-        List<Client> clients = new ArrayList<>(Collections.unmodifiableList(gameSession.getClients()));
+        List<Client> clients = new ArrayList<>(gameSession.getClients());
         for (Client client : clients) {
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))

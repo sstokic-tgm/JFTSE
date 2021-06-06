@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,14 +17,14 @@ import java.util.stream.Collectors;
 @Setter
 public class GameHandler {
 
-    private List<Client> clientList;
-    private List<Room> roomList;
+    private ConcurrentLinkedDeque<Client> clientList;
+    private ConcurrentLinkedDeque<Room> roomList;
 
     @PostConstruct
     public void init() {
 
-        clientList = new ArrayList<>();
-        roomList = new ArrayList<>();
+        clientList = new ConcurrentLinkedDeque<>();
+        roomList = new ConcurrentLinkedDeque<>();
     }
 
     public void addClient(Client client) {
