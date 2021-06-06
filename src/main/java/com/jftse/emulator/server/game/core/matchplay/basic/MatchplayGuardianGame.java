@@ -38,6 +38,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private Date stageStartTime;
     private int expPot;
     private int goldPot;
+    private boolean isHardMode;
+    private boolean randomGuardiansMode;
 
     public MatchplayGuardianGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
