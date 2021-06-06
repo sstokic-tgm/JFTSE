@@ -68,7 +68,7 @@ import com.jftse.emulator.server.game.core.service.ItemCharService;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
 import com.jftse.emulator.server.game.core.singleplay.tutorial.TutorialGame;
-import com.jftse.emulator.server.game.core.utils.BattleUtilsService;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -116,7 +116,6 @@ public class GamePacketHandler {
     private final BasicModeHandler basicModeHandler;
     private final BattleModeHandler battleModeHandler;
     private final ClientWhitelistService clientWhitelistService;
-    private final BattleUtilsService battleUtilsService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -1511,10 +1510,10 @@ public class GamePacketHandler {
                 gameSession.setActiveMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
                 break;
             case GameMode.BATTLE:
-                gameSession.setActiveMatchplayGame(new MatchplayBattleGame(battleUtilsService));
+                gameSession.setActiveMatchplayGame(new MatchplayBattleGame());
                 break;
             case GameMode.GUARDIAN:
-                gameSession.setActiveMatchplayGame(new MatchplayGuardianGame(battleUtilsService));
+                gameSession.setActiveMatchplayGame(new MatchplayGuardianGame());
                 break;
         }
 

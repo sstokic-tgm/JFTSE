@@ -31,7 +31,7 @@ import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetG
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomSetGuardians;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
-import com.jftse.emulator.server.game.core.utils.BattleUtilsService;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -474,7 +474,7 @@ public class GuardianModeHandler {
     }
 
     private PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
-        short baseHp = (short) BattleUtilsService.calculatePlayerHp(roomPlayer.getPlayer());
+        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer());
         short baseStr = roomPlayer.getPlayer().getStrength();
         short baseSta = roomPlayer.getPlayer().getStamina();
         short baseDex = roomPlayer.getPlayer().getDexterity();

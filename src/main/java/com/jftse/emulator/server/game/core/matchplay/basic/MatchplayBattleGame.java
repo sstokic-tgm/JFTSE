@@ -7,7 +7,7 @@ import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.SkillCrystal;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.game.core.utils.BattleUtilsService;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,10 +28,8 @@ public class MatchplayBattleGame extends MatchplayGame {
     private short lastCrystalId = -1;
     private short lastGuardianServeSide;
     private Date stageStartTime;
-    private BattleUtilsService battleUtilsService;
 
-    public MatchplayBattleGame(BattleUtilsService battleUtilsService) {
-        this.battleUtilsService = battleUtilsService;
+    public MatchplayBattleGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
         this.setStageStartTime(cal.getTime());
@@ -56,7 +54,7 @@ public class MatchplayBattleGame extends MatchplayGame {
 
         boolean isNormalDamageSkill = Math.abs(damage) != 1;
         if (attackingPlayer != null && isNormalDamageSkill) {
-            totalDamageToDeal = battleUtilsService.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
+            totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
         }
 
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
@@ -68,7 +66,7 @@ public class MatchplayBattleGame extends MatchplayGame {
             throw new ValidationException("playerBattleState is null");
 
         if (isNormalDamageSkill) {
-            int damageToDeny = battleUtilsService.calculateDef(playerBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
+            int damageToDeny = BattleUtils.calculateDef(playerBattleState.getSta(), Math.abs(totalDamageToDeal), hasReceiverDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
@@ -109,7 +107,7 @@ public class MatchplayBattleGame extends MatchplayGame {
                         .filter(x -> x.getWill() == attackingPlayerBattleState.getWill())
                         .findFirst()
                         .orElse(this.getWillDamages().get(0));
-                lossBallDamage = -battleUtilsService.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
             }
         }
 
