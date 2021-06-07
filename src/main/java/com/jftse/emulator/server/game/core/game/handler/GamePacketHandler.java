@@ -469,6 +469,37 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleUnknownInventoryOpenPacket(Connection connection, Packet packet) {
+        if (connection.getClient() != null) {
+            Player player = connection.getClient().getActivePlayer();
+
+            if (player != null) {
+                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
+                List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+                List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
+                List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+                List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
+
+                S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
+                S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
+                S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
+                S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
+                S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+
+                connection.sendTCP(inventoryWearClothAnswerPacket);
+                connection.sendTCP(inventoryWearQuickAnswerPacket);
+                connection.sendTCP(inventoryWearToolAnswerPacket);
+                connection.sendTCP(inventoryWearSpecialAnswerPacket);
+                connection.sendTCP(inventoryWearCardAnswerPacket);
+            }
+        }
+
+        Packet answer = new Packet((char) (packet.getPacketId() + 1));
+        answer.write((char) 0);
+        connection.sendTCP(answer);
+    }
+
     public void handleInventoryWearClothPacket(Connection connection, Packet packet) {
         C2SInventoryWearClothReqPacket inventoryWearClothReqPacket = new C2SInventoryWearClothReqPacket(packet);
 

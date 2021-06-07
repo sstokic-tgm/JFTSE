@@ -68,6 +68,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleInventoryItemSellPackets(connection, packet);
                 break;
 
+            case PacketID.C2SUnknownInventoryOpenRequest:
+                gamePacketHandler.handleUnknownInventoryOpenPacket(connection, packet);
+                break;
+
             case PacketID.C2SInventoryWearClothRequest:
                 gamePacketHandler.handleInventoryWearClothPacket(connection, packet);
                 break;

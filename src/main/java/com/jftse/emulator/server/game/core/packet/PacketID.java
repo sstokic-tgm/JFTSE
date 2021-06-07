@@ -136,6 +136,7 @@ public final class PacketID {
     public final static char S2CPlayerLevelExpData = 0x22B8;
     public final static char S2CPlayerInfoPlayStatsData = 0x1B6F;
 
+    public final static char C2SUnknownInventoryOpenRequest = 0x237C;
     public final static char C2SInventoryWearClothRequest = 0x1B63;
     public final static char S2CInventoryWearClothAnswer = 0x1B64;
     public final static char C2SInventoryWearQuickRequest = 0x1BD8;
