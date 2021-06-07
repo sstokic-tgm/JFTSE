@@ -301,6 +301,7 @@ public class GameServerNetworkListener implements ConnectionListener {
                 break;
 
             case PacketID.C2SLoginAliveClient:
+            case 0x1071:
                 // empty..
                 break;
 
