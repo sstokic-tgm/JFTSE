@@ -136,11 +136,10 @@ public class BattleModeHandler {
         game.setWillDamages(this.willDamageService.getWillDamages());
 
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-        List<PlayerBattleState> playerBattleStates = roomPlayers.stream()
-                .filter(x -> x.getPosition() < 4)
-                .map(rp -> this.createPlayerBattleState(rp))
-                .collect(Collectors.toList());
-        game.setPlayerBattleStates(playerBattleStates);
+        roomPlayers.forEach(rp -> {
+            if (rp.getPosition() < 4)
+                game.getPlayerBattleStates().add(this.createPlayerBattleState(rp));
+        });
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {

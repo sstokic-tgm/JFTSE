@@ -157,11 +157,10 @@ public class GuardianModeHandler {
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
         game.setGuardianLevelLimit(guardianLevelLimit);
 
-        List<PlayerBattleState> playerBattleStates = roomPlayers.stream()
-                .filter(x -> x.getPosition() < 4)
-                .map(rp -> this.createPlayerBattleState(rp))
-                .collect(Collectors.toList());
-        game.setPlayerBattleStates(playerBattleStates);
+        roomPlayers.forEach(rp -> {
+            if (rp.getPosition() < 4)
+                game.getPlayerBattleStates().add(this.createPlayerBattleState(rp));
+        });
 
         int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
         byte guardianStartPosition = 10;

@@ -15,6 +15,7 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -24,8 +25,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private long crystalSpawnInterval;
     private long crystalDeSpawnInterval;
     private List<Point> playerLocationsOnMap;
-    private List<PlayerBattleState> playerBattleStates;
-    private List<GuardianBattleState> guardianBattleStates;
+    private ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates;
+    private ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates;
     private List<SkillCrystal> skillCrystals;
     private List<WillDamage> willDamages;
     private short lastCrystalId = -1;
@@ -45,8 +46,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
         this.setStageStartTime(cal.getTime());
-        this.playerBattleStates = new ArrayList<>();
-        this.guardianBattleStates = new ArrayList<>();
+        this.playerBattleStates = new ConcurrentLinkedDeque<>();
+        this.guardianBattleStates = new ConcurrentLinkedDeque<>();
         this.skillCrystals = new ArrayList<>();
         this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -75),
