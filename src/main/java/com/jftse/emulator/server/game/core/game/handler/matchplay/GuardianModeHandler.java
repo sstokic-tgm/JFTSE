@@ -126,7 +126,7 @@ public class GuardianModeHandler {
 
         this.triggerGuardianAttackLoop(connection);
         this.startDefeatTimer(connection, game, gameSession, game.getGuardianStage());
-        gameSession.setSpeedHackCheckActive(true);
+        // gameSession.setSpeedHackCheckActive(true);
     }
 
     public void handlePrepareGuardianMode(Connection connection, Room room) {
@@ -261,7 +261,7 @@ public class GuardianModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
 
         // Until speed hack detection is not active do nothing here. This means we are in animations and the actual game is currently not started yet
-        if (!gameSession.isSpeedHackCheckActive()) return;
+        // if (!gameSession.isSpeedHackCheckActive()) return;
 
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
@@ -531,7 +531,7 @@ public class GuardianModeHandler {
         boolean triggerBossBattle = game.isHardMode() && timePlayingInSeconds < 300 || timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
         if ((hasBossGuardianStage || game.isHardMode()) && allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
             GameSession gameSession = connection.getClient().getActiveGameSession();
-            gameSession.stopSpeedHackDetection();
+            // gameSession.stopSpeedHackDetection();
             gameSession.clearCountDownRunnable();
 
             if (!hasBossGuardianStage && game.isHardMode()) {
@@ -593,7 +593,7 @@ public class GuardianModeHandler {
                     }
                 });
 
-                gameSession.setSpeedHackCheckActive(true);
+                // gameSession.setSpeedHackCheckActive(true);
                 this.startDefeatTimer(connection, game, gameSession, game.getBossGuardianStage());
             };
 
@@ -631,7 +631,7 @@ public class GuardianModeHandler {
 
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
-        gameSession.stopSpeedHackDetection();
+        // gameSession.stopSpeedHackDetection();
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
         gameSession.getClients().forEach(client -> {

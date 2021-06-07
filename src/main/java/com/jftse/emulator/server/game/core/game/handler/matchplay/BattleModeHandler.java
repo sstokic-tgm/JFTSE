@@ -127,7 +127,7 @@ public class BattleModeHandler {
         
         RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(initializeCrystalsRunnable, crystalSpawnInterval);
         gameSession.getRunnableEvents().add(runnableEvent);
-        gameSession.setSpeedHackCheckActive(true);
+        // gameSession.setSpeedHackCheckActive(true);
     }
 
     public void handlePrepareBattleMode(Connection connection, Room room) {
@@ -198,7 +198,7 @@ public class BattleModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
 
         // Until speed hack detection is not active do nothing here. This means we are in animations and the actual game is currently not started yet
-        if (!gameSession.isSpeedHackCheckActive()) return;
+        // if (!gameSession.isSpeedHackCheckActive()) return;
 
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
@@ -360,7 +360,7 @@ public class BattleModeHandler {
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
-        gameSession.stopSpeedHackDetection();
+        // gameSession.stopSpeedHackDetection();
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
         gameSession.getClients().forEach(client -> {
