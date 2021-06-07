@@ -1294,6 +1294,14 @@ public class GamePacketHandler {
             return;
         }
 
+        if ((room.isHardMode() || room.isArcade()) && connection.getClient().getActivePlayer().getLevel() != 60) {
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+
+            this.updateRoomForAllPlayersInMultiplayer(connection, room);
+            return;
+        }
+
         Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
         int newPosition = room.getPositions().indexOf(num.get());
         room.getPositions().set(newPosition, RoomPositionState.InUse);
