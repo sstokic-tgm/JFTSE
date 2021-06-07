@@ -25,8 +25,22 @@ public class BattleUtils {
     }
 
     public static int calculateDmg(int str, int baseDmg, boolean hasStrBuff) {
-        int additionalDmg = (int) StrTable.stream().filter(x -> x <= str).count();
-        int totalDmg = baseDmg - additionalDmg;
+        int distanceSection = 0;
+        int i = 0;
+        int step = 0;
+        do {
+            if (i > 0 && (i % 20) == 0) {
+                distanceSection++;
+                step = 0;
+            } else if (step != 0 && (step % 3) == 0) {
+                distanceSection++;
+            }
+
+            step++;
+            i++;
+        } while (i <= str);
+
+        int totalDmg = baseDmg - distanceSection;
         if (hasStrBuff) {
             totalDmg -= Math.abs(totalDmg) * 0.2;
         }
