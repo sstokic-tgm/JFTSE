@@ -2219,6 +2219,8 @@ public class GamePacketHandler {
     private void handleRoomChat(Connection connection, Room room, C2SChatRoomReqPacket chatRoomReqPacket, S2CChatRoomAnswerPacket chatRoomAnswerPacket) {
         if (room == null) return;
 
+        this.handleGuardianModeCommands(connection, room, chatRoomReqPacket);
+
         boolean isTeamChat = chatRoomReqPacket.getType() == 1;
         if (isTeamChat) {
             short senderPos = -1;
@@ -2241,6 +2243,48 @@ public class GamePacketHandler {
             return;
         }
         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+    }
+
+    private void handleGuardianModeCommands(Connection connection, Room room, C2SChatRoomReqPacket chatRoomReqPacket) {
+        boolean isGuardian = getRoomMode(room) == GameMode.GUARDIAN;
+        boolean isRoomMaster = room.getRoomPlayerList().stream()
+                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findAny()
+                .get()
+                .isMaster();
+        String message = chatRoomReqPacket.getMessage();
+        if (isRoomMaster && isGuardian && message.contains("-hard")) {
+            if (!this.isAllowedToChangeMode(room)) return;
+            room.setHardMode(!room.isHardMode());
+            S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", String.format("Hard mode %s", room.isHardMode() ? "ON" : "OFF"));
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
+        }
+
+        if (isRoomMaster && isGuardian && message.contains("-arcade")) {
+            if (!this.isAllowedToChangeMode(room)) return;
+            room.setArcade(!room.isArcade());
+            S2CChatRoomAnswerPacket arcadeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", String.format("Arcade is NOT implemented yet"));
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(arcadeChangedPacket));
+        }
+
+        if (isRoomMaster && isGuardian && message.contains("-random")) {
+            if (!this.isAllowedToChangeMode(room)) return;
+            room.setRandomGuardians(!room.isRandomGuardians());
+            S2CChatRoomAnswerPacket randomGuardianChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", String.format("Random mode %s", room.isRandomGuardians() ? "ON" : "OFF"));
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(randomGuardianChangedPacket));
+        }
+    }
+
+    private boolean isAllowedToChangeMode(Room room) {
+        List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
+        boolean allPlayerAreSixty = activePlayingPlayers.stream().allMatch(x -> x.getPlayer().getLevel() == 60);
+        if (!allPlayerAreSixty) {
+            S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "All in the room must be lvl 60 to be able to change modes");
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
+            return false;
+        }
+
+        return true;
     }
 
     private boolean areInSameTeam(int playerPos1, int playerPos2) {
