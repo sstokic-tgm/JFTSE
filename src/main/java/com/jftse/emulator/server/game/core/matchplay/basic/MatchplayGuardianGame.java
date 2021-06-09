@@ -56,7 +56,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.setFinished(false);
     }
 
-    public short damageGuardian(short guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
+    public synchronized short damageGuardian(short guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
         int totalDamageToDeal = damage;
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
@@ -90,7 +90,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newGuardianHealth;
     }
 
-    public short damagePlayer(int guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
+    public synchronized short damagePlayer(int guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
         int totalDamageToDeal = damage;
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
                 .filter(x -> x.getPosition() == guardianPos)
@@ -129,7 +129,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public short damageGuardianOnBallLoss(int guardianPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
+    public synchronized short damageGuardianOnBallLoss(int guardianPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
                 .filter(x -> x.getPosition() == guardianPos)
                 .findFirst()
@@ -166,7 +166,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newGuardianHealth;
     }
 
-    public short damagePlayerOnBallLoss(int playerPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
+    public synchronized short damagePlayerOnBallLoss(int playerPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
                 .findFirst()
@@ -203,7 +203,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public short healPlayer(int playerPos, short percentage) throws ValidationException {
+    public synchronized short healPlayer(int playerPos, short percentage) throws ValidationException {
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
                 .findFirst()
@@ -223,7 +223,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public short healGuardian(int guardianPos, short percentage) throws ValidationException {
+    public synchronized short healGuardian(int guardianPos, short percentage) throws ValidationException {
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
                 .filter(x -> x.getPosition() == guardianPos)
                 .findFirst()
@@ -244,7 +244,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newGuardianHealth;
     }
 
-    public PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
+    public synchronized PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
         PlayerBattleState playerBattleState = getPlayerBattleStates().stream()
                 .filter(x -> x.isDead())
                 .findFirst()
@@ -258,7 +258,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return playerBattleState;
     }
 
-    public GuardianBattleState reviveAnyGuardian(short revivePercentage) throws ValidationException {
+    public synchronized GuardianBattleState reviveAnyGuardian(short revivePercentage) throws ValidationException {
         GuardianBattleState guardianBattleState = getGuardianBattleStates().stream()
                 .filter(x -> x.getCurrentHealth() < 1)
                 .findFirst()
@@ -272,7 +272,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return guardianBattleState;
     }
 
-    public short getPlayerCurrentHealth(short playerPos) throws ValidationException {
+    public synchronized short getPlayerCurrentHealth(short playerPos) throws ValidationException {
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
                 .findFirst()
