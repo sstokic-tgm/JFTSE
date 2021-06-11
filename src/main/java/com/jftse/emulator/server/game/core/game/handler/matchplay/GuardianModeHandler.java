@@ -517,14 +517,14 @@ public class GuardianModeHandler {
         return new GuardianBattleState(guardian.getBtItemID(), guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
     }
 
-    private void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
+    private synchronized void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
         boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
         if (allPlayersDead && !game.isFinished()) {
             this.handleFinishGame(connection, game, false);
         }
     }
 
-    private void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
+    private synchronized void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
         boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
         boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
