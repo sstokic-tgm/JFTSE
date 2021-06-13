@@ -5,6 +5,7 @@ import com.jftse.emulator.server.database.repository.player.PlayerRepository;
 import com.jftse.emulator.server.game.core.packet.packets.player.C2SPlayerCreatePacket;
 import com.jftse.emulator.server.game.core.packet.packets.player.C2SPlayerStatusPointChangePacket;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,10 @@ public class PlayerService {
 
     public List<Player> findAll() {
         return playerRepository.findAll();
+    }
+
+    public List<Player> findAllPageable(Pageable pageable) {
+        return playerRepository.findAll(pageable).getContent();
     }
 
     public Player findById(Long playerId) {
