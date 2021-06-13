@@ -79,6 +79,7 @@ import com.jftse.emulator.server.shared.module.Client;
 import com.jftse.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -2067,7 +2068,7 @@ public class GamePacketHandler {
         int page = rankingDataRequestPacket.getPage();
         byte gameMode = rankingDataRequestPacket.getGameMode();
 
-        List<Player> allPlayers = playerService.findAll();
+        List<Player> allPlayers = playerService.findAllPageable(PageRequest.of(page == 1 ? 0 : (page * 10) - 10, 10));
 
         Comparator<Player> playerComparator = (o1, o2) -> {
             PlayerStatistic ps1 = o1.getPlayerStatistic();
@@ -2088,8 +2089,6 @@ public class GamePacketHandler {
             }
         };
         List<Player> playerList = allPlayers.stream()
-                .skip(page == 1 ? 0 : (page * 10) - 10)
-                .limit(10)
                 .sorted(playerComparator)
                 .collect(Collectors.toList());
 
