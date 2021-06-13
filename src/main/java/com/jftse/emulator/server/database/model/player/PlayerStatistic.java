@@ -18,6 +18,11 @@ public class PlayerStatistic extends AbstractBaseModel {
     private Integer basicRecordLoss = 0;
     private Integer battleRecordWin = 0;
     private Integer battleRecordLoss = 0;
+    private Integer guardianRecordWin = 0;
+    private Integer guardianRecordLoss = 0;
+    private Integer basicRP = 0;
+    private Integer battleRP = 0;
+    private Integer guardianRP = 0;
     private Integer consecutiveWins = 0;
     private Integer maxConsecutiveWins = 0;
     private Integer numberOfDisconnects = 0;

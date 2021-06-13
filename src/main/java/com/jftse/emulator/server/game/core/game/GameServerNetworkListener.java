@@ -299,6 +299,14 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleSwapQuickSlotItems(connection, packet);
                 break;
 
+            case PacketID.C2SRankingPersonalDataReq:
+                gamePacketHandler.handleRankingPersonalDataReqPacket(connection, packet);
+                break;
+
+            case PacketID.C2SRankingDataReq:
+                gamePacketHandler.handleRankingDataReqPacket(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
                 // gamePacketHandler.tryDetectSpeedHack(connection);
                 gamePacketHandler.handleHeartBeatPacket(connection, packet);

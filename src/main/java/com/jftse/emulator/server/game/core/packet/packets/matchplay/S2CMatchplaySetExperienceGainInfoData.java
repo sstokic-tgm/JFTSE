@@ -22,7 +22,7 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write((byte) 0); // guards
 
         this.write(secondsNeeded); // Playtime in seconds
-        this.write(0); // Ranking point reward
+        this.write(playerReward.getRewardRP()); // Ranking point reward
         this.write(0); // Unk
         this.write(0); // Unk
         this.write(0); // Bonus (1 = Perfect, ...)

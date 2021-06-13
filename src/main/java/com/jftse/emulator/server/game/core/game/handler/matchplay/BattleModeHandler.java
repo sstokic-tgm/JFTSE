@@ -9,6 +9,7 @@ import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
+import com.jftse.emulator.server.game.core.constants.GameMode;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.item.EItemCategory;
@@ -28,6 +29,7 @@ import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventory
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
 import com.jftse.emulator.server.game.core.utils.BattleUtils;
+import com.jftse.emulator.server.game.core.utils.RankingUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -363,7 +365,12 @@ public class BattleModeHandler {
         // gameSession.stopSpeedHackDetection();
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
-        gameSession.getClients().forEach(client -> {
+
+        List<Client> clients = new ArrayList<>(gameSession.getClients());
+        List<Player> playerList = new ArrayList<>();
+        clients.forEach(c -> playerList.add(c.getActivePlayer()));
+
+        for (Client client : clients) {
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
@@ -414,6 +421,13 @@ public class BattleModeHandler {
                 playerStatistic.setBattleRecordLoss(playerStatistic.getBattleRecordLoss() + 1);
                 playerStatistic.setConsecutiveWins(0);
             }
+            HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BATTLE);
+            int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBattleRP();
+            int playerNewRating = playerRatings.get(player.getId());
+            if (playerReward != null)
+                playerReward.setRewardRP(playerRankingPoints);
+            playerStatistic.setBattleRP(playerNewRating <= 0 ? 0 : playerNewRating);
+
             playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
 
             player.setPlayerStatistic(playerStatistic);
@@ -444,7 +458,7 @@ public class BattleModeHandler {
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
             packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
             client.setActiveGameSession(null);
-        });
+        }
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (game.isFinished() && gameSession.getClients().isEmpty()) {

@@ -6,6 +6,7 @@ import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
+import com.jftse.emulator.server.game.core.constants.GameMode;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.constants.ServeType;
@@ -22,6 +23,7 @@ import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
+import com.jftse.emulator.server.game.core.utils.RankingUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -86,6 +88,9 @@ public class BasicModeHandler {
 
         List<ServeInfo> serveInfo = new ArrayList<>();
         List<Client> clients = new ArrayList<>(gameSession.getClients());
+        List<Player> playerList = new ArrayList<>();
+        clients.forEach(c -> playerList.add(c.getActivePlayer()));
+
         for (Client client : clients) {
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
@@ -155,10 +160,18 @@ public class BasicModeHandler {
                     }
 
                     playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
+
                 } else {
                     playerStatistic.setBasicRecordLoss(playerStatistic.getBasicRecordLoss() + 1);
                     playerStatistic.setConsecutiveWins(0);
                 }
+                HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BASIC);
+                int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBasicRP();
+                int playerNewRating = playerRatings.get(player.getId());
+                if (playerReward != null)
+                    playerReward.setRewardRP(playerRankingPoints);
+                playerStatistic.setBasicRP(playerNewRating <= 0 ? 0 : playerNewRating);
+
                 playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
 
                 player.setPlayerStatistic(playerStatistic);

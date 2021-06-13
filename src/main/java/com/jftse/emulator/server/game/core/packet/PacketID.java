@@ -254,6 +254,11 @@ public final class PacketID {
     public final static char C2SLobbyJoin = 0x237A;
     public final static char C2SLobbyLeave = 0x2379;
 
+    public final static char C2SRankingPersonalDataReq = 0x206D;
+    public final static char C2SRankingDataReq = 0x206F;
+    public final static char S2CRankingPersonalDataAnswer = 0x206E;
+    public final static char S2CRankingDataAnswer = 0x2070;
+
     public final static char D2SDevPacket = 0x555;
 
     private static HashMap<Character, String> packetIdNames = new HashMap<>();

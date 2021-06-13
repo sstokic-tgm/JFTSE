@@ -59,6 +59,10 @@ import com.jftse.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaRe
 import com.jftse.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.packet.packets.player.*;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingDataRequestPacket;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingPersonalDataRequestPacket;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.S2CRankingDataAnswerPacket;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.S2CRankingPersonalDataAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.shop.*;
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialBeginRequestPacket;
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialEndPacket;
@@ -2005,6 +2009,92 @@ public class GamePacketHandler {
                     break;
             }
         }
+    }
+
+    public void handleRankingPersonalDataReqPacket(Connection connection, Packet packet) {
+        C2SRankingPersonalDataRequestPacket rankingPersonalDataRequestPacket = new C2SRankingPersonalDataRequestPacket(packet);
+        byte gameMode = rankingPersonalDataRequestPacket.getGameMode();
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        if (activePlayer == null) {
+            S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 1, gameMode, new Player(), 0);
+            connection.sendTCP(rankingPersonalDataAnswerPacket);
+        } else {
+            Player player = playerService.findByNameFetched(rankingPersonalDataRequestPacket.getNickname());
+            if (player != null) {
+                List<Player> allPlayers = playerService.findAll();
+
+                Comparator<Player> playerComparator = (o1, o2) -> {
+                    PlayerStatistic ps1 = o1.getPlayerStatistic();
+                    PlayerStatistic ps2 = o2.getPlayerStatistic();
+
+                    if (rankingPersonalDataRequestPacket.getGameMode() == GameMode.BASIC) {
+                        if (ps1.getBasicRP().equals(ps2.getBasicRP()))
+                            return o1.getCreated().compareTo(o2.getCreated());
+                        else
+                            return ps2.getBasicRP().compareTo(ps1.getBasicRP());
+                    } else if (rankingPersonalDataRequestPacket.getGameMode() == GameMode.BATTLE) {
+                        if (ps1.getBattleRP().equals(ps2.getBattleRP()))
+                            return o1.getCreated().compareTo(o2.getCreated());
+                        else
+                            return ps2.getBattleRP().compareTo(ps1.getBattleRP());
+                    } else {
+                        return o1.getCreated().compareTo(o2.getCreated());
+                    }
+                };
+                List<Player> playerList = allPlayers.stream()
+                        .sorted(playerComparator)
+                        .collect(Collectors.toList());
+                int ranking = 0;
+                for (int i = 0; i < playerList.size(); i++) {
+                    if (playerList.get(i).getName().equals(player.getName())) {
+                        ranking = i + 1;
+                        break;
+                    }
+                }
+
+                S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 0, gameMode, player, ranking);
+                connection.sendTCP(rankingPersonalDataAnswerPacket);
+            } else {
+                S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 1, gameMode, activePlayer, 0);
+                connection.sendTCP(rankingPersonalDataAnswerPacket);
+            }
+        }
+    }
+
+    public void handleRankingDataReqPacket(Connection connection, Packet packet) {
+        C2SRankingDataRequestPacket rankingDataRequestPacket = new C2SRankingDataRequestPacket(packet);
+        int page = rankingDataRequestPacket.getPage();
+        byte gameMode = rankingDataRequestPacket.getGameMode();
+
+        List<Player> allPlayers = playerService.findAll();
+
+        Comparator<Player> playerComparator = (o1, o2) -> {
+            PlayerStatistic ps1 = o1.getPlayerStatistic();
+            PlayerStatistic ps2 = o2.getPlayerStatistic();
+
+            if (rankingDataRequestPacket.getGameMode() == GameMode.BASIC) {
+                if (ps1.getBasicRP().equals(ps2.getBasicRP()))
+                    return o1.getCreated().compareTo(o2.getCreated());
+                else
+                    return ps2.getBasicRP().compareTo(ps1.getBasicRP());
+            } else if (rankingDataRequestPacket.getGameMode() == GameMode.BATTLE) {
+                if (ps1.getBattleRP().equals(ps2.getBattleRP()))
+                    return o1.getCreated().compareTo(o2.getCreated());
+                else
+                    return ps2.getBattleRP().compareTo(ps1.getBattleRP());
+            } else {
+                return o1.getCreated().compareTo(o2.getCreated());
+            }
+        };
+        List<Player> playerList = allPlayers.stream()
+                .skip(page == 1 ? 0 : (page * 10) - 10)
+                .limit(10)
+                .sorted(playerComparator)
+                .collect(Collectors.toList());
+
+        S2CRankingDataAnswerPacket rankingDataAnswerPacket = new S2CRankingDataAnswerPacket((char) 0, gameMode, playerList);
+        connection.sendTCP(rankingDataAnswerPacket);
     }
 
     public void tryDetectSpeedHack(Connection connection) {
