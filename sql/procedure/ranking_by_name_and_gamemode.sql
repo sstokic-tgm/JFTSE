@@ -13,8 +13,8 @@ BEGIN
 			ps.battleRP,
 			ps.guardianRP
 		FROM
-			player p
-			LEFT JOIN playerstatistic ps ON ps.id = p.playerStatistic_id
+			Player p
+			LEFT JOIN PlayerStatistic ps ON ps.id = p.playerStatistic_id
 		ORDER BY
 			CASE
 				WHEN gameMode = 0 THEN ps.basicRP
