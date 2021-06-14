@@ -62,6 +62,10 @@ import com.jftse.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaRe
 import com.jftse.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.packet.packets.player.*;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingDataRequestPacket;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingPersonalDataRequestPacket;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.S2CRankingDataAnswerPacket;
+import com.jftse.emulator.server.game.core.packet.packets.ranking.S2CRankingPersonalDataAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.shop.*;
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialBeginRequestPacket;
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialEndPacket;
@@ -71,21 +75,21 @@ import com.jftse.emulator.server.game.core.service.ItemCharService;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
 import com.jftse.emulator.server.game.core.singleplay.tutorial.TutorialGame;
+import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 import com.jftse.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -474,6 +478,37 @@ public class GamePacketHandler {
             connection.getClient().setActivePlayer(player);
         } break;
         }
+    }
+
+    public void handleUnknownInventoryOpenPacket(Connection connection, Packet packet) {
+        if (connection.getClient() != null) {
+            Player player = connection.getClient().getActivePlayer();
+
+            if (player != null) {
+                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
+                List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+                List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
+                List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+                List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
+
+                S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
+                S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
+                S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
+                S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
+                S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+
+                connection.sendTCP(inventoryWearClothAnswerPacket);
+                connection.sendTCP(inventoryWearQuickAnswerPacket);
+                connection.sendTCP(inventoryWearToolAnswerPacket);
+                connection.sendTCP(inventoryWearSpecialAnswerPacket);
+                connection.sendTCP(inventoryWearCardAnswerPacket);
+            }
+        }
+
+        Packet answer = new Packet((char) (packet.getPacketId() + 1));
+        answer.write((char) 0);
+        connection.sendTCP(answer);
     }
 
     public void handleInventoryWearClothPacket(Connection connection, Packet packet) {
@@ -1075,11 +1110,6 @@ public class GamePacketHandler {
         room.setRoomName(roomCreateRequestPacket.getRoomName());
         room.setAllowBattlemon((byte) 0);
 
-        if (roomCreateRequestPacket.getMode() == GameMode.BATTLE) {
-            roomCreateRequestPacket.setMode((byte) GameMode.GUARDIAN);
-            roomCreateRequestPacket.setPlayers((byte) 4);
-        }
-
         room.setMode(roomCreateRequestPacket.getMode());
         room.setRule(roomCreateRequestPacket.getRule());
         room.setPlayers(roomCreateRequestPacket.getPlayers());
@@ -1114,9 +1144,6 @@ public class GamePacketHandler {
         room.setRoomId(this.getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
         room.setAllowBattlemon(roomQuickCreateRequestPacket.getAllowBattlemon());
-
-        if (roomQuickCreateRequestPacket.getMode() == GameMode.BATTLE)
-            roomQuickCreateRequestPacket.setMode((byte) GameMode.GUARDIAN);
 
         room.setMode(roomQuickCreateRequestPacket.getMode());
         room.setRule((byte) 0);
@@ -1239,7 +1266,7 @@ public class GamePacketHandler {
     }
 
     public void handleRoomJoinRequestPacket(Connection connection, Packet packet) {
-        List<Room> roomList = this.gameHandler.getRoomList();
+        List<Room> roomList = new ArrayList<>(this.gameHandler.getRoomList());
         C2SRoomJoinRequestPacket roomJoinRequestPacket = new C2SRoomJoinRequestPacket(packet, roomList);
 
         Room room = roomList.stream()
@@ -1302,6 +1329,14 @@ public class GamePacketHandler {
 
         boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
         if (!anyPositionAvailable) {
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+
+            this.updateRoomForAllPlayersInMultiplayer(connection, room);
+            return;
+        }
+
+        if ((room.isHardMode() || room.isArcade()) && connection.getClient().getActivePlayer().getLevel() != 60) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
 
@@ -1531,7 +1566,7 @@ public class GamePacketHandler {
 
         clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
 
-        gameSession.setClients(clientsInRoom);
+        gameSession.setClients(new ConcurrentLinkedDeque<>(clientsInRoom));
         this.gameSessionManager.addGameSession(gameSession);
 
         List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
@@ -1552,7 +1587,7 @@ public class GamePacketHandler {
             int secondsToCount = 5;
             for (int i = 0; i < secondsToCount; i++) {
                 Room threadRoom = connection.getClient().getActiveRoom();
-                List<Room> roomList = this.gameHandler.getRoomList();
+                List<Room> roomList = new ArrayList<>(this.gameHandler.getRoomList());
                 Room allPlayerRoom = roomList.stream()
                         .filter(r -> r.getRoomId() == room.getRoomId())
                         .findAny()
@@ -1569,6 +1604,17 @@ public class GamePacketHandler {
                         threadRoom.setStatus(RoomStatus.NotRunning);
                         Packet startGameCancelledPacket = new Packet(PacketID.S2CRoomStartGameCancelled);
                         startGameCancelledPacket.write((char) 0);
+
+                        allPlayerRoom.getRoomPlayerList().stream()
+                                .filter(rp -> !rp.isMaster())
+                                .forEach(rp -> rp.setReady(false));
+                        clientsInRoom.forEach(c -> c.setActiveGameSession(null));
+
+                        this.gameSessionManager.removeGameSession(gameSession);
+
+                        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(allPlayerRoom.getRoomPlayerList());
+                        this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+                        this.updateRoomForAllPlayersInMultiplayer(connection, room);
                         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(startGameCancelledPacket));
                         return;
                     }
@@ -1660,16 +1706,6 @@ public class GamePacketHandler {
             gameAnimationSkipPacket.write((char) 0);
             sendPacketToAllInRoom(connection, gameAnimationSkipPacket);
 
-            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> {
-
-                RoomPlayer rp = roomPlayerList.stream()
-                        .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
-                        .findFirst().orElse(null);
-
-                S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(rp);
-                c.getConnection().sendTCP(setNameColorPacket);
-            });
-
             S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
             sendPacketToAllInRoom(connection, playerStatsPacket);
             room.setStatus(RoomStatus.Running);
@@ -1683,6 +1719,9 @@ public class GamePacketHandler {
                 if (threadRoom == null || threadRoom.getStatus() != RoomStatus.Running) {
                     return;
                 }
+
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
+                sendPacketToAllInRoom(connection, setNameColorAndRemoveBlackBarPacket);
 
                 switch (room.getMode()) {
                     case GameMode.BASIC:
@@ -2155,8 +2194,8 @@ public class GamePacketHandler {
                             .findAny()
                             .orElse(null);
                     if (room != null) {
-                        int roomIndex = this.gameHandler.getRoomList().indexOf(room);
-                        this.gameHandler.getRoomList().set(roomIndex, currentClientRoom);
+                        this.gameHandler.getRoomList().removeFirstOccurrence(room);
+                        this.gameHandler.getRoomList().add(currentClientRoom);
                     }
                 }
             }
@@ -2289,6 +2328,47 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleRankingPersonalDataReqPacket(Connection connection, Packet packet) {
+        C2SRankingPersonalDataRequestPacket rankingPersonalDataRequestPacket = new C2SRankingPersonalDataRequestPacket(packet);
+        byte gameMode = rankingPersonalDataRequestPacket.getGameMode();
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+        if (activePlayer == null) {
+            S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 1, gameMode, new Player(), 0);
+            connection.sendTCP(rankingPersonalDataAnswerPacket);
+        } else {
+            Player player = playerService.findByNameFetched(rankingPersonalDataRequestPacket.getNickname());
+            if (player != null) {
+                int ranking = playerService.getPlayerRankingByName(player.getName(), gameMode);
+
+                S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 0, gameMode, player, ranking);
+                connection.sendTCP(rankingPersonalDataAnswerPacket);
+            } else {
+                S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 1, gameMode, activePlayer, 0);
+                connection.sendTCP(rankingPersonalDataAnswerPacket);
+            }
+        }
+    }
+
+    public void handleRankingDataReqPacket(Connection connection, Packet packet) {
+        C2SRankingDataRequestPacket rankingDataRequestPacket = new C2SRankingDataRequestPacket(packet);
+        int page = rankingDataRequestPacket.getPage();
+        byte gameMode = rankingDataRequestPacket.getGameMode();
+
+        String gameModeRP;
+        if (gameMode == GameMode.BASIC)
+            gameModeRP = "playerStatistic.basicRP";
+        else if (gameMode == GameMode.BATTLE)
+            gameModeRP = "playerStatistic.battleRP";
+        else
+            gameModeRP = "playerStatistic.guardianRP";
+        List<Player> allPlayers = playerService.findAllByAlreadyCreatedPageable(PageRequest.of(page == 1 ? 0 : page - 1, 10,
+                Sort.by(gameModeRP).descending().and(Sort.by("created"))));
+
+        S2CRankingDataAnswerPacket rankingDataAnswerPacket = new S2CRankingDataAnswerPacket((char) 0, gameMode, page, allPlayers);
+        connection.sendTCP(rankingDataAnswerPacket);
+    }
+
     public void tryDetectSpeedHack(Connection connection) {
         if (connection == null || connection.getClient() == null) return;
 
@@ -2353,6 +2433,7 @@ public class GamePacketHandler {
 
     private void internalHandleRoomCreate(Connection connection, Room room) {
         room.getPositions().set(0, RoomPositionState.InUse);
+        room.setAllowBattlemon((byte) 0);
 
         byte players = room.getPlayers();
         if (players == 2) {
@@ -2467,12 +2548,28 @@ public class GamePacketHandler {
                     if (c != null && !c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null && c.getConnection().isConnected())
                         c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
                 });
+            } else {
+                GameSession gameSession = this.gameSessionManager.getGameSessionBySessionId(connection.getClient().getActiveGameSession().getSessionId());
+                if (gameSession != null) {
+                    gameSession.getClients().removeIf(c -> c.getActivePlayer() != null && connection.getClient().getActivePlayer() != null
+                                    && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()));
+                }
+                connection.getClient().setActiveGameSession(null);
+                this.gameHandler.getClientList().stream()
+                        .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                        .findAny()
+                        .ifPresent(c -> c.setActiveGameSession(null));
             }
+
             connection.getClient().setActiveRoom(null);
             this.gameHandler.getClientList().stream()
                     .filter(c -> c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
                     .findAny()
                     .ifPresent(c -> c.setActiveRoom(null));
+
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+            this.updateRoomForAllPlayersInMultiplayer(connection, room);
         }
     }
 
@@ -2523,6 +2620,8 @@ public class GamePacketHandler {
     private void handleRoomChat(Connection connection, Room room, C2SChatRoomReqPacket chatRoomReqPacket, S2CChatRoomAnswerPacket chatRoomAnswerPacket) {
         if (room == null) return;
 
+        this.handleGuardianModeCommands(connection, room, chatRoomReqPacket);
+
         boolean isTeamChat = chatRoomReqPacket.getType() == 1;
         if (isTeamChat) {
             short senderPos = -1;
@@ -2545,6 +2644,48 @@ public class GamePacketHandler {
             return;
         }
         this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+    }
+
+    private void handleGuardianModeCommands(Connection connection, Room room, C2SChatRoomReqPacket chatRoomReqPacket) {
+        boolean isGuardian = getRoomMode(room) == GameMode.GUARDIAN;
+        boolean isRoomMaster = room.getRoomPlayerList().stream()
+                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findAny()
+                .get()
+                .isMaster();
+        String message = chatRoomReqPacket.getMessage();
+        if (isRoomMaster && isGuardian && message.contains("-hard")) {
+            if (!this.isAllowedToChangeMode(room)) return;
+            room.setHardMode(!room.isHardMode());
+            S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", String.format("Hard mode %s", room.isHardMode() ? "ON" : "OFF"));
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
+        }
+
+        if (isRoomMaster && isGuardian && message.contains("-arcade")) {
+            if (!this.isAllowedToChangeMode(room)) return;
+            room.setArcade(!room.isArcade());
+            S2CChatRoomAnswerPacket arcadeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", String.format("Arcade is NOT implemented yet"));
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(arcadeChangedPacket));
+        }
+
+        if (isRoomMaster && isGuardian && message.contains("-random")) {
+            if (!this.isAllowedToChangeMode(room)) return;
+            room.setRandomGuardians(!room.isRandomGuardians());
+            S2CChatRoomAnswerPacket randomGuardianChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", String.format("Random mode %s", room.isRandomGuardians() ? "ON" : "OFF"));
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(randomGuardianChangedPacket));
+        }
+    }
+
+    private boolean isAllowedToChangeMode(Room room) {
+        List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
+        boolean allPlayerAreSixty = activePlayingPlayers.stream().allMatch(x -> x.getPlayer().getLevel() == 60);
+        if (!allPlayerAreSixty) {
+            S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "All in the room must be lvl 60 to be able to change modes");
+            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
+            return false;
+        }
+
+        return true;
     }
 
     private boolean areInSameTeam(int playerPos1, int playerPos2) {

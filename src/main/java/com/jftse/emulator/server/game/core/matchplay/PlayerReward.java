@@ -7,8 +7,9 @@ import lombok.Setter;
 @Setter
 public class PlayerReward {
     private int playerPosition;
-    private int basicRewardExp;
-    private int basicRewardGold;
+    private int rewardExp;
+    private int rewardGold;
+    private int rewardRP;
     private int rewardProductIndex;
     private int productRewardAmount;
 }

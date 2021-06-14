@@ -1,13 +1,12 @@
 package com.jftse.emulator.server.game.core.matchplay.basic;
 
 import com.jftse.emulator.common.exception.ValidationException;
-import com.jftse.emulator.server.database.model.battle.GuardianStage;
 import com.jftse.emulator.server.database.model.battle.WillDamage;
 import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
-import com.jftse.emulator.server.game.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.game.core.matchplay.battle.SkillCrystal;
+import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.utils.BattleUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +14,7 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -23,7 +23,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     private long crystalSpawnInterval;
     private long crystalDeSpawnInterval;
     private List<Point> playerLocationsOnMap;
-    private List<PlayerBattleState> playerBattleStates;
+    private ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates;
     private List<SkillCrystal> skillCrystals;
     private List<WillDamage> willDamages;
     private short lastCrystalId = -1;
@@ -34,11 +34,14 @@ public class MatchplayBattleGame extends MatchplayGame {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
         this.setStageStartTime(cal.getTime());
-        this.playerBattleStates = new ArrayList<>();
+        this.playerBattleStates = new ConcurrentLinkedDeque<>();
         this.skillCrystals = new ArrayList<>();
         this.playerLocationsOnMap = Arrays.asList(
-                new Point(20, -75),
-                new Point(-20, -75));
+                new Point(20, -125),
+                new Point(-20, 125),
+                new Point(-20, -75),
+                new Point(20, 75)
+        );
         this.willDamages = new ArrayList<>();
         this.setFinished(false);
     }
@@ -139,19 +142,24 @@ public class MatchplayBattleGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
-        // TODO: ONLY OWN TEAM
-        PlayerBattleState playerBattleState = getPlayerBattleStates().stream()
-                .filter(x -> x.isDead())
-                .findFirst()
-                .orElse(null);
-        if (playerBattleState != null) {
-            short newPlayerHealth = healPlayer(playerBattleState.getPosition(), revivePercentage);
-            playerBattleState.setCurrentHealth(newPlayerHealth);
-            playerBattleState.setDead(false);
-        }
+    public PlayerBattleState reviveAnyPlayer(short revivePercentage, Optional<RoomPlayer> roomPlayer) throws ValidationException {
+        if (roomPlayer.isPresent()) {
+            RoomPlayer rp = roomPlayer.get();
+            boolean isRedTeam = this.isRedTeam(rp.getPosition());
 
-        return playerBattleState;
+            PlayerBattleState playerBattleState = getPlayerBattleStates().stream()
+                    .filter(x -> isRedTeam == this.isRedTeam(x.getPosition()) && x.isDead() || !isRedTeam == !this.isRedTeam(x.getPosition()) && x.isDead())
+                    .findFirst()
+                    .orElse(null);
+
+            if (playerBattleState != null) {
+                short newPlayerHealth = healPlayer(playerBattleState.getPosition(), revivePercentage);
+                playerBattleState.setCurrentHealth(newPlayerHealth);
+                playerBattleState.setDead(false);
+            }
+            return playerBattleState;
+        }
+        return null;
     }
 
     public short getPlayerCurrentHealth(short playerPos) throws ValidationException {
@@ -172,8 +180,62 @@ public class MatchplayBattleGame extends MatchplayGame {
         return TimeUnit.MILLISECONDS.toSeconds(duration);
     }
 
+    public List<Integer> getPlayerPositionsOrderedByHighestHealth() {
+        List<Integer> playerPositions = new ArrayList<>();
+        this.playerBattleStates.stream()
+                .sorted(Comparator.comparingInt(PlayerBattleState::getCurrentHealth)
+                        .reversed())
+                .forEach(p -> playerPositions.add((int) p.getPosition()));
+
+        return playerPositions;
+    }
+
     public List<PlayerReward> getPlayerRewards() {
-        return new ArrayList<>();
+        int secondsPlayed = (int) Math.ceil((double) this.getTimeNeeded() / 1000);
+        List<PlayerReward> playerRewards = new ArrayList<>();
+
+        int iteration = 0;
+        for (int playerPosition : this.getPlayerPositionsOrderedByHighestHealth()) {
+            boolean wonGame = false;
+            boolean isPlayerInRedTeam = this.isRedTeam(playerPosition);
+            boolean allPlayersTeamRedDead = this.getPlayerBattleStates().stream().filter(x -> this.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+            boolean allPlayersTeamBlueDead = this.getPlayerBattleStates().stream().filter(x -> this.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+            if (isPlayerInRedTeam && allPlayersTeamBlueDead || !isPlayerInRedTeam && allPlayersTeamRedDead) {
+                wonGame = true;
+            }
+
+            int basicExpReward;
+            if (secondsPlayed > TimeUnit.MINUTES.toSeconds(15)) {
+                basicExpReward = 130;
+            } else {
+                basicExpReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
+            }
+
+            switch (iteration) {
+                case 0:
+                    basicExpReward += basicExpReward * 0.1;
+                    break;
+                case 1:
+                    basicExpReward += basicExpReward * 0.05;
+                    break;
+            }
+
+            if (wonGame) {
+                basicExpReward += basicExpReward * 0.2;
+            }
+
+            int rewardExp = basicExpReward;
+            int rewardGold = basicExpReward;
+            PlayerReward playerReward = new PlayerReward();
+            playerReward.setPlayerPosition(playerPosition);
+            playerReward.setRewardExp(rewardExp);
+            playerReward.setRewardGold(rewardGold);
+            playerRewards.add(playerReward);
+
+            iteration++;
+        }
+
+        return playerRewards;
     }
 
     @Override

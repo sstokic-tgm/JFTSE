@@ -9,6 +9,7 @@ import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.item.EItemCategory;
 import com.jftse.emulator.server.game.core.item.EItemChar;
+import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.networking.Connection;
@@ -24,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -171,6 +169,14 @@ public class LotteryService {
             playerPocket.setItemIndex(winningItem.getItem0());
             playerPocket.setUseType(winningItem.getUseType());
             playerPocket.setItemCount(lotteryItem.getQuantityMin() + existingItemCount);
+
+            if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
+
+                playerPocket.setCreated(cal.getTime());
+            }
+
             playerPocket.setPocket(pocket);
 
             playerPocket = playerPocketService.save(playerPocket);

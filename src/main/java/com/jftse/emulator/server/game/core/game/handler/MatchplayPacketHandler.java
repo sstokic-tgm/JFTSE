@@ -13,6 +13,7 @@ import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.S2CWelcomePacket;
+import com.jftse.emulator.server.game.core.packet.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.S2CMatchplayBackToRoom;
 import com.jftse.emulator.server.game.core.service.PlayerStatisticService;
 import com.jftse.emulator.server.networking.Connection;
@@ -83,15 +84,57 @@ public class MatchplayPacketHandler {
                     Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
                     answer.write((byte) 0);
                     connection.sendTCP(answer);
-                }
-                else {
+                } else {
+                    Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
+                    answer.write((byte) 1);
+                    connection.sendTCP(answer);
+
+                    List<Client> clientsInGameSession = new ArrayList<>();
+                    clientsInGameSession.addAll(gameSession.getClients()); // deep copy
+                    for (Client client : clientsInGameSession) {
+                        if (client.getActiveRoom() != null)
+                            client.getActiveRoom().setStatus(RoomStatus.StartCancelled);
+                        client.setActiveGameSession(null);
+                    }
+                    for (Client client : clientsInGameSession) {
+                        Room room = client.getActiveRoom();
+                        if (room != null) {
+                            RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
+                                    .filter(rp -> rp.getPlayer().getId() == playerId)
+                                    .findAny()
+                                    .orElse(null);
+                            if (roomPlayer != null) {
+                                String message = roomPlayer.getPlayer().getName() + " has to relog.";
+                                S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", message);
+                                clientsInGameSession.forEach(c -> {
+                                    if (c.getConnection() != null && c.getConnection().isConnected())
+                                        c.getConnection().sendTCP(chatRoomAnswerPacket);
+                                });
+                                break;
+                            }
+                        }
+                    }
+                    List<Client> relayClients = this.relayHandler.getClientsInGameSession(gameSession.getSessionId());
+                    for (Client client : relayClients) {
+                        if (client.getConnection() != null && client.getConnection().isConnected()) {
+                            this.relayHandler.removeClient(client);
+                            client.getConnection().close();
+                        }
+                    }
+
                     log.warn("Couldn't find client for player. Cancel connection to relay server");
+                    this.relayHandler.removeClient(connection.getClient());
+                    this.gameSessionManager.removeGameSession(gameSession);
                     connection.close();
                 }
             }
-        }
-        else {
+        } else {
+            Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
+            answer.write((byte) 1);
+            connection.sendTCP(answer);
+
             log.warn("Couldn't find gamesession. Cancel connection to relay server");
+            this.relayHandler.removeClient(connection.getClient());
             connection.close();
         }
     }

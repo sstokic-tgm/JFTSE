@@ -3,11 +3,13 @@ package com.jftse.emulator.server.game.core.game.handler.matchplay;
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.database.model.battle.Skill;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.constants.GameFieldSide;
+import com.jftse.emulator.server.game.core.constants.GameMode;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.item.EItemCategory;
@@ -20,13 +22,14 @@ import com.jftse.emulator.server.game.core.matchplay.event.PacketEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
+import com.jftse.emulator.server.game.core.matchplay.room.PlayerPositionInfo;
 import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
 import com.jftse.emulator.server.game.core.utils.BattleUtils;
+import com.jftse.emulator.server.game.core.utils.RankingUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -35,10 +38,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
-import java.util.Calendar;
+import java.util.*;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -57,62 +60,76 @@ public class BattleModeHandler {
     private final ClothEquipmentService clothEquipmentService;
     private final GameSessionManager gameSessionManager;
     private final WillDamageService willDamageService;
+    private final PlayerStatisticService playerStatisticService;
 
     private GameHandler gameHandler;
 
+    private Random random;
+
     public void init(GameHandler gameHandler) {
         this.gameHandler = gameHandler;
+        this.random = new Random();
     }
 
     public void handleBattleModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayBattleGame game) {
         boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide() == GameFieldSide.BlueTeam;
+        int servingPositionXOffset = random.nextInt(7);
         if (!lastGuardianServeWasOnBlueTeamsSide) {
-            // TODO: Why doesn't guardian spawn on the other end of the gamefield?
             game.setLastGuardianServeSide(GameFieldSide.BlueTeam);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 2, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.BlueTeam, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         } else {
             game.setLastGuardianServeSide(GameFieldSide.RedTeam);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         }
     }
 
     public void handleStartBattleMode(Connection connection, Room room) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
-        game.setLastGuardianServeSide(GameFieldSide.BlueTeam);
+        game.setLastGuardianServeSide(GameFieldSide.RedTeam);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
-//        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) 2, (byte) 0, (byte) 0);
-//        clients.forEach(c -> {
-//            c.getConnection().sendTCP(triggerGuardianServePacket);
-//        });
+
+        List<PlayerPositionInfo> positionInfo = new ArrayList<>();
+        clients.forEach(c -> {
+            RoomPlayer rp = room.getRoomPlayerList().stream()
+                    .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
+                    .findFirst().orElse(null);
+
+            Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
+            PlayerPositionInfo playerPositionInfo = new PlayerPositionInfo();
+            playerPositionInfo.setPlayerPosition(rp.getPosition());
+            playerPositionInfo.setPlayerStartLocation(playerLocation);
+            positionInfo.add(playerPositionInfo);
+        });
+
+        int servingPositionXOffset = random.nextInt(7);
+
+        S2CMatchplaySetPlayerPosition setPlayerPositionPacket = new S2CMatchplaySetPlayerPosition(positionInfo);
+        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) servingPositionXOffset, (byte) 0);
+        clients.forEach(c -> {
+            c.getConnection().sendTCP(setPlayerPositionPacket);
+            c.getConnection().sendTCP(triggerGuardianServePacket);
+        });
+
+        long crystalSpawnInterval = TimeUnit.SECONDS.toMillis(8);
+        long crystalDeSpawnInterval = TimeUnit.SECONDS.toMillis(10);
+        game.setCrystalSpawnInterval(crystalSpawnInterval);
+        game.setCrystalDeSpawnInterval(crystalDeSpawnInterval);
 
         int activePlayers = (int) game.getPlayerBattleStates().stream().count();
-        switch (activePlayers) {
-            case 1:
-            case 2:
-                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
-                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(8));
+        int amountOfCrystalsToSpawnPerSide = activePlayers > 2 ? 2 : 1;
+        Runnable initializeCrystalsRunnable = () -> {
+            for (int i = 0; i < amountOfCrystalsToSpawnPerSide; i++) {
                 this.placeCrystalRandomly(connection, game, GameFieldSide.RedTeam);
                 this.placeCrystalRandomly(connection, game, GameFieldSide.BlueTeam);
-                break;
-            case 3:
-            case 4:
-                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
-                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(7));
-                this.placeCrystalRandomly(connection, game, GameFieldSide.RedTeam);
-                this.placeCrystalRandomly(connection, game, GameFieldSide.RedTeam);
-                this.placeCrystalRandomly(connection, game, GameFieldSide.BlueTeam);
-                this.placeCrystalRandomly(connection, game, GameFieldSide.BlueTeam);
-                break;
-        }
-
-        gameSession.setSpeedHackCheckActive(true);
+            }
+        };
+        
+        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(initializeCrystalsRunnable, crystalSpawnInterval);
+        gameSession.getRunnableEvents().add(runnableEvent);
+        // gameSession.setSpeedHackCheckActive(true);
     }
 
     public void handlePrepareBattleMode(Connection connection, Room room) {
@@ -121,11 +138,10 @@ public class BattleModeHandler {
         game.setWillDamages(this.willDamageService.getWillDamages());
 
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-        List<PlayerBattleState> playerBattleStates = roomPlayers.stream()
-                .filter(x -> x.getPosition() < 4)
-                .map(rp -> this.createPlayerBattleState(rp))
-                .collect(Collectors.toList());
-        game.setPlayerBattleStates(playerBattleStates);
+        roomPlayers.forEach(rp -> {
+            if (rp.getPosition() < 4)
+                game.getPlayerBattleStates().add(this.createPlayerBattleState(rp));
+        });
     }
 
     public void handlePlayerPickingUpCrystal(Connection connection, C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket) {
@@ -184,7 +200,7 @@ public class BattleModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
 
         // Until speed hack detection is not active do nothing here. This means we are in animations and the actual game is currently not started yet
-        if (!gameSession.isSpeedHackCheckActive()) return;
+        // if (!gameSession.isSpeedHackCheckActive()) return;
 
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
@@ -201,11 +217,16 @@ public class BattleModeHandler {
             this.handleSkillDamage(connection, skillHitsTarget.getTargetPosition(), skillHitsTarget, game, skill);
         }
 
-        this.handleAnyTeamDead();
+        this.handleAnyTeamDead(connection, game);
     }
 
-    private void handleAnyTeamDead() {
-//        TODO: IMPLEMENT
+    private void handleAnyTeamDead(Connection connection, MatchplayBattleGame game) {
+        boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+        boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+
+        if ((allPlayersTeamRedDead || allPlayersTeamBlueDead) && !game.isFinished()) {
+            this.handleFinishGame(connection, game);
+        }
     }
 
     public void handleSwapQuickSlotItems(Connection connection, C2SMatchplaySwapQuickSlotItems swapQuickSlotItems) {
@@ -251,7 +272,7 @@ public class BattleModeHandler {
     private void handleSkillDamage(Connection connection, short targetPosition, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayBattleGame game, Skill skill) {
         boolean denyDamage = skillHitsTarget.getDamageType() == 1;
         short attackerPosition = skillHitsTarget.getAttackerPosition();
-        boolean attackerHasStrBuff = skillHitsTarget.getAttackerPosition() == 0;
+        boolean attackerHasStrBuff = skillHitsTarget.getAttackerBuffId() == 0;
         boolean receiverHasDefBuff = skillHitsTarget.getReceiverBuffId() == 1;
 
         short skillDamage = skill != null ? skill.getDamage().shortValue() : -1;
@@ -332,7 +353,7 @@ public class BattleModeHandler {
         return new PlayerBattleState(roomPlayer.getPosition(), totalHp, totalStr, totalSta, totalDex, totalWill);
     }
     
-    private void handleFinishGame(Connection connection, MatchplayBattleGame game, boolean wonGame) {
+    private void handleFinishGame(Connection connection, MatchplayBattleGame game) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
@@ -341,16 +362,29 @@ public class BattleModeHandler {
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
-        gameSession.stopSpeedHackDetection();
+        // gameSession.stopSpeedHackDetection();
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
-        gameSession.getClients().forEach(client -> {
+
+        List<Client> clients = new ArrayList<>(gameSession.getClients());
+        List<Player> playerList = new ArrayList<>();
+        clients.forEach(c -> playerList.add(c.getActivePlayer()));
+
+        for (Client client : clients) {
             List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst().orElse(null);
             if (rp == null) {
                 return;
+            }
+
+            boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
+            boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+            boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+            boolean wonGame = false;
+            if (isCurrentPlayerInRedTeam && allPlayersTeamBlueDead || !isCurrentPlayerInRedTeam && allPlayersTeamRedDead) {
+                wonGame = true;
             }
 
             PlayerReward playerReward = playerRewards.stream()
@@ -361,10 +395,10 @@ public class BattleModeHandler {
             Player player = client.getActivePlayer();
             byte oldLevel = player.getLevel();
             if (playerReward != null) {
-                byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
+                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                 if (level != 60)
-                    player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
-                player.setGold(player.getGold() + playerReward.getBasicRewardGold());
+                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.setActivePlayer(player);
 
@@ -372,6 +406,33 @@ public class BattleModeHandler {
                     this.handleRewardItem(client.getConnection(), playerReward);
                 }
             }
+
+            PlayerStatistic playerStatistic = player.getPlayerStatistic();
+            if (wonGame) {
+                playerStatistic.setBattleRecordWin(playerStatistic.getBattleRecordWin() + 1);
+
+                int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
+                if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
+                    playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
+                }
+
+                playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
+            } else {
+                playerStatistic.setBattleRecordLoss(playerStatistic.getBattleRecordLoss() + 1);
+                playerStatistic.setConsecutiveWins(0);
+            }
+            HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BATTLE);
+            int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBattleRP();
+            int playerNewRating = playerRatings.get(player.getId());
+            if (playerReward != null)
+                playerReward.setRewardRP(playerRankingPoints);
+            playerStatistic.setBattleRP(playerNewRating <= 0 ? 0 : playerNewRating);
+
+            playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+
+            player.setPlayerStatistic(playerStatistic);
+            player = playerService.save(player);
+            client.setActivePlayer(player);
 
             byte playerLevel = client.getActivePlayer().getLevel();
             if (playerLevel != oldLevel) {
@@ -397,7 +458,7 @@ public class BattleModeHandler {
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
             packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
             client.setActiveGameSession(null);
-        });
+        }
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
@@ -410,15 +471,20 @@ public class BattleModeHandler {
 
     private PlayerReward createEmptyPlayerReward() {
         PlayerReward playerReward = new PlayerReward();
-        playerReward.setBasicRewardExp(1);
-        playerReward.setBasicRewardGold(1);
+        playerReward.setRewardExp(1);
+        playerReward.setRewardGold(1);
         return playerReward;
     }
 
     private void handleRevivePlayer(Connection connection, MatchplayBattleGame game, Skill skill, C2SMatchplaySkillHitsTarget skillHitsTarget) {
         PlayerBattleState playerBattleState = null;
+
+        Optional<RoomPlayer> rp = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
+                .filter(p -> p.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findFirst();
+
         try {
-            playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue());
+            playerBattleState = game.reviveAnyPlayer(skill.getDamage().shortValue(), rp);
         } catch (ValidationException ve) {
             log.warn(ve.getMessage());
             return;
@@ -436,6 +502,7 @@ public class BattleModeHandler {
         Point2D point = this.getRandomPoint(gameFieldSide);
 
         short crystalId = (short) (game.getLastCrystalId() + 1);
+        if (crystalId > 100) crystalId = 0;
         game.setLastCrystalId(crystalId);
         SkillCrystal skillCrystal = new SkillCrystal();
         skillCrystal.setId(crystalId);

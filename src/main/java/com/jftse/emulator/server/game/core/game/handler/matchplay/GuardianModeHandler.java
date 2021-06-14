@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -46,6 +45,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -72,24 +72,24 @@ public class GuardianModeHandler {
 
     private GameHandler gameHandler;
 
+    private Random random;
+
     public void init(GameHandler gameHandler) {
         this.gameHandler = gameHandler;
+        this.random = new Random();
     }
 
     public void handleGuardianModeMatchplayPointPacket(Connection connection, C2SMatchplayPointPacket matchplayPointPacket, GameSession gameSession, MatchplayGuardianGame game) {
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
+        int servingPositionXOffset = random.nextInt(7);
         if (!lastGuardianServeWasOnGuardianSide) {
             game.setLastGuardianServeSide(GameFieldSide.Guardian);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         } else {
             game.setLastGuardianServeSide(GameFieldSide.Players);
-            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, (byte) 0, (byte) 0);
-            gameSession.getClients().forEach(x -> {
-                x.getConnection().sendTCP(triggerGuardianServePacket);
-            });
+            S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, (byte) servingPositionXOffset, (byte) 0);
+            gameSession.getClients().forEach(x -> x.getConnection().sendTCP(triggerGuardianServePacket));
         }
     }
 
@@ -98,7 +98,9 @@ public class GuardianModeHandler {
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         game.setLastGuardianServeSide(GameFieldSide.Guardian);
         List<Client> clients = this.gameHandler.getClientsInRoom(room.getRoomId());
-        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
+
+        int servingPositionXOffset = random.nextInt(7);
+        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
         clients.forEach(c -> {
             c.getConnection().sendTCP(triggerGuardianServePacket);
         });
@@ -124,12 +126,14 @@ public class GuardianModeHandler {
 
         this.triggerGuardianAttackLoop(connection);
         this.startDefeatTimer(connection, game, gameSession, game.getGuardianStage());
-        gameSession.setSpeedHackCheckActive(true);
+        // gameSession.setSpeedHackCheckActive(true);
     }
 
     public void handlePrepareGuardianMode(Connection connection, Room room) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+        game.setHardMode(room.isHardMode());
+        game.setRandomGuardiansMode(room.isRandomGuardians());
         game.setWillDamages(this.willDamageService.getWillDamages());
 
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
@@ -153,22 +157,31 @@ public class GuardianModeHandler {
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
         game.setGuardianLevelLimit(guardianLevelLimit);
 
-        List<PlayerBattleState> playerBattleStates = roomPlayers.stream()
-                .filter(x -> x.getPosition() < 4)
-                .map(rp -> this.createPlayerBattleState(rp))
-                .collect(Collectors.toList());
-        game.setPlayerBattleStates(playerBattleStates);
+        roomPlayers.forEach(rp -> {
+            if (rp.getPosition() < 4)
+                game.getPlayerBattleStates().add(this.createPlayerBattleState(rp));
+        });
 
         int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
         byte guardianStartPosition = 10;
         List<Byte> guardians = this.determineGuardians(game.getGuardianStage(), game.getGuardianLevelLimit());
+
+        if (room.isHardMode()) {
+            this.fillRemainingGuardianSlots(false, game, guardianStage, guardians);
+        }
+
         for (int i = 0; i < guardians.stream().count(); i++) {
             int guardianId = guardians.get(i);
             if (guardianId == 0) continue;
 
+            if (game.isRandomGuardiansMode()) {
+                guardianId = (int) (Math.random() * 72 + 1);
+                guardians.set(i, (byte) guardianId);
+            }
+
             short guardianPosition = (short) (i + guardianStartPosition);
             Guardian guardian = guardianService.findGuardianById((long) guardianId);
-            GuardianBattleState guardianBattleState = this.createGuardianBattleState(guardian, guardianPosition, activePlayingPlayersCount);
+            GuardianBattleState guardianBattleState = this.createGuardianBattleState(game.isHardMode(), guardian, guardianPosition, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(guardianBattleState);
         }
 
@@ -248,7 +261,7 @@ public class GuardianModeHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
 
         // Until speed hack detection is not active do nothing here. This means we are in animations and the actual game is currently not started yet
-        if (!gameSession.isSpeedHackCheckActive()) return;
+        // if (!gameSession.isSpeedHackCheckActive()) return;
 
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
         Skill skill = skillService.findSkillById((long)skillId);
@@ -341,7 +354,7 @@ public class GuardianModeHandler {
     private void handleSkillDamage(Connection connection, short targetPosition, C2SMatchplaySkillHitsTarget skillHitsTarget, MatchplayGuardianGame game, Skill skill) {
         boolean denyDamage = skillHitsTarget.getDamageType() == 1;
         short attackerPosition = skillHitsTarget.getAttackerPosition();
-        boolean attackerHasStrBuff = skillHitsTarget.getAttackerPosition() == 0;
+        boolean attackerHasStrBuff = skillHitsTarget.getAttackerBuffId() == 0;
         boolean receiverHasDefBuff = skillHitsTarget.getReceiverBuffId() == 1;
 
         short skillDamage = skill != null ? skill.getDamage().shortValue() : -1;
@@ -486,7 +499,11 @@ public class GuardianModeHandler {
         return new PlayerBattleState(roomPlayer.getPosition(), totalHp, totalStr, totalSta, totalDex, totalWill);
     }
 
-    private GuardianBattleState createGuardianBattleState(GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
+    private GuardianBattleState createGuardianBattleState(boolean isHardMode, GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
+        if (isHardMode) {
+            return new GuardianBattleState(guardian.getBtItemID(), guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold());
+        }
+
         int extraHp = guardian.getHpPer() * activePlayingPlayersCount;
         int extraStr = guardian.getAddStr() * activePlayingPlayersCount;
         int extraSta = guardian.getAddSta() * activePlayingPlayersCount;
@@ -500,22 +517,28 @@ public class GuardianModeHandler {
         return new GuardianBattleState(guardian.getBtItemID(), guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
     }
 
-    private void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
+    private synchronized void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
         boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
         if (allPlayersDead && !game.isFinished()) {
             this.handleFinishGame(connection, game, false);
         }
     }
 
-    private void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
+    private synchronized void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
         boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
         boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
-        boolean triggerBossBattle = timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
-        if (hasBossGuardianStage && allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
+        boolean triggerBossBattle = game.isHardMode() && timePlayingInSeconds < 300 || timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
+        if ((hasBossGuardianStage || game.isHardMode()) && allGuardiansDead && triggerBossBattle && !game.isBossBattleActive()) {
             GameSession gameSession = connection.getClient().getActiveGameSession();
-            gameSession.stopSpeedHackDetection();
+            // gameSession.stopSpeedHackDetection();
             gameSession.clearCountDownRunnable();
+
+            if (!hasBossGuardianStage && game.isHardMode()) {
+                GuardianStage guardianStage = game.getGuardianStage();
+                guardianStage.setBossGuardian((int) (Math.random() * 7) + 1);
+                game.setBossGuardianStage(guardianStage);
+            }
 
             game.setCurrentStage(game.getBossGuardianStage());
 
@@ -526,17 +549,27 @@ public class GuardianModeHandler {
             game.getGuardianBattleStates().clear();
 
             BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
-            GuardianBattleState bossGuardianBattleState = this.createGuardianBattleState(bossGuardian, (short) 10, activePlayingPlayersCount);
+            GuardianBattleState bossGuardianBattleState = this.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(bossGuardianBattleState);
+
+            if (game.isHardMode() && !hasBossGuardianStage) {
+                this.fillRemainingGuardianSlots(true, game, game.getBossGuardianStage(), guardians);
+                guardians.set(2, (byte) 0);
+            }
 
             byte guardianStartPosition = 11;
             for (int i = 0; i < guardians.stream().count(); i++) {
                 int guardianId = guardians.get(i);
                 if (guardianId == 0) continue;
 
+                if (game.isRandomGuardiansMode()) {
+                    guardianId = (int) (Math.random() * 72 + 1);
+                    guardians.set(i, (byte) guardianId);
+                }
+
                 short guardianPosition = (short) (i + guardianStartPosition);
                 Guardian guardian = guardianService.findGuardianById((long) guardianId);
-                GuardianBattleState guardianBattleState = this.createGuardianBattleState(guardian, guardianPosition, activePlayingPlayersCount);
+                GuardianBattleState guardianBattleState = this.createGuardianBattleState(game.isHardMode(), guardian, guardianPosition, activePlayingPlayersCount);
                 game.getGuardianBattleStates().add(guardianBattleState);
             }
 
@@ -550,19 +583,17 @@ public class GuardianModeHandler {
 
             Runnable triggerGuardianServeRunnable = () -> {
                 if (gameSession == null) return;
-                S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) 0, (byte) 0);
+                int servingPositionXOffset = random.nextInt(7);
+                S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
+                S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
                 gameSession.getClients().forEach(c -> {
                     if (c != null && c.getConnection() != null) {
+                        c.getConnection().sendTCP(setNameColorAndRemoveBlackBarPacket);
                         c.getConnection().sendTCP(triggerGuardianServePacket);
-                        RoomPlayer roomPlayer = this.getRoomPlayerFromConnection(c.getConnection());
-                        if (roomPlayer != null) {
-                            S2CGameSetNameColor setNameColorPacket = new S2CGameSetNameColor(roomPlayer);
-                            c.getConnection().sendTCP(setNameColorPacket);
-                        }
                     }
                 });
 
-                gameSession.setSpeedHackCheckActive(true);
+                // gameSession.setSpeedHackCheckActive(true);
                 this.startDefeatTimer(connection, game, gameSession, game.getBossGuardianStage());
             };
 
@@ -595,12 +626,12 @@ public class GuardianModeHandler {
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         playerRewards.forEach(x -> {
             int expMultiplier = game.getGuardianStage().getExpMultiplier();
-            x.setBasicRewardExp(x.getBasicRewardExp() * expMultiplier);
+            x.setRewardExp(x.getRewardExp() * expMultiplier);
         });
 
         connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         GameSession gameSession = connection.getClient().getActiveGameSession();
-        gameSession.stopSpeedHackDetection();
+        // gameSession.stopSpeedHackDetection();
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
         gameSession.getClients().forEach(client -> {
@@ -620,10 +651,10 @@ public class GuardianModeHandler {
             Player player = client.getActivePlayer();
             byte oldLevel = player.getLevel();
             if (playerReward != null) {
-                byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
+                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                 if (level != 60)
-                    player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
-                player.setGold(player.getGold() + playerReward.getBasicRewardGold());
+                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.setActivePlayer(player);
 
@@ -720,8 +751,8 @@ public class GuardianModeHandler {
 
     private PlayerReward createEmptyPlayerReward() {
         PlayerReward playerReward = new PlayerReward();
-        playerReward.setBasicRewardExp(1);
-        playerReward.setBasicRewardGold(1);
+        playerReward.setRewardExp(1);
+        playerReward.setRewardGold(1);
         return playerReward;
     }
 
@@ -849,6 +880,7 @@ public class GuardianModeHandler {
         Point2D point = this.getRandomPoint();
 
         short crystalId = (short) (game.getLastCrystalId() + 1);
+        if (crystalId > 100) crystalId = 0;
         game.setLastCrystalId(crystalId);
         SkillCrystal skillCrystal = new SkillCrystal();
         skillCrystal.setId(crystalId);
@@ -955,6 +987,33 @@ public class GuardianModeHandler {
         SkillDrop skillDrop = skillDrops.stream().filter(x -> x.getFrom() <= randValue && x.getTo() >= randValue).findFirst().orElse(null);
         GuardianBtItem guardianBtItem = guardianBtItemList.getGuardianBtItems().get(skillDrop.getId());
         return guardianBtItem.getSkillIndex();
+    }
+
+    private List<Guardian> getAllGuardiansFromStage(GuardianStage guardianStage) {
+        List<Integer> guardiansLeft = guardianStage.getGuardiansLeft();
+        List<Integer> guardiansMiddle = guardianStage.getGuardiansMiddle();
+        List<Integer> guardiansRight = guardianStage.getGuardiansRight();
+        List<Integer> allGuardianIdsOfStage = Stream.of(
+                guardiansLeft != null ? guardiansLeft : new ArrayList<Integer>(),
+                guardiansMiddle != null ? guardiansMiddle : new ArrayList<Integer>(),
+                guardiansRight != null ? guardiansRight : new ArrayList<Integer>())
+                .flatMap(Collection::stream)
+                .distinct()
+                .collect(Collectors.toList());
+        List<Guardian> allGuardians = this.guardianService.findGuardiansByIds(allGuardianIdsOfStage);
+        return allGuardians;
+    }
+
+    private void fillRemainingGuardianSlots(boolean forceFill, MatchplayGuardianGame game, GuardianStage guardianStage, List<Byte> guardians) {
+        int totalAvailableGuardianSlots = 3;
+        int activeGuardianSlots = forceFill ? 0 : (int) guardians.stream().filter(x -> x != 0).count();
+        int remainingGuardianSlots = totalAvailableGuardianSlots - activeGuardianSlots;
+        if (game.isHardMode() && remainingGuardianSlots != 0) {
+            List<Guardian> allGuardians = getAllGuardiansFromStage(guardianStage);
+            for (int i = activeGuardianSlots; i < totalAvailableGuardianSlots; i++) {
+                guardians.set(i, getRandomGuardian(allGuardians, guardians));
+            }
+        }
     }
 
     private RoomPlayer getRoomPlayerFromConnection(Connection connection) {

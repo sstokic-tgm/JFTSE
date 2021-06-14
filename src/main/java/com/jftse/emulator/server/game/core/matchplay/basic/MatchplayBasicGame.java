@@ -28,7 +28,7 @@ public class MatchplayBasicGame extends MatchplayGame {
     public MatchplayBasicGame(byte players) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
-        playerLocationsOnMap = Arrays.asList(
+        this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -125),
                 new Point(-20, 125),
                 new Point(-20, -75),
@@ -125,8 +125,8 @@ public class MatchplayBasicGame extends MatchplayGame {
             int rewardGold = basicExpReward;
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(playerPosition);
-            playerReward.setBasicRewardExp(rewardExp);
-            playerReward.setBasicRewardGold(rewardGold);
+            playerReward.setRewardExp(rewardExp);
+            playerReward.setRewardGold(rewardGold);
             if (wonGame) { // TODO: temporarily only
                 playerReward.setRewardProductIndex(57592);
                 playerReward.setProductRewardAmount(1);

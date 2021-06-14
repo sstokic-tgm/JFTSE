@@ -77,7 +77,8 @@ public final class PacketID {
     public final static char S2CGameDisplayPlayerStats = 0x17E4;
     public final static char S2CGameRemoveBlackBars = 0x183C;
     public final static char S2CGameNetworkSettings = 0x3EA;
-    public final static char S2CGameSetNameColors = 0x183A;
+    public final static char S2CGameSetNameColorAndRemoveBlackBar = 0x183A;
+    public final static char S2CMatchplaySetPlayerPosition = 0x184A;
     public final static char C2SRelayPacketToAllClients = 0x414;
     public final static char C2SMatchplayRegisterPlayerForGameSession = 0x3ED;
     public final static char S2CMatchplayAckPlayerInformation = 0x3EF;
@@ -135,6 +136,7 @@ public final class PacketID {
     public final static char S2CPlayerLevelExpData = 0x22B8;
     public final static char S2CPlayerInfoPlayStatsData = 0x1B6F;
 
+    public final static char C2SUnknownInventoryOpenRequest = 0x237C;
     public final static char C2SInventoryWearClothRequest = 0x1B63;
     public final static char S2CInventoryWearClothAnswer = 0x1B64;
     public final static char C2SInventoryWearQuickRequest = 0x1BD8;
@@ -251,6 +253,11 @@ public final class PacketID {
 
     public final static char C2SLobbyJoin = 0x237A;
     public final static char C2SLobbyLeave = 0x2379;
+
+    public final static char C2SRankingPersonalDataReq = 0x206D;
+    public final static char C2SRankingDataReq = 0x206F;
+    public final static char S2CRankingPersonalDataAnswer = 0x206E;
+    public final static char S2CRankingDataAnswer = 0x2070;
 
     public final static char D2SDevPacket = 0x555;
 

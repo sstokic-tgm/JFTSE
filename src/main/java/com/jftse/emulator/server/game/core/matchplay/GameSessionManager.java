@@ -7,8 +7,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 @Scope("singleton")
@@ -16,11 +15,11 @@ import java.util.List;
 @Setter
 public class GameSessionManager {
 
-    private List<GameSession> gameSessionList;
+    private CopyOnWriteArrayList<GameSession> gameSessionList;
 
     @PostConstruct
     public void init() {
-        gameSessionList = new ArrayList<>();
+        gameSessionList = new CopyOnWriteArrayList<>();
     }
 
     public void addGameSession(GameSession gameSession) {
@@ -33,7 +32,7 @@ public class GameSessionManager {
 
     public GameSession getGameSessionBySessionId(int sessionId) {
         return gameSessionList.stream()
-                .filter(gs -> gs.getSessionId() == sessionId)
+                .filter(gs -> gs != null && gs.getSessionId() == sessionId)
                 .findFirst()
                 .orElse(null);
     }

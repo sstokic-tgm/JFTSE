@@ -43,4 +43,9 @@ public class Room {
     private List<RoomPlayer> roomPlayerList;
     private List<Short> positions;
     private int status;
+
+    // Guardian
+    private boolean isHardMode; // Guardians are very strong
+    private boolean isArcade; // You have to play against all guardians there are
+    private boolean isRandomGuardians; // Always random guardians are spawned.
 }

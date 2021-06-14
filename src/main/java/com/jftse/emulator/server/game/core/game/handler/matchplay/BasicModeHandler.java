@@ -1,18 +1,17 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
+import com.jftse.emulator.server.game.core.constants.GameMode;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.constants.ServeType;
 import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.game.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBasicGame;
 import com.jftse.emulator.server.game.core.matchplay.event.PacketEventHandler;
@@ -24,6 +23,7 @@ import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
+import com.jftse.emulator.server.game.core.utils.RankingUtils;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -87,7 +87,10 @@ public class BasicModeHandler {
         }
 
         List<ServeInfo> serveInfo = new ArrayList<>();
-        List<Client> clients = new ArrayList<>(Collections.unmodifiableList(gameSession.getClients()));
+        List<Client> clients = new ArrayList<>(gameSession.getClients());
+        List<Player> playerList = new ArrayList<>();
+        clients.forEach(c -> playerList.add(c.getActivePlayer()));
+
         for (Client client : clients) {
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
@@ -135,10 +138,10 @@ public class BasicModeHandler {
                 Player player = client.getActivePlayer();
                 byte oldLevel = player.getLevel();
                 if (playerReward != null) {
-                    byte level = levelService.getLevel(playerReward.getBasicRewardExp(), player.getExpPoints(), player.getLevel());
+                    byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                     if (level != 60)
-                        player.setExpPoints(player.getExpPoints() + playerReward.getBasicRewardExp());
-                    player.setGold(player.getGold() + playerReward.getBasicRewardGold());
+                        player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                    player.setGold(player.getGold() + playerReward.getRewardGold());
                     player = levelService.setNewLevelStatusPoints(level, player);
                     client.setActivePlayer(player);
 
@@ -157,10 +160,18 @@ public class BasicModeHandler {
                     }
 
                     playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
+
                 } else {
                     playerStatistic.setBasicRecordLoss(playerStatistic.getBasicRecordLoss() + 1);
                     playerStatistic.setConsecutiveWins(0);
                 }
+                HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BASIC);
+                int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBasicRP();
+                int playerNewRating = playerRatings.get(player.getId());
+                if (playerReward != null)
+                    playerReward.setRewardRP(playerRankingPoints);
+                playerStatistic.setBasicRP(playerNewRating <= 0 ? 0 : playerNewRating);
+
                 playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
 
                 player.setPlayerStatistic(playerStatistic);
@@ -190,13 +201,9 @@ public class BasicModeHandler {
                 S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
-                gameSession.getClients().forEach(c -> {
-                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(c, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
-
-                    c.setActiveGameSession(null);
-                });
-                gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
+                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
+                client.setActiveGameSession(null);
             } else {
                 boolean shouldServeBall = game.shouldPlayerServe(isSingles, gameSession.getTimesCourtChanged(), rp.getPosition());
                 byte serveType = ServeType.None;
@@ -238,6 +245,7 @@ public class BasicModeHandler {
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(6)), PacketEventHandler.ServerClient.SERVER);
         }
 
+        gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
             this.gameSessionManager.removeGameSession(gameSession);
         }

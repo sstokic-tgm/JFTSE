@@ -15,6 +15,7 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -24,8 +25,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private long crystalSpawnInterval;
     private long crystalDeSpawnInterval;
     private List<Point> playerLocationsOnMap;
-    private List<PlayerBattleState> playerBattleStates;
-    private List<GuardianBattleState> guardianBattleStates;
+    private ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates;
+    private ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates;
     private List<SkillCrystal> skillCrystals;
     private List<WillDamage> willDamages;
     private short lastCrystalId = -1;
@@ -38,13 +39,15 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private Date stageStartTime;
     private int expPot;
     private int goldPot;
+    private boolean isHardMode;
+    private boolean randomGuardiansMode;
 
     public MatchplayGuardianGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
         this.setStageStartTime(cal.getTime());
-        this.playerBattleStates = new ArrayList<>();
-        this.guardianBattleStates = new ArrayList<>();
+        this.playerBattleStates = new ConcurrentLinkedDeque<>();
+        this.guardianBattleStates = new ConcurrentLinkedDeque<>();
         this.skillCrystals = new ArrayList<>();
         this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -75),
@@ -53,7 +56,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.setFinished(false);
     }
 
-    public short damageGuardian(short guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
+    public synchronized short damageGuardian(short guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
         int totalDamageToDeal = damage;
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
@@ -87,7 +90,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newGuardianHealth;
     }
 
-    public short damagePlayer(int guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
+    public synchronized short damagePlayer(int guardianPos, int playerPos, short damage, boolean hasAttackerDmgBuff, boolean hasReceiverDefBuff) throws ValidationException {
         int totalDamageToDeal = damage;
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
                 .filter(x -> x.getPosition() == guardianPos)
@@ -126,7 +129,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public short damageGuardianOnBallLoss(int guardianPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
+    public synchronized short damageGuardianOnBallLoss(int guardianPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
                 .filter(x -> x.getPosition() == guardianPos)
                 .findFirst()
@@ -145,11 +148,15 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     .findFirst()
                     .orElse(null);
             if (playerBattleState != null) {
+                int playerWill = playerBattleState.getWill();
                 WillDamage willDamage = this.getWillDamages().stream()
-                        .filter(x -> x.getWill() == playerBattleState.getWill())
+                        .filter(x -> x.getWill() == playerWill)
                         .findFirst()
                         .orElse(this.getWillDamages().get(0));
                 lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+
+                int additionalWillDmg = (int) (guardianBattleState.getMaxHealth() * (playerWill / 10000d));
+                lossBallDamage -= additionalWillDmg;
             }
         }
 
@@ -159,7 +166,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newGuardianHealth;
     }
 
-    public short damagePlayerOnBallLoss(int playerPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
+    public synchronized short damagePlayerOnBallLoss(int playerPos, int attackerPos, boolean hasAttackerWillBuff) throws ValidationException {
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
                 .findFirst()
@@ -196,7 +203,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public short healPlayer(int playerPos, short percentage) throws ValidationException {
+    public synchronized short healPlayer(int playerPos, short percentage) throws ValidationException {
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
                 .findFirst()
@@ -216,7 +223,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newPlayerHealth;
     }
 
-    public short healGuardian(int guardianPos, short percentage) throws ValidationException {
+    public synchronized short healGuardian(int guardianPos, short percentage) throws ValidationException {
         GuardianBattleState guardianBattleState = this.guardianBattleStates.stream()
                 .filter(x -> x.getPosition() == guardianPos)
                 .findFirst()
@@ -237,7 +244,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return newGuardianHealth;
     }
 
-    public PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
+    public synchronized PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
         PlayerBattleState playerBattleState = getPlayerBattleStates().stream()
                 .filter(x -> x.isDead())
                 .findFirst()
@@ -251,7 +258,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return playerBattleState;
     }
 
-    public GuardianBattleState reviveAnyGuardian(short revivePercentage) throws ValidationException {
+    public synchronized GuardianBattleState reviveAnyGuardian(short revivePercentage) throws ValidationException {
         GuardianBattleState guardianBattleState = getGuardianBattleStates().stream()
                 .filter(x -> x.getCurrentHealth() < 1)
                 .findFirst()
@@ -265,7 +272,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return guardianBattleState;
     }
 
-    public short getPlayerCurrentHealth(short playerPos) throws ValidationException {
+    public synchronized short getPlayerCurrentHealth(short playerPos) throws ValidationException {
         PlayerBattleState playerBattleState = this.playerBattleStates.stream()
                 .filter(x -> x.getPosition() == playerPos)
                 .findFirst()
@@ -294,8 +301,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.playerBattleStates.forEach(x -> {
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(x.getPosition());
-            playerReward.setBasicRewardExp(this.getExpPot());
-            playerReward.setBasicRewardGold(this.getGoldPot());
+            playerReward.setRewardExp(this.getExpPot());
+            playerReward.setRewardGold(this.getGoldPot());
             playerReward.setRewardProductIndex(-1);
 
             if (stageRewards != null)

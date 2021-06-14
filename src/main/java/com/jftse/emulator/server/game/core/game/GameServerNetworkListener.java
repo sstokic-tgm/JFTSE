@@ -68,6 +68,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleInventoryItemSellPackets(connection, packet);
                 break;
 
+            case PacketID.C2SUnknownInventoryOpenRequest:
+                gamePacketHandler.handleUnknownInventoryOpenPacket(connection, packet);
+                break;
+
             case PacketID.C2SInventoryWearClothRequest:
                 gamePacketHandler.handleInventoryWearClothPacket(connection, packet);
                 break;
@@ -367,12 +371,21 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleSwapQuickSlotItems(connection, packet);
                 break;
 
+            case PacketID.C2SRankingPersonalDataReq:
+                gamePacketHandler.handleRankingPersonalDataReqPacket(connection, packet);
+                break;
+
+            case PacketID.C2SRankingDataReq:
+                gamePacketHandler.handleRankingDataReqPacket(connection, packet);
+                break;
+
             case PacketID.C2SHeartbeat:
-                gamePacketHandler.tryDetectSpeedHack(connection);
+                // gamePacketHandler.tryDetectSpeedHack(connection);
                 gamePacketHandler.handleHeartBeatPacket(connection, packet);
                 break;
 
             case PacketID.C2SLoginAliveClient:
+            case 0x1071:
                 // empty..
                 break;
 
