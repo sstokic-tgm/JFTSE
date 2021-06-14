@@ -1935,7 +1935,7 @@ public class GamePacketHandler {
     public void handleGuildLeaveRequestPacket(Connection connection, Packet packet) {
         Player activePlayer = connection.getClient().getActivePlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
-        Guild guild = guildService.findById(guildMember.getGuild().getId());
+        Guild guild = guildMember.getGuild();
         guild.getMemberList().removeIf(x -> x.getId() == guildMember.getId());
         guildService.save(guild);
     }
@@ -1974,8 +1974,13 @@ public class GamePacketHandler {
         Player activePlayer = connection.getClient().getActivePlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
-        if (guildMember != null)
-            connection.sendTCP(new S2CGuildMemberDataAnswerPacket(guildMember.getGuild().getMemberList()));
+        if (guildMember != null) {
+            List<GuildMember> guildMembers = guildMember.getGuild().getMemberList()
+                    .stream()
+                    .filter(x -> !x.getWaitingForApproval())
+                    .collect(Collectors.toList());
+            connection.sendTCP(new S2CGuildMemberDataAnswerPacket(guildMembers));
+        }
     }
 
     public void handleGuildChangeMasterRequestPacket(Connection connection, Packet packet) {
@@ -2047,7 +2052,7 @@ public class GamePacketHandler {
                     .getMemberList().get(guildDismissMemberRequestPacket.getPlayerPositionInGuild() - 1);
 
             if (dismissMember != null) {
-                Guild guild = guildService.findById(dismissMember.getGuild().getId());
+                Guild guild = dismissMember.getGuild();
                 guild.getMemberList().removeIf(x -> x.getId() == dismissMember.getId());
                 guildService.save(guild);
             }
@@ -2108,13 +2113,12 @@ public class GamePacketHandler {
             if (reverseMember != null) {
                 if (guildChangeReverseMemberRequestPacket.getStatus() == 1) {
                     reverseMember.setWaitingForApproval(false);
-                    guildMemberService.save((reverseMember));
+                    guildMemberService.save(reverseMember);
                     connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 1));
                 }
                 else {
-                    Guild guild = guildService.findById(reverseMember.getGuild().getId());
-                    guild.getMemberList().removeIf(x -> x.getId() == guildMember.getId());
-                    guildService.save(guild);
+                    reverseMember.getGuild().getMemberList().removeIf(x -> x.getId() == reverseMember.getId());
+                    guildService.save(reverseMember.getGuild());
                 }
             }
         }
