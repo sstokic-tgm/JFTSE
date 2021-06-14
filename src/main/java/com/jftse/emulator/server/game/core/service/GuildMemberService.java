@@ -18,14 +18,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class GuildMemberService {
-
     private final GuildMemberRepository guildMemberRepository;
 
     public GuildMember save(GuildMember guildMember) {
         return guildMemberRepository.save(guildMember);
     }
 
-    public void remove(Long guildMemberId) {
-        guildMemberRepository.deleteById(guildMemberId);
+    public GuildMember getByPlayer(Player player) {
+        return guildMemberRepository.findByPlayer(player).orElse(null);
     }
 }
