@@ -17,6 +17,9 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     Page<Player> findAllByAlreadyCreatedTrue(Pageable pageable);
     List<Player> findAllByAlreadyCreatedTrue(Sort sort);
 
+    @Query(nativeQuery = true, value = "call ranking_by_name_and_gamemode(:name, :gameMode);")
+    int getRankingByNameAndGameMode(@Param("name") String name, @Param("gameMode") byte gameMode);
+
     @Query(value = "FROM Player p "
             + "LEFT JOIN FETCH p.account account "
             + "LEFT JOIN FETCH p.pocket pocket "

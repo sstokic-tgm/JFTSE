@@ -2024,21 +2024,7 @@ public class GamePacketHandler {
         } else {
             Player player = playerService.findByNameFetched(rankingPersonalDataRequestPacket.getNickname());
             if (player != null) {
-                String gameModeRP;
-                if (gameMode == GameMode.BASIC)
-                    gameModeRP = "playerStatistic.basicRP";
-                else if (gameMode == GameMode.BATTLE)
-                    gameModeRP = "playerStatistic.battleRP";
-                else
-                    gameModeRP = "playerStatistic.guardianRP";
-                List<Player> allPlayers = playerService.findAllByAlreadyCreatedSorted(Sort.by(gameModeRP).descending().and(Sort.by("created")));
-                int ranking = 0;
-                for (int i = 0; i < allPlayers.size(); i++) {
-                    if (allPlayers.get(i).getName().equals(player.getName())) {
-                        ranking = i + 1;
-                        break;
-                    }
-                }
+                int ranking = playerService.getPlayerRankingByName(player.getName(), gameMode);
 
                 S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 0, gameMode, player, ranking);
                 connection.sendTCP(rankingPersonalDataAnswerPacket);

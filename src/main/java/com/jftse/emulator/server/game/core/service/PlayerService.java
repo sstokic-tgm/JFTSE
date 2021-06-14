@@ -37,6 +37,10 @@ public class PlayerService {
         return playerRepository.findAllByAlreadyCreatedTrue(pageable).getContent();
     }
 
+    public int getPlayerRankingByName(String name, byte gameMode) {
+        return playerRepository.getRankingByNameAndGameMode(name, gameMode);
+    }
+
     public Player findById(Long playerId) {
         Optional<Player> player = playerRepository.findById(playerId);
         return player.orElse(null);
