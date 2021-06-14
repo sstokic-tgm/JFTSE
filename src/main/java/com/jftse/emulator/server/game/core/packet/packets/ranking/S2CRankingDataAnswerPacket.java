@@ -9,7 +9,7 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import java.util.List;
 
 public class S2CRankingDataAnswerPacket extends Packet {
-    public S2CRankingDataAnswerPacket(char result, byte gameMode, List<Player> playerList) {
+    public S2CRankingDataAnswerPacket(char result, byte gameMode, int page, List<Player> playerList) {
         super(PacketID.S2CRankingDataAnswer);
 
         this.write(result);
@@ -20,7 +20,7 @@ public class S2CRankingDataAnswerPacket extends Packet {
 
         this.write((byte) playerList.size());
 
-        for (int i = 0; i < playerList.size(); i++) {
+        for (int i = page == 1 ? 0 : (page * 10) - 10; i < playerList.size(); i++) {
             Player player = playerList.get(i);
             PlayerStatistic playerStatistic = player.getPlayerStatistic();
 

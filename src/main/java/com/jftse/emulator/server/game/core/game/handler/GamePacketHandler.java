@@ -80,6 +80,7 @@ import com.jftse.emulator.server.shared.module.GameHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -2023,32 +2024,17 @@ public class GamePacketHandler {
         } else {
             Player player = playerService.findByNameFetched(rankingPersonalDataRequestPacket.getNickname());
             if (player != null) {
-                List<Player> allPlayers = playerService.findAll();
-
-                Comparator<Player> playerComparator = (o1, o2) -> {
-                    PlayerStatistic ps1 = o1.getPlayerStatistic();
-                    PlayerStatistic ps2 = o2.getPlayerStatistic();
-
-                    if (rankingPersonalDataRequestPacket.getGameMode() == GameMode.BASIC) {
-                        if (ps1.getBasicRP().equals(ps2.getBasicRP()))
-                            return o1.getCreated().compareTo(o2.getCreated());
-                        else
-                            return ps2.getBasicRP().compareTo(ps1.getBasicRP());
-                    } else if (rankingPersonalDataRequestPacket.getGameMode() == GameMode.BATTLE) {
-                        if (ps1.getBattleRP().equals(ps2.getBattleRP()))
-                            return o1.getCreated().compareTo(o2.getCreated());
-                        else
-                            return ps2.getBattleRP().compareTo(ps1.getBattleRP());
-                    } else {
-                        return o1.getCreated().compareTo(o2.getCreated());
-                    }
-                };
-                List<Player> playerList = allPlayers.stream()
-                        .sorted(playerComparator)
-                        .collect(Collectors.toList());
+                String gameModeRP;
+                if (gameMode == GameMode.BASIC)
+                    gameModeRP = "playerStatistic.basicRP";
+                else if (gameMode == GameMode.BATTLE)
+                    gameModeRP = "playerStatistic.battleRP";
+                else
+                    gameModeRP = "playerStatistic.guardianRP";
+                List<Player> allPlayers = playerService.findAllByAlreadyCreatedSorted(Sort.by(gameModeRP).descending().and(Sort.by("created")));
                 int ranking = 0;
-                for (int i = 0; i < playerList.size(); i++) {
-                    if (playerList.get(i).getName().equals(player.getName())) {
+                for (int i = 0; i < allPlayers.size(); i++) {
+                    if (allPlayers.get(i).getName().equals(player.getName())) {
                         ranking = i + 1;
                         break;
                     }
@@ -2068,31 +2054,17 @@ public class GamePacketHandler {
         int page = rankingDataRequestPacket.getPage();
         byte gameMode = rankingDataRequestPacket.getGameMode();
 
-        List<Player> allPlayers = playerService.findAllPageable(PageRequest.of(page == 1 ? 0 : (page * 10) - 10, 10));
+        String gameModeRP;
+        if (gameMode == GameMode.BASIC)
+            gameModeRP = "playerStatistic.basicRP";
+        else if (gameMode == GameMode.BATTLE)
+            gameModeRP = "playerStatistic.battleRP";
+        else
+            gameModeRP = "playerStatistic.guardianRP";
+        List<Player> allPlayers = playerService.findAllByAlreadyCreatedPageable(PageRequest.of(page == 1 ? 0 : (page * 10) - 10, 10,
+                Sort.by(gameModeRP).descending().and(Sort.by("created"))));
 
-        Comparator<Player> playerComparator = (o1, o2) -> {
-            PlayerStatistic ps1 = o1.getPlayerStatistic();
-            PlayerStatistic ps2 = o2.getPlayerStatistic();
-
-            if (rankingDataRequestPacket.getGameMode() == GameMode.BASIC) {
-                if (ps1.getBasicRP().equals(ps2.getBasicRP()))
-                    return o1.getCreated().compareTo(o2.getCreated());
-                else
-                    return ps2.getBasicRP().compareTo(ps1.getBasicRP());
-            } else if (rankingDataRequestPacket.getGameMode() == GameMode.BATTLE) {
-                if (ps1.getBattleRP().equals(ps2.getBattleRP()))
-                    return o1.getCreated().compareTo(o2.getCreated());
-                else
-                    return ps2.getBattleRP().compareTo(ps1.getBattleRP());
-            } else {
-                return o1.getCreated().compareTo(o2.getCreated());
-            }
-        };
-        List<Player> playerList = allPlayers.stream()
-                .sorted(playerComparator)
-                .collect(Collectors.toList());
-
-        S2CRankingDataAnswerPacket rankingDataAnswerPacket = new S2CRankingDataAnswerPacket((char) 0, gameMode, playerList);
+        S2CRankingDataAnswerPacket rankingDataAnswerPacket = new S2CRankingDataAnswerPacket((char) 0, gameMode, page, allPlayers);
         connection.sendTCP(rankingDataAnswerPacket);
     }
 
