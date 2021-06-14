@@ -2061,7 +2061,7 @@ public class GamePacketHandler {
             gameModeRP = "playerStatistic.battleRP";
         else
             gameModeRP = "playerStatistic.guardianRP";
-        List<Player> allPlayers = playerService.findAllByAlreadyCreatedPageable(PageRequest.of(page == 1 ? 0 : (page * 10) - 10, 10,
+        List<Player> allPlayers = playerService.findAllByAlreadyCreatedPageable(PageRequest.of(page == 1 ? 0 : page - 1, 10,
                 Sort.by(gameModeRP).descending().and(Sort.by("created"))));
 
         S2CRankingDataAnswerPacket rankingDataAnswerPacket = new S2CRankingDataAnswerPacket((char) 0, gameMode, page, allPlayers);

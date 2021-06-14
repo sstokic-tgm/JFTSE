@@ -20,11 +20,12 @@ public class S2CRankingDataAnswerPacket extends Packet {
 
         this.write((byte) playerList.size());
 
-        for (int i = page == 1 ? 0 : (page * 10) - 10; i < playerList.size(); i++) {
+        for (int i = 0; i < playerList.size(); i++) {
             Player player = playerList.get(i);
             PlayerStatistic playerStatistic = player.getPlayerStatistic();
 
-            this.write((i + 1)); // ranking
+            int ranking = (page == 1 ? 0 : (page * 10) - 10) + 1 + i;
+            this.write(ranking); // ranking
             this.write((byte) 0); // unknown / not used
             this.write(Math.toIntExact(player.getId()));
             this.write(player.getName());
