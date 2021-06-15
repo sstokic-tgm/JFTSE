@@ -2000,12 +2000,15 @@ public class GamePacketHandler {
     }
 
     public void handleGuildReverseMemberDataRequestPacket(Connection connection, Packet packet) {
+        C2SGuildReserveMemberDataRequestPacket c2SGuildReserveMemberDataRequestPacket =
+                new C2SGuildReserveMemberDataRequestPacket(packet);
+        if (c2SGuildReserveMemberDataRequestPacket.getPage() != 0) return;
+
         Player activePlayer = connection.getClient().getActivePlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         List<GuildMember> reverseMemberList = guildMember.getGuild()
                 .getMemberList().stream().filter(GuildMember::getWaitingForApproval).collect(Collectors.toList());
-
         connection.sendTCP(new S2CGuildReverseMemberAnswerPacket(reverseMemberList));
     }
 
