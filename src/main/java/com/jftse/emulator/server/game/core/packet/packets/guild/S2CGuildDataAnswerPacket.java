@@ -42,7 +42,7 @@ public class S2CGuildDataAnswerPacket extends Packet {
             for (GuildMember subMaster : subMasterList)
                 this.write(subMaster.getPlayer().getName());
 
-            this.write((byte) memberList.size());
+            this.write((byte) memberList.stream().filter(x -> !x.getWaitingForApproval()).count());
             this.write(guild.getMaxMemberCount());
 
             List<GuildMember> reverseMemberList =

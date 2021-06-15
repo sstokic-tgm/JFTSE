@@ -1924,7 +1924,7 @@ public class GamePacketHandler {
             return;
         }
 
-        if (guild.getMemberList().size() >= guild.getMaxMemberCount()) {
+        if (guild.getMemberList().stream().filter(x -> !x.getWaitingForApproval()).count() >= guild.getMaxMemberCount()) {
             connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -7));
             return;
         }
@@ -2022,10 +2022,9 @@ public class GamePacketHandler {
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         if (guildMember != null && guildMember.getMemberRank() == 3) {
-            GuildMember newClubMaster = guildMember.getGuild()
-                    .getMemberList().stream()
-                    .filter(gm -> gm.getPlayer().getId() == guildChangeMasterRequestPacket.getPlayerId())
-                    .findFirst().orElse(null);
+            GuildMember newClubMaster = this.getGuildMemberByPlayerPositionInGuild(
+                    guildChangeMasterRequestPacket.getPlayerPositionInGuild(),
+                    guildMember);
 
             if (newClubMaster != null) {
                 guildMember.setMemberRank((byte)2);
@@ -2049,11 +2048,9 @@ public class GamePacketHandler {
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         if (guildMember != null && guildMember.getMemberRank() == 3) {
-            GuildMember subClubMaster = guildMember.getGuild()
-                    .getMemberList().stream()
-                    .filter(gm -> gm.getPlayer().getId() == guildChangeSubMasterRequestPacket.getPlayerId())
-                    .findFirst().orElse(null);
-
+            GuildMember subClubMaster = this.getGuildMemberByPlayerPositionInGuild(
+                    guildChangeSubMasterRequestPacket.getPlayerPositionInGuild(),
+                    guildMember);
             if (subClubMaster != null) {
                 if (guildChangeSubMasterRequestPacket.getStatus() == 1) {
                     subClubMaster.setMemberRank((byte)2);
@@ -2079,13 +2076,24 @@ public class GamePacketHandler {
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         if (guildMember != null && guildMember.getMemberRank() > 1) {
-            GuildMember dismissMember = guildMember.getGuild()
-                    .getMemberList().get(guildDismissMemberRequestPacket.getPlayerPositionInGuild() - 1);
-
+            GuildMember dismissMember = this.getGuildMemberByPlayerPositionInGuild(
+                    guildDismissMemberRequestPacket.getPlayerPositionInGuild(),
+                    guildMember);
             if (dismissMember != null) {
+                Client targetClient = gameHandler.getClientList()
+                        .stream()
+                        .filter(x -> x.getActivePlayer().getId() == dismissMember.getPlayer().getId())
+                        .findFirst()
+                        .orElse(null);
+
                 Guild guild = dismissMember.getGuild();
                 guild.getMemberList().removeIf(x -> x.getId() == dismissMember.getId());
                 guildService.save(guild);
+
+                if (targetClient != null) {
+                    S2CGuildDismissMemberAnswerPacket answerPacketForDismissedMember = new S2CGuildDismissMemberAnswerPacket((short) 0);
+                    targetClient.getConnection().sendTCP(answerPacketForDismissedMember);
+                }
             }
         }
     }
@@ -2150,6 +2158,7 @@ public class GamePacketHandler {
                 else {
                     reverseMember.getGuild().getMemberList().removeIf(x -> x.getId() == reverseMember.getId());
                     guildService.save(reverseMember.getGuild());
+                    connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 0));
                 }
             }
         }
@@ -2442,6 +2451,19 @@ public class GamePacketHandler {
             unknownAnswer.write((short) 0);
         }
         connection.sendTCP(unknownAnswer);
+    }
+
+    private GuildMember getGuildMemberByPlayerPositionInGuild(int playerPositionInGuild, GuildMember guildMember) {
+        List<GuildMember> memberList = guildMember.getGuild()
+                .getMemberList()
+                .stream().filter(x -> !x.getWaitingForApproval())
+                .collect(Collectors.toList());
+        if (memberList.size() < playerPositionInGuild) {
+            return null;
+        }
+
+        GuildMember dismissMember = memberList.get(playerPositionInGuild - 1);
+        return dismissMember;
     }
 
     private void internalHandleRoomPositionChange(Connection connection, RoomPlayer roomPlayer, boolean freeOldPosition, short oldPosition, short newPosition) {

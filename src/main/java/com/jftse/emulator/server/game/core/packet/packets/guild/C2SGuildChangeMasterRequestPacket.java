@@ -7,11 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SGuildChangeMasterRequestPacket extends Packet {
-    private int playerId;
+    private int playerPositionInGuild;
 
     public C2SGuildChangeMasterRequestPacket(Packet packet) {
         super(packet);
 
-        this.playerId = this.readInt();
+        this.playerPositionInGuild = this.readInt();
     }
 }
