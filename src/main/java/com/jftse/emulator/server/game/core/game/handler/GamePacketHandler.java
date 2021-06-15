@@ -1905,9 +1905,10 @@ public class GamePacketHandler {
 
     public void handleGuildListRequestPacket(Connection connection, Packet packet) {
         C2SGuildListRequestPacket guildListRequestPacket = new C2SGuildListRequestPacket(packet);
-
-        List<Guild> guildList = this.guildService.findAll();
-        connection.sendTCP(new S2CGuildListAnswerPacket(guildList));
+        if (guildListRequestPacket.getPage() == 0) {
+            List<Guild> guildList = this.guildService.findAll();
+            connection.sendTCP(new S2CGuildListAnswerPacket(guildList));
+        }
     }
 
     public void handleGuildJoinRequestPacket(Connection connection, Packet packet) {
