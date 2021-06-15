@@ -1026,11 +1026,11 @@ public class GamePacketHandler {
         char result = (char) (player == null ? 1 : 0);
 
         GuildMember guildMember = guildMemberService.getByPlayer(player);
-        String guildName = "";
-        if (guildMember != null && guildMember.getGuild() != null)
-            guildName = guildMember.getGuild().getName();
+        Guild guild = null;
+        if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
+            guild = guildMember.getGuild();
 
-        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guildName);
+        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guild);
         connection.sendTCP(lobbyUserInfoAnswerPacket);
     }
 
@@ -2185,6 +2185,45 @@ public class GamePacketHandler {
         }
         else
             connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 0));
+    }
+
+    public void handleGuildChangeLogoRequest(Connection connection, Packet packet) {
+        C2SGuildChangeLogoRequestPacket c2SGuildChangeLogoRequestPacket =
+                new C2SGuildChangeLogoRequestPacket(packet);
+
+        Player player = connection.getClient().getActivePlayer();
+        GuildMember guildMember = guildMemberService.getByPlayer(player);
+        if (c2SGuildChangeLogoRequestPacket.getPocketIdLogoBackground() > 0) {
+            PlayerPocket backgroundImagePocket = playerPocketService.findById((long) c2SGuildChangeLogoRequestPacket.getPocketIdLogoBackground());
+            guildMember.getGuild().setLogoBackgroundId(backgroundImagePocket.getItemIndex());
+            guildMember.getGuild().setLogoBackgroundColor(c2SGuildChangeLogoRequestPacket.getLogoBackgroundColor());
+        } else {
+            guildMember.getGuild().setLogoBackgroundId(-1);
+            guildMember.getGuild().setLogoBackgroundColor(-1);
+        }
+
+        if (c2SGuildChangeLogoRequestPacket.getPocketIdLogoPattern() > 0) {
+            PlayerPocket patternPocket = playerPocketService.findById((long) c2SGuildChangeLogoRequestPacket.getPocketIdLogoPattern());
+            guildMember.getGuild().setLogoPatternId(patternPocket.getItemIndex());
+            guildMember.getGuild().setLogoPatternColor(c2SGuildChangeLogoRequestPacket.getLogoPatternColor());
+        } else {
+            guildMember.getGuild().setLogoPatternId(-1);
+            guildMember.getGuild().setLogoPatternColor(-1);
+        }
+
+        if (c2SGuildChangeLogoRequestPacket.getPocketIdLogoMark() > 0) {
+            PlayerPocket markPocket = playerPocketService.findById((long) c2SGuildChangeLogoRequestPacket.getPocketIdLogoMark());
+            guildMember.getGuild().setLogoMarkId(markPocket.getItemIndex());
+            guildMember.getGuild().setLogoMarkColor(c2SGuildChangeLogoRequestPacket.getLogoMarkColor());
+        } else {
+            guildMember.getGuild().setLogoMarkId(-1);
+            guildMember.getGuild().setLogoMarkColor(-1);
+        }
+
+        guildService.save(guildMember.getGuild());
+
+        S2CGuildChangeLogoAnswerPacket answer = new S2CGuildChangeLogoAnswerPacket((short) 0);
+        connection.sendTCP(answer);
     }
 
     public void handleDisconnectPacket(Connection connection, Packet packet) {

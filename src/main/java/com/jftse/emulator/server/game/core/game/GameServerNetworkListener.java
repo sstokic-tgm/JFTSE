@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.game;
 
+import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.server.game.core.game.handler.GamePacketHandler;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.Connection;
@@ -353,6 +354,10 @@ public class GameServerNetworkListener implements ConnectionListener {
 
             case PacketID.C2SGuildChangeReverseMemberRequest:
                 gamePacketHandler.handleGuildChangeReverseMemberRequest(connection, packet);
+                break;
+
+            case PacketID.C2SGuildChangeLogoRequest:
+                gamePacketHandler.handleGuildChangeLogoRequest(connection, packet);
                 break;
 
             case PacketID.C2SMatchplayPlayerPicksUpCrystal:

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.packet.packets.lobby.room;
 
+import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
@@ -16,9 +17,9 @@ public class S2CRoomPlayerInformationPacket extends Packet {
 
         this.write((char) roomPlayerList.size());
         for (RoomPlayer roomPlayer : roomPlayerList) {
-            String guildName = "";
-            if (roomPlayer.getGuildMember() != null && roomPlayer.getGuildMember().getGuild() != null)
-                guildName = roomPlayer.getGuildMember().getGuild().getName();
+            Guild guild = null;
+            if (roomPlayer.getGuildMember() != null && !roomPlayer.getGuildMember().getWaitingForApproval() && roomPlayer.getGuildMember().getGuild() != null)
+                guild = roomPlayer.getGuildMember().getGuild();
 
             Player player = roomPlayer.getPlayer();
             ClothEquipment clothEquipment = roomPlayer.getClothEquipment();
@@ -34,13 +35,20 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write(player.getPlayerType());
             this.write((byte) 0); // unk2
             this.write((byte) 0); // unk3
-            this.write(guildName);
-            this.write(0);
-            this.write(0);
-            this.write(0);
-            this.write(0);
-            this.write(0);
-            this.write(0);
+            this.write(guild != null ? guild.getName() : "");
+
+            if (guild != null) {
+                this.write(guild.getLogoBackgroundId());
+                this.write(guild.getLogoBackgroundColor());
+                this.write(guild.getLogoPatternId());
+                this.write(guild.getLogoPatternColor());
+                this.write(guild.getLogoMarkId());
+                this.write(guild.getLogoMarkColor());
+            } else {
+                for (int i = 0; i < 6; i++)
+                    this.write(0);
+            }
+
             this.write((byte) 0);
             this.write("");
             this.write(0);
