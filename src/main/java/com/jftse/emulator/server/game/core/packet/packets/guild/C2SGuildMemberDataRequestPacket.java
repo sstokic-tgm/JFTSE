@@ -7,8 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SGuildMemberDataRequestPacket extends Packet {
+    private int page;
 
     public C2SGuildMemberDataRequestPacket(Packet packet) {
         super(packet);
+
+        this.page = this.readInt();
     }
 }

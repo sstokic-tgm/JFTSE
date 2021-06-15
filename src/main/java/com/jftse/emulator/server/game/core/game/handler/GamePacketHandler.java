@@ -2010,10 +2010,12 @@ public class GamePacketHandler {
     }
 
     public void handleGuildMemberDataRequestPacket(Connection connection, Packet packet) {
+        C2SGuildMemberDataRequestPacket c2SGuildMemberDataRequestPacket =
+                new C2SGuildMemberDataRequestPacket(packet);
         Player activePlayer = connection.getClient().getActivePlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
-        if (guildMember != null) {
+        if (guildMember != null && c2SGuildMemberDataRequestPacket.getPage() == 0) {
             List<GuildMember> guildMembers = guildMember.getGuild().getMemberList()
                     .stream()
                     .filter(x -> !x.getWaitingForApproval())
