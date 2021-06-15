@@ -1889,9 +1889,9 @@ public class GamePacketHandler {
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         if (guildMember == null)
-            connection.sendTCP(new S2CGuildDataAnswerPacket((short)1, null));
+            connection.sendTCP(new S2CGuildDataAnswerPacket((short)-2, null));
         else if (guildMember.getWaitingForApproval())
-            connection.sendTCP(new S2CGuildDataAnswerPacket((short)-1, null));
+            connection.sendTCP(new S2CGuildDataAnswerPacket((short)-1, guildMember.getGuild()));
         else
             connection.sendTCP(new S2CGuildDataAnswerPacket((short)0, guildMember.getGuild()));
     }
@@ -1967,6 +1967,8 @@ public class GamePacketHandler {
         Guild guild = guildMember.getGuild();
         guild.getMemberList().removeIf(x -> x.getId() == guildMember.getId());
         guildService.save(guild);
+
+        connection.sendTCP(new S2CGuildDataAnswerPacket((short)-2, guild));
     }
 
     public void handleGuildChangeInformationRequestPacket(Connection connection, Packet packet) {
