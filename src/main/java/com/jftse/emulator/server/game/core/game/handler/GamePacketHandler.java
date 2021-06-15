@@ -1908,11 +1908,40 @@ public class GamePacketHandler {
         Player activePlayer = connection.getClient().getActivePlayer();
 
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        if (guildMember != null && guildMember.getWaitingForApproval()) {
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -3));
+            return;
+        }
+
+        if (guildMember != null) {
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -2));
+            return;
+        }
+
         Guild guild = guildService.findById((long)guildJoinRequestPacket.getGuildId());
-        if (guild == null
-                || guildMember != null
-                || guild.getMemberList().size() == guild.getMaxMemberCount()) {
+        if (guild == null) {
             connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -1));
+            return;
+        }
+
+        if (guild.getMemberList().size() >= guild.getMaxMemberCount()) {
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -7));
+            return;
+        }
+
+        if (activePlayer.getLevel() < guild.getLevelRestriction()) {
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -4));
+            return;
+        }
+
+        boolean characterAllowed = false;
+        for (byte type : guild.getAllowedCharacterType()) {
+            characterAllowed = type == activePlayer.getPlayerType();
+            if (characterAllowed) break;
+        }
+
+        if (!characterAllowed) {
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -5));
             return;
         }
 
@@ -1925,11 +1954,11 @@ public class GamePacketHandler {
         guildMemberService.save(guildMember);
 
         if (guild.getIsPublic()) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short)0));
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short)1));
             connection.sendTCP(new S2CGuildDataAnswerPacket((short)0, guild));
         }
         else
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short)1));
+            connection.sendTCP(new S2CGuildJoinAnswerPacket((short)0));
     }
 
     public void handleGuildLeaveRequestPacket(Connection connection, Packet packet) {
