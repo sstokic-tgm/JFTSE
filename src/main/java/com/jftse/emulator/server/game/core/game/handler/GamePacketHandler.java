@@ -1025,7 +1025,12 @@ public class GamePacketHandler {
         Player player = playerService.findByIdFetched((long) lobbyUserInfoRequestPacket.getPlayerId());
         char result = (char) (player == null ? 1 : 0);
 
-        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player);
+        GuildMember guildMember = guildMemberService.getByPlayer(player);
+        String guildName = "";
+        if (guildMember != null && guildMember.getGuild() != null)
+            guildName = guildMember.getGuild().getName();
+
+        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guildName);
         connection.sendTCP(lobbyUserInfoAnswerPacket);
     }
 
@@ -1335,7 +1340,8 @@ public class GamePacketHandler {
             return;
         }
 
-        if ((room.isHardMode() || room.isArcade()) && connection.getClient().getActivePlayer().getLevel() != 60) {
+        Player activePlayer = connection.getClient().getActivePlayer();
+        if ((room.isHardMode() || room.isArcade()) && activePlayer.getLevel() != 60) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
 
@@ -1348,7 +1354,8 @@ public class GamePacketHandler {
         room.getPositions().set(newPosition, RoomPositionState.InUse);
 
         RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayer(connection.getClient().getActivePlayer());
+        roomPlayer.setPlayer(activePlayer);
+        roomPlayer.setGuildMember(guildMemberService.getByPlayer(activePlayer));
         roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
         roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
         roomPlayer.setPosition((short) newPosition);
@@ -2125,11 +2132,19 @@ public class GamePacketHandler {
 
     public void handleGuildChatRequestPacket(Connection connection, Packet packet) {
         C2SGuildChatRequestPacket guildChatRequestPacket = new C2SGuildChatRequestPacket(packet);
-
-        // ToDo: Broadcast
         Player activePlayer = connection.getClient().getActivePlayer();
-
-        connection.sendTCP(new S2CGuildChatAnswerPacket(activePlayer.getName(), guildChatRequestPacket.getMessage()));
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        List<GuildMember> guildMembers = guildMember.getGuild().getMemberList()
+                .stream()
+                .filter(x -> !x.getWaitingForApproval())
+                .collect(Collectors.toList());
+        List<Integer> allPlayerIds = guildMembers.stream()
+                .map(x -> x.getPlayer().getId().intValue())
+                .collect(Collectors.toList());
+        List<Client> allClients = gameHandler.getClientList().stream()
+                .filter(c -> allPlayerIds.contains(c.getActivePlayer().getId().intValue()))
+                .collect(Collectors.toList());
+        allClients.forEach(c -> c.getConnection().sendTCP(new S2CGuildChatAnswerPacket(activePlayer.getName(), guildChatRequestPacket.getMessage())));
     }
 
     public void handleGuildSearchRequestPacket(Connection connection, Packet packet) {
@@ -2487,8 +2502,12 @@ public class GamePacketHandler {
             room.getPositions().set(2, RoomPositionState.Locked);
             room.getPositions().set(3, RoomPositionState.Locked);
         }
+
+        Player activePlayer = connection.getClient().getActivePlayer();
+
         RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayer(connection.getClient().getActivePlayer());
+        roomPlayer.setPlayer(activePlayer);
+        roomPlayer.setGuildMember(guildMemberService.getByPlayer(activePlayer));
         roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
         roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
         roomPlayer.setPosition((short) 0);

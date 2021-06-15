@@ -6,7 +6,7 @@ import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CLobbyUserInfoAnswerPacket extends Packet {
-    public S2CLobbyUserInfoAnswerPacket(char result, Player player) {
+    public S2CLobbyUserInfoAnswerPacket(char result, Player player, String guildName) {
         super(PacketID.S2CLobbyUserInfoAnswer);
 
         this.write(result);
@@ -28,7 +28,7 @@ public class S2CLobbyUserInfoAnswerPacket extends Packet {
 
             this.write(0); // perfect(s)
             this.write(0); // guard break(s)
-            this.write(""); // guild name
+            this.write(guildName); // guild name
 
             // ?? 2x player info play stats data with a boolean true which adds 3 additional int to be written otherwise there would be 20 ints only
             for (int i = 0; i < 26; i++)

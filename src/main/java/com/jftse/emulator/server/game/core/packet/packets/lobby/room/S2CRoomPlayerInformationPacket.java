@@ -16,6 +16,10 @@ public class S2CRoomPlayerInformationPacket extends Packet {
 
         this.write((char) roomPlayerList.size());
         for (RoomPlayer roomPlayer : roomPlayerList) {
+            String guildName = "";
+            if (roomPlayer.getGuildMember() != null && roomPlayer.getGuildMember().getGuild() != null)
+                guildName = roomPlayer.getGuildMember().getGuild().getName();
+
             Player player = roomPlayer.getPlayer();
             ClothEquipment clothEquipment = roomPlayer.getClothEquipment();
             StatusPointsAddedDto statusPointsAddedDto = roomPlayer.getStatusPointsAddedDto();
@@ -30,7 +34,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write(player.getPlayerType());
             this.write((byte) 0); // unk2
             this.write((byte) 0); // unk3
-            this.write(""); // guild name
+            this.write(guildName);
             this.write(0);
             this.write(0);
             this.write(0);
