@@ -63,9 +63,7 @@ import com.jftse.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
-import com.jftse.emulator.server.game.core.packet.packets.messaging.C2SAddFriendRequestPacket;
-import com.jftse.emulator.server.game.core.packet.packets.messaging.S2CAddFriendResponsePacket;
-import com.jftse.emulator.server.game.core.packet.packets.messaging.S2CFriendsListAnswerPacket;
+import com.jftse.emulator.server.game.core.packet.packets.messaging.*;
 import com.jftse.emulator.server.game.core.packet.packets.player.*;
 import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingDataRequestPacket;
 import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingPersonalDataRequestPacket;
@@ -237,7 +235,8 @@ public class GamePacketHandler {
             List<Friend> friends = friendService.findByPlayer(player).stream()
                     .filter(x -> x.getFriendshipState() == FriendshipState.Friends)
                     .collect(Collectors.toList());
-            S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
+            S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
+                    new S2CFriendsListAnswerPacket(friends, gameHandler.getClientList().stream().collect(Collectors.toList()));
             connection.sendTCP(s2CFriendsListAnswerPacket);
 
             AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
@@ -1114,6 +1113,16 @@ public class GamePacketHandler {
             S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
                     new S2CAddFriendResponsePacket((short) 0);
             connection.sendTCP(s2CAddFriendResponsePacket);
+
+            S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket =
+                    new S2CFriendRequestNotificationPacket(player.getName());
+            Client friendClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(targetPlayer.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (friendClient != null) {
+                friendClient.getConnection().sendTCP(s2CFriendRequestNotificationPacket);
+            }
             return;
         }
 
@@ -1127,6 +1136,50 @@ public class GamePacketHandler {
                     new S2CAddFriendResponsePacket((short) -4);
             connection.sendTCP(s2CAddFriendResponsePacket);
             return;
+        }
+    }
+
+    public void handleAddFriendApprovalRequest(Connection connection, Packet packet) {
+        C2SAddFriendApprovalRequestPacket c2SAddFriendApprovalRequestPacket =
+                new C2SAddFriendApprovalRequestPacket(packet);
+        Player targetPlayer = playerService.findByName(c2SAddFriendApprovalRequestPacket.getPlayerName());
+        List<Friend> friends = friendService.findByPlayer(targetPlayer);
+        Friend friend = friends.stream()
+                .filter(x -> x.getFriend().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findFirst()
+                .orElse(null);
+        if (c2SAddFriendApprovalRequestPacket.isAccept()) {
+            friend.setFriendshipState(FriendshipState.Friends);
+            Friend newFriend = new Friend();
+            newFriend.setPlayer(connection.getClient().getActivePlayer());
+            newFriend.setFriend(targetPlayer);
+            newFriend.setFriendshipState(FriendshipState.Friends);
+
+            friendService.save(friend);
+            friendService.save(newFriend);
+
+            this.updateFriendsList(connection.getClient().getActivePlayer());
+            this.updateFriendsList(targetPlayer);
+
+            // TODO: ANSWER???
+        } else {
+            friendService.remove(friend.getId());
+            // TODO: ANSWER???
+        }
+    }
+
+    private void updateFriendsList(Player player) {
+        List<Friend> friends = friendService.findByPlayer(player).stream()
+                .filter(x -> x.getFriendshipState() == FriendshipState.Friends)
+                .collect(Collectors.toList());
+        S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
+                new S2CFriendsListAnswerPacket(friends, gameHandler.getClientList().stream().collect(Collectors.toList()));
+        Client client = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
+                .findFirst()
+                .orElse(null);
+        if (client != null) {
+            client.getConnection().sendTCP(s2CFriendsListAnswerPacket);
         }
     }
 
