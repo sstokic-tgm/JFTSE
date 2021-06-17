@@ -17,6 +17,8 @@ import com.jftse.emulator.server.database.model.item.ItemChar;
 import com.jftse.emulator.server.database.model.item.ItemHouse;
 import com.jftse.emulator.server.database.model.item.ItemHouseDeco;
 import com.jftse.emulator.server.database.model.item.Product;
+import com.jftse.emulator.server.database.model.messaging.Friend;
+import com.jftse.emulator.server.database.model.messaging.FriendshipState;
 import com.jftse.emulator.server.database.model.player.*;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
@@ -61,6 +63,9 @@ import com.jftse.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
+import com.jftse.emulator.server.game.core.packet.packets.messaging.C2SAddFriendRequestPacket;
+import com.jftse.emulator.server.game.core.packet.packets.messaging.S2CAddFriendResponsePacket;
+import com.jftse.emulator.server.game.core.packet.packets.messaging.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.player.*;
 import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingDataRequestPacket;
 import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingPersonalDataRequestPacket;
@@ -123,6 +128,7 @@ public class GamePacketHandler {
     private final BasicModeHandler basicModeHandler;
     private final BattleModeHandler battleModeHandler;
     private final ClientWhitelistService clientWhitelistService;
+    private final FriendService friendService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -227,6 +233,12 @@ public class GamePacketHandler {
 
             S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
             connection.sendTCP(playerLevelExpPacket);
+
+            List<Friend> friends = friendService.findByPlayer(player).stream()
+                    .filter(x -> x.getFriendshipState() == FriendshipState.Friends)
+                    .collect(Collectors.toList());
+            S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
+            connection.sendTCP(s2CFriendsListAnswerPacket);
 
             AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
 
@@ -1073,6 +1085,48 @@ public class GamePacketHandler {
 
             connection.sendTCP(whisperAnswerPacket);
         } break;
+        }
+    }
+
+    public void handleAddFriendRequestPacket(Connection connection, Packet packet) {
+        C2SAddFriendRequestPacket c2SAddFriendRequestPacket =
+                new C2SAddFriendRequestPacket(packet);
+        Player player = connection.getClient().getActivePlayer();
+        Player targetPlayer = playerService.findByName(c2SAddFriendRequestPacket.getPlayerName());
+        if (targetPlayer == null) {
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) -1);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
+        }
+
+        List<Friend> friends = friendService.findByPlayer(player);
+        Friend targetFriend = friends.stream()
+                .filter(x -> x.getFriend().getId().equals(targetPlayer.getId()))
+                .findFirst()
+                .orElse(null);
+        if (targetFriend == null) {
+            Friend friend = new Friend();
+            friend.setPlayer(player);
+            friend.setFriend(targetPlayer);
+            friend.setFriendshipState(FriendshipState.WaitingApproval);
+            friendService.save(friend);
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) 0);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
+        }
+
+        if (targetFriend.getFriendshipState() == FriendshipState.Friends || targetFriend.getFriendshipState() == FriendshipState.Relationship) {
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) -5);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
+        } else if (targetFriend.getFriendshipState() == FriendshipState.WaitingApproval) {
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) -4);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
         }
     }
 

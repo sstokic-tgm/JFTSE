@@ -180,6 +180,10 @@ public final class PacketID {
     public final static char C2SWhisperReq = 0x1702;
     public final static char S2CWhisperAnswer = 0x1703;
 
+    public final static char C2SAddFriendRequest = 0x1F41;
+    public final static char S2CAddFriendAnswer = 0x1F42;
+    public final static char S2CFriendsListAnswer = 0x1F4A;
+
     public final static char C2SPlayerDelete = 0x1B6B;
     public final static char S2CPlayerDelete = 0x1B6C;
 
