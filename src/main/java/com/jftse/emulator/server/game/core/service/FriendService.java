@@ -27,4 +27,6 @@ public class FriendService {
     public Friend findById(Long id) { return friendRepository.findById(id).get(); }
 
     public List<Friend> findByPlayer(Player player) { return friendRepository.findByPlayer(player); }
+
+    public List<Friend> findByFriend(Player friend) { return friendRepository.findByFriend(friend); }
 }

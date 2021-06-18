@@ -239,6 +239,15 @@ public class GamePacketHandler {
                     new S2CFriendsListAnswerPacket(friends, gameHandler.getClientList().stream().collect(Collectors.toList()));
             connection.sendTCP(s2CFriendsListAnswerPacket);
 
+            List<Friend> friendsWaitingForApproval = friendService.findByFriend(player).stream()
+                    .filter(x -> x.getFriendshipState() == FriendshipState.WaitingApproval)
+                    .collect(Collectors.toList());
+            friendsWaitingForApproval.forEach(x -> {
+                S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket =
+                        new S2CFriendRequestNotificationPacket(x.getPlayer().getName());
+                connection.sendTCP(s2CFriendRequestNotificationPacket);
+            });
+
             AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
 
             S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
