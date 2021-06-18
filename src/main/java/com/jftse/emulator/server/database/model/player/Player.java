@@ -70,4 +70,6 @@ public class Player extends AbstractBaseModel {
     private Byte dexterity = 0;
     private Byte willpower = 0;
     private Byte statusPoints = 0;
+
+    private Boolean online = false;
 }

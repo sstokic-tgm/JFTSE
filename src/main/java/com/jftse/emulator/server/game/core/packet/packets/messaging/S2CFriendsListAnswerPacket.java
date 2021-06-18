@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 public class S2CFriendsListAnswerPacket extends Packet {
-    public S2CFriendsListAnswerPacket(List<Friend> friends, List<Client> clients) {
+    public S2CFriendsListAnswerPacket(List<Friend> friends) {
         super(PacketID.S2CFriendsListAnswer);
 
         this.write((byte) friends.size());
@@ -21,9 +21,7 @@ public class S2CFriendsListAnswerPacket extends Packet {
             this.write(friend.getFriend().getId().intValue());
             this.write(friend.getFriend().getName());
             this.write(friend.getFriend().getPlayerType());
-
-            boolean isOnline = clients.stream().anyMatch(x -> x.getActivePlayer().getId().equals(friend.getFriend().getId()));
-            this.write(isOnline ? (short) 0 : (short) -1);
+            this.write(friend.getFriend().getOnline() ? (short) 0 : (short) -1);
         }
     }
 }

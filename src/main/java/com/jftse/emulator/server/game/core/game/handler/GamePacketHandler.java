@@ -232,12 +232,17 @@ public class GamePacketHandler {
             S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
             connection.sendTCP(playerLevelExpPacket);
 
+            player.setOnline(true);
+            this.playerService.save(player);
+
             List<Friend> friends = friendService.findByPlayer(player).stream()
                     .filter(x -> x.getFriendshipState() == FriendshipState.Friends)
                     .collect(Collectors.toList());
             S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
-                    new S2CFriendsListAnswerPacket(friends, gameHandler.getClientList().stream().collect(Collectors.toList()));
+                    new S2CFriendsListAnswerPacket(friends);
             connection.sendTCP(s2CFriendsListAnswerPacket);
+            friends.stream().filter(x -> x.getFriend().getOnline())
+                    .forEach(x -> this.updateFriendsList(x.getFriend()));
 
             List<Friend> friendsWaitingForApproval = friendService.findByFriend(player).stream()
                     .filter(x -> x.getFriendshipState() == FriendshipState.WaitingApproval)
@@ -1201,7 +1206,7 @@ public class GamePacketHandler {
                 .filter(x -> x.getFriendshipState() == FriendshipState.Friends)
                 .collect(Collectors.toList());
         S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
-                new S2CFriendsListAnswerPacket(friends, gameHandler.getClientList().stream().collect(Collectors.toList()));
+                new S2CFriendsListAnswerPacket(friends);
         Client client = gameHandler.getClientList().stream()
                 .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
                 .findFirst()
@@ -2424,11 +2429,17 @@ public class GamePacketHandler {
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
             authenticationService.updateAccount(account);
+            Player player = connection.getClient().getActivePlayer();
+            if (player != null) {
+                player.setOnline(false);
+                this.playerService.save(player);
+                List<Friend> friends = this.friendService.findByPlayer(player);
+                friends.forEach(x -> this.updateFriendsList(x.getFriend()));
+            }
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
                 Room currentClientRoom = connection.getClient().getActiveRoom();
-                Player player = connection.getClient().getActivePlayer();
 
                 if (currentClientRoom != null) {
                     if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
