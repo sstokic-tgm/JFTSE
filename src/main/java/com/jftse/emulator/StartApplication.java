@@ -57,7 +57,7 @@ public class StartApplication {
         ctx.getBeanFactory().autowireBean(gameServerNetworkListener);
 
         Server gameServer = new Server();
-        gameServer.addListener(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(4)));
+        gameServer.addListener(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(2)));
 
         try {
             gameServer.bind(5895);
