@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class S2CGuildSearchAnswerPacket extends Packet {
     public S2CGuildSearchAnswerPacket(List<Guild> guildList) {
-        super(PacketID.S2CGuildListAnswer);
+        super(PacketID.S2CGuildSearchAnswer);
 
         this.write((byte)guildList.size());
         for (Guild guild : guildList) {

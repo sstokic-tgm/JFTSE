@@ -2014,7 +2014,7 @@ public class GamePacketHandler {
         C2SGuildListRequestPacket guildListRequestPacket = new C2SGuildListRequestPacket(packet);
         if (guildListRequestPacket.getPage() == 0) {
             List<Guild> guildList = this.guildService.findAll();
-            connection.sendTCP(new S2CGuildListAnswerPacket(guildList));
+            StreamUtils.batches(guildList, 10).forEach(guilds -> connection.sendTCP(new S2CGuildListAnswerPacket(guilds)));
         }
     }
 
@@ -2276,7 +2276,26 @@ public class GamePacketHandler {
     }
 
     public void handleGuildSearchRequestPacket(Connection connection, Packet packet) {
-        // ToDo:
+        C2SGuildSearchRequestPacket guildSearchRequestPacket = new C2SGuildSearchRequestPacket(packet);
+        byte searchType = guildSearchRequestPacket.getSearchType();
+
+        switch (searchType) {
+            case 0:
+                Guild guild = guildService.findById((long) guildSearchRequestPacket.getNumber());
+                if (guild != null)
+                    connection.sendTCP(new S2CGuildSearchAnswerPacket(Collections.singletonList(guild)));
+                else
+                    connection.sendTCP(new S2CGuildSearchAnswerPacket(new ArrayList<>()));
+                break;
+
+            case 1:
+                List<Guild> guildList = new ArrayList<>(guildService.findAllByNameContaining(guildSearchRequestPacket.getName()));
+                StreamUtils.batches(guildList, 10).forEach(guilds -> connection.sendTCP(new S2CGuildSearchAnswerPacket(guilds)));
+                break;
+
+            default:
+                break;
+        }
     }
 
     public void handleGuildChangeReverseMemberRequest(Connection connection, Packet packet) {
