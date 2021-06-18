@@ -19,6 +19,7 @@ import com.jftse.emulator.server.database.model.item.ItemHouseDeco;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.messaging.Friend;
 import com.jftse.emulator.server.database.model.messaging.FriendshipState;
+import com.jftse.emulator.server.database.model.messaging.Message;
 import com.jftse.emulator.server.database.model.player.*;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
@@ -127,6 +128,7 @@ public class GamePacketHandler {
     private final BattleModeHandler battleModeHandler;
     private final ClientWhitelistService clientWhitelistService;
     private final FriendService friendService;
+    private final MessageService messageService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -251,6 +253,13 @@ public class GamePacketHandler {
                 S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket =
                         new S2CFriendRequestNotificationPacket(x.getPlayer().getName());
                 connection.sendTCP(s2CFriendRequestNotificationPacket);
+            });
+
+            List<Message> messages = messageService.findByReceiver(player);
+            messages.forEach(m -> {
+                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                        new S2CReceivedMessageNotificationPacket(m);
+                connection.sendTCP(s2CReceivedMessageNotificationPacket);
             });
 
             AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
@@ -1199,6 +1208,43 @@ public class GamePacketHandler {
             friendService.remove(friend.getId());
             // TODO: ANSWER???
         }
+    }
+
+    public void handleSendMessageRequest(Connection connection, Packet packet) {
+        C2SSendMessageRequestPacket c2SSendMessageRequestPacket =
+                new C2SSendMessageRequestPacket(packet);
+        Player receiver = playerService.findByName(c2SSendMessageRequestPacket.getReceiverName());
+        if (receiver != null) {
+            Message message = new Message();
+            message.setReceiver(receiver);
+            message.setSender(connection.getClient().getActivePlayer());
+            message.setMessage(c2SSendMessageRequestPacket.getMessage());
+            message.setSeen(false);
+            messageService.save(message);
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .findFirst()
+                    .orElse(null);
+            S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                    new S2CReceivedMessageNotificationPacket(message);
+            receiverClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+        }
+    }
+
+    public void handleMessageSeenRequest(Connection connection, Packet packet) {
+        C2SMessageSeenRequestPacket c2SMessageSeenRequestPacket =
+                new C2SMessageSeenRequestPacket(packet);
+        Message message = messageService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
+        message.setSeen(true);
+        messageService.save(message);
+    }
+
+    public void handleDeleteMessageRequest(Connection connection, Packet packet) {
+        C2SDeleteMessagesRequest c2SDeleteMessagesRequest = new C2SDeleteMessagesRequest(packet);
+        c2SDeleteMessagesRequest.getMessageIds().forEach(m -> {
+            messageService.remove(m.longValue());
+        });
     }
 
     private void updateFriendsList(Player player) {

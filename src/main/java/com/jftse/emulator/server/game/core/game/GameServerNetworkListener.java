@@ -360,6 +360,18 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleDeleteFriendRequest(connection, packet);
                 break;
 
+            case PacketID.C2SSendMessageRequest:
+                gamePacketHandler.handleSendMessageRequest(connection, packet);
+                break;
+
+            case PacketID.C2SDeleteMessagesRequest:
+                gamePacketHandler.handleDeleteMessageRequest(connection, packet);
+                break;
+
+            case PacketID.C2SMessageSeenRequest:
+                gamePacketHandler.handleMessageSeenRequest(connection, packet);
+                break;
+
             case PacketID.C2SGuildSearchRequest:
                 gamePacketHandler.handleGuildSearchRequestPacket(connection, packet);
                 break;
