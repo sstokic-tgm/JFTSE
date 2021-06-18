@@ -1297,16 +1297,18 @@ public class GamePacketHandler {
             // 0 = Item purchase successful, -1 = Not enough gold, -2 = Not enough AP,
             // -3 = Receiver reached maximum number of character, -6 = That user already has the maximum number of this item
             // -8 = That users character model cannot equip this item,  -9 = You cannot send gifts purchases with gold to that character
-            S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) 0);
+            S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) 0, gift);
             connection.sendTCP(s2CSendGiftAnswerPacket);
         }
     }
 
     public void handleDeleteMessageRequest(Connection connection, Packet packet) {
         C2SDeleteMessagesRequest c2SDeleteMessagesRequest = new C2SDeleteMessagesRequest(packet);
-        c2SDeleteMessagesRequest.getMessageIds().forEach(m -> {
-            this.messageService.remove(m.longValue());
-        });
+        if (c2SDeleteMessagesRequest.getType() == 0) {
+            c2SDeleteMessagesRequest.getMessageIds().forEach(m -> {
+                this.messageService.remove(m.longValue());
+            });
+        }
     }
 
     private void updateFriendsList(Player player) {
