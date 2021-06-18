@@ -12,6 +12,6 @@ public class C2SDeleteFriendRequestPacket extends Packet {
     public C2SDeleteFriendRequestPacket(Packet packet) {
         super(packet);
 
-        this.friendId = this.readInt();
+        this.friendId = packet.readInt();
     }
 }

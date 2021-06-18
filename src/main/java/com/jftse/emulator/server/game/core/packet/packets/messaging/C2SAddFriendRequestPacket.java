@@ -12,6 +12,6 @@ public class C2SAddFriendRequestPacket extends Packet {
     public C2SAddFriendRequestPacket(Packet packet) {
         super(packet);
 
-        this.playerName = this.readUnicodeString();
+        this.playerName = packet.readUnicodeString();
     }
 }

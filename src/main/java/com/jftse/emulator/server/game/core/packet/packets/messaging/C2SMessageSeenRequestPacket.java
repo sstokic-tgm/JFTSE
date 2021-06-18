@@ -13,7 +13,7 @@ public class C2SMessageSeenRequestPacket extends Packet {
     public C2SMessageSeenRequestPacket(Packet packet) {
         super(packet);
 
-        this.unk0 = this.readByte();
-        this.messageId = this.readInt();
+        this.unk0 = packet.readByte();
+        this.messageId = packet.readInt();
     }
 }

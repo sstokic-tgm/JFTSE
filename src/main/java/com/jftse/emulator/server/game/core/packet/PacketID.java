@@ -191,6 +191,10 @@ public final class PacketID {
     public final static char S2CReceivedMessageNotification = 0x1F61;
     public final static char C2SDeleteMessagesRequest = 0x1F62;
     public final static char C2SMessageSeenRequest = 0x1F67;
+    public final static char C2SSendGiftRequest = 0x1F73;
+    public final static char S2CSendGiftAnswer = 0x1F74;
+    public final static char S2CReceivedGiftNotification = 0x1F75;
+    public final static char S2CClubMembersListAnswerPacket = 0x1FBB;
 
     public final static char C2SPlayerDelete = 0x1B6B;
     public final static char S2CPlayerDelete = 0x1B6C;
