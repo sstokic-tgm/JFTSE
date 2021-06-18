@@ -356,6 +356,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleAddFriendApprovalRequest(connection, packet);
                 break;
 
+            case PacketID.C2SDeleteFriendRequest:
+                gamePacketHandler.handleDeleteFriendRequest(connection, packet);
+                break;
+
             case PacketID.C2SGuildSearchRequest:
                 gamePacketHandler.handleGuildSearchRequestPacket(connection, packet);
                 break;

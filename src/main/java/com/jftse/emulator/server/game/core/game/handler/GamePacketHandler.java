@@ -1148,6 +1148,25 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleDeleteFriendRequest(Connection connection, Packet packet) {
+        C2SDeleteFriendRequestPacket c2SDeleteFriendRequestPacket =
+                new C2SDeleteFriendRequestPacket(packet);
+        Player player = connection.getClient().getActivePlayer();
+        Friend friend1 = friendService.findByPlayerIdAndFriendId(player.getId(), c2SDeleteFriendRequestPacket.getFriendId());
+        if (friend1 != null) {
+            friendService.remove(friend1.getId());
+            S2CDeleteFriendResponsePacket s2CDeleteFriendResponsePacket =
+                    new S2CDeleteFriendResponsePacket(friend1.getFriend());
+            connection.sendTCP(s2CDeleteFriendResponsePacket);
+        }
+
+        Friend friend2 = friendService.findByPlayerIdAndFriendId(c2SDeleteFriendRequestPacket.getFriendId(), player.getId());
+        if (friend2 != null) {
+            friendService.remove(friend2.getId());
+            this.updateFriendsList(friend2.getPlayer());
+        }
+    }
+
     public void handleAddFriendApprovalRequest(Connection connection, Packet packet) {
         C2SAddFriendApprovalRequestPacket c2SAddFriendApprovalRequestPacket =
                 new C2SAddFriendApprovalRequestPacket(packet);

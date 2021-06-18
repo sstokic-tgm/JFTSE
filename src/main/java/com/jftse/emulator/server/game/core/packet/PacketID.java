@@ -182,9 +182,11 @@ public final class PacketID {
 
     public final static char C2SAddFriendRequest = 0x1F41;
     public final static char S2CAddFriendAnswer = 0x1F42;
+    public final static char S2CFriendRequestNotification = 0x1F44;
     public final static char C2SAddFriendApprovalRequest = 0x1F45;
     public final static char S2CFriendsListAnswer = 0x1F4A;
-    public final static char S2CFriendRequestNotification = 0x1F44;
+    public final static char C2SDeleteFriendRequest = 0x1F55;
+    public final static char S2CDeleteFriendAnswer = 0x1F57;
 
     public final static char C2SPlayerDelete = 0x1B6B;
     public final static char S2CPlayerDelete = 0x1B6C;
