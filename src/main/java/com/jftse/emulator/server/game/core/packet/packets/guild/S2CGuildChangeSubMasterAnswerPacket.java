@@ -4,9 +4,10 @@ import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CGuildChangeSubMasterAnswerPacket extends Packet {
-    public S2CGuildChangeSubMasterAnswerPacket(byte status) {
+    public S2CGuildChangeSubMasterAnswerPacket(byte status, short result) {
         super(PacketID.S2CGuildChangeSubMasterAnswer);
 
         this.write(status);
+        this.write(result);
     }
 }

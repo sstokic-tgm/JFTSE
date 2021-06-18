@@ -16,10 +16,11 @@ import javax.persistence.*;
 @Audited
 @Entity
 public class GuildGoldUsage extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "guild_id", referencedColumnName = "id")
     private Guild guild;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 

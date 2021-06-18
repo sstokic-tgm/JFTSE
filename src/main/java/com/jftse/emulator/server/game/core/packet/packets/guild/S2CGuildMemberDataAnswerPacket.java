@@ -10,8 +10,8 @@ public class S2CGuildMemberDataAnswerPacket extends Packet {
     public S2CGuildMemberDataAnswerPacket(List<GuildMember> guildMemberList) {
         super(PacketID.S2CGuildMemberDataAnswer);
 
-        this.write((short)0);
-        this.write((byte)guildMemberList.size());
+        this.write((short) 0);
+        this.write((byte) guildMemberList.size());
 
         for (int i = 0; i < guildMemberList.size(); i++) {
             GuildMember guildMember = guildMemberList.get(i);
@@ -23,7 +23,7 @@ public class S2CGuildMemberDataAnswerPacket extends Packet {
             this.write(guildMember.getPlayer().getPlayerType());
             this.write(guildMember.getPlayer().getName());
             this.write(guildMember.getContributionPoints());
-            this.write((short)0); // Unknown
+            this.write((short) 0); // Unknown
         }
     }
 }

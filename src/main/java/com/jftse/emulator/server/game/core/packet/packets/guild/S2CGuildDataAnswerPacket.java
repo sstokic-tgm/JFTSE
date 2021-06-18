@@ -12,9 +12,13 @@ public class S2CGuildDataAnswerPacket extends Packet {
     public S2CGuildDataAnswerPacket(short guildStatus, Guild guild) {
         super(PacketID.S2CGuildDataAnswer);
 
-        if (guildStatus != 0)
+        if (guildStatus == -2) {
             this.write(guildStatus);
-        else {
+        } else if (guildStatus == -1) {
+            this.write(guildStatus);
+            this.write(guild.getName());
+            this.write(String.valueOf(guild.getLevel()));
+        } else {
             this.write((short) 0);
             this.write(guild.getId().intValue());
             this.write(guild.getLogoBackgroundId());
@@ -38,13 +42,13 @@ public class S2CGuildDataAnswerPacket extends Packet {
             for (GuildMember subMaster : subMasterList)
                 this.write(subMaster.getPlayer().getName());
 
-            this.write((byte)memberList.size());
+            this.write((byte) memberList.stream().filter(x -> !x.getWaitingForApproval()).count());
             this.write(guild.getMaxMemberCount());
 
             List<GuildMember> reverseMemberList =
                     (List<GuildMember>) memberList.stream().filter(GuildMember::getWaitingForApproval)
                             .collect(Collectors.toList());
-            this.write((byte)reverseMemberList.size());
+            this.write((byte) reverseMemberList.size());
 
             this.write(guild.getLevel());
             this.write(guild.getClubPoints());
@@ -55,7 +59,7 @@ public class S2CGuildDataAnswerPacket extends Packet {
             this.write(guild.getLeagueRecordWin());
             this.write(guild.getLeagueRecordLoose());
             this.write(guild.getLevelRestriction());
-            this.write((byte)guild.getAllowedCharacterType().length);
+            this.write((byte) guild.getAllowedCharacterType().length);
             for (byte allowedCharacter : guild.getAllowedCharacterType())
                 this.write(allowedCharacter);
             this.write(guild.getIsPublic());

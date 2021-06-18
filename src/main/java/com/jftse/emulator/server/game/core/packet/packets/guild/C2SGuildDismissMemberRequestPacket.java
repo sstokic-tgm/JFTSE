@@ -7,11 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SGuildDismissMemberRequestPacket extends Packet {
-    private int playerId;
+    private int playerPositionInGuild;
 
     public C2SGuildDismissMemberRequestPacket(Packet packet) {
         super(packet);
 
-        this.playerId = this.readInt();
+        this.playerPositionInGuild = this.readInt();
     }
 }
