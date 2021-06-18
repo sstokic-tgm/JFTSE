@@ -31,6 +31,10 @@ public class GuildService {
         return guildList.size() != 0 ? guildList.get(0) : null;
     }
 
+    public List<Guild> findAllByNameContaining(String name) {
+        return guildRepository.findAllByNameContainingIgnoreCase(name);
+    }
+
     public Guild findById(Long id) { return guildRepository.findById(id).get(); }
 
     public List<Guild> findAll() { return guildRepository.findAll(); }

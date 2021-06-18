@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface GuildRepository extends JpaRepository<Guild, Long> {
     Optional<Guild> findById(Long id);
     List<Guild> findAllByName(String name);
+    List<Guild> findAllByNameContainingIgnoreCase(String name);
 }
