@@ -13,11 +13,11 @@ import javax.persistence.*;
 @Audited
 @Entity
 public class Friend extends AbstractBaseModel {
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "friend_id", referencedColumnName = "id")
     private Player friend;
 
