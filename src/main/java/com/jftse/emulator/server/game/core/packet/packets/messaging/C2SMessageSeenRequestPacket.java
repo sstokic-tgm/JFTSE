@@ -7,13 +7,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SMessageSeenRequestPacket extends Packet {
-    private Byte unk0;
+    private Byte type;
     private Integer messageId;
 
     public C2SMessageSeenRequestPacket(Packet packet) {
         super(packet);
 
-        this.unk0 = packet.readByte();
+        this.type = packet.readByte();
         this.messageId = packet.readInt();
     }
 }

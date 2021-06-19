@@ -1264,9 +1264,15 @@ public class GamePacketHandler {
     public void handleMessageSeenRequest(Connection connection, Packet packet) {
         C2SMessageSeenRequestPacket c2SMessageSeenRequestPacket =
                 new C2SMessageSeenRequestPacket(packet);
-        Message message = this.messageService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
-        message.setSeen(true);
-        this.messageService.save(message);
+        if (c2SMessageSeenRequestPacket.getType() == 0) {
+            Message message = this.messageService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
+            message.setSeen(true);
+            this.messageService.save(message);
+        } else if (c2SMessageSeenRequestPacket.getType() == 2) {
+            Gift gift = this.giftService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
+            gift.setSeen(true);
+            this.giftService.save(gift);
+        }
     }
 
     public void handleSendGiftRequest(Connection connection, Packet packet) {
@@ -1307,6 +1313,10 @@ public class GamePacketHandler {
         if (c2SDeleteMessagesRequest.getType() == 0) {
             c2SDeleteMessagesRequest.getMessageIds().forEach(m -> {
                 this.messageService.remove(m.longValue());
+            });
+        } else if (c2SDeleteMessagesRequest.getType() == 2) {
+            c2SDeleteMessagesRequest.getMessageIds().forEach(m -> {
+                this.giftService.remove(m.longValue());
             });
         }
     }
