@@ -1,4 +1,4 @@
-package com.jftse.emulator.server.game.core.service;
+package com.jftse.emulator.server.game.core.service.messaging;
 
 import com.jftse.emulator.server.database.model.messaging.Gift;
 import com.jftse.emulator.server.database.model.player.Player;

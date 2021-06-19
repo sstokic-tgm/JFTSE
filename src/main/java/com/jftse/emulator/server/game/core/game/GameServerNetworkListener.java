@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.game.core.game;
 
-import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.server.game.core.game.handler.GamePacketHandler;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.Connection;
@@ -374,6 +373,10 @@ public class GameServerNetworkListener implements ConnectionListener {
 
             case PacketID.C2SSendGiftRequest:
                 gamePacketHandler.handleSendGiftRequest(connection, packet);
+                break;
+
+            case PacketID.C2SSendParcelRequest:
+                gamePacketHandler.handleSendParcelRequest(connection, packet);
                 break;
 
             case PacketID.C2SGuildSearchRequest:

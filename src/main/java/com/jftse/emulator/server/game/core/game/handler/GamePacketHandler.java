@@ -17,10 +17,7 @@ import com.jftse.emulator.server.database.model.item.ItemChar;
 import com.jftse.emulator.server.database.model.item.ItemHouse;
 import com.jftse.emulator.server.database.model.item.ItemHouseDeco;
 import com.jftse.emulator.server.database.model.item.Product;
-import com.jftse.emulator.server.database.model.messaging.Friend;
-import com.jftse.emulator.server.database.model.messaging.FriendshipState;
-import com.jftse.emulator.server.database.model.messaging.Gift;
-import com.jftse.emulator.server.database.model.messaging.Message;
+import com.jftse.emulator.server.database.model.messaging.*;
 import com.jftse.emulator.server.database.model.player.*;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
@@ -77,6 +74,10 @@ import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialEn
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.S2CTutorialProgressAnswerPacket;
 import com.jftse.emulator.server.game.core.service.*;
 import com.jftse.emulator.server.game.core.service.ItemCharService;
+import com.jftse.emulator.server.game.core.service.messaging.FriendService;
+import com.jftse.emulator.server.game.core.service.messaging.GiftService;
+import com.jftse.emulator.server.game.core.service.messaging.MessageService;
+import com.jftse.emulator.server.game.core.service.messaging.ParcelService;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
 import com.jftse.emulator.server.game.core.singleplay.tutorial.TutorialGame;
@@ -131,6 +132,7 @@ public class GamePacketHandler {
     private final FriendService friendService;
     private final MessageService messageService;
     private final GiftService giftService;
+    private final ParcelService parcelService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -1305,6 +1307,33 @@ public class GamePacketHandler {
             // -8 = That users character model cannot equip this item,  -9 = You cannot send gifts purchases with gold to that character
             S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) 0, gift);
             connection.sendTCP(s2CSendGiftAnswerPacket);
+        }
+    }
+
+    public void handleSendParcelRequest(Connection connection, Packet packet) {
+        C2SSendParcelRequestPacket c2SSendParcelRequestPacket = new C2SSendParcelRequestPacket(packet);
+        Product product = this.productService.findProductByProductItemIndex(c2SSendParcelRequestPacket.getProductIndex());
+        Player receiver = this.playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
+        if (receiver != null && product != null) {
+            Parcel parcel = new Parcel();
+            parcel.setReceiver(receiver);
+            parcel.setSender(connection.getClient().getActivePlayer());
+            parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
+            parcel.setSeen(false);
+            parcel.setProduct(product);
+            parcel.setCashOnDelivery(c2SSendParcelRequestPacket.getCashOnDelivery());
+            this.parcelService.save(parcel);
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (receiverClient != null) {
+                // TODO: Notify receiver
+            }
+
+            // TODO: Handle fee
+            // TODO: Return response to sender
         }
     }
 
