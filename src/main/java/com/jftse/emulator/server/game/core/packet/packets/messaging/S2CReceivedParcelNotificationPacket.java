@@ -22,8 +22,8 @@ public class S2CReceivedParcelNotificationPacket extends Packet {
         this.write(category.getValue());
         this.write(parcel.getProduct().getItem0());
         this.write((byte) 0); //UNK
-        this.write(1); //AMOUNT
-        this.write((byte) 2); //TYPE 0 = Nothing, 1 = Gold, 2 = Cash on delivery
-        this.write(parcel.getCashOnDelivery()); //GOLD
+        this.write(parcel.getAmount());
+        this.write((byte) parcel.getParcelType().getValue());
+        this.write(parcel.getGold());
     }
 }

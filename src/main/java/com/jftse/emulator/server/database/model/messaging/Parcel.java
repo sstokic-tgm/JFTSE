@@ -29,6 +29,7 @@ public class Parcel extends AbstractBaseModel {
     private Product product;
 
     private String message;
-    private Boolean seen;
-    private Integer cashOnDelivery;
+    private Integer amount;
+    private Integer gold;
+    private ParcelType parcelType;
 }
