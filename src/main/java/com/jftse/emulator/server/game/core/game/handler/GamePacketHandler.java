@@ -1323,7 +1323,7 @@ public class GamePacketHandler {
             parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
 
             // TODO: FIND OUT QUANTITY OF ITEMS FROM PLAYERS POCKET
-            
+
             this.parcelService.save(parcel);
 
             Client receiverClient = gameHandler.getClientList().stream()

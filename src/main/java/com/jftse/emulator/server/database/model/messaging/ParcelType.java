@@ -1,15 +1,15 @@
 package com.jftse.emulator.server.database.model.messaging;
 
 public enum ParcelType {
-    None(0), Gold(10), CashOnDelivery(5);
+    None((byte) 0), Gold((byte) 1), CashOnDelivery((byte) 2);
 
-    private final int value;
+    private final Byte value;
 
-    ParcelType(int value) {
+    ParcelType(Byte value) {
         this.value = value;
     }
 
-    public int getValue() {
+    public Byte getValue() {
         return value;
     }
 }
