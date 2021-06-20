@@ -9,7 +9,7 @@ import lombok.Setter;
 public class C2SSendParcelRequestPacket extends Packet {
     private String receiverName;
     private String message;
-    private Integer productIndex;
+    private Integer playerPocketId;
     private Integer cashOnDelivery;
     private Byte unk0;
 
@@ -18,7 +18,7 @@ public class C2SSendParcelRequestPacket extends Packet {
 
         this.receiverName = packet.readUnicodeString();
         this.message = packet.readUnicodeString();
-        this.productIndex = packet.readInt();
+        this.playerPocketId = packet.readInt();
         this.unk0 = packet.readByte();
         this.cashOnDelivery = packet.readInt();
     }

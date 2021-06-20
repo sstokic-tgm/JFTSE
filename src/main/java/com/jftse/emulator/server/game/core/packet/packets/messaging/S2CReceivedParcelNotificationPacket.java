@@ -18,12 +18,12 @@ public class S2CReceivedParcelNotificationPacket extends Packet {
         this.write(parcel.getCreated());
         this.write(parcel.getMessage());
 
-        EItemCategory category = EItemCategory.valueOf(parcel.getProduct().getCategory());
+        EItemCategory category = EItemCategory.valueOf(parcel.getCategory());
         this.write(category.getValue());
-        this.write(parcel.getProduct().getItem0());
+        this.write(parcel.getItemIndex());
         this.write((byte) 0); //UNK
-        this.write(parcel.getAmount());
-        this.write((byte) parcel.getParcelType().getValue());
+        this.write(parcel.getItemCount());
+        this.write(parcel.getParcelType().getValue());
         this.write(parcel.getGold());
     }
 }

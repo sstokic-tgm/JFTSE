@@ -379,6 +379,14 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleSendParcelRequest(connection, packet);
                 break;
 
+            case PacketID.C2SDenyParcelRequest:
+                gamePacketHandler.handleDenyParcelRequest(connection, packet);
+                break;
+
+            case PacketID.C2SAcceptParcelRequest:
+                gamePacketHandler.handleAcceptParcelRequest(connection, packet);
+                break;
+
             case PacketID.C2SGuildSearchRequest:
                 gamePacketHandler.handleGuildSearchRequestPacket(connection, packet);
                 break;

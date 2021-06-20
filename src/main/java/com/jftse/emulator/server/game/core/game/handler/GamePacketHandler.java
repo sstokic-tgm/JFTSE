@@ -273,6 +273,13 @@ public class GamePacketHandler {
                 connection.sendTCP(s2CReceivedGiftNotificationPacket);
             });
 
+            List<Parcel> parcels = this.parcelService.findByReceiver(player);
+            parcels.forEach(parcel -> {
+                S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket =
+                        new S2CReceivedParcelNotificationPacket(parcel);
+                connection.sendTCP(s2CReceivedParcelNotificationPacket);
+            });
+
             GuildMember guildMember = this.guildMemberService.getByPlayer(player);
             if (guildMember != null) {
                 Guild guild = guildMember.getGuild();
@@ -1312,31 +1319,109 @@ public class GamePacketHandler {
 
     public void handleSendParcelRequest(Connection connection, Packet packet) {
         C2SSendParcelRequestPacket c2SSendParcelRequestPacket = new C2SSendParcelRequestPacket(packet);
-        Product product = this.productService.findProductByProductItemIndex(c2SSendParcelRequestPacket.getProductIndex());
+        PlayerPocket item = this.playerPocketService.findById(c2SSendParcelRequestPacket.getPlayerPocketId().longValue());
+        Player sender = connection.getClient().getActivePlayer();
         Player receiver = this.playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
-        if (receiver != null && product != null) {
-            Parcel parcel = new Parcel();
-            parcel.setReceiver(receiver);
-            parcel.setSender(connection.getClient().getActivePlayer());
-            parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
-            parcel.setProduct(product);
-            parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
+        if (receiver != null && item != null) {
+            if (item != null) {
+                // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
+                Parcel parcel = new Parcel();
+                parcel.setReceiver(receiver);
+                parcel.setSender(connection.getClient().getActivePlayer());
+                parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
+                parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
 
-            // TODO: FIND OUT QUANTITY OF ITEMS FROM PLAYERS POCKET
+                parcel.setItemCount(item.getItemCount());
+                parcel.setCategory(item.getCategory());
+                parcel.setItemIndex(item.getItemIndex());
+                parcel.setUseType(item.getUseType());
 
-            this.parcelService.save(parcel);
+                // TODO: Is this right?
+                if (receiver.getId().equals(sender.getId())) {
+                    parcel.setParcelType(ParcelType.Gold);
+                } else {
+                    parcel.setParcelType(ParcelType.CashOnDelivery);
+                }
 
-            Client receiverClient = gameHandler.getClientList().stream()
-                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
-                    .findFirst()
-                    .orElse(null);
-            if (receiverClient != null) {
-                // TODO: Notify receiver
+                this.parcelService.save(parcel);
+                this.playerPocketService.remove(item.getId());
+
+                Client receiverClient = gameHandler.getClientList().stream()
+                        .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                        .findFirst()
+                        .orElse(null);
+                if (receiverClient != null) {
+                    S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket =
+                            new S2CReceivedParcelNotificationPacket(parcel);
+                    receiverClient.getConnection().sendTCP(s2CReceivedParcelNotificationPacket);
+                }
+
+                // TODO: Handle fee
+                // TODO: Handle all these cases
+                // 0 = Successfully sent
+                //-1 = Failed to send parcel
+                //-2 = You do not have enough gold
+                //-4 = Under level 20 user can not send parcel
+                //-5 = Gold transactions must be under 1.000.000
+                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) 0);
+                connection.sendTCP(s2CSendParcelAnswerPacket);
             }
-
-            // TODO: Handle fee
-            // TODO: Return response to sender
         }
+    }
+
+    public void handleDenyParcelRequest(Connection connection, Packet packet) {
+        C2SDenyParcelRequest c2SDenyParcelRequest = new C2SDenyParcelRequest(packet);
+        Parcel parcel = this.parcelService.findById(c2SDenyParcelRequest.getParcelId().longValue());
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), parcel.getSender().getPocket());
+        if (item == null) {
+            item = new PlayerPocket();
+            item.setCategory(parcel.getCategory());
+            item.setItemCount(parcel.getItemCount());
+            item.setItemIndex(parcel.getItemIndex());
+            item.setUseType(parcel.getUseType());
+            item.setPocket(parcel.getSender().getPocket());
+        } else {
+            item.setItemCount(item.getItemCount() + parcel.getItemCount());
+        }
+
+        this.playerPocketService.save(item);
+        this.parcelService.remove(parcel.getId());
+
+        // TODO: Notify receiver and update clients, Remove parcel from list
+    }
+
+    public void handleAcceptParcelRequest(Connection connection, Packet packet) {
+        C2SAcceptParcelRequest c2SAcceptParcelRequest = new C2SAcceptParcelRequest(packet);
+        Parcel parcel = this.parcelService.findById(c2SAcceptParcelRequest.getParcelId().longValue());
+
+        // TODO: Check if enough money?
+        Player receiver = parcel.getReceiver();
+        Integer newGoldReceiver = receiver.getGold() - parcel.getGold();
+        receiver.setGold(newGoldReceiver);
+
+        Player sender = parcel.getSender();
+        Integer newGoldSender = sender.getGold() + parcel.getGold();
+        sender.setGold(newGoldSender);
+
+        Pocket receiverPocket = receiver.getPocket();
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), receiverPocket);
+        if (item == null) {
+            item = new PlayerPocket();
+            item.setCategory(parcel.getCategory());
+            item.setItemCount(parcel.getItemCount());
+            item.setItemIndex(parcel.getItemIndex());
+            item.setUseType(parcel.getUseType());
+            item.setPocket(receiverPocket);
+        } else {
+            item.setItemCount(item.getItemCount() + parcel.getItemCount());
+        }
+
+        this.playerPocketService.save(item);
+        this.parcelService.remove(parcel.getId());
+        this.playerService.save(receiver);
+        this.playerService.save(sender);
+
+        // TODO: Notify sender and receiver and update clients, Remove parcel from list
     }
 
     public void handleDeleteMessageRequest(Connection connection, Packet packet) {

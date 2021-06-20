@@ -3,6 +3,8 @@ package com.jftse.emulator.server.database.model.messaging;
 import com.jftse.emulator.common.model.AbstractBaseModel;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
@@ -23,13 +25,13 @@ public class Parcel extends AbstractBaseModel {
     @JoinColumn(name = "receiver_id", referencedColumnName = "id")
     private Player receiver;
 
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private Product product;
-
     private String message;
-    private Integer amount;
     private Integer gold;
     private ParcelType parcelType;
+
+    // ITEM INFO
+    private String category;
+    private Integer itemIndex;
+    private Integer itemCount;
+    private String useType;
 }
