@@ -202,6 +202,8 @@ public final class PacketID {
     public final static char S2CSentParcelList = 0x219D;
     public final static char C2SDenyParcelRequest = 0x21A0;
     public final static char C2SAcceptParcelRequest = 0x21A2;
+    public final static char C2SCancelParcelSendingRequest = 0x21A4;
+    public final static char S2CCancelParcelSendingAnswer = 0x21A5;
     public final static char S2CRemoveParcelFromListAnswer = 0x21A6;
 
     public final static char C2SPlayerDelete = 0x1B6B;

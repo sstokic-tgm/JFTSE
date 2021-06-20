@@ -15,7 +15,7 @@ public class S2CSentParcelListPacket extends Packet {
     public S2CSentParcelListPacket(List<Parcel> parcels) {
         super(PacketID.S2CSentParcelList);
 
-        this.write((byte) 1);
+        this.write((byte) 1); // TYPE 1 = Received parcels, 1 = Sent parcels, 2 = Received proposals, 3 = Sent proposals
         this.write((byte) parcels.size());
         for (Parcel parcel : parcels) {
             this.write(parcel.getId().intValue());

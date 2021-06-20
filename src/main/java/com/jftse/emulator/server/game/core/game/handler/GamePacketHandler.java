@@ -1372,6 +1372,10 @@ public class GamePacketHandler {
 
                 S2CInventoryItemRemoveAnswerPacket s2CInventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
                 connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);
+
+                List<Parcel> sentParcels = this.parcelService.findBySender(parcel.getSender());
+                S2CSentParcelListPacket s2CSentParcelListPacket = new S2CSentParcelListPacket(sentParcels);
+                connection.sendTCP(s2CSentParcelListPacket);
             }
         }
     }
@@ -1405,6 +1409,43 @@ public class GamePacketHandler {
         if (senderClient != null) {
             S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
             senderClient.getConnection().sendTCP(s2CInventoryDataPacket);
+
+            // TODO: Remove parcel from sent list of sender, S2CSentParcelListPacket doesn't work
+        }
+    }
+
+    public void handleCancelSendingParcelRequest(Connection connection, Packet packet) {
+        C2SCancelParcelSendingRequest c2SCancelParcelSendingRequest = new C2SCancelParcelSendingRequest(packet);
+        Parcel parcel = this.parcelService.findById(c2SCancelParcelSendingRequest.getParcelId().longValue());
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), parcel.getSender().getPocket());
+        if (item == null) {
+            item = new PlayerPocket();
+            item.setCategory(parcel.getCategory());
+            item.setItemCount(parcel.getItemCount());
+            item.setItemIndex(parcel.getItemIndex());
+            item.setUseType(parcel.getUseType());
+            item.setPocket(parcel.getSender().getPocket());
+        } else {
+            item.setItemCount(item.getItemCount() + parcel.getItemCount());
+        }
+
+        this.playerPocketService.save(item);
+        this.parcelService.remove(parcel.getId());
+
+        List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
+        S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+        connection.sendTCP(s2CInventoryDataPacket);
+
+        S2CCancelParcelSendingAnswer s2CCancelParcelSendingAnswer = new S2CCancelParcelSendingAnswer((short) 0);
+        connection.sendTCP(s2CCancelParcelSendingAnswer);
+
+        Client receiverClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(parcel.getReceiver().getId()))
+                .findFirst()
+                .orElse(null);
+        if (receiverClient != null) {
+            S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
+            receiverClient.getConnection().sendTCP(s2CRemoveParcelFromListPacket);
         }
     }
 
@@ -1446,6 +1487,8 @@ public class GamePacketHandler {
         if (senderClient != null) {
             S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
             senderClient.getConnection().sendTCP(senderMoneyPacket);
+
+            // TODO: Remove parcel from sent list of sender, S2CSentParcelListPacket doesn't work
         }
 
         S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
