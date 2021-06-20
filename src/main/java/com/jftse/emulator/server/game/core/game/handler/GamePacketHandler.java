@@ -2688,8 +2688,10 @@ public class GamePacketHandler {
             authenticationService.updateAccount(account);
             Player player = connection.getClient().getActivePlayer();
             if (player != null) {
+                player = this.playerService.findById(player.getId());
                 player.setOnline(false);
                 this.playerService.save(player);
+                connection.getClient().setActivePlayer(player);
                 List<Friend> friends = this.friendService.findByPlayer(player);
                 friends.forEach(x -> this.updateFriendsList(x.getFriend()));
 
