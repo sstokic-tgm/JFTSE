@@ -1388,7 +1388,9 @@ public class GamePacketHandler {
         this.playerPocketService.save(item);
         this.parcelService.remove(parcel.getId());
 
-        // TODO: Remove parcel from receivers client list, Add items to senders client pocket
+        // TODO: Add items to senders client pocket
+        S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
+        connection.sendTCP(s2CRemoveParcelFromListPacket);
     }
 
     public void handleAcceptParcelRequest(Connection connection, Packet packet) {
@@ -1422,7 +1424,6 @@ public class GamePacketHandler {
         this.playerService.save(receiver);
         this.playerService.save(sender);
 
-        // TODO: Notify sender and receiver, Remove parcel from client list
         Client senderClient = gameHandler.getClientList().stream()
                 .filter(x -> x.getActivePlayer().getId().equals(sender.getId()))
                 .findFirst()
@@ -1432,8 +1433,13 @@ public class GamePacketHandler {
             senderClient.getConnection().sendTCP(senderMoneyPacket);
         }
 
+        S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
+        connection.sendTCP(s2CRemoveParcelFromListPacket);
+
         S2CShopMoneyAnswerPacket receiverMoneyPacket = new S2CShopMoneyAnswerPacket(receiver);
         connection.sendTCP(receiverMoneyPacket);
+
+        // TODO: Add items to receivers client pocket
     }
 
     public void handleDeleteMessageRequest(Connection connection, Packet packet) {
