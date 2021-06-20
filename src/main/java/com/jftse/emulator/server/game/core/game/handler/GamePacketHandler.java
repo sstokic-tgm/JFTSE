@@ -1356,7 +1356,6 @@ public class GamePacketHandler {
                     receiverClient.getConnection().sendTCP(s2CReceivedParcelNotificationPacket);
                 }
 
-                // TODO: Remove item from senders client pocket
                 // TODO: Handle fee
                 // TODO: Handle all these cases
                 // 0 = Successfully sent
@@ -1366,6 +1365,9 @@ public class GamePacketHandler {
                 //-5 = Gold transactions must be under 1.000.000
                 S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) 0);
                 connection.sendTCP(s2CSendParcelAnswerPacket);
+
+                S2CInventoryItemRemoveAnswerPacket s2CInventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
+                connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);
             }
         }
     }
@@ -1388,9 +1390,18 @@ public class GamePacketHandler {
         this.playerPocketService.save(item);
         this.parcelService.remove(parcel.getId());
 
-        // TODO: Add items to senders client pocket
         S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
         connection.sendTCP(s2CRemoveParcelFromListPacket);
+
+        List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
+        Client senderClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(parcel.getSender().getId()))
+                .findFirst()
+                .orElse(null);
+        if (senderClient != null) {
+            S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+            senderClient.getConnection().sendTCP(s2CInventoryDataPacket);
+        }
     }
 
     public void handleAcceptParcelRequest(Connection connection, Packet packet) {
@@ -1439,7 +1450,9 @@ public class GamePacketHandler {
         S2CShopMoneyAnswerPacket receiverMoneyPacket = new S2CShopMoneyAnswerPacket(receiver);
         connection.sendTCP(receiverMoneyPacket);
 
-        // TODO: Add items to receivers client pocket
+        List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(receiver.getPocket());
+        S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+        connection.sendTCP(s2CInventoryDataPacket);
     }
 
     public void handleDeleteMessageRequest(Connection connection, Packet packet) {
