@@ -74,10 +74,7 @@ import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialEn
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.S2CTutorialProgressAnswerPacket;
 import com.jftse.emulator.server.game.core.service.*;
 import com.jftse.emulator.server.game.core.service.ItemCharService;
-import com.jftse.emulator.server.game.core.service.messaging.FriendService;
-import com.jftse.emulator.server.game.core.service.messaging.GiftService;
-import com.jftse.emulator.server.game.core.service.messaging.MessageService;
-import com.jftse.emulator.server.game.core.service.messaging.ParcelService;
+import com.jftse.emulator.server.game.core.service.messaging.*;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
 import com.jftse.emulator.server.game.core.singleplay.tutorial.TutorialGame;
@@ -133,6 +130,7 @@ public class GamePacketHandler {
     private final MessageService messageService;
     private final GiftService giftService;
     private final ParcelService parcelService;
+    private final ProposalService proposalService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -280,6 +278,14 @@ public class GamePacketHandler {
             List<Parcel> sentParcels = this.parcelService.findBySender(player);
             S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
             connection.sendTCP(s2CSentParcelListPacket);
+
+            List<Proposal> receivedProposals = this.proposalService.findByReceiver(player);
+            S2CProposalListPacket s2CReceivedProposalListPacket = new S2CProposalListPacket((byte) 3, receivedProposals);
+            connection.sendTCP(s2CReceivedProposalListPacket);
+
+            List<Proposal> sentProposals = this.proposalService.findBySender(player);
+            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 4, sentProposals);
+            connection.sendTCP(s2CSentProposalListPacket);
 
             GuildMember guildMember = this.guildMemberService.getByPlayer(player);
             if (guildMember != null) {
@@ -1502,6 +1508,46 @@ public class GamePacketHandler {
         List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(receiver.getPocket());
         S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
         connection.sendTCP(s2CInventoryDataPacket);
+    }
+
+    public void handleSendProposalRequest(Connection connection, Packet packet) {
+        C2SSendProposalRequestPacket c2SSendProposalRequestPacket =
+                new C2SSendProposalRequestPacket(packet);
+        PlayerPocket item = this.playerPocketService.findById(c2SSendProposalRequestPacket.getPlayerPocketId().longValue());
+        Player sender = connection.getClient().getActivePlayer();
+        Player receiver = this.playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
+        if (receiver != null && item != null) {
+            if (item != null) {
+                Proposal proposal = new Proposal();
+                proposal.setReceiver(receiver);
+                proposal.setSender(connection.getClient().getActivePlayer());
+                proposal.setMessage(c2SSendProposalRequestPacket.getMessage());
+                proposal.setSeen(false);
+                proposal.setCategory(item.getCategory());
+                proposal.setItemIndex(item.getItemIndex());
+
+                this.proposalService.save(proposal);
+                Integer newItemCount = item.getItemCount() - 1;
+                if (newItemCount < 1) {
+                    this.playerPocketService.remove(item.getId());
+                } else {
+                    item.setItemCount(newItemCount);
+                    this.playerPocketService.save(item);
+                }
+
+                Client receiverClient = gameHandler.getClientList().stream()
+                        .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                        .findFirst()
+                        .orElse(null);
+                if (receiverClient != null) {
+                    S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket =
+                            new S2CReceivedProposalNotificationPacket(proposal);
+                    receiverClient.getConnection().sendTCP(s2CReceivedProposalNotificationPacket);
+                }
+
+                // TODO: Implement answer
+            }
+        }
     }
 
     public void handleDeleteMessageRequest(Connection connection, Packet packet) {
