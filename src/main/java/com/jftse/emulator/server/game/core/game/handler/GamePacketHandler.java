@@ -1356,6 +1356,7 @@ public class GamePacketHandler {
                     receiverClient.getConnection().sendTCP(s2CReceivedParcelNotificationPacket);
                 }
 
+                // TODO: Remove item from senders client pocket
                 // TODO: Handle fee
                 // TODO: Handle all these cases
                 // 0 = Successfully sent
@@ -1387,7 +1388,7 @@ public class GamePacketHandler {
         this.playerPocketService.save(item);
         this.parcelService.remove(parcel.getId());
 
-        // TODO: Notify receiver and update clients, Remove parcel from list
+        // TODO: Remove parcel from receivers client list, Add items to senders client pocket
     }
 
     public void handleAcceptParcelRequest(Connection connection, Packet packet) {
@@ -1421,7 +1422,18 @@ public class GamePacketHandler {
         this.playerService.save(receiver);
         this.playerService.save(sender);
 
-        // TODO: Notify sender and receiver and update clients, Remove parcel from list
+        // TODO: Notify sender and receiver, Remove parcel from client list
+        Client senderClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(sender.getId()))
+                .findFirst()
+                .orElse(null);
+        if (senderClient != null) {
+            S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
+            senderClient.getConnection().sendTCP(senderMoneyPacket);
+        }
+
+        S2CShopMoneyAnswerPacket receiverMoneyPacket = new S2CShopMoneyAnswerPacket(receiver);
+        connection.sendTCP(receiverMoneyPacket);
     }
 
     public void handleDeleteMessageRequest(Connection connection, Packet packet) {
