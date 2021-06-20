@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.game.core.packet.packets.messaging;
 
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.database.model.messaging.Friend;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import java.util.List;
 @Setter
 public class S2CClubMembersListAnswerPacket extends Packet {
     public S2CClubMembersListAnswerPacket(List<GuildMember> guildMembers) {
-        super(PacketID.S2CClubMembersListAnswerPacket);
+        super(PacketID.S2CClubMembersListAnswer);
 
         this.write((byte) guildMembers.size());
         for (GuildMember guildMember : guildMembers) {

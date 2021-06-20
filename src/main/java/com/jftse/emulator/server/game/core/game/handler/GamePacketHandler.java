@@ -273,12 +273,16 @@ public class GamePacketHandler {
                 connection.sendTCP(s2CReceivedGiftNotificationPacket);
             });
 
-            List<Parcel> parcels = this.parcelService.findByReceiver(player);
-            parcels.forEach(parcel -> {
+            List<Parcel> receivedParcels = this.parcelService.findByReceiver(player);
+            receivedParcels.forEach(parcel -> {
                 S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket =
                         new S2CReceivedParcelNotificationPacket(parcel);
                 connection.sendTCP(s2CReceivedParcelNotificationPacket);
             });
+
+            List<Parcel> sentParcels = this.parcelService.findBySender(player);
+            S2CSentParcelListPacket s2CSentParcelListPacket = new S2CSentParcelListPacket(sentParcels);
+            connection.sendTCP(s2CSentParcelListPacket);
 
             GuildMember guildMember = this.guildMemberService.getByPlayer(player);
             if (guildMember != null) {

@@ -194,10 +194,12 @@ public final class PacketID {
     public final static char C2SSendGiftRequest = 0x1F73;
     public final static char S2CSendGiftAnswer = 0x1F74;
     public final static char S2CReceivedGiftNotification = 0x1F75;
-    public final static char S2CClubMembersListAnswerPacket = 0x1FBB;
+    public final static char S2CClubMembersListAnswer = 0x1FBB;
+    public final static char S2CYouGotPresentMessage = 0x2135;
     public final static char C2SSendParcelRequest = 0x2199;
     public final static char S2CSendParcelAnswer = 0x219A;
     public final static char S2CReceivedParcelNotification = 0x219B;
+    public final static char S2CSentParcelList = 0x219D;
     public final static char C2SDenyParcelRequest = 0x21A0;
     public final static char C2SAcceptParcelRequest = 0x21A2;
     public final static char S2CRemoveParcelFromListAnswer = 0x21A6;
