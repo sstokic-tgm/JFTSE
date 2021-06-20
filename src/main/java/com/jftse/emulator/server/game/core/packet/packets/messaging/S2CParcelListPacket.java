@@ -11,15 +11,15 @@ import java.util.List;
 
 @Getter
 @Setter
-public class S2CSentParcelListPacket extends Packet {
-    public S2CSentParcelListPacket(List<Parcel> parcels) {
+public class S2CParcelListPacket extends Packet {
+    public S2CParcelListPacket(byte listType, List<Parcel> parcels) {
         super(PacketID.S2CSentParcelList);
 
-        this.write((byte) 1); // TYPE 1 = Received parcels, 1 = Sent parcels, 2 = Received proposals, 3 = Sent proposals
+        this.write(listType); // TYPE 1 = Received parcels, 1 = Sent parcels, 2 = Received proposals, 3 = Sent proposals
         this.write((byte) parcels.size());
         for (Parcel parcel : parcels) {
             this.write(parcel.getId().intValue());
-            this.write(parcel.getReceiver().getName());
+            this.write(listType == (byte) 0 ? parcel.getSender().getName() : parcel.getReceiver().getName());
             this.write(parcel.getMessage());
 
             EItemCategory category = EItemCategory.valueOf(parcel.getCategory());

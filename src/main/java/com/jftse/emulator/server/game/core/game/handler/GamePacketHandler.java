@@ -274,14 +274,11 @@ public class GamePacketHandler {
             });
 
             List<Parcel> receivedParcels = this.parcelService.findByReceiver(player);
-            receivedParcels.forEach(parcel -> {
-                S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket =
-                        new S2CReceivedParcelNotificationPacket(parcel);
-                connection.sendTCP(s2CReceivedParcelNotificationPacket);
-            });
+            S2CParcelListPacket s2CReceivedParcelListPacket = new S2CParcelListPacket((byte) 0, receivedParcels);
+            connection.sendTCP(s2CReceivedParcelListPacket);
 
             List<Parcel> sentParcels = this.parcelService.findBySender(player);
-            S2CSentParcelListPacket s2CSentParcelListPacket = new S2CSentParcelListPacket(sentParcels);
+            S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
             connection.sendTCP(s2CSentParcelListPacket);
 
             GuildMember guildMember = this.guildMemberService.getByPlayer(player);
@@ -1374,7 +1371,7 @@ public class GamePacketHandler {
                 connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);
 
                 List<Parcel> sentParcels = this.parcelService.findBySender(parcel.getSender());
-                S2CSentParcelListPacket s2CSentParcelListPacket = new S2CSentParcelListPacket(sentParcels);
+                S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
                 connection.sendTCP(s2CSentParcelListPacket);
             }
         }
@@ -1383,6 +1380,8 @@ public class GamePacketHandler {
     public void handleDenyParcelRequest(Connection connection, Packet packet) {
         C2SDenyParcelRequest c2SDenyParcelRequest = new C2SDenyParcelRequest(packet);
         Parcel parcel = this.parcelService.findById(c2SDenyParcelRequest.getParcelId().longValue());
+        if (parcel == null) return;
+
         PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), parcel.getSender().getPocket());
         if (item == null) {
             item = new PlayerPocket();
@@ -1417,6 +1416,8 @@ public class GamePacketHandler {
     public void handleCancelSendingParcelRequest(Connection connection, Packet packet) {
         C2SCancelParcelSendingRequest c2SCancelParcelSendingRequest = new C2SCancelParcelSendingRequest(packet);
         Parcel parcel = this.parcelService.findById(c2SCancelParcelSendingRequest.getParcelId().longValue());
+        if (parcel == null) return;
+
         PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), parcel.getSender().getPocket());
         if (item == null) {
             item = new PlayerPocket();
@@ -1452,6 +1453,7 @@ public class GamePacketHandler {
     public void handleAcceptParcelRequest(Connection connection, Packet packet) {
         C2SAcceptParcelRequest c2SAcceptParcelRequest = new C2SAcceptParcelRequest(packet);
         Parcel parcel = this.parcelService.findById(c2SAcceptParcelRequest.getParcelId().longValue());
+        if (parcel == null) return;
 
         // TODO: Check if enough money?
         Player receiver = parcel.getReceiver();
