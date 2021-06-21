@@ -13,9 +13,9 @@ import java.util.List;
 @Setter
 public class S2CParcelListPacket extends Packet {
     public S2CParcelListPacket(byte listType, List<Parcel> parcels) {
-        super(PacketID.S2CMessengerListFiller);
+        super(PacketID.S2CParcelListAnswer);
 
-        this.write(listType); // TYPE 1 = Received parcels, 1 = Sent parcels, 2 = Received proposals, 3 = Sent proposals
+        this.write(listType);
         this.write((byte) parcels.size());
         for (Parcel parcel : parcels) {
             this.write(parcel.getId().intValue());

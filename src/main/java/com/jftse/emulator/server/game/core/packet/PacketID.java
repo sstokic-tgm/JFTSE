@@ -199,14 +199,16 @@ public final class PacketID {
     public final static char C2SSendParcelRequest = 0x2199;
     public final static char S2CSendParcelAnswer = 0x219A;
     public final static char S2CReceivedParcelNotification = 0x219B;
-    public final static char S2CMessengerListFiller = 0x219D;
+    public final static char S2CParcelListAnswer = 0x219D;
     public final static char C2SDenyParcelRequest = 0x21A0;
     public final static char C2SAcceptParcelRequest = 0x21A2;
     public final static char C2SCancelParcelSendingRequest = 0x21A4;
     public final static char S2CCancelParcelSendingAnswer = 0x21A5;
     public final static char S2CRemoveParcelFromListAnswer = 0x21A6;
     public final static char C2SSendProposalRequest = 0x251D;
+    public final static char S2CProposalDeliveredAnswer = 0x251E;
     public final static char S2CReceivedProposalNotification = 0x251F;
+    public final static char S2CProposalListAnswer = 0x2527;
 
     public final static char C2SPlayerDelete = 0x1B6B;
     public final static char S2CPlayerDelete = 0x1B6C;

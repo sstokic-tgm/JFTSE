@@ -12,12 +12,17 @@ import java.util.List;
 @Setter
 public class S2CProposalListPacket extends Packet {
     public S2CProposalListPacket(byte listType, List<Proposal> proposals) {
-        super(PacketID.S2CMessengerListFiller);
+        super(PacketID.S2CProposalListAnswer);
 
-        this.write(listType); // TYPE 1 = Received parcels, 1 = Sent parcels, 2 = Received proposals, 3 = Sent proposals
+        this.write(listType);
         this.write((byte) proposals.size());
         for (Proposal proposal : proposals) {
-            // TODO: Find out packet structure
+            this.write(proposal.getId().intValue());
+            this.write(listType == (byte) 0 ? proposal.getSender().getName() : proposal.getReceiver().getName());
+            this.write(proposal.getSeen());
+            this.write(proposal.getMessage());
+            this.write(proposal.getCreated());
+            this.write(proposal.getItemIndex());
         }
     }
 }

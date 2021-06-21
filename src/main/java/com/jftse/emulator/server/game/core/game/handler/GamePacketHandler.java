@@ -280,11 +280,11 @@ public class GamePacketHandler {
             connection.sendTCP(s2CSentParcelListPacket);
 
             List<Proposal> receivedProposals = this.proposalService.findByReceiver(player);
-            S2CProposalListPacket s2CReceivedProposalListPacket = new S2CProposalListPacket((byte) 3, receivedProposals);
+            S2CProposalListPacket s2CReceivedProposalListPacket = new S2CProposalListPacket((byte) 0, receivedProposals);
             connection.sendTCP(s2CReceivedProposalListPacket);
 
             List<Proposal> sentProposals = this.proposalService.findBySender(player);
-            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 4, sentProposals);
+            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
             connection.sendTCP(s2CSentProposalListPacket);
 
             GuildMember guildMember = this.guildMemberService.getByPlayer(player);
@@ -1545,7 +1545,13 @@ public class GamePacketHandler {
                     receiverClient.getConnection().sendTCP(s2CReceivedProposalNotificationPacket);
                 }
 
-                // TODO: Implement answer
+                List<Proposal> sentProposals = this.proposalService.findBySender(sender);
+                S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
+                connection.sendTCP(s2CSentProposalListPacket);
+
+                S2CProposalDeliveredAnswerPacket s2CProposalDeliveredAnswerPacket =
+                        new S2CProposalDeliveredAnswerPacket((short) 0);
+                connection.sendTCP(s2CProposalDeliveredAnswerPacket);
             }
         }
     }
