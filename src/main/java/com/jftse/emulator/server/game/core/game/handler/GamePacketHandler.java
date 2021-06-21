@@ -1456,6 +1456,60 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleProposalAnswerRequest(Connection connection, Packet packet) {
+        C2SProposalAnswerRequestPacket c2SProposalAnswerRequestPacket = new C2SProposalAnswerRequestPacket(packet);
+        Proposal proposal = this.proposalService.findById(c2SProposalAnswerRequestPacket.getProposalId().longValue());
+        if (proposal == null) return;
+
+        Message message = new Message();
+        message.setSeen(false);
+        message.setSender(proposal.getReceiver());
+        message.setReceiver(proposal.getSender());
+        if (c2SProposalAnswerRequestPacket.getAccepted()) {
+            message.setMessage("I accepted your proposal <3");
+
+            Friend friendOfSender = this.friendService.findByPlayerIdAndFriendId(
+                    proposal.getSender().getId(),
+                    proposal.getReceiver().getId());
+            if (friendOfSender == null) {
+                friendOfSender = new Friend();
+                friendOfSender.setPlayer(proposal.getSender());
+                friendOfSender.setFriend(proposal.getReceiver());
+            }
+
+            friendOfSender.setFriendshipState(FriendshipState.Relationship);
+
+            Friend friendOfReceiver = this.friendService.findByPlayerIdAndFriendId(
+                    proposal.getReceiver().getId(),
+                    proposal.getSender().getId());
+            if (friendOfReceiver == null) {
+                friendOfReceiver = new Friend();
+                friendOfReceiver.setPlayer(proposal.getReceiver());
+                friendOfReceiver.setFriend(proposal.getSender());
+            }
+
+            friendOfReceiver.setFriendshipState(FriendshipState.Relationship);
+
+            this.friendService.save(friendOfSender);
+            this.friendService.save(friendOfReceiver);
+        } else {
+            message.setMessage("I denied your proposal ＞﹏＜");
+        }
+
+        this.messageService.save(message);
+        this.proposalService.remove(proposal.getId());
+
+        Client senderClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(proposal.getSender().getId()))
+                .findFirst()
+                .orElse(null);
+        if (senderClient != null) {
+            S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                    new S2CReceivedMessageNotificationPacket(message);
+            senderClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+        }
+    }
+
     public void handleAcceptParcelRequest(Connection connection, Packet packet) {
         C2SAcceptParcelRequest c2SAcceptParcelRequest = new C2SAcceptParcelRequest(packet);
         Parcel parcel = this.parcelService.findById(c2SAcceptParcelRequest.getParcelId().longValue());

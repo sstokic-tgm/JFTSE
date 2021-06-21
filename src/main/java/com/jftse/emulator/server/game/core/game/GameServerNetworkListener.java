@@ -391,6 +391,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleCancelSendingParcelRequest(connection, packet);
                 break;
 
+            case PacketID.C2SProposalAnswerRequest:
+                gamePacketHandler.handleProposalAnswerRequest(connection, packet);
+                break;
+
             case PacketID.C2SSendProposalRequest:
                 gamePacketHandler.handleSendProposalRequest(connection, packet);
                 break;
