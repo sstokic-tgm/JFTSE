@@ -1303,6 +1303,7 @@ public class GamePacketHandler {
     public void handleSendGiftRequest(Connection connection, Packet packet) {
         C2SSendGiftRequestPacket c2SSendGiftRequestPacket = new C2SSendGiftRequestPacket(packet);
         Product product = this.productService.findProductByProductItemIndex(c2SSendGiftRequestPacket.getProductIndex());
+        Player sender = connection.getClient().getActivePlayer();
         Player receiver = this.playerService.findByName(c2SSendGiftRequestPacket.getReceiverName());
         if (receiver != null && product != null) {
             Gift gift = new Gift();
@@ -1311,7 +1312,36 @@ public class GamePacketHandler {
             gift.setMessage(c2SSendGiftRequestPacket.getMessage());
             gift.setSeen(false);
             gift.setProduct(product);
+
+            Integer currentGold = sender.getGold();
+            Integer price = product.getPrice0();
+            if (price > currentGold) {
+                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) -1, null);
+                connection.sendTCP(s2CSendGiftAnswerPacket);
+                return;
+            }
+
+            Pocket receiverPocket = receiver.getPocket();
+            PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(
+                    product.getItem0(),
+                    product.getCategory(),
+                    receiverPocket);
+            if (item == null) {
+                item = new PlayerPocket();
+                item.setCategory(product.getCategory());
+                item.setItemCount(1);
+                item.setItemIndex(product.getItem0());
+                item.setUseType(product.getUseType());
+                item.setPocket(receiverPocket);
+            } else {
+                item.setItemCount(item.getItemCount() + 1);
+            }
+
+            sender.setGold(currentGold - price);
+            this.playerPocketService.save(item);
+            this.playerService.save(sender);
             this.giftService.save(gift);
+            connection.getClient().setActivePlayer(sender);
 
             Client receiverClient = gameHandler.getClientList().stream()
                     .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
@@ -1321,6 +1351,10 @@ public class GamePacketHandler {
                 S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket =
                         new S2CReceivedGiftNotificationPacket(gift);
                 receiverClient.getConnection().sendTCP(s2CReceivedGiftNotificationPacket);
+
+                List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(receiver.getPocket());
+                S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+                receiverClient.getConnection().sendTCP(s2CInventoryDataPacket);
             }
 
             // 1. TODO: Actually buy and gift target player
@@ -1330,6 +1364,9 @@ public class GamePacketHandler {
             // -8 = That users character model cannot equip this item,  -9 = You cannot send gifts purchases with gold to that character
             S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) 0, gift);
             connection.sendTCP(s2CSendGiftAnswerPacket);
+
+            S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
+            connection.sendTCP(senderMoneyPacket);
         }
     }
 
@@ -1470,12 +1507,37 @@ public class GamePacketHandler {
         Proposal proposal = this.proposalService.findById(c2SProposalAnswerRequestPacket.getProposalId().longValue());
         if (proposal == null) return;
 
+        List<Friend> senderFriend = this.friendService.findByPlayer(proposal.getSender());
+        if (senderFriend.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+            if (c2SProposalAnswerRequestPacket.getAccepted()) {
+                Message message = new Message();
+                message.setSeen(false);
+                message.setSender(proposal.getSender());
+                message.setReceiver(proposal.getReceiver());
+                message.setMessage("[Automatic response] I'm sorry but I'm already in a relationship");
+                this.messageService.save(message);
+
+                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                        new S2CReceivedMessageNotificationPacket(message);
+                connection.sendTCP(s2CReceivedMessageNotificationPacket);
+            }
+
+            this.proposalService.remove(proposal.getId());
+            return;
+        }
+
         Message message = new Message();
         message.setSeen(false);
         message.setSender(proposal.getReceiver());
         message.setReceiver(proposal.getSender());
         if (c2SProposalAnswerRequestPacket.getAccepted()) {
-            message.setMessage("I accepted your proposal <3");
+            List<Friend> receiverFriend = this.friendService.findByPlayer(proposal.getReceiver());
+            if (receiverFriend.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+                this.proposalService.remove(proposal.getId());
+                return;
+            }
+
+            message.setMessage("[Automatic response] I accepted your proposal <3");
 
             Friend friendOfSender = this.friendService.findByPlayerIdAndFriendId(
                     proposal.getSender().getId(),
@@ -1502,7 +1564,7 @@ public class GamePacketHandler {
             this.friendService.save(friendOfSender);
             this.friendService.save(friendOfReceiver);
         } else {
-            message.setMessage("I denied your proposal ＞﹏＜");
+            message.setMessage("[Automatic response] I denied your proposal ＞﹏＜");
         }
 
         this.messageService.save(message);
@@ -2280,7 +2342,7 @@ public class GamePacketHandler {
                     this.guardianModeHandler.handlePrepareGuardianMode(connection, room);
                     break;
             }
-            
+
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
             room.setStatus(RoomStatus.InitializingGame);
