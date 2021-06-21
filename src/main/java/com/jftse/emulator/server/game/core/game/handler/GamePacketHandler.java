@@ -1034,11 +1034,72 @@ public class GamePacketHandler {
             connection.sendTCP(playerStatusPointChangePacket);
             S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
             connection.sendTCP(playerInfoPlayStatsPacket);
+        } else if (category.equals("SPECIAL")  && itemIndex == 26){
+            Friend playerCouple = this.friendService.findByPlayer(player).stream()
+                    .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                    .findFirst()
+                    .orElse(null);
+            if (playerCouple == null) {
+                return;
+            }
+
+            playerCouple.setFriendshipState(FriendshipState.Friends);
+
+            Friend significantOtherCouple = this.friendService.findByPlayer(playerCouple.getFriend()).stream()
+                    .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                    .findFirst()
+                    .orElse(null);
+            if (significantOtherCouple == null) {
+                return;
+            }
+
+            significantOtherCouple.setFriendshipState(FriendshipState.Friends);
+            this.friendService.save(playerCouple);
+            this.friendService.save(significantOtherCouple);
+
+            S2CYouBrokeUpWithYourCoupleAnswer s2CYouBrokeUpWithYourCoupleAnswer = new S2CYouBrokeUpWithYourCoupleAnswer();
+            connection.sendTCP(s2CYouBrokeUpWithYourCoupleAnswer);
+
+            Integer currentGold = player.getGold();
+            player.setGold(currentGold - 20000);
+            this.playerService.save(player);
+            connection.getClient().setActivePlayer(player);
+            S2CShopMoneyAnswerPacket s2CShopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
+            connection.sendTCP(s2CShopMoneyAnswerPacket);
+
+            this.updateFriendsList(player);
+            this.updateFriendsList(playerCouple.getFriend());
+
+            PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(
+                    26,
+                    EItemCategory.SPECIAL.getName(),
+                    playerCouple.getFriend().getPocket());
+            this.playerPocketService.remove(item.getId());
+
+            Message message = new Message();
+            message.setSeen(false);
+            message.setSender(player);
+            message.setReceiver(playerCouple.getFriend());
+            message.setMessage("[Automatic response] I divorced you");
+            this.messageService.save(message);
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(playerCouple.getFriend().getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (receiverClient != null) {
+                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                        new S2CReceivedMessageNotificationPacket(message);
+                receiverClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket =
+                        new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
+                receiverClient.getConnection().sendTCP(inventoryItemRemoveAnswerPacket);
+            }
         }
+
         int itemCount = playerPocket.getItemCount() - 1;
-
         if (itemCount <= 0) {
-
             playerPocketService.remove(playerPocket.getId());
             pocket = pocketService.decrementPocketBelongings(pocket);
             connection.getClient().getActivePlayer().setPocket(pocket);
@@ -1569,6 +1630,27 @@ public class GamePacketHandler {
             this.friendService.save(friendOfReceiver);
             this.updateRelationshipStatus(connection.getClient().getActivePlayer());
             this.updateRelationshipStatus(proposal.getSender());
+
+            PlayerPocket senderPocket = new PlayerPocket();
+            senderPocket.setPocket(proposal.getSender().getPocket());
+            senderPocket.setCategory(EItemCategory.SPECIAL.getName());
+            senderPocket.setUseType(EItemUseType.INSTANT.getName());
+            senderPocket.setItemCount(1);
+            senderPocket.setItemIndex(26);;
+            this.playerPocketService.save(senderPocket);
+
+            PlayerPocket receiverPocket = new PlayerPocket();
+            receiverPocket.setPocket(proposal.getReceiver().getPocket());
+            receiverPocket.setCategory(EItemCategory.SPECIAL.getName());
+            receiverPocket.setUseType(EItemUseType.INSTANT.getName());
+            receiverPocket.setItemCount(1);
+            receiverPocket.setItemIndex(26);;
+            this.playerPocketService.save(receiverPocket);
+
+            List<PlayerPocket> receiverItems = this.playerPocketService.getPlayerPocketItems(proposal.getReceiver().getPocket());
+            S2CInventoryDataPacket receiverInventoryPacket = new S2CInventoryDataPacket(receiverItems);
+            connection.sendTCP(receiverInventoryPacket);
+
         } else {
             message.setMessage("[Automatic response] I denied your proposal ＞﹏＜");
         }
@@ -1584,6 +1666,10 @@ public class GamePacketHandler {
             S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
                     new S2CReceivedMessageNotificationPacket(message);
             senderClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+
+            List<PlayerPocket> senderItems = this.playerPocketService.getPlayerPocketItems(proposal.getSender().getPocket());
+            S2CInventoryDataPacket senderInventoryPacket = new S2CInventoryDataPacket(senderItems);
+            senderClient.getConnection().sendTCP(senderInventoryPacket);
         }
     }
 

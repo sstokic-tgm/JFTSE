@@ -211,6 +211,7 @@ public final class PacketID {
     public final static char C2SProposalAnswerRequest = 0x2521;
     public final static char S2CRelationshipAnswer = 0x2523;
     public final static char S2CProposalListAnswer = 0x2527;
+    public final static char S2CYouBrokeUpWithYourCoupleAnswer = 0x252A;
 
     public final static char C2SPlayerDelete = 0x1B6B;
     public final static char S2CPlayerDelete = 0x1B6C;
