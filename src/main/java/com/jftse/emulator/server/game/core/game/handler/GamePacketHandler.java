@@ -1114,7 +1114,11 @@ public class GamePacketHandler {
         if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
             guild = guildMember.getGuild();
 
-        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guild);
+        Friend couple = this.friendService.findByPlayer(player).stream()
+                .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                .findFirst()
+                .orElse(null);
+        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guild, couple);
         connection.sendTCP(lobbyUserInfoAnswerPacket);
     }
 
@@ -3296,10 +3300,15 @@ public class GamePacketHandler {
         }
 
         Player activePlayer = connection.getClient().getActivePlayer();
+        Friend couple = this.friendService.findByPlayer(activePlayer).stream()
+                .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                .findFirst()
+                .orElse(null);
 
         RoomPlayer roomPlayer = new RoomPlayer();
         roomPlayer.setPlayer(activePlayer);
         roomPlayer.setGuildMember(guildMemberService.getByPlayer(activePlayer));
+        roomPlayer.setCouple(couple);
         roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
         roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
         roomPlayer.setPosition((short) 0);

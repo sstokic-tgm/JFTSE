@@ -50,7 +50,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             }
 
             this.write((byte) 0);
-            this.write("");
+            this.write(roomPlayer.getCouple() != null ? roomPlayer.getCouple().getFriend().getName() : "");
             this.write(0);
             this.write((byte) 0);
             this.write((short) 0); // emblem slot 1
