@@ -1563,6 +1563,8 @@ public class GamePacketHandler {
 
             this.friendService.save(friendOfSender);
             this.friendService.save(friendOfReceiver);
+            this.updateRelationshipStatus(connection.getClient().getActivePlayer());
+            this.updateRelationshipStatus(proposal.getSender());
         } else {
             message.setMessage("[Automatic response] I denied your proposal ＞﹏＜");
         }
