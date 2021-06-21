@@ -209,6 +209,7 @@ public final class PacketID {
     public final static char S2CProposalDeliveredAnswer = 0x251E;
     public final static char S2CReceivedProposalNotification = 0x251F;
     public final static char C2SProposalAnswerRequest = 0x2521;
+    public final static char S2CRelationshipAnswer = 0x2523;
     public final static char S2CProposalListAnswer = 0x2527;
 
     public final static char C2SPlayerDelete = 0x1B6B;

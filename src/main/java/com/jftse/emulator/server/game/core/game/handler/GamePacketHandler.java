@@ -257,6 +257,15 @@ public class GamePacketHandler {
                 connection.sendTCP(s2CFriendRequestNotificationPacket);
             });
 
+            Friend relation = this.friendService.findByPlayer(player).stream()
+                    .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                    .findFirst()
+                    .orElse(null);
+            if (relation != null) {
+                this.updateRelationshipStatus(player);
+                this.updateRelationshipStatus(relation.getFriend());
+            }
+
             List<Message> messages = this.messageService.findByReceiver(player);
             messages.forEach(m -> {
                 S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
@@ -1638,6 +1647,23 @@ public class GamePacketHandler {
         }
     }
 
+    private void updateRelationshipStatus(Player player) {
+        Friend friend = this.friendService.findByPlayer(player).stream()
+                .filter(x -> x.getFriendshipState() == FriendshipState.Relationship)
+                .findFirst()
+                .orElse(null);
+        if (friend != null) {
+            Client client = this.gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (client != null) {
+                S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friend);
+                client.getConnection().sendTCP(s2CRelationshipAnswerPacket);
+            }
+        }
+    }
+
     private void updateClubMembersList(Player player) {
         GuildMember guildMember = this.guildMemberService.getByPlayer(player);
         if (guildMember != null) {
@@ -2886,6 +2912,14 @@ public class GamePacketHandler {
                     guildMember.getGuild().getMemberList().stream()
                             .filter(x -> x != guildMember)
                             .forEach(x -> this.updateClubMembersList(x.getPlayer()));
+                }
+
+                Friend relation = this.friendService.findByPlayer(player).stream()
+                        .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                        .findFirst()
+                        .orElse(null);
+                if (relation != null) {
+                    this.updateRelationshipStatus(relation.getFriend());
                 }
             }
 
