@@ -1579,8 +1579,21 @@ public class GamePacketHandler {
         PlayerPocket item = this.playerPocketService.findById(c2SSendProposalRequestPacket.getPlayerPocketId().longValue());
         Player sender = connection.getClient().getActivePlayer();
         Player receiver = this.playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
+
+        List<Friend> senderFriend = this.friendService.findByPlayer(sender);
+        if (senderFriend.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+            // TODO: Somehow notify proposer, that proposer is already in a relationship
+            return;
+        }
+
         if (receiver != null && item != null) {
             if (item != null) {
+                List<Friend> receiverFriends = this.friendService.findByPlayer(receiver);
+                if (receiverFriends.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+                    // TODO: Somehow notify proposer, that proposed person is already in a relationship
+                    return;
+                }
+
                 Proposal proposal = new Proposal();
                 proposal.setReceiver(receiver);
                 proposal.setSender(connection.getClient().getActivePlayer());
