@@ -1,10 +1,8 @@
 package com.jftse.emulator.server.game.core.packet.packets.messaging;
 
-import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.messaging.Friend;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
-import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
 

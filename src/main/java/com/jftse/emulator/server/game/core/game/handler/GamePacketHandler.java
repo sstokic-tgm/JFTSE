@@ -240,7 +240,7 @@ public class GamePacketHandler {
             this.playerService.save(player);
 
             List<Friend> friends = this.friendService.findByPlayer(player).stream()
-                    .filter(x -> x.getFriendshipState() == FriendshipState.Friends)
+                    .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends)
                     .collect(Collectors.toList());
             S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
                     new S2CFriendsListAnswerPacket(friends);
@@ -249,7 +249,7 @@ public class GamePacketHandler {
                     .forEach(x -> this.updateFriendsList(x.getFriend()));
 
             List<Friend> friendsWaitingForApproval = this.friendService.findByFriend(player).stream()
-                    .filter(x -> x.getFriendshipState() == FriendshipState.WaitingApproval)
+                    .filter(x -> x.getEFriendshipState() == EFriendshipState.WaitingApproval)
                     .collect(Collectors.toList());
             friendsWaitingForApproval.forEach(x -> {
                 S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket =
@@ -258,7 +258,7 @@ public class GamePacketHandler {
             });
 
             Friend relation = this.friendService.findByPlayer(player).stream()
-                    .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                    .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
                     .findFirst()
                     .orElse(null);
             if (relation != null) {
@@ -1036,24 +1036,24 @@ public class GamePacketHandler {
             connection.sendTCP(playerInfoPlayStatsPacket);
         } else if (category.equals("SPECIAL")  && itemIndex == 26){
             Friend playerCouple = this.friendService.findByPlayer(player).stream()
-                    .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                    .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
                     .findFirst()
                     .orElse(null);
             if (playerCouple == null) {
                 return;
             }
 
-            playerCouple.setFriendshipState(FriendshipState.Friends);
+            playerCouple.setEFriendshipState(EFriendshipState.Friends);
 
             Friend significantOtherCouple = this.friendService.findByPlayer(playerCouple.getFriend()).stream()
-                    .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                    .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
                     .findFirst()
                     .orElse(null);
             if (significantOtherCouple == null) {
                 return;
             }
 
-            significantOtherCouple.setFriendshipState(FriendshipState.Friends);
+            significantOtherCouple.setEFriendshipState(EFriendshipState.Friends);
             this.friendService.save(playerCouple);
             this.friendService.save(significantOtherCouple);
 
@@ -1176,7 +1176,7 @@ public class GamePacketHandler {
             guild = guildMember.getGuild();
 
         Friend couple = this.friendService.findByPlayer(player).stream()
-                .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
                 .findFirst()
                 .orElse(null);
         S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guild, couple);
@@ -1246,7 +1246,7 @@ public class GamePacketHandler {
             Friend friend = new Friend();
             friend.setPlayer(player);
             friend.setFriend(targetPlayer);
-            friend.setFriendshipState(FriendshipState.WaitingApproval);
+            friend.setEFriendshipState(EFriendshipState.WaitingApproval);
             this.friendService.save(friend);
             S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
                     new S2CAddFriendResponsePacket((short) 0);
@@ -1264,12 +1264,12 @@ public class GamePacketHandler {
             return;
         }
 
-        if (targetFriend.getFriendshipState() == FriendshipState.Friends || targetFriend.getFriendshipState() == FriendshipState.Relationship) {
+        if (targetFriend.getEFriendshipState() == EFriendshipState.Friends || targetFriend.getEFriendshipState() == EFriendshipState.Relationship) {
             S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
                     new S2CAddFriendResponsePacket((short) -5);
             connection.sendTCP(s2CAddFriendResponsePacket);
             return;
-        } else if (targetFriend.getFriendshipState() == FriendshipState.WaitingApproval) {
+        } else if (targetFriend.getEFriendshipState() == EFriendshipState.WaitingApproval) {
             S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
                     new S2CAddFriendResponsePacket((short) -4);
             connection.sendTCP(s2CAddFriendResponsePacket);
@@ -1308,11 +1308,11 @@ public class GamePacketHandler {
         if (friend == null) return;
 
         if (c2SAddFriendApprovalRequestPacket.isAccept()) {
-            friend.setFriendshipState(FriendshipState.Friends);
+            friend.setEFriendshipState(EFriendshipState.Friends);
             Friend newFriend = new Friend();
             newFriend.setPlayer(connection.getClient().getActivePlayer());
             newFriend.setFriend(targetPlayer);
-            newFriend.setFriendshipState(FriendshipState.Friends);
+            newFriend.setEFriendshipState(EFriendshipState.Friends);
 
             this.friendService.save(friend);
             this.friendService.save(newFriend);
@@ -1456,9 +1456,9 @@ public class GamePacketHandler {
 
                 // TODO: Is this right?
                 if (receiver.getId().equals(sender.getId())) {
-                    parcel.setParcelType(ParcelType.Gold);
+                    parcel.setEParcelType(EParcelType.Gold);
                 } else {
-                    parcel.setParcelType(ParcelType.CashOnDelivery);
+                    parcel.setEParcelType(EParcelType.CashOnDelivery);
                 }
 
                 this.parcelService.save(parcel);
@@ -1573,7 +1573,7 @@ public class GamePacketHandler {
         if (proposal == null) return;
 
         List<Friend> senderFriend = this.friendService.findByPlayer(proposal.getSender());
-        if (senderFriend.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+        if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
             if (c2SProposalAnswerRequestPacket.getAccepted()) {
                 Message message = new Message();
                 message.setSeen(false);
@@ -1597,7 +1597,7 @@ public class GamePacketHandler {
         message.setReceiver(proposal.getSender());
         if (c2SProposalAnswerRequestPacket.getAccepted()) {
             List<Friend> receiverFriend = this.friendService.findByPlayer(proposal.getReceiver());
-            if (receiverFriend.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+            if (receiverFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
                 this.proposalService.remove(proposal.getId());
                 return;
             }
@@ -1613,7 +1613,7 @@ public class GamePacketHandler {
                 friendOfSender.setFriend(proposal.getReceiver());
             }
 
-            friendOfSender.setFriendshipState(FriendshipState.Relationship);
+            friendOfSender.setEFriendshipState(EFriendshipState.Relationship);
 
             Friend friendOfReceiver = this.friendService.findByPlayerIdAndFriendId(
                     proposal.getReceiver().getId(),
@@ -1624,7 +1624,7 @@ public class GamePacketHandler {
                 friendOfReceiver.setFriend(proposal.getSender());
             }
 
-            friendOfReceiver.setFriendshipState(FriendshipState.Relationship);
+            friendOfReceiver.setEFriendshipState(EFriendshipState.Relationship);
 
             this.friendService.save(friendOfSender);
             this.friendService.save(friendOfReceiver);
@@ -1735,7 +1735,7 @@ public class GamePacketHandler {
         Player receiver = this.playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
 
         List<Friend> senderFriend = this.friendService.findByPlayer(sender);
-        if (senderFriend.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+        if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
             // TODO: Somehow notify proposer, that proposer is already in a relationship
             return;
         }
@@ -1743,7 +1743,7 @@ public class GamePacketHandler {
         if (receiver != null && item != null) {
             if (item != null) {
                 List<Friend> receiverFriends = this.friendService.findByPlayer(receiver);
-                if (receiverFriends.stream().anyMatch(x -> x.getFriendshipState().equals(FriendshipState.Relationship))) {
+                if (receiverFriends.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
                     // TODO: Somehow notify proposer, that proposed person is already in a relationship
                     return;
                 }
@@ -1801,7 +1801,7 @@ public class GamePacketHandler {
 
     private void updateFriendsList(Player player) {
         List<Friend> friends = this.friendService.findByPlayer(player).stream()
-                .filter(x -> x.getFriendshipState() == FriendshipState.Friends)
+                .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends)
                 .collect(Collectors.toList());
         S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
                 new S2CFriendsListAnswerPacket(friends);
@@ -1816,7 +1816,7 @@ public class GamePacketHandler {
 
     private void updateRelationshipStatus(Player player) {
         Friend friend = this.friendService.findByPlayer(player).stream()
-                .filter(x -> x.getFriendshipState() == FriendshipState.Relationship)
+                .filter(x -> x.getEFriendshipState() == EFriendshipState.Relationship)
                 .findFirst()
                 .orElse(null);
         if (friend != null) {
@@ -3082,7 +3082,7 @@ public class GamePacketHandler {
                 }
 
                 Friend relation = this.friendService.findByPlayer(player).stream()
-                        .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                        .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
                         .findFirst()
                         .orElse(null);
                 if (relation != null) {
@@ -3387,7 +3387,7 @@ public class GamePacketHandler {
 
         Player activePlayer = connection.getClient().getActivePlayer();
         Friend couple = this.friendService.findByPlayer(activePlayer).stream()
-                .filter(x -> x.getFriendshipState().equals(FriendshipState.Relationship))
+                .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
                 .findFirst()
                 .orElse(null);
 

@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.database.model.messaging;
 
-public enum FriendshipState {
+public enum EFriendshipState {
     WaitingApproval,
     Friends,
     Relationship

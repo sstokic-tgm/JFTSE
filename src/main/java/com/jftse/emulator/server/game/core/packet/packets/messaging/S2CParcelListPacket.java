@@ -27,7 +27,7 @@ public class S2CParcelListPacket extends Packet {
             this.write(parcel.getItemIndex());
             this.write((byte) 0); //UNK
             this.write(parcel.getItemCount());
-            this.write(parcel.getParcelType().getValue());
+            this.write(parcel.getEParcelType().getValue());
             this.write(parcel.getGold());
             this.write((byte) 0); // UNK
             this.write(parcel.getCreated());
