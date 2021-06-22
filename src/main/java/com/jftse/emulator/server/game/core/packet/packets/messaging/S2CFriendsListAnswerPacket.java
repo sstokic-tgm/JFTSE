@@ -19,7 +19,7 @@ public class S2CFriendsListAnswerPacket extends Packet {
             this.write(friend.getFriend().getId().intValue());
             this.write(friend.getFriend().getName());
             this.write(friend.getFriend().getPlayerType());
-            this.write(friend.getFriend().getOnline() ? (short) 0 : (short) -1);
+            this.write(friend.getFriend().getOnline() ? (short) 0 : (short) -1); // -1 offline, 0 online, 1...n game server id => game server id indicator
         }
     }
 }

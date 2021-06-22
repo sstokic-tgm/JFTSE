@@ -19,7 +19,7 @@ public class S2CClubMembersListAnswerPacket extends Packet {
             this.write(guildMember.getPlayer().getId().intValue());
             this.write(guildMember.getPlayer().getName());
             this.write(guildMember.getPlayer().getPlayerType());
-            this.write(guildMember.getPlayer().getOnline() ? (short) 0 : (short) -1);
+            this.write(guildMember.getPlayer().getOnline() ? (short) 0 : (short) -1); // -1 offline, 0 online, 1...n game server id => game server id indicator
         }
     }
 }
