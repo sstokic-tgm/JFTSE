@@ -71,5 +71,6 @@ public class Player extends AbstractBaseModel {
     private Byte willpower = 0;
     private Byte statusPoints = 0;
 
+    @Column(columnDefinition = "bit(1) DEFAULT 0")
     private Boolean online = false;
 }
