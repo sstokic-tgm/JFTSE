@@ -645,16 +645,22 @@ public class GamePacketHandler {
 
     public void handleInventoryItemTimeExpiredPacket(Connection connection, Packet packet) {
         C2SInventoryItemTimeExpiredReqPacket inventoryItemTimeExpiredReqPacket = new C2SInventoryItemTimeExpiredReqPacket(packet);
+        long itemPocketId = inventoryItemTimeExpiredReqPacket.getItemPocketId();
+        PlayerPocket item = this.playerPocketService.findById(itemPocketId);
+        if (item != null) {
+            long timeLeft = (item.getCreated().getTime() * 10000) - (new Date().getTime() * 10000);
+            if (timeLeft < 0) {
+                this.playerPocketService.remove(itemPocketId);
 
-        Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+                Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+                pocket = this.pocketService.decrementPocketBelongings(pocket);
 
-        playerPocketService.remove((long) inventoryItemTimeExpiredReqPacket.getItemPocketId());
-        pocket = pocketService.decrementPocketBelongings(pocket);
+                connection.getClient().getActivePlayer().setPocket(pocket);
 
-        connection.getClient().getActivePlayer().setPocket(pocket);
-
-        S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemTimeExpiredReqPacket.getItemPocketId());
-        connection.sendTCP(inventoryItemRemoveAnswerPacket);
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemTimeExpiredReqPacket.getItemPocketId());
+                connection.sendTCP(inventoryItemRemoveAnswerPacket);
+            }
+        }
     }
 
     public void handleShopMoneyRequestPacket(Connection connection, Packet packet) {
