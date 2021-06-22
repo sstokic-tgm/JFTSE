@@ -1571,11 +1571,13 @@ public class GamePacketHandler {
     public void handleSendParcelRequest(Connection connection, Packet packet) {
         C2SSendParcelRequestPacket c2SSendParcelRequestPacket = new C2SSendParcelRequestPacket(packet);
         PlayerPocket item = this.playerPocketService.findById(c2SSendParcelRequestPacket.getPlayerPocketId().longValue());
-        Product product = this.productService.findProductByItemAndCategory(item.getItemIndex(), item.getCategory());
-        if (product != null && !product.getEnableParcel()) {
-            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
-            connection.sendTCP(s2CSendParcelAnswerPacket);
-        } else {
+
+        // TODO: findProductByItemAndCategory doesn't return unique items in some cases (see Rebirth). This leads to crashes here
+//        Product product = this.productService.findProductByItemAndCategory(item.getItemIndex(), item.getCategory());
+//        if (product != null && !product.getEnableParcel()) {
+//            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
+//            connection.sendTCP(s2CSendParcelAnswerPacket);
+//        } else {
 
             Player sender = connection.getClient().getActivePlayer();
             Player receiver = this.playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
@@ -1631,7 +1633,7 @@ public class GamePacketHandler {
                     connection.sendTCP(s2CSentParcelListPacket);
                 }
             }
-        }
+//        }
     }
 
     public void handleDenyParcelRequest(Connection connection, Packet packet) {
