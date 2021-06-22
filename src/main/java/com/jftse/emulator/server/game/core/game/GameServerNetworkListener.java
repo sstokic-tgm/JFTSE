@@ -347,6 +347,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleGuildChatRequestPacket(connection, packet);
                 break;
 
+            case PacketID.C2SMessageListRequest:
+                gamePacketHandler.handleMessageListRequest(connection, packet);
+                break;
+
             case PacketID.C2SAddFriendRequest:
                 gamePacketHandler.handleAddFriendRequestPacket(connection, packet);
                 break;

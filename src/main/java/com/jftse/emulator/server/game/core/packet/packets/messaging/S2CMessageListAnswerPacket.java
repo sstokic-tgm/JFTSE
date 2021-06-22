@@ -9,7 +9,7 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import java.util.List;
 
 public class S2CMessageListAnswerPacket extends Packet {
-    public S2CMessageListAnswerPacket(byte listType, List<AbstractMessage> messageList) {
+    public S2CMessageListAnswerPacket(byte listType, List<? extends AbstractMessage> messageList) {
         super(PacketID.S2CMessageListAnswer);
 
         this.write(listType);

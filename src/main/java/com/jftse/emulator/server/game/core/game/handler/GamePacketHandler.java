@@ -1225,6 +1225,37 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleMessageListRequest(Connection connection, Packet packet) {
+        C2SMessageListRequestPacket messageListRequestPacket = new C2SMessageListRequestPacket(packet);
+        byte listType = messageListRequestPacket.getListType();
+
+        Player player = connection.getClient().getActivePlayer();
+
+        switch (listType) {
+            case 0: {
+                List<Message> messages = this.messageService.findByReceiver(player);
+                S2CMessageListAnswerPacket messageListAnswerPacket = new S2CMessageListAnswerPacket(listType, messages);
+                connection.sendTCP(messageListAnswerPacket);
+
+                messageListAnswerPacket = new S2CMessageListAnswerPacket((byte) (listType + 1), messages);
+                connection.sendTCP(messageListAnswerPacket);
+
+                break;
+            }
+
+            case 2: {
+                List<Gift> gifts = this.giftService.findByReceiver(player);
+                S2CMessageListAnswerPacket messageListAnswerPacket = new S2CMessageListAnswerPacket(listType, gifts);
+                connection.sendTCP(messageListAnswerPacket);
+
+                messageListAnswerPacket = new S2CMessageListAnswerPacket((byte) (listType + 1), gifts);
+                connection.sendTCP(messageListAnswerPacket);
+
+                break;
+            }
+        }
+    }
+
     public void handleAddFriendRequestPacket(Connection connection, Packet packet) {
         C2SAddFriendRequestPacket c2SAddFriendRequestPacket =
                 new C2SAddFriendRequestPacket(packet);

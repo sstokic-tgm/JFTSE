@@ -196,6 +196,7 @@ public final class PacketID {
     public final static char C2SSendGiftRequest = 0x1F73;
     public final static char S2CSendGiftAnswer = 0x1F74;
     public final static char S2CReceivedGiftNotification = 0x1F75;
+    public final static char C2SClubMembersListRequest = 0x1FBA;
     public final static char S2CClubMembersListAnswer = 0x1FBB;
     public final static char S2CYouGotPresentMessage = 0x2135;
     public final static char C2SSendParcelRequest = 0x2199;
