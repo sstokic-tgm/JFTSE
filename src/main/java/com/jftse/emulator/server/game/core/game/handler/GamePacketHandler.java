@@ -3061,10 +3061,6 @@ public class GamePacketHandler {
 
     public void handleDisconnected(Connection connection) {
         if (connection.getClient().getAccount() != null) {
-            // reset status
-            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-            authenticationService.updateAccount(account);
             Player player = connection.getClient().getActivePlayer();
             if (player != null) {
                 player = this.playerService.findById(player.getId());
@@ -3089,6 +3085,10 @@ public class GamePacketHandler {
                     this.updateRelationshipStatus(relation.getFriend());
                 }
             }
+            // reset status
+            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+            authenticationService.updateAccount(account);
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
