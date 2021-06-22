@@ -42,6 +42,10 @@ public class ProductService {
         return this.productRepository.findProductByProductIndex(productItemIndex);
     }
 
+    public Product findProductByItemAndCategory(int itemIndex, String category) {
+        return this.productRepository.findProductByItem0AndCategory(itemIndex, category);
+    }
+
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {
         List<Integer> productIndexList = new ArrayList<>(itemList.keySet());
 

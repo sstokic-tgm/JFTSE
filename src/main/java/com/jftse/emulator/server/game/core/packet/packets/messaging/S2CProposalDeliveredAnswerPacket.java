@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class S2CProposalDeliveredAnswerPacket extends Packet {
-    public S2CProposalDeliveredAnswerPacket(short status) {
+    public S2CProposalDeliveredAnswerPacket(byte status) {
         super(PacketID.S2CProposalDeliveredAnswer);
 
         this.write(status);

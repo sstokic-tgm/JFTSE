@@ -1478,58 +1478,65 @@ public class GamePacketHandler {
     public void handleSendParcelRequest(Connection connection, Packet packet) {
         C2SSendParcelRequestPacket c2SSendParcelRequestPacket = new C2SSendParcelRequestPacket(packet);
         PlayerPocket item = this.playerPocketService.findById(c2SSendParcelRequestPacket.getPlayerPocketId().longValue());
-        Player sender = connection.getClient().getActivePlayer();
-        Player receiver = this.playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
-        if (receiver != null && item != null) {
-            if (item != null) {
-                // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
-                Parcel parcel = new Parcel();
-                parcel.setReceiver(receiver);
-                parcel.setSender(connection.getClient().getActivePlayer());
-                parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
-                parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
+        Product product = this.productService.findProductByItemAndCategory(item.getItemIndex(), item.getCategory());
+        if (product != null && !product.getEnableParcel()) {
+            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
+            connection.sendTCP(s2CSendParcelAnswerPacket);
+        } else {
 
-                parcel.setItemCount(item.getItemCount());
-                parcel.setCategory(item.getCategory());
-                parcel.setItemIndex(item.getItemIndex());
-                parcel.setUseType(item.getUseType());
+            Player sender = connection.getClient().getActivePlayer();
+            Player receiver = this.playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
+            if (receiver != null && item != null) {
+                if (item != null) {
+                    // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
+                    Parcel parcel = new Parcel();
+                    parcel.setReceiver(receiver);
+                    parcel.setSender(connection.getClient().getActivePlayer());
+                    parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
+                    parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
 
-                // TODO: Is this right?
-                if (receiver.getId().equals(sender.getId())) {
-                    parcel.setEParcelType(EParcelType.Gold);
-                } else {
-                    parcel.setEParcelType(EParcelType.CashOnDelivery);
+                    parcel.setItemCount(item.getItemCount());
+                    parcel.setCategory(item.getCategory());
+                    parcel.setItemIndex(item.getItemIndex());
+                    parcel.setUseType(item.getUseType());
+
+                    // TODO: Is this right?
+                    if (receiver.getId().equals(sender.getId())) {
+                        parcel.setEParcelType(EParcelType.Gold);
+                    } else {
+                        parcel.setEParcelType(EParcelType.CashOnDelivery);
+                    }
+
+                    this.parcelService.save(parcel);
+                    this.playerPocketService.remove(item.getId());
+
+                    Client receiverClient = gameHandler.getClientList().stream()
+                            .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                            .findFirst()
+                            .orElse(null);
+                    if (receiverClient != null) {
+                        S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket =
+                                new S2CReceivedParcelNotificationPacket(parcel);
+                        receiverClient.getConnection().sendTCP(s2CReceivedParcelNotificationPacket);
+                    }
+
+                    // TODO: Handle fee
+                    // TODO: Handle all these cases
+                    // 0 = Successfully sent
+                    //-1 = Failed to send parcel
+                    //-2 = You do not have enough gold
+                    //-4 = Under level 20 user can not send parcel
+                    //-5 = Gold transactions must be under 1.000.000
+                    S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) 0);
+                    connection.sendTCP(s2CSendParcelAnswerPacket);
+
+                    S2CInventoryItemRemoveAnswerPacket s2CInventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
+                    connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);
+
+                    List<Parcel> sentParcels = this.parcelService.findBySender(parcel.getSender());
+                    S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
+                    connection.sendTCP(s2CSentParcelListPacket);
                 }
-
-                this.parcelService.save(parcel);
-                this.playerPocketService.remove(item.getId());
-
-                Client receiverClient = gameHandler.getClientList().stream()
-                        .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
-                        .findFirst()
-                        .orElse(null);
-                if (receiverClient != null) {
-                    S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket =
-                            new S2CReceivedParcelNotificationPacket(parcel);
-                    receiverClient.getConnection().sendTCP(s2CReceivedParcelNotificationPacket);
-                }
-
-                // TODO: Handle fee
-                // TODO: Handle all these cases
-                // 0 = Successfully sent
-                //-1 = Failed to send parcel
-                //-2 = You do not have enough gold
-                //-4 = Under level 20 user can not send parcel
-                //-5 = Gold transactions must be under 1.000.000
-                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) 0);
-                connection.sendTCP(s2CSendParcelAnswerPacket);
-
-                S2CInventoryItemRemoveAnswerPacket s2CInventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
-                connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);
-
-                List<Parcel> sentParcels = this.parcelService.findBySender(parcel.getSender());
-                S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
-                connection.sendTCP(s2CSentParcelListPacket);
             }
         }
     }
@@ -1771,58 +1778,72 @@ public class GamePacketHandler {
         C2SSendProposalRequestPacket c2SSendProposalRequestPacket =
                 new C2SSendProposalRequestPacket(packet);
         PlayerPocket item = this.playerPocketService.findById(c2SSendProposalRequestPacket.getPlayerPocketId().longValue());
+
+        // 0 = MSG_PROPOSE_SUCCESS
+        //-1 = MSG_NO_CHARACTER_AT_CHARACTER_LIST
+        //-3 = MSG_PROPOSE_ACCEPT_FAILED_ALREADY_COUPLE
+        //-4 = MSG_PROPOSE_FAILED_ALREADY_PROPOSING
+        //-6 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_ACCOUNT
+        //-7 = MSG_NO_HAVE_PROPOSE_ITEM
+        //-9 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_SEX
+        if (item == null || !item.getItemIndex().equals(26)) {
+            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -7);
+            connection.sendTCP(proposalDeliveredAnswerPacket);
+            return;
+        }
+
         Player sender = connection.getClient().getActivePlayer();
         Player receiver = this.playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
 
         List<Friend> senderFriend = this.friendService.findByPlayer(sender);
         if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
-            // TODO: Somehow notify proposer, that proposer is already in a relationship
+            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -3);
+            connection.sendTCP(proposalDeliveredAnswerPacket);
             return;
         }
 
-        if (receiver != null && item != null) {
-            if (item != null) {
-                List<Friend> receiverFriends = this.friendService.findByPlayer(receiver);
-                if (receiverFriends.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
-                    // TODO: Somehow notify proposer, that proposed person is already in a relationship
-                    return;
-                }
-
-                Proposal proposal = new Proposal();
-                proposal.setReceiver(receiver);
-                proposal.setSender(connection.getClient().getActivePlayer());
-                proposal.setMessage(c2SSendProposalRequestPacket.getMessage());
-                proposal.setSeen(false);
-                proposal.setCategory(item.getCategory());
-                proposal.setItemIndex(item.getItemIndex());
-
-                this.proposalService.save(proposal);
-                Integer newItemCount = item.getItemCount() - 1;
-                if (newItemCount < 1) {
-                    this.playerPocketService.remove(item.getId());
-                } else {
-                    item.setItemCount(newItemCount);
-                    this.playerPocketService.save(item);
-                }
-
-                Client receiverClient = gameHandler.getClientList().stream()
-                        .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
-                        .findFirst()
-                        .orElse(null);
-                if (receiverClient != null) {
-                    S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket =
-                            new S2CReceivedProposalNotificationPacket(proposal);
-                    receiverClient.getConnection().sendTCP(s2CReceivedProposalNotificationPacket);
-                }
-
-                List<Proposal> sentProposals = this.proposalService.findBySender(sender);
-                S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
-                connection.sendTCP(s2CSentProposalListPacket);
-
-                S2CProposalDeliveredAnswerPacket s2CProposalDeliveredAnswerPacket =
-                        new S2CProposalDeliveredAnswerPacket((short) 0);
-                connection.sendTCP(s2CProposalDeliveredAnswerPacket);
+        if (receiver != null) {
+            List<Friend> receiverFriends = this.friendService.findByPlayer(receiver);
+            if (receiverFriends.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
+                S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -3);
+                connection.sendTCP(proposalDeliveredAnswerPacket);
+                return;
             }
+
+            Proposal proposal = new Proposal();
+            proposal.setReceiver(receiver);
+            proposal.setSender(connection.getClient().getActivePlayer());
+            proposal.setMessage(c2SSendProposalRequestPacket.getMessage());
+            proposal.setSeen(false);
+            proposal.setCategory(item.getCategory());
+            proposal.setItemIndex(item.getItemIndex());
+
+            this.proposalService.save(proposal);
+            Integer newItemCount = item.getItemCount() - 1;
+            if (newItemCount < 1) {
+                this.playerPocketService.remove(item.getId());
+            } else {
+                item.setItemCount(newItemCount);
+                this.playerPocketService.save(item);
+            }
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (receiverClient != null) {
+                S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket =
+                        new S2CReceivedProposalNotificationPacket(proposal);
+                receiverClient.getConnection().sendTCP(s2CReceivedProposalNotificationPacket);
+            }
+
+            List<Proposal> sentProposals = this.proposalService.findBySender(sender);
+            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
+            connection.sendTCP(s2CSentProposalListPacket);
+
+            S2CProposalDeliveredAnswerPacket s2CProposalDeliveredAnswerPacket =
+                    new S2CProposalDeliveredAnswerPacket((byte) 0);
+            connection.sendTCP(s2CProposalDeliveredAnswerPacket);
         }
     }
 

@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findProductByProductIndex(int productIndex);
+    Product findProductByItem0AndCategory(int itemIndex, String category);
 
     @Query(value = "SELECT p.price0 FROM Product p WHERE p.item0 = :itemIndex AND p.category = :category")
     List<Integer> getItemSellPriceByItemIndexAndCategory(@Param("itemIndex") Integer itemIndex, @Param("category") String category);
