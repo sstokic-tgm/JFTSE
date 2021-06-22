@@ -266,52 +266,6 @@ public class GamePacketHandler {
                 this.updateRelationshipStatus(relation.getFriend());
             }
 
-            List<Message> messages = this.messageService.findByReceiver(player);
-            messages.forEach(m -> {
-                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
-                        new S2CReceivedMessageNotificationPacket(m);
-                connection.sendTCP(s2CReceivedMessageNotificationPacket);
-            });
-
-            List<Gift> gifts = this.giftService.findByReceiver(player);
-            gifts.forEach(gift -> {
-                S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket =
-                        new S2CReceivedGiftNotificationPacket(gift);
-                connection.sendTCP(s2CReceivedGiftNotificationPacket);
-            });
-
-            List<Parcel> receivedParcels = this.parcelService.findByReceiver(player);
-            S2CParcelListPacket s2CReceivedParcelListPacket = new S2CParcelListPacket((byte) 0, receivedParcels);
-            connection.sendTCP(s2CReceivedParcelListPacket);
-
-            List<Parcel> sentParcels = this.parcelService.findBySender(player);
-            S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
-            connection.sendTCP(s2CSentParcelListPacket);
-
-            List<Proposal> receivedProposals = this.proposalService.findByReceiver(player);
-            S2CProposalListPacket s2CReceivedProposalListPacket = new S2CProposalListPacket((byte) 0, receivedProposals);
-            connection.sendTCP(s2CReceivedProposalListPacket);
-
-            List<Proposal> sentProposals = this.proposalService.findBySender(player);
-            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
-            connection.sendTCP(s2CSentProposalListPacket);
-
-            GuildMember guildMember = this.guildMemberService.getByPlayer(player);
-            if (guildMember != null) {
-                Guild guild = guildMember.getGuild();
-                if (guild != null) {
-                    List<GuildMember> guildMembers = guild.getMemberList().stream()
-                            .filter(x -> x != guildMember)
-                            .collect(Collectors.toList());
-                    S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket =
-                            new S2CClubMembersListAnswerPacket(guildMembers);
-                    connection.sendTCP(s2CClubMembersListAnswerPacket);
-
-                    guildMembers.stream().filter(x -> x.getPlayer().getOnline())
-                            .forEach(x -> this.updateClubMembersList(x.getPlayer()));
-                }
-            }
-
             AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
 
             S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
@@ -1237,6 +1191,7 @@ public class GamePacketHandler {
                 S2CMessageListAnswerPacket messageListAnswerPacket = new S2CMessageListAnswerPacket(listType, messages);
                 connection.sendTCP(messageListAnswerPacket);
 
+                messages = new ArrayList<>(this.messageService.findBySender(player));
                 messageListAnswerPacket = new S2CMessageListAnswerPacket((byte) (listType + 1), messages);
                 connection.sendTCP(messageListAnswerPacket);
 
@@ -1248,12 +1203,66 @@ public class GamePacketHandler {
                 S2CMessageListAnswerPacket messageListAnswerPacket = new S2CMessageListAnswerPacket(listType, gifts);
                 connection.sendTCP(messageListAnswerPacket);
 
+                gifts = this.giftService.findBySender(player);
                 messageListAnswerPacket = new S2CMessageListAnswerPacket((byte) (listType + 1), gifts);
                 connection.sendTCP(messageListAnswerPacket);
 
                 break;
             }
         }
+    }
+
+    public void handleClubMembersListRequest(Connection connection, Packet packet) {
+        GuildMember guildMember = this.guildMemberService.getByPlayer(connection.getClient().getActivePlayer());
+        if (guildMember != null) {
+            Guild guild = guildMember.getGuild();
+            if (guild != null) {
+                List<GuildMember> guildMembers = guild.getMemberList().stream()
+                        .filter(x -> x != guildMember)
+                        .collect(Collectors.toList());
+                S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket =
+                        new S2CClubMembersListAnswerPacket(guildMembers);
+                connection.sendTCP(s2CClubMembersListAnswerPacket);
+            }
+        }
+    }
+
+    public void handleParcelListRequest(Connection connection, Packet packet) {
+        C2SParcelListRequestPacket parcelListRequestPacket = new C2SParcelListRequestPacket(packet);
+        byte listType = parcelListRequestPacket.getListType();
+
+        Player player = connection.getClient().getActivePlayer();
+        List<Parcel> parcelList = new ArrayList<>();
+        switch (listType) {
+            case 0:
+                parcelList.addAll(this.parcelService.findByReceiver(player));
+                break;
+
+            case 1:
+                parcelList.addAll(this.parcelService.findBySender(player));
+                break;
+        }
+        S2CParcelListPacket s2CReceivedParcelListPacket = new S2CParcelListPacket(listType, parcelList);
+        connection.sendTCP(s2CReceivedParcelListPacket);
+    }
+
+    public void handleProposalListRequest(Connection connection, Packet packet) {
+        C2SProposalListRequestPacket proposalListRequestPacket = new C2SProposalListRequestPacket(packet);
+        byte listType = proposalListRequestPacket.getListType();
+
+        Player player = connection.getClient().getActivePlayer();
+        List<Proposal> proposalList = new ArrayList<>();
+        switch (listType) {
+            case 0:
+                proposalList.addAll(this.proposalService.findByReceiver(player));
+                break;
+
+            case 1:
+                proposalList.addAll(this.proposalService.findBySender(player));
+                break;
+        }
+        S2CProposalListPacket s2CReceivedProposalListPacket = new S2CProposalListPacket(listType, proposalList);
+        connection.sendTCP(s2CReceivedProposalListPacket);
     }
 
     public void handleAddFriendRequestPacket(Connection connection, Packet packet) {

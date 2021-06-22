@@ -19,11 +19,8 @@ public class S2CMessageListAnswerPacket extends Packet {
             if (am instanceof Message) {
                 Message m = (Message) am;
                 this.write(Math.toIntExact(m.getId()));
-                if ((listType % 2) == 0)
-                    this.write(m.getSender());
-                else
-                    this.write(m.getReceiver());
-                this.write(m.getSeen());
+                this.write((listType % 2) == 0 ? m.getSender().getName() : m.getReceiver().getName());
+                this.write((listType % 2) == 0 ? m.getSeen() : true);
                 this.write(m.getMessage());
                 this.write(m.getCreated());
                 this.write(0); // product index
@@ -32,11 +29,8 @@ public class S2CMessageListAnswerPacket extends Packet {
             } else if (am instanceof Gift) {
                 Gift g = (Gift) am;
                 this.write(Math.toIntExact(g.getId()));
-                if ((listType % 2) == 0)
-                    this.write(g.getSender());
-                else
-                    this.write(g.getReceiver());
-                this.write(g.getSeen());
+                this.write((listType % 2) == 0 ? g.getSender().getName() : g.getReceiver().getName());
+                this.write((listType % 2) == 0 ? g.getSeen() : true);
                 this.write(g.getMessage());
                 this.write(g.getCreated());
                 this.write(g.getProduct().getProductIndex());

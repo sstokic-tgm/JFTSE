@@ -202,6 +202,7 @@ public final class PacketID {
     public final static char C2SSendParcelRequest = 0x2199;
     public final static char S2CSendParcelAnswer = 0x219A;
     public final static char S2CReceivedParcelNotification = 0x219B;
+    public final static char C2SParcelListRequest = 0x219C;
     public final static char S2CParcelListAnswer = 0x219D;
     public final static char C2SDenyParcelRequest = 0x21A0;
     public final static char C2SAcceptParcelRequest = 0x21A2;
@@ -213,6 +214,7 @@ public final class PacketID {
     public final static char S2CReceivedProposalNotification = 0x251F;
     public final static char C2SProposalAnswerRequest = 0x2521;
     public final static char S2CRelationshipAnswer = 0x2523;
+    public final static char C2SProposalListRequest = 0x2526;
     public final static char S2CProposalListAnswer = 0x2527;
     public final static char S2CYouBrokeUpWithYourCoupleAnswer = 0x252A;
 
