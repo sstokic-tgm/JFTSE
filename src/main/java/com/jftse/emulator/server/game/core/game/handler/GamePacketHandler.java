@@ -1407,6 +1407,8 @@ public class GamePacketHandler {
 
     public void handleSendGiftRequest(Connection connection, Packet packet) {
         C2SSendGiftRequestPacket c2SSendGiftRequestPacket = new C2SSendGiftRequestPacket(packet);
+        byte option = c2SSendGiftRequestPacket.getOption();
+
         Product product = this.productService.findProductByProductItemIndex(c2SSendGiftRequestPacket.getProductIndex());
         Player sender = connection.getClient().getActivePlayer();
         Player receiver = this.playerService.findByName(c2SSendGiftRequestPacket.getReceiverName());
@@ -1426,25 +1428,117 @@ public class GamePacketHandler {
                 return;
             }
 
-            Pocket receiverPocket = receiver.getPocket();
-            PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(
-                    product.getItem0(),
-                    product.getCategory(),
-                    receiverPocket);
-            if (item == null) {
-                item = new PlayerPocket();
-                item.setCategory(product.getCategory());
-                item.setItemCount(1);
-                item.setItemIndex(product.getItem0());
-                item.setUseType(product.getUseType());
-                item.setPocket(receiverPocket);
-            } else {
-                item.setItemCount(item.getItemCount() + 1);
-            }
+            List<PlayerPocket> playerPocketList = new ArrayList<>();
 
-            sender.setGold(currentGold - price);
-            this.playerPocketService.save(item);
-            this.playerService.save(sender);
+            Pocket receiverPocket = receiver.getPocket();
+            if (!product.getCategory().equals(EItemCategory.CHAR.getName())) {
+                if (!product.getCategory().equals(EItemCategory.HOUSE.getName())) {
+                    // gold back
+                    if (product.getGoldBack() != 0)
+                        currentGold += product.getGoldBack();
+
+                    if (product.getItem1() != 0) {
+
+                        List<Integer> itemPartList = new ArrayList<>();
+
+                        // use reflection to get indexes of item0-9
+                        ReflectionUtils.doWithFields(product.getClass(), field -> {
+
+                            if (field.getName().startsWith("item")) {
+
+                                field.setAccessible(true);
+
+                                Integer itemIndex = (Integer) field.get(product);
+                                if (itemIndex != 0) {
+                                    itemPartList.add(itemIndex);
+                                }
+
+                                field.setAccessible(false);
+                            }
+                        });
+
+                        // case if set has player included, items are transferred to the new player
+                        if (product.getForPlayer() != -1) {
+
+                            Player newPlayer = productService.createNewPlayer(receiver.getAccount(), product.getForPlayer());
+                            Pocket newPlayerPocket = pocketService.findById(newPlayer.getPocket().getId());
+
+                            for (Integer itemIndex : itemPartList) {
+
+                                PlayerPocket playerPocket = new PlayerPocket();
+                                playerPocket.setCategory(product.getCategory());
+                                playerPocket.setItemIndex(itemIndex);
+                                playerPocket.setUseType(product.getUseType());
+                                playerPocket.setItemCount(1);
+                                playerPocket.setPocket(newPlayerPocket);
+
+                                playerPocketService.save(playerPocket);
+                                newPlayerPocket = pocketService.incrementPocketBelongings(newPlayerPocket);
+                            }
+                        }
+                        else {
+                            for (Integer itemIndex : itemPartList) {
+
+                                PlayerPocket playerPocket = new PlayerPocket();
+                                playerPocket.setCategory(product.getCategory());
+                                playerPocket.setItemIndex(itemIndex);
+                                playerPocket.setUseType(product.getUseType());
+                                playerPocket.setItemCount(1);
+                                playerPocket.setPocket(receiverPocket);
+
+                                playerPocket = playerPocketService.save(playerPocket);
+                                receiverPocket = pocketService.incrementPocketBelongings(receiverPocket);
+
+                                // add item to result
+                                playerPocketList.add(playerPocket);
+                            }
+                        }
+                    } else {
+                        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), receiverPocket);
+                        int existingItemCount = 0;
+                        boolean existingItem = false;
+
+                        if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
+                            existingItemCount = playerPocket.getItemCount();
+                            existingItem = true;
+                        } else {
+                            playerPocket = new PlayerPocket();
+                        }
+
+                        playerPocket.setCategory(product.getCategory());
+                        playerPocket.setItemIndex(product.getItem0());
+                        playerPocket.setUseType(product.getUseType());
+
+                        if (option == 0)
+                            playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
+                        else if (option == 1)
+                            playerPocket.setItemCount(product.getUse1());
+                        else if (option == 2)
+                            playerPocket.setItemCount(product.getUse2());
+
+                        // no idea how itemCount can be null here, but ok
+                        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
+
+                        if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+                            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                            cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
+
+                            playerPocket.setCreated(cal.getTime());
+                        }
+                        playerPocket.setPocket(receiverPocket);
+
+                        playerPocket = playerPocketService.save(playerPocket);
+                        if (!existingItem)
+                            receiverPocket = pocketService.incrementPocketBelongings(receiverPocket);
+
+                        // add item to result
+                        playerPocketList.add(playerPocket);
+                    }
+                    receiver.setPocket(receiverPocket);
+                    this.playerService.save(receiver);
+                }
+            }
+            sender = playerService.setMoney(sender, currentGold - price);
             this.giftService.save(gift);
             connection.getClient().setActivePlayer(sender);
 
@@ -1457,9 +1551,8 @@ public class GamePacketHandler {
                         new S2CReceivedGiftNotificationPacket(gift);
                 receiverClient.getConnection().sendTCP(s2CReceivedGiftNotificationPacket);
 
-                List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(receiver.getPocket());
-                S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
-                receiverClient.getConnection().sendTCP(s2CInventoryDataPacket);
+                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+                receiverClient.getConnection().sendTCP(inventoryDataPacket);
             }
 
             // 1. TODO: Actually buy and gift target player
