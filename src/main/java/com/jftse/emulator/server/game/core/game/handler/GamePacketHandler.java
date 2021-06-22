@@ -1555,8 +1555,6 @@ public class GamePacketHandler {
                 receiverClient.getConnection().sendTCP(inventoryDataPacket);
             }
 
-            // 1. TODO: Actually buy and gift target player
-            // 2. TODO: Handle all cases
             // 0 = Item purchase successful, -1 = Not enough gold, -2 = Not enough AP,
             // -3 = Receiver reached maximum number of character, -6 = That user already has the maximum number of this item
             // -8 = That users character model cannot equip this item,  -9 = You cannot send gifts purchases with gold to that character
@@ -1820,9 +1818,14 @@ public class GamePacketHandler {
         Parcel parcel = this.parcelService.findById(c2SAcceptParcelRequest.getParcelId().longValue());
         if (parcel == null) return;
 
-        // TODO: Check if enough money?
         Player receiver = parcel.getReceiver();
         Integer newGoldReceiver = receiver.getGold() - parcel.getGold();
+        if (newGoldReceiver < 0) {
+            S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -2);
+            connection.sendTCP(s2CAcceptParcelAnswer);
+            return;
+        }
+
         receiver.setGold(newGoldReceiver);
 
         Player sender = parcel.getSender();
