@@ -1786,7 +1786,9 @@ public class GamePacketHandler {
         //-6 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_ACCOUNT
         //-7 = MSG_NO_HAVE_PROPOSE_ITEM
         //-9 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_SEX
-        if (item == null || !item.getItemIndex().equals(26)) {
+        Integer itemIndex = item.getItemIndex();
+        boolean isValidProposalItem = itemIndex.equals(23) || itemIndex.equals(24) || itemIndex.equals(25);
+        if (item == null || !isValidProposalItem) {
             S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -7);
             connection.sendTCP(proposalDeliveredAnswerPacket);
             return;
@@ -1822,9 +1824,15 @@ public class GamePacketHandler {
             Integer newItemCount = item.getItemCount() - 1;
             if (newItemCount < 1) {
                 this.playerPocketService.remove(item.getId());
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket =
+                        new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
+                connection.sendTCP(inventoryItemRemoveAnswerPacket);
             } else {
                 item.setItemCount(newItemCount);
                 this.playerPocketService.save(item);
+                List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(sender.getPocket());
+                S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+                connection.sendTCP(s2CInventoryDataPacket);
             }
 
             Client receiverClient = gameHandler.getClientList().stream()
