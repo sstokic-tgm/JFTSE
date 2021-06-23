@@ -1652,7 +1652,7 @@ public class GamePacketHandler {
         Parcel parcel = this.parcelService.findById(c2SDenyParcelRequest.getParcelId().longValue());
         if (parcel == null) return;
 
-        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), parcel.getSender().getPocket());
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(parcel.getItemIndex(), parcel.getCategory(), parcel.getSender().getPocket());
         if (item == null) {
             item = new PlayerPocket();
             item.setCategory(parcel.getCategory());
@@ -1688,7 +1688,7 @@ public class GamePacketHandler {
         Parcel parcel = this.parcelService.findById(c2SCancelParcelSendingRequest.getParcelId().longValue());
         if (parcel == null) return;
 
-        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), parcel.getSender().getPocket());
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(parcel.getItemIndex(), parcel.getCategory(), parcel.getSender().getPocket());
         if (item == null) {
             item = new PlayerPocket();
             item.setCategory(parcel.getCategory());
@@ -1846,7 +1846,7 @@ public class GamePacketHandler {
         sender.setGold(newGoldSender);
 
         Pocket receiverPocket = receiver.getPocket();
-        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndPocket(parcel.getItemIndex(), receiverPocket);
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(parcel.getItemIndex(), parcel.getCategory(), receiverPocket);
         if (item == null) {
             item = new PlayerPocket();
             item.setCategory(parcel.getCategory());
