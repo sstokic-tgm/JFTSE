@@ -274,6 +274,13 @@ public class GamePacketHandler {
                 this.updateRelationshipStatus(relation.getFriend());
             }
 
+            GuildMember guildMember = this.guildMemberService.getByPlayer(player);
+            if (guildMember != null && guildMember.getGuild() != null) {
+                guildMember.getGuild().getMemberList().stream()
+                        .filter(x -> x != guildMember && !x.getWaitingForApproval())
+                        .forEach(x -> this.updateClubMembersList(x.getPlayer()));
+            }
+
             AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
 
             S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
@@ -1984,6 +1991,7 @@ public class GamePacketHandler {
     private void updateFriendsList(Player player) {
         List<Friend> friends = this.friendService.findByPlayer(player).stream()
                 .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends)
+                .sorted(Comparator.comparing(p -> (!p.getFriend().getOnline())))
                 .collect(Collectors.toList());
         S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
                 new S2CFriendsListAnswerPacket(friends);
@@ -2019,7 +2027,8 @@ public class GamePacketHandler {
             Guild guild = guildMember.getGuild();
             if (guild != null) {
                 List<GuildMember> guildMembers = guild.getMemberList().stream()
-                        .filter(x -> x != guildMember)
+                        .filter(x -> x != guildMember && !x.getWaitingForApproval())
+                        .sorted(Comparator.comparing(p -> (!p.getPlayer().getOnline())))
                         .collect(Collectors.toList());
                 S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket =
                         new S2CClubMembersListAnswerPacket(guildMembers);
