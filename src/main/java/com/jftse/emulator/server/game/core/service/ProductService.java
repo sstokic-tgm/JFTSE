@@ -43,7 +43,7 @@ public class ProductService {
     }
 
     public Product findProductByItemAndCategory(int itemIndex, String category) {
-        return this.productRepository.findProductByItem0AndCategory(itemIndex, category);
+        return this.productRepository.findProductByItem0AndCategoryAndEnabledIsTrue(itemIndex, category);
     }
 
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {
