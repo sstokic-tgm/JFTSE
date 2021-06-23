@@ -1789,7 +1789,7 @@ public class GamePacketHandler {
             senderPocket.setCategory(EItemCategory.SPECIAL.getName());
             senderPocket.setUseType(EItemUseType.INSTANT.getName());
             senderPocket.setItemCount(1);
-            senderPocket.setItemIndex(26);;
+            senderPocket.setItemIndex(26);
             this.playerPocketService.save(senderPocket);
 
             PlayerPocket receiverPocket = new PlayerPocket();
@@ -1797,7 +1797,7 @@ public class GamePacketHandler {
             receiverPocket.setCategory(EItemCategory.SPECIAL.getName());
             receiverPocket.setUseType(EItemUseType.INSTANT.getName());
             receiverPocket.setItemCount(1);
-            receiverPocket.setItemIndex(26);;
+            receiverPocket.setItemIndex(26);
             this.playerPocketService.save(receiverPocket);
 
             List<PlayerPocket> receiverItems = this.playerPocketService.getPlayerPocketItems(proposal.getReceiver().getPocket());
