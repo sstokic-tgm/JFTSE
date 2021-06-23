@@ -40,6 +40,7 @@ public class PlayerPocketService {
         return getPlayerPocketAndHandleDuplicates(playerPocketList);
     }
 
+    @Deprecated(forRemoval = true)
     public PlayerPocket getItemAsPocketByItemIndexAndPocket(Integer itemIndex, Pocket pocket) {
         List<PlayerPocket> playerPocketList = playerPocketRepository.findAllByItemIndexAndPocket(itemIndex, pocket);
         return getPlayerPocketAndHandleDuplicates(playerPocketList);
