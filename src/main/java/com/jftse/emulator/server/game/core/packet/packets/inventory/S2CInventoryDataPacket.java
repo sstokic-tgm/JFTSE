@@ -21,12 +21,7 @@ public class S2CInventoryDataPacket extends Packet {
             this.write(playerPocket.getItemIndex());
             this.write(playerPocket.getUseType().equals("N/A") ? (byte) 0 : EItemUseType.valueOf(playerPocket.getUseType().toUpperCase()).getValue());
             this.write(playerPocket.getItemCount());
-
-            long timeLeft = (playerPocket.getCreated().getTime() * 10000) - (new Date().getTime() * 10000);
-            if (timeLeft <= 0) {
-                timeLeft = 0;
-            }
-            this.write(timeLeft);
+            this.write(playerPocket.getCreated());
 
             this.write((byte) 0); // enchant str
             this.write((byte) 0); // enchant sta
