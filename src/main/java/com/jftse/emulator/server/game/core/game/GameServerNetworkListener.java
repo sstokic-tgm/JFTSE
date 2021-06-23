@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.game.core.game;
 
-import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.server.game.core.game.handler.GamePacketHandler;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.Connection;
@@ -46,6 +45,10 @@ public class GameServerNetworkListener implements ConnectionListener {
 
             case PacketID.C2SGameLoginData:
                 gamePacketHandler.handleGameServerLoginPacket(connection, packet);
+                break;
+
+            case PacketID.C2SServerTimeRequest:
+                gamePacketHandler.handleServerTimeRequestPacket(connection, packet);
                 break;
 
             case PacketID.C2SGameReceiveData:
@@ -346,6 +349,74 @@ public class GameServerNetworkListener implements ConnectionListener {
 
             case PacketID.C2SGuildChatRequest:
                 gamePacketHandler.handleGuildChatRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SMessageListRequest:
+                gamePacketHandler.handleMessageListRequest(connection, packet);
+                break;
+
+            case PacketID.C2SClubMembersListRequest:
+                gamePacketHandler.handleClubMembersListRequest(connection, packet);
+                break;
+
+            case PacketID.C2SParcelListRequest:
+                gamePacketHandler.handleParcelListRequest(connection, packet);
+                break;
+
+            case PacketID.C2SProposalListRequest:
+                gamePacketHandler.handleProposalListRequest(connection, packet);
+                break;
+
+            case PacketID.C2SAddFriendRequest:
+                gamePacketHandler.handleAddFriendRequestPacket(connection, packet);
+                break;
+
+            case PacketID.C2SAddFriendApprovalRequest:
+                gamePacketHandler.handleAddFriendApprovalRequest(connection, packet);
+                break;
+
+            case PacketID.C2SDeleteFriendRequest:
+                gamePacketHandler.handleDeleteFriendRequest(connection, packet);
+                break;
+
+            case PacketID.C2SSendMessageRequest:
+                gamePacketHandler.handleSendMessageRequest(connection, packet);
+                break;
+
+            case PacketID.C2SDeleteMessagesRequest:
+                gamePacketHandler.handleDeleteMessageRequest(connection, packet);
+                break;
+
+            case PacketID.C2SMessageSeenRequest:
+                gamePacketHandler.handleMessageSeenRequest(connection, packet);
+                break;
+
+            case PacketID.C2SSendGiftRequest:
+                gamePacketHandler.handleSendGiftRequest(connection, packet);
+                break;
+
+            case PacketID.C2SSendParcelRequest:
+                gamePacketHandler.handleSendParcelRequest(connection, packet);
+                break;
+
+            case PacketID.C2SDenyParcelRequest:
+                gamePacketHandler.handleDenyParcelRequest(connection, packet);
+                break;
+
+            case PacketID.C2SAcceptParcelRequest:
+                gamePacketHandler.handleAcceptParcelRequest(connection, packet);
+                break;
+
+            case PacketID.C2SCancelParcelSendingRequest:
+                gamePacketHandler.handleCancelSendingParcelRequest(connection, packet);
+                break;
+
+            case PacketID.C2SProposalAnswerRequest:
+                gamePacketHandler.handleProposalAnswerRequest(connection, packet);
+                break;
+
+            case PacketID.C2SSendProposalRequest:
+                gamePacketHandler.handleSendProposalRequest(connection, packet);
                 break;
 
             case PacketID.C2SGuildSearchRequest:

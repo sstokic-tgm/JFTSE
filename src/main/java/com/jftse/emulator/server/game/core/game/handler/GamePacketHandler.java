@@ -17,6 +17,7 @@ import com.jftse.emulator.server.database.model.item.ItemChar;
 import com.jftse.emulator.server.database.model.item.ItemHouse;
 import com.jftse.emulator.server.database.model.item.ItemHouseDeco;
 import com.jftse.emulator.server.database.model.item.Product;
+import com.jftse.emulator.server.database.model.messaging.*;
 import com.jftse.emulator.server.database.model.player.*;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
@@ -61,6 +62,7 @@ import com.jftse.emulator.server.game.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.game.core.packet.packets.lottery.C2SOpenGachaReqPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lottery.S2COpenGachaAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
+import com.jftse.emulator.server.game.core.packet.packets.messaging.*;
 import com.jftse.emulator.server.game.core.packet.packets.player.*;
 import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingDataRequestPacket;
 import com.jftse.emulator.server.game.core.packet.packets.ranking.C2SRankingPersonalDataRequestPacket;
@@ -72,6 +74,7 @@ import com.jftse.emulator.server.game.core.packet.packets.tutorial.C2STutorialEn
 import com.jftse.emulator.server.game.core.packet.packets.tutorial.S2CTutorialProgressAnswerPacket;
 import com.jftse.emulator.server.game.core.service.*;
 import com.jftse.emulator.server.game.core.service.ItemCharService;
+import com.jftse.emulator.server.game.core.service.messaging.*;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeBattleGame;
 import com.jftse.emulator.server.game.core.singleplay.tutorial.TutorialGame;
@@ -123,6 +126,11 @@ public class GamePacketHandler {
     private final BasicModeHandler basicModeHandler;
     private final BattleModeHandler battleModeHandler;
     private final ClientWhitelistService clientWhitelistService;
+    private final FriendService friendService;
+    private final MessageService messageService;
+    private final GiftService giftService;
+    private final ParcelService parcelService;
+    private final ProposalService proposalService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -212,6 +220,14 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleServerTimeRequestPacket(Connection connection, Packet packet) {
+        Date currentTime = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
+
+        Packet answer = new Packet(PacketID.S2CServerTimeAnswer);
+        answer.write(currentTime);
+        connection.sendTCP(answer);
+    }
+
     public void handleGameServerDataRequestPacket(Connection connection, Packet packet) {
         Client client = connection.getClient();
         Player player = client.getActivePlayer();
@@ -227,6 +243,36 @@ public class GamePacketHandler {
 
             S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
             connection.sendTCP(playerLevelExpPacket);
+
+            player.setOnline(true);
+            this.playerService.save(player);
+
+            List<Friend> friends = this.friendService.findByPlayer(player).stream()
+                    .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends)
+                    .collect(Collectors.toList());
+            S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
+                    new S2CFriendsListAnswerPacket(friends);
+            connection.sendTCP(s2CFriendsListAnswerPacket);
+            friends.stream().filter(x -> x.getFriend().getOnline())
+                    .forEach(x -> this.updateFriendsList(x.getFriend()));
+
+            List<Friend> friendsWaitingForApproval = this.friendService.findByFriend(player).stream()
+                    .filter(x -> x.getEFriendshipState() == EFriendshipState.WaitingApproval)
+                    .collect(Collectors.toList());
+            friendsWaitingForApproval.forEach(x -> {
+                S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket =
+                        new S2CFriendRequestNotificationPacket(x.getPlayer().getName());
+                connection.sendTCP(s2CFriendRequestNotificationPacket);
+            });
+
+            Friend relation = this.friendService.findByPlayer(player).stream()
+                    .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
+                    .findFirst()
+                    .orElse(null);
+            if (relation != null) {
+                this.updateRelationshipStatus(player);
+                this.updateRelationshipStatus(relation.getFriend());
+            }
 
             AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
 
@@ -607,16 +653,22 @@ public class GamePacketHandler {
 
     public void handleInventoryItemTimeExpiredPacket(Connection connection, Packet packet) {
         C2SInventoryItemTimeExpiredReqPacket inventoryItemTimeExpiredReqPacket = new C2SInventoryItemTimeExpiredReqPacket(packet);
+        long itemPocketId = inventoryItemTimeExpiredReqPacket.getItemPocketId();
+        PlayerPocket item = this.playerPocketService.findById(itemPocketId);
+        if (item != null && item.getUseType().equals(EItemUseType.TIME.getName())) {
+            long timeLeft = (item.getCreated().getTime() * 10000) - (new Date().getTime() * 10000);
+            if (timeLeft < 0) {
+                this.playerPocketService.remove(itemPocketId);
 
-        Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+                Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+                pocket = this.pocketService.decrementPocketBelongings(pocket);
 
-        playerPocketService.remove((long) inventoryItemTimeExpiredReqPacket.getItemPocketId());
-        pocket = pocketService.decrementPocketBelongings(pocket);
+                connection.getClient().getActivePlayer().setPocket(pocket);
 
-        connection.getClient().getActivePlayer().setPocket(pocket);
-
-        S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemTimeExpiredReqPacket.getItemPocketId());
-        connection.sendTCP(inventoryItemRemoveAnswerPacket);
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemTimeExpiredReqPacket.getItemPocketId());
+                connection.sendTCP(inventoryItemRemoveAnswerPacket);
+            }
+        }
     }
 
     public void handleShopMoneyRequestPacket(Connection connection, Packet packet) {
@@ -950,11 +1002,72 @@ public class GamePacketHandler {
             connection.sendTCP(playerStatusPointChangePacket);
             S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
             connection.sendTCP(playerInfoPlayStatsPacket);
+        } else if (category.equals("SPECIAL")  && itemIndex == 26){
+            Friend playerCouple = this.friendService.findByPlayer(player).stream()
+                    .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
+                    .findFirst()
+                    .orElse(null);
+            if (playerCouple == null) {
+                return;
+            }
+
+            playerCouple.setEFriendshipState(EFriendshipState.Friends);
+
+            Friend significantOtherCouple = this.friendService.findByPlayer(playerCouple.getFriend()).stream()
+                    .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
+                    .findFirst()
+                    .orElse(null);
+            if (significantOtherCouple == null) {
+                return;
+            }
+
+            significantOtherCouple.setEFriendshipState(EFriendshipState.Friends);
+            this.friendService.save(playerCouple);
+            this.friendService.save(significantOtherCouple);
+
+            S2CYouBrokeUpWithYourCoupleAnswer s2CYouBrokeUpWithYourCoupleAnswer = new S2CYouBrokeUpWithYourCoupleAnswer();
+            connection.sendTCP(s2CYouBrokeUpWithYourCoupleAnswer);
+
+            Integer currentGold = player.getGold();
+            player.setGold(currentGold - 20000);
+            this.playerService.save(player);
+            connection.getClient().setActivePlayer(player);
+            S2CShopMoneyAnswerPacket s2CShopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
+            connection.sendTCP(s2CShopMoneyAnswerPacket);
+
+            this.updateFriendsList(player);
+            this.updateFriendsList(playerCouple.getFriend());
+
+            PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(
+                    26,
+                    EItemCategory.SPECIAL.getName(),
+                    playerCouple.getFriend().getPocket());
+            this.playerPocketService.remove(item.getId());
+
+            Message message = new Message();
+            message.setSeen(false);
+            message.setSender(player);
+            message.setReceiver(playerCouple.getFriend());
+            message.setMessage("[Automatic response] I divorced you");
+            this.messageService.save(message);
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(playerCouple.getFriend().getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (receiverClient != null) {
+                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                        new S2CReceivedMessageNotificationPacket(message);
+                receiverClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket =
+                        new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
+                receiverClient.getConnection().sendTCP(inventoryItemRemoveAnswerPacket);
+            }
         }
+
         int itemCount = playerPocket.getItemCount() - 1;
-
         if (itemCount <= 0) {
-
             playerPocketService.remove(playerPocket.getId());
             pocket = pocketService.decrementPocketBelongings(pocket);
             connection.getClient().getActivePlayer().setPocket(pocket);
@@ -1030,7 +1143,11 @@ public class GamePacketHandler {
         if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
             guild = guildMember.getGuild();
 
-        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guild);
+        Friend couple = this.friendService.findByPlayer(player).stream()
+                .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
+                .findFirst()
+                .orElse(null);
+        S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guild, couple);
         connection.sendTCP(lobbyUserInfoAnswerPacket);
     }
 
@@ -1073,6 +1190,847 @@ public class GamePacketHandler {
 
             connection.sendTCP(whisperAnswerPacket);
         } break;
+        }
+    }
+
+    public void handleMessageListRequest(Connection connection, Packet packet) {
+        C2SMessageListRequestPacket messageListRequestPacket = new C2SMessageListRequestPacket(packet);
+        byte listType = messageListRequestPacket.getListType();
+
+        Player player = connection.getClient().getActivePlayer();
+
+        switch (listType) {
+            case 0: {
+                List<Message> messages = this.messageService.findByReceiver(player);
+                S2CMessageListAnswerPacket messageListAnswerPacket = new S2CMessageListAnswerPacket(listType, messages);
+                connection.sendTCP(messageListAnswerPacket);
+
+                messages = new ArrayList<>(this.messageService.findBySender(player));
+                messageListAnswerPacket = new S2CMessageListAnswerPacket((byte) (listType + 1), messages);
+                connection.sendTCP(messageListAnswerPacket);
+
+                break;
+            }
+
+            case 2: {
+                List<Gift> gifts = this.giftService.findByReceiver(player);
+                S2CMessageListAnswerPacket messageListAnswerPacket = new S2CMessageListAnswerPacket(listType, gifts);
+                connection.sendTCP(messageListAnswerPacket);
+
+                gifts = this.giftService.findBySender(player);
+                messageListAnswerPacket = new S2CMessageListAnswerPacket((byte) (listType + 1), gifts);
+                connection.sendTCP(messageListAnswerPacket);
+
+                break;
+            }
+        }
+    }
+
+    public void handleClubMembersListRequest(Connection connection, Packet packet) {
+        GuildMember guildMember = this.guildMemberService.getByPlayer(connection.getClient().getActivePlayer());
+        if (guildMember != null) {
+            Guild guild = guildMember.getGuild();
+            if (guild != null) {
+                List<GuildMember> guildMembers = guild.getMemberList().stream()
+                        .filter(x -> x != guildMember)
+                        .collect(Collectors.toList());
+                S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket =
+                        new S2CClubMembersListAnswerPacket(guildMembers);
+                connection.sendTCP(s2CClubMembersListAnswerPacket);
+            }
+        }
+    }
+
+    public void handleParcelListRequest(Connection connection, Packet packet) {
+        C2SParcelListRequestPacket parcelListRequestPacket = new C2SParcelListRequestPacket(packet);
+        byte listType = parcelListRequestPacket.getListType();
+
+        Player player = connection.getClient().getActivePlayer();
+        List<Parcel> parcelList = new ArrayList<>();
+        switch (listType) {
+            case 0:
+                parcelList.addAll(this.parcelService.findByReceiver(player));
+                break;
+
+            case 1:
+                parcelList.addAll(this.parcelService.findBySender(player));
+                break;
+        }
+        S2CParcelListPacket s2CReceivedParcelListPacket = new S2CParcelListPacket(listType, parcelList);
+        connection.sendTCP(s2CReceivedParcelListPacket);
+    }
+
+    public void handleProposalListRequest(Connection connection, Packet packet) {
+        C2SProposalListRequestPacket proposalListRequestPacket = new C2SProposalListRequestPacket(packet);
+        byte listType = proposalListRequestPacket.getListType();
+
+        Player player = connection.getClient().getActivePlayer();
+        List<Proposal> proposalList = new ArrayList<>();
+        switch (listType) {
+            case 0:
+                proposalList.addAll(this.proposalService.findByReceiver(player));
+                break;
+
+            case 1:
+                proposalList.addAll(this.proposalService.findBySender(player));
+                break;
+        }
+        S2CProposalListPacket s2CReceivedProposalListPacket = new S2CProposalListPacket(listType, proposalList);
+        connection.sendTCP(s2CReceivedProposalListPacket);
+    }
+
+    public void handleAddFriendRequestPacket(Connection connection, Packet packet) {
+        C2SAddFriendRequestPacket c2SAddFriendRequestPacket =
+                new C2SAddFriendRequestPacket(packet);
+        Player player = connection.getClient().getActivePlayer();
+        Player targetPlayer = this.playerService.findByName(c2SAddFriendRequestPacket.getPlayerName());
+        if (targetPlayer == null) {
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) -1);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
+        }
+
+        List<Friend> friends = this.friendService.findByPlayer(player);
+        Friend targetFriend = friends.stream()
+                .filter(x -> x.getFriend().getId().equals(targetPlayer.getId()))
+                .findFirst()
+                .orElse(null);
+        if (targetFriend == null) {
+            Friend friend = new Friend();
+            friend.setPlayer(player);
+            friend.setFriend(targetPlayer);
+            friend.setEFriendshipState(EFriendshipState.WaitingApproval);
+            this.friendService.save(friend);
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) 0);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+
+            S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket =
+                    new S2CFriendRequestNotificationPacket(player.getName());
+            Client friendClient = this.gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(targetPlayer.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (friendClient != null) {
+                friendClient.getConnection().sendTCP(s2CFriendRequestNotificationPacket);
+            }
+            return;
+        }
+
+        if (targetFriend.getEFriendshipState() == EFriendshipState.Friends || targetFriend.getEFriendshipState() == EFriendshipState.Relationship) {
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) -5);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
+        } else if (targetFriend.getEFriendshipState() == EFriendshipState.WaitingApproval) {
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket =
+                    new S2CAddFriendResponsePacket((short) -4);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
+        }
+    }
+
+    public void handleDeleteFriendRequest(Connection connection, Packet packet) {
+        C2SDeleteFriendRequestPacket c2SDeleteFriendRequestPacket =
+                new C2SDeleteFriendRequestPacket(packet);
+        Player player = connection.getClient().getActivePlayer();
+        Friend friend1 = this.friendService.findByPlayerIdAndFriendId(player.getId(), c2SDeleteFriendRequestPacket.getFriendId());
+        if (friend1 != null) {
+            this.friendService.remove(friend1.getId());
+            S2CDeleteFriendResponsePacket s2CDeleteFriendResponsePacket =
+                    new S2CDeleteFriendResponsePacket(friend1.getFriend());
+            connection.sendTCP(s2CDeleteFriendResponsePacket);
+        }
+
+        Friend friend2 = this.friendService.findByPlayerIdAndFriendId(c2SDeleteFriendRequestPacket.getFriendId(), player.getId());
+        if (friend2 != null) {
+            this.friendService.remove(friend2.getId());
+            this.updateFriendsList(friend2.getPlayer());
+        }
+    }
+
+    public void handleAddFriendApprovalRequest(Connection connection, Packet packet) {
+        C2SAddFriendApprovalRequestPacket c2SAddFriendApprovalRequestPacket =
+                new C2SAddFriendApprovalRequestPacket(packet);
+        Player targetPlayer = this.playerService.findByName(c2SAddFriendApprovalRequestPacket.getPlayerName());
+        List<Friend> friends = this.friendService.findByPlayer(targetPlayer);
+        Friend friend = friends.stream()
+                .filter(x -> x.getFriend().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findFirst()
+                .orElse(null);
+        if (friend == null) return;
+
+        if (c2SAddFriendApprovalRequestPacket.isAccept()) {
+            friend.setEFriendshipState(EFriendshipState.Friends);
+            Friend newFriend = new Friend();
+            newFriend.setPlayer(connection.getClient().getActivePlayer());
+            newFriend.setFriend(targetPlayer);
+            newFriend.setEFriendshipState(EFriendshipState.Friends);
+
+            this.friendService.save(friend);
+            this.friendService.save(newFriend);
+
+            this.updateFriendsList(connection.getClient().getActivePlayer());
+            this.updateFriendsList(targetPlayer);
+
+            // TODO: ANSWER???
+        } else {
+            this.friendService.remove(friend.getId());
+            // TODO: ANSWER???
+        }
+    }
+
+    public void handleSendMessageRequest(Connection connection, Packet packet) {
+        C2SSendMessageRequestPacket c2SSendMessageRequestPacket =
+                new C2SSendMessageRequestPacket(packet);
+        Player receiver = this.playerService.findByName(c2SSendMessageRequestPacket.getReceiverName());
+        if (receiver != null) {
+            Message message = new Message();
+            message.setReceiver(receiver);
+            message.setSender(connection.getClient().getActivePlayer());
+            message.setMessage(c2SSendMessageRequestPacket.getMessage());
+            message.setSeen(false);
+            this.messageService.save(message);
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (receiverClient != null) {
+                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                        new S2CReceivedMessageNotificationPacket(message);
+                receiverClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+            }
+        }
+    }
+
+    public void handleMessageSeenRequest(Connection connection, Packet packet) {
+        C2SMessageSeenRequestPacket c2SMessageSeenRequestPacket =
+                new C2SMessageSeenRequestPacket(packet);
+        if (c2SMessageSeenRequestPacket.getType() == 0) {
+            Message message = this.messageService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
+            message.setSeen(true);
+            this.messageService.save(message);
+        } else if (c2SMessageSeenRequestPacket.getType() == 2) {
+            Gift gift = this.giftService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
+            gift.setSeen(true);
+            this.giftService.save(gift);
+        }
+    }
+
+    public void handleSendGiftRequest(Connection connection, Packet packet) {
+        C2SSendGiftRequestPacket c2SSendGiftRequestPacket = new C2SSendGiftRequestPacket(packet);
+        byte option = c2SSendGiftRequestPacket.getOption();
+
+        Product product = this.productService.findProductByProductItemIndex(c2SSendGiftRequestPacket.getProductIndex());
+        Player sender = connection.getClient().getActivePlayer();
+        Player receiver = this.playerService.findByName(c2SSendGiftRequestPacket.getReceiverName());
+        if (receiver != null && product != null) {
+            Gift gift = new Gift();
+            gift.setReceiver(receiver);
+            gift.setSender(connection.getClient().getActivePlayer());
+            gift.setMessage(c2SSendGiftRequestPacket.getMessage());
+            gift.setSeen(false);
+            gift.setProduct(product);
+            gift.setUseTypeOption(option);
+
+            Integer currentGold = sender.getGold();
+            Integer price = product.getPrice0();
+            if (price > currentGold) {
+                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) -1, null);
+                connection.sendTCP(s2CSendGiftAnswerPacket);
+                return;
+            }
+
+            List<PlayerPocket> playerPocketList = new ArrayList<>();
+
+            Pocket receiverPocket = receiver.getPocket();
+            if (!product.getCategory().equals(EItemCategory.CHAR.getName())) {
+                if (!product.getCategory().equals(EItemCategory.HOUSE.getName())) {
+                    // gold back
+                    if (product.getGoldBack() != 0)
+                        currentGold += product.getGoldBack();
+
+                    if (product.getItem1() != 0) {
+
+                        List<Integer> itemPartList = new ArrayList<>();
+
+                        // use reflection to get indexes of item0-9
+                        ReflectionUtils.doWithFields(product.getClass(), field -> {
+
+                            if (field.getName().startsWith("item")) {
+
+                                field.setAccessible(true);
+
+                                Integer itemIndex = (Integer) field.get(product);
+                                if (itemIndex != 0) {
+                                    itemPartList.add(itemIndex);
+                                }
+
+                                field.setAccessible(false);
+                            }
+                        });
+
+                        // case if set has player included, items are transferred to the new player
+                        if (product.getForPlayer() != -1) {
+
+                            Player newPlayer = productService.createNewPlayer(receiver.getAccount(), product.getForPlayer());
+                            Pocket newPlayerPocket = pocketService.findById(newPlayer.getPocket().getId());
+
+                            for (Integer itemIndex : itemPartList) {
+
+                                PlayerPocket playerPocket = new PlayerPocket();
+                                playerPocket.setCategory(product.getCategory());
+                                playerPocket.setItemIndex(itemIndex);
+                                playerPocket.setUseType(product.getUseType());
+                                playerPocket.setItemCount(1);
+                                playerPocket.setPocket(newPlayerPocket);
+
+                                playerPocketService.save(playerPocket);
+                                newPlayerPocket = pocketService.incrementPocketBelongings(newPlayerPocket);
+                            }
+                        }
+                        else {
+                            for (Integer itemIndex : itemPartList) {
+
+                                PlayerPocket playerPocket = new PlayerPocket();
+                                playerPocket.setCategory(product.getCategory());
+                                playerPocket.setItemIndex(itemIndex);
+                                playerPocket.setUseType(product.getUseType());
+                                playerPocket.setItemCount(1);
+                                playerPocket.setPocket(receiverPocket);
+
+                                playerPocket = playerPocketService.save(playerPocket);
+                                receiverPocket = pocketService.incrementPocketBelongings(receiverPocket);
+
+                                // add item to result
+                                playerPocketList.add(playerPocket);
+                            }
+                        }
+                    } else {
+                        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), receiverPocket);
+                        int existingItemCount = 0;
+                        boolean existingItem = false;
+
+                        if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
+                            existingItemCount = playerPocket.getItemCount();
+                            existingItem = true;
+                        } else {
+                            playerPocket = new PlayerPocket();
+                        }
+
+                        playerPocket.setCategory(product.getCategory());
+                        playerPocket.setItemIndex(product.getItem0());
+                        playerPocket.setUseType(product.getUseType());
+
+                        if (option == 0)
+                            playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
+                        else if (option == 1)
+                            playerPocket.setItemCount(product.getUse1());
+                        else if (option == 2)
+                            playerPocket.setItemCount(product.getUse2());
+
+                        // no idea how itemCount can be null here, but ok
+                        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
+
+                        if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+                            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                            cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
+
+                            playerPocket.setCreated(cal.getTime());
+                        }
+                        playerPocket.setPocket(receiverPocket);
+
+                        playerPocket = playerPocketService.save(playerPocket);
+                        if (!existingItem)
+                            receiverPocket = pocketService.incrementPocketBelongings(receiverPocket);
+
+                        // add item to result
+                        playerPocketList.add(playerPocket);
+                    }
+                    receiver.setPocket(receiverPocket);
+                    this.playerService.save(receiver);
+                }
+            }
+            sender = playerService.setMoney(sender, currentGold - price);
+            this.giftService.save(gift);
+            connection.getClient().setActivePlayer(sender);
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (receiverClient != null) {
+                S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket =
+                        new S2CReceivedGiftNotificationPacket(gift);
+                receiverClient.getConnection().sendTCP(s2CReceivedGiftNotificationPacket);
+
+                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+                receiverClient.getConnection().sendTCP(inventoryDataPacket);
+            }
+
+            // 0 = Item purchase successful, -1 = Not enough gold, -2 = Not enough AP,
+            // -3 = Receiver reached maximum number of character, -6 = That user already has the maximum number of this item
+            // -8 = That users character model cannot equip this item,  -9 = You cannot send gifts purchases with gold to that character
+            S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) 0, gift);
+            connection.sendTCP(s2CSendGiftAnswerPacket);
+
+            S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
+            connection.sendTCP(senderMoneyPacket);
+        }
+    }
+
+    public void handleSendParcelRequest(Connection connection, Packet packet) {
+        C2SSendParcelRequestPacket c2SSendParcelRequestPacket = new C2SSendParcelRequestPacket(packet);
+        PlayerPocket item = this.playerPocketService.findById(c2SSendParcelRequestPacket.getPlayerPocketId().longValue());
+
+        Product product = this.productService.findProductByItemAndCategory(item.getItemIndex(), item.getCategory());
+        if (product != null && !product.getEnableParcel()) {
+            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
+            connection.sendTCP(s2CSendParcelAnswerPacket);
+        } else {
+            Player sender = connection.getClient().getActivePlayer();
+            Player receiver = this.playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
+            if (receiver != null && item != null) {
+                if (item != null) {
+                    // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
+                    Parcel parcel = new Parcel();
+                    parcel.setReceiver(receiver);
+                    parcel.setSender(connection.getClient().getActivePlayer());
+                    parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
+                    parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
+
+                    parcel.setItemCount(item.getItemCount());
+                    parcel.setCategory(item.getCategory());
+                    parcel.setItemIndex(item.getItemIndex());
+                    parcel.setUseType(item.getUseType());
+
+                    // TODO: Is this right?
+                    if (receiver.getId().equals(sender.getId())) {
+                        parcel.setEParcelType(EParcelType.Gold);
+                    } else {
+                        parcel.setEParcelType(EParcelType.CashOnDelivery);
+                    }
+
+                    this.parcelService.save(parcel);
+                    this.playerPocketService.remove(item.getId());
+
+                    Client receiverClient = gameHandler.getClientList().stream()
+                            .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                            .findFirst()
+                            .orElse(null);
+                    if (receiverClient != null) {
+                        S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket =
+                                new S2CReceivedParcelNotificationPacket(parcel);
+                        receiverClient.getConnection().sendTCP(s2CReceivedParcelNotificationPacket);
+                    }
+
+                    // TODO: Handle fee
+                    // TODO: Handle all these cases
+                    // 0 = Successfully sent
+                    //-1 = Failed to send parcel
+                    //-2 = You do not have enough gold
+                    //-4 = Under level 20 user can not send parcel
+                    //-5 = Gold transactions must be under 1.000.000
+                    S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) 0);
+                    connection.sendTCP(s2CSendParcelAnswerPacket);
+
+                    S2CInventoryItemRemoveAnswerPacket s2CInventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
+                    connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);
+
+                    List<Parcel> sentParcels = this.parcelService.findBySender(parcel.getSender());
+                    S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
+                    connection.sendTCP(s2CSentParcelListPacket);
+                }
+            }
+        }
+    }
+
+    public void handleDenyParcelRequest(Connection connection, Packet packet) {
+        C2SDenyParcelRequest c2SDenyParcelRequest = new C2SDenyParcelRequest(packet);
+        Parcel parcel = this.parcelService.findById(c2SDenyParcelRequest.getParcelId().longValue());
+        if (parcel == null) return;
+
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(parcel.getItemIndex(), parcel.getCategory(), parcel.getSender().getPocket());
+        if (item == null) {
+            item = new PlayerPocket();
+            item.setCategory(parcel.getCategory());
+            item.setItemCount(parcel.getItemCount());
+            item.setItemIndex(parcel.getItemIndex());
+            item.setUseType(parcel.getUseType());
+            item.setPocket(parcel.getSender().getPocket());
+        } else {
+            item.setItemCount(item.getItemCount() + parcel.getItemCount());
+        }
+
+        this.playerPocketService.save(item);
+        this.parcelService.remove(parcel.getId());
+
+        S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
+        connection.sendTCP(s2CRemoveParcelFromListPacket);
+
+        List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
+        Client senderClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(parcel.getSender().getId()))
+                .findFirst()
+                .orElse(null);
+        if (senderClient != null) {
+            S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+            senderClient.getConnection().sendTCP(s2CInventoryDataPacket);
+
+            // TODO: Remove parcel from sent list of sender, S2CSentParcelListPacket doesn't work
+        }
+    }
+
+    public void handleCancelSendingParcelRequest(Connection connection, Packet packet) {
+        C2SCancelParcelSendingRequest c2SCancelParcelSendingRequest = new C2SCancelParcelSendingRequest(packet);
+        Parcel parcel = this.parcelService.findById(c2SCancelParcelSendingRequest.getParcelId().longValue());
+        if (parcel == null) return;
+
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(parcel.getItemIndex(), parcel.getCategory(), parcel.getSender().getPocket());
+        if (item == null) {
+            item = new PlayerPocket();
+            item.setCategory(parcel.getCategory());
+            item.setItemCount(parcel.getItemCount());
+            item.setItemIndex(parcel.getItemIndex());
+            item.setUseType(parcel.getUseType());
+            item.setPocket(parcel.getSender().getPocket());
+        } else {
+            item.setItemCount(item.getItemCount() + parcel.getItemCount());
+        }
+
+        this.playerPocketService.save(item);
+        this.parcelService.remove(parcel.getId());
+
+        List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
+        S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+        connection.sendTCP(s2CInventoryDataPacket);
+
+        S2CCancelParcelSendingAnswer s2CCancelParcelSendingAnswer = new S2CCancelParcelSendingAnswer((short) 0);
+        connection.sendTCP(s2CCancelParcelSendingAnswer);
+
+        Client receiverClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(parcel.getReceiver().getId()))
+                .findFirst()
+                .orElse(null);
+        if (receiverClient != null) {
+            S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
+            receiverClient.getConnection().sendTCP(s2CRemoveParcelFromListPacket);
+        }
+    }
+
+    public void handleProposalAnswerRequest(Connection connection, Packet packet) {
+        C2SProposalAnswerRequestPacket c2SProposalAnswerRequestPacket = new C2SProposalAnswerRequestPacket(packet);
+        Proposal proposal = this.proposalService.findById(c2SProposalAnswerRequestPacket.getProposalId().longValue());
+        if (proposal == null) return;
+
+        List<Friend> senderFriend = this.friendService.findByPlayer(proposal.getSender());
+        if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
+            if (c2SProposalAnswerRequestPacket.getAccepted()) {
+                Message message = new Message();
+                message.setSeen(false);
+                message.setSender(proposal.getSender());
+                message.setReceiver(proposal.getReceiver());
+                message.setMessage("[Automatic response] I'm sorry but I'm already in a relationship");
+                this.messageService.save(message);
+
+                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                        new S2CReceivedMessageNotificationPacket(message);
+                connection.sendTCP(s2CReceivedMessageNotificationPacket);
+            }
+
+            this.proposalService.remove(proposal.getId());
+            return;
+        }
+
+        Message message = new Message();
+        message.setSeen(false);
+        message.setSender(proposal.getReceiver());
+        message.setReceiver(proposal.getSender());
+        if (c2SProposalAnswerRequestPacket.getAccepted()) {
+            List<Friend> receiverFriend = this.friendService.findByPlayer(proposal.getReceiver());
+            if (receiverFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
+                this.proposalService.remove(proposal.getId());
+                return;
+            }
+
+            message.setMessage("[Automatic response] I accepted your proposal <3");
+
+            Friend friendOfSender = this.friendService.findByPlayerIdAndFriendId(
+                    proposal.getSender().getId(),
+                    proposal.getReceiver().getId());
+            if (friendOfSender == null) {
+                friendOfSender = new Friend();
+                friendOfSender.setPlayer(proposal.getSender());
+                friendOfSender.setFriend(proposal.getReceiver());
+            }
+
+            friendOfSender.setEFriendshipState(EFriendshipState.Relationship);
+
+            Friend friendOfReceiver = this.friendService.findByPlayerIdAndFriendId(
+                    proposal.getReceiver().getId(),
+                    proposal.getSender().getId());
+            if (friendOfReceiver == null) {
+                friendOfReceiver = new Friend();
+                friendOfReceiver.setPlayer(proposal.getReceiver());
+                friendOfReceiver.setFriend(proposal.getSender());
+            }
+
+            friendOfReceiver.setEFriendshipState(EFriendshipState.Relationship);
+
+            this.friendService.save(friendOfSender);
+            this.friendService.save(friendOfReceiver);
+            this.updateRelationshipStatus(connection.getClient().getActivePlayer());
+            this.updateRelationshipStatus(proposal.getSender());
+
+            PlayerPocket senderPocket = new PlayerPocket();
+            senderPocket.setPocket(proposal.getSender().getPocket());
+            senderPocket.setCategory(EItemCategory.SPECIAL.getName());
+            senderPocket.setUseType(EItemUseType.INSTANT.getName());
+            senderPocket.setItemCount(1);
+            senderPocket.setItemIndex(26);
+            this.playerPocketService.save(senderPocket);
+
+            PlayerPocket receiverPocket = new PlayerPocket();
+            receiverPocket.setPocket(proposal.getReceiver().getPocket());
+            receiverPocket.setCategory(EItemCategory.SPECIAL.getName());
+            receiverPocket.setUseType(EItemUseType.INSTANT.getName());
+            receiverPocket.setItemCount(1);
+            receiverPocket.setItemIndex(26);
+            this.playerPocketService.save(receiverPocket);
+
+            List<PlayerPocket> receiverItems = this.playerPocketService.getPlayerPocketItems(proposal.getReceiver().getPocket());
+            S2CInventoryDataPacket receiverInventoryPacket = new S2CInventoryDataPacket(receiverItems);
+            connection.sendTCP(receiverInventoryPacket);
+
+        } else {
+            message.setMessage("[Automatic response] I denied your proposal ＞﹏＜");
+        }
+
+        this.messageService.save(message);
+        this.proposalService.remove(proposal.getId());
+
+        Client senderClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(proposal.getSender().getId()))
+                .findFirst()
+                .orElse(null);
+        if (senderClient != null) {
+            S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket =
+                    new S2CReceivedMessageNotificationPacket(message);
+            senderClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+
+            List<PlayerPocket> senderItems = this.playerPocketService.getPlayerPocketItems(proposal.getSender().getPocket());
+            S2CInventoryDataPacket senderInventoryPacket = new S2CInventoryDataPacket(senderItems);
+            senderClient.getConnection().sendTCP(senderInventoryPacket);
+        }
+    }
+
+    public void handleAcceptParcelRequest(Connection connection, Packet packet) {
+        C2SAcceptParcelRequest c2SAcceptParcelRequest = new C2SAcceptParcelRequest(packet);
+        Parcel parcel = this.parcelService.findById(c2SAcceptParcelRequest.getParcelId().longValue());
+        if (parcel == null) return;
+
+        Player receiver = parcel.getReceiver();
+        Integer newGoldReceiver = receiver.getGold() - parcel.getGold();
+        if (newGoldReceiver < 0) {
+            S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -2);
+            connection.sendTCP(s2CAcceptParcelAnswer);
+            return;
+        }
+
+        receiver.setGold(newGoldReceiver);
+
+        Player sender = parcel.getSender();
+        Integer newGoldSender = sender.getGold() + parcel.getGold();
+        sender.setGold(newGoldSender);
+
+        Pocket receiverPocket = receiver.getPocket();
+        PlayerPocket item = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(parcel.getItemIndex(), parcel.getCategory(), receiverPocket);
+        if (item == null) {
+            item = new PlayerPocket();
+            item.setCategory(parcel.getCategory());
+            item.setItemCount(parcel.getItemCount());
+            item.setItemIndex(parcel.getItemIndex());
+            item.setUseType(parcel.getUseType());
+            item.setPocket(receiverPocket);
+        } else {
+            item.setItemCount(item.getItemCount() + parcel.getItemCount());
+        }
+
+        this.playerPocketService.save(item);
+        this.parcelService.remove(parcel.getId());
+        this.playerService.save(receiver);
+        this.playerService.save(sender);
+
+        Client senderClient = gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(sender.getId()))
+                .findFirst()
+                .orElse(null);
+        if (senderClient != null) {
+            S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
+            senderClient.getConnection().sendTCP(senderMoneyPacket);
+
+            // TODO: Remove parcel from sent list of sender, S2CSentParcelListPacket doesn't work
+        }
+
+        S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
+        connection.sendTCP(s2CRemoveParcelFromListPacket);
+
+        S2CShopMoneyAnswerPacket receiverMoneyPacket = new S2CShopMoneyAnswerPacket(receiver);
+        connection.sendTCP(receiverMoneyPacket);
+
+        List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(receiver.getPocket());
+        S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+        connection.sendTCP(s2CInventoryDataPacket);
+    }
+
+    public void handleSendProposalRequest(Connection connection, Packet packet) {
+        C2SSendProposalRequestPacket c2SSendProposalRequestPacket =
+                new C2SSendProposalRequestPacket(packet);
+        PlayerPocket item = this.playerPocketService.findById(c2SSendProposalRequestPacket.getPlayerPocketId().longValue());
+
+        // 0 = MSG_PROPOSE_SUCCESS
+        //-1 = MSG_NO_CHARACTER_AT_CHARACTER_LIST
+        //-3 = MSG_PROPOSE_ACCEPT_FAILED_ALREADY_COUPLE
+        //-4 = MSG_PROPOSE_FAILED_ALREADY_PROPOSING
+        //-6 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_ACCOUNT
+        //-7 = MSG_NO_HAVE_PROPOSE_ITEM
+        //-9 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_SEX
+        boolean isValidProposalItem = item != null &&
+                item.getItemIndex().equals(23) ||
+                item.getItemIndex().equals(24) ||
+                item.getItemIndex().equals(25);
+        if (!isValidProposalItem) {
+            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -7);
+            connection.sendTCP(proposalDeliveredAnswerPacket);
+            return;
+        }
+
+        Player sender = connection.getClient().getActivePlayer();
+        Player receiver = this.playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
+
+        List<Friend> senderFriend = this.friendService.findByPlayer(sender);
+        if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
+            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -3);
+            connection.sendTCP(proposalDeliveredAnswerPacket);
+            return;
+        }
+
+        if (receiver != null) {
+            List<Friend> receiverFriends = this.friendService.findByPlayer(receiver);
+            if (receiverFriends.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
+                S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -3);
+                connection.sendTCP(proposalDeliveredAnswerPacket);
+                return;
+            }
+
+            Proposal proposal = new Proposal();
+            proposal.setReceiver(receiver);
+            proposal.setSender(connection.getClient().getActivePlayer());
+            proposal.setMessage(c2SSendProposalRequestPacket.getMessage());
+            proposal.setSeen(false);
+            proposal.setCategory(item.getCategory());
+            proposal.setItemIndex(item.getItemIndex());
+
+            this.proposalService.save(proposal);
+            Integer newItemCount = item.getItemCount() - 1;
+            if (newItemCount < 1) {
+                this.playerPocketService.remove(item.getId());
+                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket =
+                        new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
+                connection.sendTCP(inventoryItemRemoveAnswerPacket);
+            } else {
+                item.setItemCount(newItemCount);
+                this.playerPocketService.save(item);
+                List<PlayerPocket> items = this.playerPocketService.getPlayerPocketItems(sender.getPocket());
+                S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+                connection.sendTCP(s2CInventoryDataPacket);
+            }
+
+            Client receiverClient = gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (receiverClient != null) {
+                S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket =
+                        new S2CReceivedProposalNotificationPacket(proposal);
+                receiverClient.getConnection().sendTCP(s2CReceivedProposalNotificationPacket);
+            }
+
+            List<Proposal> sentProposals = this.proposalService.findBySender(sender);
+            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
+            connection.sendTCP(s2CSentProposalListPacket);
+
+            S2CProposalDeliveredAnswerPacket s2CProposalDeliveredAnswerPacket =
+                    new S2CProposalDeliveredAnswerPacket((byte) 0);
+            connection.sendTCP(s2CProposalDeliveredAnswerPacket);
+        }
+    }
+
+    public void handleDeleteMessageRequest(Connection connection, Packet packet) {
+        C2SDeleteMessagesRequest c2SDeleteMessagesRequest = new C2SDeleteMessagesRequest(packet);
+        if (c2SDeleteMessagesRequest.getType() == 0) {
+            c2SDeleteMessagesRequest.getMessageIds().forEach(m -> {
+                this.messageService.remove(m.longValue());
+            });
+        } else if (c2SDeleteMessagesRequest.getType() == 2) {
+            c2SDeleteMessagesRequest.getMessageIds().forEach(m -> {
+                this.giftService.remove(m.longValue());
+            });
+        }
+    }
+
+    private void updateFriendsList(Player player) {
+        List<Friend> friends = this.friendService.findByPlayer(player).stream()
+                .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends)
+                .collect(Collectors.toList());
+        S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
+                new S2CFriendsListAnswerPacket(friends);
+        Client client = this.gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
+                .findFirst()
+                .orElse(null);
+        if (client != null) {
+            client.getConnection().sendTCP(s2CFriendsListAnswerPacket);
+        }
+    }
+
+    private void updateRelationshipStatus(Player player) {
+        Friend friend = this.friendService.findByPlayer(player).stream()
+                .filter(x -> x.getEFriendshipState() == EFriendshipState.Relationship)
+                .findFirst()
+                .orElse(null);
+        if (friend != null) {
+            Client client = this.gameHandler.getClientList().stream()
+                    .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (client != null) {
+                S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friend);
+                client.getConnection().sendTCP(s2CRelationshipAnswerPacket);
+            }
+        }
+    }
+
+    private void updateClubMembersList(Player player) {
+        GuildMember guildMember = this.guildMemberService.getByPlayer(player);
+        if (guildMember != null) {
+            Guild guild = guildMember.getGuild();
+            if (guild != null) {
+                List<GuildMember> guildMembers = guild.getMemberList().stream()
+                        .filter(x -> x != guildMember)
+                        .collect(Collectors.toList());
+                S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket =
+                        new S2CClubMembersListAnswerPacket(guildMembers);
+                Client client = this.gameHandler.getClientList().stream()
+                        .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
+                        .findFirst()
+                        .orElse(null);
+                if (client != null) {
+                    client.getConnection().sendTCP(s2CClubMembersListAnswerPacket);
+                }
+            }
         }
     }
 
@@ -1658,7 +2616,7 @@ public class GamePacketHandler {
                     this.guardianModeHandler.handlePrepareGuardianMode(connection, room);
                     break;
             }
-            
+
             Packet startGamePacket = new Packet(PacketID.S2CRoomStartGame);
             startGamePacket.write((char) 0);
             room.setStatus(RoomStatus.InitializingGame);
@@ -2285,6 +3243,30 @@ public class GamePacketHandler {
 
     public void handleDisconnected(Connection connection) {
         if (connection.getClient().getAccount() != null) {
+            Player player = connection.getClient().getActivePlayer();
+            if (player != null) {
+                player = this.playerService.findById(player.getId());
+                player.setOnline(false);
+                this.playerService.save(player);
+                connection.getClient().setActivePlayer(player);
+                List<Friend> friends = this.friendService.findByPlayer(player);
+                friends.forEach(x -> this.updateFriendsList(x.getFriend()));
+
+                GuildMember guildMember = this.guildMemberService.getByPlayer(player);
+                if (guildMember != null && guildMember.getGuild() != null) {
+                    guildMember.getGuild().getMemberList().stream()
+                            .filter(x -> x != guildMember)
+                            .forEach(x -> this.updateClubMembersList(x.getPlayer()));
+                }
+
+                Friend relation = this.friendService.findByPlayer(player).stream()
+                        .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
+                        .findFirst()
+                        .orElse(null);
+                if (relation != null) {
+                    this.updateRelationshipStatus(relation.getFriend());
+                }
+            }
             // reset status
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
@@ -2293,7 +3275,6 @@ public class GamePacketHandler {
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
                 Room currentClientRoom = connection.getClient().getActiveRoom();
-                Player player = connection.getClient().getActivePlayer();
 
                 if (currentClientRoom != null) {
                     if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
@@ -2544,8 +3525,7 @@ public class GamePacketHandler {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
-        }
-        else {
+        } else {
             unknownAnswer.write((short) 0);
         }
         connection.sendTCP(unknownAnswer);
@@ -2587,10 +3567,15 @@ public class GamePacketHandler {
         }
 
         Player activePlayer = connection.getClient().getActivePlayer();
+        Friend couple = this.friendService.findByPlayer(activePlayer).stream()
+                .filter(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))
+                .findFirst()
+                .orElse(null);
 
         RoomPlayer roomPlayer = new RoomPlayer();
         roomPlayer.setPlayer(activePlayer);
         roomPlayer.setGuildMember(guildMemberService.getByPlayer(activePlayer));
+        roomPlayer.setCouple(couple);
         roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
         roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
         roomPlayer.setPosition((short) 0);
