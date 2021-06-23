@@ -18,5 +18,6 @@ public class S2CReceivedGiftNotificationPacket extends Packet {
         this.write(gift.getMessage());
         this.write(gift.getCreated());
         this.write(gift.getProduct().getProductIndex());
+        this.write(gift.getUseTypeOption());
     }
 }

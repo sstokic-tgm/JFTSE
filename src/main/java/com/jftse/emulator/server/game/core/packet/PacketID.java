@@ -14,6 +14,8 @@ public final class PacketID {
     public final static char S2CDisconnectAnswer = 0xFA8;
     public final static char C2SAuthLoginData = 0xFA9;
     public final static char S2CAuthLoginData = 0xFAA;
+    public final static char C2SServerTimeRequest = 0xFAB;
+    public final static char S2CServerTimeAnswer = 0xFAC;
     public final static char C2SPlayerNameCheck = 0x1019;
     public final static char S2CPlayerNameCheckAnswer = 0x101A;
     public final static char C2SPlayerCreate = 0x101B;

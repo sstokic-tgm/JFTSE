@@ -24,7 +24,7 @@ public class S2CMessageListAnswerPacket extends Packet {
                 this.write(m.getMessage());
                 this.write(m.getCreated());
                 this.write(0); // product index
-                this.write((byte) 0); // unk
+                this.write(m.getUseTypeOption());
 
             } else if (am instanceof Gift) {
                 Gift g = (Gift) am;
@@ -34,7 +34,7 @@ public class S2CMessageListAnswerPacket extends Packet {
                 this.write(g.getMessage());
                 this.write(g.getCreated());
                 this.write(g.getProduct().getProductIndex());
-                this.write((byte) 0); // unk
+                this.write(g.getUseTypeOption());
             }
         }
     }

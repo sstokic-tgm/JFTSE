@@ -21,4 +21,5 @@ public class AbstractMessage extends AbstractBaseModel {
 
     private String message;
     private Boolean seen;
+    private Byte useTypeOption = 0;
 }

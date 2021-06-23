@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.game.core.packet.packets.messaging;
 
 import com.jftse.emulator.server.database.model.messaging.Gift;
-import com.jftse.emulator.server.database.model.messaging.Message;
 import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.Getter;
@@ -18,9 +17,9 @@ public class S2CSendGiftAnswerPacket extends Packet {
             this.write(gift.getId().intValue());
             this.write(gift.getReceiver().getName());
             this.write(gift.getMessage());
-            this.write(gift.getProduct().getProductIndex());
-            this.write((byte) 0); // Unk
             this.write(gift.getCreated());
+            this.write(gift.getProduct().getProductIndex());
+            this.write(gift.getUseTypeOption());
         }
     }
 }

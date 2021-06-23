@@ -47,6 +47,10 @@ public class GameServerNetworkListener implements ConnectionListener {
                 gamePacketHandler.handleGameServerLoginPacket(connection, packet);
                 break;
 
+            case PacketID.C2SServerTimeRequest:
+                gamePacketHandler.handleServerTimeRequestPacket(connection, packet);
+                break;
+
             case PacketID.C2SGameReceiveData:
                 gamePacketHandler.handleGameServerDataRequestPacket(connection, packet);
                 break;

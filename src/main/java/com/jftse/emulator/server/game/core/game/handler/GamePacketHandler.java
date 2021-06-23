@@ -220,6 +220,14 @@ public class GamePacketHandler {
         }
     }
 
+    public void handleServerTimeRequestPacket(Connection connection, Packet packet) {
+        Date currentTime = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
+
+        Packet answer = new Packet(PacketID.S2CServerTimeAnswer);
+        answer.write(currentTime);
+        connection.sendTCP(answer);
+    }
+
     public void handleGameServerDataRequestPacket(Connection connection, Packet packet) {
         Client client = connection.getClient();
         Player player = client.getActivePlayer();
@@ -647,7 +655,7 @@ public class GamePacketHandler {
         C2SInventoryItemTimeExpiredReqPacket inventoryItemTimeExpiredReqPacket = new C2SInventoryItemTimeExpiredReqPacket(packet);
         long itemPocketId = inventoryItemTimeExpiredReqPacket.getItemPocketId();
         PlayerPocket item = this.playerPocketService.findById(itemPocketId);
-        if (item != null) {
+        if (item != null && item.getUseType().equals(EItemUseType.TIME.getName())) {
             long timeLeft = (item.getCreated().getTime() * 10000) - (new Date().getTime() * 10000);
             if (timeLeft < 0) {
                 this.playerPocketService.remove(itemPocketId);
@@ -1425,6 +1433,7 @@ public class GamePacketHandler {
             gift.setMessage(c2SSendGiftRequestPacket.getMessage());
             gift.setSeen(false);
             gift.setProduct(product);
+            gift.setUseTypeOption(option);
 
             Integer currentGold = sender.getGold();
             Integer price = product.getPrice0();
@@ -3518,8 +3527,7 @@ public class GamePacketHandler {
         Packet unknownAnswer = new Packet((char) (packet.getPacketId() + 1));
         if (unknownAnswer.getPacketId() == (char) 0x200E) {
             unknownAnswer.write((char) 1);
-        }
-        else {
+        } else {
             unknownAnswer.write((short) 0);
         }
         connection.sendTCP(unknownAnswer);
