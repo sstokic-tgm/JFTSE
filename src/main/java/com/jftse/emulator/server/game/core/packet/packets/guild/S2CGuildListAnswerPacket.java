@@ -30,7 +30,7 @@ public class S2CGuildListAnswerPacket extends Packet {
             this.write(clubMaster.getPlayer().getName());
             this.write(guild.getLevel());
             this.write(guild.getLevelRestriction());
-            this.write((byte)memberList.size());
+            this.write((byte)memberList.stream().filter(x -> !x.getWaitingForApproval()).count());
             this.write(guild.getMaxMemberCount());
             this.write(guild.getBattleRecordWin());
             this.write(guild.getBattleRecordLoose());
