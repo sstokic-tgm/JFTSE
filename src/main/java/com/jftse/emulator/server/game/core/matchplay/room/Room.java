@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.matchplay.room;
 
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.game.core.constants.RoomPositionState;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.util.List;
 @Setter
 public class Room {
     public Room() {
+        bannedPlayers = new ArrayList<>();
         roomPlayerList = new ArrayList<>();
         positions = Arrays.asList(
                 RoomPositionState.Free, RoomPositionState.Free,
@@ -40,6 +42,7 @@ public class Room {
     private byte map;
     private int ball;
     private String password;
+    private List<Player> bannedPlayers;
     private List<RoomPlayer> roomPlayerList;
     private List<Short> positions;
     private int status;

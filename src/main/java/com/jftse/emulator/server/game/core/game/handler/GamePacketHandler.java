@@ -2316,6 +2316,12 @@ public class GamePacketHandler {
             return;
         }
 
+        if (room.getBannedPlayers().contains(connection.getClient().getActivePlayer())) {
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+            return;
+        }
+
         Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
         int newPosition = room.getPositions().indexOf(num.get());
         room.getPositions().set(newPosition, RoomPositionState.InUse);
@@ -2453,10 +2459,12 @@ public class GamePacketHandler {
                     answerPacket.write(0);
                     client.getConnection().sendTCP(answerPacket);
 
-                    handleRoomPlayerChanges(client.getConnection());
+                    this.handleRoomPlayerChanges(client.getConnection());
 
                     S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
                     client.getConnection().sendTCP(roomJoinAnswerPacket);
+
+                    room.getBannedPlayers().add(client.getActivePlayer());
                 }
             }
         }
