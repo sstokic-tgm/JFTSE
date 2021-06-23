@@ -5,6 +5,7 @@ CREATE PROCEDURE ranking_by_name_and_gamemode(IN name varchar(255), IN gameMode 
 BEGIN
 	SET @ranking := 0;
 
+    DROP TEMPORARY TABLE IF EXISTS tempRanking;
 	CREATE TEMPORARY TABLE tempRanking AS (
 		SELECT
 			@ranking := @ranking + 1 AS ranking,
@@ -25,8 +26,6 @@ BEGIN
 		);
 
 	SELECT tr.ranking FROM tempRanking tr WHERE tr.name = name;
-
-	DROP TEMPORARY TABLE IF EXISTS tempRanking;
 
 END //
 
