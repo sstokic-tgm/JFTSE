@@ -252,7 +252,7 @@ public class AuthPacketHandler {
         C2SAuthLoginPacket authLoginPacket = new C2SAuthLoginPacket(packet);
 
         Account account = authenticationService.findAccountByUsername(authLoginPacket.getUsername());
-        if (account != null) {
+        if (account != null && account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
             account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
             account = authenticationService.updateAccount(account);
 
@@ -267,6 +267,7 @@ public class AuthPacketHandler {
         else {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) -1, (byte) 0);
             connection.sendTCP(authLoginAnswerPacket);
+            connection.close();
         }
     }
 
@@ -274,8 +275,10 @@ public class AuthPacketHandler {
         if (connection.getClient().getAccount() != null) {
             // reset status
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-            authenticationService.updateAccount(account);
+            if (account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
+                account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+                authenticationService.updateAccount(account);
+            }
         }
 
         S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();

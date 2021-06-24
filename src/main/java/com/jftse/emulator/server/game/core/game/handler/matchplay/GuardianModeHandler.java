@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.game.core.game.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.battle.*;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -23,6 +24,8 @@ import com.jftse.emulator.server.game.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
+import com.jftse.emulator.server.game.core.packet.packets.authserver.S2CLoginAnswerPacket;
+import com.jftse.emulator.server.game.core.packet.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
@@ -69,6 +72,7 @@ public class GuardianModeHandler {
     private final WillDamageService willDamageService;
     private final GuardianSkillsService guardianSkillsService;
     private final ProductService productService;
+    private final AuthenticationService authenticationService;
 
     private GameHandler gameHandler;
 
@@ -232,15 +236,53 @@ public class GuardianModeHandler {
 
         Room room = connection.getClient().getActiveRoom();
         List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
+        RoomPlayer roomPlayer = roomPlayers.stream()
+                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .findAny()
+                .orElse(null);
+        Skill skill = skillService.findSkillById((long) anyoneUsesSkill.getSkillIndex() + 1);
 
         if (attackerIsGuardian) {
-            Skill skill = skillService.findSkillById((long)anyoneUsesSkill.getSkillIndex() + 1);
             if (skill != null) {
                 this.handleSpecialSkillsUseOfGuardians(connection, position, game, roomPlayers, skill);
             }
         } else if (attackerIsPlayer) {
-            if (anyoneUsesSkill.isQuickSlot()) {
-                this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
+            if (roomPlayer != null) {
+                PlayerBattleState playerBattleState = game.getPlayerBattleStates().stream()
+                        .filter(x -> x.getPosition() == roomPlayer.getPosition())
+                        .findFirst()
+                        .orElse(null);
+
+                if (anyoneUsesSkill.isQuickSlot()) {
+                    if (playerBattleState != null) {
+                        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+                        if (playerBattleState.getLastQS().containsKey(skill.getId())) {
+                            long lastQSUseTime = playerBattleState.getLastQS().get(skill.getId());
+                            long timePassed = cal.getTimeInMillis() - lastQSUseTime;
+                            if (timePassed >= skill.getGdCoolingTime().longValue()) {
+                                this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
+                                playerBattleState.getLastQS().put(skill.getId(), cal.getTimeInMillis());
+                            } else {
+                                playerBattleState.setCurrentHealth((short) 0);
+                                playerBattleState.setDead(true);
+                                S2CMatchplayDealDamage matchplayDealDamage = new S2CMatchplayDealDamage((short) position, playerBattleState.getCurrentHealth(), skill.getTargeting().shortValue(), (byte) 3, 0, 0);
+                                S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", roomPlayer.getPlayer().getName() + " died because of no QS CD hack. Marked for ban.");
+                                this.sendPacketToAllClientsInSameGameSession(matchplayDealDamage, connection);
+                                this.sendPacketToAllClientsInSameGameSession(chatRoomAnswerPacket, connection);
+
+                                Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+                                account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
+                                this.authenticationService.updateAccount(account);
+                                return;
+                            }
+
+                        } else {
+                            this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
+                            playerBattleState.getLastQS().put(skill.getId(), cal.getTimeInMillis());
+                        }
+                    }
+                }
             }
         }
 

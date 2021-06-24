@@ -3250,8 +3250,10 @@ public class GamePacketHandler {
 
             // reset status
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-            authenticationService.updateAccount(account);
+            if (account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
+                account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+                authenticationService.updateAccount(account);
+            }
         }
 
         S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
@@ -3286,8 +3288,10 @@ public class GamePacketHandler {
             }
             // reset status
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-            authenticationService.updateAccount(account);
+            if (account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
+                account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+                authenticationService.updateAccount(account);
+            }
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
