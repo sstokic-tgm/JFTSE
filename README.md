@@ -95,9 +95,9 @@ When it says
 Then the initialization was successful and the server is running.
 
 Before you start to play, you have to do 3 more things:
-1. Execute[^2] the SQL file **__gameservertype.sql__** located inside **sql/insert/** (execute this first!)
-2. Execute[^2] the SQL file **__gameserver.sql__** located inside **sql/insert/**
-3. Create[^2] an account inside the Account table. e.g: ```INSERT INTO `fantasytennis`.`Account`(`ap`, `gameMaster`, `password`, `status`, `username`) VALUES (0, b'1', 'test', 0, 'test');```
+1. Execute[^2] the SQL file **__gameservertype.sql__** located inside **docker/sql/insert/** (execute this first!)
+2. Execute[^2] the SQL file **__gameserver.sql__** located inside **docker/sql/insert/**
+3. Execute[^2] the SQL file **__account.sql__** located inside **docker/sql/insert/**
 
 ### Running it
 
@@ -106,6 +106,13 @@ You run the emulator via:
 cd target
 java -jar ft_server_emulator.jar
 ```
+
+## Running client
+1. Download FT Client from : https://www.jftse.com/client/FantaTennis.7z
+2. Unzip and execute it for the first time in order to create configuration files
+3. Edit 'Serverinfo.ini' file to replace the IP (127.0.0.1) and Port (5894)
+4. Disable AntiCheat under GlobalSettings.java with IsAntiCheatEnabled=false. A new build is required in order to take this modification
+5. Start the client with 'FantaTennis.exe' and log in with 'test/test'
 
 ## Reporting issues
 
