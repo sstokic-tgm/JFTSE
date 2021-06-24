@@ -202,6 +202,7 @@ public class BattleModeHandler {
 
                     if (playerBattleState.getLastQS().containsKey(skill.getId())) {
                         long lastQSUseTime = playerBattleState.getLastQS().get(skill.getId());
+                        lastQSUseTime -= connection.getLatency();
                         long timePassed = cal.getTimeInMillis() - lastQSUseTime;
                         if (timePassed >= skill.getCoolingTime().longValue()) {
                             this.handleQuickSlotItemUse(connection, anyoneUsesSkill);

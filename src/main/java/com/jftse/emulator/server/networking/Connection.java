@@ -62,6 +62,10 @@ public class Connection {
         }
     }
 
+    public long getLatency() {
+        return Math.abs(System.currentTimeMillis() - tcpConnection.getLastReadTime());
+    }
+
     public void addConnectionListener(ConnectionListener connectionListener) {
         if(connectionListener == null)
             throw new IllegalArgumentException("ConnectionListener cannot be null.");
