@@ -230,6 +230,11 @@ public class MatchplayBattleGame extends MatchplayGame {
             playerReward.setPlayerPosition(playerPosition);
             playerReward.setRewardExp(rewardExp);
             playerReward.setRewardGold(rewardGold);
+            if (wonGame) { // TODO: temporarily only
+                playerReward.setRewardProductIndex(57592);
+                playerReward.setProductRewardAmount(1);
+            }
+
             playerRewards.add(playerReward);
 
             iteration++;
