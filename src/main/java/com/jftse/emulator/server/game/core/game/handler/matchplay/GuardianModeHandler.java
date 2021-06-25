@@ -259,12 +259,14 @@ public class GuardianModeHandler {
 
                         if (playerBattleState.getLastQS().containsKey(skill.getId())) {
                             long lastQSUseTime = playerBattleState.getLastQS().get(skill.getId());
-                            lastQSUseTime -= connection.getLatency();
+                            long latency = connection.getLatency();
+                            lastQSUseTime -= (latency + 4950);
                             long timePassed = cal.getTimeInMillis() - lastQSUseTime;
                             if (timePassed >= skill.getGdCoolingTime().longValue()) {
                                 this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
                                 playerBattleState.getLastQS().put(skill.getId(), cal.getTimeInMillis());
                             } else {
+                                log.info("[Guardian] No QS CD detection\nlatency: " + latency + "\ntimePassed: " + timePassed + "\nlastQSUseTime: " + lastQSUseTime + "\nskill: " + skill.getName() + "\nskill-CD: " + skill.getGdCoolingTime() + "\nplayerName: " + roomPlayer.getPlayer().getName());
                                 playerBattleState.setCurrentHealth((short) 0);
                                 playerBattleState.setDead(true);
                                 S2CMatchplayDealDamage matchplayDealDamage = new S2CMatchplayDealDamage((short) position, playerBattleState.getCurrentHealth(), skill.getTargeting().shortValue(), (byte) 3, 0, 0);

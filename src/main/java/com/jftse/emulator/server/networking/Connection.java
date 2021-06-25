@@ -63,7 +63,7 @@ public class Connection {
     }
 
     public long getLatency() {
-        return Math.abs(System.currentTimeMillis() - tcpConnection.getLastReadTime());
+        return Math.abs(tcpConnection.getLastReadTime() - tcpConnection.getLastWriteTime());
     }
 
     public void addConnectionListener(ConnectionListener connectionListener) {
