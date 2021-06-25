@@ -1904,10 +1904,10 @@ public class GamePacketHandler {
         //-6 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_ACCOUNT
         //-7 = MSG_NO_HAVE_PROPOSE_ITEM
         //-9 = MSG_YOU_CAN_NOT_PROPOSE_FOR_SAME_SEX
-        boolean isValidProposalItem = item != null &&
+        boolean isValidProposalItem = item != null && (
                 item.getItemIndex().equals(23) ||
                 item.getItemIndex().equals(24) ||
-                item.getItemIndex().equals(25);
+                item.getItemIndex().equals(25));
         if (!isValidProposalItem) {
             S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -7);
             connection.sendTCP(proposalDeliveredAnswerPacket);
@@ -1995,13 +1995,10 @@ public class GamePacketHandler {
                 .collect(Collectors.toList());
         S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket =
                 new S2CFriendsListAnswerPacket(friends);
-        Client client = this.gameHandler.getClientList().stream()
-                .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
+        this.gameHandler.getClientList().stream()
+                .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(player.getId()))
                 .findFirst()
-                .orElse(null);
-        if (client != null) {
-            client.getConnection().sendTCP(s2CFriendsListAnswerPacket);
-        }
+                .ifPresent(client -> client.getConnection().sendTCP(s2CFriendsListAnswerPacket));
     }
 
     private void updateRelationshipStatus(Player player) {
@@ -2032,13 +2029,10 @@ public class GamePacketHandler {
                         .collect(Collectors.toList());
                 S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket =
                         new S2CClubMembersListAnswerPacket(guildMembers);
-                Client client = this.gameHandler.getClientList().stream()
-                        .filter(x -> x.getActivePlayer().getId().equals(player.getId()))
+                this.gameHandler.getClientList().stream()
+                        .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(player.getId()))
                         .findFirst()
-                        .orElse(null);
-                if (client != null) {
-                    client.getConnection().sendTCP(s2CClubMembersListAnswerPacket);
-                }
+                        .ifPresent(client -> client.getConnection().sendTCP(s2CClubMembersListAnswerPacket));
             }
         }
     }
