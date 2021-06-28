@@ -17,6 +17,7 @@ public class PlayerBattleState {
     private int will;
     private boolean dead;
     private HashMap<Long, Long> lastQS;
+    private HashMap<Long, Integer> lastQSCounter;
 
     public PlayerBattleState(short position, short hp, int str, int sta, int dex, int will) {
         this.position = position;
@@ -27,5 +28,6 @@ public class PlayerBattleState {
         this.dex = dex;
         this.will = will;
         lastQS = new HashMap<>();
+        lastQSCounter = new HashMap<>();
     }
 }

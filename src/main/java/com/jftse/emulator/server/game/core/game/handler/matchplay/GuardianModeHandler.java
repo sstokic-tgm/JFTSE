@@ -257,32 +257,42 @@ public class GuardianModeHandler {
                     if (playerBattleState != null) {
                         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
-                        if (playerBattleState.getLastQS().containsKey(skill.getId())) {
+                        if (playerBattleState.getLastQS().containsKey(skill.getId()) && playerBattleState.getLastQSCounter().containsKey(skill.getId())) {
                             long lastQSUseTime = playerBattleState.getLastQS().get(skill.getId());
+                            int counter = playerBattleState.getLastQSCounter().get(skill.getId());
+
                             long latency = connection.getLatency();
                             lastQSUseTime -= (latency + 4950);
                             long timePassed = cal.getTimeInMillis() - lastQSUseTime;
+
                             if (timePassed >= skill.getGdCoolingTime().longValue()) {
                                 this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
                                 playerBattleState.getLastQS().put(skill.getId(), cal.getTimeInMillis());
+                                playerBattleState.getLastQSCounter().put(skill.getId(), 0);
                             } else {
-                                log.info("[Guardian] No QS CD detection\nlatency: " + latency + "\ntimePassed: " + timePassed + "\nlastQSUseTime: " + lastQSUseTime + "\nskill: " + skill.getName() + "\nskill-CD: " + skill.getGdCoolingTime() + "\nplayerName: " + roomPlayer.getPlayer().getName());
-                                playerBattleState.setCurrentHealth((short) 0);
-                                playerBattleState.setDead(true);
-                                S2CMatchplayDealDamage matchplayDealDamage = new S2CMatchplayDealDamage((short) position, playerBattleState.getCurrentHealth(), skill.getTargeting().shortValue(), (byte) 3, 0, 0);
-                                S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", roomPlayer.getPlayer().getName() + " died because of no QS CD hack. Marked for ban.");
-                                this.sendPacketToAllClientsInSameGameSession(matchplayDealDamage, connection);
-                                this.sendPacketToAllClientsInSameGameSession(chatRoomAnswerPacket, connection);
+                                if (counter > 5) {
+                                    log.info("[Guardian] No QS CD detection\nlatency: " + latency + "\ntimePassed: " + timePassed + "\nlastQSUseTime: " + lastQSUseTime + "\nskill: " + skill.getName() + "\nskill-CD: " + skill.getGdCoolingTime() + "\nplayerName: " + roomPlayer.getPlayer().getName());
+                                    playerBattleState.setCurrentHealth((short) 0);
+                                    playerBattleState.setDead(true);
+                                    S2CMatchplayDealDamage matchplayDealDamage = new S2CMatchplayDealDamage((short) position, playerBattleState.getCurrentHealth(), skill.getTargeting().shortValue(), (byte) 3, 0, 0);
+                                    S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", roomPlayer.getPlayer().getName() + " died because of no QS CD hack. Marked for ban.");
+                                    this.sendPacketToAllClientsInSameGameSession(matchplayDealDamage, connection);
+                                    this.sendPacketToAllClientsInSameGameSession(chatRoomAnswerPacket, connection);
 
-                                Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-                                account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
-                                this.authenticationService.updateAccount(account);
-                                return;
+                                    Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+                                    account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
+                                    this.authenticationService.updateAccount(account);
+                                    return;
+                                } else {
+                                    counter++;
+                                    playerBattleState.getLastQSCounter().put(skill.getId(), counter);
+                                }
                             }
 
                         } else {
                             this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
                             playerBattleState.getLastQS().put(skill.getId(), cal.getTimeInMillis());
+                            playerBattleState.getLastQSCounter().put(skill.getId(), 0);
                         }
                     }
                 }
