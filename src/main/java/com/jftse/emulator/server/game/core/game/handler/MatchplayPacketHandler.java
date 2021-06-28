@@ -175,6 +175,14 @@ public class MatchplayPacketHandler {
         Room room = client.getActiveRoom();
         if (room == null || room.getStatus() != RoomStatus.Running) {
             if (room != null) {
+                // Test if on timeout an active game session exist for the timing out client
+                GameSession gameSession = client.getActiveGameSession();
+                if (gameSession != null) {
+                    boolean allClientsInactiveGameSession = gameSession.getClients().stream().allMatch(c -> c.getActiveGameSession() == null);
+                    if (!allClientsInactiveGameSession)
+                        return;
+                }
+
                 log.warn(String.format("Room  state is %s . Close connection", room.getStatus()));
             }
 
