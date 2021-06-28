@@ -3,6 +3,7 @@ package com.jftse.emulator.server.game.core.game.handler.matchplay;
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.battle.Skill;
+import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
@@ -14,6 +15,7 @@ import com.jftse.emulator.server.game.core.constants.GameMode;
 import com.jftse.emulator.server.game.core.constants.PacketEventType;
 import com.jftse.emulator.server.game.core.constants.RoomStatus;
 import com.jftse.emulator.server.game.core.item.EItemCategory;
+import com.jftse.emulator.server.game.core.item.EItemUseType;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.game.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.game.core.matchplay.basic.MatchplayBattleGame;
@@ -28,6 +30,7 @@ import com.jftse.emulator.server.game.core.matchplay.room.Room;
 import com.jftse.emulator.server.game.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.game.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.game.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.game.core.service.*;
@@ -65,6 +68,7 @@ public class BattleModeHandler {
     private final WillDamageService willDamageService;
     private final PlayerStatisticService playerStatisticService;
     private final AuthenticationService authenticationService;
+    private final ProductService productService;
 
     private GameHandler gameHandler;
 
@@ -515,6 +519,57 @@ public class BattleModeHandler {
     }
 
     private void handleRewardItem(Connection connection, PlayerReward playerReward) {
+        if (playerReward.getRewardProductIndex() < 0) {
+            return;
+        }
+
+        Product product = this.productService.findProductByProductItemIndex(playerReward.getRewardProductIndex());
+        if (product == null) {
+            return;
+        }
+
+        Player player = connection.getClient().getActivePlayer();
+        Pocket pocket = player.getPocket();
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
+        int existingItemCount = 0;
+        boolean existingItem = false;
+
+        if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
+            existingItemCount = playerPocket.getItemCount();
+            existingItem = true;
+        } else {
+            playerPocket = new PlayerPocket();
+        }
+
+        playerPocket.setCategory(product.getCategory());
+        playerPocket.setItemIndex(product.getItem0());
+        playerPocket.setUseType(product.getUseType());
+
+        playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
+
+        // no idea how itemCount can be null here, but ok
+        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
+
+        if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
+
+            playerPocket.setCreated(cal.getTime());
+        }
+        playerPocket.setPocket(pocket);
+
+        playerPocketService.save(playerPocket);
+        if (!existingItem)
+            pocket = pocketService.incrementPocketBelongings(pocket);
+
+        // add item to result
+        connection.getClient().getActivePlayer().setPocket(pocket);
+
+        List<PlayerPocket> playerPocketList = new ArrayList<>();
+        playerPocketList.add(playerPocket);
+
+        S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+        connection.sendTCP(inventoryDataPacket);
     }
 
     private PlayerReward createEmptyPlayerReward() {
