@@ -1179,7 +1179,10 @@ public class GamePacketHandler {
             List<Client> clientList = this.getGameHandler().getClientList().stream()
                     .filter(Client::isInLobby)
                     .collect(Collectors.toList());
-            clientList.forEach(c -> c.getConnection().sendTCP(chatLobbyAnswerPacket));
+            if (chatLobbyReqPacket.getMessage().startsWith("-og"))
+                connection.sendTCP(chatLobbyAnswerPacket);
+            else
+                clientList.forEach(c -> c.getConnection().sendTCP(chatLobbyAnswerPacket));
 
             this.handleLobbyChatCommands(connection, chatLobbyReqPacket);
         } break;
@@ -3844,7 +3847,7 @@ public class GamePacketHandler {
                 new Thread(() -> {
                     String gachaName = commandArgumentList.get(1);
                     Integer count = Integer.valueOf(commandArgumentList.get(2));
-                    Product product = this.productService.findProductsByName(gachaName);
+                    Product product = this.productService.findProductByName(gachaName, EItemCategory.LOTTERY.getName());
                     if (product != null) {
                         if (!product.getCategory().equals(EItemCategory.LOTTERY.getName())) {
                             S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", gachaName + " is not a gacha.");
