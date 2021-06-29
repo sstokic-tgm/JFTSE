@@ -31,6 +31,8 @@ public class Client {
     private short lobbyCurrentRoomListPage = -1;
     private long lastHearBeatTime;
 
+    private boolean usingGachaMachine = false;
+
     private String ip;
     private int port;
 }

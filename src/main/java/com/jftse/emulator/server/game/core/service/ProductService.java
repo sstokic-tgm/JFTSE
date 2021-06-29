@@ -42,8 +42,13 @@ public class ProductService {
         return this.productRepository.findProductByProductIndex(productItemIndex);
     }
 
-    public Product findProductByItemAndCategory(int itemIndex, String category) {
+    public Product findProductByItemAndCategoryAndEnabledIsTrue(int itemIndex, String category) {
         return this.productRepository.findProductByItem0AndCategoryAndEnabledIsTrue(itemIndex, category);
+    }
+
+    public Product findProductByItemAndCategory(int itemIndex, String category) {
+        List<Product> productList = productRepository.findProductsByItem0AndAndCategory(itemIndex, category);
+        return productList.isEmpty() ? null : productList.get(0);
     }
 
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {

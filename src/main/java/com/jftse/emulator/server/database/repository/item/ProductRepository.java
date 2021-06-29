@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findProductByProductIndex(int productIndex);
     Product findProductByItem0AndCategoryAndEnabledIsTrue(int itemIndex, String category);
+    List<Product> findProductsByItem0AndAndCategory(int itemIndex, String category);
     List<Product> findProductsByNameAndCategory(String name, String category);
 
     @Query(value = "SELECT p.price0 FROM Product p WHERE p.item0 = :itemIndex AND p.category = :category")
