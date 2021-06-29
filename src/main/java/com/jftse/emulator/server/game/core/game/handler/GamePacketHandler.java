@@ -92,6 +92,8 @@ import org.springframework.util.ReflectionUtils;
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -1178,6 +1180,8 @@ public class GamePacketHandler {
                     .filter(Client::isInLobby)
                     .collect(Collectors.toList());
             clientList.forEach(c -> c.getConnection().sendTCP(chatLobbyAnswerPacket));
+
+            this.handleLobbyChatCommands(connection, chatLobbyReqPacket);
         } break;
         case PacketID.C2SChatRoomReq: {
             C2SChatRoomReqPacket chatRoomReqPacket = new C2SChatRoomReqPacket(packet);
@@ -3822,6 +3826,88 @@ public class GamePacketHandler {
             room.setRandomGuardians(!room.isRandomGuardians());
             S2CChatRoomAnswerPacket randomGuardianChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", String.format("Random mode %s", room.isRandomGuardians() ? "ON" : "OFF"));
             this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(randomGuardianChangedPacket));
+        }
+    }
+
+    private void handleLobbyChatCommands(Connection connection, C2SChatLobbyReqPacket chatLobbyReqPacket) {
+        Player player = connection.getClient().getActivePlayer();
+        Pocket pocket = this.pocketService.findById(player.getPocket().getId());
+
+        List<String> commandArgumentList = new ArrayList<>();
+        Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(chatLobbyReqPacket.getMessage());
+        while (m.find())
+            commandArgumentList.add(m.group(1).replace("\"", ""));
+
+        String option = commandArgumentList.get(0);
+        switch (option) {
+            case "-og": {
+                new Thread(() -> {
+                    String gachaName = commandArgumentList.get(1);
+                    Integer count = Integer.valueOf(commandArgumentList.get(2));
+                    Product product = this.productService.findProductsByName(gachaName);
+                    if (product != null) {
+                        if (!product.getCategory().equals(EItemCategory.LOTTERY.getName())) {
+                            S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", gachaName + " is not a gacha.");
+                            connection.sendTCP(chatLobbyAnswerPacket);
+                            return;
+                        }
+
+                        PlayerPocket playerPocketGacha = this.playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
+                        if (playerPocketGacha != null) {
+                            S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Please wait in lobby until it finishes.");
+                            connection.sendTCP(chatLobbyAnswerPacket);
+                            chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Opening " + product.getName() + "...");
+                            connection.sendTCP(chatLobbyAnswerPacket);
+
+                            List<PlayerPocket> result = new ArrayList<>();
+                            Map<String, Integer> resultDisplay = new HashMap<>();
+                            if (count > playerPocketGacha.getItemCount())
+                                count = playerPocketGacha.getItemCount();
+                            else if (count <= 0)
+                                count = 1;
+
+                            for (int i = 0; i < count; i++) {
+                                if ((i % 500) == 0 && i != 0) {
+                                    chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Current opening progress: " + ((i * 100) / count) + "%");
+                                    connection.sendTCP(chatLobbyAnswerPacket);
+                                }
+                                result.addAll(this.lotteryService.drawLottery(connection, playerPocketGacha.getId(), product.getProductIndex()));
+                            }
+                            chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Finished. Preparing drawn items...");
+                            connection.sendTCP(chatLobbyAnswerPacket);
+
+                            result.forEach(pp -> {
+                                Product p = this.productService.findProductByItemAndCategory(pp.getItemIndex(), pp.getCategory());
+                                Integer itemCount = resultDisplay.get(p.getName()) == null ? 0 : resultDisplay.get(p.getName());
+                                itemCount++;
+                                resultDisplay.put(p.getName(), itemCount);
+                            });
+                            String resultText = "Drawn items: (count represents how often it was drawn)";
+                            chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", resultText);
+                            connection.sendTCP(chatLobbyAnswerPacket);
+
+                            resultDisplay.forEach((key, value) -> {
+                                S2CChatLobbyAnswerPacket chatLobbyResultItemPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", value + "x - " + key);
+                                connection.sendTCP(chatLobbyResultItemPacket);
+                            });
+
+                            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
+                            StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
+                                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+                                connection.sendTCP(inventoryDataPacket);
+                            });
+                        } else {
+                            S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "You do not have this gacha.");
+                            connection.sendTCP(chatLobbyAnswerPacket);
+                        }
+                    } else {
+                        S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Gacha not found.");
+                        connection.sendTCP(chatLobbyAnswerPacket);
+                    }
+                }).start();
+
+                break;
+            }
         }
     }
 

@@ -60,6 +60,10 @@ public class ProductService {
         return result;
     }
 
+    public Product findProductsByName(String name) {
+        return productRepository.findProductByNameAndEnabledIsTrue(name).orElse(null);
+    }
+
     public List<Product> findProductsByItemList(List<Integer> itemList) {
         return productRepository.findProductsByProductIndexIn(itemList);
     }
