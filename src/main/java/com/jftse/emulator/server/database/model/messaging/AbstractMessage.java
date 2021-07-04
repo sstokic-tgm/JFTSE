@@ -4,11 +4,13 @@ import com.jftse.emulator.common.model.AbstractBaseModel;
 import com.jftse.emulator.server.database.model.player.Player;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 
 @Getter
 @Setter
+@Audited
 @MappedSuperclass
 public class AbstractMessage extends AbstractBaseModel {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
