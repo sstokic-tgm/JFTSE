@@ -2948,11 +2948,16 @@ public class GamePacketHandler {
     public void handleGuildLeaveRequestPacket(Connection connection, Packet packet) {
         Player activePlayer = connection.getClient().getActivePlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
-        Guild guild = guildMember.getGuild();
-        guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
-        guildService.save(guild);
+        if (guildMember.getMemberRank() == 3) {
+            S2CGuildLeaveAnswerPacket guildLeaveAnswerPacket = new S2CGuildLeaveAnswerPacket((char) -2);
+            connection.sendTCP(guildLeaveAnswerPacket);
+        } else {
+            Guild guild = guildMember.getGuild();
+            guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
+            guildService.save(guild);
 
-        connection.sendTCP(new S2CGuildDataAnswerPacket((short) -2, guild));
+            connection.sendTCP(new S2CGuildDataAnswerPacket((short) -2, guild));
+        }
     }
 
     public void handleGuildChangeInformationRequestPacket(Connection connection, Packet packet) {

@@ -240,7 +240,7 @@ public final class PacketID {
     public final static char C2SGuildJoinRequest = 0x2011;
     public final static char S2CGuildJoinAnswer = 0x2012;
     public final static char C2SGuildLeaveRequest = 0x2014;
-    public final static char S2CGuildLeaveAnswer = 0x2015; // ?
+    public final static char S2CGuildLeaveAnswer = 0x2015;
     public final static char C2SGuildChangeInformationRequest = 0x2017;
     public final static char C2SGuildReserveMemberDataRequest = 0x2018;
     public final static char S2CGuildReserveMemberDataAnswer = 0x2019;
