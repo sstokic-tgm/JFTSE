@@ -179,6 +179,12 @@ public class AuthPacketHandler {
                 connection.sendTCP(playerCreateAnswerPacket);
             }
             else {
+                if (player.getAlreadyCreated()) {
+                    S2CPlayerCreateAnswerPacket playerCreateAnswerPacket = new S2CPlayerCreateAnswerPacket((char) -2);
+                    connection.sendTCP(playerCreateAnswerPacket);
+                    return;
+                }
+
                 player.setName(playerCreatePacket.getNickname());
                 player.setAlreadyCreated(true);
 
