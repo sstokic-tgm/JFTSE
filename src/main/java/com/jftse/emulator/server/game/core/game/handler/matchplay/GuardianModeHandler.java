@@ -281,6 +281,7 @@ public class GuardianModeHandler {
 
                                     Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
                                     account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
+                                    account.setBanReason("No QS CD hack in guardian mode.");
                                     this.authenticationService.updateAccount(account);
                                     return;
                                 } else {

@@ -168,14 +168,6 @@ public class GamePacketHandler {
             authenticationService.updateAccount(account);
         });
 
-        if (GlobalSettings.IsAntiCheatEnabled) {
-            List<ClientWhitelist> clientWhiteList = clientWhitelistService.findAll();
-            for (int i = 0; i < clientWhiteList.size(); i++) {
-                Long id = clientWhiteList.get(i).getId();
-                clientWhitelistService.remove(id);
-            }
-        }
-
         this.getGameHandler().getRoomList().clear();
         this.getGameHandler().getClientList().clear();
         gameSessionManager.getGameSessionList().clear();
@@ -3541,10 +3533,10 @@ public class GamePacketHandler {
     }
 
     public void handleHeartBeatPacket(Connection connection, Packet packet) {
-        if (!GlobalSettings.IsAntiCheatEnabled) return;
+        if (!GlobalSettings.IsAntiCheatEnabled || connection.getClient() == null || connection.getClient().getAccount() == null) return;
         String hostAddress = connection.getClient().getIp();
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, connection.getHwid());
-        if (clientWhitelist == null)
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwidAndAccount(hostAddress, connection.getHwid(), connection.getClient().getAccount());
+        if (clientWhitelist != null && !clientWhitelist.getIsActive())
             handleDisconnected(connection);
     }
 

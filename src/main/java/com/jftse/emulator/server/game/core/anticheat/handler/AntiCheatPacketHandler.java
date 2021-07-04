@@ -36,11 +36,7 @@ public class AntiCheatPacketHandler {
     }
 
     public void handleCleanUp() {
-        List<ClientWhitelist> clientWhiteList = clientWhitelistService.findAll();
-        for (int i = 0; i < clientWhiteList.size(); i++) {
-            Long id = clientWhiteList.get(i).getId();
-            clientWhitelistService.remove(id);
-        }
+        // empty...
     }
 
     public void sendWelcomePacket(Connection connection) {
@@ -51,15 +47,13 @@ public class AntiCheatPacketHandler {
             connection.getClient().setIp(hostAddress);
             connection.getClient().setPort(port);
 
-            ClientWhitelist existingClientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, null);
-            if (existingClientWhitelist == null) {
-                ClientWhitelist clientWhitelist = new ClientWhitelist();
-                clientWhitelist.setIp(hostAddress);
-                clientWhitelist.setPort(port);
-                clientWhitelist.setFlagged(false);
-                clientWhitelist.setIsAuthenticated(false);
-                clientWhitelistService.save(clientWhitelist);
-            }
+            ClientWhitelist clientWhitelist = new ClientWhitelist();
+            clientWhitelist.setIp(hostAddress);
+            clientWhitelist.setPort(port);
+            clientWhitelist.setFlagged(false);
+            clientWhitelist.setIsAuthenticated(false);
+            clientWhitelist.setIsActive(true);
+            clientWhitelistService.save(clientWhitelist);
 
             S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
             connection.sendTCP(welcomePacket);
@@ -70,8 +64,10 @@ public class AntiCheatPacketHandler {
         if (connection.getClient() != null) {
             String hostAddress = connection.getClient().getIp();
             ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, connection.getHwid());
-            if (clientWhitelist != null)
-                clientWhitelistService.remove(clientWhitelist.getId());
+            if (clientWhitelist != null) {
+                clientWhitelist.setIsActive(false);
+                clientWhitelistService.save(clientWhitelist);
+            }
 
             this.antiCheatHandler.removeClient(connection.getClient());
             connection.setClient(null);

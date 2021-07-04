@@ -28,4 +28,6 @@ public class Account extends AbstractBaseModel {
     // char
     private Integer status;
     private Boolean gameMaster;
+
+    private String banReason;
 }

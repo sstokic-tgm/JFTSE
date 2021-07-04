@@ -16,11 +16,13 @@ import com.jftse.emulator.server.game.core.packet.packets.authserver.*;
 import com.jftse.emulator.server.game.core.packet.packets.player.*;
 import com.jftse.emulator.server.game.core.service.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class AuthPacketHandler {
@@ -72,11 +74,17 @@ public class AuthPacketHandler {
         }
         else {
             Integer accountStatus = account.getStatus();
-            if (!accountStatus.equals((int) S2CLoginAnswerPacket.SUCCESS)) {
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
+            if (!accountStatus.equals((int) S2CLoginAnswerPacket.SUCCESS) || isClientFlagged(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
+                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
                 connection.sendTCP(loginAnswerPacket);
             }
             else {
+                if (!linkAccountToClientWhitelist(connection.getRemoteAddressTCP(), loginPacket.getHwid(), account)) {
+                    S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket((short) -80);
+                    connection.sendTCP(loginAnswerPacket);
+                    return;
+                }
+
                 // set last login date
                 account.setLastLogin(new Date());
                 // mark as logged in
@@ -93,6 +101,13 @@ public class AuthPacketHandler {
 
                 S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
                 connection.sendTCP(gameServerListPacket);
+
+                String hostAddress;
+                if (connection.getRemoteAddressTCP() != null)
+                    hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+                else
+                    hostAddress = "null";
+                log.info(account.getUsername() + " has logged in from " + hostAddress + " with hwid " + loginPacket.getHwid());
             }
         }
     }
@@ -315,5 +330,28 @@ public class AuthPacketHandler {
         String hostAddress = inetSocketAddress.getAddress().getHostAddress();
         ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, hwid);
         return clientWhitelist != null;
+    }
+
+    private boolean isClientFlagged(InetSocketAddress inetSocketAddress, String hwid) {
+        if (inetSocketAddress == null)
+            return false;
+        String hostAddress = inetSocketAddress.getAddress().getHostAddress();
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwidAndFlaggedTrue(hostAddress, hwid);
+        return clientWhitelist != null && clientWhitelist.getFlagged();
+    }
+
+    private boolean linkAccountToClientWhitelist(InetSocketAddress inetSocketAddress, String hwid, Account account) {
+        if (inetSocketAddress != null) {
+            String hostAddress = inetSocketAddress.getAddress().getHostAddress();
+            ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, hwid);
+            if (clientWhitelist != null) {
+                clientWhitelist.setAccount(account);
+                clientWhitelistService.save(clientWhitelist);
+                return true;
+            } else {
+                return false;
+            }
+        } else
+            return false;
     }
 }
