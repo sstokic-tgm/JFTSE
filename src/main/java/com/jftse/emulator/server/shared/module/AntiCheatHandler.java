@@ -1,8 +1,10 @@
 package com.jftse.emulator.server.shared.module;
 
+import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Log4j2
 @Service
 @Getter
 @Setter
@@ -25,7 +28,10 @@ public class AntiCheatHandler {
     @PostConstruct
     public void init() {
         clientList = new HashMap<>();
-        fileList = getFiles();
+        if (GlobalSettings.IsAntiCheatEnabled)
+            fileList = getFiles();
+        else
+            fileList = new ArrayList<>();
     }
 
     public void addClient(Client client) {
@@ -43,6 +49,10 @@ public class AntiCheatHandler {
     private List<String> getFiles() {
         List<String> result = new ArrayList<>();
         InputStream is = ResourceUtil.getResource("res-files.txt");
+        if (is == null) {
+            log.info("Anti-Cheat is enabled but no res-files.txt found!");
+            return result;
+        }
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             while (reader.ready())
                 result.add(reader.readLine());
