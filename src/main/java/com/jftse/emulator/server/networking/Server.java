@@ -278,7 +278,7 @@ public class Server implements Runnable {
 
     private void acceptOperation(SocketChannel socketChannel) {
         Connection connection = newConnection();
-        connection.initialize(4096, 4096);
+        connection.initialize(16384, 16384);
         connection.setServer(this);
 
         try {

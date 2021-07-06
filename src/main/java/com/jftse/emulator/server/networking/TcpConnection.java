@@ -38,7 +38,8 @@ public class TcpConnection {
     private int header1Key = 0;
     private int sendIndicator = 0;
     private int receiveIndicator = 0;
-    private byte[] decryptKey = new byte[4];
+    private byte[] decryptKey;
+    private byte[] encryptKey;
     private final byte[] serialTable = {
         (byte)0xF2, (byte)0x30, (byte)0x75, (byte)0x86, (byte)0xD4, (byte)0x7D, (byte)0x57, (byte)0x38, (byte)0x6E, (byte)0x68,
         (byte)0x4F, (byte)0x7E, (byte)0x30, (byte)0x58, (byte)0xED, (byte)0x7D, (byte)0x5C, (byte)0x47, (byte)0xC3, (byte)0x31,
@@ -103,12 +104,15 @@ public class TcpConnection {
         (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00
     };
 
-    public TcpConnection(int writeBufferSize, int objectBufferSize) {
+    public TcpConnection(int writeBufferSize, int objectBufferSize, int decKey, int encKey) {
         this.writeBuffer = ByteBuffer.allocate(writeBufferSize);
         this.readBuffer = ByteBuffer.allocate(objectBufferSize);
 
         writeBuffer.order(ByteOrder.LITTLE_ENDIAN);
         readBuffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        this.decryptKey = BitKit.getBytes(decKey);
+        this.encryptKey = BitKit.getBytes(encKey);
     }
 
     public SelectionKey accept(Selector selector, SocketChannel socketChannel) throws IOException {
@@ -135,7 +139,7 @@ public class TcpConnection {
     }
 
     public Packet readPacket(Connection connection) throws IOException {
-        readBuffer = ByteBuffer.allocate(4096);
+        readBuffer = ByteBuffer.allocate(16384);
         readBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
         SocketChannel socketChannel = this.socketChannel;
@@ -153,23 +157,23 @@ public class TcpConnection {
         if (bytesRead == 0)
             return null;
 
-        currentObjectLength = BitKit.bytesToShort(readBuffer.array(), 6);
+        Packet packet;
+        byte[] encryptedData = new byte[bytesRead];
+        BitKit.blockCopy(readBuffer.array(), 0, encryptedData, 0, bytesRead);
+        byte[] data = decryptBytes(encryptedData, encryptedData.length);
+
+        currentObjectLength = BitKit.bytesToShort(data, 6);
         if (currentObjectLength < 0)
             throw new IOException("Invalid object length: " + currentObjectLength);
         if (currentObjectLength > readBuffer.capacity())
             throw new IOException("Unable to read object larger than read buffer: " + currentObjectLength);
 
-        Packet packet;
-        byte[] data = new byte[bytesRead];
-
-        BitKit.blockCopy(readBuffer.array(), 0, data, 0, bytesRead);
-
         if (GlobalSettings.LogAllPackets)
-            log.debug("payload - RECV " + BitKit.toString(data, 0, bytesRead) + " bytesRead: " + bytesRead);
+            log.debug("payload - RECV " + BitKit.toString(encryptedData, 0, encryptedData.length) + " bytesRead: " + bytesRead);
 
+        BiPredicate<Integer, Integer> packetSizePosRangeCheck = (l, r) -> l >= r;
         // a read tcp packet may contain multiple nested packets, so we handle that properly
         while (true) {
-            BiPredicate<Integer, Integer> packetSizePosRangeCheck = (l, r) -> l >= r;
             if (packetSizePosRangeCheck.test(6, data.length))
                 throw new IOException("Invalid packet size position");
 
@@ -188,7 +192,8 @@ public class TcpConnection {
             int packetSize = BitKit.bytesToShort(data, 6);
             currentObjectLength = packetSize;
 
-            if (packetSize + 8 < data.length) {
+            if (packetSize + 8 < encryptedData.length) {
+                data = decryptBytes(encryptedData, packetSize + 8);
                 packet = new Packet(data);
 
                 if (GlobalSettings.LogAllPackets)
@@ -196,10 +201,12 @@ public class TcpConnection {
 
                 connection.notifyReceived(packet);
 
-                byte[] tmp = new byte[data.length - 8 - packetSize];
-                BitKit.blockCopy(data, packetSize + 8, tmp, 0, tmp.length);
-                data = new byte[tmp.length];
-                BitKit.blockCopy(tmp, 0, data, 0, data.length);
+                // prepare data for loop
+                byte[] tmp = new byte[encryptedData.length - 8 - packetSize];
+                BitKit.blockCopy(encryptedData, packetSize + 8, tmp, 0, tmp.length);
+                encryptedData = new byte[tmp.length];
+                BitKit.blockCopy(tmp, 0, encryptedData, 0, encryptedData.length);
+                data = decryptBytes(encryptedData, encryptedData.length);
 
                 this.receiveIndicator++;
                 this.receiveIndicator %= 60;
@@ -208,7 +215,8 @@ public class TcpConnection {
                 break;
             }
         }
-        if (currentObjectLength + 8 <= data.length) {
+        if (currentObjectLength + 8 <= encryptedData.length) {
+            data = decryptBytes(encryptedData, currentObjectLength + 8);
             packet = new Packet(data);
             this.receiveIndicator++;
             this.receiveIndicator %= 60;
@@ -260,9 +268,15 @@ public class TcpConnection {
             writeBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
             byte[] data = packet.getRawPacket();
+            byte[] encryptedData;
             createSerial(data);
             createCheckSum(data);
-            writeBuffer.put(data);
+            if (packet.getPacketId() != PacketID.S2CLoginWelcomePacket) {
+                encryptedData = encryptBytes(data, data.length);
+                writeBuffer.put(encryptedData);
+            } else {
+                writeBuffer.put(data);
+            }
 
             if (GlobalSettings.LogAllPackets)
                 log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
@@ -279,7 +293,7 @@ public class TcpConnection {
         }
     }
 
-    public byte[] decryptBytes(byte[] encryptedBuffer, int size) {
+    private byte[] decryptBytes(byte[] encryptedBuffer, int size) {
         byte[] decrypted = new byte[size];
         BitKit.blockCopy(encryptedBuffer, 0, decrypted, 0, size);
 
@@ -287,6 +301,16 @@ public class TcpConnection {
             decrypted[i] ^= this.decryptKey[(i & 3)];
 
         return decrypted;
+    }
+
+    private byte[] encryptBytes(byte[] decryptedBuffer, int size) {
+        byte[] encrypted = new byte[size];
+        BitKit.blockCopy(decryptedBuffer, 0, encrypted, 0, size);
+
+        for(int i = 0; i < size; i++)
+            encrypted[i] ^= this.encryptKey[(i & 3)];
+
+        return encrypted;
     }
 
     private void createSerial(byte[] data) {

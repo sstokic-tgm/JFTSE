@@ -51,7 +51,7 @@ public class MatchplayPacketHandler {
     }
 
     public void sendWelcomePacket(Connection connection) {
-        S2CWelcomePacket welcomePacket = new S2CWelcomePacket(0, 0, 0, 0);
+        S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecKey(), connection.getEncKey(), 0, 0);
         connection.sendTCP(welcomePacket);
     }
 

@@ -7,9 +7,11 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
@@ -27,10 +29,26 @@ public class Connection {
     private String hwid;
     private Client client;
 
-    protected Connection() { }
+    private int decKey;
+    private int encKey;
+
+    protected Connection() {
+        this.decKey = getRandomBigInteger().intValueExact();
+        this.encKey = getRandomBigInteger().intValueExact();
+    }
+
+    private BigInteger getRandomBigInteger() {
+        Random rnd = new Random();
+        BigInteger upperLimit = new BigInteger("10000");
+        BigInteger result;
+        do {
+            result = new BigInteger(upperLimit.bitLength(), rnd);
+        } while (result.compareTo(upperLimit) > 0);
+        return result;
+    }
 
     public void initialize(int writeBufferSize, int objectBufferSize) {
-        tcpConnection = new TcpConnection(writeBufferSize, objectBufferSize);
+        tcpConnection = new TcpConnection(writeBufferSize, objectBufferSize, decKey, encKey);
     }
 
     public int getId() {
