@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.networking;
 
+import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
@@ -33,8 +34,8 @@ public class Connection {
     private int encKey;
 
     protected Connection() {
-        this.decKey = getRandomBigInteger().intValueExact();
-        this.encKey = getRandomBigInteger().intValueExact();
+        this.decKey = GlobalSettings.UseNetworkEncryption ? getRandomBigInteger().intValueExact() : 0;
+        this.encKey = GlobalSettings.UseNetworkEncryption ? getRandomBigInteger().intValueExact() : 0;
     }
 
     private BigInteger getRandomBigInteger() {
