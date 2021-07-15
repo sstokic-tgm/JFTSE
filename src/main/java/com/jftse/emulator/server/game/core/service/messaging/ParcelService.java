@@ -29,4 +29,12 @@ public class ParcelService {
     public List<Parcel> findBySender(Player sender) { return parcelRepository.findBySender(sender); }
 
     public List<Parcel> findByReceiver(Player receiver) { return parcelRepository.findByReceiver(receiver); }
+
+    public long deleteBySender(Player sender) {
+        return parcelRepository.deleteBySender(sender);
+    }
+
+    public long deleteByReceiver(Player receiver) {
+        return parcelRepository.deleteByReceiver(receiver);
+    }
 }

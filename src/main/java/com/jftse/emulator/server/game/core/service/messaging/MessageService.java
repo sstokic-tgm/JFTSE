@@ -29,4 +29,12 @@ public class MessageService {
     public List<Message> findBySender(Player sender) { return messageRepository.findBySender(sender); }
 
     public List<Message> findByReceiver(Player receiver) { return messageRepository.findByReceiver(receiver); }
+
+    public long deleteBySender(Player sender) {
+        return messageRepository.deleteBySender(sender);
+    }
+
+    public long deleteByReceiver(Player receiver) {
+        return messageRepository.deleteByReceiver(receiver);
+    }
 }

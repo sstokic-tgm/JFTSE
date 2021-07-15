@@ -11,4 +11,6 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long> {
     Optional<Parcel> findById(Long id);
     List<Parcel> findBySender(Player sender);
     List<Parcel> findByReceiver(Player receiver);
+    long deleteBySender(Player sender);
+    long deleteByReceiver(Player receiver);
 }

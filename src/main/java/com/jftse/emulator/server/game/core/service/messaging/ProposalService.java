@@ -29,4 +29,12 @@ public class ProposalService {
     public List<Proposal> findBySender(Player sender) { return proposalRepository.findBySender(sender); }
 
     public List<Proposal> findByReceiver(Player receiver) { return proposalRepository.findByReceiver(receiver); }
+
+    public long deleteBySender(Player sender) {
+        return proposalRepository.deleteBySender(sender);
+    }
+
+    public long deleteByReceiver(Player receiver) {
+        return proposalRepository.deleteByReceiver(receiver);
+    }
 }

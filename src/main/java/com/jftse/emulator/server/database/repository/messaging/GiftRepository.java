@@ -11,4 +11,6 @@ public interface GiftRepository extends JpaRepository<Gift, Long> {
     Optional<Gift> findById(Long id);
     List<Gift> findBySender(Player sender);
     List<Gift> findByReceiver(Player receiver);
+    long deleteBySender(Player sender);
+    long deleteByReceiver(Player receiver);
 }

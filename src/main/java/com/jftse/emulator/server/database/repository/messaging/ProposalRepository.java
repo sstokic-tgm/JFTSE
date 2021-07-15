@@ -11,4 +11,6 @@ public interface ProposalRepository extends JpaRepository<Proposal, Long> {
     Optional<Proposal> findById(Long id);
     List<Proposal> findBySender(Player sender);
     List<Proposal> findByReceiver(Player receiver);
+    long deleteBySender(Player sender);
+    long deleteByReceiver(Player receiver);
 }

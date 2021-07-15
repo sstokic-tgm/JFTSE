@@ -9,6 +9,7 @@ import com.jftse.emulator.server.database.model.player.*;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.game.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.jftse.emulator.server.game.core.packet.packets.S2CWelcomePacket;
+import com.jftse.emulator.server.game.core.service.messaging.*;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -38,6 +39,12 @@ public class AuthPacketHandler {
     private final PlayerStatisticService playerStatisticService;
     private final ItemCharService itemCharService;
     private final ClientWhitelistService clientWhitelistService;
+
+    private final FriendService friendService;
+    private final GiftService giftService;
+    private final MessageService messageService;
+    private final ParcelService parcelService;
+    private final ProposalService proposalService;
 
     public void sendWelcomePacket(Connection connection) {
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecKey(), connection.getEncKey(), 0, 0);
@@ -252,6 +259,15 @@ public class AuthPacketHandler {
 
         Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
         if (player != null) {
+
+            friendService.deleteByPlayer(player);
+            giftService.deleteBySender(player);
+            giftService.deleteByReceiver(player);
+            messageService.deleteBySender(player);
+            messageService.deleteByReceiver(player);
+            parcelService.deleteBySender(player);
+            parcelService.deleteByReceiver(player);
+            proposalService.deleteByReceiver(player);
 
             connection.getClient().getAccount().getPlayerList().removeIf(pl -> pl.getId().equals(player.getId()));
             playerService.remove(player.getId());

@@ -29,4 +29,12 @@ public class GiftService {
     public List<Gift> findBySender(Player sender) { return giftRepository.findBySender(sender); }
 
     public List<Gift> findByReceiver(Player receiver) { return giftRepository.findByReceiver(receiver); }
+
+    public long deleteBySender(Player sender) {
+        return giftRepository.deleteBySender(sender);
+    }
+
+    public long deleteByReceiver(Player receiver) {
+        return giftRepository.deleteByReceiver(receiver);
+    }
 }

@@ -31,4 +31,8 @@ public class FriendService {
     public List<Friend> findByFriend(Player friend) { return friendRepository.findByFriend(friend); }
 
     public Friend findByPlayerIdAndFriendId(long playerId, long friendId) { return friendRepository.findByPlayerIdAndFriendId(playerId, friendId); }
+
+    public long deleteByPlayer(Player player) {
+        return friendRepository.deleteByPlayer(player);
+    }
 }
