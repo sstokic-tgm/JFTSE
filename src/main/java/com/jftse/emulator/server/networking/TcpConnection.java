@@ -154,7 +154,7 @@ public class TcpConnection {
         if (bytesRead == -1)
             throw new SocketException("Connection is closed.");
 
-        if (bytesRead == 0)
+        if (bytesRead < 7)
             return null;
 
         Packet packet;
