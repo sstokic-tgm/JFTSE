@@ -22,8 +22,8 @@ public class GuildService {
         return guildRepository.save(guild);
     }
 
-    public void remove(Long guildMemberId) {
-        guildRepository.deleteById(guildMemberId);
+    public void remove(Long guildId) {
+        guildRepository.deleteById(guildId);
     }
 
     public Guild findByName(String name) {

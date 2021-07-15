@@ -3,6 +3,8 @@ package com.jftse.emulator.server.game.core.auth.handler;
 import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
+import com.jftse.emulator.server.database.model.guild.Guild;
+import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.item.ItemChar;
 import com.jftse.emulator.server.database.model.player.*;
@@ -45,6 +47,9 @@ public class AuthPacketHandler {
     private final MessageService messageService;
     private final ParcelService parcelService;
     private final ProposalService proposalService;
+
+    private final GuildMemberService guildMemberService;
+    private final GuildService guildService;
 
     public void sendWelcomePacket(Connection connection) {
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecKey(), connection.getEncKey(), 0, 0);
@@ -259,6 +264,17 @@ public class AuthPacketHandler {
 
         Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
         if (player != null) {
+
+            GuildMember guildMember = guildMemberService.getByPlayer(player);
+            if (guildMember != null && guildMember.getMemberRank() != 3) {
+                Guild guild = guildMember.getGuild();
+                guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
+                guildService.save(guild);
+            } else {
+                S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
+                connection.sendTCP(playerDeleteAnswerPacket);
+                return;
+            }
 
             friendService.deleteByPlayer(player);
             giftService.deleteBySender(player);
