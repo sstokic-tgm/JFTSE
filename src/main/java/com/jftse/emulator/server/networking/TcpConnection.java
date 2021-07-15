@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -258,28 +259,36 @@ public class TcpConnection {
         return buffer.position() == 0;
     }
 
-    public int send(Packet packet) throws IOException {
+    public int send(Packet... packets) throws IOException {
         SocketChannel socketChannel = this.socketChannel;
         if(socketChannel == null)
             throw new SocketException("Connection is closed.");
 
         synchronized (writeLock) {
-            writeBuffer = ByteBuffer.allocate(packet.getDataLength() + 8);
+            int length = packets.length;
+            for (Packet packet : packets)
+                length += (packet.getDataLength() + 8);
+            
+            if (length > 16384)
+                throw new ValidationException("Packet length can not be bigger than 16384");
+
+            writeBuffer = ByteBuffer.allocate(length);
             writeBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-            byte[] data = packet.getRawPacket();
-            byte[] encryptedData;
-            createSerial(data);
-            createCheckSum(data);
-            if (packet.getPacketId() != PacketID.S2CLoginWelcomePacket) {
-                encryptedData = encryptBytes(data, data.length);
-                writeBuffer.put(encryptedData);
-            } else {
-                writeBuffer.put(data);
+            for (Packet packet : packets) {
+                byte[] data = packet.getRawPacket();
+                byte[] encryptedData;
+                createSerial(data);
+                createCheckSum(data);
+                if (packet.getPacketId() != PacketID.S2CLoginWelcomePacket) {
+                    encryptedData = encryptBytes(data, data.length);
+                    writeBuffer.put(encryptedData);
+                } else {
+                    writeBuffer.put(data);
+                }
+                if (GlobalSettings.LogAllPackets)
+                    log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
             }
-
-            if (GlobalSettings.LogAllPackets)
-                log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
             if(!writeToSocket()) {
                 selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
@@ -289,7 +298,7 @@ public class TcpConnection {
 
             lastWriteTime = System.currentTimeMillis();
 
-            return packet.getDataLength();
+            return length;
         }
     }
 

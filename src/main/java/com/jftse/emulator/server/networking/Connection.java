@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -60,13 +61,13 @@ public class Connection {
         return isConnected;
     }
 
-    public int sendTCP(Packet packet) {
-        if(packet == null)
+    public int sendTCP(Packet... packets) {
+        if(packets == null || packets.length == 0)
             throw new IllegalArgumentException("Packet cannot be null.");
 
         try {
 
-            return tcpConnection.send(packet);
+            return tcpConnection.send(packets);
         } catch (IOException ioe) {
             switch ("" + ioe.getMessage()) {
                 case "Connection is closed.":
