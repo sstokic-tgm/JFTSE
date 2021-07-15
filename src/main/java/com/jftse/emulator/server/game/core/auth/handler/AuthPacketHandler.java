@@ -283,6 +283,7 @@ public class AuthPacketHandler {
             messageService.deleteByReceiver(player);
             parcelService.deleteBySender(player);
             parcelService.deleteByReceiver(player);
+            proposalService.deleteBySender(player);
             proposalService.deleteByReceiver(player);
 
             connection.getClient().getAccount().getPlayerList().removeIf(pl -> pl.getId().equals(player.getId()));
