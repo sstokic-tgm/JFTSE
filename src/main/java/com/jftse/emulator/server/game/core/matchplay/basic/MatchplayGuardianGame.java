@@ -312,7 +312,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     Random r = new Random();
                     int itemRewardToGive = stageRewards.get(r.nextInt(rewardsCount));
                     playerReward.setRewardProductIndex(itemRewardToGive);
-                    playerReward.setProductRewardAmount(1);
+
+                    int amount = isHardMode ? 3 : 1;
+                    playerReward.setProductRewardAmount(amount);
                 }
             }
 
