@@ -41,6 +41,7 @@ public class AuthPacketHandler {
     private final PlayerStatisticService playerStatisticService;
     private final ItemCharService itemCharService;
     private final ClientWhitelistService clientWhitelistService;
+    private final ProfaneWordsService profaneWordsService;
 
     private final FriendService friendService;
     private final GiftService giftService;
@@ -179,9 +180,11 @@ public class AuthPacketHandler {
 
     public void handlePlayerNameCheckPacket(Connection connection, Packet packet) {
         C2SPlayerNameCheckPacket playerNameCheckPacket = new C2SPlayerNameCheckPacket(packet);
+        String playerName = playerNameCheckPacket.getNickname();
+        boolean isPlayerNameValid = !profaneWordsService.textContainsProfaneWord(playerName);
 
-        Player player = playerService.findByName(playerNameCheckPacket.getNickname());
-        if (player == null) {
+        Player player = playerService.findByName(playerName);
+        if (player == null && isPlayerNameValid) {
             S2CPlayerNameCheckAnswerPacket playerNameCheckAnswerPacket = new S2CPlayerNameCheckAnswerPacket((char) 0);
             connection.sendTCP(playerNameCheckAnswerPacket);
         }
@@ -192,11 +195,12 @@ public class AuthPacketHandler {
     }
 
     public void handlePlayerCreatePacket(Connection connection, Packet packet) {
-
         C2SPlayerCreatePacket playerCreatePacket = new C2SPlayerCreatePacket(packet);
+        String playerName = playerCreatePacket.getNickname();
+        boolean isPlayerNameValid = !profaneWordsService.textContainsProfaneWord(playerName);
 
         Player player = playerService.findByIdFetched((long) playerCreatePacket.getPlayerId());
-        if (player == null) {
+        if (player == null || !isPlayerNameValid) {
             S2CPlayerCreateAnswerPacket playerCreateAnswerPacket = new S2CPlayerCreateAnswerPacket((char) -1);
             connection.sendTCP(playerCreateAnswerPacket);
         }
