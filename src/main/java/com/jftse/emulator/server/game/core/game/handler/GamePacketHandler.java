@@ -3525,6 +3525,12 @@ public class GamePacketHandler {
     }
 
     public void handleHeartBeatPacket(Connection connection, Packet packet) {
+        if (connection.getClient() != null && connection.getClient().getActivePlayer() != null) {
+            Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+            if (player.getAccount().getStatus() == -6)
+                handleDisconnected(connection);
+        }
+
         if (!GlobalSettings.IsAntiCheatEnabled || connection.getClient() == null || connection.getClient().getAccount() == null) return;
         String hostAddress = connection.getClient().getIp();
         ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwidAndAccount(hostAddress, connection.getHwid(), connection.getClient().getAccount());
