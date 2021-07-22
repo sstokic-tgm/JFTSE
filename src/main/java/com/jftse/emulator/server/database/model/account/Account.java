@@ -30,4 +30,5 @@ public class Account extends AbstractBaseModel {
     private Boolean gameMaster;
 
     private String banReason;
+    private Date bannedUntil;
 }

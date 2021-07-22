@@ -87,8 +87,16 @@ public class AuthPacketHandler {
         }
         else {
             Integer accountStatus = account.getStatus();
+            if (accountStatus.equals((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID)
+                    && account.getBannedUntil() != null && account.getBannedUntil().getTime() < new Date().getTime()) {
+                account.setStatus(0);
+                account.setBannedUntil(null);
+                account.setBanReason(null);
+                accountStatus = 0;
+            }
+
             if (!accountStatus.equals((int) S2CLoginAnswerPacket.SUCCESS) || isClientFlagged(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
+                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
                 connection.sendTCP(loginAnswerPacket);
             }
             else {
