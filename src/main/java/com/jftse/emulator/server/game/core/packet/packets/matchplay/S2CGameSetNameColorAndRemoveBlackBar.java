@@ -6,6 +6,7 @@ import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class S2CGameSetNameColorAndRemoveBlackBar extends Packet {
     public S2CGameSetNameColorAndRemoveBlackBar(Room room) {
@@ -15,9 +16,12 @@ public class S2CGameSetNameColorAndRemoveBlackBar extends Packet {
             this.write((char) 0);
         } else {
             List<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+            List<RoomPlayer> activePlayers = roomPlayerList.stream()
+                    .filter(x -> x.getPosition() < 4)
+                    .collect(Collectors.toList());
 
-            this.write((char) roomPlayerList.size());
-            for (RoomPlayer roomPlayer : roomPlayerList) {
+            this.write((char) activePlayers.size());
+            for (RoomPlayer roomPlayer : activePlayers) {
                 this.write(roomPlayer.getPosition());
                 this.write(roomPlayer.getPosition());
             }

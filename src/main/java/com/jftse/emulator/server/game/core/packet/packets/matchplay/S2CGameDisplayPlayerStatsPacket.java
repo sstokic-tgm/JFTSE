@@ -8,6 +8,7 @@ import com.jftse.emulator.server.game.core.packet.PacketID;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class S2CGameDisplayPlayerStatsPacket extends Packet {
     public S2CGameDisplayPlayerStatsPacket(Room room) {
@@ -15,10 +16,12 @@ public class S2CGameDisplayPlayerStatsPacket extends Packet {
 
         List<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
         short gameMode = room.getMode();
+        List<RoomPlayer> activePlayers = roomPlayerList.stream()
+                .filter(x -> x.getPosition() < 4)
+                .collect(Collectors.toList());
 
-        this.write((char)roomPlayerList.size());
-
-        for (RoomPlayer roomPlayer : roomPlayerList) {
+        this.write((char)activePlayers.size());
+        for (RoomPlayer roomPlayer : activePlayers) {
             Player player = roomPlayer.getPlayer();
             this.write(roomPlayer.getPosition());
             this.write(player.getName());

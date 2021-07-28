@@ -25,6 +25,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             ClothEquipment clothEquipment = roomPlayer.getClothEquipment();
             StatusPointsAddedDto statusPointsAddedDto = roomPlayer.getStatusPointsAddedDto();
 
+            boolean isSpectator = roomPlayer.getPosition() > 3;
             this.write(roomPlayer.getPosition());
             this.write(player.getName());
             this.write(player.getLevel());
@@ -33,7 +34,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write(roomPlayer.isReady());
             this.write(roomPlayer.isFitting());
             this.write(player.getPlayerType());
-            this.write((byte) 0); // unk2
+            this.write(isSpectator);
             this.write((byte) 0); // unk3
             this.write(guild != null ? guild.getName() : "");
 
