@@ -2274,24 +2274,26 @@ public class GamePacketHandler {
             return;
         }
 
-        if (room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
-            connection.sendTCP(roomJoinAnswerPacket);
-
-            this.updateRoomForAllPlayersInMultiplayer(connection, room);
-            return;
-        }
-
-        boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
-        if (!anyPositionAvailable) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
-            connection.sendTCP(roomJoinAnswerPacket);
-
-            this.updateRoomForAllPlayersInMultiplayer(connection, room);
-            return;
-        }
-
         Player activePlayer = connection.getClient().getActivePlayer();
+        if (!activePlayer.getAccount().getGameMaster()) {
+            if (room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
+                S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
+                connection.sendTCP(roomJoinAnswerPacket);
+
+                this.updateRoomForAllPlayersInMultiplayer(connection, room);
+                return;
+            }
+
+            boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
+            if (!anyPositionAvailable) {
+                S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+                connection.sendTCP(roomJoinAnswerPacket);
+
+                this.updateRoomForAllPlayersInMultiplayer(connection, room);
+                return;
+            }
+        }
+
         if ((room.isHardMode() || room.isArcade()) && activePlayer.getLevel() != 60) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
@@ -2306,8 +2308,25 @@ public class GamePacketHandler {
             return;
         }
 
+
+        boolean useGmSlot = false;
+        int gmSlot = 9;
+        if (activePlayer.getAccount().getGameMaster()) {
+            boolean isGmSlotInUse = room.getPositions().get(gmSlot) == RoomPositionState.InUse;
+            boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
+            if (isGmSlotInUse && !anyPositionAvailable) {
+                S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+                connection.sendTCP(roomJoinAnswerPacket);
+
+                this.updateRoomForAllPlayersInMultiplayer(connection, room);
+                return;
+            } else {
+                useGmSlot = true;
+            }
+        }
+
         Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
-        int newPosition = room.getPositions().indexOf(num.get());
+        int newPosition = useGmSlot ? 9 : room.getPositions().indexOf(num.get());
         room.getPositions().set(newPosition, RoomPositionState.InUse);
 
         RoomPlayer roomPlayer = new RoomPlayer();
@@ -3686,7 +3705,11 @@ public class GamePacketHandler {
                     if (c != null) {
                         if (c.getActiveRoom() != null) {
                             c.getActiveRoom().setRoomPlayerList(roomPlayerList);
-                            c.getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Free);
+                            if (playerPosition == 9) {
+                                c.getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Locked);
+                            } else {
+                                c.getActiveRoom().getPositions().set(playerPosition, RoomPositionState.Free);
+                            }
                         }
 
                         if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null && c.getConnection().isConnected())

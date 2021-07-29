@@ -21,7 +21,7 @@ public class Room {
                 RoomPositionState.Free, RoomPositionState.Free,
                 RoomPositionState.Locked, RoomPositionState.Free,
                 RoomPositionState.Free, RoomPositionState.Free,
-                RoomPositionState.Free);
+                RoomPositionState.Free, RoomPositionState.Locked);
         status = RoomStatus.NotRunning;
     }
 
