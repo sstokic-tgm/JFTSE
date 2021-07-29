@@ -2032,7 +2032,7 @@ public class GamePacketHandler {
         connection.getClient().setLobbyCurrentRoomListPage((short) -1);
 
         if (joined) {
-            handleRoomPlayerChanges(connection);
+            handleRoomPlayerChanges(connection, true);
         }
 
         this.refreshLobbyPlayerListForAllClients();
@@ -2314,14 +2314,14 @@ public class GamePacketHandler {
         if (activePlayer.getAccount().getGameMaster()) {
             boolean isGmSlotInUse = room.getPositions().get(gmSlot) == RoomPositionState.InUse;
             boolean anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
-            if (isGmSlotInUse && !anyPositionAvailable) {
+            if (!isGmSlotInUse) {
+                useGmSlot = true;
+            } else if (!anyPositionAvailable){
                 S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
                 connection.sendTCP(roomJoinAnswerPacket);
 
                 this.updateRoomForAllPlayersInMultiplayer(connection, room);
                 return;
-            } else {
-                useGmSlot = true;
             }
         }
 
@@ -2367,7 +2367,7 @@ public class GamePacketHandler {
 
     public void handleRoomLeaveRequestPacket(Connection connection, Packet packet) {
         connection.getClient().setLobbyCurrentRoomListPage((short) -1);
-        handleRoomPlayerChanges(connection);
+        handleRoomPlayerChanges(connection, true);
         Packet answerPacket = new Packet(PacketID.S2CRoomLeaveAnswer);
         answerPacket.write(0);
         connection.sendTCP(answerPacket);
@@ -2463,7 +2463,7 @@ public class GamePacketHandler {
                     answerPacket.write(0);
                     client.getConnection().sendTCP(answerPacket);
 
-                    this.handleRoomPlayerChanges(client.getConnection());
+                    this.handleRoomPlayerChanges(client.getConnection(), true);
 
                     S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
                     client.getConnection().sendTCP(roomJoinAnswerPacket);
@@ -3271,6 +3271,7 @@ public class GamePacketHandler {
 
     public void handleDisconnected(Connection connection) {
         if (connection.getClient().getAccount() != null) {
+            boolean notifyClients = true;
             Player player = connection.getClient().getActivePlayer();
             if (player != null) {
                 player = this.playerService.findById(player.getId());
@@ -3304,8 +3305,8 @@ public class GamePacketHandler {
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
-                Room currentClientRoom = connection.getClient().getActiveRoom();
 
+                Room currentClientRoom = connection.getClient().getActiveRoom();
                 if (currentClientRoom != null) {
                     if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
                         PlayerStatistic playerStatistic = player.getPlayerStatistic();
@@ -3317,18 +3318,26 @@ public class GamePacketHandler {
                         connection.getClient().setActivePlayer(player);
                     }
 
-                    currentClientRoom.setStatus(RoomStatus.NotRunning);
+                    Player finalPlayer = player;
+                    RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
+                            .filter(x -> x.getPlayer().getId() == finalPlayer.getId())
+                            .findFirst()
+                            .orElse(null);
+                    notifyClients = roomPlayer.getPosition() < 4;
+                    if (notifyClients) {
+                        currentClientRoom.setStatus(RoomStatus.NotRunning);
 
-                    gameSession.getClients().forEach(c -> {
-                        Room room = c.getActiveRoom();
-                        if (room != null) {
-                            if (c.getConnection().getId() != connection.getId()) {
-                                S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                                c.getConnection().sendTCP(backToRoomPacket);
+                        gameSession.getClients().forEach(c -> {
+                            Room room = c.getActiveRoom();
+                            if (room != null) {
+                                if (c.getConnection().getId() != connection.getId()) {
+                                    S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                                    c.getConnection().sendTCP(backToRoomPacket);
+                                }
                             }
-                        }
-                    });
-                    this.gameSessionManager.getGameSessionList().removeIf(gs -> gs.getSessionId() == gameSession.getSessionId());
+                        });
+                        this.gameSessionManager.getGameSessionList().removeIf(gs -> gs.getSessionId() == gameSession.getSessionId());
+                    }
 
                     connection.getClient().setActiveGameSession(null);
 
@@ -3342,7 +3351,7 @@ public class GamePacketHandler {
                     }
                 }
             }
-            handleRoomPlayerChanges(connection);
+            handleRoomPlayerChanges(connection, notifyClients);
         }
 
         gameHandler.removeClient(connection.getClient());
@@ -3668,7 +3677,7 @@ public class GamePacketHandler {
         });
     }
 
-    private void handleRoomPlayerChanges(Connection connection) {
+    private void handleRoomPlayerChanges(Connection connection, boolean notifyClients) {
         Room room = connection.getClient().getActiveRoom();
 
         if (room != null) {
@@ -3712,8 +3721,10 @@ public class GamePacketHandler {
                             }
                         }
 
-                        if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null && c.getConnection().isConnected())
-                            c.getConnection().sendTCP(roomPlayerInformationPacket, roomPositionChangeAnswerPacket);
+                        if (notifyClients) {
+                            if (!c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId()) && c.getConnection() != null && c.getConnection().isConnected())
+                                c.getConnection().sendTCP(roomPlayerInformationPacket, roomPositionChangeAnswerPacket);
+                        }
                     }
                 });
             } else {
@@ -3735,9 +3746,11 @@ public class GamePacketHandler {
                     .findAny()
                     .ifPresent(c -> c.setActiveRoom(null));
 
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
-            this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
-            this.updateRoomForAllPlayersInMultiplayer(connection, room);
+            if (notifyClients) {
+                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayerList);
+                this.gameHandler.getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
+                this.updateRoomForAllPlayersInMultiplayer(connection, room);
+            }
         }
     }
 

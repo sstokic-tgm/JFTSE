@@ -140,12 +140,27 @@ public class MatchplayPacketHandler {
     }
 
     public void handleDisconnected(Connection connection) {
-        if (connection.getClient() == null) {
+        Client connectionClient = connection.getClient();
+        if (connectionClient == null) {
             connection.close();
             return;
         }
+
+        boolean notifyClients = true;
+        Room room = connectionClient.getActiveRoom();
+        Player player = connectionClient.getActivePlayer();
+        if (room != null && player != null) {
+            RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
+                    .filter(x -> x.getPlayer().getId() == player.getId())
+                    .findFirst()
+                    .orElse(null);
+            if (roomPlayer != null && roomPlayer.getPosition() > 3) {
+                notifyClients = false;
+            }
+        }
+
         GameSession gameSession = connection.getClient().getActiveGameSession();
-        if (gameSession != null) {
+        if (gameSession != null && notifyClients) {
             List<Client> clientsInGameSession = new ArrayList<>();
             clientsInGameSession.addAll(gameSession.getClients()); // deep copy
             for (Client client : clientsInGameSession) {
@@ -161,6 +176,7 @@ public class MatchplayPacketHandler {
                 }
             }
         }
+
         this.relayHandler.removeClient(connection.getClient());
         connection.close();
     }
