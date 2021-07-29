@@ -104,6 +104,9 @@ public class BattleModeHandler {
             RoomPlayer rp = room.getRoomPlayerList().stream()
                     .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
                     .findFirst().orElse(null);
+            if (rp == null || rp.getPosition() > 3) {
+                return;
+            }
 
             Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
             PlayerPositionInfo playerPositionInfo = new PlayerPositionInfo();
@@ -442,79 +445,82 @@ public class BattleModeHandler {
                 return;
             }
 
-            boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
-            boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
-            boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
-            boolean wonGame = false;
-            if (isCurrentPlayerInRedTeam && allPlayersTeamBlueDead || !isCurrentPlayerInRedTeam && allPlayersTeamRedDead) {
-                wonGame = true;
-            }
+            boolean isActivePlayer = rp.getPosition() < 4;
+            if (isActivePlayer) {
+                boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
+                boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+                boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+                boolean wonGame = false;
+                if (isCurrentPlayerInRedTeam && allPlayersTeamBlueDead || !isCurrentPlayerInRedTeam && allPlayersTeamRedDead) {
+                    wonGame = true;
+                }
 
-            PlayerReward playerReward = playerRewards.stream()
-                    .filter(x -> x.getPlayerPosition() == rp.getPosition())
-                    .findFirst()
-                    .orElse(this.createEmptyPlayerReward());
+                PlayerReward playerReward = playerRewards.stream()
+                        .filter(x -> x.getPlayerPosition() == rp.getPosition())
+                        .findFirst()
+                        .orElse(this.createEmptyPlayerReward());
 
-            Player player = client.getActivePlayer();
-            byte oldLevel = player.getLevel();
-            if (playerReward != null) {
-                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
-                if (level != 60)
-                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
-                player.setGold(player.getGold() + playerReward.getRewardGold());
-                player = levelService.setNewLevelStatusPoints(level, player);
+                Player player = client.getActivePlayer();
+                byte oldLevel = player.getLevel();
+                if (playerReward != null) {
+                    byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
+                    if (level != 60)
+                        player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                    player.setGold(player.getGold() + playerReward.getRewardGold());
+                    player = levelService.setNewLevelStatusPoints(level, player);
+                    client.setActivePlayer(player);
+
+                    if (wonGame) {
+                        this.handleRewardItem(client.getConnection(), playerReward);
+                    }
+                }
+
+                PlayerStatistic playerStatistic = player.getPlayerStatistic();
+                if (wonGame) {
+                    playerStatistic.setBattleRecordWin(playerStatistic.getBattleRecordWin() + 1);
+
+                    int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
+                    if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
+                        playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
+                    }
+
+                    playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
+                } else {
+                    playerStatistic.setBattleRecordLoss(playerStatistic.getBattleRecordLoss() + 1);
+                    playerStatistic.setConsecutiveWins(0);
+                }
+                HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BATTLE);
+                int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBattleRP();
+                int playerNewRating = playerRatings.get(player.getId());
+                if (playerReward != null)
+                    playerReward.setRewardRP(playerRankingPoints);
+                playerStatistic.setBattleRP(playerNewRating <= 0 ? 0 : playerNewRating);
+
+                playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+
+                player.setPlayerStatistic(playerStatistic);
+                player = playerService.save(player);
                 client.setActivePlayer(player);
 
+                byte playerLevel = client.getActivePlayer().getLevel();
+                if (playerLevel != oldLevel) {
+                    StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                    rp.setStatusPointsAddedDto(statusPointsAddedDto);
+
+                    S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                }
+
                 if (wonGame) {
-                    this.handleRewardItem(client.getConnection(), playerReward);
-                }
-            }
-
-            PlayerStatistic playerStatistic = player.getPlayerStatistic();
-            if (wonGame) {
-                playerStatistic.setBattleRecordWin(playerStatistic.getBattleRecordWin() + 1);
-
-                int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
-                if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
-                    playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
+                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
                 }
 
-                playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
-            } else {
-                playerStatistic.setBattleRecordLoss(playerStatistic.getBattleRecordLoss() + 1);
-                playerStatistic.setConsecutiveWins(0);
+                byte resultTitle = (byte) (wonGame ? 1 : 0);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
+                client.getConnection().sendTCP(setExperienceGainInfoData);
             }
-            HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BATTLE);
-            int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBattleRP();
-            int playerNewRating = playerRatings.get(player.getId());
-            if (playerReward != null)
-                playerReward.setRewardRP(playerRankingPoints);
-            playerStatistic.setBattleRP(playerNewRating <= 0 ? 0 : playerNewRating);
-
-            playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
-
-            player.setPlayerStatistic(playerStatistic);
-            player = playerService.save(player);
-            client.setActivePlayer(player);
-
-            byte playerLevel = client.getActivePlayer().getLevel();
-            if (playerLevel != oldLevel) {
-                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-                rp.setStatusPointsAddedDto(statusPointsAddedDto);
-
-                S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
-                packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
-            }
-
-            if (wonGame) {
-                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
-            }
-
-            byte resultTitle = (byte) (wonGame ? 1 : 0);
-            S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
-            client.getConnection().sendTCP(setExperienceGainInfoData);
-
+            
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
             client.getConnection().sendTCP(setGameResultData);
 

@@ -699,43 +699,46 @@ public class GuardianModeHandler {
                 return;
             }
 
-            PlayerReward playerReward = playerRewards.stream()
-                    .filter(x -> x.getPlayerPosition() == rp.getPosition())
-                    .findFirst()
-                    .orElse(this.createEmptyPlayerReward());
+            boolean isActivePlayer = rp.getPosition() < 4;
+            if (isActivePlayer) {
+                PlayerReward playerReward = playerRewards.stream()
+                        .filter(x -> x.getPlayerPosition() == rp.getPosition())
+                        .findFirst()
+                        .orElse(this.createEmptyPlayerReward());
 
-            Player player = client.getActivePlayer();
-            byte oldLevel = player.getLevel();
-            if (playerReward != null) {
-                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
-                if (level != 60)
-                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
-                player.setGold(player.getGold() + playerReward.getRewardGold());
-                player = levelService.setNewLevelStatusPoints(level, player);
-                client.setActivePlayer(player);
+                Player player = client.getActivePlayer();
+                byte oldLevel = player.getLevel();
+                if (playerReward != null) {
+                    byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
+                    if (level != 60)
+                        player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                    player.setGold(player.getGold() + playerReward.getRewardGold());
+                    player = levelService.setNewLevelStatusPoints(level, player);
+                    client.setActivePlayer(player);
+
+                    if (wonGame) {
+                        this.handleRewardItem(client.getConnection(), playerReward);
+                    }
+                }
+
+                byte playerLevel = client.getActivePlayer().getLevel();
+                if (playerLevel != oldLevel) {
+                    StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                    rp.setStatusPointsAddedDto(statusPointsAddedDto);
+
+                    S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
+                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                }
 
                 if (wonGame) {
-                    this.handleRewardItem(client.getConnection(), playerReward);
+                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
                 }
+
+                byte resultTitle = (byte) (wonGame ? 1 : 0);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
+                client.getConnection().sendTCP(setExperienceGainInfoData);
             }
-
-            byte playerLevel = client.getActivePlayer().getLevel();
-            if (playerLevel != oldLevel) {
-                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-                rp.setStatusPointsAddedDto(statusPointsAddedDto);
-
-                S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
-                packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
-            }
-
-            if (wonGame) {
-                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
-            }
-
-            byte resultTitle = (byte) (wonGame ? 1 : 0);
-            S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
-            client.getConnection().sendTCP(setExperienceGainInfoData);
 
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
             client.getConnection().sendTCP(setGameResultData);
