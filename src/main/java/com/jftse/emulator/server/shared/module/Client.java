@@ -23,6 +23,7 @@ public class Client {
     private TutorialGame activeTutorialGame;
 
     private boolean inLobby;
+    private boolean isSpectator;
 
     private Room activeRoom;
     private GameSession activeGameSession;

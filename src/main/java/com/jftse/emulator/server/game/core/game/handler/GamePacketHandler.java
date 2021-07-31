@@ -3592,7 +3592,11 @@ public class GamePacketHandler {
     private void internalHandleRoomPositionChange(Connection connection, RoomPlayer roomPlayer, boolean freeOldPosition, short oldPosition, short newPosition) {
         Room room = connection.getClient().getActiveRoom();
         if (freeOldPosition) {
-            room.getPositions().set(oldPosition, RoomPositionState.Free);
+            if (oldPosition == 9) {
+                room.getPositions().set(oldPosition, RoomPositionState.Locked);
+            } else {
+                room.getPositions().set(oldPosition, RoomPositionState.Free);
+            }
         }
 
         room.getPositions().set(newPosition, RoomPositionState.InUse);

@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class C2SMatchplayPlayerIdsInSessionPacket extends Packet {
     private int sessionId;
-    private byte unk0;
+    private boolean isSpectator;
     private List<Integer> playerIds;
 
     public C2SMatchplayPlayerIdsInSessionPacket(Packet packet) {
@@ -20,7 +20,7 @@ public class C2SMatchplayPlayerIdsInSessionPacket extends Packet {
         this.playerIds = new ArrayList<>();
 
         this.sessionId = this.readInt();
-        this.unk0 = this.readByte();
+        this.isSpectator = this.readBoolean();
         playerIds.add(this.readInt());
         playerIds.add(this.readInt());
         playerIds.add(this.readInt());

@@ -76,6 +76,7 @@ public class MatchplayPacketHandler {
                     client.setActivePlayer(playerClient.getActivePlayer());
                     client.setActiveGameSession(gameSession);
                     client.setConnection(connection);
+                    client.setSpectator(matchplayPlayerIdsInSessionPacket.isSpectator());
 
                     connection.setClient(client);
                     gameSession.getClientsInRelay().add(client);
@@ -146,19 +147,7 @@ public class MatchplayPacketHandler {
             return;
         }
 
-        boolean notifyClients = true;
-        Room room = connectionClient.getActiveRoom();
-        Player player = connectionClient.getActivePlayer();
-        if (room != null && player != null) {
-            RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                    .filter(x -> x.getPlayer().getId() == player.getId())
-                    .findFirst()
-                    .orElse(null);
-            if (roomPlayer != null && roomPlayer.getPosition() > 3) {
-                notifyClients = false;
-            }
-        }
-
+        boolean notifyClients = !connectionClient.isSpectator();
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null && notifyClients) {
             List<Client> clientsInGameSession = new ArrayList<>();
@@ -215,6 +204,10 @@ public class MatchplayPacketHandler {
         MatchplayGame game = gameSession.getActiveMatchplayGame();
         if (game == null) {
             connection.close();
+            return;
+        }
+
+        if (room.getStatus() == RoomStatus.Running && client.isSpectator()) {
             return;
         }
 
