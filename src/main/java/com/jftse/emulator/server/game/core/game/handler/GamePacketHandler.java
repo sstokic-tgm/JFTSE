@@ -2310,6 +2310,8 @@ public class GamePacketHandler {
         if (room.getBannedPlayers().contains(connection.getClient().getActivePlayer())) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
+
+            this.updateRoomForAllPlayersInMultiplayer(connection, room);
             return;
         }
 
@@ -2328,6 +2330,14 @@ public class GamePacketHandler {
                 this.updateRoomForAllPlayersInMultiplayer(connection, room);
                 return;
             }
+        }
+
+        if (activePlayer.getLevel() < (room.getLevel() - room.getLevelRange()) && activePlayer.getLevel() > room.getLevel()) {
+            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+
+            this.updateRoomForAllPlayersInMultiplayer(connection, room);
+            return;
         }
 
         Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
