@@ -107,7 +107,7 @@ public class MatchplayBattleGame extends MatchplayGame {
                 WillDamage willDamage = this.getWillDamages().stream()
                         .filter(x -> x.getWill() == attackingPlayerBattleState.getWill())
                         .findFirst()
-                        .orElse(this.getWillDamages().get(0));
+                        .orElse(this.getWillDamages().get(this.getWillDamages().size() - 1));
                 lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
             }
         }
