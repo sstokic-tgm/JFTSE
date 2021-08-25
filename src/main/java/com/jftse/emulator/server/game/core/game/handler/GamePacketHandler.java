@@ -3475,7 +3475,7 @@ public class GamePacketHandler {
 
         C2SMatchplaySwapQuickSlotItems swapQuickSlotItems = new C2SMatchplaySwapQuickSlotItems(packet);
         Room room = connection.getClient().getActiveRoom();
-        if (room != null) { // shouldn't happen
+        if (room != null && room.isQuickSlot()) { // shouldn't happen
             switch (room.getMode()) {
                 case GameMode.GUARDIAN:
                     this.guardianModeHandler.handleSwapQuickSlotItems(connection, swapQuickSlotItems);
