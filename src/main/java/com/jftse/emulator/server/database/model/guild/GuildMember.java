@@ -24,7 +24,7 @@ public class GuildMember extends AbstractBaseModel {
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 
-    private byte memberRank;
+    private Byte memberRank;
     private Integer contributionPoints = 0;
     private Date requestDate;
     private Boolean waitingForApproval;
