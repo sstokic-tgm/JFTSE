@@ -3006,6 +3006,8 @@ public class GamePacketHandler {
             List<GuildMember> guildMembers = guildMember.getGuild().getMemberList()
                     .stream()
                     .filter(x -> !x.getWaitingForApproval())
+                    .sorted(Comparator.comparingInt(GuildMember::getMemberRank)
+                            .reversed())
                     .collect(Collectors.toList());
             connection.sendTCP(new S2CGuildMemberDataAnswerPacket(guildMembers));
         }
