@@ -1180,10 +1180,15 @@ public class GamePacketHandler {
             C2SWhisperReqPacket whisperReqPacket = new C2SWhisperReqPacket(packet);
             S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
-            this.gameHandler.getClientList().stream()
-                .filter(cl -> cl.getActivePlayer() != null && cl.getActivePlayer().getName().equalsIgnoreCase(whisperReqPacket.getReceiverName()))
-                .findAny()
-                .ifPresent(cl -> cl.getConnection().sendTCP(whisperAnswerPacket));
+            Optional<Client> optClientToWhisper = this.gameHandler.getClientList().stream()
+                    .filter(cl -> cl.getActivePlayer() != null && cl.getActivePlayer().getName().equalsIgnoreCase(whisperReqPacket.getReceiverName()))
+                    .findAny();
+            if (optClientToWhisper.isPresent()) {
+                optClientToWhisper.get().getConnection().sendTCP(whisperAnswerPacket);
+            } else {
+                S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "Whisper", "This user not connected.");
+                connection.sendTCP(chatLobbyAnswerPacket);
+            }
 
             connection.sendTCP(whisperAnswerPacket);
         } break;
