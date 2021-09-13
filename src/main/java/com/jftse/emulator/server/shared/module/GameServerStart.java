@@ -63,7 +63,7 @@ public class GameServerStart implements CommandLineRunner {
         log.info("--------------------------------------");
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-        executor.scheduleWithFixedDelay(new GameServerChecker(gameServer, relayServer, gameServerNetworkListener, relayServerNetworkListener), 0, 2, TimeUnit.MINUTES);
-        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer, relayServerNetworkListener), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new GameServerChecker(gameServer, relayServer, gameServerNetworkListener, relayServerNetworkListener), 1, 2, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer, relayServerNetworkListener), 1, 5, TimeUnit.MINUTES);
     }
 }

@@ -41,6 +41,6 @@ public class AuthenticationServerStart implements CommandLineRunner {
         log.info("--------------------------------------");
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 0, 5, TimeUnit.MINUTES);
+        executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 1, 5, TimeUnit.MINUTES);
     }
 }
