@@ -278,14 +278,16 @@ public class AuthPacketHandler {
         if (player != null) {
 
             GuildMember guildMember = guildMemberService.getByPlayer(player);
-            if (guildMember != null && guildMember.getMemberRank() != 3) {
-                Guild guild = guildMember.getGuild();
-                guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
-                guildService.save(guild);
-            } else {
-                S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
-                connection.sendTCP(playerDeleteAnswerPacket);
-                return;
+            if (guildMember != null) {
+                if (guildMember.getMemberRank() != 3) {
+                    Guild guild = guildMember.getGuild();
+                    guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
+                    guildService.save(guild);
+                } else {
+                    S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
+                    connection.sendTCP(playerDeleteAnswerPacket);
+                    return;
+                }
             }
 
             friendService.deleteByPlayer(player);
