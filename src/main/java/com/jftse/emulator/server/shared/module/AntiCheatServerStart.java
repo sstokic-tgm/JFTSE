@@ -23,10 +23,8 @@ public class AntiCheatServerStart implements CommandLineRunner {
         if (GlobalSettings.IsAntiCheatEnabled) {
             log.info("Initializing anti cheat heartbeat server...");
 
-            antiCheatHeartBeatNetworkListener = new AntiCheatHeartBeatNetworkListener();
             Server antiCheatServer = new Server();
             antiCheatServer.addListener(antiCheatHeartBeatNetworkListener);
-
             try {
                 antiCheatServer.bind(1337); // adjustable
             }
