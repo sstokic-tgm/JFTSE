@@ -8,7 +8,6 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS tempRanking;
 	CREATE TEMPORARY TABLE tempRanking AS (
 		SELECT
-			@ranking := @ranking + 1 AS ranking,
 			p.name,
 			ps.basicRP,
 			ps.battleRP,
@@ -16,6 +15,8 @@ BEGIN
 		FROM
 			Player p
 			LEFT JOIN PlayerStatistic ps ON ps.id = p.playerStatistic_id
+		WHERE
+		    p.alreadyCreated = 1
 		ORDER BY
 			CASE
 				WHEN gameMode = 0 THEN ps.basicRP
@@ -25,7 +26,17 @@ BEGIN
 			p.created
 		);
 
-	SELECT tr.ranking FROM tempRanking tr WHERE tr.name = name;
+	SELECT
+	    tr.ranking
+	FROM
+		(
+			SELECT
+				*,
+				@ranking := @ranking + 1 AS ranking
+			FROM tempRanking
+		) tr
+	WHERE
+		tr.name = name;
 
 END //
 
