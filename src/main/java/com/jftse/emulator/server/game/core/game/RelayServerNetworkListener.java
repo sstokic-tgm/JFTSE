@@ -7,10 +7,12 @@ import com.jftse.emulator.server.networking.ConnectionListener;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
+@Service
 public class RelayServerNetworkListener implements ConnectionListener {
     @Autowired
     private MatchplayPacketHandler matchplayPacketHandler;
