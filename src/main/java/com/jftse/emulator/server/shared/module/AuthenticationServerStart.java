@@ -37,7 +37,7 @@ public class AuthenticationServerStart implements CommandLineRunner {
         }
         authenticationServer.start("auth server");
 
-        log.info("Successfully initialized!");
+        log.info("Successfully initialized");
         log.info("--------------------------------------");
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);

@@ -42,7 +42,7 @@ public class GameServerStart implements CommandLineRunner {
         }
         gameServer.start("game server");
 
-        log.info("Successfully initialized!");
+        log.info("Successfully initialized");
         log.info("--------------------------------------");
 
         log.info("Initializing relay server...");
@@ -59,7 +59,7 @@ public class GameServerStart implements CommandLineRunner {
         }
         relayServer.start("relay server");
 
-        log.info("Successfully initialized!");
+        log.info("Successfully initialized");
         log.info("--------------------------------------");
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);

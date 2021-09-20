@@ -35,7 +35,7 @@ public class AntiCheatServerStart implements CommandLineRunner {
             }
             antiCheatServer.start("anti cheat server");
 
-            log.info("Successfully initialized!");
+            log.info("Successfully initialized");
             log.info("--------------------------------------");
         }
     }

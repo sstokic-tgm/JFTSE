@@ -106,7 +106,7 @@ public class DbDataLoader implements CommandLineRunner {
 
             log.info("Initializing LevelExp...");
             if (loadLevelExp())
-                log.info("LevelExp successfully initialized!");
+                log.info("LevelExp successfully initialized");
         }
         else
             dataLoaded = false;
@@ -114,7 +114,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!mapQuestInitialized) {
             log.info("Initializing MapQuest...");
             if (loadMapQuest())
-                log.info("MapQuest successfully initialized!");
+                log.info("MapQuest successfully initialized");
         }
         else
             dataLoaded = false;
@@ -122,7 +122,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!itemPartInitialized) {
             log.info("Initializing ItemPart...");
             if (loadItemPart())
-                log.info("ItemPart successfully initialized!");
+                log.info("ItemPart successfully initialized");
         }
         else
             dataLoaded = false;
@@ -130,7 +130,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!itemSpecialInitialized) {
             log.info("Initializing ItemSpecial...");
             if (loadItemSpecial())
-                log.info("ItemSpecial successfully initialized!");
+                log.info("ItemSpecial successfully initialized");
         }
         else
             dataLoaded = false;
@@ -138,7 +138,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!itemToolInitialized) {
             log.info("Initializing ItemTool...");
             if (loadItemTool())
-                log.info("ItemTool successfully initialized!");
+                log.info("ItemTool successfully initialized");
         }
         else
             dataLoaded = false;
@@ -232,7 +232,7 @@ public class DbDataLoader implements CommandLineRunner {
             dataLoaded = false;
 
         if (!dataLoaded)
-            log.info("Data is up to date!");
+            log.info("Data is up to date");
 
         log.info("--------------------------------------");
     }
