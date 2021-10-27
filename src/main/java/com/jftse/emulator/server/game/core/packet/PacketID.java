@@ -302,7 +302,7 @@ public final class PacketID {
 
     public final static char D2SDevPacket = 0x555;
 
-    private static HashMap<Character, String> packetIdNames = new HashMap<>();
+    private final static HashMap<Character, String> packetIdNames = new HashMap<>();
 
     static {
         // create a list of all char constants of this class for method getPacketIdName()

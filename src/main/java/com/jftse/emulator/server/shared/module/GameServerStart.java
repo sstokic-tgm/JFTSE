@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.shared.module;
 
 import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
-import com.jftse.emulator.server.game.core.game.RelayServerNetworkListener;
+import com.jftse.emulator.server.game.core.listener.RelayServerNetworkListener;
 import com.jftse.emulator.server.networking.Server;
 import com.jftse.emulator.server.networking.ThreadedConnectionListener;
 import com.jftse.emulator.server.shared.module.checker.GameServerChecker;
@@ -31,7 +31,7 @@ public class GameServerStart implements CommandLineRunner {
         log.info("Initializing game server...");
 
         Server gameServer = new Server();
-        gameServer.addListener(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(2)));
+        gameServer.addListener(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(8)));
         try {
             gameServer.bind(5895);
         }
@@ -48,7 +48,7 @@ public class GameServerStart implements CommandLineRunner {
         log.info("Initializing relay server...");
 
         Server relayServer = new Server();
-        relayServer.addListener(new ThreadedConnectionListener(relayServerNetworkListener, Executors.newFixedThreadPool(2)));
+        relayServer.addListener(new ThreadedConnectionListener(relayServerNetworkListener, Executors.newFixedThreadPool(8)));
         try {
             relayServer.bind(5896);
         }

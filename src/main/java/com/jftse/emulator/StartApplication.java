@@ -4,7 +4,7 @@ import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.discord.DiscordWebhook;
 import com.jftse.emulator.server.game.core.anticheat.AntiCheatHeartBeatNetworkListener;
 import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
-import com.jftse.emulator.server.game.core.game.RelayServerNetworkListener;
+import com.jftse.emulator.server.game.core.listener.RelayServerNetworkListener;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

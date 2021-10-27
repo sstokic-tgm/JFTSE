@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.shared.module;
 
-import com.jftse.emulator.server.game.core.auth.AuthenticationServerNetworkListener;
+import com.jftse.emulator.server.game.core.listener.AuthenticationServerNetworkListener;
 import com.jftse.emulator.server.networking.Server;
 import com.jftse.emulator.server.shared.module.checker.AuthServerChecker;
 import lombok.extern.log4j.Log4j2;

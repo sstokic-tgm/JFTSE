@@ -1,7 +1,10 @@
-package com.jftse.emulator.server.game.core.game;
+package com.jftse.emulator.server.game.core.listener;
 
-import com.jftse.emulator.server.game.core.game.handler.MatchplayPacketHandler;
-import com.jftse.emulator.server.game.core.packet.PacketID;
+import com.jftse.emulator.server.game.core.handler.AbstractHandler;
+import com.jftse.emulator.server.game.core.handler.relay.BasicRelayHandler;
+import com.jftse.emulator.server.game.core.manager.RelayManager;
+import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
+import com.jftse.emulator.server.game.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.ConnectionListener;
 import com.jftse.emulator.server.networking.packet.Packet;
@@ -15,42 +18,24 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RelayServerNetworkListener implements ConnectionListener {
     @Autowired
-    private MatchplayPacketHandler matchplayPacketHandler;
+    private RelayManager relayManager;
+    @Autowired
+    private GameSessionManager gameSessionManager;
 
     public void cleanUp() {
-        matchplayPacketHandler.handleCleanUp();
+        relayManager.getClientList().clear();
+        gameSessionManager.getGameSessionList().clear();
     }
 
     public void connected(Connection connection) {
         long timeout = TimeUnit.MINUTES.toMillis(2);
         connection.getTcpConnection().setTimeoutMillis((int) timeout);
 
-        matchplayPacketHandler.sendWelcomePacket(connection);
+        new BasicRelayHandler().sendWelcomePacket(connection);
     }
 
     public void disconnected(Connection connection) {
-        matchplayPacketHandler.handleDisconnected(connection);
-    }
-
-    public void received(Connection connection, Packet packet) {
-        switch (packet.getPacketId()) {
-            case PacketID.C2SRelayPacketToAllClients:
-                matchplayPacketHandler.handleRelayPacketToClientsInGameSessionRequest(connection, packet);
-                break;
-
-            case PacketID.C2SMatchplayRegisterPlayerForGameSession:
-                matchplayPacketHandler.handleRegisterPlayerForSession(connection, packet);
-                break;
-
-            case PacketID.C2SHeartbeat:
-            case PacketID.C2SLoginAliveClient:
-                // empty..
-                break;
-
-            default:
-                // empty
-                break;
-        }
+        new BasicRelayHandler().handleDisconnected(connection);
     }
 
     public void idle(Connection connection) {
@@ -69,6 +54,6 @@ public class RelayServerNetworkListener implements ConnectionListener {
     }
 
     public void onTimeout(Connection connection) {
-        matchplayPacketHandler.handleTimeout(connection);
+        new BasicRelayHandler().handleTimeout(connection);
     }
 }

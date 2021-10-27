@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.game.core.packet.packets.authserver;
 
 import com.jftse.emulator.server.database.model.gameserver.GameServer;
-import com.jftse.emulator.server.game.core.packet.PacketID;
+import com.jftse.emulator.server.game.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 public class S2CGameServerListPacket extends Packet {
 
     public S2CGameServerListPacket(List<GameServer> gameServerList) {
-        super(PacketID.S2CGameServerList);
+        super(PacketOperations.S2CGameServerList.getValueAsChar());
 
         this.write((byte) gameServerList.size());
 

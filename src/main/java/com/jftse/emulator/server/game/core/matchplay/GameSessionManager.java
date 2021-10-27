@@ -3,6 +3,7 @@ package com.jftse.emulator.server.game.core.matchplay;
 import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -10,16 +11,23 @@ import javax.annotation.PostConstruct;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
-@Scope("singleton")
 @Getter
-@Setter
+@Log4j2
 public class GameSessionManager {
+    private static GameSessionManager instance;
 
     private CopyOnWriteArrayList<GameSession> gameSessionList;
 
     @PostConstruct
     public void init() {
+        instance = this;
         gameSessionList = new CopyOnWriteArrayList<>();
+
+        log.info(this.getClass().getSimpleName() + " initialized");
+    }
+
+    public static GameSessionManager getInstance() {
+        return instance;
     }
 
     public void addGameSession(GameSession gameSession) {
