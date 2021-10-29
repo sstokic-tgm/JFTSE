@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.game.core.game.handler;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.common.utilities.StringUtils;
@@ -133,6 +133,8 @@ public class GamePacketHandler {
     private final GiftService giftService;
     private final ParcelService parcelService;
     private final ProposalService proposalService;
+
+    private final ConfigService configService;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -2799,7 +2801,7 @@ public class GamePacketHandler {
     }
 
     public void handleDevPacket(Connection connection, Packet packet) {
-        if (GlobalSettings.ShouldHandleDevPackets) {
+        if (configService.getValue("dev.packets.handle", false)) {
             byte[] data = packet.getData();
             Packet packetToRelay = new Packet(data);
             this.getGameHandler().getClientList().forEach(x -> x.getConnection().sendTCP(packetToRelay));
@@ -3576,7 +3578,7 @@ public class GamePacketHandler {
                 handleDisconnected(connection);
         }
 
-        if (!GlobalSettings.IsAntiCheatEnabled || connection.getClient() == null || connection.getClient().getAccount() == null) return;
+        if (!configService.getValue("anticheat.enabled", false) || connection.getClient() == null || connection.getClient().getAccount() == null) return;
         String hostAddress = connection.getClient().getIp();
         ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwidAndAccount(hostAddress, connection.getHwid(), connection.getClient().getAccount());
         if (clientWhitelist != null && !clientWhitelist.getIsActive())

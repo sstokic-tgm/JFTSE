@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.game.core.handler.authentication;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.game.core.handler.AbstractHandler;
@@ -24,10 +24,12 @@ public class LoginPacketHandler extends AbstractHandler {
 
     private final AuthenticationService authenticationService;
     private final ClientWhitelistService clientWhitelistService;
+    private final ConfigService configService;
 
     public LoginPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         clientWhitelistService = ServiceManager.getInstance().getClientWhitelistService();
+        configService = ServiceManager.getInstance().getConfigService();
     }
 
     @Override
@@ -38,7 +40,7 @@ public class LoginPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (GlobalSettings.IsAntiCheatEnabled && !isClientValid(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
+        if (configService.getValue("anticheat.enabled", false) && !isClientValid(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
 
@@ -76,7 +78,7 @@ public class LoginPacketHandler extends AbstractHandler {
                 S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
                 connection.sendTCP(loginAnswerPacket);
             } else {
-                if (GlobalSettings.IsAntiCheatEnabled && !linkAccountToClientWhitelist(connection.getRemoteAddressTCP(), loginPacket.getHwid(), account)) {
+                if (configService.getValue("anticheat.enabled", false) && !linkAccountToClientWhitelist(connection.getRemoteAddressTCP(), loginPacket.getHwid(), account)) {
                     S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket((short) -80);
                     connection.sendTCP(loginAnswerPacket);
                     return;

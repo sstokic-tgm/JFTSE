@@ -1,13 +1,10 @@
 package com.jftse.emulator.server.game.core.listener;
 
-import com.jftse.emulator.server.game.core.handler.AbstractHandler;
 import com.jftse.emulator.server.game.core.handler.relay.BasicRelayHandler;
 import com.jftse.emulator.server.game.core.manager.RelayManager;
 import com.jftse.emulator.server.game.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.game.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.ConnectionListener;
-import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

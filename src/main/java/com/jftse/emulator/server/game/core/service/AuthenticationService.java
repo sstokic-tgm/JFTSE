@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.game.core.service;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.gameserver.GameServer;
 import com.jftse.emulator.server.database.repository.account.AccountRepository;
@@ -23,6 +23,9 @@ import java.util.Optional;
 public class AuthenticationService {
     private final AccountRepository accountRepository;
     private final GameServerRepository gameServerRepository;
+
+    private final ConfigService configService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -36,7 +39,7 @@ public class AuthenticationService {
         if (optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
 
-            if (GlobalSettings.UsePasswordEncryption) {
+            if (configService.getValue("password.encryption.enabled", false)) {
                 if (passwordEncoder.matches(password, account.getPassword()))
                     return account;
                 else

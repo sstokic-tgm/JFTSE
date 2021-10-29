@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.game.core.packet;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
@@ -306,7 +307,7 @@ public final class PacketID {
 
     static {
         // create a list of all char constants of this class for method getPacketIdName()
-        if (GlobalSettings.TranslatePacketIds) {
+        if (ConfigService.getInstance().getValue("packets.id.translate.enabled", true)) {
             Field[] fields = PacketID.class.getFields();
             for (Field field : fields) {
                 if (field.getType().equals(char.class)) {

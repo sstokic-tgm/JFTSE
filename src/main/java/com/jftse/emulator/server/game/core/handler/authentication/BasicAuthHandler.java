@@ -6,9 +6,7 @@ import com.jftse.emulator.server.game.core.packet.packets.S2CWelcomePacket;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.game.core.packet.packets.authserver.*;
 import com.jftse.emulator.server.game.core.service.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Service;
 
 @Log4j2
 public class BasicAuthHandler {

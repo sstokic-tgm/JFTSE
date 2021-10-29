@@ -1,10 +1,11 @@
 package com.jftse.emulator.server.shared.module;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -25,10 +26,13 @@ public class AntiCheatHandler {
     private Map<Client, Map<String, Boolean>> clientList;
     private List<String> fileList;
 
+    @Autowired
+    private ConfigService configService;
+
     @PostConstruct
     public void init() {
         clientList = new HashMap<>();
-        if (GlobalSettings.IsAntiCheatEnabled)
+        if (configService.getValue("anticheat.enabled", false))
             fileList = getFiles();
         else
             fileList = new ArrayList<>();

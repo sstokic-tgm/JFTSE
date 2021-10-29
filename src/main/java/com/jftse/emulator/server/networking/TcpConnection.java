@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.networking;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
-import com.jftse.emulator.server.game.core.packet.PacketID;
+import com.jftse.emulator.server.game.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
@@ -144,7 +144,7 @@ public class TcpConnection {
         readBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
         SocketChannel socketChannel = this.socketChannel;
-        if (socketChannel == null)
+        if (socketChannel == null || !socketChannel.isConnected())
             throw new SocketException("Connection is closed.");
 
         int bytesRead = socketChannel.read(readBuffer);
@@ -169,7 +169,7 @@ public class TcpConnection {
         if (currentObjectLength > readBuffer.capacity())
             throw new IOException("Unable to read object larger than read buffer: " + currentObjectLength);
 
-        if (GlobalSettings.LogAllPackets)
+        if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
             log.debug("payload - RECV " + BitKit.toString(encryptedData, 0, encryptedData.length) + " bytesRead: " + bytesRead);
 
         BiPredicate<Integer, Integer> packetSizePosRangeCheck = (l, r) -> l >= r;
@@ -197,8 +197,8 @@ public class TcpConnection {
                 data = decryptBytes(encryptedData, packetSize + 8);
                 packet = new Packet(data);
 
-                if (GlobalSettings.LogAllPackets)
-                    log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
+                    log.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
                 connection.notifyReceived(packet);
 
@@ -222,8 +222,8 @@ public class TcpConnection {
             this.receiveIndicator++;
             this.receiveIndicator %= 60;
 
-            if (GlobalSettings.LogAllPackets)
-                log.info("RECV [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+            if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
+                log.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         }
         else {
             packet = null;
@@ -280,14 +280,14 @@ public class TcpConnection {
                 byte[] encryptedData;
                 createSerial(data);
                 createCheckSum(data);
-                if (packet.getPacketId() != PacketID.S2CLoginWelcomePacket) {
+                if (packet.getPacketId() != PacketOperations.S2CLoginWelcomePacket.getValueAsChar()) {
                     encryptedData = encryptBytes(data, data.length);
                     writeBuffer.put(encryptedData);
                 } else {
                     writeBuffer.put(data);
                 }
-                if (GlobalSettings.LogAllPackets)
-                    log.info("SEND [" + PacketID.getName(packet.getPacketId()) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
+                    log.info("SEND [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
             }
 
             if(!writeToSocket()) {

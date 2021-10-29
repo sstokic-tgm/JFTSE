@@ -1,7 +1,7 @@
 package com.jftse.emulator;
 
-import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.discord.DiscordWebhook;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.game.core.anticheat.AntiCheatHeartBeatNetworkListener;
 import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
 import com.jftse.emulator.server.game.core.listener.RelayServerNetworkListener;
@@ -23,6 +23,9 @@ public class StartApplication {
     @Autowired
     private AntiCheatHeartBeatNetworkListener antiCheatHeartBeatNetworkListener;
 
+    @Autowired
+    private ConfigService configService;
+
     public static void main(String[] args) {
         SpringApplication.run(StartApplication.class, args);
         log.info("Emulator successfully started!");
@@ -42,7 +45,7 @@ public class StartApplication {
 
         gameServerNetworkListener.cleanUp();
         relayServerNetworkListener.cleanUp();
-        if (GlobalSettings.IsAntiCheatEnabled) {
+        if (configService.getValue("anticheat.enabled", false)) {
             antiCheatHeartBeatNetworkListener.cleanUp();
         }
     }

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.game.core.manager;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.game.core.service.*;
 import com.jftse.emulator.server.game.core.service.messaging.*;
 import lombok.Getter;
@@ -56,6 +57,9 @@ public class ServiceManager {
 
     @Autowired
     private ProfaneWordsService profaneWordsService;
+
+    @Autowired
+    private ConfigService configService;
 
     @PostConstruct
     public void init() {

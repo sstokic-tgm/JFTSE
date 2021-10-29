@@ -320,6 +320,7 @@ public enum PacketOperations {
         C2SLoginAliveClient.handler = LoginAliveClientHandler.class;
         C2SRelayPacketToAllClients.handler = RelayPacketRequestHandler.class;
         C2SMatchplayRegisterPlayerForGameSession.handler = RegisterPlayerForSessionHandler.class;
+
         C2SUnknown0xE00E.handler = UnknownPacketHandler.class;
     }
 
@@ -358,6 +359,6 @@ public enum PacketOperations {
                 return packetOperation.getName();
             }
         }
-        return null;
+        return String.format("0x%x", value);
     }
 }

@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.shared.module;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.game.core.anticheat.AntiCheatHeartBeatNetworkListener;
 import com.jftse.emulator.server.networking.Server;
 import lombok.extern.log4j.Log4j2;
@@ -18,9 +18,12 @@ public class AntiCheatServerStart implements CommandLineRunner {
     @Autowired
     private AntiCheatHeartBeatNetworkListener antiCheatHeartBeatNetworkListener;
 
+    @Autowired
+    private ConfigService configService;
+
     @Override
     public void run(String... args) throws Exception {
-        if (GlobalSettings.IsAntiCheatEnabled) {
+        if (configService.getValue("anticheat.enabled", false)) {
             log.info("Initializing anti cheat heartbeat server...");
 
             Server antiCheatServer = new Server();

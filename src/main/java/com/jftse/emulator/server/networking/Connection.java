@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.networking;
 
-import com.jftse.emulator.common.GlobalSettings;
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
@@ -12,7 +12,6 @@ import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -35,8 +34,8 @@ public class Connection {
     private int encKey;
 
     protected Connection() {
-        this.decKey = GlobalSettings.UseNetworkEncryption ? getRandomBigInteger().intValueExact() : 0;
-        this.encKey = GlobalSettings.UseNetworkEncryption ? getRandomBigInteger().intValueExact() : 0;
+        this.decKey = ConfigService.getInstance().getValue("network.encryption.enabled", false) ? getRandomBigInteger().intValueExact() : 0;
+        this.encKey = ConfigService.getInstance().getValue("network.encryption.enabled", false) ? getRandomBigInteger().intValueExact() : 0;
     }
 
     private BigInteger getRandomBigInteger() {
