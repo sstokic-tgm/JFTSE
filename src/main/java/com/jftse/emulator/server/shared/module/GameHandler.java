@@ -1,13 +1,12 @@
 package com.jftse.emulator.server.shared.module;
 
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.game.core.matchplay.room.Room;
+import com.jftse.emulator.server.core.matchplay.room.Room;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;

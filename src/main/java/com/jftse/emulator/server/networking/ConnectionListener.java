@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.networking;
 
-import com.jftse.emulator.server.game.core.handler.AbstractHandler;
-import com.jftse.emulator.server.game.core.packet.PacketOperations;
+import com.jftse.emulator.server.core.handler.AbstractHandler;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public interface ConnectionListener {

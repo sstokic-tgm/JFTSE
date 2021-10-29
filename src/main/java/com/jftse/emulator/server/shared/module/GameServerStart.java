@@ -1,7 +1,8 @@
 package com.jftse.emulator.server.shared.module;
 
-import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
-import com.jftse.emulator.server.game.core.listener.RelayServerNetworkListener;
+import com.jftse.emulator.server.core.game.GameServerNetworkListener;
+import com.jftse.emulator.server.core.listener.RelayServerNetworkListener;
+import com.jftse.emulator.server.core.manager.ThreadManager;
 import com.jftse.emulator.server.networking.Server;
 import com.jftse.emulator.server.networking.ThreadedConnectionListener;
 import com.jftse.emulator.server.shared.module.checker.GameServerChecker;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -25,6 +25,9 @@ public class GameServerStart implements CommandLineRunner {
     private GameServerNetworkListener gameServerNetworkListener;
     @Autowired
     private RelayServerNetworkListener relayServerNetworkListener;
+
+    @Autowired
+    private ThreadManager threadManager;
 
     @Override
     public void run(String... args) throws Exception {
@@ -62,8 +65,7 @@ public class GameServerStart implements CommandLineRunner {
         log.info("Successfully initialized");
         log.info("--------------------------------------");
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-        executor.scheduleWithFixedDelay(new GameServerChecker(gameServer, relayServer, gameServerNetworkListener, relayServerNetworkListener), 1, 2, TimeUnit.MINUTES);
-        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer, relayServerNetworkListener), 1, 5, TimeUnit.MINUTES);
+        threadManager.schedule(new GameServerChecker(gameServer, relayServer, gameServerNetworkListener, relayServerNetworkListener), 1, 2, TimeUnit.MINUTES);
+        threadManager.schedule(new RelayServerChecker(relayServer, relayServerNetworkListener), 1, 5, TimeUnit.MINUTES);
     }
 }

@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.shared.module;
 
 import com.jftse.emulator.common.service.ConfigService;
-import com.jftse.emulator.server.game.core.anticheat.AntiCheatHeartBeatNetworkListener;
+import com.jftse.emulator.server.core.anticheat.AntiCheatHeartBeatNetworkListener;
 import com.jftse.emulator.server.networking.Server;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.shared.module;
 
-import com.jftse.emulator.server.game.core.listener.AuthenticationServerNetworkListener;
+import com.jftse.emulator.server.core.listener.AuthenticationServerNetworkListener;
+import com.jftse.emulator.server.core.manager.ThreadManager;
 import com.jftse.emulator.server.networking.Server;
 import com.jftse.emulator.server.shared.module.checker.AuthServerChecker;
 import lombok.extern.log4j.Log4j2;
@@ -10,8 +11,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -20,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 public class AuthenticationServerStart implements CommandLineRunner {
     @Autowired
     private AuthenticationServerNetworkListener authenticationNetworkListener;
+
+    @Autowired
+    private ThreadManager threadManager;
 
     @Override
     public void run(String... args) throws Exception {
@@ -40,7 +42,6 @@ public class AuthenticationServerStart implements CommandLineRunner {
         log.info("Successfully initialized");
         log.info("--------------------------------------");
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleWithFixedDelay(new AuthServerChecker(authenticationServer), 1, 5, TimeUnit.MINUTES);
+        threadManager.schedule(new AuthServerChecker(authenticationServer), 1, 5, TimeUnit.MINUTES);
     }
 }

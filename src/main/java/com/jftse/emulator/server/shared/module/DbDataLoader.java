@@ -18,7 +18,7 @@ import com.jftse.emulator.server.database.repository.challenge.ChallengeReposito
 import com.jftse.emulator.server.database.repository.item.*;
 import com.jftse.emulator.server.database.repository.level.LevelExpRepository;
 import com.jftse.emulator.server.database.repository.tutorial.TutorialRepository;
-import com.jftse.emulator.server.game.core.constants.GameMode;
+import com.jftse.emulator.server.core.constants.GameMode;
 import lombok.extern.log4j.Log4j2;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;

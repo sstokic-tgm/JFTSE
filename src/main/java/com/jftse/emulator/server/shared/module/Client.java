@@ -2,10 +2,10 @@ package com.jftse.emulator.server.shared.module;
 
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.game.core.matchplay.room.GameSession;
-import com.jftse.emulator.server.game.core.matchplay.room.Room;
-import com.jftse.emulator.server.game.core.singleplay.challenge.ChallengeGame;
-import com.jftse.emulator.server.game.core.singleplay.tutorial.TutorialGame;
+import com.jftse.emulator.server.core.matchplay.room.GameSession;
+import com.jftse.emulator.server.core.matchplay.room.Room;
+import com.jftse.emulator.server.core.singleplay.challenge.ChallengeGame;
+import com.jftse.emulator.server.core.singleplay.tutorial.TutorialGame;
 import com.jftse.emulator.server.networking.Connection;
 import lombok.Getter;
 import lombok.Setter;
