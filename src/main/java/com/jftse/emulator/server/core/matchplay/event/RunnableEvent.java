@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.matchplay.event;
 
+import com.jftse.emulator.server.core.manager.ThreadManager;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class RunnableEvent {
 
     public void fire() {
         fired = true;
-        runnable.run();
+        ThreadManager.getInstance().newTask(runnable);
     }
 
     public boolean shouldFire(long currentTime) {

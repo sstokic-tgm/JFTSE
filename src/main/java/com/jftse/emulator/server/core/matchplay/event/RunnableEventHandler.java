@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Scope("singleton")
 @Getter
 @Setter
 public class RunnableEventHandler {

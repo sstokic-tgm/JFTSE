@@ -144,18 +144,6 @@ public class GamePacketHandler {
         this.basicModeHandler.init(this.gameHandler);
         this.guardianModeHandler.init(this.gameHandler);
         this.battleModeHandler.init(this.gameHandler);
-        threadManager.newTask(packetEventHandler);
-        threadManager.register(() -> {
-            try {
-                List<GameSession> gameSessions = new ArrayList<>(this.gameSessionManager.getGameSessionList()); // deep copy
-                gameSessions.forEach(gameSession -> {
-                    if (gameSession == null) return;
-                    runnableEventHandler.handleQueuedRunnableEvents(gameSession);
-                });
-            } catch (Exception ex) {
-                log.error(String.format("Exception in runnable thread: %s", ex.getMessage()));
-            }
-        }, 0, 5, TimeUnit.MILLISECONDS);
     }
 
     public GameHandler getGameHandler() {

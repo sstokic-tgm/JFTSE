@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.core.matchplay.event;
 
 import com.jftse.emulator.server.core.constants.PacketEventType;
-import com.jftse.emulator.server.core.thread.AbstractTask;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Service
 @Getter
 @Setter
-public class PacketEventHandler extends AbstractTask {
+public class PacketEventHandler {
     private CopyOnWriteArrayList<PacketEvent> server_packetEventList;
     private CopyOnWriteArrayList<PacketEvent> client_packetEventList;
 
@@ -107,17 +106,5 @@ public class PacketEventHandler extends AbstractTask {
         packetEvent.setEventFireTime(eventFireTime);
 
         return packetEvent;
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            handleQueuedPackets();
-
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-            }
-        }
     }
 }
