@@ -35,7 +35,11 @@ public class ServiceManager {
     @Autowired
     private PocketService pocketService;
     @Autowired
+    private PlayerPocketService playerPocketService;
+    @Autowired
     private PlayerStatisticService playerStatisticService;
+    @Autowired
+    private ProductService productService;
     @Autowired
     private HomeService homeService;
     @Autowired
@@ -54,6 +58,8 @@ public class ServiceManager {
     private GuildService guildService;
     @Autowired
     private ItemCharService itemCharService;
+    @Autowired
+    private SocialService socialService;
 
     @Autowired
     private ProfaneWordsService profaneWordsService;
