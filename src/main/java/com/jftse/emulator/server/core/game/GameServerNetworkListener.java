@@ -1,6 +1,9 @@
 package com.jftse.emulator.server.core.game;
 
 import com.jftse.emulator.server.core.game.handler.GamePacketHandler;
+import com.jftse.emulator.server.core.handler.DisconnectPacketHandler;
+import com.jftse.emulator.server.core.handler.game.BasicGameHandler;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packet.PacketID;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.ConnectionListener;
@@ -17,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class GameServerNetworkListener implements ConnectionListener {
     @Autowired
     private GamePacketHandler gamePacketHandler;
+    @Autowired
+    private GameManager gameManager;
 
     public void cleanUp() {
         gamePacketHandler.handleCleanUp();
@@ -30,9 +35,9 @@ public class GameServerNetworkListener implements ConnectionListener {
         client.setConnection(connection);
 
         connection.setClient(client);
-        gamePacketHandler.getGameHandler().addClient(client);
+        gameManager.addClient(client);
 
-        gamePacketHandler.sendWelcomePacket(connection);
+        new BasicGameHandler().sendWelcomePacket(connection);
     }
 
     public void disconnected(Connection connection) {
@@ -41,79 +46,6 @@ public class GameServerNetworkListener implements ConnectionListener {
 
     public void received(Connection connection, Packet packet) {
         switch (packet.getPacketId()) {
-            case PacketID.C2SDisconnectRequest:
-                gamePacketHandler.handleDisconnectPacket(connection, packet);
-                break;
-
-            case PacketID.C2SGameLoginData:
-                gamePacketHandler.handleGameServerLoginPacket(connection, packet);
-                break;
-
-            case PacketID.C2SServerTimeRequest:
-                gamePacketHandler.handleServerTimeRequestPacket(connection, packet);
-                break;
-
-            case PacketID.C2SGameReceiveData:
-                gamePacketHandler.handleGameServerDataRequestPacket(connection, packet);
-                break;
-
-            case PacketID.C2SHomeItemsLoadReq:
-                gamePacketHandler.handleHomeItemsLoadRequestPacket(connection, packet);
-                break;
-
-            case PacketID.C2SHomeItemsPlaceReq:
-                gamePacketHandler.handleHomeItemsPlaceRequestPacket(connection, packet);
-                break;
-
-            case PacketID.C2SHomeItemsClearReq:
-                gamePacketHandler.handleHomeItemClearRequestPacket(connection, packet);
-                break;
-
-            case PacketID.C2SInventorySellReq:
-            case PacketID.C2SInventorySellItemCheckReq:
-                gamePacketHandler.handleInventoryItemSellPackets(connection, packet);
-                break;
-
-            case PacketID.C2SUnknownInventoryOpenRequest:
-                gamePacketHandler.handleUnknownInventoryOpenPacket(connection, packet);
-                break;
-
-            case PacketID.C2SInventoryWearClothRequest:
-                gamePacketHandler.handleInventoryWearClothPacket(connection, packet);
-                break;
-
-            case PacketID.C2SInventoryWearToolRequest:
-                gamePacketHandler.handleInventoryWearToolPacket(connection, packet);
-                break;
-
-            case PacketID.C2SInventoryWearQuickRequest:
-                gamePacketHandler.handleInventoryWearQuickPacket(connection, packet);
-                break;
-
-            case PacketID.C2SInventoryWearSpecialRequest:
-                gamePacketHandler.handleInventoryWearSpecialPacket(connection, packet);
-                break;
-
-            case PacketID.C2SInventoryWearCardRequest:
-                gamePacketHandler.handleInventoryWearCardPacket(connection, packet);
-                break;
-
-            case PacketID.C2SInventoryItemTimeExpiredRequest:
-                gamePacketHandler.handleInventoryItemTimeExpiredPacket(connection, packet);
-                break;
-
-            case PacketID.C2SShopMoneyReq:
-                gamePacketHandler.handleShopMoneyRequestPacket(connection, packet);
-                break;
-
-            case PacketID.C2SShopBuyReq:
-                gamePacketHandler.handleShopBuyRequestPacket(connection, packet);
-                break;
-
-            case PacketID.C2SShopRequestDataPrepare:
-            case PacketID.C2SShopRequestData:
-                gamePacketHandler.handleShopRequestDataPackets(connection, packet);
-                break;
 
             case PacketID.C2SPlayerStatusPointChange:
                 gamePacketHandler.handlePlayerStatusPointChangePacket(connection, packet);

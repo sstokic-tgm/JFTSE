@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.packet;
 
 import com.jftse.emulator.server.core.handler.*;
 import com.jftse.emulator.server.core.handler.authentication.*;
+import com.jftse.emulator.server.core.handler.game.*;
 import com.jftse.emulator.server.core.handler.relay.*;
 
 public enum PacketOperations {
@@ -320,6 +321,25 @@ public enum PacketOperations {
         C2SLoginAliveClient.handler = LoginAliveClientHandler.class;
         C2SRelayPacketToAllClients.handler = RelayPacketRequestHandler.class;
         C2SMatchplayRegisterPlayerForGameSession.handler = RegisterPlayerForSessionHandler.class;
+        C2SGameLoginData.handler = GameServerLoginPacketHandler.class;
+        C2SServerTimeRequest.handler = ServerTimeRequestPacketHandler.class;
+        C2SGameReceiveData.handler = GameServerDataRequestPacketHandler.class;
+        C2SHomeItemsLoadReq.handler = HomeItemsLoadRequestPacketHandler.class;
+        C2SHomeItemsPlaceReq.handler = HomeItemsPlaceRequestPacketHandler.class;
+        C2SHomeItemsClearReq.handler = HomeItemClearRequestPacketHandler.class;
+        C2SInventorySellReq.handler = InventorySellRequestHandler.class;
+        C2SInventorySellItemCheckReq.handler = InventorySellItemCheckRequestHandler.class;
+        C2SUnknownInventoryOpenRequest.handler = UnknownInventoryOpenPacketHandler.class;
+        C2SInventoryWearClothRequest.handler = InventoryWearClothPacketHandler.class;
+        C2SInventoryWearToolRequest.handler = InventoryWearToolPacketHandler.class;
+        C2SInventoryWearQuickRequest.handler = InventoryWearQuickPacketHandler.class;
+        C2SInventoryWearSpecialRequest.handler = InventoryWearSpecialPacketHandler.class;
+        C2SInventoryWearCardRequest.handler = InventoryWearCardPacketHandler.class;
+        C2SInventoryItemTimeExpiredRequest.handler = InventoryItemTimeExpiredPacketHandler.class;
+        C2SShopMoneyReq.handler = ShopMoneyRequestPacketHandler.class;
+        C2SShopBuyReq.handler = ShopBuyRequestPacketHandler.class;
+        C2SShopRequestDataPrepare.handler = ShopRequestDataPreparePacketHandler.class;
+        C2SShopRequestData.handler = ShopRequestDataPacketHandler.class;
 
         C2SUnknown0xE00E.handler = UnknownPacketHandler.class;
     }
