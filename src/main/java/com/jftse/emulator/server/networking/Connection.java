@@ -103,7 +103,7 @@ public class Connection {
         boolean wasConnected = isConnected;
         isConnected = false;
         tcpConnection.close();
-        if(wasConnected)
+        if (wasConnected)
             notifyDisconnected();
 
         setConnected(false);

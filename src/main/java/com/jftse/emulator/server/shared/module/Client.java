@@ -21,12 +21,12 @@ public class Client {
 
     private ChallengeGame activeChallengeGame;
     private TutorialGame activeTutorialGame;
+    private Room activeRoom;
+    private GameSession activeGameSession;
 
     private boolean inLobby;
     private boolean isSpectator;
 
-    private Room activeRoom;
-    private GameSession activeGameSession;
     private int lobbyGameModeTabFilter;
     private byte lobbyCurrentPlayerListPage = 1;
     private short lobbyCurrentRoomListPage = -1;
