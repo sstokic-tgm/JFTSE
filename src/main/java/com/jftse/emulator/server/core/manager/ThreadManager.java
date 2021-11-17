@@ -75,7 +75,14 @@ public class ThreadManager {
 
     @PreDestroy
     public void onExit() {
-        tpe.shutdownNow();
-        stpe.shutdownNow();
+        tpe.shutdown();
+        stpe.shutdown();
+
+        try {
+            tpe.awaitTermination(1, TimeUnit.MINUTES);
+            stpe.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException ie) {
+            log.error(ie.getMessage(), ie);
+        }
     }
 }
