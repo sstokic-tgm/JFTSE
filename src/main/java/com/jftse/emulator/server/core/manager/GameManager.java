@@ -5,6 +5,7 @@ import com.jftse.emulator.server.core.matchplay.event.PacketEventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +18,8 @@ import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 @Service
 @Getter
@@ -75,6 +76,25 @@ public class GameManager {
         rooms.remove(room);
     }
 
+    public List<Player> getPlayersInLobby() {
+        return clients.stream()
+                .filter(Client::isInLobby)
+                .map(Client::getActivePlayer)
+                .collect(Collectors.toList());
+    }
+
+    public List<Client> getClientsInLobby() {
+        return clients.stream()
+                .filter(Client::isInLobby)
+                .collect(Collectors.toList());
+    }
+
+    public List<Client> getClientsInRoom(short roomId) {
+        return clients.stream()
+                .filter(c -> c.getActiveRoom() != null && c.getActiveRoom().getRoomId() == roomId)
+                .collect(Collectors.toList());
+    }
+
     private void setupGlobalTasks() {
         threadManager.newTask(() -> {
             log.info("Queued packet handling started");
@@ -113,13 +133,5 @@ public class GameManager {
     @PreDestroy
     public void onExit() {
         running.compareAndSet(true, false);
-        try {
-            threadManager.getTpe().awaitTermination(50, TimeUnit.MILLISECONDS);
-            threadManager.getStpe().awaitTermination(50, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ie) {
-            log.error(ie.getMessage(), ie);
-        }
-        threadManager.getTpe().shutdown();
-        threadManager.getStpe().shutdown();
     }
 }
