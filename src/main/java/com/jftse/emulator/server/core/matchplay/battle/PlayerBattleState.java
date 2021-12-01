@@ -20,6 +20,7 @@ public class PlayerBattleState {
     private AtomicBoolean dead;
     private ConcurrentHashMap<Long, Long> lastQS;
     private ConcurrentHashMap<Long, Integer> lastQSCounter;
+    private ConcurrentHashMap<Long, Long> lastSkillHitsTarget;
 
     public PlayerBattleState(short position, short hp, int str, int sta, int dex, int will) {
         this.position = new AtomicInteger(position);
@@ -32,5 +33,6 @@ public class PlayerBattleState {
         this.dead = new AtomicBoolean(false);
         lastQS = new ConcurrentHashMap<>();
         lastQSCounter = new ConcurrentHashMap<>();
+        lastSkillHitsTarget = new ConcurrentHashMap<>(4);
     }
 }
