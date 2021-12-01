@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.core.packet.packets.lobby.room;
 
 import com.jftse.emulator.server.core.matchplay.room.Room;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CRoomInformationPacket extends Packet {
     public S2CRoomInformationPacket(Room room) {
-        super(PacketID.S2CRoomInformation);
+        super(PacketOperations.S2CRoomInformation.getValueAsChar());
 
         this.write(room.getRoomId());
         this.write(room.getRoomName());

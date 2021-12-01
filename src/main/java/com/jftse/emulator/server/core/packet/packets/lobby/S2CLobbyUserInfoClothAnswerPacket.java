@@ -2,12 +2,12 @@ package com.jftse.emulator.server.core.packet.packets.lobby;
 
 import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CLobbyUserInfoClothAnswerPacket extends Packet {
     public S2CLobbyUserInfoClothAnswerPacket(char result, Player player) {
-        super(PacketID.S2CLobbyUserInfoClothAnswer);
+        super(PacketOperations.S2CLobbyUserInfoClothAnswer.getValueAsChar());
 
         this.write(result);
         if (player != null) {

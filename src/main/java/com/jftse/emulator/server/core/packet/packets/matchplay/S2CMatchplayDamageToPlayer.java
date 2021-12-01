@@ -1,11 +1,11 @@
 package com.jftse.emulator.server.core.packet.packets.matchplay;
 
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CMatchplayDamageToPlayer extends Packet {
     public S2CMatchplayDamageToPlayer() {
-        super(PacketID.S2CMatchplayDamageToPlayer);
+        super(PacketOperations.S2CMatchplayDamageToPlayer.getValueAsChar());
 
         this.write((short) 0); //0 = Guard, 4 = Flame (only once)
         this.write((short) 0); //Damage

@@ -11,7 +11,7 @@ import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.core.service.GuildMemberService;
 import com.jftse.emulator.server.core.service.GuildService;
 import com.jftse.emulator.server.core.service.PlayerService;
-import com.jftse.emulator.server.core.service.messaging.*;
+import com.jftse.emulator.server.core.service.messenger.*;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class PlayerDeletePacketHandler extends AbstractHandler {

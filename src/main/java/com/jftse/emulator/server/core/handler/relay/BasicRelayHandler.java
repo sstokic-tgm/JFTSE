@@ -4,8 +4,8 @@ import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.manager.RelayManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
-import com.jftse.emulator.server.core.matchplay.basic.MatchplayBattleGame;
-import com.jftse.emulator.server.core.matchplay.basic.MatchplayGuardianGame;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
@@ -36,7 +36,7 @@ public class BasicRelayHandler {
         if (connection.getClient() == null)
             return;
 
-        boolean notifyClients = !connection.getClient().isSpectator();
+        boolean notifyClients = !connection.getClient().getIsSpectator().get();
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null && notifyClients) {
             List<Client> clientsInGameSession = new ArrayList<>(gameSession.getClients());
@@ -55,7 +55,6 @@ public class BasicRelayHandler {
         }
         RelayManager.getInstance().removeClient(connection.getClient());
         connection.setClient(null);
-        connection.close();
     }
 
     public void handleTimeout(Connection connection) {
@@ -95,7 +94,7 @@ public class BasicRelayHandler {
             return;
         }
 
-        if (room.getStatus() == RoomStatus.Running && client.isSpectator()) {
+        if (room.getStatus() == RoomStatus.Running && client.getIsSpectator().get()) {
             return;
         }
 
@@ -126,12 +125,12 @@ public class BasicRelayHandler {
         if (roomPlayer == null) return false;
 
         PlayerBattleState playerBattleState = game.getPlayerBattleStates().stream()
-                .filter(x -> x.getPosition() == roomPlayer.getPosition())
+                .filter(x -> x.getPosition().get() == roomPlayer.getPosition())
                 .findFirst()
                 .orElse(null);
         if (playerBattleState == null) return false;
 
-        if (playerBattleState.isDead()) {
+        if (playerBattleState.getDead().get()) {
             connection.getTcpConnection().setLastReadTime(System.currentTimeMillis());
             return true;
         }

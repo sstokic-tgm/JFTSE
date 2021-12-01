@@ -1,14 +1,14 @@
 package com.jftse.emulator.server.core.packet.packets.home;
 
 import com.jftse.emulator.server.database.model.home.HomeInventory;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CHomeItemsLoadAnswerPacket extends Packet {
     public S2CHomeItemsLoadAnswerPacket(List<HomeInventory> homeInventoryList) {
-        super(PacketID.S2CHomeItemsLoadAnswer);
+        super(PacketOperations.S2CHomeItemsLoadAnswer.getValueAsChar());
 
         this.write((char) homeInventoryList.size());
         

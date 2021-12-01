@@ -22,8 +22,11 @@ public class RelayPacketRequestHandler extends AbstractHandler {
         if (connection.getClient() != null) {
             GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
-                ConcurrentLinkedDeque<Client> clientList = RelayManager.getInstance().getClientsInGameSession(gameSession.getSessionId());
-                for (Client client : clientList) {
+                ConcurrentLinkedDeque<Client> clientList = new ConcurrentLinkedDeque<>(gameSession.getClientsInRelay());
+                int clientsSize = clientList.size();
+                for (int i = 0; i < clientsSize; i++) {
+                    Client client = clientList.poll();
+
                     if (client.getConnection() != null && client.getConnection().isConnected()) {
                         client.getConnection().sendTCP(relayPacket);
                     }

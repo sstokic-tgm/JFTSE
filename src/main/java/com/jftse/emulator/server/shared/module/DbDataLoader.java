@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.shared.module;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.server.database.model.battle.BossGuardian;
@@ -73,6 +74,9 @@ public class DbDataLoader implements CommandLineRunner {
     private BossGuardianRepository bossGuardianRepository;
     @Autowired
     private ItemCharRepository itemCharRepository;
+
+    @Autowired
+    private ConfigService configService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -420,7 +424,7 @@ public class DbDataLoader implements CommandLineRunner {
 
             for (int i = 0; i < expList.size(); i++) {
 
-                if (i == 60)
+                if (i == configService.getValue("player.level.max", 60))
                     break;
 
                 Node exp = expList.get(i);

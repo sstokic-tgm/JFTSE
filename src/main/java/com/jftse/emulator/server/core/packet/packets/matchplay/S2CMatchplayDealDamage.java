@@ -1,11 +1,11 @@
 package com.jftse.emulator.server.core.packet.packets.matchplay;
 
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CMatchplayDealDamage extends Packet {
     public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, short targeting, byte skillAnimation, int xKnockbackPosition, int yKnockbackPosition) {
-        super(PacketID.S2CMatchplayDamageToPlayer);
+        super(PacketOperations.S2CMatchplayDamageToPlayer.getValueAsChar());
 
         this.write(entityPosition);
         this.write(entityHpToSet);

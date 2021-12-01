@@ -2,7 +2,9 @@ package com.jftse.emulator.server.core.listener;
 
 import com.jftse.emulator.server.core.handler.relay.BasicRelayHandler;
 import com.jftse.emulator.server.core.manager.RelayManager;
+import com.jftse.emulator.server.core.manager.ServerManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
+import com.jftse.emulator.server.core.packet.packets.S2CServerNoticePacket;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.ConnectionListener;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +21,9 @@ public class RelayServerNetworkListener implements ConnectionListener {
     @Autowired
     private GameSessionManager gameSessionManager;
 
+    @Autowired
+    private ServerManager serverManager;
+
     public void cleanUp() {
         relayManager.getClientList().clear();
         gameSessionManager.getGameSessionList().clear();
@@ -29,6 +34,11 @@ public class RelayServerNetworkListener implements ConnectionListener {
         connection.getTcpConnection().setTimeoutMillis((int) timeout);
 
         new BasicRelayHandler().sendWelcomePacket(connection);
+
+        if (serverManager.getServerNoticeIsSet().get()) {
+            S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(serverManager.getServerNoticeMessage());
+            connection.sendTCP(serverNoticePacket);
+        }
     }
 
     public void disconnected(Connection connection) {

@@ -2,14 +2,14 @@ package com.jftse.emulator.server.core.packet.packets.guild;
 
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CGuildListAnswerPacket extends Packet {
     public S2CGuildListAnswerPacket(List<Guild> guildList) {
-        super(PacketID.S2CGuildListAnswer);
+        super(PacketOperations.S2CGuildListAnswer.getValueAsChar());
 
         this.write((byte)guildList.size());
         for (int i = 0; i < guildList.size(); i++)
@@ -37,7 +37,7 @@ public class S2CGuildListAnswerPacket extends Packet {
             this.write(guild.getLeagueRecordLoose());
             this.write(guild.getIntroduction());
             this.write(guild.getCreated());
-            this.write(guild.isCastleOwner());
+            this.write(guild.getCastleOwner());
             this.write((byte)guild.getAllowedCharacterType().length);
             for (byte allowedCharacter : guild.getAllowedCharacterType())
                 this.write(allowedCharacter);

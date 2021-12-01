@@ -2,13 +2,13 @@ package com.jftse.emulator.server.core.packet.packets.matchplay;
 
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
     public S2CGameEndLevelUpPlayerStatsPacket(short playerPosition, Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketID.S2CGameEndLevelUpPlayerStats);
+        super(PacketOperations.S2CGameEndLevelUpPlayerStats.getValueAsChar());
 
         this.write(playerPosition); // not sure if it's the pos
         this.write(player.getLevel());

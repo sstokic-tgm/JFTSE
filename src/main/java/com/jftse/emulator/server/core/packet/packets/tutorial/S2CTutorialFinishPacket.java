@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.packet.packets.tutorial;
 
 import com.jftse.emulator.server.core.item.EItemCategory;
 import com.jftse.emulator.server.core.item.EItemUseType;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.Date;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class S2CTutorialFinishPacket extends Packet {
     public S2CTutorialFinishPacket(boolean win, byte newLevel, int exp, int gold, int secondsNeeded, List<Map<String, Object>> rewardItemList) {
-        super(PacketID.S2CTutorialEnd);
+        super(PacketOperations.S2CTutorialEnd.getValueAsChar());
 
         this.write(win, newLevel, exp, gold, secondsNeeded);
 

@@ -255,7 +255,7 @@ public class Server implements Runnable {
         shutdown = false;
         while(!shutdown) {
             try {
-                update(150);
+                update(100);
             } catch (IOException ioe) {
                 log.error("Thread exception " + ioe.getMessage(), ioe);
                 close();
@@ -322,7 +322,7 @@ public class Server implements Runnable {
     }
 
     public void sendToAllTcp(Packet packet) {
-        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
+        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext(); ) {
             Connection connection = it.next();
             connection.sendTCP(packet);
         }

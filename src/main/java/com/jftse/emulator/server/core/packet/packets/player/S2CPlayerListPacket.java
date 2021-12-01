@@ -3,14 +3,14 @@ package com.jftse.emulator.server.core.packet.packets.player;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CPlayerListPacket extends Packet {
     public S2CPlayerListPacket(Account account, List<Player> playerList) {
-        super(PacketID.S2CPlayerList);
+        super(PacketOperations.S2CPlayerList.getValueAsChar());
 
         this.write(0);
         this.write(0);

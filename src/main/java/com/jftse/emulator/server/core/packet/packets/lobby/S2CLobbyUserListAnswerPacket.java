@@ -1,14 +1,14 @@
 package com.jftse.emulator.server.core.packet.packets.lobby;
 
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CLobbyUserListAnswerPacket extends Packet {
     public S2CLobbyUserListAnswerPacket(List<Player> playerList) {
-        super(PacketID.S2CLobbyUserListAnswer);
+        super(PacketOperations.S2CLobbyUserListAnswer.getValueAsChar());
 
         this.write((byte) playerList.size());
 

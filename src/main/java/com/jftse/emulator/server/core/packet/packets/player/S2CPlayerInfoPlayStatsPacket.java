@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.core.packet.packets.player;
 
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CPlayerInfoPlayStatsPacket extends Packet {
     public S2CPlayerInfoPlayStatsPacket(PlayerStatistic playerStatistic) {
-        super(PacketID.S2CPlayerInfoPlayStatsData);
+        super(PacketOperations.S2CPlayerInfoPlayStatsData.getValueAsChar());
 
         this.write(playerStatistic.getBasicRecordWin());
         this.write(playerStatistic.getBasicRecordLoss());

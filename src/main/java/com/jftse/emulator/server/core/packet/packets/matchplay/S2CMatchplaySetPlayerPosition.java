@@ -1,14 +1,14 @@
 package com.jftse.emulator.server.core.packet.packets.matchplay;
 
 import com.jftse.emulator.server.core.matchplay.room.PlayerPositionInfo;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CMatchplaySetPlayerPosition extends Packet {
     public S2CMatchplaySetPlayerPosition(List<PlayerPositionInfo> positionInfo) {
-        super(PacketID.S2CMatchplaySetPlayerPosition);
+        super(PacketOperations.S2CMatchplaySetPlayerPosition.getValueAsChar());
 
         this.write((char) positionInfo.size());
         for (PlayerPositionInfo playerPositionInfo : positionInfo) {

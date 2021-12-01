@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.service.*;
-import com.jftse.emulator.server.core.service.messaging.*;
+import com.jftse.emulator.server.core.service.messenger.*;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +60,32 @@ public class ServiceManager {
     private ItemCharService itemCharService;
     @Autowired
     private SocialService socialService;
+    @Autowired
+    private ChallengeService challengeService;
+    @Autowired
+    private TutorialService tutorialService;
+    @Autowired
+    private LotteryService lotteryService;
+    @Autowired
+    private LevelService levelService;
+    @Autowired
+    private GuardianService guardianService;
+    @Autowired
+    private GuardianStageService guardianStageService;
+    @Autowired
+    private BossGuardianService bossGuardianService;
+    @Autowired
+    private GuardianSkillsService guardianSkillsService;
+    @Autowired
+    private SkillService skillService;
+    @Autowired
+    private WillDamageService willDamageService;
 
     @Autowired
     private ProfaneWordsService profaneWordsService;
+
+    @Autowired
+    private ModuleService moduleService;
 
     @Autowired
     private ConfigService configService;

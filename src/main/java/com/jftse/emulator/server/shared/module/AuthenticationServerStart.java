@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.shared.module;
 
 import com.jftse.emulator.server.core.listener.AuthenticationServerNetworkListener;
+import com.jftse.emulator.server.core.manager.ServerManager;
 import com.jftse.emulator.server.core.manager.ThreadManager;
 import com.jftse.emulator.server.networking.Server;
 import com.jftse.emulator.server.shared.module.checker.AuthServerChecker;
@@ -20,6 +21,8 @@ public class AuthenticationServerStart implements CommandLineRunner {
     @Autowired
     private AuthenticationServerNetworkListener authenticationNetworkListener;
 
+    @Autowired
+    private ServerManager serverManager;
     @Autowired
     private ThreadManager threadManager;
 
@@ -41,6 +44,8 @@ public class AuthenticationServerStart implements CommandLineRunner {
 
         log.info("Successfully initialized");
         log.info("--------------------------------------");
+
+        serverManager.add(authenticationServer);
 
         threadManager.schedule(new AuthServerChecker(authenticationServer), 1, 5, TimeUnit.MINUTES);
     }

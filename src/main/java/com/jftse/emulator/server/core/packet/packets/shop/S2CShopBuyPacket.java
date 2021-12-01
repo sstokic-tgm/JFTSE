@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.packet.packets.shop;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.core.item.EItemCategory;
 import com.jftse.emulator.server.core.item.EItemUseType;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class S2CShopBuyPacket extends Packet {
     public final static short INVENTORY_FULL = -98;
 
     public S2CShopBuyPacket(short result, List<PlayerPocket> playerPocketList) {
-        super(PacketID.S2CShopBuyAnswer);
+        super(PacketOperations.S2CShopBuyAnswer.getValueAsChar());
 
         this.write(result);
 

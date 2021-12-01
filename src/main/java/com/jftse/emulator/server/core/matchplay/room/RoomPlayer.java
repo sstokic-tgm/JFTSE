@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.matchplay.room;
 
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.database.model.messaging.Friend;
+import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;

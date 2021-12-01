@@ -56,11 +56,11 @@ public class Connection {
         return id;
     }
 
-    public boolean isConnected() {
+    public synchronized boolean isConnected() {
         return isConnected;
     }
 
-    public int sendTCP(Packet... packets) {
+    public synchronized int sendTCP(Packet... packets) {
         if(packets == null || packets.length == 0)
             throw new IllegalArgumentException("Packet cannot be null.");
 
@@ -81,7 +81,7 @@ public class Connection {
         }
     }
 
-    public long getLatency() {
+    public synchronized long getLatency() {
         return Math.abs(tcpConnection.getLastReadTime() - tcpConnection.getLastWriteTime());
     }
 
@@ -99,7 +99,7 @@ public class Connection {
         connectionListeners.remove(connectionListener);
     }
 
-    public void close() {
+    public synchronized void close() {
         boolean wasConnected = isConnected;
         isConnected = false;
         tcpConnection.close();
@@ -122,9 +122,9 @@ public class Connection {
     }
 
     public void notifyIdle() {
-        for(ConnectionListener cl : connectionListeners) {
+        for (ConnectionListener cl : connectionListeners) {
             cl.idle(this);
-            if(!isIdle())
+            if (!isIdle())
                 break;
         }
     }

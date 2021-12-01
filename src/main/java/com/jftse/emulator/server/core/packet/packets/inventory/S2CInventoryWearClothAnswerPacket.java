@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.packet.packets.inventory;
 
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.packet.Packet;
 
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class S2CInventoryWearClothAnswerPacket extends Packet {
     public S2CInventoryWearClothAnswerPacket(char status, C2SInventoryWearClothReqPacket inventoryWearClothReqPacket, Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketID.S2CInventoryWearClothAnswer);
+        super(PacketOperations.S2CInventoryWearClothAnswer.getValueAsChar());
 
         this.write(status); // status
 
@@ -72,7 +72,7 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
     }
 
     public S2CInventoryWearClothAnswerPacket(char status, Map<String, Integer> inventoryEquippedCloths, Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketID.S2CInventoryWearClothAnswer);
+        super(PacketOperations.S2CInventoryWearClothAnswer.getValueAsChar());
 
         this.write(status); // status
 

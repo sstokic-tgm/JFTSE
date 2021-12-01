@@ -2,14 +2,14 @@ package com.jftse.emulator.server.core.packet.packets.guild;
 
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CGuildSearchAnswerPacket extends Packet {
     public S2CGuildSearchAnswerPacket(List<Guild> guildList) {
-        super(PacketID.S2CGuildSearchAnswer);
+        super(PacketOperations.S2CGuildSearchAnswer.getValueAsChar());
 
         this.write((byte)guildList.size());
         for (Guild guild : guildList) {

@@ -1,8 +1,24 @@
 package com.jftse.emulator.server.core.packet;
 
 import com.jftse.emulator.server.core.handler.*;
+import com.jftse.emulator.server.core.handler.anticheat.*;
 import com.jftse.emulator.server.core.handler.authentication.*;
 import com.jftse.emulator.server.core.handler.game.*;
+import com.jftse.emulator.server.core.handler.game.challenge.*;
+import com.jftse.emulator.server.core.handler.game.chat.*;
+import com.jftse.emulator.server.core.handler.game.emblem.*;
+import com.jftse.emulator.server.core.handler.game.gacha.*;
+import com.jftse.emulator.server.core.handler.game.guild.*;
+import com.jftse.emulator.server.core.handler.game.home.*;
+import com.jftse.emulator.server.core.handler.game.inventory.*;
+import com.jftse.emulator.server.core.handler.game.lobby.*;
+import com.jftse.emulator.server.core.handler.game.lobby.room.*;
+import com.jftse.emulator.server.core.handler.game.matchplay.*;
+import com.jftse.emulator.server.core.handler.game.messenger.*;
+import com.jftse.emulator.server.core.handler.game.player.*;
+import com.jftse.emulator.server.core.handler.game.ranking.*;
+import com.jftse.emulator.server.core.handler.game.shop.*;
+import com.jftse.emulator.server.core.handler.game.tutorial.*;
 import com.jftse.emulator.server.core.handler.relay.*;
 
 public enum PacketOperations {
@@ -10,6 +26,7 @@ public enum PacketOperations {
     C2SLoginRequest(0x0FA1),
     S2CLoginAnswerPacket(0x0FA2),
     C2SHeartbeat(0x0FA3),
+    C2SServerNotice(0x0FA5),
     S2CServerNotice(0x0FA6),
     C2SDisconnectRequest(0x0FA7),
     S2CDisconnectAnswer(0xFA8),
@@ -302,8 +319,12 @@ public enum PacketOperations {
     S2CRankingDataAnswer(0x2070),
 
     C2SUnknown0xE00E(0xE00E),
+    C2SUnknown0x1071(0x1071),
 
-    D2SDevPacket(0x555);
+    D2SDevPacket(0x555),
+
+    C2SAntiCheatClientRegister(0x9791),
+    C2SAntiCheatClientModuleReq(0x9795);
 
     private final int value;
     private Class<? extends AbstractHandler> handler;
@@ -319,6 +340,7 @@ public enum PacketOperations {
         C2SAuthLoginData.handler = AuthLoginDataPacketHandler.class;
         C2SHeartbeat.handler = HeartBeatPacketHandler.class;
         C2SLoginAliveClient.handler = LoginAliveClientHandler.class;
+        C2SServerNotice.handler = ServerNoticeHandler.class;
         C2SRelayPacketToAllClients.handler = RelayPacketRequestHandler.class;
         C2SMatchplayRegisterPlayerForGameSession.handler = RegisterPlayerForSessionHandler.class;
         C2SGameLoginData.handler = GameServerLoginPacketHandler.class;
@@ -340,8 +362,99 @@ public enum PacketOperations {
         C2SShopBuyReq.handler = ShopBuyRequestPacketHandler.class;
         C2SShopRequestDataPrepare.handler = ShopRequestDataPreparePacketHandler.class;
         C2SShopRequestData.handler = ShopRequestDataPacketHandler.class;
+        C2SPlayerStatusPointChange.handler = PlayerStatusPointChangePacketHandler.class;
+        C2SChallengeProgressReq.handler = ChallengeProgressRequestPacketHandler.class;
+        C2STutorialProgressReq.handler = TutorialProgressRequestPacketHandler.class;
+        C2SChallengeBeginReq.handler = ChallengeBeginRequestPacketHandler.class;
+        C2SChallengeHp.handler = ChallengeHpPacketHandler.class;
+        C2SChallengePoint.handler = ChallengePointPacketHandler.class;
+        C2SChallengeDamage.handler = ChallengeDamagePacketHandler.class;
+        C2SChallengeSet.handler = ChallengeSetPacketHandler.class;
+        C2STutorialBegin.handler = TutorialBeginPacketHandler.class;
+        C2STutorialEnd.handler = TutorialEndPacketHandler.class;
+        C2SQuickSlotUseRequest.handler = QuickSlotUseRequestHandler.class;
+        C2SLobbyUserListRequest.handler = LobbyUserListReqPacketHandler.class;
+        C2SLobbyUserInfoRequest.handler = LobbyUserInfoReqPacketHandler.class;
+        C2SLobbyUserInfoClothRequest.handler = LobbyUserInfoClothReqPacketHandler.class;
+        C2SChatLobbyReq.handler = ChatMessageLobbyPacketHandler.class;
+        C2SChatRoomReq.handler = ChatMessageRoomPacketHandler.class;
+        C2SWhisperReq.handler = ChatMessageWhisperPacketHandler.class;
+        C2SLobbyJoin.handler = LobbyJoinPacketHandler.class;
+        C2SLobbyLeave.handler = LobbyLeavePacketHandler.class;
+        C2SEmblemListRequest.handler = EmblemListRequestPacketHandler.class;
+        C2SOpenGachaReq.handler = OpenGachaRequestPacketHandler.class;
+        C2SRoomCreate.handler = RoomCreateRequestPacketHandler.class;
+        C2SRoomNameChange.handler = RoomNameChangePacketHandler.class;
+        C2SRoomGameModeChange.handler = GameModeChangePacketHandler.class;
+        C2SRoomIsPrivateChange.handler = RoomIsPrivateChangePacketHandler.class;
+        C2SRoomLevelRangeChange.handler = RoomLevelRangeChangePacketHandler.class;
+        C2SRoomSkillFreeChange.handler = RoomSkillFreeChangePacketHandler.class;
+        C2SRoomAllowBattlemonChange.handler = RoomAllowBattlemonChangePacketHandler.class;
+        C2SRoomQuickSlotChange.handler = RoomQuickSlotChangePacketHandler.class;
+        C2SRoomJoin.handler = RoomJoinRequestPacketHandler.class;
+        C2SRoomLeave.handler = RoomLeaveRequestPacketHandler.class;
+        C2SRoomReadyChange.handler = RoomReadyChangeRequestPacketHandler.class;
+        C2SRoomMapChange.handler = RoomMapChangeRequestPacketHandler.class;
+        C2SRoomPositionChange.handler = RoomPositionChangeRequestPacketHandler.class;
+        C2SRoomKickPlayer.handler = RoomKickPlayerRequestPacketHandler.class;
+        C2SRoomSlotCloseReq.handler = RoomSlotCloseRequestPacketHandler.class;
+        C2SRoomFittingReq.handler = RoomFittingRequestPacketHandler.class;
+        C2SRoomCreateQuick.handler = RoomCreateQuickRequestPacketHandler.class;
+        C2SRoomListReq.handler = RoomListRequestPacketHandler.class;
+        C2SMatchplayClientBackInRoom.handler = ClientBackInRoomPacketHandler.class;
+        C2SRankingPersonalDataReq.handler = RankingPersonalDataReqPacketHandler.class;
+        C2SRankingDataReq.handler = RankingDataReqPacketHandler.class;
+        C2SGuildNoticeRequest.handler = GuildNoticeRequestPacketHandler.class;
+        C2SGuildNameCheckRequest.handler = GuildNameCheckRequestPacketHandler.class;
+        C2SGuildCreateRequest.handler = GuildCreateRequestPacketHandler.class;
+        C2SGuildDataRequest.handler = GuildDataRequestPacketHandler.class;
+        C2SGuildListRequest.handler = GuildListRequestPacketHandler.class;
+        C2SGuildJoinRequest.handler = GuildJoinRequestPacketHandler.class;
+        C2SGuildLeaveRequest.handler = GuildLeaveRequestPacketHandler.class;
+        C2SGuildChangeInformationRequest.handler = GuildChangeInformationRequestPacketHandler.class;
+        C2SGuildReserveMemberDataRequest.handler = GuildReverseMemberDataRequestPacketHandler.class;
+        C2SGuildMemberDataRequest.handler = GuildMemberDataRequestPacketHandler.class;
+        C2SGuildChangeMasterRequest.handler = GuildChangeMasterRequestPacketHandler.class;
+        C2SGuildChangeSubMasterRequest.handler = GuildChangeSubMasterRequestPacketHandler.class;
+        C2SGuildDismissMemberRequest.handler = GuildDismissMemberRequestPacketHandler.class;
+        C2SGuildDeleteRequest.handler = GuildDeleteRequestPacketHandler.class;
+        C2SGuildChangeNoticeRequest.handler = GuildChangeNoticeRequestPacketHandler.class;
+        C2SGuildChatRequest.handler = GuildChatRequestPacketHandler.class;
+        C2SGuildSearchRequest.handler = GuildSearchRequestPacketHandler.class;
+        C2SGuildChangeReverseMemberRequest.handler = GuildChangeReverseMemberRequestHandler.class;
+        C2SGuildChangeLogoRequest.handler = GuildChangeLogoRequestHandler.class;
+        C2SClubMembersListRequest.handler = ClubMembersListRequestHandler.class;
+        C2SMessageListRequest.handler = MessageListRequestHandler.class;
+        C2SParcelListRequest.handler = ParcelListRequestHandler.class;
+        C2SProposalListRequest.handler = ProposalListRequestHandler.class;
+        C2SAddFriendRequest.handler = AddFriendRequestPacketHandler.class;
+        C2SAddFriendApprovalRequest.handler = AddFriendApprovalRequestHandler.class;
+        C2SDeleteFriendRequest.handler = DeleteFriendRequestHandler.class;
+        C2SSendMessageRequest.handler = SendMessageRequestHandler.class;
+        C2SDeleteMessagesRequest.handler = DeleteMessageRequestHandler.class;
+        C2SMessageSeenRequest.handler = MessageSeenRequestHandler.class;
+        C2SSendGiftRequest.handler = SendGiftRequestHandler.class;
+        C2SSendParcelRequest.handler = SendParcelRequestHandler.class;
+        C2SDenyParcelRequest.handler = DenyParcelRequestHandler.class;
+        C2SAcceptParcelRequest.handler = AcceptParcelRequestHandler.class;
+        C2SCancelParcelSendingRequest.handler = CancelSendingParcelRequestHandler.class;
+        C2SProposalAnswerRequest.handler = ProposalAnswerRequestHandler.class;
+        C2SSendProposalRequest.handler = SendProposalRequestHandler.class;
+        C2SRoomTriggerStartGame.handler = RoomStartGamePacketHandler.class;
+        C2SGameAnimationSkipReady.handler = GameAnimationReadyToSkipPacketHandler.class;
+        C2SGameAnimationSkipTriggered.handler = GameAnimationSkipTriggeredPacketHandler.class;
+        C2SMatchplayPoint.handler = MatchplayPointPacketHandler.class;
+        C2SMatchplayPlayerPicksUpCrystal.handler = PlayerPickingUpCrystalHandler.class;
+        C2SMatchplayPlayerUseSkill.handler = PlayerUseSkillHandler.class;
+        C2SMatchplaySkillHitsTarget.handler = SkillHitsTargetHandler.class;
+        C2SMatchplaySwapQuickSlotItems.handler = SwapQuickSlotItemsHandler.class;
 
+        D2SDevPacket.handler = DevPacketHandler.class;
         C2SUnknown0xE00E.handler = UnknownPacketHandler.class;
+        C2SUnknown0x1071.handler = Unknown0x1071PacketHandler.class;
+
+        C2SAntiCheatClientRegister.handler = ACClientRegisterHandler.class;
+        C2SAntiCheatClientModuleReq.handler = ACClientModuleHandler.class;
     }
 
     PacketOperations(int value) {

@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.packet.packets.inventory;
 
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CInventorySellAnswerPacket extends Packet {
@@ -9,7 +9,7 @@ public class S2CInventorySellAnswerPacket extends Packet {
     public final static byte IMPOSSIBLE_ITEM = -2;
 
     public S2CInventorySellAnswerPacket(byte status, int itemPocketId, int price) {
-        super(PacketID.S2CInventorySellAnswer);
+        super(PacketOperations.S2CInventorySellAnswer.getValueAsChar());
 
         this.write(status);
         this.write(itemPocketId);

@@ -11,7 +11,7 @@ public class C2SGuildChangeInformationRequestPacket extends Packet {
     private boolean isPublic;
     private byte minLevel;
     private byte allowedCharacterTypeCount;
-    private byte[] allowedCharacterType;
+    private Byte[] allowedCharacterType;
 
     public C2SGuildChangeInformationRequestPacket(Packet packet) {
         super(packet);
@@ -20,7 +20,7 @@ public class C2SGuildChangeInformationRequestPacket extends Packet {
         this.isPublic = this.readBoolean();
         this.minLevel = this.readByte();
         this.allowedCharacterTypeCount = this.readByte();
-        this.allowedCharacterType = new byte[this.allowedCharacterTypeCount];
+        this.allowedCharacterType = new Byte[this.allowedCharacterTypeCount];
 
         for (int i = 0; i < this.allowedCharacterTypeCount; i++)
             this.allowedCharacterType[i] = this.readByte();

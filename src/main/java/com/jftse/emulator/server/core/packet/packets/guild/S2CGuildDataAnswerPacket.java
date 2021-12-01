@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.packet.packets.guild;
 
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class S2CGuildDataAnswerPacket extends Packet {
     public S2CGuildDataAnswerPacket(short guildStatus, Guild guild) {
-        super(PacketID.S2CGuildDataAnswer);
+        super(PacketOperations.S2CGuildDataAnswer.getValueAsChar());
 
         if (guildStatus == -2) {
             this.write(guildStatus);
@@ -66,7 +66,7 @@ public class S2CGuildDataAnswerPacket extends Packet {
             this.write(guild.getIntroduction());
             this.write(guild.getNotice());
             this.write(guild.getCreated());
-            this.write(guild.isCastleOwner());
+            this.write(guild.getCastleOwner());
         }
     }
 }

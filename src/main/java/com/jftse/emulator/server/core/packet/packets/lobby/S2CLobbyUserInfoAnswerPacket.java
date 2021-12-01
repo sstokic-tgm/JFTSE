@@ -1,15 +1,15 @@
 package com.jftse.emulator.server.core.packet.packets.lobby;
 
 import com.jftse.emulator.server.database.model.guild.Guild;
-import com.jftse.emulator.server.database.model.messaging.Friend;
+import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CLobbyUserInfoAnswerPacket extends Packet {
     public S2CLobbyUserInfoAnswerPacket(char result, Player player, Guild guild, Friend couple) {
-        super(PacketID.S2CLobbyUserInfoAnswer);
+        super(PacketOperations.S2CLobbyUserInfoAnswer.getValueAsChar());
 
         this.write(result);
         if (player != null) {

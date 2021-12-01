@@ -3,31 +3,35 @@ package com.jftse.emulator.server.core.matchplay.battle;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Getter
 @Setter
 public class GuardianBattleState {
-    private int btItemId;
-    private short position;
-    private int maxHealth;
-    private int currentHealth;
-    private int str;
-    private int sta;
-    private int dex;
-    private int will;
-    private int exp;
-    private int gold;
-    private boolean looted;
+    private AtomicInteger btItemId;
+    private AtomicInteger position;
+    private AtomicInteger maxHealth;
+    private AtomicInteger currentHealth;
+    private AtomicInteger str;
+    private AtomicInteger sta;
+    private AtomicInteger dex;
+    private AtomicInteger will;
+    private final int exp;
+    private final int gold;
+    private AtomicBoolean looted;
 
     public GuardianBattleState(int btItemId, short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
-        this.btItemId = btItemId;
-        this.position = position;
-        this.maxHealth = hp;
-        this.currentHealth = hp;
-        this.str = str;
-        this.sta = sta;
-        this.dex = dex;
-        this.will = will;
+        this.btItemId = new AtomicInteger(btItemId);
+        this.position = new AtomicInteger(position);
+        this.maxHealth = new AtomicInteger(hp);
+        this.currentHealth = new AtomicInteger(hp);
+        this.str = new AtomicInteger(str);
+        this.sta = new AtomicInteger(sta);
+        this.dex = new AtomicInteger(dex);
+        this.will = new AtomicInteger(will);
         this.exp = exp;
         this.gold = gold;
+        this.looted = new AtomicBoolean(false);
     }
 }

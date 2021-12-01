@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.packet.packets.shop;
 
 import com.jftse.emulator.server.database.model.item.Product;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 public class S2CShopAnswerDataPacket extends Packet {
 
     public S2CShopAnswerDataPacket(int pageCount, List<Product> productList) {
-        super(PacketID.S2CShopAnswerData);
+        super(PacketOperations.S2CShopAnswerData.getValueAsChar());
 
         this.write(pageCount);
 

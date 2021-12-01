@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.packet.packets.player;
 
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.packet.Packet;
 
@@ -11,7 +11,7 @@ public class S2CPlayerStatusPointChangePacket extends Packet {
      * TODO: reverse this packet structure correctly
      */
     public S2CPlayerStatusPointChangePacket(Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketID.S2CPlayerStatusPointChange);
+        super(PacketOperations.S2CPlayerStatusPointChange.getValueAsChar());
 
         this.write(BattleUtils.calculatePlayerHp(player));
 

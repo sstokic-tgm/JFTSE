@@ -47,7 +47,7 @@ public class LotteryService {
     }
 
     public List<PlayerPocket> drawLottery(Connection connection, long playerPocketId, int productIndex) {
-        Player player = connection.getClient().getActivePlayer();
+        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
 
         List<PlayerPocket> result = new ArrayList<>();
 

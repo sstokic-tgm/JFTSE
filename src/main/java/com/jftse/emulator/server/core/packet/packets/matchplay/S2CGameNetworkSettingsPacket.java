@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.packet.packets.matchplay;
 
 import com.jftse.emulator.server.core.matchplay.room.Room;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class S2CGameNetworkSettingsPacket extends Packet {
     public S2CGameNetworkSettingsPacket(String host, int port, Room room, List<Client> clientsInRoom) {
-        super(PacketID.S2CGameNetworkSettings);
+        super(PacketOperations.S2CGameNetworkSettings.getValueAsChar());
 
         this.write(host);
         this.write((char) port);

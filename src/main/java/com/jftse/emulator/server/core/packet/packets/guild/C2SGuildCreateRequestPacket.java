@@ -12,7 +12,7 @@ public class C2SGuildCreateRequestPacket extends Packet {
     private boolean isPublic;
     private byte levelRestriction;
     private byte allowedCharacterTypeCount;
-    private byte[] allowedCharacterType;
+    private Byte[] allowedCharacterType;
 
     public C2SGuildCreateRequestPacket(Packet packet) {
         super(packet);
@@ -22,7 +22,7 @@ public class C2SGuildCreateRequestPacket extends Packet {
         this.isPublic = this.readBoolean();
         this.levelRestriction = this.readByte();
         this.allowedCharacterTypeCount = this.readByte();
-        this.allowedCharacterType = new byte[this.allowedCharacterTypeCount];
+        this.allowedCharacterType = new Byte[this.allowedCharacterTypeCount];
 
         for (int i = 0; i < this.allowedCharacterTypeCount; i++)
             this.allowedCharacterType[i] = this.readByte();

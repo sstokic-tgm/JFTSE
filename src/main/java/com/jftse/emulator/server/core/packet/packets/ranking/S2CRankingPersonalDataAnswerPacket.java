@@ -3,12 +3,12 @@ package com.jftse.emulator.server.core.packet.packets.ranking;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.core.constants.GameMode;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CRankingPersonalDataAnswerPacket extends Packet {
     public S2CRankingPersonalDataAnswerPacket(char result, byte gameMode, Player player, int ranking) {
-        super(PacketID.S2CRankingPersonalDataAnswer);
+        super(PacketOperations.S2CRankingPersonalDataAnswer.getValueAsChar());
 
         PlayerStatistic playerStatistic = player.getPlayerStatistic();
 

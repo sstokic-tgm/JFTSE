@@ -1,11 +1,10 @@
 package com.jftse.emulator.server.core.service;
 
-import com.jftse.emulator.server.core.packet.packets.messaging.S2CFriendsListAnswerPacket;
-import com.jftse.emulator.server.core.service.messaging.FriendService;
+import com.jftse.emulator.server.core.service.messenger.FriendService;
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.database.model.messaging.EFriendshipState;
-import com.jftse.emulator.server.database.model.messaging.Friend;
+import com.jftse.emulator.server.database.model.messenger.EFriendshipState;
+import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.Player;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

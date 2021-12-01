@@ -1,11 +1,11 @@
 package com.jftse.emulator.server.core.packet.packets.inventory;
 
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CInventorySellItemAnswerPacket extends Packet {
     public S2CInventorySellItemAnswerPacket(char itemCount, int itemPocketId) {
-        super(PacketID.S2CInventorySellItemAnswer);
+        super(PacketOperations.S2CInventorySellItemAnswer.getValueAsChar());
 
         this.write(itemCount);
 

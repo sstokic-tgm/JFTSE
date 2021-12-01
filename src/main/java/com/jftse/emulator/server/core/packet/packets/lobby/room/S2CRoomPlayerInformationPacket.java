@@ -5,7 +5,7 @@ import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.networking.packet.Packet;
 
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class S2CRoomPlayerInformationPacket extends Packet {
     public S2CRoomPlayerInformationPacket(List<RoomPlayer> roomPlayerList) {
-        super(PacketID.S2CRoomPlayerInformation);
+        super(PacketOperations.S2CRoomPlayerInformation.getValueAsChar());
 
         this.write((char) roomPlayerList.size());
         for (RoomPlayer roomPlayer : roomPlayerList) {

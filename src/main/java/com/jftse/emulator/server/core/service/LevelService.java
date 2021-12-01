@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.service;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.database.model.level.LevelExp;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.repository.level.LevelExpRepository;
@@ -18,8 +19,10 @@ public class LevelService {
 
     private final PlayerService playerService;
 
+    private final ConfigService configService;
+
     public byte getLevel(int expValue, int currentExp, byte currentLevel) {
-        if (currentLevel == 60)
+        if (currentLevel == configService.getValue("player.level.max", 60))
             return currentLevel;
 
         int newExp = expValue + currentExp;

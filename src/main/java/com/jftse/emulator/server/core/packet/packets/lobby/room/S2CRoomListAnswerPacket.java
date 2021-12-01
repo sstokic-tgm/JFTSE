@@ -3,14 +3,14 @@ package com.jftse.emulator.server.core.packet.packets.lobby.room;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.matchplay.room.Room;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CRoomListAnswerPacket extends Packet {
     public S2CRoomListAnswerPacket(List<Room> roomList) {
-        super(PacketID.S2CRoomListAnswer);
+        super(PacketOperations.S2CRoomListAnswer.getValueAsChar());
 
         this.write((char) roomList.size());
         for (Room room : roomList) {

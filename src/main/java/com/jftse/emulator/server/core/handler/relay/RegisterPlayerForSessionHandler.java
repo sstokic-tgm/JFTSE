@@ -7,7 +7,7 @@ import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.matchplay.C2SMatchplayPlayerIdsInSessionPacket;
 import com.jftse.emulator.server.networking.packet.Packet;
@@ -43,17 +43,17 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                     client.setActivePlayer(playerClient.getActivePlayer());
                     client.setActiveGameSession(gameSession);
                     client.setConnection(connection);
-                    client.setSpectator(matchplayPlayerIdsInSessionPacket.isSpectator());
+                    client.getIsSpectator().set(matchplayPlayerIdsInSessionPacket.isSpectator());
 
                     connection.setClient(client);
                     gameSession.getClientsInRelay().add(client);
                     RelayManager.getInstance().addClient(client);
 
-                    Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
+                    Packet answer = new Packet(PacketOperations.S2CMatchplayAckPlayerInformation.getValueAsChar());
                     answer.write((byte) 0);
                     connection.sendTCP(answer);
                 } else {
-                    Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
+                    Packet answer = new Packet(PacketOperations.S2CMatchplayAckPlayerInformation.getValueAsChar());
                     answer.write((byte) 1);
                     connection.sendTCP(answer);
 
@@ -96,7 +96,7 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                 }
             }
         } else {
-            Packet answer = new Packet(PacketID.S2CMatchplayAckPlayerInformation);
+            Packet answer = new Packet(PacketOperations.S2CMatchplayAckPlayerInformation.getValueAsChar());
             answer.write((byte) 1);
             connection.sendTCP(answer);
 

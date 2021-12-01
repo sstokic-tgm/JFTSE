@@ -3,14 +3,14 @@ package com.jftse.emulator.server.core.packet.packets.ranking;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.core.constants.GameMode;
-import com.jftse.emulator.server.core.packet.PacketID;
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.List;
 
 public class S2CRankingDataAnswerPacket extends Packet {
     public S2CRankingDataAnswerPacket(char result, byte gameMode, int page, List<Player> playerList) {
-        super(PacketID.S2CRankingDataAnswer);
+        super(PacketOperations.S2CRankingDataAnswer.getValueAsChar());
 
         this.write(result);
 

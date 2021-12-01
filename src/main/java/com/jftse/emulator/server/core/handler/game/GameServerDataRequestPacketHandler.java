@@ -8,10 +8,10 @@ import com.jftse.emulator.server.core.packet.packets.authserver.gameserver.C2SGa
 import com.jftse.emulator.server.core.packet.packets.authserver.gameserver.S2CGameServerAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packet.packets.inventory.*;
-import com.jftse.emulator.server.core.packet.packets.messaging.S2CClubMembersListAnswerPacket;
-import com.jftse.emulator.server.core.packet.packets.messaging.S2CFriendRequestNotificationPacket;
-import com.jftse.emulator.server.core.packet.packets.messaging.S2CFriendsListAnswerPacket;
-import com.jftse.emulator.server.core.packet.packets.messaging.S2CRelationshipAnswerPacket;
+import com.jftse.emulator.server.core.packet.packets.messenger.S2CClubMembersListAnswerPacket;
+import com.jftse.emulator.server.core.packet.packets.messenger.S2CFriendRequestNotificationPacket;
+import com.jftse.emulator.server.core.packet.packets.messenger.S2CFriendsListAnswerPacket;
+import com.jftse.emulator.server.core.packet.packets.messenger.S2CRelationshipAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerLevelExpPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
@@ -19,8 +19,8 @@ import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.home.AccountHome;
-import com.jftse.emulator.server.database.model.messaging.EFriendshipState;
-import com.jftse.emulator.server.database.model.messaging.Friend;
+import com.jftse.emulator.server.database.model.messenger.EFriendshipState;
+import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
@@ -94,7 +94,11 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
                         GameManager.getInstance().getClients().stream()
                                 .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(f.getFriend().getId()))
                                 .findFirst()
-                                .ifPresent(c -> c.getConnection().sendTCP(friendListAnswerPacket));
+                                .ifPresent(c -> {
+                                    if (c.getConnection() != null && c.getConnection().isConnected()) {
+                                        c.getConnection().sendTCP(friendListAnswerPacket);
+                                    }
+                                });
                     });
 
             List<Friend> friendsWaitingForApproval = socialService.getFriendList(player, EFriendshipState.WaitingApproval);
@@ -130,7 +134,11 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
                             GameManager.getInstance().getClients().stream()
                                     .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(x.getPlayer().getId()))
                                     .findFirst()
-                                    .ifPresent(c -> c.getConnection().sendTCP(s2CClubMembersListAnswerPacket));
+                                    .ifPresent(c -> {
+                                        if (c.getConnection() != null && c.getConnection().isConnected()) {
+                                            c.getConnection().sendTCP(s2CClubMembersListAnswerPacket);
+                                        }
+                                    });
                         });
             }
 

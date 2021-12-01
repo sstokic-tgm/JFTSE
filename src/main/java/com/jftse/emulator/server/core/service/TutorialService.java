@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.service;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.tutorial.Tutorial;
@@ -25,6 +26,7 @@ public class TutorialService {
     private final TutorialRepository tutorialRepository;
     private final TutorialProgressRepository tutorialProgressRepository;
 
+    private final PlayerService playerService;
     private final ItemRewardService itemRewardService;
     private final LevelService levelService;
 
@@ -75,8 +77,8 @@ public class TutorialService {
 
         byte level = levelService.getLevel(rewardExp, connection.getClient().getActivePlayer().getExpPoints(), connection.getClient().getActivePlayer().getLevel());
 
-        Player player = connection.getClient().getActivePlayer();
-        if (level != 60)
+        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        if (level < ConfigService.getInstance().getValue("player.level.max", 60))
             player.setExpPoints(player.getExpPoints() + rewardExp);
         player.setGold(player.getGold() + rewardGold);
 

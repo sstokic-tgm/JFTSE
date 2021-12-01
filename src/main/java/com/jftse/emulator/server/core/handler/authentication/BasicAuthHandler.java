@@ -33,6 +33,5 @@ public class BasicAuthHandler {
         }
 
         connection.setClient(null);
-        connection.close();
     }
 }
