@@ -94,7 +94,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
         percentage = game.getGuardianHealPercentage();
         short healthToHeal = (short) (targetGuardian.getMaxHealth().get() * (percentage / 100f));
-        short currentHealth = (short) (targetGuardian.getCurrentHealth().get() < 0 ? 0 : targetGuardian.getCurrentHealth());
+        short currentHealth = (short) (Math.max(targetGuardian.getCurrentHealth().get(), 0));
         short newGuardianHealth = (short) (currentHealth + healthToHeal);
         if (newGuardianHealth > targetGuardian.getMaxHealth().get()) {
             newGuardianHealth = (short) targetGuardian.getMaxHealth().get();

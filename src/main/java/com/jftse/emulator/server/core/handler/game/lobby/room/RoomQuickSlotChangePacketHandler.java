@@ -12,6 +12,7 @@ public class RoomQuickSlotChangePacketHandler extends AbstractHandler {
 
     @Override
     public boolean process(Packet packet) {
+        changeRoomQuickSlotRequestPacket = new C2SRoomQuickSlotChangeRequestPacket(packet);
         return true;
     }
 
