@@ -31,7 +31,7 @@ public class StartApplication {
         SpringApplication.run(StartApplication.class, args);
         log.info("Emulator successfully started!");
 
-        DiscordWebhook discordWebhook = new DiscordWebhook(""); // empty till global config table created
+        DiscordWebhook discordWebhook = new DiscordWebhook(ConfigService.getInstance().getValue("discord.webhook.url", ""));
         discordWebhook.setContent("Login Server is online.\nGame Server is online.\nMatchmaking Server is online.");
         try {
             discordWebhook.execute();
