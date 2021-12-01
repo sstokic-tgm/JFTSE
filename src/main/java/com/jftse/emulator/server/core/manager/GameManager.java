@@ -190,15 +190,28 @@ public class GameManager {
         final short playerPosition = roomPlayer.isPresent() ? roomPlayer.get().getPosition() : -1;
         final boolean isMaster = roomPlayer.isPresent() && roomPlayer.get().isMaster();
         if (isMaster) {
-            roomPlayerList.stream()
-                    .filter(rp -> !rp.isMaster() && rp.getPosition() < 4)
-                    .findFirst()
-                    .ifPresent(rp -> {
-                        synchronized (rp) {
-                            rp.setMaster(true);
-                            rp.setReady(false);
-                        }
-                    });
+            long slotCount = roomPlayerList.stream().filter(rp -> !rp.isMaster() && rp.getPosition() < 4).count();
+            if (slotCount > 0) {
+                roomPlayerList.stream()
+                        .filter(rp -> !rp.isMaster() && rp.getPosition() < 4)
+                        .findFirst()
+                        .ifPresent(rp -> {
+                            synchronized (rp) {
+                                rp.setMaster(true);
+                                rp.setReady(false);
+                            }
+                        });
+            } else {
+                roomPlayerList.stream()
+                        .filter(rp -> !rp.isMaster())
+                        .findFirst()
+                        .ifPresent(rp -> {
+                            synchronized (rp) {
+                                rp.setMaster(true);
+                                rp.setReady(false);
+                            }
+                        });
+            }
         }
 
         final int positionsSize = room.getPositions().size();
