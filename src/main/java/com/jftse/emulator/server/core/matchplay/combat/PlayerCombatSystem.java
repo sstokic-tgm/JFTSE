@@ -120,26 +120,33 @@ public class PlayerCombatSystem implements PlayerCombatable {
         if (targetPlayer == null)
             throw new ValidationException("targetPlayer battle state is null");
 
-        short healthToHeal = (short) (targetPlayer.getMaxHealth().get() * (percentage / 100f));
-        short currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
-        short newPlayerHealth = (short) (currentHealth + healthToHeal);
-        if (newPlayerHealth > targetPlayer.getMaxHealth().get()) {
-            newPlayerHealth = (short) targetPlayer.getMaxHealth().get();
-        }
+        short newPlayerHealth = 0;
+        short currentHealth = 0;
+        do {
+            short healthToHeal = (short) (targetPlayer.getMaxHealth().get() * (percentage / 100f));
+            currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
+            newPlayerHealth = (short) (currentHealth + healthToHeal);
+            if (newPlayerHealth > targetPlayer.getMaxHealth().get()) {
+                newPlayerHealth = (short) targetPlayer.getMaxHealth().get();
+            }
+        } while (!targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth));
 
-        targetPlayer.getCurrentHealth().getAndSet(newPlayerHealth);
         return newPlayerHealth;
     }
 
     @Override
     public short updateHealthByDamage(PlayerBattleState targetPlayer, int dmg) {
-        short newPlayerHealth = (short) (targetPlayer.getCurrentHealth().get() + dmg);
-        if (newPlayerHealth < 1) {
-            targetPlayer.getDead().getAndSet(true);
-        }
+        short newPlayerHealth = 0;
+        short currentHealth = 0;
+        do {
+            currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
+            newPlayerHealth = (short) (currentHealth + dmg);
+            if (newPlayerHealth < 1) {
+                targetPlayer.getDead().getAndSet(true);
+            }
+            newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
+        } while (!targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth));
 
-        newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
-        targetPlayer.getCurrentHealth().getAndSet(newPlayerHealth);
         return newPlayerHealth;
     }
 
@@ -161,8 +168,7 @@ public class PlayerCombatSystem implements PlayerCombatable {
                             .orElse(null);
 
             if (playerBattleState != null) {
-                short newPlayerHealth = heal(playerBattleState.getPosition().get(), revivePercentage);
-                playerBattleState.getCurrentHealth().getAndSet(newPlayerHealth);
+                heal(playerBattleState.getPosition().get(), revivePercentage);
                 playerBattleState.getDead().getAndSet(false);
             }
             return playerBattleState;
@@ -183,8 +189,7 @@ public class PlayerCombatSystem implements PlayerCombatable {
                         .orElse(null);
 
         if (playerBattleState != null) {
-            short newPlayerHealth = heal(playerBattleState.getPosition().get(), revivePercentage);
-            playerBattleState.getCurrentHealth().getAndSet(newPlayerHealth);
+            heal(playerBattleState.getPosition().get(), revivePercentage);
             playerBattleState.getDead().getAndSet(false);
         }
 

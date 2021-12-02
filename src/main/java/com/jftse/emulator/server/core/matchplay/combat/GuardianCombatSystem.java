@@ -93,14 +93,18 @@ public class GuardianCombatSystem implements GuardianCombatable {
             throw new ValidationException("targetGuardian battle state is null");
 
         percentage = game.getGuardianHealPercentage();
-        short healthToHeal = (short) (targetGuardian.getMaxHealth().get() * (percentage / 100f));
-        short currentHealth = (short) (Math.max(targetGuardian.getCurrentHealth().get(), 0));
-        short newGuardianHealth = (short) (currentHealth + healthToHeal);
-        if (newGuardianHealth > targetGuardian.getMaxHealth().get()) {
-            newGuardianHealth = (short) targetGuardian.getMaxHealth().get();
-        }
 
-        targetGuardian.getCurrentHealth().getAndSet(newGuardianHealth);
+        short currentHealth = 0;
+        short newGuardianHealth = 0;
+        do {
+            short healthToHeal = (short) (targetGuardian.getMaxHealth().get() * (percentage / 100f));
+            currentHealth = (short) (Math.max(targetGuardian.getCurrentHealth().get(), 0));
+            newGuardianHealth = (short) (currentHealth + healthToHeal);
+            if (newGuardianHealth > targetGuardian.getMaxHealth().get()) {
+                newGuardianHealth = (short) targetGuardian.getMaxHealth().get();
+            }
+        } while (!targetGuardian.getCurrentHealth().compareAndSet(currentHealth, newGuardianHealth));
+
         return newGuardianHealth;
     }
 
@@ -171,21 +175,30 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
     @Override
     public short updateHealthByDamage(GuardianBattleState targetGuardian, int dmg) {
-        short newGuardianHealth = (short) (targetGuardian.getCurrentHealth().get() + dmg);
-        newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
-        targetGuardian.getCurrentHealth().getAndSet(newGuardianHealth);
+        short currentHealth = 0;
+        short newGuardianHealth = 0;
+        do {
+            currentHealth = (short) Math.max(targetGuardian.getCurrentHealth().get(), 0);
+            newGuardianHealth = (short) (currentHealth + dmg);
+            newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
+        } while (!targetGuardian.getCurrentHealth().compareAndSet(currentHealth, newGuardianHealth));
+
         return newGuardianHealth;
     }
 
     @Override
     public short updateHealthByDamage(PlayerBattleState targetPlayer, int dmg) {
-        short newPlayerHealth = (short) (targetPlayer.getCurrentHealth().get() + dmg);
-        if (newPlayerHealth < 1) {
-            targetPlayer.getDead().getAndSet(true);
-        }
+        short newPlayerHealth = 0;
+        short currentHealth = 0;
+        do {
+            currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
+            newPlayerHealth = (short) (currentHealth + dmg);
+            if (newPlayerHealth < 1) {
+                targetPlayer.getDead().getAndSet(true);
+            }
+            newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
+        } while (!targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth));
 
-        newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
-        targetPlayer.getCurrentHealth().getAndSet(newPlayerHealth);
         return newPlayerHealth;
     }
 
@@ -198,8 +211,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
         if (guardianBattleState != null) {
             revivePercentage = game.getGuardianHealPercentage();
-            short newGuardianHealth = heal(guardianBattleState.getPosition().get(), revivePercentage);
-            guardianBattleState.getCurrentHealth().getAndSet(newGuardianHealth);
+            heal(guardianBattleState.getPosition().get(), revivePercentage);
         }
 
         return guardianBattleState;
