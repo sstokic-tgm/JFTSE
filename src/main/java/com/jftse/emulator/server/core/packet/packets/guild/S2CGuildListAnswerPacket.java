@@ -4,9 +4,11 @@ import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
+@Log4j2
 public class S2CGuildListAnswerPacket extends Packet {
     public S2CGuildListAnswerPacket(List<Guild> guildList) {
         super(PacketOperations.S2CGuildListAnswer.getValueAsChar());
@@ -26,6 +28,8 @@ public class S2CGuildListAnswerPacket extends Packet {
             this.write(guild.getIsPublic());
             List<GuildMember> memberList = guild.getMemberList();
             GuildMember clubMaster = memberList.stream().filter(gm -> gm.getMemberRank() == 3).findFirst().orElse(null);
+            if (clubMaster == null)
+                log.debug("clubMaster == null, guild id: " + guild.getId() + " guild name: " + guild.getName());
             this.write(clubMaster.getPlayer().getName());
             this.write(guild.getLevel());
             this.write(guild.getLevelRestriction());
