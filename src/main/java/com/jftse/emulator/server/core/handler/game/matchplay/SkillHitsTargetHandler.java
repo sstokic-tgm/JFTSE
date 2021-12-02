@@ -184,28 +184,49 @@ public class SkillHitsTargetHandler extends AbstractHandler {
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         long currentTimestamp = cal.getTimeInMillis();
-        if (skillDamage >= 1) { // handle double activation of skills (shields, heals)
-            PlayerBattleState targetPlayer = game instanceof MatchplayBattleGame ?
-                    ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> x.getPosition().get() == targetPosition)
-                            .findFirst()
-                            .orElse(null) :
-                    ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> x.getPosition().get() == targetPosition)
-                            .findFirst()
-                            .orElse(null);
+        if (skill != null) {
+            if (targetPosition < 4) {
+                PlayerBattleState targetPlayer = game instanceof MatchplayBattleGame ?
+                        ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                .filter(x -> x.getPosition().get() == targetPosition)
+                                .findFirst()
+                                .orElse(null) :
+                        ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                                .filter(x -> x.getPosition().get() == targetPosition)
+                                .findFirst()
+                                .orElse(null);
 
-            if (targetPlayer != null) {
-                if (targetPlayer.getLastSkillHitsTarget().containsKey(skill.getId())) {
-                    long timestamp = targetPlayer.getLastSkillHitsTarget().get(skill.getId());
+                if (targetPlayer != null) {
+                    if (targetPlayer.getLastSkillHitsTarget().containsKey(skill.getId())) {
+                        long timestamp = targetPlayer.getLastSkillHitsTarget().get(skill.getId());
 
-                    long timePassed = timestamp - currentTimestamp;
-                    if (timePassed <= 50) {
-                        targetPlayer.getLastSkillHitsTarget().remove(skill.getId());
-                        return;
+                        long timePassed = timestamp - currentTimestamp;
+                        if (timePassed <= 30) {
+                            targetPlayer.getLastSkillHitsTarget().remove(skill.getId());
+                            return;
+                        }
+                    } else {
+                        targetPlayer.getLastSkillHitsTarget().put(skill.getId(), currentTimestamp);
                     }
-                } else {
-                    targetPlayer.getLastSkillHitsTarget().put(skill.getId(), currentTimestamp);
+                }
+            } else {
+                GuardianBattleState targetGuardian = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                        .filter(x -> x.getPosition().get() == targetPosition)
+                        .findFirst()
+                        .orElse(null);
+
+                if (targetGuardian != null) {
+                    if (targetGuardian.getLastSkillHitsTarget().containsKey(skill.getId())) {
+                        long timestamp = targetGuardian.getLastSkillHitsTarget().get(skill.getId());
+
+                        long timePassed = timestamp - currentTimestamp;
+                        if (timePassed <= 30) {
+                            targetGuardian.getLastSkillHitsTarget().remove(skill.getId());
+                            return;
+                        }
+                    } else {
+                        targetGuardian.getLastSkillHitsTarget().put(skill.getId(), currentTimestamp);
+                    }
                 }
             }
         }

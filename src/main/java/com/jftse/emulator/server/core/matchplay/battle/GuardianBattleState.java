@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.matchplay.battle;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,6 +21,7 @@ public class GuardianBattleState {
     private final int exp;
     private final int gold;
     private AtomicBoolean looted;
+    private ConcurrentHashMap<Long, Long> lastSkillHitsTarget;
 
     public GuardianBattleState(int btItemId, short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
         this.btItemId = new AtomicInteger(btItemId);
@@ -33,5 +35,6 @@ public class GuardianBattleState {
         this.exp = exp;
         this.gold = gold;
         this.looted = new AtomicBoolean(false);
+        lastSkillHitsTarget = new ConcurrentHashMap<>(5);
     }
 }
