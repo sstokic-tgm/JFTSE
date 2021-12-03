@@ -6,7 +6,9 @@ import com.jftse.emulator.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.database.model.battle.WillDamage;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class GuardianCombatSystem implements GuardianCombatable {
     private MatchplayGuardianGame game;
 
@@ -179,6 +181,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
         short newGuardianHealth = 0;
         do {
             currentHealth = (short) Math.max(targetGuardian.getCurrentHealth().get(), 0);
+            log.debug("updateHealthByDamage(GuardianBattleState targetGuardian, int dmg): " + currentHealth + ", " + dmg);
             newGuardianHealth = (short) (currentHealth + dmg);
             newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
         } while (!targetGuardian.getCurrentHealth().compareAndSet(currentHealth, newGuardianHealth));
@@ -192,6 +195,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
         short currentHealth = 0;
         do {
             currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
+            log.debug("updateHealthByDamage(PlayerBattleState targetPlayer, int dmg): " + currentHealth + ", " + dmg);
             newPlayerHealth = (short) (currentHealth + dmg);
             if (newPlayerHealth < 1) {
                 targetPlayer.getDead().getAndSet(true);
