@@ -24,9 +24,9 @@ public class Guild extends AbstractBaseModel {
 
     @Column(unique = true)
     private String name;
-    private String introduction;
+    private String introduction = "";
     private String notice = "";
-    private Integer logoBackgroundId;
+    private Integer logoBackgroundId = -1;
     private Integer logoBackgroundColor = -1;
     private Integer logoPatternId = -1;
     private Integer logoPatternColor = -1;
