@@ -90,8 +90,16 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                     }
 
                     log.warn("Couldn't find client for player. Cancel connection to relay server");
-                    RelayManager.getInstance().removeClient(connection.getClient());
-                    GameSessionManager.getInstance().removeGameSession(gameSession);
+                    try {
+                        RelayManager.getInstance().removeClient(connection.getClient());
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                    try {
+                        GameSessionManager.getInstance().removeGameSession(gameSession);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
                     connection.close();
                 }
             }
