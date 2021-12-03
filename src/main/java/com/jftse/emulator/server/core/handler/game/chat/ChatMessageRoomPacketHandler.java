@@ -46,19 +46,19 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
             for (Client c : GameManager.getInstance().getClientsInRoom(room.getRoomId())) {
                 for (RoomPlayer rp : c.getActiveRoom().getRoomPlayerList()) {
                     if (c.getActivePlayer() != null && c.getActivePlayer().getId().equals(rp.getPlayer().getId()) && areInSameTeam(senderPos, rp.getPosition())) {
-                        c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomReqPacket);
+                        c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomAnswerPacket);
                     }
                 }
             }
             connection.sendTCP(chatRoomAnswerPacket); // Send to sender
-            return;
+        } else {
+            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomAnswerPacket));
         }
-        GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomAnswerPacket));
     }
 
     private boolean areInSameTeam(int playerPos1, int playerPos2) {
-        boolean bothInRedTeam = playerPos1 == 0 && playerPos2 == 2 || playerPos1 == 2 && playerPos2 == 0;
-        boolean bothInBlueTeam = playerPos1 == 1 && playerPos2 == 3 || playerPos1 == 3 && playerPos2 == 1;
+        boolean bothInRedTeam = (playerPos1 == 0 && playerPos2 == 2) || (playerPos1 == 2 && playerPos2 == 0);
+        boolean bothInBlueTeam = (playerPos1 == 1 && playerPos2 == 3) || (playerPos1 == 3 && playerPos2 == 1);
         return bothInRedTeam || bothInBlueTeam;
     }
 }
