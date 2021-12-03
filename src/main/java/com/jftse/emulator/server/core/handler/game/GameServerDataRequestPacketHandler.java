@@ -12,6 +12,7 @@ import com.jftse.emulator.server.core.packet.packets.messenger.S2CClubMembersLis
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CFriendRequestNotificationPacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CRelationshipAnswerPacket;
+import com.jftse.emulator.server.core.packet.packets.pet.S2CPetDataAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerLevelExpPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
@@ -21,6 +22,7 @@ import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.messenger.EFriendshipState;
 import com.jftse.emulator.server.database.model.messenger.Friend;
+import com.jftse.emulator.server.database.model.pet.Pet;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
@@ -35,6 +37,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
 
     private final PlayerService playerService;
     private final HomeService homeService;
+    private final PetService petService;
     private final GuildMemberService guildMemberService;
     private final PlayerPocketService playerPocketService;
     private final ClothEquipmentService clothEquipmentService;
@@ -47,6 +50,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
     public GameServerDataRequestPacketHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         homeService = ServiceManager.getInstance().getHomeService();
+        petService = ServiceManager.getInstance().getPetService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
@@ -146,6 +150,11 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
 
             S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
             connection.sendTCP(homeDataPacket);
+
+            List<Pet> petList = petService.findAllByPlayerId(player.getId());
+
+            S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
+            connection.sendTCP(petDataAnswerPacket);
         } else if (requestType == 1) {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);

@@ -15,6 +15,7 @@ import com.jftse.emulator.server.core.handler.game.lobby.*;
 import com.jftse.emulator.server.core.handler.game.lobby.room.*;
 import com.jftse.emulator.server.core.handler.game.matchplay.*;
 import com.jftse.emulator.server.core.handler.game.messenger.*;
+import com.jftse.emulator.server.core.handler.game.pet.*;
 import com.jftse.emulator.server.core.handler.game.player.*;
 import com.jftse.emulator.server.core.handler.game.ranking.*;
 import com.jftse.emulator.server.core.handler.game.shop.*;
@@ -179,6 +180,9 @@ public enum PacketOperations {
     C2SHomeItemsLoadReq(0x254E),
     S2CHomeItemsLoadAnswer(0x254F),
     S2CHomeData(0x1519),
+
+    C2SPetDataRequest(0x151A),
+    S2CPetDataAnswer(0x151B),
 
     C2SShopMoneyReq(0x1B60),
     S2CShopMoneyAnswer(0x1B61),
@@ -349,6 +353,7 @@ public enum PacketOperations {
         C2SHomeItemsLoadReq.handler = HomeItemsLoadRequestPacketHandler.class;
         C2SHomeItemsPlaceReq.handler = HomeItemsPlaceRequestPacketHandler.class;
         C2SHomeItemsClearReq.handler = HomeItemClearRequestPacketHandler.class;
+        C2SPetDataRequest.handler = PetDataRequestPacketHandler.class;
         C2SInventorySellReq.handler = InventorySellRequestHandler.class;
         C2SInventorySellItemCheckReq.handler = InventorySellItemCheckRequestHandler.class;
         C2SUnknownInventoryOpenRequest.handler = UnknownInventoryOpenPacketHandler.class;
