@@ -113,7 +113,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
                 Client friendRelationClient = GameManager.getInstance().getClients().stream()
-                        .filter(x -> x.getActivePlayer().getId().equals(myRelation.getFriend().getId()))
+                        .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(myRelation.getFriend().getId()))
                         .findFirst()
                         .orElse(null);
                 Friend friendRelation = socialService.getRelationship(myRelation.getFriend());

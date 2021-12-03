@@ -44,7 +44,7 @@ public class SendMessageRequestHandler extends AbstractHandler {
             messageService.save(message);
 
             Client receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(receiver.getId()))
                     .findFirst()
                     .orElse(null);
             if (receiverClient != null) {

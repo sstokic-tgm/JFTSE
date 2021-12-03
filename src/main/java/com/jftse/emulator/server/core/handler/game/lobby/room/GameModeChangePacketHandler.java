@@ -39,7 +39,7 @@ public class GameModeChangePacketHandler extends AbstractHandler {
             });
 
             GameManager.getInstance().getClientsInLobby().forEach(c -> {
-                boolean isActivePlayer = c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
+                boolean isActivePlayer = c.getActivePlayer() != null && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
                 if (isActivePlayer)
                     return;
 

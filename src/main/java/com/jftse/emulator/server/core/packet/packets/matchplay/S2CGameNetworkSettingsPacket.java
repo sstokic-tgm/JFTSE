@@ -20,7 +20,10 @@ public class S2CGameNetworkSettingsPacket extends Packet {
         int maxClientsInRoom = 4;
         int missingClientsCount = maxClientsInRoom - clientsInRoomSize;
 
-        clientsInRoom.forEach(c -> this.write(Math.toIntExact(c.getActivePlayer().getId())));
+        clientsInRoom.forEach(c -> {
+            if (c.getActivePlayer() != null)
+                this.write(Math.toIntExact(c.getActivePlayer().getId()));
+        });
 
         for (int i = 1; i <= missingClientsCount; i++) {
             this.write(0);

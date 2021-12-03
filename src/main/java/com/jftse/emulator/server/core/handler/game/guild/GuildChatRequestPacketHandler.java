@@ -47,7 +47,7 @@ public class GuildChatRequestPacketHandler extends AbstractHandler {
                 .map(x -> x.getPlayer().getId().intValue())
                 .collect(Collectors.toList());
         List<Client> allClients = GameManager.getInstance().getClients().stream()
-                .filter(c -> allPlayerIds.contains(c.getActivePlayer().getId().intValue()))
+                .filter(c -> c.getActivePlayer() != null && allPlayerIds.contains(c.getActivePlayer().getId().intValue()))
                 .collect(Collectors.toList());
 
         allClients.forEach(c -> {

@@ -64,7 +64,7 @@ public class AddFriendRequestPacketHandler extends AbstractHandler {
             S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(player.getName());
 
             GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer().getId().equals(targetPlayer.getId()))
+                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(targetPlayer.getId()))
                     .findFirst()
                     .ifPresent(friendClient -> {
                         if (friendClient.getConnection() != null && friendClient.getConnection().isConnected()) {

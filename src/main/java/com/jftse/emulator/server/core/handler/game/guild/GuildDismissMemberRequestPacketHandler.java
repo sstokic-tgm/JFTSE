@@ -56,7 +56,7 @@ public class GuildDismissMemberRequestPacketHandler extends AbstractHandler {
                     guildService.save(guild);
 
                     Client targetClient = GameManager.getInstance().getClients().stream()
-                            .filter(c -> c.getActivePlayer().getId().equals(dismissMember.getPlayer().getId()))
+                            .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(dismissMember.getPlayer().getId()))
                             .findFirst()
                             .orElse(null);
 

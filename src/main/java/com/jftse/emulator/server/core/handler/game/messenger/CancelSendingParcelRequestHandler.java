@@ -61,7 +61,7 @@ public class CancelSendingParcelRequestHandler extends AbstractHandler {
         connection.sendTCP(s2CCancelParcelSendingAnswer);
 
         Client receiverClient = GameManager.getInstance().getClients().stream()
-                .filter(x -> x.getActivePlayer().getId().equals(parcel.getReceiver().getId()))
+                .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(parcel.getReceiver().getId()))
                 .findFirst()
                 .orElse(null);
         if (receiverClient != null) {

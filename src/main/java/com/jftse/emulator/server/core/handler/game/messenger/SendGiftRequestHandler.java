@@ -194,7 +194,7 @@ public class SendGiftRequestHandler extends AbstractHandler {
             connection.getClient().setActivePlayer(sender);
 
             Client receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer().getId().equals(receiver.getId()))
+                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(receiver.getId()))
                     .findFirst()
                     .orElse(null);
             if (receiverClient != null) {

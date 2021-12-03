@@ -45,7 +45,7 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
             if (senderPos < 0) return;
             for (Client c : GameManager.getInstance().getClientsInRoom(room.getRoomId())) {
                 for (RoomPlayer rp : c.getActiveRoom().getRoomPlayerList()) {
-                    if (c.getActivePlayer().getId().equals(rp.getPlayer().getId()) && areInSameTeam(senderPos, rp.getPosition())) {
+                    if (c.getActivePlayer() != null && c.getActivePlayer().getId().equals(rp.getPlayer().getId()) && areInSameTeam(senderPos, rp.getPosition())) {
                         c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomReqPacket);
                     }
                 }

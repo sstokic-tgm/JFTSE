@@ -129,7 +129,7 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
             messageService.save(message);
 
             Client friendRelationClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer().getId().equals(playerCouple.getFriend().getId()))
+                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(playerCouple.getFriend().getId()))
                     .findFirst()
                     .orElse(null);
             if (friendRelationClient != null) {

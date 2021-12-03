@@ -35,7 +35,7 @@ public class GameSession {
 
     public Client getClientByPlayerId(long playerId) {
         return clients.stream()
-                .filter(c -> c.getActivePlayer().getId().equals(playerId))
+                .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(playerId))
                 .findFirst()
                 .orElse(null);
     }

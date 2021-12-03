@@ -117,7 +117,7 @@ public class ProposalAnswerRequestHandler extends AbstractHandler {
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
                 Client friendRelationClient = GameManager.getInstance().getClients().stream()
-                        .filter(x -> x.getActivePlayer().getId().equals(myRelation.getFriend().getId()))
+                        .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(myRelation.getFriend().getId()))
                         .findFirst()
                         .orElse(null);
                 Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
@@ -155,7 +155,7 @@ public class ProposalAnswerRequestHandler extends AbstractHandler {
         proposalService.remove(proposal.getId());
 
         Client senderClient = GameManager.getInstance().getClients().stream()
-                .filter(x -> x.getActivePlayer().getId().equals(proposal.getSender().getId()))
+                .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(proposal.getSender().getId()))
                 .findFirst()
                 .orElse(null);
         if (senderClient != null) {

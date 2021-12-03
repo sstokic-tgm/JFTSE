@@ -53,7 +53,7 @@ public class StartBattleModeHandler extends AbstractHandler {
             Client client = clients.poll();
 
             RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst()
                     .orElse(null);
             if (rp == null || rp.getPosition() > 3) {

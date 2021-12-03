@@ -120,7 +120,7 @@ public class FinishGameTask extends AbstractTask {
             Client client = gameSession.getClients().poll();
 
             RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst().orElse(null);
             if (rp == null) {
                 gameSession.getClients().offer(client);
@@ -243,7 +243,7 @@ public class FinishGameTask extends AbstractTask {
             Client client = gameSession.getClients().poll();
 
             RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst().orElse(null);
             if (rp == null) {
                 gameSession.getClients().offer(client);
