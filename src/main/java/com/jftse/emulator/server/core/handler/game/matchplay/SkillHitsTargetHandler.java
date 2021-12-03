@@ -201,7 +201,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                         long timestamp = targetPlayer.getLastSkillHitsTarget().get(skill.getId());
 
                         long timePassed = timestamp - currentTimestamp;
-                        if (timePassed <= 30) {
+                        if (timePassed <= 15) {
                             targetPlayer.getLastSkillHitsTarget().remove(skill.getId());
                             return;
                         }
@@ -220,7 +220,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                         long timestamp = targetGuardian.getLastSkillHitsTarget().get(skill.getId());
 
                         long timePassed = timestamp - currentTimestamp;
-                        if (timePassed <= 30) {
+                        if (timePassed <= 15) {
                             targetGuardian.getLastSkillHitsTarget().remove(skill.getId());
                             return;
                         }
