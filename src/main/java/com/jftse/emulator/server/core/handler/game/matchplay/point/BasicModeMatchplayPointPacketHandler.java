@@ -180,7 +180,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                     byte oldLevel = player.getLevel();
                     if (playerReward != null) {
                         byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
-                        if (level < ConfigService.getInstance().getValue("player.level.max", 60))
+                        if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
                             player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                         player.setGold(player.getGold() + playerReward.getRewardGold());
                         player = levelService.setNewLevelStatusPoints(level, player);

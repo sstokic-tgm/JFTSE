@@ -142,7 +142,7 @@ public class FinishGameTask extends AbstractTask {
                 Player player = playerService.findById(client.getActivePlayer().getId());
                 byte oldLevel = player.getLevel();
                 byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
-                if (level < ConfigService.getInstance().getValue("player.level.max", 60))
+                if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
                     player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                 player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
@@ -260,7 +260,7 @@ public class FinishGameTask extends AbstractTask {
                 Player player = playerService.findById(client.getActivePlayer().getId());
                 byte oldLevel = player.getLevel();
                 byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
-                if (level < ConfigService.getInstance().getValue("player.level.max", 60))
+                if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
                     player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                 player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);

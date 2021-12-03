@@ -106,7 +106,7 @@ public class ChallengeService {
         byte level = levelService.getLevel(rewardExp, connection.getClient().getActivePlayer().getExpPoints(), connection.getClient().getActivePlayer().getLevel());
 
         Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
-        if (level < ConfigService.getInstance().getValue("player.level.max", 60))
+        if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (player.getLevel() < level))
             player.setExpPoints(player.getExpPoints() + rewardExp);
         player.setGold(player.getGold() + rewardGold);
 
