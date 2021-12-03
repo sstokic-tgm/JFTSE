@@ -43,6 +43,8 @@ public class ServiceManager {
     @Autowired
     private HomeService homeService;
     @Autowired
+    private PetService petService;
+    @Autowired
     private FriendService friendService;
     @Autowired
     private GiftService giftService;
