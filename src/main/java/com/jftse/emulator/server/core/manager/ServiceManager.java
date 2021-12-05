@@ -17,6 +17,8 @@ public class ServiceManager {
     private static ServiceManager instance;
 
     @Autowired
+    private AuthTokenService authTokenService;
+    @Autowired
     private AuthenticationService authenticationService;
     @Autowired
     private ClientWhitelistService clientWhitelistService;
