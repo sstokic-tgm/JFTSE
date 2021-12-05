@@ -140,6 +140,12 @@ public class Packet {
         return result;
     }
 
+    public long readLong() {
+        long result = BitKit.bytesToLong(this.data, readPosition);
+        this.readPosition += 8;
+        return result;
+    }
+
     public byte readByte() {
         byte result = this.data[this.readPosition];
         this.readPosition += 1;
