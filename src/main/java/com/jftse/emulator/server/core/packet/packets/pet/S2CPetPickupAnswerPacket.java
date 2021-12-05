@@ -6,7 +6,8 @@ import com.jftse.emulator.server.networking.packet.Packet;
 
 public class S2CPetPickupAnswerPacket extends Packet {
     public S2CPetPickupAnswerPacket(short result, Integer petType) {
-        super(PacketOperations.S2CPetPickupAnswer.getValueAsChar());
+        super((char) 0x1); // temp until PacketOperations are updated
+        // super(PacketOperations.S2CPetPickupAnswer.getValueAsChar());
 
         this.write(result);
         this.write(petType);
