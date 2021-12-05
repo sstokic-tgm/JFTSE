@@ -33,7 +33,6 @@ public class StringUtils {
 
     public static String randomString(int length) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        String pwd = RandomStringUtils.random(length, characters);
-        return pwd;
+        return RandomStringUtils.random(length, characters);
     }
 }
