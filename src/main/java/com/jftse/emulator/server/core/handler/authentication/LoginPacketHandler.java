@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.authentication;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.service.AuthTokenService;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
@@ -12,10 +14,13 @@ import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPa
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.core.service.AuthenticationService;
 import com.jftse.emulator.server.core.service.ClientWhitelistService;
+import com.jftse.emulator.server.database.model.auth.AuthToken;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 
 @Log4j2
@@ -24,11 +29,15 @@ public class LoginPacketHandler extends AbstractHandler {
 
     private final AuthenticationService authenticationService;
     private final ClientWhitelistService clientWhitelistService;
+    private final AuthTokenService authTokenService;
+
     private final ConfigService configService;
 
     public LoginPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         clientWhitelistService = ServiceManager.getInstance().getClientWhitelistService();
+        authTokenService = ServiceManager.getInstance().getAuthTokenService();
+
         configService = ServiceManager.getInstance().getConfigService();
     }
 
@@ -92,7 +101,21 @@ public class LoginPacketHandler extends AbstractHandler {
 
                 connection.getClient().setAccount(account);
 
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.SUCCESS);
+                AuthToken existingAuthToken = authTokenService.findAuthTokenByAccountName(account.getUsername());
+                if (existingAuthToken != null) {
+                    authTokenService.remove(existingAuthToken);
+                }
+
+                String token = StringUtils.randomString(16);
+                long timestamp = Instant.now().toEpochMilli();
+
+                AuthToken authToken = new AuthToken();
+                authToken.setToken(token);
+                authToken.setLoginTimestamp(timestamp);
+                authToken.setAccountName(account.getUsername());
+                authTokenService.save(authToken);
+
+                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.SUCCESS, token, timestamp);
                 connection.sendTCP(loginAnswerPacket);
 
                 S2CPlayerListPacket PlayerListPacket = new S2CPlayerListPacket(account, account.getPlayerList());
