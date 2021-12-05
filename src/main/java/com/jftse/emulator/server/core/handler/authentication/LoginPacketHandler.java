@@ -19,7 +19,6 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
