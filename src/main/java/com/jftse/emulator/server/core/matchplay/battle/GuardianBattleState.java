@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 @Setter
 public class GuardianBattleState {
+    private final int id;
     private AtomicInteger btItemId;
     private AtomicInteger position;
     private AtomicInteger maxHealth;
@@ -23,7 +24,8 @@ public class GuardianBattleState {
     private AtomicBoolean looted;
     private ConcurrentHashMap<Long, Long> lastSkillHitsTarget;
 
-    public GuardianBattleState(int btItemId, short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
+    public GuardianBattleState(int id, int btItemId, short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
+        this.id = id;
         this.btItemId = new AtomicInteger(btItemId);
         this.position = new AtomicInteger(position);
         this.maxHealth = new AtomicInteger(hp);

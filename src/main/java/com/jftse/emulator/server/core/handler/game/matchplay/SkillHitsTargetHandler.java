@@ -334,58 +334,59 @@ public class SkillHitsTargetHandler extends AbstractHandler {
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
         boolean triggerBossBattle = game.getIsHardMode().get() && timePlayingInSeconds < 300 || timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
         if ((hasBossGuardianStage || game.getIsHardMode().get()) && allGuardiansDead && triggerBossBattle && !game.getBossBattleActive().get()) {
-            GameSession gameSession = connection.getClient().getActiveGameSession();
-            gameSession.clearCountDownRunnable();
+            while (game.getBossBattleActive().compareAndSet(false, true)) {
+                GameSession gameSession = connection.getClient().getActiveGameSession();
+                gameSession.clearCountDownRunnable();
 
-            if (!hasBossGuardianStage && game.getIsHardMode().get()) {
-                GuardianStage guardianStage = game.getGuardianStage();
-                guardianStage.setBossGuardian((int) (Math.random() * 7) + 1);
-                game.setBossGuardianStage(guardianStage);
-            }
-
-            game.setCurrentStage(game.getBossGuardianStage());
-
-            int activePlayingPlayersCount = game.getPlayerBattleStates().size();
-            List<Byte> guardians = game.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
-            byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
-            game.getBossBattleActive().getAndSet(true);
-            game.getGuardianBattleStates().clear();
-
-            BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
-            GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
-            game.getGuardianBattleStates().add(bossGuardianBattleState);
-
-            if (game.getIsHardMode().get() && !hasBossGuardianStage) {
-                game.fillRemainingGuardianSlots(true, game, game.getBossGuardianStage(), guardians);
-                guardians.set(2, (byte) 0);
-            }
-
-            byte guardianStartPosition = 11;
-            for (int i = 0; i < guardians.stream().count(); i++) {
-                int guardianId = guardians.get(i);
-                if (guardianId == 0) continue;
-
-                if (game.getRandomGuardiansMode().get()) {
-                    guardianId = (int) (Math.random() * 72 + 1);
-                    guardians.set(i, (byte) guardianId);
+                if (!hasBossGuardianStage && game.getIsHardMode().get()) {
+                    GuardianStage guardianStage = game.getGuardianStage();
+                    guardianStage.setBossGuardian((int) (Math.random() * 7) + 1);
+                    game.setBossGuardianStage(guardianStage);
                 }
 
-                short guardianPosition = (short) (i + guardianStartPosition);
-                Guardian guardian = guardianService.findGuardianById((long) guardianId);
-                GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
-                game.getGuardianBattleStates().add(guardianBattleState);
+                game.setCurrentStage(game.getBossGuardianStage());
+
+                int activePlayingPlayersCount = game.getPlayerBattleStates().size();
+                List<Byte> guardians = game.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
+                byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
+                game.getGuardianBattleStates().clear();
+
+                BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
+                GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
+                game.getGuardianBattleStates().add(bossGuardianBattleState);
+
+                if (game.getIsHardMode().get() && !hasBossGuardianStage) {
+                    game.fillRemainingGuardianSlots(true, game, game.getBossGuardianStage(), guardians);
+                    guardians.set(2, (byte) 0);
+                }
+
+                byte guardianStartPosition = 11;
+                for (int i = 0; i < guardians.stream().count(); i++) {
+                    int guardianId = guardians.get(i);
+                    if (guardianId == 0) continue;
+
+                    if (game.getRandomGuardiansMode().get()) {
+                        guardianId = (int) (Math.random() * 72 + 1);
+                        guardians.set(i, (byte) guardianId);
+                    }
+
+                    short guardianPosition = (short) (i + guardianStartPosition);
+                    Guardian guardian = guardianService.findGuardianById((long) guardianId);
+                    GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
+                    game.getGuardianBattleStates().add(guardianBattleState);
+                }
+
+                game.resetStageStartTime();
+
+                S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
+                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
+
+                S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
+                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
+
+                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
+                gameSession.getRunnableEvents().add(runnableEvent);
             }
-
-            game.resetStageStartTime();
-
-            S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates());
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
-
-            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
-
-            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
-            gameSession.getRunnableEvents().add(runnableEvent);
         } else if (allGuardiansDead && !game.getFinished().get()) {
             ThreadManager.getInstance().newTask(new FinishGameTask(connection, true));
         }
