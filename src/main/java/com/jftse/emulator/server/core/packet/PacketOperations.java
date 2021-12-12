@@ -130,8 +130,10 @@ public enum PacketOperations {
     S2CMatchplayGiveRandomSkill(0x332E),
     S2CMatchplayGiveSpecificSkill(0x18E8),
     C2SGameServerConnectionProblem(0x3F1),
+
     C2CBallAnimationPacket(0x10E3),
     C2CPlayerAnimationPacket(0x32C9),
+    C2CSpiderMineExplodePacket(0x3391),
 
     S2CSetHost(0x177E),
     S2CSetHostUnknown(0x17DA),
@@ -489,6 +491,15 @@ public enum PacketOperations {
             }
         }
         return UnknownPacketHandler.class;
+    }
+
+    public static Class<? extends AbstractHandler> nullableHandlerOf(int packetId) {
+        for (PacketOperations pop : VALUES) {
+            if (pop.getValue().equals(packetId)) {
+                return pop.getHandler();
+            }
+        }
+        return null;
     }
 
     public static String getNameByValue(int value) {

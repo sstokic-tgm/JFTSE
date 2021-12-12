@@ -12,14 +12,16 @@ public interface ConnectionListener {
     default void received(Connection connection, Packet packet) {
         Class<? extends AbstractHandler> handlerClass = PacketOperations.handlerOf(packet.getPacketId());
 
-        try {
-            AbstractHandler handler = handlerClass.getDeclaredConstructor().newInstance();
-            handler.setConnection(connection);
-            if (handler.process(packet))
-                handler.handle();
+        if (handlerClass != null) {
+            try {
+                AbstractHandler handler = handlerClass.getDeclaredConstructor().newInstance();
+                handler.setConnection(connection);
+                if (handler.process(packet))
+                    handler.handle();
 
-        } catch (Exception e) {
-            onException(connection, e);
+            } catch (Exception e) {
+                onException(connection, e);
+            }
         }
     }
 
