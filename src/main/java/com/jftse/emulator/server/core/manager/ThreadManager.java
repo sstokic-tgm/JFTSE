@@ -32,15 +32,10 @@ public class ThreadManager {
                     Thread t = new Thread(r);
                     t.start();
                 });
-        stpe = new ScheduledThreadPoolExecutor(8, new ThreadFactory() {
-            private final AtomicInteger threadNumber = new AtomicInteger(1);
-
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
-                t.setName("ThreadManager-Worker-" + threadNumber.getAndIncrement());
-                return t;
-            }
+        stpe = new ScheduledThreadPoolExecutor(8, r -> {
+            Thread t = new Thread(r);
+            t.setName("ThreadManager-Worker");
+            return t;
         });
 
         stpe.setKeepAliveTime(5, TimeUnit.MINUTES);
