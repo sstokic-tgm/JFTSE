@@ -57,7 +57,7 @@ public class StartBattleModeHandler extends AbstractHandler {
                     .findFirst()
                     .orElse(null);
             if (rp == null || rp.getPosition() > 3) {
-                return;
+                continue;
             }
 
             Point playerLocation = new Point();
