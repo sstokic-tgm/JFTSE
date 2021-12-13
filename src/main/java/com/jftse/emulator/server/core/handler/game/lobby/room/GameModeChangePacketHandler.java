@@ -22,10 +22,6 @@ public class GameModeChangePacketHandler extends AbstractHandler {
     public void handle() {
         Room room = connection.getClient().getActiveRoom();
 
-        if (changeRoomGameModeRequestPacket.getMode() == GameMode.BATTLE) {
-            changeRoomGameModeRequestPacket.setMode((byte) GameMode.GUARDIAN);
-        }
-
         if (room != null) {
             synchronized (room) {
                 room.setMode(changeRoomGameModeRequestPacket.getMode());
