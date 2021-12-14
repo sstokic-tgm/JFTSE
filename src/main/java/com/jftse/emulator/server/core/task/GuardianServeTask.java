@@ -40,7 +40,7 @@ public class GuardianServeTask extends AbstractTask {
                 c.getConnection().sendTCP(triggerGuardianServePacket);
             }
         });
-
+        game.resetStageStartTime();
         ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession, game.getBossGuardianStage()));
     }
 }

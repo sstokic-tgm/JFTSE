@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,7 +21,11 @@ public class PlayerBattleState {
     private AtomicBoolean dead;
     private ConcurrentHashMap<Long, Long> lastQS;
     private ConcurrentHashMap<Long, Integer> lastQSCounter;
-    private ConcurrentHashMap<Long, Long> lastSkillHitsTarget;
+
+    private AtomicBoolean shieldActive;
+    private AtomicBoolean miniamActive;
+    private AtomicBoolean apollonFlashActive;
+    private LinkedBlockingDeque<SkillUse> skillUseDeque;
 
     public PlayerBattleState(short position, short hp, int str, int sta, int dex, int will) {
         this.position = new AtomicInteger(position);
@@ -33,6 +38,10 @@ public class PlayerBattleState {
         this.dead = new AtomicBoolean(false);
         lastQS = new ConcurrentHashMap<>();
         lastQSCounter = new ConcurrentHashMap<>();
-        lastSkillHitsTarget = new ConcurrentHashMap<>(4);
+
+        shieldActive = new AtomicBoolean(false);
+        miniamActive = new AtomicBoolean(false);
+        apollonFlashActive = new AtomicBoolean(false);
+        skillUseDeque = new LinkedBlockingDeque<>();
     }
 }

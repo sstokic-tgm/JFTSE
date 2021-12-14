@@ -31,6 +31,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
     private AtomicInteger lastCrystalId;
     private AtomicInteger lastGuardianServeSide;
+    private AtomicInteger spiderMineIdentifier;
 
     private final PlayerCombatSystem playerCombatSystem;
 
@@ -50,6 +51,7 @@ public class MatchplayBattleGame extends MatchplayGame {
         this.lastCrystalId = new AtomicInteger(-1);
         this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.RedTeam);
         this.willDamages = new ArrayList<>();
+        this.spiderMineIdentifier = new AtomicInteger(0);
         this.setFinished(new AtomicBoolean(false));
 
         playerCombatSystem = new PlayerCombatSystem(this);

@@ -55,6 +55,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private AtomicInteger goldPot;
     private AtomicBoolean isHardMode;
     private AtomicBoolean randomGuardiansMode;
+    private AtomicInteger spiderMineIdentifier;
 
     private final PlayerCombatSystem playerCombatSystem;
     private final GuardianCombatSystem guardianCombatSystem;
@@ -80,6 +81,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.goldPot = new AtomicInteger(0);
         this.isHardMode = new AtomicBoolean(false);
         this.randomGuardiansMode = new AtomicBoolean(false);
+        this.spiderMineIdentifier = new AtomicInteger(0);
         this.setFinished(new AtomicBoolean(false));
 
         playerCombatSystem = new PlayerCombatSystem(this);

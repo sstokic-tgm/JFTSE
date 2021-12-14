@@ -413,4 +413,20 @@ public class GameManager {
             }
         }
     }
+
+    public void sendPacketToAllRelayClientsInSameGameSession(Packet packet, Connection connection) {
+        GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession != null) {
+            synchronized (gameSession) {
+                ConcurrentLinkedDeque<Client> clientsInGameSession = new ConcurrentLinkedDeque<>(gameSession.getClientsInRelay());
+                int clientsInGameSessionSize = clientsInGameSession.size();
+                for (int i = 0; i < clientsInGameSessionSize; i++) {
+                    Client client = clientsInGameSession.poll();
+                    if (client.getConnection() != null && client.getConnection().isConnected()) {
+                        client.getConnection().sendTCP(packet);
+                    }
+                }
+            }
+        }
+    }
 }
