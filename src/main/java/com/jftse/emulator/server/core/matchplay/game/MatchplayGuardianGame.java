@@ -23,6 +23,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,6 +57,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private AtomicBoolean isHardMode;
     private AtomicBoolean randomGuardiansMode;
     private AtomicInteger spiderMineIdentifier;
+    private ConcurrentLinkedDeque<ScheduledFuture<?>> scheduledFutures;
 
     private final PlayerCombatSystem playerCombatSystem;
     private final GuardianCombatSystem guardianCombatSystem;
@@ -82,6 +84,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.isHardMode = new AtomicBoolean(false);
         this.randomGuardiansMode = new AtomicBoolean(false);
         this.spiderMineIdentifier = new AtomicInteger(0);
+        this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.setFinished(new AtomicBoolean(false));
 
         playerCombatSystem = new PlayerCombatSystem(this);

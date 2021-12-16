@@ -87,10 +87,13 @@ public class FinishGameTask extends AbstractTask {
         MatchplayGame game = gameSession.getActiveMatchplayGame();
 
         if (game != null && !game.getFinished().get()) {
-            if (game instanceof MatchplayBattleGame)
+            if (game instanceof MatchplayBattleGame) {
+                ((MatchplayBattleGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
                 finishBattleGame(connection, (MatchplayBattleGame) game);
-            else if (game instanceof MatchplayGuardianGame)
+            } else if (game instanceof MatchplayGuardianGame) {
+                ((MatchplayGuardianGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
                 finishGuardianGame(connection, (MatchplayGuardianGame) game, wonGame);
+            }
         }
     }
 

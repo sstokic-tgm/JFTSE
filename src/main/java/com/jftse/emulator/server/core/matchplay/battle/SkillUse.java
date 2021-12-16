@@ -106,6 +106,7 @@ public class SkillUse {
                 else if (dex > 59)
                     shotCount += 4;
             }
+            case 21 -> shotCount = 1; // inferno, special treatment
             default -> shotCount = skill.getShotCnt(); // all other
         }
         this.shotCount.set(shotCount);
@@ -141,5 +142,9 @@ public class SkillUse {
 
     public boolean isEarth() {
         return skill.getId().equals(23L);
+    }
+
+    public boolean isInferno() {
+        return skill.getId().equals(21L);
     }
 }

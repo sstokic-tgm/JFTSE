@@ -29,6 +29,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -74,149 +75,174 @@ public class SkillHitsTargetHandler extends AbstractHandler {
         boolean useSkill = false;
 
         if (skill != null) {
-            if (skillHitsTarget.getTargetPosition() < 4) {
-                if (game instanceof MatchplayBattleGame) {
-                    PlayerBattleState playerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> (skillHitsTarget.getAttackerPosition() == 4 && x.getPosition().get() == skillHitsTarget.getTargetPosition())
-                                    || x.getPosition().get() == skillHitsTarget.getAttackerPosition())
+            if (game instanceof MatchplayBattleGame) {
+                PlayerBattleState playerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                        .filter(x ->
+                                (skillHitsTarget.getAttackerPosition() == 4 && x.getPosition().get() == skillHitsTarget.getTargetPosition()) ||
+                                        (skillHitsTarget.getAttackerPosition() < 4 && x.getPosition().get() == skillHitsTarget.getAttackerPosition()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (playerBattleState != null) {
+                    final LinkedBlockingDeque<SkillUse> skillUses = new LinkedBlockingDeque<>(playerBattleState.getSkillUseDeque());
+
+                    SkillUse skillUse = skillUses.stream()
+                            .filter(su -> su.getSkill().getId().equals(skill.getId())
+                                    &&
+                                    (
+                                            (su.getAttackerPosition() == su.getTargetPosition()
+                                                    && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                    ||
+                                                    (su.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
+                                                            && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                    ))
                             .findFirst()
-                            .orElse(null);
+                            .orElseGet(() -> {
+                                PlayerBattleState pb = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                        .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                        .findFirst()
+                                        .orElse(null);
+                                if (pb != null) {
+                                    skillUses.clear();
+                                    skillUses.addAll(pb.getSkillUseDeque());
 
-                    if (playerBattleState != null) {
-                        int skillUseDequeSize = playerBattleState.getSkillUseDeque().size();
-                        for (int i = 0; i < skillUseDequeSize; i++) {
-                            try {
-                                log.debug("SkillHitsTargetHandler: take() from deque\n" +
-                                        "skillUseDequeSize: " + skillUseDequeSize
-                                );
-                                SkillUse current = playerBattleState.getSkillUseDeque().take();
-                                log.debug("SkillHitsTargetHandler: taken skill\n" +
-                                        "skillUseDequeSize: " + skillUseDequeSize + "\n" +
-                                        "skill Name: " + current.getSkill().getName() + "\n" +
-                                        "skill id: " + current.getSkill().getId() + "\n" +
-                                        "skillHitsTarget.getAttackerPosition(): " + skillHitsTarget.getAttackerPosition() + "\n" +
-                                        "skillHitsTarget.getTargetPosition(): " + skillHitsTarget.getTargetPosition() + "\n" +
-                                        "current.getUsesSkill().getAttackerPosition(): " + current.getAttackerPosition() + "\n" +
-                                        "current.getUsesSkill().getTargetPosition(): " + current.getTargetPosition()
-                                );
-
-                                if (current.getSkill().getId().equals(skill.getId())
-                                        &&
-                                        (
-                                                (current.getAttackerPosition() == current.getTargetPosition()
-                                                        && current.getTargetPosition() == skillHitsTarget.getTargetPosition())
-                                                        ||
-                                                        (current.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
-                                                                && current.getTargetPosition() == skillHitsTarget.getTargetPosition())
-                                                        ||
-                                                        (current.isMiniam()
-                                                                && current.getAttackerPosition() == skillHitsTarget.getAttackerPosition())
-                                                        ||
-                                                        (current.isApollonFlash()
-                                                                && current.getAttackerPosition() == skillHitsTarget.getAttackerPosition())
-                                        )
-                                ) {
-                                    log.debug("SkillHitsTargetHandler: found skill which is same");
-
-                                    if ((current.isMiniam() || current.isApollonFlash()) && current.getUsed().get()) {
-                                        PlayerBattleState targetPlayerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                                                .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
-                                                .findFirst()
-                                                .orElse(null);
-
-                                        if (targetPlayerBattleState != null) {
-                                            boolean miniamActive = targetPlayerBattleState.getMiniamActive().get();
-                                            boolean apollonFlashActive = targetPlayerBattleState.getApollonFlashActive().get();
-
-                                            if ((current.isMiniam() && miniamActive) || (current.isApollonFlash() && apollonFlashActive)) {
-                                                log.debug((current.isMiniam() ? "miniam " : "apollon flash ") + "already used");
-                                                continue;
-                                            }
-                                            if (current.isMiniam()) {
-                                                targetPlayerBattleState.getMiniamActive().compareAndSet(!miniamActive, true);
-                                            }
-                                            if (current.isApollonFlash()) {
-                                                targetPlayerBattleState.getApollonFlashActive().compareAndSet(!apollonFlashActive, true);
-                                            }
-                                        }
-                                    }
-
-                                    if ((Instant.now().toEpochMilli() - current.getTimestamp()) < 18 && current.getSkill().getShotType() != 0 && !current.getUsed().get()) {
-                                        log.debug("damage to fast");
-                                        playerBattleState.getSkillUseDeque().put(current);
-                                        continue;
-                                    }
-
-                                    if (current.isSpiderMine() && current.getSpiderMineIsPlaced().get() && current.getSpiderMineIsExploded().get() && current.getUsed().get()) {
-                                        log.debug("spider mine already exploded");
-                                        continue;
-                                    }
-
-                                    if (!current.getPlayTimePassed().get() || !current.getUsed().get()) {
-                                        log.debug("SkillHitsTargetHandler: skill not used up yet");
-
-                                        current.getShotCount().getAndDecrement();
-                                        log.debug("shotCount: " + current.getShotCount() + "\n" +
-                                                "used: " + current.getUsed().get());
-
-                                        if (current.getShotCount().get() <= 0) {
-                                            current.getUsed().set(true);
-                                            if (current.isSpiderMine() && !current.getSpiderMineIsExploded().compareAndSet(false, true)) {
-                                                log.debug("spider mine already marked as exploded");
-                                            }
-                                            if (current.isShield()) {
-                                                PlayerBattleState targetPlayerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                                                        .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
-                                                        .findFirst()
-                                                        .orElse(null);
-                                                if (targetPlayerBattleState != null) {
-                                                    targetPlayerBattleState.getShieldActive().compareAndSet(false, true);
-                                                }
-                                            }
-                                        } else {
-                                            current.setTimestamp(Instant.now().toEpochMilli());
-                                        }
-
-                                        if (!current.getPlayTimePassed().get()) {
-                                            playerBattleState.getSkillUseDeque().put(current);
-                                        }
-
-                                        if (!current.getUsed().get()) {
-                                            playerBattleState.getSkillUseDeque().put(current);
-                                        }
-                                        useSkill = true;
-                                    } else {
-                                        PlayerBattleState targetPlayerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                                                .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
-                                                .findFirst()
-                                                .orElse(null);
-                                        if (targetPlayerBattleState != null) {
-                                            if (current.isMiniam()) {
-                                                targetPlayerBattleState.getMiniamActive().set(false);
-                                            }
-                                            if (current.isApollonFlash()) {
-                                                targetPlayerBattleState.getApollonFlashActive().set(false);
-                                            }
-                                            if (current.isShield()) {
-                                                targetPlayerBattleState.getShieldActive().set(false);
-                                            }
-                                        }
-
-                                        log.debug("skill is used up");
-                                        continue;
-                                    }
-                                    break;
+                                    return skillUses.stream()
+                                            .filter(su -> su.getSkill().getId().equals(skill.getId())
+                                                    &&
+                                                    (
+                                                            (su.getAttackerPosition() == su.getTargetPosition()
+                                                                    && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                                    ||
+                                                                    (su.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
+                                                                            && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                    ))
+                                            .findFirst()
+                                            .orElse(null);
                                 } else {
-                                    log.debug("skill not same. put to deque");
-                                    playerBattleState.getSkillUseDeque().put(current);
-                                    log.debug("put to deque");
+                                    return null;
                                 }
-                            } catch (InterruptedException e) {
-                                log.error(e.getMessage(), e);
-                            }
+                            });
+
+                    if (skillUse != null) {
+                        log.debug("SkillHitsTargetHandler: found skill which is same\n" +
+                                "skillUseDequeSize: " + skillUses.size() + "\n" +
+                                "skill Name: " + skillUse.getSkill().getName() + "\n" +
+                                "skill id: " + skillUse.getSkill().getId() + "\n" +
+                                "skillHitsTarget.getAttackerPosition(): " + skillHitsTarget.getAttackerPosition() + "\n" +
+                                "skillHitsTarget.getTargetPosition(): " + skillHitsTarget.getTargetPosition() + "\n" +
+                                "current.getUsesSkill().getAttackerPosition(): " + skillUse.getAttackerPosition() + "\n" +
+                                "current.getUsesSkill().getTargetPosition(): " + skillUse.getTargetPosition()
+                        );
+
+                        //if ((Instant.now().toEpochMilli() - skillUse.getTimestamp()) < 2 && skillUse.getSkill().getShotType() != 0 && !skillUse.getUsed().get()) {
+                        //    log.debug("damage to fast");
+                        //} else {
+                        if (skillUse.isSpiderMine() && skillUse.getSpiderMineIsPlaced().get() && skillUse.getSpiderMineIsExploded().get() && skillUse.getUsed().get()) {
+                            log.debug("spider mine already exploded");
+                            boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                            log.debug("removed from skillUseDeque: " + removeResult);
                         }
+
+                        boolean shieldActivated = false;
+                        if (skillUse.isShield() && skillUse.getUsed().get()) {
+                            PlayerBattleState targetPlayerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition() && x.getShieldActive().get())
+                                    .findFirst()
+                                    .orElse(null);
+                            if (targetPlayerBattleState != null)
+                                shieldActivated = true;
+                        }
+                        boolean miniamActivated = false;
+                        if (skillUse.isMiniam() && skillUse.getUsed().get()) {
+                            PlayerBattleState targetPlayerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                    .findFirst()
+                                    .orElse(null);
+                            if (targetPlayerBattleState != null)
+                                miniamActivated = true;
+                        }
+                        boolean apollonFlashActivated = false;
+                        if (skillUse.isApollonFlash() && skillUse.getUsed().get()) {
+                            PlayerBattleState targetPlayerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                    .findFirst()
+                                    .orElse(null);
+                            if (targetPlayerBattleState != null)
+                                apollonFlashActivated = true;
+                        }
+
+                        if ((!skillUse.getPlayTimePassed().get() || !skillUse.getUsed().get()) && !(shieldActivated || miniamActivated || apollonFlashActivated) && !(skillUse.getPlayTimePassed().get() && skillUse.getUsed().get())) {
+                            log.debug("SkillHitsTargetHandler: skill not used up yet");
+
+                            skillUse.getShotCount().getAndDecrement();
+                            log.debug("shotCount: " + skillUse.getShotCount() + "\n" +
+                                    "used: " + skillUse.getUsed().get());
+
+                            if (skillUse.getShotCount().get() <= 0) {
+                                skillUse.getUsed().set(true);
+                                if (skillUse.isSpiderMine() && !skillUse.getSpiderMineIsExploded().compareAndSet(false, true)) {
+                                    log.debug("spider mine already marked as exploded");
+                                }
+                                if (skillUse.isShield()) {
+                                    ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .ifPresent(targetPlayerBattleState -> targetPlayerBattleState.getShieldActive().compareAndSet(false, true));
+                                }
+                                if (skillUse.isMiniam()) {
+                                    ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .ifPresent(targetPlayerBattleState -> targetPlayerBattleState.getMiniamActive().compareAndSet(false, true));
+                                }
+                                if (skillUse.isApollonFlash()) {
+                                    ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .ifPresent(targetPlayerBattleState -> targetPlayerBattleState.getApollonFlashActive().compareAndSet(false, true));
+                                }
+
+                                if (!(skillUse.isSpiderMine() && skillUse.getSpiderMineIsPlaced().get() && skillUse.getSpiderMineIsExploded().get())) {
+                                    boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                    log.debug("removed from skillUseDeque: " + removeResult);
+
+                                    skillUse.getPlayTimePassed().compareAndSet(false, true);
+                                }
+                            } else {
+                                skillUse.setTimestamp(Instant.now().toEpochMilli());
+                            }
+                            useSkill = true;
+                        } else {
+                            PlayerBattleState targetPlayerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                    .findFirst()
+                                    .orElse(null);
+                            if (targetPlayerBattleState != null) {
+                                if (skillUse.isMiniam()) {
+                                    targetPlayerBattleState.getMiniamActive().set(false);
+                                }
+                                if (skillUse.isApollonFlash()) {
+                                    targetPlayerBattleState.getApollonFlashActive().set(false);
+                                }
+                                if (skillUse.isShield()) {
+                                    targetPlayerBattleState.getShieldActive().set(false);
+                                }
+
+                                boolean removeResult = targetPlayerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                log.debug("removed from skillUseDeque: " + removeResult);
+                            }
+
+                            log.debug("skill is used up");
+                            boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                            log.debug("removed from skillUseDeque: " + removeResult);
+                        }
+                        //}
                     }
-                } else {
+                    boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.getPlayTimePassed().get());
+                    log.debug("removed from skillUseDeque: " + removeResult);
+                }
+            } else {
+                if (skillHitsTarget.getTargetPosition() < 4) {
                     GuardianBattleState guardianBattleState = null;
                     PlayerBattleState playerBattleState = null;
 
@@ -233,299 +259,344 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                     }
 
                     if (guardianBattleState != null || playerBattleState != null) {
-                        int skillUseDequeSize;
-                        if (guardianBattleState != null) {
-                            skillUseDequeSize = guardianBattleState.getSkillUseDeque().size();
-                        } else {
-                            skillUseDequeSize = playerBattleState.getSkillUseDeque().size();
-                        }
+                        final LinkedBlockingDeque<SkillUse> skillUses = new LinkedBlockingDeque<>(guardianBattleState == null ?
+                                playerBattleState.getSkillUseDeque() :
+                                guardianBattleState.getSkillUseDeque());
 
-                        for (int i = 0; i < skillUseDequeSize; i++) {
-                            try {
-                                log.debug("SkillHitsTargetHandler: take() from deque\n" +
-                                        "skillUseDequeSize: " + skillUseDequeSize
-                                );
-                                SkillUse current = guardianBattleState != null ?
-                                        guardianBattleState.getSkillUseDeque().take() :
-                                        playerBattleState.getSkillUseDeque().take();
-                                log.debug("SkillHitsTargetHandler: taken skill\n" +
-                                        "skillUseDequeSize: " + skillUseDequeSize + "\n" +
-                                        "skill Name: " + current.getSkill().getName() + "\n" +
-                                        "skill id: " + current.getSkill().getId() + "\n" +
-                                        "skillHitsTarget.getAttackerPosition(): " + skillHitsTarget.getAttackerPosition() + "\n" +
-                                        "skillHitsTarget.getTargetPosition(): " + skillHitsTarget.getTargetPosition() + "\n" +
-                                        "current.getUsesSkill().getAttackerPosition(): " + current.getAttackerPosition() + "\n" +
-                                        "current.getUsesSkill().getTargetPosition(): " + current.getTargetPosition()
-                                );
-
-                                if (current.getSkill().getId().equals(skill.getId())
+                        SkillUse skillUse = skillUses.stream()
+                                .filter(su -> su.getSkill().getId().equals(skill.getId())
                                         &&
                                         (
-                                                (current.getAttackerPosition() == current.getTargetPosition()
-                                                        && current.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                (su.getAttackerPosition() == su.getTargetPosition()
+                                                        && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
                                                         ||
-                                                        (current.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
-                                                                && current.getTargetPosition() == skillHitsTarget.getTargetPosition())
-                                                        ||
-                                                        (current.isMiniam()
-                                                                && current.getAttackerPosition() == skillHitsTarget.getAttackerPosition())
-                                                        ||
-                                                        (current.isApollonFlash()
-                                                                && current.getAttackerPosition() == skillHitsTarget.getAttackerPosition())
-                                        )
-                                ) {
-                                    log.debug("SkillHitsTargetHandler: found skill which is same");
+                                                        (su.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
+                                                                && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                        ))
+                                .findFirst()
+                                .orElseGet(() -> {
+                                    PlayerBattleState pb = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (pb != null) {
+                                        skillUses.clear();
+                                        skillUses.addAll(pb.getSkillUseDeque());
 
-                                    if ((current.isMiniam() || current.isApollonFlash()) && current.getUsed().get()) {
-                                        PlayerBattleState targetPlayerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                                                .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                        return skillUses.stream()
+                                                .filter(su -> su.getSkill().getId().equals(skill.getId())
+                                                        &&
+                                                        (
+                                                                (su.getAttackerPosition() == su.getTargetPosition()
+                                                                        && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                                        ||
+                                                                        (su.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
+                                                                                && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                        ))
                                                 .findFirst()
                                                 .orElse(null);
-
-                                        if (targetPlayerBattleState != null) {
-                                            boolean miniamActive = targetPlayerBattleState.getMiniamActive().get();
-                                            boolean apollonFlashActive = targetPlayerBattleState.getApollonFlashActive().get();
-
-                                            if ((current.isMiniam() && miniamActive) || (current.isApollonFlash() && apollonFlashActive)) {
-                                                log.debug((current.isMiniam() ? "miniam " : "apollon flash ") + "already used");
-                                                continue;
-                                            }
-                                            if (current.isMiniam()) {
-                                                targetPlayerBattleState.getMiniamActive().compareAndSet(!miniamActive, true);
-                                            }
-                                            if (current.isApollonFlash()) {
-                                                targetPlayerBattleState.getApollonFlashActive().compareAndSet(!apollonFlashActive, true);
-                                            }
-                                        }
-                                    }
-
-                                    if ((Instant.now().toEpochMilli() - current.getTimestamp()) < 18 && current.getSkill().getShotType() != 0 && !current.getUsed().get()) {
-                                        log.debug("damage to fast");
-                                        if (guardianBattleState != null) {
-                                            guardianBattleState.getSkillUseDeque().put(current);
-                                        } else {
-                                            playerBattleState.getSkillUseDeque().put(current);
-                                        }
-                                        continue;
-                                    }
-
-                                    if (current.isSpiderMine() && current.getSpiderMineIsPlaced().get() && current.getSpiderMineIsExploded().get() && current.getUsed().get()) {
-                                        log.debug("spider mine already exploded");
-                                        continue;
-                                    }
-
-                                    if (!current.getPlayTimePassed().get() || !current.getUsed().get()) {
-                                        log.debug("SkillHitsTargetHandler: skill not used up yet");
-
-                                        current.getShotCount().getAndDecrement();
-                                        log.debug("shotCount: " + current.getShotCount() + "\n" +
-                                                "used: " + current.getUsed().get());
-
-                                        if (current.getShotCount().get() <= 0) {
-                                            current.getUsed().set(true);
-                                            if (current.isSpiderMine() && !current.getSpiderMineIsExploded().compareAndSet(false, true)) {
-                                                log.debug("spider mine already marked as exploded");
-                                            }
-                                            if (current.isShield()) {
-                                                PlayerBattleState targetPlayerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                                                        .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
-                                                        .findFirst()
-                                                        .orElse(null);
-                                                if (targetPlayerBattleState != null) {
-                                                    targetPlayerBattleState.getShieldActive().compareAndSet(false, true);
-                                                }
-                                            }
-                                        } else {
-                                            current.setTimestamp(Instant.now().toEpochMilli());
-                                        }
-
-                                        if (!current.getPlayTimePassed().get()) {
-                                            if (guardianBattleState != null) {
-                                                guardianBattleState.getSkillUseDeque().put(current);
-                                            } else {
-                                                playerBattleState.getSkillUseDeque().put(current);
-                                            }
-                                        }
-
-                                        if (!current.getUsed().get()) {
-                                            if (guardianBattleState != null) {
-                                                guardianBattleState.getSkillUseDeque().put(current);
-                                            } else {
-                                                playerBattleState.getSkillUseDeque().put(current);
-                                            }
-                                        }
-                                        useSkill = true;
                                     } else {
-                                        PlayerBattleState targetPlayerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                                                .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
-                                                .findFirst()
-                                                .orElse(null);
-                                        if (targetPlayerBattleState != null) {
-                                            if (current.isMiniam()) {
-                                                targetPlayerBattleState.getMiniamActive().set(false);
-                                            }
-                                            if (current.isApollonFlash()) {
-                                                targetPlayerBattleState.getApollonFlashActive().set(false);
-                                            }
-                                            if (current.isShield()) {
-                                                targetPlayerBattleState.getShieldActive().set(false);
-                                            }
-                                        }
-
-                                        log.debug("skill is used up");
-                                        continue;
+                                        return null;
                                     }
-                                    break;
-                                } else {
-                                    log.debug("skill not same. put to deque");
-                                    if (guardianBattleState != null) {
-                                        guardianBattleState.getSkillUseDeque().put(current);
-                                    } else {
-                                        playerBattleState.getSkillUseDeque().put(current);
-                                    }
-                                    log.debug("put to deque");
-                                }
-                            } catch (InterruptedException e) {
-                                log.error(e.getMessage(), e);
-                            }
-                        }
-                    }
-                }
-            } else {
-                GuardianBattleState guardianBattleState = null;
-                PlayerBattleState playerBattleState = null;
+                                });
 
-                if (skillHitsTarget.getAttackerPosition() == 4) {
-                    guardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
-                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
-                            .findFirst()
-                            .orElse(null);
-                } else {
-                    playerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> x.getPosition().get() == skillHitsTarget.getAttackerPosition())
-                            .findFirst()
-                            .orElse(null);
-                }
-
-                if (guardianBattleState != null || playerBattleState != null) {
-                    int skillUseDequeSize;
-                    if (guardianBattleState != null) {
-                        skillUseDequeSize = guardianBattleState.getSkillUseDeque().size();
-                    } else {
-                        skillUseDequeSize = playerBattleState.getSkillUseDeque().size();
-                    }
-
-                    for (int i = 0; i < skillUseDequeSize; i++) {
-                        try {
-                            log.debug("SkillHitsTargetHandler: take() from deque\n" +
-                                    "skillUseDequeSize: " + skillUseDequeSize
-                            );
-                            SkillUse current = playerBattleState.getSkillUseDeque().take();
-                            log.debug("SkillHitsTargetHandler: taken skill\n" +
-                                    "skillUseDequeSize: " + skillUseDequeSize + "\n" +
-                                    "skill Name: " + current.getSkill().getName() + "\n" +
-                                    "skill id: " + current.getSkill().getId() + "\n" +
+                        if (skillUse != null) {
+                            log.debug("SkillHitsTargetHandler: found skill which is same\n" +
+                                    "skillUseDequeSize: " + skillUses.size() + "\n" +
+                                    "skill Name: " + skillUse.getSkill().getName() + "\n" +
+                                    "skill id: " + skillUse.getSkill().getId() + "\n" +
                                     "skillHitsTarget.getAttackerPosition(): " + skillHitsTarget.getAttackerPosition() + "\n" +
                                     "skillHitsTarget.getTargetPosition(): " + skillHitsTarget.getTargetPosition() + "\n" +
-                                    "current.getUsesSkill().getAttackerPosition(): " + current.getAttackerPosition() + "\n" +
-                                    "current.getUsesSkill().getTargetPosition(): " + current.getTargetPosition()
+                                    "current.getUsesSkill().getAttackerPosition(): " + skillUse.getAttackerPosition() + "\n" +
+                                    "current.getUsesSkill().getTargetPosition(): " + skillUse.getTargetPosition()
                             );
 
-                            if (current.getSkill().getId().equals(skill.getId())
-                                    &&
-                                    (
-                                            (current.getAttackerPosition() == current.getTargetPosition()
-                                                    && current.getTargetPosition() == skillHitsTarget.getTargetPosition())
-                                                    ||
-                                                    (current.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
-                                                            && current.getTargetPosition() == skillHitsTarget.getTargetPosition())
-                                                    ||
-                                                    (current.isMiniam()
-                                                            && current.getAttackerPosition() == skillHitsTarget.getAttackerPosition())
-                                                    ||
-                                                    (current.isApollonFlash()
-                                                            && current.getAttackerPosition() == skillHitsTarget.getAttackerPosition())
-                                    )
-                            ) {
-                                log.debug("SkillHitsTargetHandler: found skill which is same");
+                            //if ((Instant.now().toEpochMilli() - skillUse.getTimestamp()) < 2 && skillUse.getSkill().getShotType() != 0 && !skillUse.getUsed().get()) {
+                            //    log.debug("damage to fast");
+                            //} else {
+                                if (skillUse.isSpiderMine() && skillUse.getSpiderMineIsPlaced().get() && skillUse.getSpiderMineIsExploded().get() && skillUse.getUsed().get()) {
+                                    log.debug("spider mine already exploded");
+                                    if (playerBattleState != null) {
+                                        boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
+                                    }
+                                    if (guardianBattleState != null) {
+                                        boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
+                                    }
+                                }
 
-                                if ((current.isMiniam() || current.isApollonFlash()) && current.getUsed().get()) {
+                                boolean shieldActivated = false;
+                                if (skillUse.isShield() && skillUse.getUsed().get()) {
+                                    GuardianBattleState targetGuardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition() && x.getShieldActive().get())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (targetGuardianBattleState != null)
+                                        shieldActivated = true;
+                                }
+                                boolean miniamActivated = false;
+                                if (skillUse.isMiniam() && skillUse.getUsed().get()) {
                                     GuardianBattleState targetGuardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
                                             .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
                                             .findFirst()
                                             .orElse(null);
-
-                                    if (targetGuardianBattleState != null) {
-                                        boolean miniamActive = targetGuardianBattleState.getMiniamActive().get();
-                                        boolean apollonFlashActive = targetGuardianBattleState.getApollonFlashActive().get();
-
-                                        if ((current.isMiniam() && miniamActive) || (current.isApollonFlash() && apollonFlashActive)) {
-                                            log.debug((current.isMiniam() ? "miniam " : "apollon flash ") + "already used");
-                                            continue;
-                                        }
-                                        if (current.isMiniam()) {
-                                            targetGuardianBattleState.getMiniamActive().compareAndSet(!miniamActive, true);
-                                        }
-                                        if (current.isApollonFlash()) {
-                                            targetGuardianBattleState.getApollonFlashActive().compareAndSet(!apollonFlashActive, true);
-                                        }
-                                    }
+                                    if (targetGuardianBattleState != null)
+                                        miniamActivated = true;
+                                }
+                                boolean apollonFlashActivated = false;
+                                if (skillUse.isApollonFlash() && skillUse.getUsed().get()) {
+                                    GuardianBattleState targetGuardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (targetGuardianBattleState != null)
+                                        apollonFlashActivated = true;
                                 }
 
-                                if ((Instant.now().toEpochMilli() - current.getTimestamp()) < 18 && current.getSkill().getShotType() != 0 && !current.getUsed().get()) {
-                                    log.debug("damage to fast");
-                                    if (guardianBattleState != null) {
-                                        guardianBattleState.getSkillUseDeque().put(current);
-                                    } else {
-                                        playerBattleState.getSkillUseDeque().put(current);
-                                    }
-                                    continue;
-                                }
-
-                                if (current.isSpiderMine() && current.getSpiderMineIsPlaced().get() && current.getSpiderMineIsExploded().get() && current.getUsed().get()) {
-                                    log.debug("spider mine already exploded");
-                                    continue;
-                                }
-
-                                if (!current.getPlayTimePassed().get() || !current.getUsed().get()) {
+                                if ((!skillUse.getPlayTimePassed().get() || !skillUse.getUsed().get()) && !(shieldActivated || miniamActivated || apollonFlashActivated) && !(skillUse.getPlayTimePassed().get() && skillUse.getUsed().get())) {
                                     log.debug("SkillHitsTargetHandler: skill not used up yet");
 
-                                    current.getShotCount().getAndDecrement();
-                                    log.debug("shotCount: " + current.getShotCount() + "\n" +
-                                            "used: " + current.getUsed().get());
+                                    skillUse.getShotCount().getAndDecrement();
+                                    log.debug("shotCount: " + skillUse.getShotCount() + "\n" +
+                                            "used: " + skillUse.getUsed().get());
 
-                                    if (current.getShotCount().get() <= 0) {
-                                        current.getUsed().set(true);
-                                        if (current.isSpiderMine() && !current.getSpiderMineIsExploded().compareAndSet(false, true)) {
+                                    if (skillUse.getShotCount().get() <= 0) {
+                                        skillUse.getUsed().set(true);
+                                        if (skillUse.isSpiderMine() && !skillUse.getSpiderMineIsExploded().compareAndSet(false, true)) {
                                             log.debug("spider mine already marked as exploded");
                                         }
-                                        if (current.isShield()) {
-                                            GuardianBattleState targetGuardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                        if (skillUse.isShield()) {
+                                            ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
                                                     .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
                                                     .findFirst()
-                                                    .orElse(null);
-                                            if (targetGuardianBattleState != null) {
-                                                targetGuardianBattleState.getShieldActive().compareAndSet(false, true);
+                                                    .ifPresent(targetPlayerBattleState -> targetPlayerBattleState.getShieldActive().compareAndSet(false, true));
+                                        }
+                                        if (skillUse.isMiniam()) {
+                                            ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                                    .findFirst()
+                                                    .ifPresent(targetPlayerBattleState -> targetPlayerBattleState.getMiniamActive().compareAndSet(false, true));
+                                        }
+                                        if (skillUse.isApollonFlash()) {
+                                            ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                                    .findFirst()
+                                                    .ifPresent(targetPlayerBattleState -> targetPlayerBattleState.getApollonFlashActive().compareAndSet(false, true));
+                                        }
+
+                                        if (!(skillUse.isSpiderMine() && skillUse.getSpiderMineIsPlaced().get() && skillUse.getSpiderMineIsExploded().get())) {
+                                            if (playerBattleState != null) {
+                                                boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                                log.debug("removed from skillUseDeque: " + removeResult);
                                             }
+                                            if (guardianBattleState != null) {
+                                                boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                                log.debug("removed from skillUseDeque: " + removeResult);
+                                            }
+                                            skillUse.getPlayTimePassed().compareAndSet(false, true);
                                         }
                                     } else {
-                                        current.setTimestamp(Instant.now().toEpochMilli());
+                                        skillUse.setTimestamp(Instant.now().toEpochMilli());
+                                    }
+                                    useSkill = true;
+                                } else {
+                                    PlayerBattleState targetPlayerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (targetPlayerBattleState != null) {
+                                        if (skillUse.isMiniam()) {
+                                            targetPlayerBattleState.getMiniamActive().set(false);
+                                        }
+                                        if (skillUse.isApollonFlash()) {
+                                            targetPlayerBattleState.getApollonFlashActive().set(false);
+                                        }
+                                        if (skillUse.isShield()) {
+                                            targetPlayerBattleState.getShieldActive().set(false);
+                                        }
+
+                                        boolean removeResult = targetPlayerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
                                     }
 
-                                    if (!current.getPlayTimePassed().get()) {
-                                        if (guardianBattleState != null) {
-                                            guardianBattleState.getSkillUseDeque().put(current);
-                                        } else {
-                                            playerBattleState.getSkillUseDeque().put(current);
-                                        }
+                                    log.debug("skill is used up");
+                                    if (playerBattleState != null) {
+                                        boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
                                     }
+                                    if (guardianBattleState != null) {
+                                        boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
+                                    }
+                                }
+                            //}
+                        }
+                        if (playerBattleState != null) {
+                            boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.getPlayTimePassed().get());
+                            log.debug("removed from skillUseDeque: " + removeResult);
+                        }
+                        if (guardianBattleState != null) {
+                            boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.getPlayTimePassed().get());
+                            log.debug("removed from skillUseDeque: " + removeResult);
+                        }
+                    }
+                } else {
+                    GuardianBattleState guardianBattleState = null;
+                    PlayerBattleState playerBattleState = null;
 
-                                    if (!current.getUsed().get()) {
-                                        if (guardianBattleState != null) {
-                                            guardianBattleState.getSkillUseDeque().put(current);
-                                        } else {
-                                            playerBattleState.getSkillUseDeque().put(current);
+                    if (skillHitsTarget.getAttackerPosition() == 4) {
+                        guardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                .findFirst()
+                                .orElse(null);
+                    } else {
+                        playerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                                .filter(x -> x.getPosition().get() == skillHitsTarget.getAttackerPosition())
+                                .findFirst()
+                                .orElse(null);
+                    }
+
+                    if (guardianBattleState != null || playerBattleState != null) {
+                        final LinkedBlockingDeque<SkillUse> skillUses = new LinkedBlockingDeque<>(guardianBattleState == null ?
+                                playerBattleState.getSkillUseDeque() :
+                                guardianBattleState.getSkillUseDeque());
+
+                        SkillUse skillUse = skillUses.stream()
+                                .filter(su -> su.getSkill().getId().equals(skill.getId())
+                                        &&
+                                        (
+                                                (su.getAttackerPosition() == su.getTargetPosition()
+                                                        && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                        ||
+                                                        (su.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
+                                                                && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                        ))
+                                .findFirst()
+                                .orElseGet(() -> {
+                                    GuardianBattleState gb = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (gb != null) {
+                                        skillUses.clear();
+                                        skillUses.addAll(gb.getSkillUseDeque());
+
+                                        return skillUses.stream()
+                                                .filter(su -> su.getSkill().getId().equals(skill.getId())
+                                                        &&
+                                                        (
+                                                                (su.getAttackerPosition() == su.getTargetPosition()
+                                                                        && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                                        ||
+                                                                        (su.getAttackerPosition() == skillHitsTarget.getAttackerPosition()
+                                                                                && su.getTargetPosition() == skillHitsTarget.getTargetPosition())
+                                                        ))
+                                                .findFirst()
+                                                .orElse(null);
+                                    } else {
+                                        return null;
+                                    }
+                                });
+
+                        if (skillUse != null) {
+                            log.debug("SkillHitsTargetHandler: found skill which is same\n" +
+                                    "skillUseDequeSize: " + skillUses.size() + "\n" +
+                                    "skill Name: " + skillUse.getSkill().getName() + "\n" +
+                                    "skill id: " + skillUse.getSkill().getId() + "\n" +
+                                    "skillHitsTarget.getAttackerPosition(): " + skillHitsTarget.getAttackerPosition() + "\n" +
+                                    "skillHitsTarget.getTargetPosition(): " + skillHitsTarget.getTargetPosition() + "\n" +
+                                    "current.getUsesSkill().getAttackerPosition(): " + skillUse.getAttackerPosition() + "\n" +
+                                    "current.getUsesSkill().getTargetPosition(): " + skillUse.getTargetPosition()
+                            );
+
+                            //if ((Instant.now().toEpochMilli() - skillUse.getTimestamp()) < 2 && skillUse.getSkill().getShotType() != 0 && !skillUse.getUsed().get()) {
+                            //    log.debug("damage to fast");
+                            //} else {
+                                if (skillUse.isSpiderMine() && skillUse.getSpiderMineIsPlaced().get() && skillUse.getSpiderMineIsExploded().get() && skillUse.getUsed().get()) {
+                                    log.debug("spider mine already exploded");
+                                    if (playerBattleState != null) {
+                                        boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
+                                    }
+                                    if (guardianBattleState != null) {
+                                        boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
+                                    }
+                                }
+
+                                boolean shieldActivated = false;
+                                if (skillUse.isShield() && skillUse.getUsed().get()) {
+                                    GuardianBattleState targetGuardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition() && x.getShieldActive().get())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (targetGuardianBattleState != null)
+                                        shieldActivated = true;
+                                }
+                                boolean miniamActivated = false;
+                                if (skillUse.isMiniam() && skillUse.getUsed().get()) {
+                                    GuardianBattleState targetGuardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (targetGuardianBattleState != null)
+                                        miniamActivated = true;
+                                }
+                                boolean apollonFlashActivated = false;
+                                if (skillUse.isApollonFlash() && skillUse.getUsed().get()) {
+                                    GuardianBattleState targetGuardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                            .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                            .findFirst()
+                                            .orElse(null);
+                                    if (targetGuardianBattleState != null)
+                                        apollonFlashActivated = true;
+                                }
+
+                                if ((!skillUse.getPlayTimePassed().get() || !skillUse.getUsed().get()) && !(shieldActivated || miniamActivated || apollonFlashActivated) && !(skillUse.getPlayTimePassed().get() && skillUse.getUsed().get())) {
+                                    log.debug("SkillHitsTargetHandler: skill not used up yet");
+
+                                    skillUse.getShotCount().getAndDecrement();
+                                    log.debug("shotCount: " + skillUse.getShotCount() + "\n" +
+                                            "used: " + skillUse.getUsed().get());
+
+                                    if (skillUse.getShotCount().get() <= 0) {
+                                        skillUse.getUsed().set(true);
+                                        if (skillUse.isSpiderMine() && !skillUse.getSpiderMineIsExploded().compareAndSet(false, true)) {
+                                            log.debug("spider mine already marked as exploded");
                                         }
+                                        if (skillUse.isShield()) {
+                                            ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                                    .findFirst()
+                                                    .ifPresent(targetGuardianBattleState -> targetGuardianBattleState.getShieldActive().compareAndSet(false, true));
+                                        }
+                                        if (skillUse.isMiniam()) {
+                                            ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                                    .findFirst()
+                                                    .ifPresent(targetGuardianBattleState -> targetGuardianBattleState.getMiniamActive().compareAndSet(false, true));
+                                        }
+                                        if (skillUse.isApollonFlash()) {
+                                            ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                                                    .filter(x -> x.getPosition().get() == skillHitsTarget.getTargetPosition())
+                                                    .findFirst()
+                                                    .ifPresent(targetGuardianBattleState -> targetGuardianBattleState.getApollonFlashActive().compareAndSet(false, true));
+                                        }
+
+                                        if (!(skillUse.isSpiderMine() && skillUse.getSpiderMineIsPlaced().get() && skillUse.getSpiderMineIsExploded().get())) {
+                                            if (playerBattleState != null) {
+                                                boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                                log.debug("removed from skillUseDeque: " + removeResult);
+                                            }
+                                            if (guardianBattleState != null) {
+                                                boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                                log.debug("removed from skillUseDeque: " + removeResult);
+                                            }
+                                            skillUse.getPlayTimePassed().compareAndSet(false, true);
+                                        }
+                                    } else {
+                                        skillUse.setTimestamp(Instant.now().toEpochMilli());
                                     }
                                     useSkill = true;
                                 } else {
@@ -534,32 +605,39 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                                             .findFirst()
                                             .orElse(null);
                                     if (targetGuardianBattleState != null) {
-                                        if (current.isMiniam()) {
-                                            targetGuardianBattleState.getMiniamActive().set(false);
+                                        if (skillUse.isMiniam()) {
+                                            targetGuardianBattleState.getMiniamActive().compareAndSet(true, false);
                                         }
-                                        if (current.isApollonFlash()) {
-                                            targetGuardianBattleState.getApollonFlashActive().set(false);
+                                        if (skillUse.isApollonFlash()) {
+                                            targetGuardianBattleState.getApollonFlashActive().compareAndSet(true, false);
                                         }
-                                        if (current.isShield()) {
-                                            targetGuardianBattleState.getShieldActive().set(false);
+                                        if (skillUse.isShield()) {
+                                            targetGuardianBattleState.getShieldActive().compareAndSet(true, false);
                                         }
+
+                                        boolean removeResult = targetGuardianBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
                                     }
 
                                     log.debug("skill is used up");
-                                    continue;
+                                    if (playerBattleState != null) {
+                                        boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
+                                    }
+                                    if (guardianBattleState != null) {
+                                        boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.equals(skillUse));
+                                        log.debug("removed from skillUseDeque: " + removeResult);
+                                    }
                                 }
-                                break;
-                            } else {
-                                log.debug("skill not same. put to deque");
-                                if (guardianBattleState != null) {
-                                    guardianBattleState.getSkillUseDeque().put(current);
-                                } else {
-                                    playerBattleState.getSkillUseDeque().put(current);
-                                }
-                                log.debug("put to deque");
-                            }
-                        } catch (InterruptedException e) {
-                            log.error(e.getMessage(), e);
+                            //}
+                        }
+                        if (playerBattleState != null) {
+                            boolean removeResult = playerBattleState.getSkillUseDeque().removeIf(su -> su.getPlayTimePassed().get());
+                            log.debug("removed from skillUseDeque: " + removeResult);
+                        }
+                        if (guardianBattleState != null) {
+                            boolean removeResult = guardianBattleState.getSkillUseDeque().removeIf(su -> su.getPlayTimePassed().get());
+                            log.debug("removed from skillUseDeque: " + removeResult);
                         }
                     }
                 }
@@ -609,7 +687,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
 
         if (game instanceof MatchplayBattleGame) {
             this.handleAnyTeamDead(connection, (MatchplayBattleGame) game);
-        } else if (game instanceof MatchplayGuardianGame) {
+        } else {
             this.handleAllGuardiansDead(connection, (MatchplayGuardianGame) game);
             this.handleAllPlayersDead(connection, (MatchplayGuardianGame) game);
         }

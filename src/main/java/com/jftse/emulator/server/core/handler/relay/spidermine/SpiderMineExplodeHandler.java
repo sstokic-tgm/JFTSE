@@ -85,7 +85,7 @@ public class SpiderMineExplodeHandler extends AbstractHandler {
                                         setExplodedBySkillUseDeque(otherSkillUseDequeSize, opb.getSkillUseDeque());
                                     }
                                 }
-                            }, 5, TimeUnit.SECONDS);
+                            }, 3, TimeUnit.SECONDS);
                         }
                         pb.getSkillUseDeque().put(current);
 
@@ -124,7 +124,7 @@ public class SpiderMineExplodeHandler extends AbstractHandler {
                                         setExplodedBySkillUseDeque(otherSkillUseDequeSize, ogb.getSkillUseDeque());
                                     }
                                 }
-                            }, 5, TimeUnit.SECONDS);
+                            }, 3, TimeUnit.SECONDS);
                         }
                         gb.getSkillUseDeque().put(current);
 
@@ -146,7 +146,8 @@ public class SpiderMineExplodeHandler extends AbstractHandler {
                 if (current.isSpiderMine() &&
                         (current.getSpiderMineId() == spiderMineExplodePacket.getSpiderMineId() ||
                                 current.getSpiderMineEffectId() == spiderMineExplodePacket.getSpiderMineId())) {
-                    weakUpdateExplodedAndRelayPacket(current);
+                    weakUpdateExploded(current);
+                    relaySpiderMinePacket(current);
                 }
                 skillUseDeque.put(current);
             } catch (InterruptedException e) {
@@ -163,9 +164,8 @@ public class SpiderMineExplodeHandler extends AbstractHandler {
                 if (current.isSpiderMine() &&
                         (current.getSpiderMineId() == spiderMineExplodePacket.getSpiderMineId() ||
                                 current.getSpiderMineEffectId() == spiderMineExplodePacket.getSpiderMineId())) {
-                    ThreadManager.getInstance().schedule(() -> {
-                        weakUpdateExplodedAndRelayPacket(current);
-                    }, 5, TimeUnit.SECONDS);
+                    ThreadManager.getInstance().schedule(() -> weakUpdateExploded(current), 3, TimeUnit.SECONDS);
+                    relaySpiderMinePacket(current);
                 }
                 skillUseDeque.put(current);
             } catch (InterruptedException e) {
@@ -174,11 +174,14 @@ public class SpiderMineExplodeHandler extends AbstractHandler {
         }
     }
 
-    private void weakUpdateExplodedAndRelayPacket(SkillUse current) {
+    private void weakUpdateExploded(SkillUse current) {
         final boolean notExploded = !current.getSpiderMineIsExploded().get();
         if (!current.getSpiderMineIsExploded().compareAndSet(notExploded, true)) {
             log.debug("spider mine already marked as exploded");
         }
+    }
+
+    private void relaySpiderMinePacket(SkillUse current) {
         short spiderId = (short) (spiderMineExplodePacket.getSpiderMineId() > current.getSpiderMineId() ? current.getSpiderMineEffectId() : current.getSpiderMineId());
 
         spiderMineExplodePacketToRelay = new C2CSpiderMineExplodePacket(spiderMineExplodePacket.getTargetPosition() != 4 ? current.getTargetPosition() : spiderMineExplodePacket.getTargetPosition(), spiderId);

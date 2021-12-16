@@ -16,6 +16,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,6 +33,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     private AtomicInteger lastCrystalId;
     private AtomicInteger lastGuardianServeSide;
     private AtomicInteger spiderMineIdentifier;
+    private ConcurrentLinkedDeque<ScheduledFuture<?>> scheduledFutures;
 
     private final PlayerCombatSystem playerCombatSystem;
 
@@ -52,6 +54,7 @@ public class MatchplayBattleGame extends MatchplayGame {
         this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.RedTeam);
         this.willDamages = new ArrayList<>();
         this.spiderMineIdentifier = new AtomicInteger(0);
+        this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.setFinished(new AtomicBoolean(false));
 
         playerCombatSystem = new PlayerCombatSystem(this);

@@ -4,6 +4,9 @@ import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
+import com.jftse.emulator.server.core.matchplay.MatchplayGame;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
@@ -163,6 +166,12 @@ public class BasicGameHandler {
                             GameSessionManager.getInstance().getGameSessionList().removeIf(gs -> gs.getSessionId() == gameSession.getSessionId());
                         }
                     }
+                    MatchplayGame game = gameSession.getActiveMatchplayGame();
+                    if (game instanceof MatchplayBattleGame)
+                        ((MatchplayBattleGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
+                    else if (game instanceof MatchplayGuardianGame)
+                        ((MatchplayGuardianGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
+
                     connection.getClient().setActiveGameSession(null);
                 }
             }

@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -130,15 +131,23 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                                     log.debug("current skill cooling time passed. put to queue");
 
                                     if (skillUse.isSpiderMine()) {
-                                        handleSpiderMine(game, skillUse, guardianBattleState);
+                                        handleSpiderMine(game, skillUse);
                                     }
 
                                     if (skillUse.isEarth()) {
-                                        handleEarth(game, skillUse, guardianBattleState);
+                                        handleEarth(game, skillUse);
                                     }
 
                                     if (skillUse.isApollonFlash()) {
-                                        handleApollonFlash(game, skillUse, guardianBattleState);
+                                        handleApollonFlash(game, skillUse);
+                                    }
+
+                                    if (skillUse.isMiniam()) {
+                                        handleMiniam(game, skillUse);
+                                    }
+
+                                    if (skillUse.isInferno()) {
+                                        handleInferno(game, skillUse);
                                     }
 
                                     if (skillUse.isRangeShield()) {
@@ -152,27 +161,39 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                                     guardianBattleState.getSkillUseDeque().put(skillUse);
                                     log.debug("put to deque");
                                     useSkill = true;
-                                    ThreadManager.getInstance().schedule(() -> {
-                                        final boolean playTimePassed = skillUse.getPlayTimePassed().get();
-                                        if (!playTimePassed) {
-                                            skillUse.getPlayTimePassed().set(true);
+                                    ScheduledFuture<?> scheduledFuture = ThreadManager.getInstance().schedule(() -> {
+                                        if (skillUse != null) {
+                                            final boolean playTimePassed = skillUse.getPlayTimePassed().get();
+                                            if (!playTimePassed) {
+                                                skillUse.getPlayTimePassed().set(true);
+                                            }
                                         }
                                     }, skillUse.getSkill().getPlayTime().intValue(), TimeUnit.SECONDS);
+                                    ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+                                    break;
                                 }
                             } else {
-                                if (skillUse.getTimestamp() != current.getTimestamp()) {
+                                if (skillUse.getTimestamp() == current.getTimestamp()) {
                                     log.debug("skill already added, don't add to queue");
                                 } else {
                                     if (skillUse.isSpiderMine()) {
-                                        handleSpiderMine(game, skillUse, guardianBattleState);
+                                        handleSpiderMine(game, skillUse);
                                     }
 
                                     if (skillUse.isEarth()) {
-                                        handleEarth(game, skillUse, guardianBattleState);
+                                        handleEarth(game, skillUse);
                                     }
 
                                     if (skillUse.isApollonFlash()) {
-                                        handleApollonFlash(game, skillUse, guardianBattleState);
+                                        handleApollonFlash(game, skillUse);
+                                    }
+
+                                    if (skillUse.isMiniam()) {
+                                        handleMiniam(game, skillUse);
+                                    }
+
+                                    if (skillUse.isInferno()) {
+                                        handleInferno(game, skillUse);
                                     }
 
                                     if (skillUse.isRangeShield()) {
@@ -185,15 +206,18 @@ public class PlayerUseSkillHandler extends AbstractHandler {
 
                                     guardianBattleState.getSkillUseDeque().put(skillUse);
                                     useSkill = true;
-                                    ThreadManager.getInstance().schedule(() -> {
-                                        final boolean playTimePassed = skillUse.getPlayTimePassed().get();
-                                        if (!playTimePassed) {
-                                            skillUse.getPlayTimePassed().set(true);
+                                    ScheduledFuture<?> scheduledFuture = ThreadManager.getInstance().schedule(() -> {
+                                        if (skillUse != null) {
+                                            final boolean playTimePassed = skillUse.getPlayTimePassed().get();
+                                            if (!playTimePassed) {
+                                                skillUse.getPlayTimePassed().set(true);
+                                            }
                                         }
                                     }, skillUse.getSkill().getPlayTime().intValue(), TimeUnit.SECONDS);
+                                    ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+                                    break;
                                 }
                             }
-                            break;
                         } else {
                             log.debug("is not same skill. put to deque");
                             guardianBattleState.getSkillUseDeque().put(current);
@@ -259,6 +283,14 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                                             handleApollonFlash(game, skillUse, playerBattleState);
                                         }
 
+                                        if (skillUse.isMiniam()) {
+                                            handleMiniam(game, skillUse, playerBattleState);
+                                        }
+
+                                        if (skillUse.isInferno()) {
+                                            handleInferno(game, skillUse, playerBattleState);
+                                        }
+
                                         if (skillUse.isRangeShield()) {
                                             handleRangeShield(game, skillUse, playerBattleState);
                                         }
@@ -270,15 +302,22 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                                         playerBattleState.getSkillUseDeque().put(skillUse);
                                         log.debug("put to deque");
                                         useSkill = true;
-                                        ThreadManager.getInstance().schedule(() -> {
-                                            final boolean playTimePassed = skillUse.getPlayTimePassed().get();
-                                            if (!playTimePassed) {
-                                                skillUse.getPlayTimePassed().set(true);
+                                        ScheduledFuture<?> scheduledFuture = ThreadManager.getInstance().schedule(() -> {
+                                            if (skillUse != null) {
+                                                final boolean playTimePassed = skillUse.getPlayTimePassed().get();
+                                                if (!playTimePassed) {
+                                                    skillUse.getPlayTimePassed().set(true);
+                                                }
                                             }
                                         }, skillUse.getSkill().getPlayTime().intValue(), TimeUnit.SECONDS);
+                                        if (isBattleGame)
+                                            ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                                        else
+                                            ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+                                        break;
                                     }
                                 } else {
-                                    if (skillUse.getTimestamp() != current.getTimestamp()) {
+                                    if (skillUse.getTimestamp() == current.getTimestamp()) {
                                         log.debug("skill already added, don't add to queue");
                                     } else {
                                         if (skillUse.isSpiderMine()) {
@@ -293,6 +332,14 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                                             handleApollonFlash(game, skillUse, playerBattleState);
                                         }
 
+                                        if (skillUse.isMiniam()) {
+                                            handleMiniam(game, skillUse, playerBattleState);
+                                        }
+
+                                        if (skillUse.isInferno()) {
+                                            handleInferno(game, skillUse, playerBattleState);
+                                        }
+
                                         if (skillUse.isRangeShield()) {
                                             handleRangeShield(game, skillUse, playerBattleState);
                                         }
@@ -303,15 +350,21 @@ public class PlayerUseSkillHandler extends AbstractHandler {
 
                                         playerBattleState.getSkillUseDeque().put(skillUse);
                                         useSkill = true;
-                                        ThreadManager.getInstance().schedule(() -> {
-                                            final boolean playTimePassed = skillUse.getPlayTimePassed().get();
-                                            if (!playTimePassed) {
-                                                skillUse.getPlayTimePassed().set(true);
+                                        ScheduledFuture<?> scheduledFuture = ThreadManager.getInstance().schedule(() -> {
+                                            if (skillUse != null) {
+                                                final boolean playTimePassed = skillUse.getPlayTimePassed().get();
+                                                if (!playTimePassed) {
+                                                    skillUse.getPlayTimePassed().set(true);
+                                                }
                                             }
                                         }, skillUse.getSkill().getPlayTime().intValue(), TimeUnit.SECONDS);
+                                        if (isBattleGame)
+                                            ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                                        else
+                                            ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+                                        break;
                                     }
                                 }
-                                break;
                             } else {
                                 log.debug("is not same skill. put to deque");
                                 playerBattleState.getSkillUseDeque().put(current);
@@ -392,16 +445,18 @@ public class PlayerUseSkillHandler extends AbstractHandler {
         return skillUseDeque.size();
     }
 
-    private void addSkillUseToSkillUseDeque(SkillUse skillUseForOtherPb, LinkedBlockingDeque<SkillUse> skillUseDeque) throws InterruptedException {
+    private ScheduledFuture<?> addSkillUseToSkillUseDeque(SkillUse skillUseForOtherPb, LinkedBlockingDeque<SkillUse> skillUseDeque) throws InterruptedException {
         skillUseDeque.put(skillUseForOtherPb);
 
-        ThreadManager.getInstance().schedule(() -> {
-            final boolean playTimePassed = skillUseForOtherPb.getPlayTimePassed().get();
-            if (!playTimePassed) {
-                skillUseForOtherPb.getPlayTimePassed().set(true);
-                skillUseForOtherPb.getUsed().set(true);
+        ScheduledFuture<?> scheduledFuture = ThreadManager.getInstance().schedule(() -> {
+            if (skillUseForOtherPb != null) {
+                final boolean playTimePassed = skillUseForOtherPb.getPlayTimePassed().get();
+                if (!playTimePassed) {
+                    skillUseForOtherPb.getPlayTimePassed().set(true);
+                }
             }
         }, skillUseForOtherPb.getSkill().getPlayTime().intValue(), TimeUnit.SECONDS);
+        return scheduledFuture;
     }
 
     private void handleSpiderMine(MatchplayGame game, SkillUse skillUse, PlayerBattleState playerBattleState) throws InterruptedException {
@@ -419,21 +474,33 @@ public class PlayerUseSkillHandler extends AbstractHandler {
             skillUse.setSpiderMineId(spiderMineId);
         }
 
-        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(isBattleGame ?
-                ((MatchplayBattleGame) game).getPlayerBattleStates() :
-                ((MatchplayGuardianGame) game).getPlayerBattleStates());
+        if (isBattleGame) {
+            boolean isRedTeam = game.isRedTeam(playerBattleState.getPosition().get());
 
-        int playerBattleStatesSize = playerBattleStates.size();
-        for (int i = 0; i < playerBattleStatesSize; i++) {
-            PlayerBattleState pb = playerBattleStates.poll();
-            if (pb.getPosition().get() != playerBattleState.getPosition().get()) {
-                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayBattleGame) game).getPlayerBattleStates());
+            int playerBattleStatesSize = playerBattleStates.size();
+            for (int i = 0; i < playerBattleStatesSize; i++) {
+                PlayerBattleState pb = playerBattleStates.poll();
+                boolean isPbRedTeam = game.isRedTeam(pb.getPosition().get());
+                if (pb.getPosition().get() != playerBattleState.getPosition().get() && ((isRedTeam && !isPbRedTeam) || (!isRedTeam && isPbRedTeam))) {
+                    SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                    ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                    ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                }
+            }
+        } else {
+            ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+            int guardianBattleStatesSize = guardianBattleStates.size();
+            for (int i = 0; i < guardianBattleStatesSize; i++) {
+                GuardianBattleState gb = guardianBattleStates.poll();
+                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
             }
         }
     }
 
-    private void handleSpiderMine(MatchplayGame game, SkillUse skillUse, GuardianBattleState guardianBattleState) throws InterruptedException {
+    private void handleSpiderMine(MatchplayGame game, SkillUse skillUse) throws InterruptedException {
         synchronized (game) {
             final int spiderMineEffectId = ((MatchplayGuardianGame) game).getSpiderMineIdentifier().getAndIncrement();
             skillUse.setSpiderMineEffectId(spiderMineEffectId);
@@ -442,75 +509,178 @@ public class PlayerUseSkillHandler extends AbstractHandler {
             skillUse.setSpiderMineId(spiderMineId);
         }
 
-        ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getPlayerBattleStates());
 
-        int guardianBattleStatesSize = guardianBattleStates.size();
-        for (int i = 0; i < guardianBattleStatesSize; i++) {
-            GuardianBattleState gb = guardianBattleStates.poll();
-            if (gb.getPosition().get() != guardianBattleState.getPosition().get()) {
-                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
-            }
+        int playerBattleStatesSize = playerBattleStates.size();
+        for (int i = 0; i < playerBattleStatesSize; i++) {
+            PlayerBattleState pb = playerBattleStates.poll();
+            SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+            ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
         }
     }
 
     private void handleEarth(MatchplayGame game, SkillUse skillUse, PlayerBattleState playerBattleState) throws InterruptedException {
         boolean isBattleGame = game instanceof MatchplayBattleGame;
 
-        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(isBattleGame ?
-                ((MatchplayBattleGame) game).getPlayerBattleStates() :
-                ((MatchplayGuardianGame) game).getPlayerBattleStates());
+        if (isBattleGame) {
+            boolean isRedTeam = game.isRedTeam(playerBattleState.getPosition().get());
 
-        int playerBattleStatesSize = playerBattleStates.size();
-        for (int i = 0; i < playerBattleStatesSize; i++) {
-            PlayerBattleState pb = playerBattleStates.poll();
-            if (pb.getPosition().get() != playerBattleState.getPosition().get()) {
-                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayBattleGame) game).getPlayerBattleStates());
+            int playerBattleStatesSize = playerBattleStates.size();
+            for (int i = 0; i < playerBattleStatesSize; i++) {
+                PlayerBattleState pb = playerBattleStates.poll();
+                boolean isPbRedTeam = game.isRedTeam(pb.getPosition().get());
+                if (pb.getPosition().get() != playerBattleState.getPosition().get() && ((isRedTeam && !isPbRedTeam) || (!isRedTeam && isPbRedTeam))) {
+                    SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                    ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                    ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                }
+            }
+        } else {
+            ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+            int guardianBattleStatesSize = guardianBattleStates.size();
+            for (int i = 0; i < guardianBattleStatesSize; i++) {
+                GuardianBattleState gb = guardianBattleStates.poll();
+                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
             }
         }
     }
 
-    private void handleEarth(MatchplayGame game, SkillUse skillUse, GuardianBattleState guardianBattleState) throws InterruptedException {
-        ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+    private void handleEarth(MatchplayGame game, SkillUse skillUse) throws InterruptedException {
+        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getPlayerBattleStates());
 
-        int guardianBattleStatesSize = guardianBattleStates.size();
-        for (int i = 0; i < guardianBattleStatesSize; i++) {
-            GuardianBattleState gb = guardianBattleStates.poll();
-            if (gb.getPosition().get() != guardianBattleState.getPosition().get()) {
-                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
-            }
+        int playerBattleStatesSize = playerBattleStates.size();
+        for (int i = 0; i < playerBattleStatesSize; i++) {
+            PlayerBattleState pb = playerBattleStates.poll();
+            SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+            ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
         }
     }
 
     private void handleApollonFlash(MatchplayGame game, SkillUse skillUse, PlayerBattleState playerBattleState) throws InterruptedException {
         boolean isBattleGame = game instanceof MatchplayBattleGame;
 
-        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(isBattleGame ?
-                ((MatchplayBattleGame) game).getPlayerBattleStates() :
-                ((MatchplayGuardianGame) game).getPlayerBattleStates());
+        if (isBattleGame) {
+            boolean isRedTeam = game.isRedTeam(playerBattleState.getPosition().get());
 
-        int playerBattleStatesSize = playerBattleStates.size();
-        for (int i = 0; i < playerBattleStatesSize; i++) {
-            PlayerBattleState pb = playerBattleStates.poll();
-            if (pb.getPosition().get() != playerBattleState.getPosition().get()) {
-                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayBattleGame) game).getPlayerBattleStates());
+            int playerBattleStatesSize = playerBattleStates.size();
+            for (int i = 0; i < playerBattleStatesSize; i++) {
+                PlayerBattleState pb = playerBattleStates.poll();
+                boolean isPbRedTeam = game.isRedTeam(pb.getPosition().get());
+                if (pb.getPosition().get() != playerBattleState.getPosition().get() && ((isRedTeam && !isPbRedTeam) || (!isRedTeam && isPbRedTeam))) {
+                    SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                    ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                    ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                }
+            }
+        } else {
+            ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+            int guardianBattleStatesSize = guardianBattleStates.size();
+            for (int i = 0; i < guardianBattleStatesSize; i++) {
+                GuardianBattleState gb = guardianBattleStates.poll();
+                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
             }
         }
     }
 
-    private void handleApollonFlash(MatchplayGame game, SkillUse skillUse, GuardianBattleState guardianBattleState) throws InterruptedException {
-        ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+    private void handleApollonFlash(MatchplayGame game, SkillUse skillUse) throws InterruptedException {
+        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getPlayerBattleStates());
 
-        int guardianBattleStatesSize = guardianBattleStates.size();
-        for (int i = 0; i < guardianBattleStatesSize; i++) {
-            GuardianBattleState gb = guardianBattleStates.poll();
-            if (gb.getPosition().get() != guardianBattleState.getPosition().get()) {
-                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+        int playerBattleStatesSize = playerBattleStates.size();
+        for (int i = 0; i < playerBattleStatesSize; i++) {
+            PlayerBattleState pb = playerBattleStates.poll();
+            SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+            ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+        }
+    }
+
+    private void handleMiniam(MatchplayGame game, SkillUse skillUse, PlayerBattleState playerBattleState) throws InterruptedException {
+        boolean isBattleGame = game instanceof MatchplayBattleGame;
+
+        if (isBattleGame) {
+            boolean isRedTeam = game.isRedTeam(playerBattleState.getPosition().get());
+
+            ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayBattleGame) game).getPlayerBattleStates());
+            int playerBattleStatesSize = playerBattleStates.size();
+            for (int i = 0; i < playerBattleStatesSize; i++) {
+                PlayerBattleState pb = playerBattleStates.poll();
+                boolean isPbRedTeam = game.isRedTeam(pb.getPosition().get());
+                if (pb.getPosition().get() != playerBattleState.getPosition().get() && ((isRedTeam && !isPbRedTeam) || (!isRedTeam && isPbRedTeam))) {
+                    SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                    ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                    ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                }
             }
+        } else {
+            ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+            int guardianBattleStatesSize = guardianBattleStates.size();
+            for (int i = 0; i < guardianBattleStatesSize; i++) {
+                GuardianBattleState gb = guardianBattleStates.poll();
+                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+            }
+        }
+    }
+
+    private void handleMiniam(MatchplayGame game, SkillUse skillUse) throws InterruptedException {
+        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getPlayerBattleStates());
+
+        int playerBattleStatesSize = playerBattleStates.size();
+        for (int i = 0; i < playerBattleStatesSize; i++) {
+            PlayerBattleState pb = playerBattleStates.poll();
+            SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+            ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+        }
+    }
+
+    private void handleInferno(MatchplayGame game, SkillUse skillUse, PlayerBattleState playerBattleState) throws InterruptedException {
+        boolean isBattleGame = game instanceof MatchplayBattleGame;
+
+        if (isBattleGame) {
+            boolean isRedTeam = game.isRedTeam(playerBattleState.getPosition().get());
+
+            ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayBattleGame) game).getPlayerBattleStates());
+            int playerBattleStatesSize = playerBattleStates.size();
+            for (int i = 0; i < playerBattleStatesSize; i++) {
+                PlayerBattleState pb = playerBattleStates.poll();
+                boolean isPbRedTeam = game.isRedTeam(pb.getPosition().get());
+                if (pb.getPosition().get() != playerBattleState.getPosition().get() && ((isRedTeam && !isPbRedTeam) || (!isRedTeam && isPbRedTeam))) {
+                    SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                    ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                    ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                }
+            }
+        } else {
+            ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getGuardianBattleStates());
+            int guardianBattleStatesSize = guardianBattleStates.size();
+            for (int i = 0; i < guardianBattleStatesSize; i++) {
+                GuardianBattleState gb = guardianBattleStates.poll();
+                SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
+            }
+        }
+    }
+
+    private void handleInferno(MatchplayGame game, SkillUse skillUse) throws InterruptedException {
+        ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates = new ConcurrentLinkedDeque<>(((MatchplayGuardianGame) game).getPlayerBattleStates());
+
+        int playerBattleStatesSize = playerBattleStates.size();
+        for (int i = 0; i < playerBattleStatesSize; i++) {
+            PlayerBattleState pb = playerBattleStates.poll();
+            SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), skillUse.getAttackerPosition(), (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
+            ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+            ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
         }
     }
 
@@ -521,12 +691,20 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                 ((MatchplayBattleGame) game).getPlayerBattleStates() :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates());
 
+        playerBattleStates.removeIf(pb -> isBattleGame &&
+                ((game.isRedTeam(playerBattleState.getPosition().get()) && !game.isRedTeam(pb.getPosition().get())) ||
+                        (!game.isRedTeam(playerBattleState.getPosition().get()) && game.isRedTeam(pb.getPosition().get()))));
+
         int playerBattleStatesSize = playerBattleStates.size();
         for (int i = 0; i < playerBattleStatesSize; i++) {
             PlayerBattleState pb = playerBattleStates.poll();
             if (pb.getPosition().get() != playerBattleState.getPosition().get()) {
                 SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), (byte) 4, (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                if (isBattleGame)
+                    ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                else
+                    ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
             }
         }
     }
@@ -539,7 +717,8 @@ public class PlayerUseSkillHandler extends AbstractHandler {
             GuardianBattleState gb = guardianBattleStates.poll();
             if (gb.getPosition().get() != guardianBattleState.getPosition().get()) {
                 SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), (byte) 4, (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
             }
         }
     }
@@ -551,13 +730,21 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                 ((MatchplayBattleGame) game).getPlayerBattleStates() :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates());
 
+        playerBattleStates.removeIf(pb -> isBattleGame &&
+                ((game.isRedTeam(playerBattleState.getPosition().get()) && !game.isRedTeam(pb.getPosition().get())) ||
+                        (!game.isRedTeam(playerBattleState.getPosition().get()) && game.isRedTeam(pb.getPosition().get()))));
+
         int playerBattleStatesSize = playerBattleStates.size();
         for (int i = 0; i < playerBattleStatesSize; i++) {
             PlayerBattleState pb = playerBattleStates.poll();
             if (pb.getPosition().get() != playerBattleState.getPosition().get()) {
                 SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), (byte) 4, (byte) pb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
                 skillUseForOtherPb.getSkill().setPlayTime(3.0);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, pb.getSkillUseDeque());
+                if (isBattleGame)
+                    ((MatchplayBattleGame) game).getScheduledFutures().offer(scheduledFuture);
+                else
+                    ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
             }
         }
     }
@@ -571,7 +758,8 @@ public class PlayerUseSkillHandler extends AbstractHandler {
             if (gb.getPosition().get() != guardianBattleState.getPosition().get()) {
                 SkillUse skillUseForOtherPb = new SkillUse(skillUse.getSkill(), (byte) 4, (byte) gb.getPosition().get(), false, Instant.now().toEpochMilli(), false);
                 skillUseForOtherPb.getSkill().setPlayTime(3.0);
-                this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ScheduledFuture<?> scheduledFuture = this.addSkillUseToSkillUseDeque(skillUseForOtherPb, gb.getSkillUseDeque());
+                ((MatchplayGuardianGame) game).getScheduledFutures().offer(scheduledFuture);
             }
         }
     }
