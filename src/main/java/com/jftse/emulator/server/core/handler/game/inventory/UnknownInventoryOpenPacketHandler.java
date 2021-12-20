@@ -20,6 +20,7 @@ public class UnknownInventoryOpenPacketHandler extends AbstractHandler {
     private final ToolSlotEquipmentService toolSlotEquipmentService;
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
     private final CardSlotEquipmentService cardSlotEquipmentService;
+    private final BattlemonSlotEquipmentService battlemonSlotEquipmentService;
 
     public UnknownInventoryOpenPacketHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
@@ -28,6 +29,7 @@ public class UnknownInventoryOpenPacketHandler extends AbstractHandler {
         toolSlotEquipmentService = ServiceManager.getInstance().getToolSlotEquipmentService();
         specialSlotEquipmentService = ServiceManager.getInstance().getSpecialSlotEquipmentService();
         cardSlotEquipmentService = ServiceManager.getInstance().getCardSlotEquipmentService();
+        battlemonSlotEquipmentService = ServiceManager.getInstance().getBattlemonSlotEquipmentService();
     }
 
     @Override
@@ -47,14 +49,16 @@ public class UnknownInventoryOpenPacketHandler extends AbstractHandler {
             List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
             List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
             List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
+            List<Integer> equippedBattlemonSlots = battlemonSlotEquipmentService.getEquippedBattlemonSlots(player);
 
             S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
             S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
             S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
             S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
             S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+            S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(equippedBattlemonSlots);
 
-            connection.sendTCP(inventoryWearClothAnswerPacket, inventoryWearQuickAnswerPacket, inventoryWearToolAnswerPacket, inventoryWearSpecialAnswerPacket, inventoryWearCardAnswerPacket);
+            connection.sendTCP(inventoryWearClothAnswerPacket, inventoryWearQuickAnswerPacket, inventoryWearToolAnswerPacket, inventoryWearSpecialAnswerPacket, inventoryWearCardAnswerPacket, inventoryWearBattlemonAnswerPacket);
         }
 
         Packet answer = new Packet((char) (packet.getPacketId() + 1));
