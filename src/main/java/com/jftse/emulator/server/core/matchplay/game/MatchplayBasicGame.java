@@ -11,71 +11,60 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Setter
 public class MatchplayBasicGame extends MatchplayGame {
-    private ConcurrentHashMap<Integer, Integer> individualPointsMadeFromPlayers;
-    private ConcurrentLinkedDeque<Point> playerLocationsOnMap;
-    private AtomicInteger pointsRedTeam;
-    private AtomicInteger pointsBlueTeam;
-    private AtomicInteger setsRedTeam;
-    private AtomicInteger setsBlueTeam;
-    private AtomicReference<RoomPlayer> servePlayer;
-    private AtomicReference<RoomPlayer> receiverPlayer;
+    private HashMap<Integer, Integer> individualPointsMadeFromPlayers;
+    private ArrayList<Point> playerLocationsOnMap;
+    private int pointsRedTeam;
+    private int pointsBlueTeam;
+    private int setsRedTeam;
+    private int setsBlueTeam;
+    private RoomPlayer servePlayer;
+    private RoomPlayer receiverPlayer;
 
     public MatchplayBasicGame(byte players) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
-        this.playerLocationsOnMap = new ConcurrentLinkedDeque<>(Arrays.asList(
+        this.playerLocationsOnMap = new ArrayList<>(Arrays.asList(
                 new Point(20, -125),
                 new Point(-20, 125),
                 new Point(-20, -75),
                 new Point(20, 75)
         ));
-        this.pointsRedTeam = new AtomicInteger(0);
-        this.pointsBlueTeam = new AtomicInteger(0);
-        this.setsRedTeam = new AtomicInteger(0);
-        this.setsBlueTeam = new AtomicInteger(0);
-        this.setFinished(new AtomicBoolean(false));
-        this.individualPointsMadeFromPlayers = new ConcurrentHashMap<>(players);
+
+        this.individualPointsMadeFromPlayers = new HashMap<>(players);
         for (int i = 0; i < players; i++) {
             this.individualPointsMadeFromPlayers.put(i, 0);
         }
-
-        servePlayer = new AtomicReference<>();
-        receiverPlayer = new AtomicReference<>();
     }
 
     public void setPoints(byte pointsRedTeam, byte pointsBlueTeam) {
-        this.pointsRedTeam.getAndSet(pointsRedTeam);
-        this.pointsBlueTeam.getAndSet(pointsBlueTeam);
+        this.pointsRedTeam = pointsRedTeam;
+        this.pointsBlueTeam = pointsBlueTeam;
 
         if (pointsRedTeam == 4 && pointsBlueTeam < 3) {
-            this.setsRedTeam.getAndIncrement();
+            this.setsRedTeam += 1;
             resetPoints();
         }
         else if (pointsRedTeam > 4 && (pointsRedTeam - pointsBlueTeam) == 2) {
-            this.setsRedTeam.getAndIncrement();
+            this.setsRedTeam += 1;
             resetPoints();
         }
         else if (pointsBlueTeam == 4 && pointsRedTeam < 3) {
-            this.setsBlueTeam.getAndIncrement();
+            this.setsBlueTeam += 1;
             resetPoints();
         }
         else if (pointsBlueTeam > 4 && (pointsBlueTeam - pointsRedTeam) == 2) {
-            this.setsBlueTeam.getAndIncrement();
+            this.setsBlueTeam += 1;
             resetPoints();
         }
 
-        if (this.setsRedTeam.get() == 2 || this.setsBlueTeam.get() == 2) {
-            this.getFinished().getAndSet(true);
+        if (this.setsRedTeam == 2 || this.setsBlueTeam == 2) {
+            this.setFinished(true);
 
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             this.setEndTime(cal.getTime());
@@ -101,7 +90,7 @@ public class MatchplayBasicGame extends MatchplayGame {
         for (int playerPosition : this.getPlayerPositionsOrderedByPerformance()) {
             boolean wonGame = false;
             boolean isPlayerInRedTeam = this.isRedTeam(playerPosition);
-            if (isPlayerInRedTeam && this.getSetsRedTeam().get() == 2 || !isPlayerInRedTeam && this.getSetsBlueTeam().get() == 2) {
+            if (isPlayerInRedTeam && this.getSetsRedTeam() == 2 || !isPlayerInRedTeam && this.getSetsBlueTeam() == 2) {
                 wonGame = true;
             }
 
@@ -142,8 +131,8 @@ public class MatchplayBasicGame extends MatchplayGame {
     }
 
     private void resetPoints() {
-        this.pointsRedTeam.set(0);
-        this.pointsBlueTeam.set(0);
+        this.pointsRedTeam = 0;
+        this.pointsBlueTeam = 0;
     }
 
     @Override

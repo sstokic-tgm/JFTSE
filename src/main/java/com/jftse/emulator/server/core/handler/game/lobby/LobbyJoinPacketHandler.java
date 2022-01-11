@@ -12,10 +12,10 @@ public class LobbyJoinPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (!connection.getClient().getInLobby().compareAndSet(false, true)) {
-            connection.getClient().getInLobby().set(true);
+        if (!connection.getClient().isInLobby()) {
+            connection.getClient().setInLobby(true);
         }
-        connection.getClient().getLobbyCurrentRoomListPage().getAndSet(-1);
+        connection.getClient().setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().handleRoomPlayerChanges(connection, true);
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();

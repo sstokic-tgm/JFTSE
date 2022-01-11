@@ -20,7 +20,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 public class StartBattleModeHandler extends AbstractHandler {
@@ -45,19 +44,16 @@ public class StartBattleModeHandler extends AbstractHandler {
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
         Room room = connection.getClient().getActiveRoom();
 
-        ConcurrentLinkedDeque<Client> clients = new ConcurrentLinkedDeque<>(gameSession.getClients());
+        ArrayList<Client> clients = new ArrayList<>(gameSession.getClients());
         List<PlayerPositionInfo> positionInfo = new ArrayList<>();
 
-        int clientsSize = clients.size();
-        for (int i = 0; i < clientsSize; i++) {
-            Client client = clients.poll();
-
+        clients.forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
                     .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst()
                     .orElse(null);
             if (rp == null || rp.getPosition() > 3) {
-                continue;
+                return;
             }
 
             Point playerLocation = new Point();
@@ -75,9 +71,7 @@ public class StartBattleModeHandler extends AbstractHandler {
             playerPositionInfo.setPlayerPosition(rp.getPosition());
             playerPositionInfo.setPlayerStartLocation(playerLocation);
             positionInfo.add(playerPositionInfo);
-
-            clients.offer(client);
-        }
+        });
 
         int servingPositionXOffset = random.nextInt(7);
 
@@ -88,8 +82,8 @@ public class StartBattleModeHandler extends AbstractHandler {
 
         long crystalSpawnInterval = TimeUnit.SECONDS.toMillis(8);
         long crystalDeSpawnInterval = TimeUnit.SECONDS.toMillis(10);
-        game.getCrystalSpawnInterval().getAndSet(crystalSpawnInterval);
-        game.getCrystalDeSpawnInterval().getAndSet(crystalDeSpawnInterval);
+        game.setCrystalSpawnInterval(crystalSpawnInterval);
+        game.setCrystalDeSpawnInterval(crystalDeSpawnInterval);
 
         int activePlayers = game.getPlayerBattleStates().size();
         int amountOfCrystalsToSpawnPerSide = activePlayers > 2 ? 2 : 1;

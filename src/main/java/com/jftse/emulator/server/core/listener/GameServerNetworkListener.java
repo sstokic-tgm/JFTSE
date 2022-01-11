@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -30,16 +31,15 @@ public class GameServerNetworkListener implements ConnectionListener {
 
     public void cleanUp() {
         // reset status
-        int clientsSize = gameManager.getClients().size();
-        for (int i = 0; i < clientsSize; i++) {
-            Client client = gameManager.getClients().poll();
-
+        gameManager.getClients().stream().collect(Collectors.toList()).forEach(client -> {
             Account account = serviceManager.getAuthenticationService().findAccountById(client.getAccount().getId());
             if (account.getStatus() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
                 account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
                 serviceManager.getAuthenticationService().updateAccount(account);
             }
-        }
+
+            gameManager.getClients().remove(client);
+        });
 
         gameManager.getRooms().clear();
         GameSessionManager.getInstance().getGameSessionList().clear();
@@ -57,7 +57,7 @@ public class GameServerNetworkListener implements ConnectionListener {
 
         new BasicGameHandler().sendWelcomePacket(connection);
 
-        if (serverManager.getServerNoticeIsSet().get()) {
+        if (serverManager.isServerNoticeIsSet()) {
             S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(serverManager.getServerNoticeMessage());
             connection.sendTCP(serverNoticePacket);
         }

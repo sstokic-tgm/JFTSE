@@ -20,7 +20,7 @@ public class ServerNoticeHandler extends AbstractHandler {
     public void handle() {
         log.debug("[analysis purpose] received server notice packet: " + BitKit.toString(packet.getData(), 0, packet.getDataLength()));
 
-        if (ServerManager.getInstance().getServerNoticeIsSet().get()) {
+        if (ServerManager.getInstance().isServerNoticeIsSet()) {
             S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(ServerManager.getInstance().getServerNoticeMessage());
             connection.sendTCP(serverNoticePacket);
             log.debug("[analysis purpose] sent server notice: " + ServerManager.getInstance().getServerNoticeMessage());

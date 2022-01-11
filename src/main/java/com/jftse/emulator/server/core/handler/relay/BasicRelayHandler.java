@@ -18,7 +18,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Log4j2
 public class BasicRelayHandler {
@@ -36,7 +35,7 @@ public class BasicRelayHandler {
         if (connection.getClient() == null)
             return;
 
-        boolean notifyClients = !connection.getClient().getIsSpectator().get();
+        boolean notifyClients = !connection.getClient().isSpectator();
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null && notifyClients) {
             List<Client> clientsInGameSession = new ArrayList<>(gameSession.getClients());
@@ -45,7 +44,7 @@ public class BasicRelayHandler {
                 if (client.getConnection() != null && client.getConnection().isConnected())
                     client.getConnection().sendTCP(backToRoomPacket);
             }
-            ConcurrentLinkedDeque<Client> relayClients = RelayManager.getInstance().getClientsInGameSession(gameSession.getSessionId());
+            ArrayList<Client> relayClients = RelayManager.getInstance().getClientsInGameSession(gameSession.getSessionId());
             for (Client client : relayClients) {
                 if (client.getConnection() != null && client.getConnection().isConnected() && client.getConnection().getId() != connection.getId()) {
                     RelayManager.getInstance().removeClient(client);
@@ -94,7 +93,7 @@ public class BasicRelayHandler {
             return;
         }
 
-        if (room.getStatus() == RoomStatus.Running && client.getIsSpectator().get()) {
+        if (room.getStatus() == RoomStatus.Running && client.isSpectator()) {
             return;
         }
 
@@ -125,12 +124,12 @@ public class BasicRelayHandler {
         if (roomPlayer == null) return false;
 
         PlayerBattleState playerBattleState = game.getPlayerBattleStates().stream()
-                .filter(x -> x.getPosition().get() == roomPlayer.getPosition())
+                .filter(x -> x.getPosition() == roomPlayer.getPosition())
                 .findFirst()
                 .orElse(null);
         if (playerBattleState == null) return false;
 
-        if (playerBattleState.getDead().get()) {
+        if (playerBattleState.isDead()) {
             connection.getTcpConnection().setLastReadTime(System.currentTimeMillis());
             return true;
         }

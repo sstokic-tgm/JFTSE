@@ -46,14 +46,14 @@ public class RoomListRequestPacketHandler extends AbstractHandler {
         }
 
         short direction = roomListRequestPacket.getDirection() == 0 ? (short) -1 : (short) 1;
-        short currentLobbyRoomListPage = (short) connection.getClient().getLobbyCurrentRoomListPage().get();
+        short currentLobbyRoomListPage = (short) connection.getClient().getLobbyCurrentRoomListPage();
 
         boolean wantsToGoBackOnNegativePage = direction == -1 && currentLobbyRoomListPage == 0;
         if (wantsToGoBackOnNegativePage) {
             direction = 0;
         }
 
-        int currentRoomType = connection.getClient().getLobbyGameModeTabFilter().get();
+        int currentRoomType = connection.getClient().getLobbyGameModeTabFilter();
         int availableRoomsCount = (int) GameManager.getInstance().getRooms().stream()
                 .filter(x -> currentRoomType == GameMode.ALL || GameManager.getInstance().getRoomMode(x) == currentRoomType)
                 .count();
@@ -67,8 +67,8 @@ public class RoomListRequestPacketHandler extends AbstractHandler {
             currentLobbyRoomListPage = 0;
         }
 
-        connection.getClient().getLobbyCurrentRoomListPage().set(currentLobbyRoomListPage);
-        connection.getClient().getLobbyGameModeTabFilter().set(gameMode);
+        connection.getClient().setLobbyCurrentRoomListPage(currentLobbyRoomListPage);
+        connection.getClient().setLobbyGameModeTabFilter(gameMode);
 
         List<Room> roomList = GameManager.getInstance().getFilteredRoomsForClient(connection.getClient());
         S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(roomList);

@@ -22,12 +22,8 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,27 +33,27 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private final short guardianHealPercentage = 5; // Balancing purposes. Only ever heal 5% of guardians hp.
     public final static long guardianAttackLoopTime = TimeUnit.SECONDS.toMillis(8);
 
-    private AtomicLong crystalSpawnInterval;
-    private AtomicLong crystalDeSpawnInterval;
-    private ConcurrentLinkedDeque<Point> playerLocationsOnMap;
-    private ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates;
-    private ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates;
-    private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
+    private long crystalSpawnInterval;
+    private long crystalDeSpawnInterval;
+    private ArrayList<Point> playerLocationsOnMap;
+    private ArrayList<PlayerBattleState> playerBattleStates;
+    private ArrayList<GuardianBattleState> guardianBattleStates;
+    private ArrayList<SkillCrystal> skillCrystals;
     private List<WillDamage> willDamages;
-    private AtomicInteger lastCrystalId;
+    private int lastCrystalId;
     private GuardianStage guardianStage;
     private GuardianStage bossGuardianStage;
     private GuardianStage currentStage;
-    private AtomicBoolean bossBattleActive;
-    private AtomicInteger lastGuardianServeSide;
+    private boolean bossBattleActive;
+    private int lastGuardianServeSide;
     private int guardianLevelLimit;
     private Date stageStartTime;
-    private AtomicInteger expPot;
-    private AtomicInteger goldPot;
-    private AtomicBoolean isHardMode;
-    private AtomicBoolean randomGuardiansMode;
-    private AtomicInteger spiderMineIdentifier;
-    private ConcurrentLinkedDeque<ScheduledFuture<?>> scheduledFutures;
+    private int expPot;
+    private int goldPot;
+    private boolean isHardMode;
+    private boolean isRandomGuardiansMode;
+    private int spiderMineIdentifier;
+    private ArrayList<ScheduledFuture<?>> scheduledFutures;
 
     private final PlayerCombatSystem playerCombatSystem;
     private final GuardianCombatSystem guardianCombatSystem;
@@ -66,26 +62,18 @@ public class MatchplayGuardianGame extends MatchplayGame {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
         this.setStageStartTime(cal.getTime());
-        this.crystalSpawnInterval = new AtomicLong(0);
-        this.crystalDeSpawnInterval = new AtomicLong(0);
-        this.playerLocationsOnMap = new ConcurrentLinkedDeque<>(Arrays.asList(
+        this.playerLocationsOnMap = new ArrayList<>(Arrays.asList(
                 new Point(20, -75),
                 new Point(-20, -75)
         ));
-        this.playerBattleStates = new ConcurrentLinkedDeque<>();
-        this.guardianBattleStates = new ConcurrentLinkedDeque<>();
-        this.skillCrystals = new ConcurrentLinkedDeque<>();
-        this.lastCrystalId = new AtomicInteger(-1);
+        this.playerBattleStates = new ArrayList<>();
+        this.guardianBattleStates = new ArrayList<>();
+        this.skillCrystals = new ArrayList<>();
+        this.lastCrystalId = -1;
         this.willDamages = new ArrayList<>();
-        this.bossBattleActive = new AtomicBoolean(false);
-        this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.Guardian);
-        this.expPot = new AtomicInteger(0);
-        this.goldPot = new AtomicInteger(0);
-        this.isHardMode = new AtomicBoolean(false);
-        this.randomGuardiansMode = new AtomicBoolean(false);
-        this.spiderMineIdentifier = new AtomicInteger(0);
-        this.scheduledFutures = new ConcurrentLinkedDeque<>();
-        this.setFinished(new AtomicBoolean(false));
+        this.lastGuardianServeSide = GameFieldSide.Guardian;
+        this.scheduledFutures = new ArrayList<>();
+        this.setFinished(false);
 
         playerCombatSystem = new PlayerCombatSystem(this);
         guardianCombatSystem = new GuardianCombatSystem(this);
@@ -148,7 +136,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         int totalAvailableGuardianSlots = 3;
         int activeGuardianSlots = forceFill ? 0 : (int) guardians.stream().filter(x -> x != 0).count();
         int remainingGuardianSlots = totalAvailableGuardianSlots - activeGuardianSlots;
-        if (game.getIsHardMode().get() && remainingGuardianSlots != 0) {
+        if (game.isHardMode() && remainingGuardianSlots != 0) {
             List<Guardian> allGuardians = getAllGuardiansFromStage(guardianStage);
             for (int i = activeGuardianSlots; i < totalAvailableGuardianSlots; i++) {
                 guardians.set(i, getRandomGuardian(allGuardians, guardians));
@@ -218,9 +206,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
         List<PlayerReward> playerRewards = new ArrayList<>();
         this.playerBattleStates.forEach(x -> {
             PlayerReward playerReward = new PlayerReward();
-            playerReward.setPlayerPosition(x.getPosition().get());
-            playerReward.setRewardExp(this.getExpPot().get());
-            playerReward.setRewardGold(this.getGoldPot().get());
+            playerReward.setPlayerPosition(x.getPosition());
+            playerReward.setRewardExp(this.getExpPot());
+            playerReward.setRewardGold(this.getGoldPot());
             playerReward.setRewardProductIndex(-1);
 
             if (stageRewards != null)
@@ -231,7 +219,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     int itemRewardToGive = stageRewards.get(r.nextInt(rewardsCount));
                     playerReward.setRewardProductIndex(itemRewardToGive);
 
-                    int amount = this.isHardMode.get() ? 3 : 1;
+                    int amount = this.isHardMode() ? 3 : 1;
                     playerReward.setProductRewardAmount(amount);
                 }
             }

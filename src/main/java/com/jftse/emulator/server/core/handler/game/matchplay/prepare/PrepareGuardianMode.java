@@ -22,7 +22,6 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 public class PrepareGuardianMode extends AbstractHandler {
@@ -50,11 +49,11 @@ public class PrepareGuardianMode extends AbstractHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
-        game.getIsHardMode().getAndSet(room.isHardMode());
-        game.getRandomGuardiansMode().getAndSet(room.isRandomGuardians());
+        game.setHardMode(room.isHardMode());
+        game.setRandomGuardiansMode(room.isRandomGuardians());
         game.setWillDamages(willDamageService.getWillDamages());
 
-        ConcurrentLinkedDeque<RoomPlayer> roomPlayers = new ConcurrentLinkedDeque<>(room.getRoomPlayerList());
+        ArrayList<RoomPlayer> roomPlayers = new ArrayList<>(room.getRoomPlayerList());
 
         float averagePlayerLevel = this.getAveragePlayerLevel(new ArrayList<>(roomPlayers));
         this.handleMonsLavaMap(connection, room, averagePlayerLevel);
@@ -75,15 +74,10 @@ public class PrepareGuardianMode extends AbstractHandler {
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
         game.setGuardianLevelLimit(guardianLevelLimit);
 
-        int roomPlayersSize = roomPlayers.size();
-        for (int i = 0; i < roomPlayersSize; i++) {
-            RoomPlayer roomPlayer = roomPlayers.poll();
-
+        roomPlayers.forEach(roomPlayer -> {
             if (roomPlayer.getPosition() < 4)
                 game.getPlayerBattleStates().add(game.createPlayerBattleState(roomPlayer));
-
-            roomPlayers.offer(roomPlayer);
-        }
+        });
 
         int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
         byte guardianStartPosition = 10;
@@ -97,14 +91,14 @@ public class PrepareGuardianMode extends AbstractHandler {
             int guardianId = guardians.get(i);
             if (guardianId == 0) continue;
 
-            if (game.getRandomGuardiansMode().get()) {
+            if (game.isRandomGuardiansMode()) {
                 guardianId = (int) (Math.random() * 72 + 1);
                 guardians.set(i, (byte) guardianId);
             }
 
             short guardianPosition = (short) (i + guardianStartPosition);
             Guardian guardian = guardianService.findGuardianById((long) guardianId);
-            GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
+            GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.isHardMode(), guardian, guardianPosition, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(guardianBattleState);
         }
 

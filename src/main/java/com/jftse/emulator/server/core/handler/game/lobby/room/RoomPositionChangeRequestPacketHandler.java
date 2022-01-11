@@ -13,7 +13,6 @@ import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RoomPositionChangeRequestPacketHandler extends AbstractHandler {
     private C2SRoomPositionChangeRequestPacket roomPositionChangeRequestPacket;
@@ -73,7 +72,7 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractHandler {
                         requestingSlotChangePlayerOldPosition, positionToClaim);
             }
 
-            ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+            ArrayList<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
             roomPlayerList.forEach(rp -> {
                 synchronized (rp) {
                     rp.setReady(false);

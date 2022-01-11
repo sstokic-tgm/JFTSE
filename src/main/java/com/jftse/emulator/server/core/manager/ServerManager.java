@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @Getter
@@ -22,7 +21,7 @@ public class ServerManager {
 
     private List<Server> serverList;
 
-    private AtomicBoolean serverNoticeIsSet;
+    private boolean serverNoticeIsSet;
     private long serverNoticeTime; // -1 = not set, 0 = infinite, time > 0 = time
     private String serverNoticeMessage;
 
@@ -32,7 +31,7 @@ public class ServerManager {
 
         serverList = new ArrayList<>();
 
-        serverNoticeIsSet = new AtomicBoolean(false);
+        serverNoticeIsSet = false;
         serverNoticeTime = -1;
 
         log.info(this.getClass().getSimpleName() + " initialized");
@@ -83,7 +82,7 @@ public class ServerManager {
     }
 
     public synchronized void broadcastServerNotice(String message, long time) {
-        if (!serverNoticeIsSet.get()) {
+        if (!serverNoticeIsSet) {
             serverNoticeMessage = message;
             serverNoticeTime = time;
 
@@ -92,7 +91,7 @@ public class ServerManager {
             for (Server server : serverList) {
                 server.sendToAllTcp(serverNoticePacket);
             }
-            serverNoticeIsSet.set(!StringUtils.isEmpty(message));
+            serverNoticeIsSet = !StringUtils.isEmpty(message);
         }
     }
 }

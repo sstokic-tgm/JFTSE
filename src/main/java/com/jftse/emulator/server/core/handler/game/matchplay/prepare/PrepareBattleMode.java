@@ -31,14 +31,9 @@ public class PrepareBattleMode extends AbstractHandler {
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
         game.setWillDamages(willDamageService.getWillDamages());
 
-        int roomPlayersSize = room.getRoomPlayerList().size();
-        for (int i = 0; i < roomPlayersSize; i++) {
-            RoomPlayer roomPlayer = room.getRoomPlayerList().poll();
-
+        room.getRoomPlayerList().forEach(roomPlayer -> {
             if (roomPlayer.getPosition() < 4)
                 game.getPlayerBattleStates().add(game.createPlayerBattleState(roomPlayer));
-
-            room.getRoomPlayerList().offer(roomPlayer);
-        }
+        });
     }
 }

@@ -30,7 +30,7 @@ public class UnbanPlayerCommand extends Command {
     public void execute(Connection connection, List<String> params) {
         if (params.size() < 1) {
             Packet answer;
-            if (connection.getClient().getInLobby().get())
+            if (connection.getClient().isInLobby())
                 answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Use -unban <playerName>");
             else
                 answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Use -unban <playerName>");
@@ -42,7 +42,7 @@ public class UnbanPlayerCommand extends Command {
         Player playerToUnban = playerService.findByName(playerName);
         if (playerToUnban == null) {
             Packet answer;
-            if (connection.getClient().getInLobby().get())
+            if (connection.getClient().isInLobby())
                 answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player not found");
             else
                 answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player not found");
@@ -59,7 +59,7 @@ public class UnbanPlayerCommand extends Command {
             authenticationService.updateAccount(accountToUnban);
 
             Packet answer;
-            if (connection.getClient().getInLobby().get())
+            if (connection.getClient().isInLobby())
                 answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player " + playerName + " has been unbanned");
             else
                 answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player " + playerName + " has been unbanned");

@@ -19,13 +19,13 @@ public class ServerNoticeCommand extends Command {
     public void execute(Connection connection, List<String> params) {
         if (params.size() < 1) {
             Packet answer;
-            if (connection.getClient().getInLobby().get())
+            if (connection.getClient().isInLobby())
                 answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Use -serverNotice <\"message\"> to set a server notice");
             else
                 answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Use -serverNotice <\"message\"> to set a server notice");
             connection.sendTCP(answer);
 
-            ServerManager.getInstance().getServerNoticeIsSet().set(false);
+            ServerManager.getInstance().setServerNoticeIsSet(false);
             ServerManager.getInstance().broadcastServerNotice("", -1);
             return;
         }

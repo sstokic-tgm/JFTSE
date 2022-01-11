@@ -12,6 +12,9 @@ import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayLetCr
 import com.jftse.emulator.server.core.thread.AbstractTask;
 import com.jftse.emulator.server.networking.Connection;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public class DespawnCrystalTask extends AbstractTask {
     private final Connection connection;
     private SkillCrystal skillCrystal;
@@ -55,26 +58,19 @@ public class DespawnCrystalTask extends AbstractTask {
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
-            int skillCrystalsSize = isBattleGame ? ((MatchplayBattleGame) game).getSkillCrystals().size() : ((MatchplayGuardianGame) game).getSkillCrystals().size();
-            for (int i = 0; i < skillCrystalsSize; i++) {
-                SkillCrystal current = isBattleGame ? ((MatchplayBattleGame) game).getSkillCrystals().poll() : ((MatchplayGuardianGame) game).getSkillCrystals().poll();
-
+            ArrayList<SkillCrystal> skillCrystals = isBattleGame ? ((MatchplayBattleGame) game).getSkillCrystals() : ((MatchplayGuardianGame) game).getSkillCrystals();
+            skillCrystals.stream().collect(Collectors.toList()).forEach(current -> {
                 if (current.getId() == skillCrystal.getId()) {
-                    skillCrystalsSize--;
-                    continue;
+                    skillCrystals.remove(current);
+                    return;
                 }
-
-                if (isBattleGame)
-                    ((MatchplayBattleGame) game).getSkillCrystals().offer(current);
-                else
-                    ((MatchplayGuardianGame) game).getSkillCrystals().offer(current);
-            }
+            });
 
             RunnableEvent runnableEvent = null;
             if (isBattleGame)
-                runnableEvent = runnableEventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection, gameFieldSide), ((MatchplayBattleGame) game).getCrystalSpawnInterval().get());
+                runnableEvent = runnableEventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection, gameFieldSide), ((MatchplayBattleGame) game).getCrystalSpawnInterval());
             else
-                runnableEvent = runnableEventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection), ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get());
+                runnableEvent = runnableEventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection), ((MatchplayGuardianGame) game).getCrystalSpawnInterval());
 
             gameSession.getRunnableEvents().add(runnableEvent);
         }

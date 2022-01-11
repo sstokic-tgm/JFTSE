@@ -16,7 +16,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Log4j2
 public class RegisterPlayerForSessionHandler extends AbstractHandler {
@@ -43,7 +42,7 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                     client.setActivePlayer(playerClient.getActivePlayer());
                     client.setActiveGameSession(gameSession);
                     client.setConnection(connection);
-                    client.getIsSpectator().set(matchplayPlayerIdsInSessionPacket.isSpectator());
+                    client.setSpectator((matchplayPlayerIdsInSessionPacket.isSpectator()));
 
                     connection.setClient(client);
                     gameSession.getClientsInRelay().add(client);
@@ -81,7 +80,7 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                             }
                         }
                     }
-                    ConcurrentLinkedDeque<Client> relayClients = RelayManager.getInstance().getClientsInGameSession(gameSession.getSessionId());
+                    ArrayList<Client> relayClients = RelayManager.getInstance().getClientsInGameSession(gameSession.getSessionId());
                     for (Client client : relayClients) {
                         if (client.getConnection() != null && client.getConnection().isConnected()) {
                             RelayManager.getInstance().removeClient(client);

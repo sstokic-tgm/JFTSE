@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,8 +19,8 @@ public class Server implements Runnable {
     private final int writeBufferSize, objectBufferSize;
     private Selector selector;
     private ServerSocketChannel serverChannel;
-    private ConcurrentLinkedDeque<Connection> connections = new ConcurrentLinkedDeque<>();
-    private ConcurrentLinkedDeque<ConnectionListener> connectionListeners = new ConcurrentLinkedDeque<>();
+    private ArrayList<Connection> connections = new ArrayList<>();
+    private ArrayList<ConnectionListener> connectionListeners = new ArrayList<>();
     private volatile boolean shutdown;
     private final Object updateLock = new Object();
     private Thread updateThread;
@@ -354,8 +353,12 @@ public class Server implements Runnable {
     }
 
     private void close() {
-        for (Connection connection = this.connections.poll(); connection != null; connection = this.connections.poll())
-            connection.close();
+        this.connections.forEach(connection -> {
+            if (connection != null) {
+                connection.close();
+            }
+        });
+
         this.connections.clear();
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;

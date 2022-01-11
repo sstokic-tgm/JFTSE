@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Service
 @Getter
@@ -38,7 +37,7 @@ public class AntiCheatManager {
         }
     }
 
-    private ConcurrentLinkedDeque<AntiCheatClient> clients;
+    private ArrayList<AntiCheatClient> clients;
     private List<String> fileList;
 
     @Autowired
@@ -48,7 +47,7 @@ public class AntiCheatManager {
     public void init() {
         instance = this;
 
-        clients = new ConcurrentLinkedDeque<>();
+        clients = new ArrayList<>();
 
         if (configService.getValue("anticheat.enabled", false))
             fileList = getFiles();
@@ -77,15 +76,11 @@ public class AntiCheatManager {
     public Map<String, Boolean> getFilesByClient(Client client) {
         Map<String, Boolean> result = null;
 
-        int clientsSize = clients.size();
-        for (int i = 0; i < clientsSize; i++) {
-            AntiCheatClient antiCheatClient = clients.poll();
-
-            if (antiCheatClient.getClient().equals(client))
-                result = antiCheatClient.getFileList();
-
-            clients.offer(antiCheatClient);
+        AntiCheatClient antiCheatClient = clients.stream().filter(x -> x.client.equals(client)).findFirst().orElse(null);
+        if (antiCheatClient != null) {
+            result = antiCheatClient.getFileList();
         }
+
         return result;
     }
 

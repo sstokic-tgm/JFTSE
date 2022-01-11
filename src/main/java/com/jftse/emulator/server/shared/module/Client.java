@@ -11,10 +11,6 @@ import com.jftse.emulator.server.networking.Connection;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 @Getter
 @Setter
 public class Client {
@@ -29,15 +25,15 @@ public class Client {
     private Room activeRoom;
     private GameSession activeGameSession;
 
-    private AtomicBoolean inLobby = new AtomicBoolean(false);
-    private AtomicBoolean isSpectator = new AtomicBoolean(false);
+    private boolean inLobby = false;
+    private boolean isSpectator = false;
 
-    private AtomicInteger lobbyGameModeTabFilter = new AtomicInteger(GameMode.ALL);
-    private AtomicInteger lobbyCurrentPlayerListPage = new AtomicInteger(1);
-    private AtomicInteger lobbyCurrentRoomListPage = new AtomicInteger(-1);
-    private AtomicLong lastHearBeatTime = new AtomicLong(0);
+    private int lobbyGameModeTabFilter = GameMode.ALL;
+    private int lobbyCurrentPlayerListPage = 1;
+    private int lobbyCurrentRoomListPage = -1;
+    private long lastHearBeatTime = 0;
 
-    private AtomicBoolean usingGachaMachine = new AtomicBoolean(false);
+    private boolean usingGachaMachine = false;
 
     private String ip;
     private int port;

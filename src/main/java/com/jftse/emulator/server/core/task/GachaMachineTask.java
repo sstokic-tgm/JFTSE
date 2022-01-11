@@ -57,7 +57,7 @@ public class GachaMachineTask extends AbstractTask {
 
             PlayerPocket playerPocketGacha = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
             if (playerPocketGacha != null) {
-                connection.getClient().getUsingGachaMachine().compareAndSet(false, true);
+                connection.getClient().setUsingGachaMachine(true);
 
                 S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Please wait in lobby until it finishes.");
                 if (connection.isConnected())
@@ -95,7 +95,7 @@ public class GachaMachineTask extends AbstractTask {
                 });
 
                 if (connection.getClient() != null)
-                    connection.getClient().getUsingGachaMachine().compareAndSet(true, false);
+                    connection.getClient().setUsingGachaMachine(false);
 
                 String resultText = "Drawn items: (count represents how often it was drawn)";
                 chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", resultText);

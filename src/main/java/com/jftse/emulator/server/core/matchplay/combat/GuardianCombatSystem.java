@@ -20,17 +20,17 @@ public class GuardianCombatSystem implements GuardianCombatable {
     public short dealDamage(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) throws ValidationException {
         int totalDamageToDeal = damage;
         PlayerBattleState attackingPlayer = game.getPlayerBattleStates().stream()
-                .filter(x -> x.getPosition().get() == attackerPos)
+                .filter(x -> x.getPosition() == attackerPos)
                 .findFirst()
                 .orElse(null);
 
         boolean isNormalDamageSkill = Math.abs(damage) != 1;
         if (attackingPlayer != null && isNormalDamageSkill) {
-            totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr().get(), damage, hasAttackerDmgBuff);
+            totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
         }
 
         GuardianBattleState targetGuardian = game.getGuardianBattleStates().stream()
-                .filter(x -> x.getPosition().get() == targetPos)
+                .filter(x -> x.getPosition() == targetPos)
                 .findFirst()
                 .orElse(null);
 
@@ -38,7 +38,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
             throw new ValidationException("targetGuardian battle state is null");
 
         if (isNormalDamageSkill) {
-            int damageToDeny = BattleUtils.calculateDef(targetGuardian.getSta().get(), Math.abs(totalDamageToDeal), hasTargetDefBuff);
+            int damageToDeny = BattleUtils.calculateDef(targetGuardian.getSta(), Math.abs(totalDamageToDeal), hasTargetDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
@@ -52,7 +52,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
     @Override
     public short dealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
         GuardianBattleState targetGuardian = game.getGuardianBattleStates().stream()
-                .filter(x -> x.getPosition().get() == targetPos)
+                .filter(x -> x.getPosition() == targetPos)
                 .findFirst()
                 .orElse(null);
 
@@ -62,21 +62,21 @@ public class GuardianCombatSystem implements GuardianCombatable {
         int lossBallDamage = 0;
         boolean servingGuardianScored = attackerPos == 4;
         if (servingGuardianScored) {
-            lossBallDamage = (short) -(targetGuardian.getMaxHealth().get() * 0.02);
+            lossBallDamage = (short) -(targetGuardian.getMaxHealth() * 0.02);
         } else {
             PlayerBattleState attackingPlayer = game.getPlayerBattleStates().stream()
-                    .filter(x -> x.getPosition().get() == attackerPos)
+                    .filter(x -> x.getPosition() == attackerPos)
                     .findFirst()
                     .orElse(null);
             if (attackingPlayer != null) {
-                int playerWill = attackingPlayer.getWill().get();
+                int playerWill = attackingPlayer.getWill();
                 WillDamage willDamage = game.getWillDamages().stream()
                         .filter(x -> x.getWill() == playerWill)
                         .findFirst()
                         .orElse(game.getWillDamages().get(game.getWillDamages().size() - 1));
                 lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
 
-                int additionalWillDmg = (int) (targetGuardian.getMaxHealth().get() * (playerWill / 10000d));
+                int additionalWillDmg = (int) (targetGuardian.getMaxHealth() * (playerWill / 10000d));
                 lossBallDamage -= additionalWillDmg;
             }
         }
@@ -87,7 +87,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
     @Override
     public short heal(int targetPos, short percentage) throws ValidationException {
         GuardianBattleState targetGuardian = game.getGuardianBattleStates().stream()
-                .filter(x -> x.getPosition().get() == targetPos)
+                .filter(x -> x.getPosition() == targetPos)
                 .findFirst()
                 .orElse(null);
 
@@ -96,17 +96,14 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
         percentage = game.getGuardianHealPercentage();
 
-        short currentHealth = 0;
-        short newGuardianHealth = 0;
-        do {
-            short healthToHeal = (short) (targetGuardian.getMaxHealth().get() * (percentage / 100f));
-            currentHealth = (short) (Math.max(targetGuardian.getCurrentHealth().get(), 0));
-            newGuardianHealth = (short) (currentHealth + healthToHeal);
-            if (newGuardianHealth > targetGuardian.getMaxHealth().get()) {
-                newGuardianHealth = (short) targetGuardian.getMaxHealth().get();
-            }
-        } while (!targetGuardian.getCurrentHealth().compareAndSet(currentHealth, newGuardianHealth));
+        short healthToHeal = (short) (targetGuardian.getMaxHealth() * (percentage / 100f));
+        short currentHealth = (short) (Math.max(targetGuardian.getCurrentHealth(), 0));
+        short newGuardianHealth = (short) (currentHealth + healthToHeal);
+        if (newGuardianHealth > targetGuardian.getMaxHealth()) {
+            newGuardianHealth = (short) targetGuardian.getMaxHealth();
+        }
 
+        targetGuardian.setCurrentHealth(newGuardianHealth);
         return newGuardianHealth;
     }
 
@@ -114,17 +111,17 @@ public class GuardianCombatSystem implements GuardianCombatable {
     public short dealDamageToPlayer(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) throws ValidationException {
         int totalDamageToDeal = damage;
         GuardianBattleState attackingGuardian = game.getGuardianBattleStates().stream()
-                .filter(x -> x.getPosition().get() == attackerPos)
+                .filter(x -> x.getPosition() == attackerPos)
                 .findFirst()
                 .orElse(null);
 
         boolean isNormalDamageSkill = Math.abs(damage) != 1;
         if (attackingGuardian != null && isNormalDamageSkill) {
-            totalDamageToDeal = BattleUtils.calculateDmg(attackingGuardian.getStr().get(), damage, hasAttackerDmgBuff);
+            totalDamageToDeal = BattleUtils.calculateDmg(attackingGuardian.getStr(), damage, hasAttackerDmgBuff);
         }
 
         PlayerBattleState targetPlayer = game.getPlayerBattleStates().stream()
-                .filter(x -> x.getPosition().get() == targetPos)
+                .filter(x -> x.getPosition() == targetPos)
                 .findFirst()
                 .orElse(null);
 
@@ -132,7 +129,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
             throw new ValidationException("targetPlayer battle state is null");
 
         if (isNormalDamageSkill) {
-            int damageToDeny = BattleUtils.calculateDef(targetPlayer.getSta().get(), Math.abs(totalDamageToDeal), hasTargetDefBuff);
+            int damageToDeny = BattleUtils.calculateDef(targetPlayer.getSta(), Math.abs(totalDamageToDeal), hasTargetDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
@@ -146,7 +143,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
     @Override
     public short dealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
         PlayerBattleState targetPlayer = game.getPlayerBattleStates().stream()
-                .filter(x -> x.getPosition().get() == targetPos)
+                .filter(x -> x.getPosition() == targetPos)
                 .findFirst()
                 .orElse(null);
 
@@ -156,14 +153,14 @@ public class GuardianCombatSystem implements GuardianCombatable {
         int lossBallDamage = 0;
         boolean servingGuardianScored = attackerPos == 4;
         if (servingGuardianScored) {
-            lossBallDamage = (short) -(targetPlayer.getMaxHealth().get() * 0.02);
+            lossBallDamage = (short) -(targetPlayer.getMaxHealth() * 0.02);
         } else {
             GuardianBattleState attackingGuardian = game.getGuardianBattleStates().stream()
-                    .filter(x -> x.getPosition().get() == attackerPos)
+                    .filter(x -> x.getPosition() == attackerPos)
                     .findFirst()
                     .orElse(null);
             if (attackingGuardian != null) {
-                int guardianWill = attackingGuardian.getWill().get();
+                int guardianWill = attackingGuardian.getWill();
                 WillDamage willDamage = game.getWillDamages().stream()
                         .filter(x -> x.getWill() == guardianWill)
                         .findFirst()
@@ -177,45 +174,38 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
     @Override
     public short updateHealthByDamage(GuardianBattleState targetGuardian, int dmg) {
-        short currentHealth = 0;
-        short newGuardianHealth = 0;
-        do {
-            currentHealth = (short) Math.max(targetGuardian.getCurrentHealth().get(), 0);
-            log.debug("updateHealthByDamage(GuardianBattleState targetGuardian, int dmg): " + currentHealth + ", " + dmg);
-            newGuardianHealth = (short) (currentHealth + dmg);
-            newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
-        } while (!targetGuardian.getCurrentHealth().compareAndSet(currentHealth, newGuardianHealth));
-
+        short currentHealth = (short) Math.max(targetGuardian.getCurrentHealth(), 0);
+        log.debug("updateHealthByDamage(GuardianBattleState targetGuardian, int dmg): " + currentHealth + ", " + dmg);
+        short newGuardianHealth = (short) (currentHealth + dmg);
+        newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
+        targetGuardian.setCurrentHealth(newGuardianHealth);
         return newGuardianHealth;
     }
 
     @Override
     public short updateHealthByDamage(PlayerBattleState targetPlayer, int dmg) {
-        short newPlayerHealth = 0;
-        short currentHealth = 0;
-        do {
-            currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
-            log.debug("updateHealthByDamage(PlayerBattleState targetPlayer, int dmg): " + currentHealth + ", " + dmg);
-            newPlayerHealth = (short) (currentHealth + dmg);
-            if (newPlayerHealth < 1) {
-                targetPlayer.getDead().getAndSet(true);
-            }
-            newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
-        } while (!targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth));
+        short currentHealth = (short) Math.max(targetPlayer.getCurrentHealth(), 0);
+        log.debug("updateHealthByDamage(PlayerBattleState targetPlayer, int dmg): " + currentHealth + ", " + dmg);
+        short newPlayerHealth = (short) (currentHealth + dmg);
+        if (newPlayerHealth < 1) {
+            targetPlayer.setDead(true);
+        }
+        newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
 
+        targetPlayer.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
     }
 
     @Override
     public GuardianBattleState reviveAnyGuardian(short revivePercentage) throws ValidationException {
         GuardianBattleState guardianBattleState = game.getGuardianBattleStates().stream()
-                .filter(x -> x.getCurrentHealth().get() < 1)
+                .filter(x -> x.getCurrentHealth() < 1)
                 .findFirst()
                 .orElse(null);
 
         if (guardianBattleState != null) {
             revivePercentage = game.getGuardianHealPercentage();
-            heal(guardianBattleState.getPosition().get(), revivePercentage);
+            heal(guardianBattleState.getPosition(), revivePercentage);
         }
 
         return guardianBattleState;

@@ -16,7 +16,6 @@ import com.jftse.emulator.server.shared.module.Client;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class StartBasicModeHandler extends AbstractHandler {
     @Override
@@ -30,12 +29,10 @@ public class StartBasicModeHandler extends AbstractHandler {
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(removeBlackBarsPacket, connection);
 
         Room room = connection.getClient().getActiveRoom();
-        ConcurrentLinkedDeque<Client> clients = new ConcurrentLinkedDeque<>(connection.getClient().getActiveGameSession().getClients());
+        ArrayList<Client> clients = new ArrayList<>(connection.getClient().getActiveGameSession().getClients());
         List<ServeInfo> serveInfo = new ArrayList<>();
-        int clientsSize = clients.size();
-        for (int i = 0; i < clientsSize; i++) {
-            Client client = clients.poll();
 
+        clients.forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
                     .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst()
@@ -47,25 +44,16 @@ public class StartBasicModeHandler extends AbstractHandler {
                     GameSession gameSession = client.getActiveGameSession();
                     MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getActiveMatchplayGame();
 
-                    Point playerLocation = new Point();
-                    int playerLocationsOnMapSize = game.getPlayerLocationsOnMap().size();
-                    for (int j = 0; j < playerLocationsOnMapSize; j++) {
-                        Point current = game.getPlayerLocationsOnMap().poll();
-
-                        if (rp.getPosition() == j)
-                            playerLocation = new Point(current);
-
-                        game.getPlayerLocationsOnMap().offer(current);
-                    }
+                    Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
 
                     byte serveType = ServeType.None;
                     if (rp.getPosition() == 0) {
                         serveType = ServeType.ServeBall;
-                        game.getServePlayer().getAndSet(rp);
+                        game.setServePlayer(rp);
                     }
                     if (rp.getPosition() == 1) {
                         serveType = ServeType.ReceiveBall;
-                        game.getReceiverPlayer().getAndSet(rp);
+                        game.setReceiverPlayer(rp);
                     }
                     ServeInfo playerServeInfo = new ServeInfo();
                     playerServeInfo.setPlayerPosition(rp.getPosition());
@@ -74,7 +62,8 @@ public class StartBasicModeHandler extends AbstractHandler {
                     serveInfo.add(playerServeInfo);
                 }
             }
-        }
+        });
+
         S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfo);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplayTriggerServe, connection);
     }

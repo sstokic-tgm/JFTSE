@@ -35,7 +35,7 @@ public class RelayServerNetworkListener implements ConnectionListener {
 
         new BasicRelayHandler().sendWelcomePacket(connection);
 
-        if (serverManager.getServerNoticeIsSet().get()) {
+        if (serverManager.isServerNoticeIsSet()) {
             S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(serverManager.getServerNoticeMessage());
             connection.sendTCP(serverNoticePacket);
         }

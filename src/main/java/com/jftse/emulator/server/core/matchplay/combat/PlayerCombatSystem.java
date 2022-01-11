@@ -25,26 +25,26 @@ public class PlayerCombatSystem implements PlayerCombatable {
         int totalDamageToDeal = damage;
         PlayerBattleState attackingPlayer = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == attackerPos)
+                        .filter(x -> x.getPosition() == attackerPos)
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == attackerPos)
+                        .filter(x -> x.getPosition() == attackerPos)
                         .findFirst()
                         .orElse(null);
 
         boolean isNormalDamageSkill = Math.abs(damage) != 1;
         if (isNormalDamageSkill) {
-            totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr().get(), damage, hasAttackerDmgBuff);
+            totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
         }
 
         PlayerBattleState targetPlayer = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == targetPos)
+                        .filter(x -> x.getPosition() == targetPos)
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == targetPos)
+                        .filter(x -> x.getPosition() == targetPos)
                         .findFirst()
                         .orElse(null);
 
@@ -52,7 +52,7 @@ public class PlayerCombatSystem implements PlayerCombatable {
             throw new ValidationException("targetPlayer battle state is null");
 
         if (isNormalDamageSkill) {
-            int damageToDeny = BattleUtils.calculateDef(targetPlayer.getSta().get(), Math.abs(totalDamageToDeal), hasTargetDefBuff);
+            int damageToDeny = BattleUtils.calculateDef(targetPlayer.getSta(), Math.abs(totalDamageToDeal), hasTargetDefBuff);
             if (damageToDeny > Math.abs(totalDamageToDeal)) {
                 totalDamageToDeal = -1;
             } else {
@@ -67,11 +67,11 @@ public class PlayerCombatSystem implements PlayerCombatable {
     public short dealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
         PlayerBattleState targetPlayer = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == targetPos)
+                        .filter(x -> x.getPosition() == targetPos)
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == targetPos)
+                        .filter(x -> x.getPosition() == targetPos)
                         .findFirst()
                         .orElse(null);
 
@@ -81,21 +81,21 @@ public class PlayerCombatSystem implements PlayerCombatable {
         int lossBallDamage = 0;
         boolean servingGuardianScored = attackerPos == 4;
         if (servingGuardianScored) {
-            lossBallDamage = (short) -(targetPlayer.getMaxHealth().get() * 0.1);
+            lossBallDamage = (short) -(targetPlayer.getMaxHealth() * 0.1);
         } else {
             PlayerBattleState attackingPlayer = isBattleGame ?
                     ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> x.getPosition().get() == attackerPos)
+                            .filter(x -> x.getPosition() == attackerPos)
                             .findFirst()
                             .orElse(null) :
                     ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> x.getPosition().get() == attackerPos)
+                            .filter(x -> x.getPosition() == attackerPos)
                             .findFirst()
                             .orElse(null);
 
             if (attackingPlayer != null) {
                 WillDamage willDamage = game.getWillDamages().stream()
-                        .filter(x -> x.getWill() == attackingPlayer.getWill().get())
+                        .filter(x -> x.getWill() == attackingPlayer.getWill())
                         .findFirst()
                         .orElse(game.getWillDamages().get(game.getWillDamages().size() - 1));
                 lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
@@ -109,44 +109,38 @@ public class PlayerCombatSystem implements PlayerCombatable {
     public short heal(int targetPos, short percentage) throws ValidationException {
         PlayerBattleState targetPlayer = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == targetPos)
+                        .filter(x -> x.getPosition() == targetPos)
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == targetPos)
+                        .filter(x -> x.getPosition() == targetPos)
                         .findFirst()
                         .orElse(null);
 
         if (targetPlayer == null)
             throw new ValidationException("targetPlayer battle state is null");
 
-        short newPlayerHealth = 0;
-        short currentHealth = 0;
-        do {
-            short healthToHeal = (short) (targetPlayer.getMaxHealth().get() * (percentage / 100f));
-            currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
-            newPlayerHealth = (short) (currentHealth + healthToHeal);
-            if (newPlayerHealth > targetPlayer.getMaxHealth().get()) {
-                newPlayerHealth = (short) targetPlayer.getMaxHealth().get();
-            }
-        } while (!targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth));
+        short healthToHeal = (short) (targetPlayer.getMaxHealth() * (percentage / 100f));
+        short currentHealth = (short) Math.max(targetPlayer.getCurrentHealth(), 0);
+        short newPlayerHealth = (short) (currentHealth + healthToHeal);
+        if (newPlayerHealth > targetPlayer.getMaxHealth()) {
+            newPlayerHealth = (short) targetPlayer.getMaxHealth();
+        }
 
+        targetPlayer.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
     }
 
     @Override
     public short updateHealthByDamage(PlayerBattleState targetPlayer, int dmg) {
-        short newPlayerHealth = 0;
-        short currentHealth = 0;
-        do {
-            currentHealth = (short) Math.max(targetPlayer.getCurrentHealth().get(), 0);
-            newPlayerHealth = (short) (currentHealth + dmg);
-            if (newPlayerHealth < 1) {
-                targetPlayer.getDead().getAndSet(true);
-            }
-            newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
-        } while (!targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth));
+        short currentHealth = (short) Math.max(targetPlayer.getCurrentHealth(), 0);
+        short newPlayerHealth = (short) (currentHealth + dmg);
+        if (newPlayerHealth < 1) {
+            targetPlayer.setDead(true);
+        }
+        newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
 
+        targetPlayer.setCurrentHealth(newPlayerHealth);
         return newPlayerHealth;
     }
 
@@ -157,19 +151,19 @@ public class PlayerCombatSystem implements PlayerCombatable {
 
             PlayerBattleState playerBattleState = isBattleGame ?
                     ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition().get()) && x.getDead().get()
-                                    || !isRedTeam == !game.isRedTeam(x.getPosition().get()) && x.getDead().get())
+                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition()) && x.isDead()
+                                    || !isRedTeam == !game.isRedTeam(x.getPosition()) && x.isDead())
                             .findFirst()
                             .orElse(null) :
                     ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition().get()) && x.getDead().get()
-                                    || !isRedTeam == !game.isRedTeam(x.getPosition().get()) && x.getDead().get())
+                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition()) && x.isDead()
+                                    || !isRedTeam == !game.isRedTeam(x.getPosition()) && x.isDead())
                             .findFirst()
                             .orElse(null);
 
             if (playerBattleState != null) {
-                heal(playerBattleState.getPosition().get(), revivePercentage);
-                playerBattleState.getDead().getAndSet(false);
+                heal(playerBattleState.getPosition(), revivePercentage);
+                playerBattleState.setDead(false);
             }
             return playerBattleState;
         }
@@ -180,17 +174,17 @@ public class PlayerCombatSystem implements PlayerCombatable {
     public PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
         PlayerBattleState playerBattleState = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getDead().get())
+                        .filter(x -> x.isDead())
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getDead().get())
+                        .filter(x -> x.isDead())
                         .findFirst()
                         .orElse(null);
 
         if (playerBattleState != null) {
-            heal(playerBattleState.getPosition().get(), revivePercentage);
-            playerBattleState.getDead().getAndSet(false);
+            heal(playerBattleState.getPosition(), revivePercentage);
+            playerBattleState.setDead(false);
         }
 
         return playerBattleState;
@@ -200,17 +194,17 @@ public class PlayerCombatSystem implements PlayerCombatable {
     public short getPlayerCurrentHealth(short playerPos) throws ValidationException {
         PlayerBattleState playerBattleState = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == playerPos)
+                        .filter(x -> x.getPosition() == playerPos)
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition().get() == playerPos)
+                        .filter(x -> x.getPosition() == playerPos)
                         .findFirst()
                         .orElse(null);
 
         if (playerBattleState == null)
             throw new ValidationException("playerBattleState is null");
 
-        return (short) playerBattleState.getCurrentHealth().get();
+        return (short) playerBattleState.getCurrentHealth();
     }
 }

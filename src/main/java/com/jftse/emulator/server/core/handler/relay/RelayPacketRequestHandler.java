@@ -1,15 +1,13 @@
 package com.jftse.emulator.server.core.handler.relay;
 
 import com.jftse.emulator.server.core.handler.AbstractHandler;
-import com.jftse.emulator.server.core.handler.relay.spidermine.SpiderMineExplodeHandler;
-import com.jftse.emulator.server.core.manager.RelayManager;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.ArrayList;
 
 @Log4j2
 public class RelayPacketRequestHandler extends AbstractHandler {
@@ -46,15 +44,12 @@ public class RelayPacketRequestHandler extends AbstractHandler {
                     }
                 }
 
-                ConcurrentLinkedDeque<Client> clientList = new ConcurrentLinkedDeque<>(gameSession.getClientsInRelay());
-                int clientsSize = clientList.size();
-                for (int i = 0; i < clientsSize; i++) {
-                    Client client = clientList.poll();
-
+                ArrayList<Client> clientList = new ArrayList<>(gameSession.getClientsInRelay());
+                clientList.forEach(client -> {
                     if (client.getConnection() != null && client.getConnection().isConnected()) {
                         client.getConnection().sendTCP(relayPacket);
                     }
-                }
+                });
             }
         }
     }

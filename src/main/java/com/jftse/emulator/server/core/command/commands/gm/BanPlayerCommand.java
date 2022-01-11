@@ -33,7 +33,7 @@ public class BanPlayerCommand extends Command {
     public void execute(Connection connection, List<String> params) {
         if (params.size() < 3) {
             Packet answer;
-            if (connection.getClient().getInLobby().get())
+            if (connection.getClient().isInLobby())
                 answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Use -ban <playerName> <\"banReason\"> <daysToBan>");
             else
                 answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Use -ban <playerName> <\"banReason\"> <daysToBan>");
@@ -47,7 +47,7 @@ public class BanPlayerCommand extends Command {
         Player playerToBan = playerService.findByName(playerName);
         if (playerToBan == null) {
             Packet answer;
-            if (connection.getClient().getInLobby().get())
+            if (connection.getClient().isInLobby())
                 answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player not found");
             else
                 answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player not found");
@@ -74,7 +74,7 @@ public class BanPlayerCommand extends Command {
             SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
             Packet answer;
-            if (connection.getClient().getInLobby().get())
+            if (connection.getClient().isInLobby())
                 answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player " + playerName + " has been banned until " + sdf.format(cal.getTime()));
             else
                 answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player " + playerName + " has been banned until " + sdf.format(cal.getTime()));

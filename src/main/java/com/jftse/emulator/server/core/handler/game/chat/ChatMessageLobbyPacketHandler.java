@@ -31,7 +31,7 @@ public class ChatMessageLobbyPacketHandler extends AbstractHandler {
         }
 
         List<Client> clientList = GameManager.getInstance().getClients().stream()
-                .filter(c -> c.getInLobby().get())
+                .filter(c -> c.isInLobby())
                 .collect(Collectors.toList());
 
         clientList.forEach(c -> c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatLobbyAnswerPacket));

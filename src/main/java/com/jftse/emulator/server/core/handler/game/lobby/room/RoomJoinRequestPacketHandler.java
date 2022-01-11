@@ -19,7 +19,6 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RoomJoinRequestPacketHandler extends AbstractHandler {
@@ -188,7 +187,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
         room.getRoomPlayerList().add(roomPlayer);
 
         connection.getClient().setActiveRoom(room);
-        connection.getClient().getInLobby().set(false);
+        connection.getClient().setInLobby(false);
 
         handleRoomUponJoin(room, roomJoinRequestPacket.getRoomId());
     }

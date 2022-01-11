@@ -50,14 +50,14 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
         Point2D point = isBattleGame ? this.getRandomPoint(gameFieldSide) : this.getRandomPoint();
 
         short crystalId = (short) (isBattleGame ?
-                (((MatchplayBattleGame) game).getLastCrystalId().get() + 1) :
-                (((MatchplayGuardianGame) game).getLastCrystalId().get() + 1));
+                (((MatchplayBattleGame) game).getLastCrystalId() + 1) :
+                (((MatchplayGuardianGame) game).getLastCrystalId() + 1));
         if (crystalId > 100) crystalId = 0;
 
         if (isBattleGame)
-            ((MatchplayBattleGame) game).getLastCrystalId().getAndSet(crystalId);
+            ((MatchplayBattleGame) game).setLastCrystalId(crystalId);
         else
-            ((MatchplayGuardianGame) game).getLastCrystalId().getAndSet(crystalId);
+            ((MatchplayGuardianGame) game).setLastCrystalId(crystalId);
 
         SkillCrystal skillCrystal = new SkillCrystal();
         skillCrystal.setId(crystalId);
@@ -71,9 +71,9 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
 
         RunnableEvent runnableEvent = null;
         if (isBattleGame)
-            runnableEvent = runnableEventHandler.createRunnableEvent(new DespawnCrystalTask(connection, skillCrystal, gameFieldSide), ((MatchplayBattleGame) game).getCrystalDeSpawnInterval().get());
+            runnableEvent = runnableEventHandler.createRunnableEvent(new DespawnCrystalTask(connection, skillCrystal, gameFieldSide), ((MatchplayBattleGame) game).getCrystalDeSpawnInterval());
         else
-            runnableEvent = runnableEventHandler.createRunnableEvent(new DespawnCrystalTask(connection, skillCrystal), ((MatchplayGuardianGame) game).getCrystalDeSpawnInterval().get());
+            runnableEvent = runnableEventHandler.createRunnableEvent(new DespawnCrystalTask(connection, skillCrystal), ((MatchplayGuardianGame) game).getCrystalDeSpawnInterval());
 
         gameSession.getRunnableEvents().add(runnableEvent);
     }

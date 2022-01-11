@@ -17,6 +17,8 @@ import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayGiveR
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
 import com.jftse.emulator.server.networking.packet.Packet;
 
+import java.util.stream.Collectors;
+
 public class PlayerPickingUpCrystalHandler extends AbstractHandler {
     private C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket;
 
@@ -71,31 +73,23 @@ public class PlayerPickingUpCrystalHandler extends AbstractHandler {
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(randomGuardianSkill, connection);
 
             if (isBattleGame) {
-                int skillCrystalsSize = ((MatchplayBattleGame) game).getSkillCrystals().size();
-                for (int i = 0; i < skillCrystalsSize; i++) {
-                    SkillCrystal current = ((MatchplayBattleGame) game).getSkillCrystals().poll();
-
+                ((MatchplayBattleGame) game).getSkillCrystals().stream().collect(Collectors.toList()).forEach(current -> {
                     if (current.getId() == skillCrystal.getId()) {
-                        skillCrystalsSize--;
-                        continue;
+                        ((MatchplayBattleGame) game).getSkillCrystals().remove(current);
+                        return;
                     }
-                    ((MatchplayBattleGame) game).getSkillCrystals().offer(current);
-                }
+                });
             } else {
-                int skillCrystalsSize = ((MatchplayGuardianGame) game).getSkillCrystals().size();
-                for (int i = 0; i < skillCrystalsSize; i++) {
-                    SkillCrystal current = ((MatchplayGuardianGame) game).getSkillCrystals().poll();
-
+                ((MatchplayGuardianGame) game).getSkillCrystals().stream().collect(Collectors.toList()).forEach(current -> {
                     if (current.getId() == skillCrystal.getId()) {
-                        skillCrystalsSize--;
-                        continue;
+                        ((MatchplayGuardianGame) game).getSkillCrystals().remove(current);
+                        return;
                     }
-                    ((MatchplayGuardianGame) game).getSkillCrystals().offer(current);
-                }
+                });
             }
 
             PlaceCrystalRandomlyTask placeCrystalRandomlyTask = isBattleGame ? new PlaceCrystalRandomlyTask(connection, gameFieldSide) : new PlaceCrystalRandomlyTask(connection);
-            long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval().get() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get();
+            long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval();
 
             RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);
             gameSession.getRunnableEvents().add(runnableEvent);
