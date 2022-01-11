@@ -212,18 +212,10 @@ public class GameManager {
             }
         }
 
-        final int positionsSize = room.getPositions().size();
-        for (int i = 0; i < positionsSize; i++) {
-            Short current = room.getPositions().poll();
-
-            if (i == playerPosition) {
-                if (playerPosition == 9)
-                    room.getPositions().offer(RoomPositionState.Locked);
-                else
-                    room.getPositions().offer(RoomPositionState.Free);
-            } else {
-                room.getPositions().offer(current);
-            }
+        if (playerPosition == 9) {
+            room.getPositions().set(playerPosition, RoomPositionState.Locked);
+        } else {
+            room.getPositions().set(playerPosition, RoomPositionState.Free);
         }
 
         roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(activePlayer.getId()));
@@ -298,23 +290,13 @@ public class GameManager {
     }
 
     public void internalHandleRoomCreate(final Connection connection, Room room) {
-        final int positionsSize = room.getPositions().size();
-
-        room.getPositions().pollFirst();
-        room.getPositions().offerFirst(RoomPositionState.InUse);
-
+        room.getPositions().set(0, RoomPositionState.InUse);
         room.setAllowBattlemon((byte) 0);
 
         byte players = room.getPlayers();
         if (players == 2) {
-            for (int i = 0; i < positionsSize; i++) {
-                Short current = room.getPositions().poll();
-
-                if (i == 2 || i == 3)
-                    room.getPositions().offer(RoomPositionState.Locked);
-                else
-                    room.getPositions().offer(current);
-            }
+            room.getPositions().set(2, RoomPositionState.Locked);
+            room.getPositions().set(3, RoomPositionState.Locked);
         }
 
         Player activePlayer = serviceManager.getPlayerService().findById(connection.getClient().getActivePlayer().getId());
@@ -347,17 +329,10 @@ public class GameManager {
 
         List<Packet> roomSlotCloseAnswerPackets = new ArrayList<>();
         // TODO: Temporarily. Delete these lines if spectators work
-        for (int i = 0; i < positionsSize; i++) {
-            Short current = room.getPositions().poll();
-
-            if (i >= 5 && i < 9) {
-                room.getPositions().offer(RoomPositionState.Locked);
-
-                S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
-                roomSlotCloseAnswerPackets.add(roomSlotCloseAnswerPacket);
-            } else {
-                room.getPositions().offer(current);
-            }
+        for (int i = 5; i < 9; i++) {
+            connection.getClient().getActiveRoom().getPositions().set(i, RoomPositionState.Locked);
+            S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
+            roomSlotCloseAnswerPackets.add(roomSlotCloseAnswerPacket);
         }
 
         getClientsInRoom(room.getRoomId()).forEach(c -> {

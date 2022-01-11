@@ -47,26 +47,15 @@ public class StartBattleModeHandler extends AbstractHandler {
         ArrayList<Client> clients = new ArrayList<>(gameSession.getClients());
         List<PlayerPositionInfo> positionInfo = new ArrayList<>();
 
-        clients.forEach(client -> {
+        clients.forEach(c -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
-                    .findFirst()
-                    .orElse(null);
+                    .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
+                    .findFirst().orElse(null);
             if (rp == null || rp.getPosition() > 3) {
                 return;
             }
 
-            Point playerLocation = new Point();
-            int playerLocationsOnMapSize = game.getPlayerLocationsOnMap().size();
-            for (int j = 0; j < playerLocationsOnMapSize; j++) {
-                Point current = game.getPlayerLocationsOnMap().poll();
-
-                if (rp.getPosition() == j)
-                    playerLocation = new Point(current);
-
-                game.getPlayerLocationsOnMap().offer(current);
-            }
-
+            Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
             PlayerPositionInfo playerPositionInfo = new PlayerPositionInfo();
             playerPositionInfo.setPlayerPosition(rp.getPosition());
             playerPositionInfo.setPlayerStartLocation(playerLocation);

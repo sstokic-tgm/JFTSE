@@ -23,7 +23,7 @@ public class PlayerBattleState {
     private boolean shieldActive;
     private boolean miniamActive;
     private boolean apollonFlashActive;
-    private ArrayList<SkillUse> skillUseDeque;
+    private ArrayList<SkillUse> skillUseList;
 
     public PlayerBattleState(short position, short hp, int str, int sta, int dex, int will) {
         this.position = position;
@@ -40,6 +40,6 @@ public class PlayerBattleState {
         shieldActive = false;
         miniamActive = false;
         apollonFlashActive = false;
-        skillUseDeque = new ArrayList<>();
+        skillUseList = new ArrayList<>();
     }
 }

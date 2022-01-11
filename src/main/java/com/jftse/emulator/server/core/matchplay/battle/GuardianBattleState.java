@@ -26,7 +26,6 @@ public class GuardianBattleState {
     private boolean shieldActive;
     private boolean miniamActive;
     private boolean apollonFlashActive;
-    private ArrayList<SkillUse> skillUseDeque;
 
     public GuardianBattleState(int id, int btItemId, short position, int hp, int str, int sta, int dex, int will, int exp, int gold) {
         this.id = id;
@@ -46,6 +45,5 @@ public class GuardianBattleState {
         shieldActive = false;
         miniamActive = false;
         apollonFlashActive = false;
-        skillUseDeque = new ArrayList<>();
     }
 }
