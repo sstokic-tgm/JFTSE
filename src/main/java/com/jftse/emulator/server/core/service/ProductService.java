@@ -34,6 +34,7 @@ public class ProductService {
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
     private final ToolSlotEquipmentService toolSlotEquipmentService;
     private final CardSlotEquipmentService cardSlotEquipmentService;
+    private final BattlemonSlotEquipmentService battlemonSlotEquipmentService;
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
     private final ItemCharService itemCharService;
@@ -182,11 +183,15 @@ public class ProductService {
         CardSlotEquipment cardSlotEquipment = new CardSlotEquipment();
         cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
 
+        BattlemonSlotEquipment battlemonSlotEquipment = new BattlemonSlotEquipment();
+        battlemonSlotEquipment = battlemonSlotEquipmentService.save(battlemonSlotEquipment);
+
         player.setClothEquipment(clothEquipment);
         player.setQuickSlotEquipment(quickSlotEquipment);
         player.setSpecialSlotEquipment(specialSlotEquipment);
         player.setToolSlotEquipment(toolSlotEquipment);
         player.setCardSlotEquipment(cardSlotEquipment);
+        player.setBattlemonSlotEquipment(battlemonSlotEquipment);
 
         Pocket pocket = new Pocket();
         pocket = pocketService.save(pocket);

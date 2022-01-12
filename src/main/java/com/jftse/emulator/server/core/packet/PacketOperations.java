@@ -165,6 +165,8 @@ public enum PacketOperations {
     C2SInventoryWearClothRequest(0x1B63),
     S2CInventoryWearClothAnswer(0x1B64),
     C2SInventoryWearQuickRequest(0x1BD8),
+    C2SInventoryWearBattlemonRequest(0x1BDB),
+    S2CInventoryWearBattlemonAnswer(0x1BDC),
     S2CInventoryWearQuickAnswer(0x1BD9),
     C2SInventoryWearToolRequest(0x1D04),
     S2CInventoryWearToolAnswer(0x1D05),
@@ -366,6 +368,7 @@ public enum PacketOperations {
         C2SInventoryWearQuickRequest.handler = InventoryWearQuickPacketHandler.class;
         C2SInventoryWearSpecialRequest.handler = InventoryWearSpecialPacketHandler.class;
         C2SInventoryWearCardRequest.handler = InventoryWearCardPacketHandler.class;
+        C2SInventoryWearBattlemonRequest.handler = InventoryWearBattlemonPacketHandler.class;
         C2SInventoryItemTimeExpiredRequest.handler = InventoryItemTimeExpiredPacketHandler.class;
         C2SShopMoneyReq.handler = ShopMoneyRequestPacketHandler.class;
         C2SShopBuyReq.handler = ShopBuyRequestPacketHandler.class;

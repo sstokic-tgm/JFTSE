@@ -45,6 +45,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
     private final ToolSlotEquipmentService toolSlotEquipmentService;
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
     private final CardSlotEquipmentService cardSlotEquipmentService;
+    private final BattlemonSlotEquipmentService battlemonSlotEquipmentService;
     private final SocialService socialService;
 
     public GameServerDataRequestPacketHandler() {
@@ -58,6 +59,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
         toolSlotEquipmentService = ServiceManager.getInstance().getToolSlotEquipmentService();
         specialSlotEquipmentService = ServiceManager.getInstance().getSpecialSlotEquipmentService();
         cardSlotEquipmentService = ServiceManager.getInstance().getCardSlotEquipmentService();
+        battlemonSlotEquipmentService = ServiceManager.getInstance().getBattlemonSlotEquipmentService();
         socialService = ServiceManager.getInstance().getSocialService();
     }
 
@@ -176,6 +178,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
             List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
             List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
             List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
+            List<Integer> equippedBattlemonSlots = battlemonSlotEquipmentService.getEquippedBattlemonSlots(player);
 
             S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
             S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
@@ -184,11 +187,12 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
             S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
             S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
             S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+            S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(equippedBattlemonSlots);
 
             connection.sendTCP(
                     playerStatusPointChangePacket, playerInfoPlayStatsPacket, inventoryWearClothAnswerPacket,
                     inventoryWearQuickAnswerPacket, inventoryWearToolAnswerPacket, inventoryWearSpecialAnswerPacket,
-                    inventoryWearCardAnswerPacket);
+                    inventoryWearCardAnswerPacket, inventoryWearBattlemonAnswerPacket);
         } else {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
