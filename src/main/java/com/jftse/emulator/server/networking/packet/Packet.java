@@ -43,7 +43,7 @@ public class Packet {
     public Packet(char packetId) {
         this.packetId = packetId;
         this.dataLength = 0;
-        this.data = new byte[4096];
+        this.data = new byte[16384];
     }
 
     private int indexOf(byte[] data, byte[] pattern, int offset) {
@@ -188,8 +188,7 @@ public class Packet {
                 } else {
                     this.readPosition += 2;
                 }
-            }
-            else {
+            } else {
                 result = this.readString();
             }
         }
@@ -199,9 +198,9 @@ public class Packet {
 
     public String readString() {
         String result = "";
-        int stringLength = indexOf(this.data, new byte[] {0x00}, this.readPosition) - this.readPosition;
+        int stringLength = indexOf(this.data, new byte[]{0x00}, this.readPosition) - this.readPosition;
 
-        if(stringLength > 0) {
+        if (stringLength > 0) {
             result = new String(this.data, this.readPosition, stringLength, StandardCharsets.US_ASCII);
             this.readPosition += stringLength + 1;
         }

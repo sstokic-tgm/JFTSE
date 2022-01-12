@@ -49,10 +49,10 @@ public class Server implements Runnable {
                 });
             }
 
-            public void received(Connection connection, Packet packet) {
+            public void received(Connection connection, List<Packet> packets) {
                 Server.this.connectionListeners.forEach(cl -> {
                     try {
-                        cl.received(connection, packet);
+                        cl.received(connection, packets);
                     } catch (Exception ex) {
                         log.error("OnReceived exception " + ex.getMessage(), ex);
                     }
@@ -172,10 +172,10 @@ public class Server implements Runnable {
                                 try {
                                     while (true) {
 
-                                        Packet packet = fromConnection.getTcpConnection().readPacket(fromConnection);
-                                        if(packet == null)
+                                        List<Packet> packets = fromConnection.getTcpConnection().readPacket(fromConnection);
+                                        if(packets == null || packets.isEmpty())
                                             break;
-                                        fromConnection.notifyReceived(packet);
+                                        fromConnection.notifyReceived(packets);
                                     }
                                 } catch (IOException ioe) {
                                     fromConnection.notifyException(ioe);
