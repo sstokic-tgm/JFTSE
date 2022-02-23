@@ -67,10 +67,11 @@ public class LoginPacketHandler extends AbstractHandler {
             return;
         }
 
-        Account account = authenticationService.login(loginPacket.getUsername(), loginPacket.getPassword());
+        int loginResult = authenticationService.login(loginPacket.getUsername(), loginPacket.getPassword());
+        Account account = authenticationService.findAccountByUsername(loginPacket.getUsername());
 
-        if (account == null) {
-            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.ACCOUNT_INVALID_USER_ID);
+        if (account == null || loginResult != S2CLoginAnswerPacket.SUCCESS) {
+            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket((short) loginResult);
             connection.sendTCP(loginAnswerPacket);
         } else {
             Integer accountStatus = account.getStatus();
