@@ -27,8 +27,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,8 +55,8 @@ public class GameManager {
 
     private boolean running;
 
-    private ArrayList<Client> clients;
-    private ArrayList<Room> rooms;
+    private ConcurrentLinkedDeque<Client> clients;
+    private ConcurrentLinkedDeque<Room> rooms;
 
     @PostConstruct
     public void init() {
@@ -65,8 +65,8 @@ public class GameManager {
         running = true;
         setupGlobalTasks();
 
-        clients = new ArrayList<>();
-        rooms = new ArrayList<>();
+        clients = new ConcurrentLinkedDeque<>();
+        rooms = new ConcurrentLinkedDeque<>();
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }

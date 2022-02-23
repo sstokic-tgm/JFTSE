@@ -12,9 +12,9 @@ import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
 @Setter
@@ -25,7 +25,7 @@ public class Connection {
     private String name;
     private Server server;
     private TcpConnection tcpConnection;
-    private ArrayList<ConnectionListener> connectionListeners = new ArrayList<>();
+    private ConcurrentLinkedDeque<ConnectionListener> connectionListeners = new ConcurrentLinkedDeque<>();
     private volatile boolean isConnected;
 
     private String hwid;
