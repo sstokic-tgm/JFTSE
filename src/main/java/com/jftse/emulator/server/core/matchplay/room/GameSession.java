@@ -7,14 +7,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
 @Setter
 public class GameSession {
     public GameSession() {
-        clients = new ArrayList<>();
-        clientsInRelay = new ArrayList<>();
-        runnableEvents = new ArrayList<>();
+        clients = new ConcurrentLinkedDeque<>();
+        clientsInRelay = new ConcurrentLinkedDeque<>();
+        runnableEvents = new ConcurrentLinkedDeque<>();
     }
 
     private int sessionId;
@@ -24,9 +25,9 @@ public class GameSession {
     private int lastBallHitByPlayer = -1;
     private long timeLastBallWasHit = -1;
     private int timesCourtChanged = 0;
-    private ArrayList<Client> clients;
-    private ArrayList<Client> clientsInRelay;
-    private ArrayList<RunnableEvent> runnableEvents;
+    private ConcurrentLinkedDeque<Client> clients;
+    private ConcurrentLinkedDeque<Client> clientsInRelay;
+    private ConcurrentLinkedDeque<RunnableEvent> runnableEvents;
     private volatile RunnableEvent countDownRunnable;
 
     public Client getClientByPlayerId(long playerId) {

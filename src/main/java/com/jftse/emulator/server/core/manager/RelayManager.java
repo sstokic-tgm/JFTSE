@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,12 +18,12 @@ import java.util.stream.Collectors;
 public class RelayManager {
     private static RelayManager instance;
 
-    private ArrayList<Client> clientList;
+    private ConcurrentLinkedDeque<Client> clientList;
 
     @PostConstruct
     public void init() {
         instance = this;
-        clientList = new ArrayList<>();
+        clientList = new ConcurrentLinkedDeque<>();
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }
