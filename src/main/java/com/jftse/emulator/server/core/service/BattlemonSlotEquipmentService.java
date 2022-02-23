@@ -52,8 +52,10 @@ public class BattlemonSlotEquipmentService {
 
         BattlemonSlotEquipment battlemonSlotEquipment = findById(player.getBattlemonSlotEquipment().getId());
 
-        result.add(battlemonSlotEquipment.getSlot1());
-        result.add(battlemonSlotEquipment.getSlot2());
+        if (battlemonSlotEquipment != null) {
+            result.add(battlemonSlotEquipment.getSlot1());
+            result.add(battlemonSlotEquipment.getSlot2());
+        }
 
         return result;
     }
