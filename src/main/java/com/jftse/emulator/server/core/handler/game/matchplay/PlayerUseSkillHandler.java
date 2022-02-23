@@ -4,9 +4,9 @@ import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.battle.GuardianBattleState;
-import com.jftse.emulator.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
@@ -67,7 +67,7 @@ public class PlayerUseSkillHandler extends AbstractHandler {
         // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
         if (gameSession == null) return;
 
-        MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
+        MatchplayGame game = gameSession.getActiveMatchplayGame();
         if (game == null) return;
 
         Room room = connection.getClient().getActiveRoom();
@@ -80,7 +80,7 @@ public class PlayerUseSkillHandler extends AbstractHandler {
 
         if (attackerIsGuardian) {
             if (skill != null) {
-                this.handleSpecialSkillsUseOfGuardians(connection, position, game, roomPlayers, skill);
+                this.handleSpecialSkillsUseOfGuardians(connection, position, (MatchplayGuardianGame) game, roomPlayers, skill);
             }
         } else if (attackerIsPlayer) {
             if (roomPlayer != null) {
