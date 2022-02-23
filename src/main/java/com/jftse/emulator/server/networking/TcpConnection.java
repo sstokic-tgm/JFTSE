@@ -17,6 +17,8 @@ import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiPredicate;
 
 @Getter
@@ -139,7 +141,7 @@ public class TcpConnection {
         }
     }
 
-    public Packet readPacket(Connection connection) throws IOException {
+    public List<Packet> readPacket(Connection connection) throws IOException {
         readBuffer = ByteBuffer.allocate(16384);
         readBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -157,6 +159,8 @@ public class TcpConnection {
 
         if (bytesRead < 7)
             return null;
+
+        List<Packet> result = new ArrayList<>();
 
         Packet packet;
         byte[] encryptedData = new byte[bytesRead];
@@ -200,7 +204,8 @@ public class TcpConnection {
                 if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
                     log.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
-                connection.notifyReceived(packet);
+                // connection.notifyReceived(packet);
+                result.add(packet);
 
                 // prepare data for loop
                 byte[] tmp = new byte[encryptedData.length - 8 - packetSize];
@@ -230,7 +235,10 @@ public class TcpConnection {
         }
         currentObjectLength = 0;
 
-        return packet;
+        if (packet != null)
+            result.add(packet);
+
+        return result;
     }
 
     public void writeOperation() throws IOException {

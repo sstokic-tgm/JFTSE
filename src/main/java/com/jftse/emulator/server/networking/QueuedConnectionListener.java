@@ -2,6 +2,8 @@ package com.jftse.emulator.server.networking;
 
 import com.jftse.emulator.server.networking.packet.Packet;
 
+import java.util.List;
+
 public abstract class QueuedConnectionListener implements ConnectionListener {
     private final ConnectionListener connectionListener;
 
@@ -17,8 +19,8 @@ public abstract class QueuedConnectionListener implements ConnectionListener {
         queue(() -> connectionListener.disconnected(connection));
     }
 
-    public void received(Connection connection, Packet packet) {
-        queue(() -> connectionListener.received(connection, packet));
+    public void received(Connection connection, List<Packet> packets) {
+        queue(() -> connectionListener.received(connection, packets));
     }
 
     public void idle(Connection connection) {

@@ -9,11 +9,9 @@ import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.database.model.messenger.EFriendshipState;
 import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
@@ -375,7 +373,7 @@ public class GameManager {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
             synchronized (gameSession) {
-                ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClients());
+                final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClients());
                 clientsInGameSession.forEach(c -> {
                     if (c.getConnection() != null && c.getConnection().isConnected()) {
                         c.getConnection().sendTCP(packet);
@@ -389,7 +387,7 @@ public class GameManager {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
             synchronized (gameSession) {
-                ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClientsInRelay());
+                final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClientsInRelay());
                 clientsInGameSession.forEach(c -> {
                     if (c.getConnection() != null && c.getConnection().isConnected()) {
                         c.getConnection().sendTCP(packet);

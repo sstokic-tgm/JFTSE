@@ -10,14 +10,11 @@ import com.jftse.emulator.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
-import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.matchplay.C2SMatchplayUsesSkill;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayDealDamage;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayUseSkill;
 import com.jftse.emulator.server.core.service.*;
-import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.battle.Skill;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
@@ -87,54 +84,8 @@ public class PlayerUseSkillHandler extends AbstractHandler {
             }
         } else if (attackerIsPlayer) {
             if (roomPlayer != null) {
-                PlayerBattleState playerBattleState = game.getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition() == roomPlayer.getPosition())
-                        .findFirst()
-                        .orElse(null);
-
                 if (anyoneUsesSkill.isQuickSlot()) {
-                    if (playerBattleState != null) {
-                        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-
-                        if (playerBattleState.getLastQS().containsKey(skill.getId()) && playerBattleState.getLastQSCounter().containsKey(skill.getId())) {
-                            long lastQSUseTime = playerBattleState.getLastQS().get(skill.getId());
-                            int counter = playerBattleState.getLastQSCounter().get(skill.getId());
-
-                            long latency = connection.getLatency();
-                            lastQSUseTime -= (latency + 4950);
-                            long timePassed = cal.getTimeInMillis() - lastQSUseTime;
-
-                            if (timePassed >= skill.getGdCoolingTime().longValue()) {
-                                this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
-                                playerBattleState.getLastQS().put(skill.getId(), cal.getTimeInMillis());
-                                playerBattleState.getLastQSCounter().put(skill.getId(), 0);
-                            } else {
-                                if (counter > 5) {
-                                    log.info("[Guardian] No QS CD detection\nlatency: " + latency + "\ntimePassed: " + timePassed + "\nlastQSUseTime: " + lastQSUseTime + "\nskill: " + skill.getName() + "\nskill-CD: " + skill.getGdCoolingTime() + "\nplayerName: " + roomPlayer.getPlayer().getName());
-                                    playerBattleState.setCurrentHealth((short) 0);
-                                    playerBattleState.setDead(true);
-                                    S2CMatchplayDealDamage matchplayDealDamage = new S2CMatchplayDealDamage((short) position, (short) playerBattleState.getCurrentHealth(), skill.getTargeting().shortValue(), (byte) 3, 0, 0);
-                                    S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", roomPlayer.getPlayer().getName() + " died because of no QS CD hack. Marked for ban.");
-                                    GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplayDealDamage, connection);
-                                    GameManager.getInstance().sendPacketToAllClientsInSameGameSession(chatRoomAnswerPacket, connection);
-
-                                    Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-                                    account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
-                                    account.setBanReason("No QS CD hack in guardian mode.");
-                                    this.authenticationService.updateAccount(account);
-                                    return;
-                                } else {
-                                    counter++;
-                                    playerBattleState.getLastQSCounter().put(skill.getId(), counter);
-                                }
-                            }
-
-                        } else {
-                            this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
-                            playerBattleState.getLastQS().put(skill.getId(), cal.getTimeInMillis());
-                            playerBattleState.getLastQSCounter().put(skill.getId(), 0);
-                        }
-                    }
+                    this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
                 }
             }
         }
@@ -215,27 +166,7 @@ public class PlayerUseSkillHandler extends AbstractHandler {
             S2CMatchplayDealDamage damagePacket =
                     new S2CMatchplayDealDamage(guardianPos, newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damagePacket, connection);
-        } /*else if (skill.getId() == 9) { // Miniam needs to be treated individually
-            int roomPlayersSize = roomPlayers.size();
-            for (int i = 0; i < roomPlayersSize; i++) {
-                RoomPlayer roomPlayer = roomPlayers.poll();
-
-                Short newHealth;
-                try {
-                    newHealth = game.getGuardianCombatSystem().dealDamageToPlayer(guardianPos, roomPlayer.getPosition(), skill.getDamage().shortValue(), false, false);
-                } catch (ValidationException ve) {
-                    roomPlayers.offer(roomPlayer);
-                    log.warn(ve.getMessage());
-                    continue;
-                }
-
-                S2CMatchplayDealDamage damagePacket =
-                        new S2CMatchplayDealDamage(roomPlayer.getPosition(), newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
-                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damagePacket, connection);
-
-                roomPlayers.offer(roomPlayer);
-            }
-        }*/
+        }
     }
 
     private void handleReviveGuardian(Connection connection, MatchplayGuardianGame game, Skill skill) {
@@ -244,8 +175,8 @@ public class PlayerUseSkillHandler extends AbstractHandler {
             guardianBattleState = game.getGuardianCombatSystem().reviveAnyGuardian(skill.getDamage().shortValue());
         } catch (ValidationException ve) {
             log.warn(ve.getMessage());
-            return;
         }
+
         if (guardianBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
                     new S2CMatchplayDealDamage((short) guardianBattleState.getPosition(), (short) guardianBattleState.getCurrentHealth(), (short) 0, skill.getId().byteValue(), 0, 0);

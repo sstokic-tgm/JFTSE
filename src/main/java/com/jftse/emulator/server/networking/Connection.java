@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Getter
@@ -117,8 +118,8 @@ public class Connection {
         connectionListeners.forEach(cl -> cl.disconnected(this));
     }
 
-    public void notifyReceived(Packet packet) {
-        connectionListeners.forEach(cl -> cl.received(this, packet));
+    public void notifyReceived(List<Packet> packets) {
+        connectionListeners.forEach(cl -> cl.received(this, packets));
     }
 
     public void notifyIdle() {

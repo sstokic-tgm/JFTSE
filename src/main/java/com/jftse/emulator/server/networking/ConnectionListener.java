@@ -4,23 +4,27 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
+import java.util.List;
+
 public interface ConnectionListener {
 
     void connected(Connection connection);
     void disconnected(Connection connection);
 
-    default void received(Connection connection, Packet packet) {
-        Class<? extends AbstractHandler> handlerClass = PacketOperations.handlerOf(packet.getPacketId());
+    default void received(Connection connection, List<Packet> packets) {
+        for (Packet packet : packets) {
+            Class<? extends AbstractHandler> handlerClass = PacketOperations.handlerOf(packet.getPacketId());
 
-        if (handlerClass != null) {
-            try {
-                AbstractHandler handler = handlerClass.getDeclaredConstructor().newInstance();
-                handler.setConnection(connection);
-                if (handler.process(packet))
-                    handler.handle();
+            if (handlerClass != null) {
+                try {
+                    AbstractHandler handler = handlerClass.getDeclaredConstructor().newInstance();
+                    handler.setConnection(connection);
+                    if (handler.process(packet))
+                        handler.handle();
 
-            } catch (Exception e) {
-                onException(connection, e);
+                } catch (Exception e) {
+                    onException(connection, e);
+                }
             }
         }
     }
