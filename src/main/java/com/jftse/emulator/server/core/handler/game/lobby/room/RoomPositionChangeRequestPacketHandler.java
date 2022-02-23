@@ -13,7 +13,6 @@ import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RoomPositionChangeRequestPacketHandler extends AbstractHandler {
     private C2SRoomPositionChangeRequestPacket roomPositionChangeRequestPacket;
@@ -45,16 +44,7 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractHandler {
                 }
 
                 boolean requestingSlotChangePlayerIsMaster = requestingSlotChangePlayer.isMaster();
-                boolean slotIsInUse = false;
-                int positionSize = room.getPositions().size();
-                for (int i = 0; i < positionSize; i++) {
-                    Short current = room.getPositions().poll();
-                    room.getPositions().offer(current);
-
-                    if (i == positionToClaim && current == RoomPositionState.InUse)
-                        slotIsInUse = true;
-                }
-
+                boolean slotIsInUse = room.getPositions().get(positionToClaim) == RoomPositionState.InUse;
                 if (slotIsInUse && !requestingSlotChangePlayerIsMaster) {
                     S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "You cannot claim this players slot");
                     connection.sendTCP(chatRoomAnswerPacket);
@@ -73,7 +63,7 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractHandler {
                         requestingSlotChangePlayerOldPosition, positionToClaim);
             }
 
-            ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+            ArrayList<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
             roomPlayerList.forEach(rp -> {
                 synchronized (rp) {
                     rp.setReady(false);
@@ -89,28 +79,15 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractHandler {
     }
 
     private void internalHandleRoomPositionChange(final Connection connection, Room room, RoomPlayer roomPlayer, boolean freeOldPosition, short oldPosition, short newPosition) {
-        int positionSize = room.getPositions().size();
         if (freeOldPosition) {
-            for (int i = 0; i < positionSize; i++) {
-                Short current = room.getPositions().poll();
-
-                if (i == oldPosition && oldPosition == 9)
-                    current = RoomPositionState.Locked;
-                else if (i == oldPosition)
-                    current = RoomPositionState.Free;
-
-                room.getPositions().offer(current);
+            if (oldPosition == 9) {
+                room.getPositions().set(oldPosition, RoomPositionState.Locked);
+            } else {
+                room.getPositions().set(oldPosition, RoomPositionState.Free);
             }
         }
-        positionSize = room.getPositions().size();
-        for (int i = 0; i < positionSize; i++) {
-            Short current = room.getPositions().poll();
 
-            if (i == newPosition)
-                current = RoomPositionState.InUse;
-
-            room.getPositions().offer(current);
-        }
+        room.getPositions().set(newPosition, RoomPositionState.InUse);
 
         synchronized (roomPlayer) {
             roomPlayer.setPosition(newPosition);

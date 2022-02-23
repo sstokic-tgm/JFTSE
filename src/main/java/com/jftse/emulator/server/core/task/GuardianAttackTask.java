@@ -18,7 +18,6 @@ import com.jftse.emulator.server.networking.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 public class GuardianAttackTask extends AbstractTask {
@@ -42,15 +41,12 @@ public class GuardianAttackTask extends AbstractTask {
         if (gameSession == null) return;
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
-        ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = new ConcurrentLinkedDeque<>(game.getGuardianBattleStates());
-        int guardianBattleStatesSize = guardianBattleStates.size();
-        for (int i = 0; i < guardianBattleStatesSize; i++) {
-            GuardianBattleState guardianBattleState = guardianBattleStates.poll();
-
+        final ArrayList<GuardianBattleState> guardianBattleStates = new ArrayList<>(game.getGuardianBattleStates());
+        guardianBattleStates.forEach(guardianBattleState -> {
             int skillIndex = this.getRandomGuardianSkillBasedOnProbability(guardianBattleState.getBtItemId());
-            S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill((short) 0, (short) guardianBattleState.getPosition().get(), skillIndex);
+            S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill((short) 0, (short) guardianBattleState.getPosition(), skillIndex);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
-        }
+        });
 
         RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(new GuardianAttackTask(connection), MatchplayGuardianGame.guardianAttackLoopTime);
         gameSession.getRunnableEvents().add(runnableEvent);

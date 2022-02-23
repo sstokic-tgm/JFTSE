@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.matchplay.event;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;

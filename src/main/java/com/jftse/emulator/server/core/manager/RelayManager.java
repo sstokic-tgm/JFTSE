@@ -7,7 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 public class RelayManager {
     private static RelayManager instance;
 
-    private ConcurrentLinkedDeque<Client> clientList;
+    private ArrayList<Client> clientList;
 
     @PostConstruct
     public void init() {
         instance = this;
-        clientList = new ConcurrentLinkedDeque<>();
+        clientList = new ArrayList<>();
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }
@@ -39,9 +39,9 @@ public class RelayManager {
         clientList.remove(client);
     }
 
-    public ConcurrentLinkedDeque<Client> getClientsInGameSession(int sessionId) {
+    public ArrayList<Client> getClientsInGameSession(int sessionId) {
         return clientList.stream()
                 .filter(c -> c.getActiveGameSession() != null && c.getActiveGameSession().getSessionId() == sessionId)
-                .collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

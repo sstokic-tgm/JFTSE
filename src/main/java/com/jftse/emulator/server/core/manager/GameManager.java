@@ -9,11 +9,9 @@ import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
-import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
-import com.jftse.emulator.server.database.model.messenger.EFriendshipState;
 import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
@@ -29,10 +27,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,7 +53,7 @@ public class GameManager {
     @Autowired
     private ThreadManager threadManager;
 
-    private AtomicBoolean running;
+    private boolean running;
 
     private ConcurrentLinkedDeque<Client> clients;
     private ConcurrentLinkedDeque<Room> rooms;
@@ -66,7 +62,7 @@ public class GameManager {
     public void init() {
         instance = this;
 
-        running = new AtomicBoolean(true);
+        running = true;
         setupGlobalTasks();
 
         clients = new ConcurrentLinkedDeque<>();
@@ -97,14 +93,14 @@ public class GameManager {
 
     public List<Player> getPlayersInLobby() {
         return clients.stream()
-                .filter(c -> c.getInLobby().get())
+                .filter(c -> c.isInLobby())
                 .map(Client::getActivePlayer)
                 .collect(Collectors.toList());
     }
 
     public List<Client> getClientsInLobby() {
         return clients.stream()
-                .filter(c -> c.getInLobby().get())
+                .filter(c -> c.isInLobby())
                 .collect(Collectors.toList());
     }
 
@@ -117,7 +113,7 @@ public class GameManager {
     private void setupGlobalTasks() {
         threadManager.newTask(() -> {
             log.info("Queued packet handling started");
-            while (running.get()) {
+            while (running) {
                 try {
                     packetEventHandler.handleQueuedPackets();
 
@@ -131,7 +127,7 @@ public class GameManager {
         });
         threadManager.newTask(() -> {
             log.info("Queued runnable event handling started");
-            while (running.get()) {
+            while (running) {
                 try {
                     List<GameSession> gameSessions = new ArrayList<>(gameSessionManager.getGameSessionList());
                     gameSessions.forEach(gameSession -> {
@@ -151,14 +147,14 @@ public class GameManager {
 
     @PreDestroy
     public void onExit() {
-        running.compareAndSet(true, false);
+        running = false;
     }
 
     public void refreshLobbyPlayerListForAllClients() {
         final List<Client> clientsInLobby = getClientsInLobby();
         clientsInLobby.forEach(c -> {
             if (c.getConnection() != null && c.getConnection().isConnected()) {
-                final int currentPage = c.getLobbyCurrentPlayerListPage().get();
+                final int currentPage = c.getLobbyCurrentPlayerListPage();
                 final List<Player> playersInLobby = getPlayersInLobby().stream()
                         .skip(currentPage == 1 ? 0 : (currentPage * 10L) - 10)
                         .limit(10)
@@ -182,7 +178,7 @@ public class GameManager {
         if (room == null)
             return;
 
-        ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+        ArrayList<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
         final Optional<RoomPlayer> roomPlayer = roomPlayerList.stream()
                 .filter(rp -> rp.getPlayer().getId().equals(activePlayer.getId()))
                 .findFirst();
@@ -214,18 +210,10 @@ public class GameManager {
             }
         }
 
-        final int positionsSize = room.getPositions().size();
-        for (int i = 0; i < positionsSize; i++) {
-            Short current = room.getPositions().poll();
-
-            if (i == playerPosition) {
-                if (playerPosition == 9)
-                    room.getPositions().offer(RoomPositionState.Locked);
-                else
-                    room.getPositions().offer(RoomPositionState.Free);
-            } else {
-                room.getPositions().offer(current);
-            }
+        if (playerPosition == 9) {
+            room.getPositions().set(playerPosition, RoomPositionState.Locked);
+        } else {
+            room.getPositions().set(playerPosition, RoomPositionState.Free);
         }
 
         roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(activePlayer.getId()));
@@ -283,8 +271,8 @@ public class GameManager {
     }
 
     public List<Room> getFilteredRoomsForClient(Client client) {
-        final int clientRoomModeFilter = client.getLobbyGameModeTabFilter().get();
-        final int currentRoomListPage = Math.max(client.getLobbyCurrentRoomListPage().get(), 0);
+        final int clientRoomModeFilter = client.getLobbyGameModeTabFilter();
+        final int currentRoomListPage = Math.max(client.getLobbyCurrentRoomListPage(), 0);
         return getRooms().stream()
                 .filter(r -> clientRoomModeFilter == GameMode.ALL || getRoomMode(r) == clientRoomModeFilter)
                 .skip(currentRoomListPage * 5L)
@@ -300,23 +288,13 @@ public class GameManager {
     }
 
     public void internalHandleRoomCreate(final Connection connection, Room room) {
-        final int positionsSize = room.getPositions().size();
-
-        room.getPositions().pollFirst();
-        room.getPositions().offerFirst(RoomPositionState.InUse);
-
+        room.getPositions().set(0, RoomPositionState.InUse);
         room.setAllowBattlemon((byte) 0);
 
         byte players = room.getPlayers();
         if (players == 2) {
-            for (int i = 0; i < positionsSize; i++) {
-                Short current = room.getPositions().poll();
-
-                if (i == 2 || i == 3)
-                    room.getPositions().offer(RoomPositionState.Locked);
-                else
-                    room.getPositions().offer(current);
-            }
+            room.getPositions().set(2, RoomPositionState.Locked);
+            room.getPositions().set(3, RoomPositionState.Locked);
         }
 
         Player activePlayer = serviceManager.getPlayerService().findById(connection.getClient().getActivePlayer().getId());
@@ -335,7 +313,7 @@ public class GameManager {
 
         addRoom(room);
         connection.getClient().setActiveRoom(room);
-        connection.getClient().getInLobby().set(false);
+        connection.getClient().setInLobby(false);
 
         S2CRoomCreateAnswerPacket roomCreateAnswerPacket = new S2CRoomCreateAnswerPacket((char) 0, (byte) 0, (byte) 0, (byte) 0);
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
@@ -349,17 +327,10 @@ public class GameManager {
 
         List<Packet> roomSlotCloseAnswerPackets = new ArrayList<>();
         // TODO: Temporarily. Delete these lines if spectators work
-        for (int i = 0; i < positionsSize; i++) {
-            Short current = room.getPositions().poll();
-
-            if (i >= 5 && i < 9) {
-                room.getPositions().offer(RoomPositionState.Locked);
-
-                S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
-                roomSlotCloseAnswerPackets.add(roomSlotCloseAnswerPacket);
-            } else {
-                room.getPositions().offer(current);
-            }
+        for (int i = 5; i < 9; i++) {
+            connection.getClient().getActiveRoom().getPositions().set(i, RoomPositionState.Locked);
+            S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
+            roomSlotCloseAnswerPackets.add(roomSlotCloseAnswerPacket);
         }
 
         getClientsInRoom(room.getRoomId()).forEach(c -> {
@@ -401,13 +372,13 @@ public class GameManager {
     public void sendPacketToAllClientsInSameGameSession(Packet packet, Connection connection) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
-            ConcurrentLinkedDeque<Client> clientsInGameSession = new ConcurrentLinkedDeque<>(gameSession.getClients());
-            int clientsInGameSessionSize = clientsInGameSession.size();
-            for (int i = 0; i < clientsInGameSessionSize; i++) {
-                Client client = clientsInGameSession.poll();
-                if (client.getConnection() != null && client.getConnection().isConnected()) {
-                    client.getConnection().sendTCP(packet);
-                }
+            synchronized (gameSession) {
+                final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClients());
+                clientsInGameSession.forEach(c -> {
+                    if (c.getConnection() != null && c.getConnection().isConnected()) {
+                        c.getConnection().sendTCP(packet);
+                    }
+                });
             }
         }
     }
@@ -415,13 +386,13 @@ public class GameManager {
     public void sendPacketToAllRelayClientsInSameGameSession(Packet packet, Connection connection) {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
-            ConcurrentLinkedDeque<Client> clientsInGameSession = new ConcurrentLinkedDeque<>(gameSession.getClientsInRelay());
-            int clientsInGameSessionSize = clientsInGameSession.size();
-            for (int i = 0; i < clientsInGameSessionSize; i++) {
-                Client client = clientsInGameSession.poll();
-                if (client.getConnection() != null && client.getConnection().isConnected()) {
-                    client.getConnection().sendTCP(packet);
-                }
+            synchronized (gameSession) {
+                final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClientsInRelay());
+                clientsInGameSession.forEach(c -> {
+                    if (c.getConnection() != null && c.getConnection().isConnected()) {
+                        c.getConnection().sendTCP(packet);
+                    }
+                });
             }
         }
     }

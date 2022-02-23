@@ -26,7 +26,6 @@ import com.jftse.emulator.server.shared.module.Client;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -91,7 +90,7 @@ public class RoomStartGamePacketHandler extends AbstractHandler {
 
         clientsInRoom.forEach(c -> c.setActiveGameSession(gameSession));
 
-        gameSession.setClients(new ConcurrentLinkedDeque<>(clientsInRoom));
+        gameSession.setClients(new ArrayList<>(clientsInRoom));
         GameSessionManager.getInstance().addGameSession(gameSession);
 
         List<Client> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);

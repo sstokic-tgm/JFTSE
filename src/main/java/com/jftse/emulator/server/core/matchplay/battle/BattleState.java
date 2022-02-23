@@ -10,40 +10,39 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 @Setter
 public class BattleState {
-    protected AtomicInteger position;
+    protected int position;
 
-    protected AtomicInteger maxHealth;
-    protected AtomicInteger currentHealth;
+    protected int maxHealth;
+    protected int currentHealth;
 
-    protected AtomicInteger str;
-    protected AtomicInteger sta;
-    protected AtomicInteger dex;
-    protected AtomicInteger will;
+    protected int str;
+    protected int sta;
+    protected int dex;
+    protected int will;
 
-    protected AtomicBoolean dead;
-    protected AtomicBoolean shieldActive;
-    protected AtomicBoolean miniamActive;
-    protected AtomicBoolean apollonFlashActive;
+    protected boolean dead;
+    protected boolean shieldActive;
+    protected boolean miniamActive;
+    protected boolean apollonFlashActive;
     protected LinkedBlockingDeque<SkillUse> skillUseDeque;
 
     protected BattleState(short position, int hp, int str, int sta, int dex, int will) {
         this();
 
-        this.position = new AtomicInteger(position);
-        this.maxHealth = new AtomicInteger(hp);
-        this.currentHealth = new AtomicInteger(hp);
+        this.position = position;
+        this.maxHealth = hp;
+        this.currentHealth = hp;
 
-        this.str = new AtomicInteger(str);
-        this.sta = new AtomicInteger(sta);
-        this.dex = new AtomicInteger(dex);
-        this.will = new AtomicInteger(will);
+        this.str = str;
+        this.sta = sta;
+        this.dex = dex;
+        this.will = will;
     }
 
     protected BattleState() {
-
-        shieldActive = new AtomicBoolean(false);
-        miniamActive = new AtomicBoolean(false);
-        apollonFlashActive = new AtomicBoolean(false);
+        shieldActive = false;
+        miniamActive = false;
+        apollonFlashActive = false;
 
         skillUseDeque = new LinkedBlockingDeque<>();
     }

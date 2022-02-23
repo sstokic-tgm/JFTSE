@@ -41,13 +41,13 @@ public class StartGuardianModeHandler extends AbstractHandler {
         int activePlayers = game.getPlayerBattleStates().size();
         switch (activePlayers) {
             case 1, 2 -> {
-                game.getCrystalSpawnInterval().getAndSet(TimeUnit.SECONDS.toMillis(5));
-                game.getCrystalDeSpawnInterval().getAndSet(TimeUnit.SECONDS.toMillis(8));
+                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
+                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(8));
                 ThreadManager.getInstance().newTask(new PlaceCrystalRandomlyTask(connection));
             }
             case 3, 4 -> {
-                game.getCrystalSpawnInterval().getAndSet(TimeUnit.SECONDS.toMillis(5));
-                game.getCrystalDeSpawnInterval().getAndSet(TimeUnit.SECONDS.toMillis(7));
+                game.setCrystalSpawnInterval(TimeUnit.SECONDS.toMillis(5));
+                game.setCrystalDeSpawnInterval(TimeUnit.SECONDS.toMillis(7));
                 ThreadManager.getInstance().newTask(new PlaceCrystalRandomlyTask(connection));
                 ThreadManager.getInstance().newTask(new PlaceCrystalRandomlyTask(connection));
             }

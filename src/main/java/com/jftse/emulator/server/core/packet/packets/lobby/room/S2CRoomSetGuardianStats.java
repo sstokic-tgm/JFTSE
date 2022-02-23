@@ -4,16 +4,15 @@ import com.jftse.emulator.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 public class S2CRoomSetGuardianStats extends Packet {
-    public S2CRoomSetGuardianStats(ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates, List<Byte> guardians) {
+    public S2CRoomSetGuardianStats(ArrayList<GuardianBattleState> guardianBattleStates, List<Byte> guardians) {
         super(PacketOperations.S2CRoomSetGuardianStats.getValueAsChar());
 
-        final ConcurrentLinkedDeque<GuardianBattleState> finalGuardianBattleStates = new ConcurrentLinkedDeque<>();
+        final ArrayList<GuardianBattleState> finalGuardianBattleStates = new ArrayList<>();
 
         // sort by determined guardians
         guardians.forEach(g -> {
@@ -34,11 +33,11 @@ public class S2CRoomSetGuardianStats extends Packet {
             GuardianBattleState guardianBattleState = it.next();
 
             this.write(i);
-            this.write((short) guardianBattleState.getMaxHealth().get());
-            this.write((byte) guardianBattleState.getStr().get());
-            this.write((byte) guardianBattleState.getSta().get());
-            this.write((byte) guardianBattleState.getDex().get());
-            this.write((byte) guardianBattleState.getWill().get());
+            this.write((short) guardianBattleState.getMaxHealth());
+            this.write((byte) guardianBattleState.getStr());
+            this.write((byte) guardianBattleState.getSta());
+            this.write((byte) guardianBattleState.getDex());
+            this.write((byte) guardianBattleState.getWill());
         }
     }
 }

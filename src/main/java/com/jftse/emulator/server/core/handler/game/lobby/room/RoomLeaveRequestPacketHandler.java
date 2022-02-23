@@ -13,7 +13,7 @@ public class RoomLeaveRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        connection.getClient().getLobbyCurrentRoomListPage().set(-1);
+        connection.getClient().setLobbyCurrentRoomListPage(-1);
         GameManager.getInstance().handleRoomPlayerChanges(connection, true);
         Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer.getValueAsChar());
         answerPacket.write(0);

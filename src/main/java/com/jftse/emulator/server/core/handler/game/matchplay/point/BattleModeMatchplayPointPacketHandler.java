@@ -29,10 +29,10 @@ public class BattleModeMatchplayPointPacketHandler extends AbstractHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
 
-        boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide().get() == GameFieldSide.BlueTeam;
+        boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide() == GameFieldSide.BlueTeam;
         int servingPositionXOffset = random.nextInt(7);
         if (!lastGuardianServeWasOnBlueTeamsSide) {
-            game.getLastGuardianServeSide().getAndSet(GameFieldSide.BlueTeam);
+            game.setLastGuardianServeSide(GameFieldSide.BlueTeam);
             S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.BlueTeam, (byte) servingPositionXOffset, (byte) 0);
             gameSession.getClients().forEach(x -> {
                 if (x.getConnection() != null && x.getConnection().isConnected()) {
@@ -40,7 +40,7 @@ public class BattleModeMatchplayPointPacketHandler extends AbstractHandler {
                 }
             });
         } else {
-            game.getLastGuardianServeSide().getAndSet(GameFieldSide.RedTeam);
+            game.setLastGuardianServeSide(GameFieldSide.RedTeam);
             S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) servingPositionXOffset, (byte) 0);
             gameSession.getClients().forEach(x -> {
                 if (x.getConnection() != null && x.getConnection().isConnected()) {

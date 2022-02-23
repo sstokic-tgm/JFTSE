@@ -21,7 +21,6 @@ import com.jftse.emulator.server.core.handler.game.ranking.*;
 import com.jftse.emulator.server.core.handler.game.shop.*;
 import com.jftse.emulator.server.core.handler.game.tutorial.*;
 import com.jftse.emulator.server.core.handler.relay.*;
-import com.jftse.emulator.server.core.handler.relay.spidermine.*;
 
 public enum PacketOperations {
     S2CLoginWelcomePacket(0xFF9A),
@@ -460,9 +459,6 @@ public enum PacketOperations {
         C2SMatchplayPlayerUseSkill.handler = PlayerUseSkillHandler.class;
         C2SMatchplaySkillHitsTarget.handler = SkillHitsTargetHandler.class;
         C2SMatchplaySwapQuickSlotItems.handler = SwapQuickSlotItemsHandler.class;
-
-        C2CSpiderMineExplodePacket.handler = SpiderMineExplodeHandler.class;
-        C2CSpiderMinePlacedPacket.handler = SpiderMinePlacedHandler.class;
 
         D2SDevPacket.handler = DevPacketHandler.class;
         C2SUnknown0xE00E.handler = UnknownPacketHandler.class;

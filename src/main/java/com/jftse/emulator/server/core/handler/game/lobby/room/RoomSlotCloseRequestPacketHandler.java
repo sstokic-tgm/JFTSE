@@ -27,15 +27,7 @@ public class RoomSlotCloseRequestPacketHandler extends AbstractHandler {
         byte slot = roomSlotCloseRequestPacket.getSlot();
         Room room = connection.getClient().getActiveRoom();
         if (room != null) {
-            int positionsSize = room.getPositions().size();
-            for (int i = 0; i < positionsSize; i++) {
-                Short current = room.getPositions().poll();
-
-                if (i == slot)
-                    current = deactivate ? RoomPositionState.Locked : RoomPositionState.Free;
-
-                room.getPositions().offer(current);
-            }
+            room.getPositions().set(slot, deactivate ? RoomPositionState.Locked : RoomPositionState.Free);
 
             S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket(slot, deactivate);
             GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {

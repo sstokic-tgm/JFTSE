@@ -15,47 +15,43 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Getter
 @Setter
 public class MatchplayBattleGame extends MatchplayGame {
-    private AtomicLong crystalSpawnInterval;
-    private AtomicLong crystalDeSpawnInterval;
-    private ConcurrentLinkedDeque<Point> playerLocationsOnMap;
-    private ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates;
-    private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
-    private AtomicInteger lastCrystalId;
-    private AtomicInteger lastGuardianServeSide;
-    private AtomicInteger spiderMineIdentifier;
-    private ConcurrentLinkedDeque<ScheduledFuture<?>> scheduledFutures;
+    private long crystalSpawnInterval;
+    private long crystalDeSpawnInterval;
+    private ArrayList<Point> playerLocationsOnMap;
+    private ArrayList<PlayerBattleState> playerBattleStates;
+    private ArrayList<SkillCrystal> skillCrystals;
+    private int lastCrystalId;
+    private int lastGuardianServeSide;
+    private int spiderMineIdentifier;
+    private ArrayList<ScheduledFuture<?>> scheduledFutures;
 
     private final PlayerCombatSystem playerCombatSystem;
 
     public MatchplayBattleGame() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.setStartTime(cal.getTime());
-        this.crystalSpawnInterval = new AtomicLong(0);
-        this.crystalDeSpawnInterval = new AtomicLong(0);
-        this.playerLocationsOnMap = new ConcurrentLinkedDeque<>(Arrays.asList(
+        this.crystalSpawnInterval = 0;
+        this.crystalDeSpawnInterval = 0;
+        this.playerLocationsOnMap = new ArrayList<>(Arrays.asList(
                 new Point(20, -125),
                 new Point(-20, 125),
                 new Point(-20, -75),
                 new Point(20, 75)
         ));
-        this.playerBattleStates = new ConcurrentLinkedDeque<>();
-        this.skillCrystals = new ConcurrentLinkedDeque<>();
-        this.lastCrystalId = new AtomicInteger(-1);
-        this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.RedTeam);
+        this.playerBattleStates = new ArrayList<>();
+        this.skillCrystals = new ArrayList<>();
+        this.lastCrystalId = -1;
+        this.lastGuardianServeSide = GameFieldSide.RedTeam;
         this.willDamages = new ArrayList<>();
-        this.spiderMineIdentifier = new AtomicInteger(0);
-        this.scheduledFutures = new ConcurrentLinkedDeque<>();
-        this.setFinished(new AtomicBoolean(false));
+        this.spiderMineIdentifier = 0;
+        this.scheduledFutures = new ArrayList<>();
+        this.setFinished(false);
 
         playerCombatSystem = new PlayerCombatSystem(this);
     }
@@ -77,9 +73,9 @@ public class MatchplayBattleGame extends MatchplayGame {
     public List<Integer> getPlayerPositionsOrderedByHighestHealth() {
         List<Integer> playerPositions = new ArrayList<>();
         this.playerBattleStates.stream()
-                .sorted(Comparator.comparingInt(pbs -> ((PlayerBattleState) pbs).getCurrentHealth().get())
+                .sorted(Comparator.comparingInt(pbs -> ((PlayerBattleState) pbs).getCurrentHealth())
                         .reversed())
-                .forEach(p -> playerPositions.add(p.getPosition().get()));
+                .forEach(p -> playerPositions.add(p.getPosition()));
 
         return playerPositions;
     }
@@ -93,11 +89,11 @@ public class MatchplayBattleGame extends MatchplayGame {
             boolean wonGame = false;
             boolean isPlayerInRedTeam = this.isRedTeam(playerPosition);
             boolean allPlayersTeamRedDead = this.getPlayerBattleStates().stream()
-                    .filter(x -> this.isRedTeam(x.getPosition().get()))
-                    .allMatch(x -> x.getCurrentHealth().get() < 1);
+                    .filter(x -> this.isRedTeam(x.getPosition()))
+                    .allMatch(x -> x.getCurrentHealth() < 1);
             boolean allPlayersTeamBlueDead = this.getPlayerBattleStates().stream()
-                    .filter(x -> this.isBlueTeam(x.getPosition().get()))
-                    .allMatch(x -> x.getCurrentHealth().get() < 1);
+                    .filter(x -> this.isBlueTeam(x.getPosition()))
+                    .allMatch(x -> x.getCurrentHealth() < 1);
             if (isPlayerInRedTeam && allPlayersTeamBlueDead || !isPlayerInRedTeam && allPlayersTeamRedDead) {
                 wonGame = true;
             }

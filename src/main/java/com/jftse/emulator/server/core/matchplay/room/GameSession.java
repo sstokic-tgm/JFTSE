@@ -6,31 +6,27 @@ import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
 
 @Getter
 @Setter
 public class GameSession {
     public GameSession() {
-        clients = new ConcurrentLinkedDeque<>();
-        clientsInRelay = new ConcurrentLinkedDeque<>();
-        runnableEvents = new ConcurrentLinkedDeque<>();
+        clients = new ArrayList<>();
+        clientsInRelay = new ArrayList<>();
+        runnableEvents = new ArrayList<>();
     }
 
     private int sessionId;
     private MatchplayGame activeMatchplayGame;
     private byte players;
 
-    private AtomicInteger lastBallHitByPlayer = new AtomicInteger(-1);
-    private AtomicLong timeLastBallWasHit = new AtomicLong(-1);
-    private AtomicInteger timesCourtChanged = new AtomicInteger(0);
-    private ConcurrentLinkedDeque<Client> clients;
-    private ConcurrentLinkedDeque<Client> clientsInRelay;
-    private ConcurrentLinkedDeque<RunnableEvent> runnableEvents;
+    private int lastBallHitByPlayer = -1;
+    private long timeLastBallWasHit = -1;
+    private int timesCourtChanged = 0;
+    private ArrayList<Client> clients;
+    private ArrayList<Client> clientsInRelay;
+    private ArrayList<RunnableEvent> runnableEvents;
     private volatile RunnableEvent countDownRunnable;
 
     public Client getClientByPlayerId(long playerId) {

@@ -86,7 +86,7 @@ public class FinishGameTask extends AbstractTask {
 
         MatchplayGame game = gameSession.getActiveMatchplayGame();
 
-        if (game != null && !game.getFinished().get()) {
+        if (game != null && !game.isFinished()) {
             if (game instanceof MatchplayBattleGame) {
                 ((MatchplayBattleGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
                 finishBattleGame(connection, (MatchplayBattleGame) game);
@@ -101,7 +101,7 @@ public class FinishGameTask extends AbstractTask {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
-        game.getFinished().getAndSet(true);
+        game.setFinished(true);
 
         List<PlayerReward> playerRewards = game.getPlayerRewards();
 
@@ -118,23 +118,19 @@ public class FinishGameTask extends AbstractTask {
         for (Iterator<Client> it = gameSession.getClients().iterator(); it.hasNext(); )
             playerList.add(it.next().getActivePlayer());
 
-        int clientsInGameSessionSize = gameSession.getClients().size();
-        for (int i = 0; i < clientsInGameSessionSize; i++) {
-            Client client = gameSession.getClients().poll();
-
+        gameSession.getClients().forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
                     .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst().orElse(null);
             if (rp == null) {
-                gameSession.getClients().offer(client);
-                continue;
+                return;
             }
 
             boolean isActivePlayer = rp.getPosition() < 4;
             if (isActivePlayer) {
                 boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
-                boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition().get())).allMatch(x -> x.getCurrentHealth().get() < 1);
-                boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition().get())).allMatch(x -> x.getCurrentHealth().get() < 1);
+                boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+                boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
                 boolean wonGame = isCurrentPlayerInRedTeam && allPlayersTeamBlueDead || !isCurrentPlayerInRedTeam && allPlayersTeamRedDead;
 
                 PlayerReward playerReward = playerRewards.stream()
@@ -210,12 +206,10 @@ public class FinishGameTask extends AbstractTask {
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
             packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
             client.setActiveGameSession(null);
-
-            gameSession.getClients().offer(client);
-        }
+        });
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
-        if (game.getFinished().get() && gameSession.getClients().isEmpty()) {
+        if (game.isFinished() && gameSession.getClients().isEmpty()) {
             GameSessionManager.getInstance().removeGameSession(gameSession);
         }
     }
@@ -224,7 +218,7 @@ public class FinishGameTask extends AbstractTask {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
-        game.getFinished().getAndSet(true);
+        game.setFinished(true);
 
         List<PlayerReward> playerRewards = game.getPlayerRewards();
         playerRewards.forEach(x -> {
@@ -241,16 +235,12 @@ public class FinishGameTask extends AbstractTask {
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
 
-        int clientsInGameSessionSize = gameSession.getClients().size();
-        for (int i = 0; i < clientsInGameSessionSize; i++) {
-            Client client = gameSession.getClients().poll();
-
+        gameSession.getClients().forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
                     .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
                     .findFirst().orElse(null);
             if (rp == null) {
-                gameSession.getClients().offer(client);
-                continue;
+                return;
             }
 
             boolean isActivePlayer = rp.getPosition() < 4;
@@ -302,12 +292,10 @@ public class FinishGameTask extends AbstractTask {
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
             packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
             client.setActiveGameSession(null);
-
-            gameSession.getClients().offer(client);
-        }
+        });
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
-        if (game.getFinished().get() && gameSession.getClients().isEmpty()) {
+        if (game.isFinished() && gameSession.getClients().isEmpty()) {
             GameSessionManager.getInstance().removeGameSession(gameSession);
         }
     }

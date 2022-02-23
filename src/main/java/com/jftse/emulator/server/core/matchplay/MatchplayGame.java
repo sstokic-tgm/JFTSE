@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Setter
@@ -16,7 +15,7 @@ public abstract class MatchplayGame {
 
     protected List<WillDamage> willDamages;
 
-    private AtomicBoolean finished;
+    private boolean finished;
 
     public abstract long getTimeNeeded();
 

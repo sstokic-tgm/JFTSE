@@ -22,7 +22,7 @@ public class OpenGachaCommand extends Command {
             return;
         }
 
-        if (!connection.getClient().getUsingGachaMachine().get()) {
+        if (!connection.getClient().isUsingGachaMachine()) {
             ThreadManager.getInstance().newTask(new GachaMachineTask(connection, params));
         }
     }

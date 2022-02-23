@@ -22,7 +22,7 @@ public class LobbyUserListReqPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         byte page = lobbyUserListRequestPacket.getPage();
-        int clientLobbyCurrentPlayerListPage = connection.getClient().getLobbyCurrentPlayerListPage().get();
+        int clientLobbyCurrentPlayerListPage = connection.getClient().getLobbyCurrentPlayerListPage();
         boolean shouldJustRefresh = lobbyUserListRequestPacket.getRefresh() == 0 & page == 1;
         boolean wantsToGoBackOnNegativePage = page == -1 && clientLobbyCurrentPlayerListPage == 1;
         if (wantsToGoBackOnNegativePage || shouldJustRefresh) {
@@ -30,7 +30,7 @@ public class LobbyUserListReqPacketHandler extends AbstractHandler {
         }
 
         clientLobbyCurrentPlayerListPage += page;
-        connection.getClient().getLobbyCurrentPlayerListPage().set(clientLobbyCurrentPlayerListPage);
+        connection.getClient().setLobbyCurrentPlayerListPage(clientLobbyCurrentPlayerListPage);
         List<Player> lobbyPlayerList = GameManager.getInstance().getPlayersInLobby().stream()
                 .skip(clientLobbyCurrentPlayerListPage == 1 ? 0 : (clientLobbyCurrentPlayerListPage * 10L) - 10)
                 .limit(10)

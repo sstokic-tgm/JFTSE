@@ -7,15 +7,15 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 public class S2CGameDisplayPlayerStatsPacket extends Packet {
     public S2CGameDisplayPlayerStatsPacket(Room room) {
         super(PacketOperations.S2CGameDisplayPlayerStats.getValueAsChar());
 
-        final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+        final ArrayList<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
         short gameMode = room.getMode();
         List<RoomPlayer> activePlayers = roomPlayerList.stream()
                 .filter(x -> x.getPosition() < 4)

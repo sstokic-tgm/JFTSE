@@ -5,9 +5,6 @@ import com.jftse.emulator.server.database.model.battle.Skill;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Getter
 @Setter
 public class SkillUse {
@@ -16,12 +13,12 @@ public class SkillUse {
     private byte targetPosition;
     private boolean isQuickSlot;
     private long timestamp;
-    private AtomicBoolean used;
-    private AtomicInteger shotCount;
-    private AtomicBoolean playTimePassed = new AtomicBoolean(false);
+    private boolean used;
+    private int shotCount;
+    private boolean playTimePassed;
 
-    private AtomicBoolean spiderMineIsPlaced = new AtomicBoolean(false);
-    private AtomicBoolean spiderMineIsExploded = new AtomicBoolean(false);
+    private boolean spiderMineIsPlaced;
+    private boolean spiderMineIsExploded;
     private int spiderMineId;
     private int spiderMineEffectId;
 
@@ -31,8 +28,8 @@ public class SkillUse {
         this.targetPosition = targetPosition;
         this.isQuickSlot = isQuickSlot;
         this.timestamp = timestamp;
-        this.used = new AtomicBoolean(used);
-        this.shotCount = new AtomicInteger(1);
+        this.used = used;
+        this.shotCount = 1;
     }
 
     public SkillUse(Skill skill, C2SMatchplayUsesSkill usesSkill, long timestamp, boolean used) {
@@ -41,8 +38,8 @@ public class SkillUse {
         this.targetPosition = usesSkill.getTargetPosition();
         this.isQuickSlot = usesSkill.isQuickSlot();
         this.timestamp = timestamp;
-        this.used = new AtomicBoolean(used);
-        this.shotCount = new AtomicInteger(1);
+        this.used = used;
+        this.shotCount = 1;
     }
 
     public boolean isSame(SkillUse other) {
@@ -109,7 +106,7 @@ public class SkillUse {
             case 21 -> shotCount = 1; // inferno, special treatment
             default -> shotCount = skill.getShotCnt(); // all other
         }
-        this.shotCount.set(shotCount);
+        this.shotCount = shotCount;
     }
 
     public boolean isShield() {

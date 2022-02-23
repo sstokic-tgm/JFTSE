@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.service;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.gameserver.GameServer;
 import com.jftse.emulator.server.database.repository.account.AccountRepository;
@@ -34,24 +35,24 @@ public class AuthenticationService {
         return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2Y, 12);
     }
 
-    public Account login(String username, String password) {
+    public int login(String username, String password) {
         Optional<Account> optionalAccount = accountRepository.findAccountByUsername(username);
-        if (optionalAccount.isPresent()) {
+        if (optionalAccount.isPresent() && optionalAccount.get().getUsername().equals(username)) {
             Account account = optionalAccount.get();
 
             if (configService.getValue("password.encryption.enabled", false)) {
                 if (passwordEncoder.matches(password, account.getPassword()))
-                    return account;
+                    return S2CLoginAnswerPacket.SUCCESS;
                 else
-                    return null;
+                    return S2CLoginAnswerPacket.ACCOUNT_INVALID_PASSWORD;
             } else {
                 if (password.equals(account.getPassword()))
-                    return account;
+                    return S2CLoginAnswerPacket.SUCCESS;
                 else
-                    return null;
+                    return S2CLoginAnswerPacket.ACCOUNT_INVALID_PASSWORD;
             }
         } else
-            return null;
+            return S2CLoginAnswerPacket.ACCOUNT_INVALID_USER_ID;
     }
 
     public Account updateAccount(Account account) {
@@ -60,7 +61,9 @@ public class AuthenticationService {
 
     public Account findAccountByUsername(String username) {
         Optional<Account> account = accountRepository.findAccountByUsername(username);
-        return account.orElse(null);
+        if (account.isPresent() && account.get().getUsername().equals(username))
+            return account.get();
+        return null;
     }
 
     public Account findAccountById(Long id) {

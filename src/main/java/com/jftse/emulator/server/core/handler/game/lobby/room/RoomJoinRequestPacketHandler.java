@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RoomJoinRequestPacketHandler extends AbstractHandler {
     private C2SRoomJoinRequestPacket roomJoinRequestPacket;
@@ -115,7 +114,6 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-
         boolean useGmSlot = false;
         int gmSlot = 9;
         if (activePlayer.getAccount().getGameMaster()) {
@@ -148,15 +146,8 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-        int newPosition = -1;
-        int positionsSize = room.getPositions().size();
-        for (int i = 0; i < positionsSize; i++) {
-            Short current = room.getPositions().poll();
-            room.getPositions().offer(current);
-
-            if (current == RoomPositionState.Free)
-                newPosition = i;
-        }
+        Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
+        int newPosition = useGmSlot ? 9 : room.getPositions().indexOf(num.get());
         if (newPosition == -1) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
@@ -165,17 +156,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-        newPosition = useGmSlot ? 9 : newPosition;
-        positionsSize = room.getPositions().size();
-        for (int i = 0; i < positionsSize; i++) {
-            Short current = room.getPositions().poll();
-
-            if (i == newPosition) {
-                room.getPositions().offer(RoomPositionState.InUse);
-            } else {
-                room.getPositions().offer(current);
-            }
-        }
+        room.getPositions().set(newPosition, RoomPositionState.InUse);
 
         RoomPlayer roomPlayer = new RoomPlayer();
         roomPlayer.setPlayer(activePlayer);
@@ -188,7 +169,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
         room.getRoomPlayerList().add(roomPlayer);
 
         connection.getClient().setActiveRoom(room);
-        connection.getClient().getInLobby().set(false);
+        connection.getClient().setInLobby(false);
 
         handleRoomUponJoin(room, roomJoinRequestPacket.getRoomId());
     }
@@ -199,7 +180,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
 
         connection.sendTCP(roomJoinAnswerPacket, roomInformationPacket);
 
-        final ConcurrentLinkedDeque<Short> positions = room.getPositions();
+        final ArrayList<Short> positions = room.getPositions();
         List<Packet> roomSlotCloseAnswerPackets = new ArrayList<>();
         closeRoomSlots(positions, roomSlotCloseAnswerPackets);
 
@@ -213,7 +194,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();
     }
 
-    private void closeRoomSlots(ConcurrentLinkedDeque<Short> positions, List<Packet> roomSlotCloseAnswerPackets) {
+    private void closeRoomSlots(ArrayList<Short> positions, List<Packet> roomSlotCloseAnswerPackets) {
         int i = 0;
         for (Iterator<Short> it = positions.iterator(); it.hasNext(); ) {
             short positionState = it.next();

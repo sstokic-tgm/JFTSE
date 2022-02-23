@@ -12,10 +12,10 @@ public class LobbyLeavePacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (!connection.getClient().getInLobby().compareAndSet(true, false)) {
-            connection.getClient().getInLobby().set(false);
+        if (!connection.getClient().isInLobby()) {
+            connection.getClient().setInLobby(false);
         }
-        connection.getClient().getLobbyCurrentRoomListPage().getAndSet(-1);
+        connection.getClient().setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();
     }

@@ -29,16 +29,16 @@ public class GuardianModeMatchplayPointPacketHandler extends AbstractHandler {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();
 
-        boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide().get() == GameFieldSide.Guardian;
+        boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide() == GameFieldSide.Guardian;
         int servingPositionXOffset = random.nextInt(7);
         if (!lastGuardianServeWasOnGuardianSide) {
-            game.getLastGuardianServeSide().getAndSet(GameFieldSide.Guardian);
+            game.setLastGuardianServeSide(GameFieldSide.Guardian);
             S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
             gameSession.getClients().forEach(x -> {
                 x.getConnection().sendTCP(triggerGuardianServePacket);
             });
         } else {
-            game.getLastGuardianServeSide().getAndSet(GameFieldSide.Players);
+            game.setLastGuardianServeSide(GameFieldSide.Players);
             S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, (byte) servingPositionXOffset, (byte) 0);
             gameSession.getClients().forEach(x -> {
                 if (x.getConnection() != null && x.getConnection().isConnected()) {
