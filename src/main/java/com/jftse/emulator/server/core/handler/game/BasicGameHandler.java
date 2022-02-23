@@ -27,6 +27,7 @@ import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.shared.module.Client;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 public class BasicGameHandler {
@@ -48,8 +49,9 @@ public class BasicGameHandler {
 
     public void sendWelcomePacket(Connection connection) {
         if (connection.getRemoteAddressTCP() != null) {
-            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
-            int port = connection.getRemoteAddressTCP().getPort();
+            InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+            String hostAddress = inetSocketAddress.getAddress().getHostAddress();
+            int port = inetSocketAddress.getPort();
 
             connection.getClient().setIp(hostAddress);
             connection.getClient().setPort(port);

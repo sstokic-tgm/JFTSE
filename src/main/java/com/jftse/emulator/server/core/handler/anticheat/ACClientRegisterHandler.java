@@ -8,6 +8,7 @@ import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,8 @@ public class ACClientRegisterHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getRemoteAddressTCP() != null) {
-            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+            InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+            String hostAddress = inetSocketAddress.getAddress().getHostAddress();
 
             if (connection.getClient() != null) {
                 Client client = connection.getClient();

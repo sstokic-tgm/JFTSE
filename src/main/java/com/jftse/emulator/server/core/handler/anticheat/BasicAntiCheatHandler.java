@@ -7,6 +7,8 @@ import com.jftse.emulator.server.core.service.ClientWhitelistService;
 import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.networking.Connection;
 
+import java.net.InetSocketAddress;
+
 public class BasicAntiCheatHandler {
     private final ClientWhitelistService clientWhitelistService;
 
@@ -16,8 +18,9 @@ public class BasicAntiCheatHandler {
 
     public void sendWelcomePacket(Connection connection) {
         if (connection.getRemoteAddressTCP() != null) {
-            String hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
-            int port = connection.getRemoteAddressTCP().getPort();
+            InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+            String hostAddress = inetSocketAddress.getAddress().getHostAddress();
+            int port = inetSocketAddress.getPort();
 
             connection.getClient().setIp(hostAddress);
             connection.getClient().setPort(port);
