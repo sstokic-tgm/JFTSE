@@ -321,11 +321,9 @@ public class FinishGameTask extends AbstractTask {
         Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
         Pocket pocket = player.getPocket();
         PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
-        int existingItemCount = 0;
         boolean existingItem = false;
 
         if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
-            existingItemCount = playerPocket.getItemCount();
             existingItem = true;
         } else {
             playerPocket = new PlayerPocket();
@@ -335,10 +333,8 @@ public class FinishGameTask extends AbstractTask {
         playerPocket.setItemIndex(product.getItem0());
         playerPocket.setUseType(product.getUseType());
 
-        playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
-
         // no idea how itemCount can be null here, but ok
-        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
+        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + playerReward.getProductRewardAmount());
 
         if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
