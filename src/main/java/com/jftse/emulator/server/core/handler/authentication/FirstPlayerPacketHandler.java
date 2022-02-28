@@ -19,6 +19,7 @@ public class FirstPlayerPacketHandler extends AbstractHandler {
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
     private final ToolSlotEquipmentService toolSlotEquipmentService;
     private final CardSlotEquipmentService cardSlotEquipmentService;
+    private final BattlemonSlotEquipmentService battlemonSlotEquipmentService;
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
     private final PlayerService playerService;
@@ -30,6 +31,7 @@ public class FirstPlayerPacketHandler extends AbstractHandler {
         specialSlotEquipmentService = ServiceManager.getInstance().getSpecialSlotEquipmentService();
         toolSlotEquipmentService = ServiceManager.getInstance().getToolSlotEquipmentService();
         cardSlotEquipmentService = ServiceManager.getInstance().getCardSlotEquipmentService();
+        battlemonSlotEquipmentService = ServiceManager.getInstance().getBattlemonSlotEquipmentService();
         pocketService = ServiceManager.getInstance().getPocketService();
         playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         playerService = ServiceManager.getInstance().getPlayerService();
@@ -71,6 +73,10 @@ public class FirstPlayerPacketHandler extends AbstractHandler {
             CardSlotEquipment cardSlotEquipment = new CardSlotEquipment();
             cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
             player.setCardSlotEquipment(cardSlotEquipment);
+            
+            BattlemonSlotEquipment battlemonSlotEquipment = new BattlemonSlotEquipment();
+            battlemonSlotEquipment = battlemonSlotEquipmentService.save(battlemonSlotEquipment);
+            player.setBattlemonSlotEquipment(battlemonSlotEquipment);
 
             Pocket pocket = new Pocket();
             pocket = pocketService.save(pocket);
