@@ -44,13 +44,11 @@ public class PlayerCreatePacketHandler extends AbstractHandler {
         if (player == null || !isPlayerNameValid) {
             S2CPlayerCreateAnswerPacket playerCreateAnswerPacket = new S2CPlayerCreateAnswerPacket((char) -1);
             connection.sendTCP(playerCreateAnswerPacket);
-        }
-        else {
+        } else {
             if (playerService.findByName(playerCreatePacket.getNickname()) != null) {
                 S2CPlayerCreateAnswerPacket playerCreateAnswerPacket = new S2CPlayerCreateAnswerPacket((char) -1);
                 connection.sendTCP(playerCreateAnswerPacket);
-            }
-            else {
+            } else {
                 if (player.getAlreadyCreated()) {
                     S2CPlayerCreateAnswerPacket playerCreateAnswerPacket = new S2CPlayerCreateAnswerPacket((char) -2);
                     connection.sendTCP(playerCreateAnswerPacket);
@@ -68,21 +66,35 @@ public class PlayerCreatePacketHandler extends AbstractHandler {
                     player.setDexterity(itemChar.getDexterity());
                     player.setWillpower(itemChar.getWillpower());
 
-                    player.setStatusPoints((byte) (player.getStatusPoints() + 19));
-                }
-                else {
+                    if (player.getFirstPlayer()) {
+                        player.setStatusPoints((byte) 5);
+                    } else {
+                        player.setStatusPoints((byte) (player.getStatusPoints() + 19));
+                    }
+                } else {
                     player.setStrength(playerCreatePacket.getStrength());
                     player.setStamina(playerCreatePacket.getStamina());
                     player.setDexterity(playerCreatePacket.getDexterity());
                     player.setWillpower(playerCreatePacket.getWillpower());
 
-                    player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 19));
+                    if (player.getFirstPlayer()) {
+                        player.setStatusPoints(playerCreatePacket.getStatusPoints());
+                    } else {
+                        player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 19));
+                    }
                 }
 
-                // make every new char level 20 - only temporary
-                player.setLevel((byte) 20);
-                player.setExpPoints(15623);
-                player.setGold(100000);
+                if (player.getFirstPlayer()) {
+                    // make every first new char level 20 - only temporary
+                    player.setLevel((byte) 20);
+                    player.setExpPoints(15623);
+                    player.setGold(100000);
+                } else {
+                    // make every new char level 1 - only temporary
+                    player.setLevel((byte) 1);
+                    player.setExpPoints(0);
+                    player.setGold(10000);
+                }
 
                 player = playerService.save(player);
 
