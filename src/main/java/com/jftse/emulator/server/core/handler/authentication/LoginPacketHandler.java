@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.handler.authentication;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.service.AuthTokenService;
+import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.anticheat.ClientWhitelist;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
@@ -29,6 +30,7 @@ public class LoginPacketHandler extends AbstractHandler {
     private final AuthenticationService authenticationService;
     private final ClientWhitelistService clientWhitelistService;
     private final AuthTokenService authTokenService;
+    private final PlayerService playerService;
 
     private final ConfigService configService;
 
@@ -36,6 +38,7 @@ public class LoginPacketHandler extends AbstractHandler {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         clientWhitelistService = ServiceManager.getInstance().getClientWhitelistService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
+        playerService = ServiceManager.getInstance().getPlayerService();
 
         configService = ServiceManager.getInstance().getConfigService();
     }
@@ -118,7 +121,7 @@ public class LoginPacketHandler extends AbstractHandler {
                 S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.SUCCESS, token, timestamp);
                 connection.sendTCP(loginAnswerPacket);
 
-                S2CPlayerListPacket PlayerListPacket = new S2CPlayerListPacket(account, account.getPlayerList());
+                S2CPlayerListPacket PlayerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account));
                 connection.sendTCP(PlayerListPacket);
 
                 S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());

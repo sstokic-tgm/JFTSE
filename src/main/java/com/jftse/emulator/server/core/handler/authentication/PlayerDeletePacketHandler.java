@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.authentication;
 
+import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -13,6 +14,8 @@ import com.jftse.emulator.server.core.service.GuildService;
 import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.core.service.messenger.*;
 import com.jftse.emulator.server.networking.packet.Packet;
+
+import java.util.List;
 
 public class PlayerDeletePacketHandler extends AbstractHandler {
     private C2SPlayerDeletePacket playerDeletePacket;
@@ -70,13 +73,14 @@ public class PlayerDeletePacketHandler extends AbstractHandler {
             proposalService.deleteBySender(player);
             proposalService.deleteByReceiver(player);
 
-            connection.getClient().getAccount().getPlayerList().removeIf(pl -> pl.getId().equals(player.getId()));
             playerService.remove(player.getId());
 
             S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) 0);
             connection.sendTCP(playerDeleteAnswerPacket);
 
-            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(connection.getClient().getAccount(), connection.getClient().getAccount().getPlayerList());
+            Account account = connection.getClient().getAccount();
+            List<Player> playerList = playerService.findAllByAccount(account);
+            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList);
             connection.sendTCP(playerListPacket);
         } else {
             S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);

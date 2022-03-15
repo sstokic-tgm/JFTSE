@@ -11,6 +11,8 @@ import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
+import java.util.List;
+
 public class FirstPlayerPacketHandler extends AbstractHandler {
     private C2SFirstPlayerPacket firstPlayerPacket;
 
@@ -47,8 +49,9 @@ public class FirstPlayerPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         Client client = connection.getClient();
+        List<Player> playerList = playerService.findAllByAccount(client.getAccount());
 
-        if (client.getAccount().getPlayerList().isEmpty()) {
+        if (playerList.isEmpty()) {
             Player player = new Player();
             player.setAccount(client.getAccount());
             player.setPlayerType(firstPlayerPacket.getPlayerType());
@@ -73,7 +76,7 @@ public class FirstPlayerPacketHandler extends AbstractHandler {
             CardSlotEquipment cardSlotEquipment = new CardSlotEquipment();
             cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
             player.setCardSlotEquipment(cardSlotEquipment);
-            
+
             BattlemonSlotEquipment battlemonSlotEquipment = new BattlemonSlotEquipment();
             battlemonSlotEquipment = battlemonSlotEquipmentService.save(battlemonSlotEquipment);
             player.setBattlemonSlotEquipment(battlemonSlotEquipment);

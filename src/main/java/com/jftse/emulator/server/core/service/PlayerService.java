@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.service;
 
+import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.repository.player.PlayerRepository;
 import com.jftse.emulator.server.core.packet.packets.player.C2SPlayerCreatePacket;
@@ -35,6 +36,10 @@ public class PlayerService {
 
     public List<Player> findAllByAlreadyCreatedPageable(Pageable pageable) {
         return playerRepository.findAllByAlreadyCreatedTrue(pageable).getContent();
+    }
+
+    public List<Player> findAllByAccount(Account account) {
+        return playerRepository.findAllByAccount_Id(account.getId());
     }
 
     public int getPlayerRankingByName(String name, byte gameMode) {

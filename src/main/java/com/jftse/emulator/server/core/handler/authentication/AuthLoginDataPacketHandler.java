@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.authentication;
 
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.service.AuthTokenService;
+import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -20,10 +21,12 @@ public class AuthLoginDataPacketHandler extends AbstractHandler {
 
     private final AuthenticationService authenticationService;
     private final AuthTokenService authTokenService;
+    private final PlayerService playerService;
 
     public AuthLoginDataPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
+        playerService = ServiceManager.getInstance().getPlayerService();
     }
 
     @Override
@@ -56,7 +59,7 @@ public class AuthLoginDataPacketHandler extends AbstractHandler {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.SUCCESS, token, timestamp);
             connection.sendTCP(loginAnswerPacket);
 
-            S2CPlayerListPacket PlayerListPacket = new S2CPlayerListPacket(account, account.getPlayerList());
+            S2CPlayerListPacket PlayerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account));
             connection.sendTCP(PlayerListPacket);
         } else {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) -1, (byte) 0);
