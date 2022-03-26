@@ -124,9 +124,6 @@ public class LoginPacketHandler extends AbstractHandler {
                 S2CPlayerListPacket PlayerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account));
                 connection.sendTCP(PlayerListPacket);
 
-                S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
-                connection.sendTCP(gameServerListPacket);
-
                 String hostAddress;
                 if (connection.getRemoteAddressTCP() != null)
                     hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
