@@ -29,7 +29,7 @@ public class InventoryWearBattlemonPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        /* Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
         BattlemonSlotEquipment battlemonSlotEquipment = player.getBattlemonSlotEquipment();
 
         battlemonSlotEquipmentService.updateBattlemonSlots(battlemonSlotEquipment, inventoryWearBattlemonRequestPacket.getBattlemonSlotList());
@@ -37,6 +37,7 @@ public class InventoryWearBattlemonPacketHandler extends AbstractHandler {
 
         player = playerService.save(player);
         connection.getClient().setActivePlayer(player);
+        */
 
         S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(inventoryWearBattlemonRequestPacket.getBattlemonSlotList());
         connection.sendTCP(inventoryWearBattlemonAnswerPacket);

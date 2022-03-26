@@ -77,9 +77,10 @@ public class FirstPlayerPacketHandler extends AbstractHandler {
             cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
             player.setCardSlotEquipment(cardSlotEquipment);
 
-            BattlemonSlotEquipment battlemonSlotEquipment = new BattlemonSlotEquipment();
+            /*BattlemonSlotEquipment battlemonSlotEquipment = new BattlemonSlotEquipment();
             battlemonSlotEquipment = battlemonSlotEquipmentService.save(battlemonSlotEquipment);
             player.setBattlemonSlotEquipment(battlemonSlotEquipment);
+            */
 
             Pocket pocket = new Pocket();
             pocket = pocketService.save(pocket);

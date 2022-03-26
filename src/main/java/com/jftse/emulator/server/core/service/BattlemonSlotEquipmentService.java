@@ -50,7 +50,7 @@ public class BattlemonSlotEquipmentService {
     public List<Integer> getEquippedBattlemonSlots(Player player) {
         List<Integer> result = new ArrayList<>();
 
-        BattlemonSlotEquipment battlemonSlotEquipment = findById(player.getBattlemonSlotEquipment().getId());
+        BattlemonSlotEquipment battlemonSlotEquipment = null;// findById(player.getBattlemonSlotEquipment().getId());
 
         if (battlemonSlotEquipment != null) {
             result.add(battlemonSlotEquipment.getSlot1());
