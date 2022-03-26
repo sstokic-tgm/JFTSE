@@ -30,8 +30,7 @@ public class AuthenticationServerStart implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Initializing authentication server...");
 
-        Server authenticationServer = new Server();
-        authenticationServer.addListener(authenticationNetworkListener);
+        Server authenticationServer = new Server(authenticationNetworkListener);
         try {
             authenticationServer.bind(5894);
         }

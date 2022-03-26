@@ -36,8 +36,7 @@ public class GameServerStart implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Initializing game server...");
 
-        Server gameServer = new Server();
-        gameServer.addListener(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(8)));
+        Server gameServer = new Server(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(8)));
         try {
             gameServer.bind(5895);
         }
@@ -53,8 +52,7 @@ public class GameServerStart implements CommandLineRunner {
 
         log.info("Initializing relay server...");
 
-        Server relayServer = new Server();
-        relayServer.addListener(new ThreadedConnectionListener(relayServerNetworkListener, Executors.newFixedThreadPool(8)));
+        Server relayServer = new Server(new ThreadedConnectionListener(relayServerNetworkListener, Executors.newFixedThreadPool(8)));
         try {
             relayServer.bind(5896);
         }

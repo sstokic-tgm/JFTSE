@@ -31,8 +31,7 @@ public class AntiCheatServerStart implements CommandLineRunner {
         if (configService.getValue("anticheat.enabled", false)) {
             log.info("Initializing anti cheat heartbeat server...");
 
-            Server antiCheatServer = new Server();
-            antiCheatServer.addListener(new ThreadedConnectionListener(antiCheatHeartBeatNetworkListener, Executors.newFixedThreadPool(4)));
+            Server antiCheatServer = new Server(new ThreadedConnectionListener(antiCheatHeartBeatNetworkListener, Executors.newFixedThreadPool(4)));
             try {
                 antiCheatServer.bind(configService.getValue("anticheat.port", 1337)); // adjustable
             }
