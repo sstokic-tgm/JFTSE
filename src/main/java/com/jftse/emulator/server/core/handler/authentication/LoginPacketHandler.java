@@ -86,8 +86,8 @@ public class LoginPacketHandler extends AbstractHandler {
                 accountStatus = 0;
             }
 
-            if (!accountStatus.equals((int) S2CLoginAnswerPacket.SUCCESS) || isClientFlagged(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
+            if (isClientFlagged(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
+                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID);
                 connection.sendTCP(loginAnswerPacket);
             } else {
                 if (configService.getValue("anticheat.enabled", false) && !linkAccountToClientWhitelist(connection.getRemoteAddressTCP(), loginPacket.getHwid(), account)) {

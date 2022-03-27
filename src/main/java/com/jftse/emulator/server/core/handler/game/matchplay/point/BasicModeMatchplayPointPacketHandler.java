@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler.game.matchplay.point;
 
-import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
@@ -14,19 +13,20 @@ import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.matchplay.event.PacketEventHandler;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
-import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.room.ServeInfo;
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.core.utils.RankingUtils;
+import com.jftse.emulator.server.database.model.GameLog;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
+import com.jftse.emulator.server.database.model.tutorial.GameLogType;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -48,6 +48,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
     private final ProductService productService;
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
+    private final GameLogService gameLogService;
 
     public BasicModeMatchplayPointPacketHandler() {
         packetEventHandler = GameManager.getInstance().getPacketEventHandler();
@@ -58,7 +59,8 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         productService = ServiceManager.getInstance().getProductService();
         pocketService = ServiceManager.getInstance().getPocketService();
-        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();;
+        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
+        gameLogService = ServiceManager.getInstance().getGameLogService();
     }
 
     @Override
@@ -107,6 +109,14 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         List<Player> playerList = new ArrayList<>();
         clients.forEach(c -> playerList.add(c.getActivePlayer()));
 
+        StringBuilder gameLogContent = new StringBuilder();
+        if (game.isFinished()) {
+            gameLogContent.append("Basic game finished. ");
+
+            boolean redTeamWon = game.getSetsRedTeam() == 2;
+            gameLogContent.append(redTeamWon ? "Red " : "Blue ").append("team won. ");
+        }
+
         for (Client client : clients) {
             RoomPlayer rp = roomPlayerList.stream()
                     .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
@@ -118,12 +128,16 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
             boolean isActivePlayer = rp.getPosition() < 4;
             boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
             if (isActivePlayer) {
+                gameLogContent.append(isCurrentPlayerInRedTeam ? "red " : "blue ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
+
                 boolean shouldPlayerSwitchServingSide =
                         game.shouldSwitchServingSide(isSingles, isRedTeamServing, anyTeamWonSet, rp.getPosition());
                 if (shouldPlayerSwitchServingSide) {
                     Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
                     game.getPlayerLocationsOnMap().set(rp.getPosition(), game.invertPointX(playerLocation));
                 }
+            } else {
+                gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
             if (!game.isFinished()) {
@@ -246,6 +260,15 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                     serveInfo.add(playerServeInfo);
                 }
             }
+        }
+
+        if (game.isFinished()) {
+            gameLogContent.append("playtime: ").append(game.getTimeNeeded()).append("s");
+
+            GameLog gameLog = new GameLog();
+            gameLog.setGameLogType(GameLogType.BASIC_GAME);
+            gameLog.setContent(gameLogContent.toString());
+            gameLogService.save(gameLog);
         }
 
         if (serveInfo.size() > 0) {

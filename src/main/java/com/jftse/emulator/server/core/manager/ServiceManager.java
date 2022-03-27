@@ -92,6 +92,8 @@ public class ServiceManager {
 
     @Autowired
     private ModuleService moduleService;
+    @Autowired
+    private GameLogService gameLogService;
 
     @Autowired
     private ConfigService configService;

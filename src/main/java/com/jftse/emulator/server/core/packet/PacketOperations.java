@@ -327,6 +327,8 @@ public enum PacketOperations {
     S2CRankingPersonalDataAnswer(0x206E),
     S2CRankingDataAnswer(0x2070),
 
+    S2CDCMsg(0x2329),
+
     C2SUnknown0xE00E(0xE00E),
     C2SUnknown0x1071(0x1071),
 

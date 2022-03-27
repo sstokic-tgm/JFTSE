@@ -16,17 +16,20 @@ import com.jftse.emulator.server.core.matchplay.event.PacketEventHandler;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
+import com.jftse.emulator.server.core.packet.packets.S2CDCMsgPacket;
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.core.thread.AbstractTask;
 import com.jftse.emulator.server.core.utils.RankingUtils;
+import com.jftse.emulator.server.database.model.GameLog;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
+import com.jftse.emulator.server.database.model.tutorial.GameLogType;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -45,6 +48,7 @@ public class FinishGameTask extends AbstractTask {
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
+    private final GameLogService gameLogService;
 
     private final PacketEventHandler packetEventHandler;
 
@@ -59,6 +63,7 @@ public class FinishGameTask extends AbstractTask {
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
+        this.gameLogService = ServiceManager.getInstance().getGameLogService();
 
         packetEventHandler = GameManager.getInstance().getPacketEventHandler();
     }
@@ -73,6 +78,7 @@ public class FinishGameTask extends AbstractTask {
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
+        this.gameLogService = ServiceManager.getInstance().getGameLogService();
 
         packetEventHandler = GameManager.getInstance().getPacketEventHandler();
     }
@@ -118,6 +124,14 @@ public class FinishGameTask extends AbstractTask {
         for (Iterator<Client> it = gameSession.getClients().iterator(); it.hasNext(); )
             playerList.add(it.next().getActivePlayer());
 
+        StringBuilder gameLogContent = new StringBuilder();
+        gameLogContent.append("Battle game finished. ");
+
+        boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+        boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+
+        gameLogContent.append(allPlayersTeamRedDead ? "Blue " : "Red ").append("team won. ");
+
         gameSession.getClients().forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
                     .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
@@ -129,9 +143,9 @@ public class FinishGameTask extends AbstractTask {
             boolean isActivePlayer = rp.getPosition() < 4;
             if (isActivePlayer) {
                 boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
-                boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
-                boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
                 boolean wonGame = isCurrentPlayerInRedTeam && allPlayersTeamBlueDead || !isCurrentPlayerInRedTeam && allPlayersTeamRedDead;
+
+                gameLogContent.append(isCurrentPlayerInRedTeam ? "red " : "blue ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
 
                 PlayerReward playerReward = playerRewards.stream()
                         .filter(x -> x.getPlayerPosition() == rp.getPosition())
@@ -198,6 +212,8 @@ public class FinishGameTask extends AbstractTask {
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                 client.getConnection().sendTCP(setExperienceGainInfoData);
+            } else {
+                gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
@@ -207,6 +223,13 @@ public class FinishGameTask extends AbstractTask {
             packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
             client.setActiveGameSession(null);
         });
+
+        gameLogContent.append("playtime: ").append(game.getTimeNeeded()).append("s");
+
+        GameLog gameLog = new GameLog();
+        gameLog.setGameLogType(GameLogType.BATTLE_GAME);
+        gameLog.setContent(gameLogContent.toString());
+        gameLogService.save(gameLog);
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
@@ -220,12 +243,6 @@ public class FinishGameTask extends AbstractTask {
 
         game.setFinished(true);
 
-        List<PlayerReward> playerRewards = game.getPlayerRewards();
-        playerRewards.forEach(x -> {
-            int expMultiplier = game.getGuardianStage().getExpMultiplier();
-            x.setRewardExp(x.getRewardExp() * expMultiplier);
-        });
-
         Room room = connection.getClient().getActiveRoom();
         synchronized (room) {
             room.setStatus(RoomStatus.NotRunning);
@@ -234,6 +251,59 @@ public class FinishGameTask extends AbstractTask {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
+
+        if (game.isBossBattleActive() && wonGame) {
+            long timeNeededSeconds = TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded());
+            List<Integer> stages = Arrays.asList(9, 10, 13, 14);
+
+            boolean underSixty = (timeNeededSeconds < 60) && !stages.contains(game.getCurrentStage().getMapId());
+            boolean underNinety = (timeNeededSeconds < 90) && stages.contains(game.getCurrentStage().getMapId());
+
+            if (underNinety || underSixty) {
+                StringBuilder gameLogContent = new StringBuilder();
+                gameLogContent.append("Boss Guardian finished before ");
+                if (underNinety)
+                    gameLogContent.append("90s. ");
+                if (underSixty)
+                    gameLogContent.append("60s. ");
+
+                gameSession.getClients().forEach(client -> {
+                    S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
+                    client.getConnection().sendTCP(msgPacket);
+                    client.getConnection().close();
+
+                    RoomPlayer rp = room.getRoomPlayerList().stream()
+                            .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                            .findFirst().orElse(null);
+                    if (rp == null) {
+                        return;
+                    }
+
+                    gameLogContent.append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
+                });
+                gameLogContent.append("timeNeededSeconds: ").append(timeNeededSeconds).append("s");
+
+                GameLog gameLog = new GameLog();
+                gameLog.setGameLogType(GameLogType.BANABLE);
+                gameLog.setContent(gameLogContent.toString());
+                gameLogService.save(gameLog);
+
+                gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
+                if (game.isFinished() && gameSession.getClients().isEmpty()) {
+                    GameSessionManager.getInstance().removeGameSession(gameSession);
+                }
+                return;
+            }
+        }
+
+        List<PlayerReward> playerRewards = game.getPlayerRewards();
+        playerRewards.forEach(x -> {
+            int expMultiplier = game.getGuardianStage().getExpMultiplier();
+            x.setRewardExp(x.getRewardExp() * expMultiplier);
+        });
+
+        StringBuilder gameLogContent = new StringBuilder();
+        gameLogContent.append(game.isBossBattleActive() ? "Boss " : "Guardian ").append("battle finished. ");
 
         gameSession.getClients().forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
@@ -245,6 +315,8 @@ public class FinishGameTask extends AbstractTask {
 
             boolean isActivePlayer = rp.getPosition() < 4;
             if (isActivePlayer) {
+                gameLogContent.append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
+
                 PlayerReward playerReward = playerRewards.stream()
                         .filter(x -> x.getPlayerPosition() == rp.getPosition())
                         .findFirst()
@@ -284,6 +356,8 @@ public class FinishGameTask extends AbstractTask {
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                 client.getConnection().sendTCP(setExperienceGainInfoData);
+            } else {
+                gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
@@ -293,6 +367,13 @@ public class FinishGameTask extends AbstractTask {
             packetEventHandler.push(packetEventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)), PacketEventHandler.ServerClient.SERVER);
             client.setActiveGameSession(null);
         });
+
+        gameLogContent.append("playtime: ").append(game.getTimeNeeded()).append("s");
+
+        GameLog gameLog = new GameLog();
+        gameLog.setGameLogType(GameLogType.GUARDIAN_GAME);
+        gameLog.setContent(gameLogContent.toString());
+        gameLogService.save(gameLog);
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (game.isFinished() && gameSession.getClients().isEmpty()) {

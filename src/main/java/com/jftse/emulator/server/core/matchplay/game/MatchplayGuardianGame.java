@@ -199,6 +199,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     public void resetStageStartTime() {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         setStageStartTime(cal.getTime());
+        setStartTime(cal.getTime());
     }
 
     public List<PlayerReward> getPlayerRewards() {

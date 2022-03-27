@@ -126,18 +126,23 @@ public class CommandManager {
             commandInstance.setRank(rank);
 
             registeredCommands.put(commandName, commandInstance);
+            log.info("Registered command -" + commandName);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             log.error(e.getMessage(), e);
         }
     }
 
     private void registerCommands() {
+        log.info("Loading commands...");
         addCommand("og", 0, OpenGachaCommand.class);
         addCommand("hard", 0, HardModeCommand.class);
         addCommand("arcade", 0, ArcadeModeCommand.class);
         addCommand("random", 0, RandomModeCommand.class);
+        addCommand("latency", 0, LatencyCommand.class);
         addCommand("ban", 1, BanPlayerCommand.class);
         addCommand("unban", 1, UnbanPlayerCommand.class);
-        addCommand("serverNotice", 1, ServerNoticeCommand.class);
+        addCommand("sN", 1, ServerNoticeCommand.class);
+        addCommand("serverKick", 1, ServerKickCommand.class);
+        log.info("Commands has been loaded.");
     }
 }
