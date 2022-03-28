@@ -307,7 +307,6 @@ public class FinishGameTask extends AbstractTask {
         gameLogContent.append(game.getCurrentStage().getName()).append(" ");
         gameLogContent.append(game.isBossBattleActive() ? "Boss " : "Guardian ").append("battle finished. ");
         gameLogContent.append(wonGame ? "Players " : "Guardians ").append("won. ");
-        gameLogContent.append(game.getCurrentStage().getName()).append(" ");
 
         gameSession.getClients().forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
