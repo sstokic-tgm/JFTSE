@@ -28,8 +28,10 @@ public class BasicAuthHandler {
         if (connection.getClient().getAccount() != null) {
             // reset status
             Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
-            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-            authenticationService.updateAccount(account);
+            if (account.getStatus() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
+                account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+                authenticationService.updateAccount(account);
+            }
         }
 
         connection.setClient(null);
