@@ -266,6 +266,7 @@ public class FinishGameTask extends AbstractTask {
                     gameLogContent.append("90s. ");
                 if (underSixty)
                     gameLogContent.append("60s. ");
+                gameLogContent.append(game.getCurrentStage().getName()).append(" ");
 
                 gameSession.getClients().forEach(client -> {
                     S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
@@ -306,6 +307,7 @@ public class FinishGameTask extends AbstractTask {
         gameLogContent.append(game.getCurrentStage().getName()).append(" ");
         gameLogContent.append(game.isBossBattleActive() ? "Boss " : "Guardian ").append("battle finished. ");
         gameLogContent.append(wonGame ? "Players " : "Guardians ").append("won. ");
+        gameLogContent.append(game.getCurrentStage().getName()).append(" ");
 
         gameSession.getClients().forEach(client -> {
             RoomPlayer rp = room.getRoomPlayerList().stream()
