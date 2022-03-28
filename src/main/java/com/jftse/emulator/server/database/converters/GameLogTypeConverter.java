@@ -1,6 +1,6 @@
-package com.jftse.emulator.server.database;
+package com.jftse.emulator.server.database.converters;
 
-import com.jftse.emulator.server.database.model.tutorial.GameLogType;
+import com.jftse.emulator.server.database.model.log.GameLogType;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

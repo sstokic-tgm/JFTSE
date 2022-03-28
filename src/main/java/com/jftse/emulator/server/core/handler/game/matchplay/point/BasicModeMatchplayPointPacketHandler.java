@@ -19,14 +19,14 @@ import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryDataP
 import com.jftse.emulator.server.core.packet.packets.matchplay.*;
 import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.core.utils.RankingUtils;
-import com.jftse.emulator.server.database.model.GameLog;
+import com.jftse.emulator.server.database.model.log.GameLog;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
-import com.jftse.emulator.server.database.model.tutorial.GameLogType;
+import com.jftse.emulator.server.database.model.log.GameLogType;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;

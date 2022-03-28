@@ -1,7 +1,6 @@
-package com.jftse.emulator.server.database.model;
+package com.jftse.emulator.server.database.model.log;
 
 import com.jftse.emulator.common.model.AbstractBaseModel;
-import com.jftse.emulator.server.database.model.tutorial.GameLogType;
 import lombok.Getter;
 import lombok.Setter;
 
