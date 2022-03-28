@@ -224,7 +224,7 @@ public class FinishGameTask extends AbstractTask {
             client.setActiveGameSession(null);
         });
 
-        gameLogContent.append("playtime: ").append(game.getTimeNeeded()).append("s");
+        gameLogContent.append("playtime: ").append(TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded())).append("s");
 
         GameLog gameLog = new GameLog();
         gameLog.setGameLogType(GameLogType.BATTLE_GAME);
@@ -282,7 +282,7 @@ public class FinishGameTask extends AbstractTask {
 
                     gameLogContent.append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
                 });
-                gameLogContent.append("timeNeededSeconds: ").append(timeNeededSeconds).append("s");
+                gameLogContent.append("playtime: ").append(timeNeededSeconds).append("s");
 
                 GameLog gameLog = new GameLog();
                 gameLog.setGameLogType(GameLogType.BANABLE);
@@ -371,7 +371,7 @@ public class FinishGameTask extends AbstractTask {
             client.setActiveGameSession(null);
         });
 
-        gameLogContent.append("playtime: ").append(game.getTimeNeeded()).append("s");
+        gameLogContent.append("playtime: ").append(TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded())).append("s");
 
         GameLog gameLog = new GameLog();
         gameLog.setGameLogType(GameLogType.GUARDIAN_GAME);

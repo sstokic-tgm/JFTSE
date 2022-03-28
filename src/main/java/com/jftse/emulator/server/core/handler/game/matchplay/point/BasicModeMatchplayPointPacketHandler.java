@@ -263,7 +263,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         }
 
         if (game.isFinished()) {
-            gameLogContent.append("playtime: ").append(game.getTimeNeeded()).append("s");
+            gameLogContent.append("playtime: ").append(TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded())).append("s");
 
             GameLog gameLog = new GameLog();
             gameLog.setGameLogType(GameLogType.BASIC_GAME);
