@@ -100,8 +100,8 @@ public class GuardianCombatSystem implements GuardianCombatable {
         short healthToHeal = (short) (targetGuardian.getMaxHealth() * (percentage / 100f));
         currentHealth = Math.max(currentHealth, 0);
         short newGuardianHealth = (short) (currentHealth + healthToHeal);
-        if (newGuardianHealth > currentHealth) {
-            newGuardianHealth = (short) currentHealth;
+        if (newGuardianHealth > targetGuardian.getMaxHealth()) {
+            newGuardianHealth = (short) targetGuardian.getMaxHealth();
         }
 
         if (targetGuardian.getCurrentHealth().compareAndSet(currentHealth, newGuardianHealth))

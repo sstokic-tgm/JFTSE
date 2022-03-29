@@ -147,7 +147,7 @@ public class Server implements Runnable {
 
             synchronized (keys) {
                 for (Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext(); ) {
-                    keepAlive();
+                    // keepAlive();
                     SelectionKey selectionKey = iter.next();
                     iter.remove();
                     Connection fromConnection = (Connection) selectionKey.attachment();
@@ -216,11 +216,11 @@ public class Server implements Runnable {
         this.connections.forEach((id, connection) -> {
             if (connection.getTcpConnection().isTimedOut(time)) {
                 connection.notifyTimeout();
-            } else {
+            } /*else {
                 if (connection.getTcpConnection().needsKeepAlive(time)) {
                     connection.sendTCP(new Packet(PacketOperations.C2SHeartbeat.getValueAsChar()));
                 }
-            }
+            }*/
             if (connection.isIdle()) {
                 connection.notifyIdle();
             }
