@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.shared.module.checker;
 
 import com.jftse.emulator.common.discord.DiscordWebhook;
-import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
-import com.jftse.emulator.server.game.core.game.RelayServerNetworkListener;
+import com.jftse.emulator.server.core.listener.GameServerNetworkListener;
+import com.jftse.emulator.server.core.listener.RelayServerNetworkListener;
 import com.jftse.emulator.server.networking.ConnectionListener;
 import com.jftse.emulator.server.networking.Server;
 import lombok.extern.log4j.Log4j2;

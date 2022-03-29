@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class GuardianStage {
+    private String Name = "";
     private Integer MapId = 0;
     private List<Integer> GuardiansLeft = new ArrayList<>();
     private List<Integer> GuardiansRight = new ArrayList<>();
