@@ -120,28 +120,34 @@ public class PlayerCombatSystem implements PlayerCombatable {
         if (targetPlayer == null)
             throw new ValidationException("targetPlayer battle state is null");
 
+        int currentHealth = targetPlayer.getCurrentHealth().get();
         short healthToHeal = (short) (targetPlayer.getMaxHealth() * (percentage / 100f));
-        short currentHealth = (short) Math.max(targetPlayer.getCurrentHealth(), 0);
+        currentHealth = Math.max(currentHealth, 0);
         short newPlayerHealth = (short) (currentHealth + healthToHeal);
         if (newPlayerHealth > targetPlayer.getMaxHealth()) {
             newPlayerHealth = (short) targetPlayer.getMaxHealth();
         }
 
-        targetPlayer.setCurrentHealth(newPlayerHealth);
-        return newPlayerHealth;
+        if (targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth))
+            return newPlayerHealth;
+        else
+            return (short) currentHealth;
     }
 
     @Override
     public short updateHealthByDamage(PlayerBattleState targetPlayer, int dmg) {
-        short currentHealth = (short) Math.max(targetPlayer.getCurrentHealth(), 0);
+        int currentHealth = targetPlayer.getCurrentHealth().get();
+        currentHealth = Math.max(currentHealth, 0);
         short newPlayerHealth = (short) (currentHealth + dmg);
         if (newPlayerHealth < 1) {
             targetPlayer.setDead(true);
         }
         newPlayerHealth = newPlayerHealth < 0 ? 0 : newPlayerHealth;
 
-        targetPlayer.setCurrentHealth(newPlayerHealth);
-        return newPlayerHealth;
+        if (targetPlayer.getCurrentHealth().compareAndSet(currentHealth, newPlayerHealth))
+            return newPlayerHealth;
+        else
+            return (short) currentHealth;
     }
 
     @Override
@@ -205,6 +211,6 @@ public class PlayerCombatSystem implements PlayerCombatable {
         if (playerBattleState == null)
             throw new ValidationException("playerBattleState is null");
 
-        return (short) playerBattleState.getCurrentHealth();
+        return (short) playerBattleState.getCurrentHealth().get();
     }
 }

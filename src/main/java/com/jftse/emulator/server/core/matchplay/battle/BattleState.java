@@ -13,7 +13,7 @@ public class BattleState {
     protected int position;
 
     protected int maxHealth;
-    protected int currentHealth;
+    protected AtomicInteger currentHealth;
 
     protected int str;
     protected int sta;
@@ -31,7 +31,7 @@ public class BattleState {
 
         this.position = position;
         this.maxHealth = hp;
-        this.currentHealth = hp;
+        this.currentHealth = new AtomicInteger(hp);
 
         this.str = str;
         this.sta = sta;

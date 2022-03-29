@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,6 +56,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private int spiderMineIdentifier;
     private ArrayList<ScheduledFuture<?>> scheduledFutures;
 
+    private AtomicBoolean stageChangingToBoss;
+
     private final PlayerCombatSystem playerCombatSystem;
     private final GuardianCombatSystem guardianCombatSystem;
 
@@ -74,6 +77,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.lastGuardianServeSide = GameFieldSide.Guardian;
         this.scheduledFutures = new ArrayList<>();
         this.setFinished(false);
+
+        this.stageChangingToBoss = new AtomicBoolean(false);
 
         playerCombatSystem = new PlayerCombatSystem(this);
         guardianCombatSystem = new GuardianCombatSystem(this);

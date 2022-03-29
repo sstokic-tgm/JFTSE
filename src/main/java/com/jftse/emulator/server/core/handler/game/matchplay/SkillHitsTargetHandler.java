@@ -78,9 +78,11 @@ public class SkillHitsTargetHandler extends AbstractHandler {
 
         boolean denyDamage = skillHitsTarget.getDamageType() == 1;
         if (skillId == 0 && !denyDamage) {
-            this.handleBallLossDamage(connection, game);
+            if (!this.handleBallLossDamage(connection, game))
+                return;
         } else {
-            this.handleSkillDamage(connection, skillHitsTarget.getTargetPosition(), game, skill);
+            if (!this.handleSkillDamage(connection, skillHitsTarget.getTargetPosition(), game, skill))
+                return;
         }
 
         if (game instanceof MatchplayBattleGame) {
@@ -135,12 +137,12 @@ public class SkillHitsTargetHandler extends AbstractHandler {
 
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth(), (short) 0, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), (short) 0, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }
 
-    private void handleBallLossDamage(Connection connection, MatchplayGame game) {
+    private boolean handleBallLossDamage(Connection connection, MatchplayGame game) {
         short receiverPosition = skillHitsTarget.getTargetPosition();
         short attackerPosition = skillHitsTarget.getAttackerPosition();
         boolean attackerHasWillBuff = skillHitsTarget.getAttackerBuffId() == 3;
@@ -154,7 +156,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
             } else {
                 if (guardianMadePoint) {
                     if (!skillHitsTarget.isApplySkillEffect()) {
-                        return;
+                        return false;
                     }
 
                     newHealth = ((MatchplayGuardianGame) game).getGuardianCombatSystem().dealDamageOnBallLossToPlayer(attackerPosition, receiverPosition, attackerHasWillBuff);
@@ -167,14 +169,15 @@ public class SkillHitsTargetHandler extends AbstractHandler {
             }
         } catch (ValidationException ve) {
             log.warn(ve.getMessage());
-            return;
+            return false;
         }
 
         S2CMatchplayDealDamage damagePacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damagePacket, connection);
+        return true;
     }
 
-    private void handleSkillDamage(Connection connection, short targetPosition, MatchplayGame game, Skill skill) {
+    private boolean handleSkillDamage(Connection connection, short targetPosition, MatchplayGame game, Skill skill) {
         boolean denyDamage = skillHitsTarget.getDamageType() == 1;
         short attackerPosition = skillHitsTarget.getAttackerPosition();
         boolean attackerHasStrBuff = skillHitsTarget.getAttackerBuffId() == 0;
@@ -185,6 +188,13 @@ public class SkillHitsTargetHandler extends AbstractHandler {
         short newHealth;
         if (game instanceof MatchplayBattleGame) {
             try {
+                PlayerBattleState targetPlayer = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                        .filter(x -> x.getPosition() == targetPosition)
+                        .findFirst()
+                        .orElse(null);
+                if (targetPlayer != null && targetPlayer.getCurrentHealth().get() < 1)
+                    return false;
+
                 if (skillDamage > 1) {
                     newHealth = ((MatchplayBattleGame) game).getPlayerCombatSystem().heal(targetPosition, skillDamage);
                 } else if (denyDamage) {
@@ -192,17 +202,24 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                 } else if (skillDamage == 0) {
                     newHealth = ((MatchplayBattleGame) game).getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                 } else if (!skillHitsTarget.isApplySkillEffect()) {
-                    return;
+                    return false;
                 } else {
                     newHealth = ((MatchplayBattleGame) game).getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
                 }
             } catch (ValidationException ve) {
                 log.warn(ve.getMessage());
-                return;
+                return false;
             }
         } else {
             if (targetPosition < 4) {
                 try {
+                    PlayerBattleState targetPlayer = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                            .filter(x -> x.getPosition() == targetPosition)
+                            .findFirst()
+                            .orElse(null);
+                    if (targetPlayer != null && targetPlayer.getCurrentHealth().get() < 1)
+                        return false;
+
                     if (skillDamage > 1) {
                         newHealth = ((MatchplayGuardianGame) game).getPlayerCombatSystem().heal(targetPosition, skillDamage);
                     } else if (denyDamage) {
@@ -210,16 +227,23 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                     } else if (skillDamage == 0) {
                         newHealth = ((MatchplayGuardianGame) game).getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                     } else if (!skillHitsTarget.isApplySkillEffect()) {
-                        return;
+                        return false;
                     } else {
                         newHealth = ((MatchplayGuardianGame) game).getGuardianCombatSystem().dealDamageToPlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
                     }
                 } catch (ValidationException ve) {
                     log.warn(ve.getMessage());
-                    return;
+                    return false;
                 }
             } else {
                 try {
+                    GuardianBattleState targetGuardian = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                            .filter(x -> x.getPosition() == targetPosition)
+                            .findFirst()
+                            .orElse(null);
+                    if (targetGuardian != null && targetGuardian.getCurrentHealth().get() < 1)
+                        return false;
+
                     if (skillDamage > 1) {
                         newHealth = ((MatchplayGuardianGame) game).getGuardianCombatSystem().heal(targetPosition, skillDamage);
                     } else if (denyDamage) {
@@ -229,7 +253,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                     }
                 } catch (ValidationException ve) {
                     log.warn(ve.getMessage());
-                    return;
+                    return false;
                 }
 
                 if (newHealth < 1) {
@@ -242,6 +266,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
         S2CMatchplayDealDamage damageToPlayerPacket =
                 new S2CMatchplayDealDamage(targetPosition, newHealth, (short) 0, skillToApply, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+        return true;
     }
 
     private void increasePotsFromGuardiansDeath(MatchplayGuardianGame game, int guardianPos) {
@@ -270,8 +295,8 @@ public class SkillHitsTargetHandler extends AbstractHandler {
     }
 
     private void handleAnyTeamDead(Connection connection, MatchplayBattleGame game) {
-        boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
-        boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth() < 1);
+        boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth().get() < 1);
+        boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth().get() < 1);
 
         if ((allPlayersTeamRedDead || allPlayersTeamBlueDead) && !game.isFinished()) {
             ThreadManager.getInstance().newTask(new FinishGameTask(connection));
@@ -279,70 +304,74 @@ public class SkillHitsTargetHandler extends AbstractHandler {
     }
 
     private void handleAllGuardiansDead(Connection connection, MatchplayGuardianGame game) {
+        boolean stageChangingToBoss = game.getStageChangingToBoss().get();
         boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
-        boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
+        boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
         boolean triggerBossBattle = game.isHardMode() && timePlayingInSeconds < 300 || timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
         boolean isBossBattleActive = game.isBossBattleActive();
         if ((hasBossGuardianStage || game.isHardMode()) && allGuardiansDead && triggerBossBattle && !isBossBattleActive) {
-            game.setBossBattleActive(true);
-            GameSession gameSession = connection.getClient().getActiveGameSession();
-            gameSession.clearCountDownRunnable();
+            if (game.getStageChangingToBoss().compareAndSet(false, true)) {
+                game.setBossBattleActive(true);
+                GameSession gameSession = connection.getClient().getActiveGameSession();
+                gameSession.clearCountDownRunnable();
 
-            if (!hasBossGuardianStage && game.isHardMode()) {
-                GuardianStage guardianStage = game.getGuardianStage();
-                guardianStage.setBossGuardian((int) (Math.random() * 7) + 1);
-                game.setBossGuardianStage(guardianStage);
-            }
-
-            game.setCurrentStage(game.getBossGuardianStage());
-
-            int activePlayingPlayersCount = game.getPlayerBattleStates().size();
-            List<Byte> guardians = game.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
-            byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
-            game.getGuardianBattleStates().clear();
-
-            BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
-            GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
-            game.getGuardianBattleStates().add(bossGuardianBattleState);
-
-            if (game.isHardMode() && !hasBossGuardianStage) {
-                game.fillRemainingGuardianSlots(true, game, game.getBossGuardianStage(), guardians);
-                guardians.set(2, (byte) 0);
-            }
-
-            byte guardianStartPosition = 11;
-            for (int i = 0; i < guardians.stream().count(); i++) {
-                int guardianId = guardians.get(i);
-                if (guardianId == 0) continue;
-
-                if (game.isRandomGuardiansMode()) {
-                    guardianId = (int) (Math.random() * 72 + 1);
-                    guardians.set(i, (byte) guardianId);
+                if (!hasBossGuardianStage && game.isHardMode()) {
+                    GuardianStage guardianStage = game.getGuardianStage();
+                    guardianStage.setBossGuardian((int) (Math.random() * 7) + 1);
+                    game.setBossGuardianStage(guardianStage);
                 }
 
-                short guardianPosition = (short) (i + guardianStartPosition);
-                Guardian guardian = guardianService.findGuardianById((long) guardianId);
-                GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.isHardMode(), guardian, guardianPosition, activePlayingPlayersCount);
-                game.getGuardianBattleStates().add(guardianBattleState);
+                game.setCurrentStage(game.getBossGuardianStage());
+
+                int activePlayingPlayersCount = game.getPlayerBattleStates().size();
+                List<Byte> guardians = game.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
+                byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
+                game.getGuardianBattleStates().clear();
+
+                BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
+                GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
+                game.getGuardianBattleStates().add(bossGuardianBattleState);
+
+                if (game.isHardMode() && !hasBossGuardianStage) {
+                    game.fillRemainingGuardianSlots(true, game, game.getBossGuardianStage(), guardians);
+                    guardians.set(2, (byte) 0);
+                }
+
+                byte guardianStartPosition = 11;
+                for (int i = 0; i < guardians.stream().count(); i++) {
+                    int guardianId = guardians.get(i);
+                    if (guardianId == 0) continue;
+
+                    if (game.isRandomGuardiansMode()) {
+                        guardianId = (int) (Math.random() * 72 + 1);
+                        guardians.set(i, (byte) guardianId);
+                    }
+
+                    short guardianPosition = (short) (i + guardianStartPosition);
+                    Guardian guardian = guardianService.findGuardianById((long) guardianId);
+                    GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.isHardMode(), guardian, guardianPosition, activePlayingPlayersCount);
+                    game.getGuardianBattleStates().add(guardianBattleState);
+                }
+                game.getStageChangingToBoss().set(false);
+
+                S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
+                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
+
+                S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
+                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
+
+                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
+                gameSession.getRunnableEvents().add(runnableEvent);
             }
 
-            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
-
-            S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
-
-            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
-            gameSession.getRunnableEvents().add(runnableEvent);
-
-        } else if (allGuardiansDead && !game.isFinished()) {
+        } else if (allGuardiansDead && !game.isFinished() && !stageChangingToBoss) {
             ThreadManager.getInstance().newTask(new FinishGameTask(connection, true));
         }
     }
 
     private void handleAllPlayersDead(Connection connection, MatchplayGuardianGame game) {
-        boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth() < 1);
+        boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         if (allPlayersDead && !game.isFinished()) {
             ThreadManager.getInstance().newTask(new FinishGameTask(connection, false));
         }

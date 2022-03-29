@@ -73,7 +73,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     public List<Integer> getPlayerPositionsOrderedByHighestHealth() {
         List<Integer> playerPositions = new ArrayList<>();
         this.playerBattleStates.stream()
-                .sorted(Comparator.comparingInt(pbs -> ((PlayerBattleState) pbs).getCurrentHealth())
+                .sorted(Comparator.comparingInt(pbs -> ((PlayerBattleState) pbs).getCurrentHealth().get())
                         .reversed())
                 .forEach(p -> playerPositions.add(p.getPosition()));
 
@@ -90,10 +90,10 @@ public class MatchplayBattleGame extends MatchplayGame {
             boolean isPlayerInRedTeam = this.isRedTeam(playerPosition);
             boolean allPlayersTeamRedDead = this.getPlayerBattleStates().stream()
                     .filter(x -> this.isRedTeam(x.getPosition()))
-                    .allMatch(x -> x.getCurrentHealth() < 1);
+                    .allMatch(x -> x.getCurrentHealth().get() < 1);
             boolean allPlayersTeamBlueDead = this.getPlayerBattleStates().stream()
                     .filter(x -> this.isBlueTeam(x.getPosition()))
-                    .allMatch(x -> x.getCurrentHealth() < 1);
+                    .allMatch(x -> x.getCurrentHealth().get() < 1);
             if (isPlayerInRedTeam && allPlayersTeamBlueDead || !isPlayerInRedTeam && allPlayersTeamRedDead) {
                 wonGame = true;
             }
