@@ -1,7 +1,9 @@
 package com.jftse.emulator.server.shared.module;
 
-import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
-import com.jftse.emulator.server.game.core.game.RelayServerNetworkListener;
+import com.jftse.emulator.server.core.listener.GameServerNetworkListener;
+import com.jftse.emulator.server.core.listener.RelayServerNetworkListener;
+import com.jftse.emulator.server.core.manager.ServerManager;
+import com.jftse.emulator.server.core.manager.ThreadManager;
 import com.jftse.emulator.server.networking.Server;
 import com.jftse.emulator.server.networking.ThreadedConnectionListener;
 import com.jftse.emulator.server.shared.module.checker.GameServerChecker;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -26,12 +27,16 @@ public class GameServerStart implements CommandLineRunner {
     @Autowired
     private RelayServerNetworkListener relayServerNetworkListener;
 
+    @Autowired
+    private ServerManager serverManager;
+    @Autowired
+    private ThreadManager threadManager;
+
     @Override
     public void run(String... args) throws Exception {
         log.info("Initializing game server...");
 
-        Server gameServer = new Server();
-        gameServer.addListener(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(2)));
+        Server gameServer = new Server(new ThreadedConnectionListener(gameServerNetworkListener, Executors.newFixedThreadPool(8)));
         try {
             gameServer.bind(5895);
         }
@@ -42,13 +47,12 @@ public class GameServerStart implements CommandLineRunner {
         }
         gameServer.start("game server");
 
-        log.info("Successfully initialized!");
+        log.info("Successfully initialized");
         log.info("--------------------------------------");
 
         log.info("Initializing relay server...");
 
-        Server relayServer = new Server();
-        relayServer.addListener(new ThreadedConnectionListener(relayServerNetworkListener, Executors.newFixedThreadPool(2)));
+        Server relayServer = new Server(new ThreadedConnectionListener(relayServerNetworkListener, Executors.newFixedThreadPool(8)));
         try {
             relayServer.bind(5896);
         }
@@ -59,11 +63,13 @@ public class GameServerStart implements CommandLineRunner {
         }
         relayServer.start("relay server");
 
-        log.info("Successfully initialized!");
+        log.info("Successfully initialized");
         log.info("--------------------------------------");
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-        executor.scheduleWithFixedDelay(new GameServerChecker(gameServer, relayServer, gameServerNetworkListener, relayServerNetworkListener), 1, 2, TimeUnit.MINUTES);
-        executor.scheduleWithFixedDelay(new RelayServerChecker(relayServer, relayServerNetworkListener), 1, 5, TimeUnit.MINUTES);
+        serverManager.add(gameServer);
+        serverManager.add(relayServer);
+
+        threadManager.schedule(new GameServerChecker(gameServer, relayServer, gameServerNetworkListener, relayServerNetworkListener), 1, 2, TimeUnit.MINUTES);
+        threadManager.schedule(new RelayServerChecker(relayServer, relayServerNetworkListener), 1, 5, TimeUnit.MINUTES);
     }
 }

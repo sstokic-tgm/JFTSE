@@ -4,6 +4,7 @@ import com.jftse.emulator.common.model.AbstractBaseModel;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
+import com.jftse.emulator.server.database.model.pet.Pet;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.database.model.tutorial.TutorialProgress;
 import lombok.Getter;
@@ -46,6 +47,11 @@ public class Player extends AbstractBaseModel {
     @JoinColumn(name = "cardSlotEquipment_id", referencedColumnName = "id")
     private CardSlotEquipment cardSlotEquipment;
 
+    /* @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @JoinColumn(name = "battlemonSlotEquipment_id", referencedColumnName = "id")
+    private BattlemonSlotEquipment battlemonSlotEquipment;
+     */
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "playerStatistic_id", referencedColumnName = "id")
     private PlayerStatistic playerStatistic;
@@ -55,6 +61,9 @@ public class Player extends AbstractBaseModel {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "player")
     private List<TutorialProgress> tutorialProgressList;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "player")
+    private List<Pet> petList;
 
     private Boolean firstPlayer = false;
     private Boolean alreadyCreated = false;

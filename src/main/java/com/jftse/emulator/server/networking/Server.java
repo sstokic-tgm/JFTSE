@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.networking;
 
+import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,93 +10,81 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
 @Log4j2
 public class Server implements Runnable {
-    private final int writeBufferSize, objectBufferSize;
+    private final int writeBufferSize, readBufferSize;
     private Selector selector;
     private ServerSocketChannel serverChannel;
-    private ConcurrentLinkedDeque<Connection> connections = new ConcurrentLinkedDeque<>();
-    private ConcurrentLinkedDeque<ConnectionListener> connectionListeners = new ConcurrentLinkedDeque<>();
+    private final ConcurrentHashMap<Long, Connection> connections = new ConcurrentHashMap<>();
+    private final ConnectionListener connectionListener;
     private volatile boolean shutdown;
     private final Object updateLock = new Object();
     private Thread updateThread;
     private int tcpPort;
 
     private ConnectionListener dispatchListener = new ConnectionListener() {
-            public void connected(Connection connection) {
-                Server.this.connectionListeners.forEach(cl -> {
-                    try {
-                        cl.connected(connection);
-                    } catch (Exception ex) {
-                        log.error("OnConnected exception " + ex.getMessage(), ex);
-                    }
-                });
+        public void connected(Connection connection) {
+            try {
+                Server.this.connectionListener.connected(connection);
+            } catch (Exception ex) {
+                log.error("OnConnected exception " + ex.getMessage(), ex);
             }
+        }
 
-            public void disconnected(Connection connection) {
-                removeConnection(connection);
-                Server.this.connectionListeners.forEach(cl -> {
-                    try {
-                        cl.disconnected(connection);
-                    } catch (Exception ex) {
-                        log.error("OnDisconnected exception " + ex.getMessage(), ex);
-                    }
-                });
+        public void disconnected(Connection connection) {
+            removeConnection(connection);
+            try {
+                Server.this.connectionListener.disconnected(connection);
+            } catch (Exception ex) {
+                log.error("OnDisconnected exception " + ex.getMessage(), ex);
             }
+        }
 
-            public void received(Connection connection, Packet packet) {
-                Server.this.connectionListeners.forEach(cl -> {
-                    try {
-                        cl.received(connection, packet);
-                    } catch (Exception ex) {
-                        log.error("OnReceived exception " + ex.getMessage(), ex);
-                    }
-                });
-
+        public void received(Connection connection, List<Packet> packets) {
+            try {
+                Server.this.connectionListener.received(connection, packets);
+            } catch (Exception ex) {
+                log.error("OnReceived exception " + ex.getMessage(), ex);
             }
+        }
 
-            public void idle(Connection connection) {
-                Server.this.connectionListeners.forEach(cl -> {
-                    try {
-                        cl.idle(connection);
-                    } catch (Exception ex) {
-                        log.error("OnIdle exception " + ex.getMessage(), ex);
-                    }
-                });
+        public void idle(Connection connection) {
+            try {
+                Server.this.connectionListener.idle(connection);
+            } catch (Exception ex) {
+                log.error("OnIdle exception " + ex.getMessage(), ex);
             }
+        }
 
-            public void onException(Connection connection, Exception exception) {
-                Server.this.connectionListeners.forEach(cl -> {
-                    try {
-                        cl.onException(connection, exception);
-                    } catch (Exception ex) {
-                        log.error("OnException exception " + ex.getMessage(), ex);
-                    }
-                });
+        public void onException(Connection connection, Exception exception) {
+            try {
+                Server.this.connectionListener.onException(connection, exception);
+            } catch (Exception ex) {
+                log.error("OnException exception " + ex.getMessage(), ex);
             }
+        }
 
-            public void onTimeout(Connection connection) {
-                Server.this.connectionListeners.forEach(cl -> cl.onTimeout(connection));
-            }
+        public void onTimeout(Connection connection) {
+            Server.this.connectionListener.onTimeout(connection);
+        }
 
-            public void cleanUp() {
-                // empty..
-            }
-        };
+        public void cleanUp() {
+            // empty..
+        }
+    };
 
-    public Server() {
-        this(4096, 4096);
+    public Server(ConnectionListener connectionListener) {
+        this(16384, 16384, connectionListener);
     }
 
-    public Server(int writeBufferSize, int objectBufferSize) {
+    public Server(int writeBufferSize, int readBufferSize, ConnectionListener connectionListener) {
         this.writeBufferSize = writeBufferSize;
-        this.objectBufferSize = objectBufferSize;
+        this.readBufferSize = readBufferSize;
+        this.connectionListener = connectionListener;
 
         try {
             selector = Selector.open();
@@ -149,8 +138,7 @@ public class Server implements Runnable {
 
         if (timeout > 0) {
             select = selector.select(timeout);
-        }
-        else {
+        } else {
             select = selector.selectNow();
         }
 
@@ -158,7 +146,8 @@ public class Server implements Runnable {
             Set<SelectionKey> keys = selector.selectedKeys();
 
             synchronized (keys) {
-                for (Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext();) {
+                for (Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext(); ) {
+                    keepAlive();
                     SelectionKey selectionKey = iter.next();
                     iter.remove();
                     Connection fromConnection = (Connection) selectionKey.attachment();
@@ -167,21 +156,24 @@ public class Server implements Runnable {
                         if (!selectionKey.isValid())
                             continue;
 
+                        int ops = selectionKey.readyOps();
+
                         if (fromConnection != null) {
-                            if(selectionKey.isReadable()) {
+                            if ((ops & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
                                 try {
                                     while (true) {
 
-                                        Packet packet = fromConnection.getTcpConnection().readPacket(fromConnection);
-                                        if(packet == null)
+                                        List<Packet> packets = fromConnection.getTcpConnection().readPacket();
+                                        if (packets == null || packets.isEmpty())
                                             break;
-                                        fromConnection.notifyReceived(packet);
+                                        fromConnection.notifyReceived(packets);
                                     }
                                 } catch (IOException ioe) {
                                     fromConnection.notifyException(ioe);
                                     fromConnection.close();
                                 }
-                            } else if (selectionKey.isWritable()) {
+                            }
+                            if ((ops & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
 
                                 try {
                                     fromConnection.getTcpConnection().writeOperation();
@@ -190,33 +182,29 @@ public class Server implements Runnable {
                                     fromConnection.close();
                                 }
                             }
+                            continue;
                         }
-                        else {
-                            if (selectionKey.isAcceptable()) {
-                                ServerSocketChannel serverSocketChannel = this.serverChannel;
+                        if ((ops & SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) {
+                            ServerSocketChannel serverSocketChannel = this.serverChannel;
+                            if (serverSocketChannel == null)
+                                continue;
 
-                                if (serverSocketChannel != null) {
-                                    try {
-                                        SocketChannel socketChannel = serverSocketChannel.accept();
-                                        if (socketChannel != null)
-                                            acceptOperation(socketChannel);
-                                    }
-                                    catch (IOException ioe) {
-                                        log.error(ioe.getMessage());
-                                    }
-                                }
+                            try {
+                                SocketChannel socketChannel = serverSocketChannel.accept();
+                                if (socketChannel != null)
+                                    acceptOperation(socketChannel);
+                            } catch (IOException ioe) {
+                                log.error(ioe.getMessage());
                             }
-                            else {
-                                selectionKey.channel().close();
-                            }
+                            continue;
                         }
-                    }
-                    catch (CancelledKeyException cke) {
-                        if(fromConnection != null) {
+                        selectionKey.channel().close();
+
+                    } catch (CancelledKeyException cke) {
+                        if (fromConnection != null) {
                             fromConnection.notifyException(cke);
                             fromConnection.close();
-                        }
-                        else {
+                        } else {
                             selectionKey.channel().close();
                         }
                     }
@@ -225,37 +213,34 @@ public class Server implements Runnable {
         }
 
         long time = System.currentTimeMillis();
-        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
-            Connection connection = it.next();
-
+        this.connections.forEach((id, connection) -> {
             if (connection.getTcpConnection().isTimedOut(time)) {
                 connection.notifyTimeout();
+            } else {
+                if (connection.getTcpConnection().needsKeepAlive(time)) {
+                    connection.sendTCP(new Packet(PacketOperations.C2SHeartbeat.getValueAsChar()));
+                }
             }
-            /* else {
-
-               if (connection.getTcpConnection().needsKeepAlive(time))
-               connection.sendTCP(new Packet((char) 0x0FA3));
-               }*/
-            if (connection.isIdle())
+            if (connection.isIdle()) {
                 connection.notifyIdle();
-        }
+            }
+        });
     }
 
     private void keepAlive() {
         long time = System.currentTimeMillis();
-        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
-            Connection connection = it.next();
-
-            if (connection.getTcpConnection().needsKeepAlive(time))
-                connection.sendTCP(new Packet((char) 0x0FA3));
-        }
+        this.connections.forEach((id, connection) -> {
+            if (connection.getTcpConnection().needsKeepAlive(time)) {
+                connection.sendTCP(new Packet(PacketOperations.C2SHeartbeat.getValueAsChar()));
+            }
+        });
     }
 
     public void run() {
         shutdown = false;
-        while(!shutdown) {
+        while (!shutdown) {
             try {
-                update(150);
+                update(10);
             } catch (IOException ioe) {
                 log.error("Thread exception " + ioe.getMessage(), ioe);
                 close();
@@ -270,7 +255,7 @@ public class Server implements Runnable {
     }
 
     public void stop() {
-        if(!shutdown) {
+        if (!shutdown) {
             close();
             shutdown = true;
         }
@@ -278,20 +263,16 @@ public class Server implements Runnable {
 
     private void acceptOperation(SocketChannel socketChannel) {
         Connection connection = newConnection();
-        connection.initialize(16384, 16384);
-        connection.setServer(this);
+        connection.initialize(this.writeBufferSize, this.readBufferSize);
 
         try {
             SelectionKey selectionKey = connection.getTcpConnection().accept(selector, socketChannel);
             selectionKey.attach(connection);
 
-            int id = getNextFreeConnectionId();
-
+            long id = addConnection(connection);
             connection.setId(id);
             connection.setConnected(true);
-            connection.addConnectionListener(dispatchListener);
 
-            addConnection(connection);
             connection.notifyConnected();
         } catch (IOException ioe) {
             log.error(ioe.getMessage());
@@ -299,68 +280,41 @@ public class Server implements Runnable {
         }
     }
 
-    private int getNextFreeConnectionId() {
-        Set<Integer> ids = connections.stream()
-                .map(Connection::getId)
-                .collect(Collectors.toSet());
-        return IntStream.iterate(1, n -> n + 1)
-                .filter(n -> !ids.contains(n))
-                .findFirst()
-                .getAsInt();
-    }
-
     protected Connection newConnection() {
-        return new Connection();
+        return new Connection(this, dispatchListener);
     }
 
-    private void addConnection(Connection connection) {
-        connections.add(connection);
+    private long addConnection(Connection connection) {
+        long id = 1;
+        while (connections.putIfAbsent(id, connection) != null) {
+            id++;
+        }
+        return id;
     }
 
     private void removeConnection(Connection connection) {
-        connections.remove(connection);
+        connections.remove(connection.getId());
     }
 
     public void sendToAllTcp(Packet packet) {
-        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
-            Connection connection = it.next();
-            connection.sendTCP(packet);
-        }
+        this.connections.forEach((id, connection) -> connection.sendTCP(packet));
     }
 
-    public void sendToTcp(int connectionId, Packet packet) {
-        for (Iterator<Connection> it = this.connections.iterator(); it.hasNext();) {
-            Connection connection = it.next();
-
+    public void sendToTcp(long connectionId, Packet packet) {
+        this.connections.forEach((id, connection) -> {
             if (connection.getId() == connectionId) {
                 connection.sendTCP(packet);
-                break;
             }
-        }
-    }
-
-    public void addListener(ConnectionListener connectionListener) {
-        if(connectionListener == null)
-            throw new IllegalArgumentException("ConnectionListener cannot be null.");
-
-        connectionListeners.add(connectionListener);
-    }
-
-    public void removeListener(ConnectionListener connectionListener) {
-        if(connectionListener == null)
-            throw new IllegalArgumentException("ConnectionListener cannot be null.");
-
-        connectionListeners.remove(connectionListener);
+        });
     }
 
     private void close() {
-        for (Connection connection = this.connections.poll(); connection != null; connection = this.connections.poll())
-            connection.close();
+        this.connections.forEach((id, connection) -> connection.close());
         this.connections.clear();
 
         ServerSocketChannel serverSocketChannel = this.serverChannel;
 
-        if(serverSocketChannel != null) {
+        if (serverSocketChannel != null) {
             try {
                 serverSocketChannel.close();
             } catch (IOException ioe) {
@@ -369,7 +323,8 @@ public class Server implements Runnable {
             this.serverChannel = null;
         }
 
-        synchronized (updateLock) { }
+        synchronized (updateLock) {
+        }
 
         selector.wakeup();
         try {
@@ -389,7 +344,6 @@ public class Server implements Runnable {
     }
 
     public Thread getUpdateThread() {
-
         return updateThread;
     }
 }

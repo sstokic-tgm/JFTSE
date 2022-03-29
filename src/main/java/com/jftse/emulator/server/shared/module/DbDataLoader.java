@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.shared.module;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.server.database.model.battle.BossGuardian;
@@ -18,7 +19,7 @@ import com.jftse.emulator.server.database.repository.challenge.ChallengeReposito
 import com.jftse.emulator.server.database.repository.item.*;
 import com.jftse.emulator.server.database.repository.level.LevelExpRepository;
 import com.jftse.emulator.server.database.repository.tutorial.TutorialRepository;
-import com.jftse.emulator.server.game.core.constants.GameMode;
+import com.jftse.emulator.server.core.constants.GameMode;
 import lombok.extern.log4j.Log4j2;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -74,6 +75,9 @@ public class DbDataLoader implements CommandLineRunner {
     @Autowired
     private ItemCharRepository itemCharRepository;
 
+    @Autowired
+    private ConfigService configService;
+
     @Override
     public void run(String... args) throws Exception {
 
@@ -106,7 +110,7 @@ public class DbDataLoader implements CommandLineRunner {
 
             log.info("Initializing LevelExp...");
             if (loadLevelExp())
-                log.info("LevelExp successfully initialized!");
+                log.info("LevelExp successfully initialized");
         }
         else
             dataLoaded = false;
@@ -114,7 +118,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!mapQuestInitialized) {
             log.info("Initializing MapQuest...");
             if (loadMapQuest())
-                log.info("MapQuest successfully initialized!");
+                log.info("MapQuest successfully initialized");
         }
         else
             dataLoaded = false;
@@ -122,7 +126,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!itemPartInitialized) {
             log.info("Initializing ItemPart...");
             if (loadItemPart())
-                log.info("ItemPart successfully initialized!");
+                log.info("ItemPart successfully initialized");
         }
         else
             dataLoaded = false;
@@ -130,7 +134,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!itemSpecialInitialized) {
             log.info("Initializing ItemSpecial...");
             if (loadItemSpecial())
-                log.info("ItemSpecial successfully initialized!");
+                log.info("ItemSpecial successfully initialized");
         }
         else
             dataLoaded = false;
@@ -138,7 +142,7 @@ public class DbDataLoader implements CommandLineRunner {
         if (!itemToolInitialized) {
             log.info("Initializing ItemTool...");
             if (loadItemTool())
-                log.info("ItemTool successfully initialized!");
+                log.info("ItemTool successfully initialized");
         }
         else
             dataLoaded = false;
@@ -232,7 +236,7 @@ public class DbDataLoader implements CommandLineRunner {
             dataLoaded = false;
 
         if (!dataLoaded)
-            log.info("Data is up to date!");
+            log.info("Data is up to date");
 
         log.info("--------------------------------------");
     }
@@ -420,7 +424,7 @@ public class DbDataLoader implements CommandLineRunner {
 
             for (int i = 0; i < expList.size(); i++) {
 
-                if (i == 60)
+                if (i == configService.getValue("player.level.max", 60))
                     break;
 
                 Node exp = expList.get(i);

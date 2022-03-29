@@ -1,10 +1,11 @@
 package com.jftse.emulator;
 
-import com.jftse.emulator.common.GlobalSettings;
 import com.jftse.emulator.common.discord.DiscordWebhook;
-import com.jftse.emulator.server.game.core.anticheat.AntiCheatHeartBeatNetworkListener;
-import com.jftse.emulator.server.game.core.game.GameServerNetworkListener;
-import com.jftse.emulator.server.game.core.game.RelayServerNetworkListener;
+import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.listener.AntiCheatHeartBeatNetworkListener;
+import com.jftse.emulator.server.core.listener.GameServerNetworkListener;
+import com.jftse.emulator.server.core.listener.RelayServerNetworkListener;
+import com.jftse.emulator.server.core.manager.ServerManager;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -23,11 +24,14 @@ public class StartApplication {
     @Autowired
     private AntiCheatHeartBeatNetworkListener antiCheatHeartBeatNetworkListener;
 
+    @Autowired
+    private ConfigService configService;
+
     public static void main(String[] args) {
         SpringApplication.run(StartApplication.class, args);
         log.info("Emulator successfully started!");
 
-        DiscordWebhook discordWebhook = new DiscordWebhook(""); // empty till global config table created
+        DiscordWebhook discordWebhook = new DiscordWebhook(ConfigService.getInstance().getValue("discord.webhook.url", ""));
         discordWebhook.setContent("Login Server is online.\nGame Server is online.\nMatchmaking Server is online.");
         try {
             discordWebhook.execute();
@@ -42,8 +46,17 @@ public class StartApplication {
 
         gameServerNetworkListener.cleanUp();
         relayServerNetworkListener.cleanUp();
-        if (GlobalSettings.IsAntiCheatEnabled) {
+        if (configService.getValue("anticheat.enabled", false)) {
             antiCheatHeartBeatNetworkListener.cleanUp();
         }
+
+        ServerManager.getInstance().getServerList().forEach(s -> {
+            try {
+                s.dispose();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        });
+        ServerManager.getInstance().getServerList().clear();
     }
 }
