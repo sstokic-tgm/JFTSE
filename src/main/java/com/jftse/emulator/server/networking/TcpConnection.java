@@ -12,6 +12,7 @@ import javax.validation.ValidationException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
@@ -127,7 +128,8 @@ public class TcpConnection {
             this.socketChannel = socketChannel;
             socketChannel.configureBlocking(false);
             Socket socket = socketChannel.socket();
-            socket.setTcpNoDelay(true);
+            socket.setOption(StandardSocketOptions.TCP_NODELAY, true);
+            socket.setOption(StandardSocketOptions.SO_REUSEADDR, true);
 
             selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
 

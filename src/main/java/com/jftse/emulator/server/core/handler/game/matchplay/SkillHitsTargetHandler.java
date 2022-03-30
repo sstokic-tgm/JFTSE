@@ -188,11 +188,11 @@ public class SkillHitsTargetHandler extends AbstractHandler {
         short newHealth;
         if (game instanceof MatchplayBattleGame) {
             try {
-                PlayerBattleState targetPlayer = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.getPosition() == targetPosition)
+                PlayerBattleState playerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                        .filter(state -> state.getPosition() == targetPosition)
                         .findFirst()
                         .orElse(null);
-                if (targetPlayer != null && targetPlayer.getCurrentHealth().get() < 1)
+                if (playerBattleState != null && playerBattleState.getCurrentHealth().get() < 1)
                     return false;
 
                 if (skillDamage > 1) {
@@ -213,11 +213,11 @@ public class SkillHitsTargetHandler extends AbstractHandler {
         } else {
             if (targetPosition < 4) {
                 try {
-                    PlayerBattleState targetPlayer = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> x.getPosition() == targetPosition)
+                    PlayerBattleState playerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                            .filter(state -> state.getPosition() == targetPosition)
                             .findFirst()
                             .orElse(null);
-                    if (targetPlayer != null && targetPlayer.getCurrentHealth().get() < 1)
+                    if (playerBattleState != null && playerBattleState.getCurrentHealth().get() < 1)
                         return false;
 
                     if (skillDamage > 1) {
@@ -237,11 +237,11 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                 }
             } else {
                 try {
-                    GuardianBattleState targetGuardian = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
-                            .filter(x -> x.getPosition() == targetPosition)
+                    GuardianBattleState guardianBattleState = ((MatchplayGuardianGame) game).getGuardianBattleStates().stream()
+                            .filter(state -> state.getPosition() == targetPosition)
                             .findFirst()
                             .orElse(null);
-                    if (targetGuardian != null && targetGuardian.getCurrentHealth().get() < 1)
+                    if (guardianBattleState != null && guardianBattleState.getCurrentHealth().get() < 1)
                         return false;
 
                     if (skillDamage > 1) {
@@ -353,7 +353,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                     GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.isHardMode(), guardian, guardianPosition, activePlayingPlayersCount);
                     game.getGuardianBattleStates().add(guardianBattleState);
                 }
-                game.getStageChangingToBoss().set(false);
+                game.getStageChangingToBoss().compareAndSet(true, false);
 
                 S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
                 GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);

@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.matchplay.combat;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
+import com.jftse.emulator.server.core.matchplay.battle.BattleState;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.battle.PlayerBattleState;
@@ -180,11 +181,11 @@ public class PlayerCombatSystem implements PlayerCombatable {
     public PlayerBattleState reviveAnyPlayer(short revivePercentage) throws ValidationException {
         PlayerBattleState playerBattleState = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.isDead())
+                        .filter(BattleState::isDead)
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                        .filter(x -> x.isDead())
+                        .filter(BattleState::isDead)
                         .findFirst()
                         .orElse(null);
 
