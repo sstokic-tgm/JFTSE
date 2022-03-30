@@ -5,6 +5,7 @@ import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
 
 import java.util.List;
@@ -17,9 +18,10 @@ public class RandomModeCommand extends Command {
 
     @Override
     public void execute(Connection connection, List<String> params) {
-        if (connection.getClient().getActiveRoom() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient().getActiveRoom() == null || connection.getClient().getPlayer() == null)
             return;
 
+        Player player = connection.getClient().getPlayer();
         Room room = connection.getClient().getActiveRoom();
 
         boolean isGuardian = GameManager.getInstance().getRoomMode(room) == GameMode.GUARDIAN;
@@ -27,7 +29,7 @@ public class RandomModeCommand extends Command {
             return;
 
         room.getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
                 .findAny()
                 .ifPresent(rp -> {
                     if (rp.isMaster()) {

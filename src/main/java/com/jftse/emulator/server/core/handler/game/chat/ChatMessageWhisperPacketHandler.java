@@ -21,10 +21,10 @@ public class ChatMessageWhisperPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getActivePlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
+        S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(connection.getClient().getPlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
         Optional<Client> optClientToWhisper = GameManager.getInstance().getClients().stream()
-                .filter(cl -> cl.getActivePlayer() != null && cl.getActivePlayer().getName().equalsIgnoreCase(whisperReqPacket.getReceiverName()))
+                .filter(cl -> cl.getPlayer() != null && cl.getPlayer().getName().equalsIgnoreCase(whisperReqPacket.getReceiverName()))
                 .findAny();
         if (optClientToWhisper.isPresent()) {
             connection.getServer().sendToTcp(optClientToWhisper.get().getConnection().getId(), whisperAnswerPacket);

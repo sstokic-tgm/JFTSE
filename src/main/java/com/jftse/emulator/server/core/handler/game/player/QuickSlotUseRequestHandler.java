@@ -38,7 +38,6 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final FriendService friendService;
-    private final PlayerService playerService;
     private final SocialService socialService;
     private final MessageService messageService;
 
@@ -49,7 +48,6 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         quickSlotEquipmentService = ServiceManager.getInstance().getQuickSlotEquipmentService();
         friendService = ServiceManager.getInstance().getFriendService();
-        playerService = ServiceManager.getInstance().getPlayerService();
         socialService = ServiceManager.getInstance().getSocialService();
         messageService = ServiceManager.getInstance().getMessageService();
     }
@@ -62,7 +60,7 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         Pocket pocket = player.getPocket();
 
         PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) quickSlotUseRequestPacket.getQuickSlotId(), pocket);
@@ -106,8 +104,7 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
 
             Integer currentGold = player.getGold();
             player.setGold(currentGold - 20000);
-            playerService.save(player);
-            connection.getClient().setActivePlayer(player);
+            connection.getClient().savePlayer(player);
             S2CShopMoneyAnswerPacket s2CShopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
             connection.sendTCP(s2CShopMoneyAnswerPacket);
 
@@ -129,7 +126,7 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
             messageService.save(message);
 
             Client friendRelationClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(playerCouple.getFriend().getId()))
+                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(playerCouple.getFriend().getId()))
                     .findFirst()
                     .orElse(null);
             if (friendRelationClient != null) {
@@ -148,14 +145,12 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
         if (itemCount <= 0) {
             playerPocketService.remove(playerPocket.getId());
             pocket = pocketService.decrementPocketBelongings(pocket);
-            connection.getClient().getActivePlayer().setPocket(pocket);
+            player.setPocket(pocket);
 
             QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
             quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, quickSlotUseRequestPacket.getQuickSlotId());
             player.setQuickSlotEquipment(quickSlotEquipment);
-
-            player = playerService.save(player);
-            connection.getClient().setActivePlayer(player);
+            connection.getClient().savePlayer(player);
 
             S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(quickSlotUseRequestPacket.getQuickSlotId());
             connection.sendTCP(inventoryItemRemoveAnswerPacket);

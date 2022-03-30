@@ -6,7 +6,6 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.guild.C2SGuildChatRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.guild.S2CGuildChatAnswerPacket;
 import com.jftse.emulator.server.core.service.GuildMemberService;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
@@ -18,11 +17,9 @@ import java.util.stream.Collectors;
 public class GuildChatRequestPacketHandler extends AbstractHandler {
     private C2SGuildChatRequestPacket guildChatRequestPacket;
 
-    private final PlayerService playerService;
     private final GuildMemberService guildMemberService;
 
     public GuildChatRequestPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
     }
 
@@ -34,10 +31,10 @@ public class GuildChatRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         List<GuildMember> guildMembers = guildMember.getGuild().getMemberList().stream()
@@ -47,7 +44,7 @@ public class GuildChatRequestPacketHandler extends AbstractHandler {
                 .map(x -> x.getPlayer().getId().intValue())
                 .collect(Collectors.toList());
         List<Client> allClients = GameManager.getInstance().getClients().stream()
-                .filter(c -> c.getActivePlayer() != null && allPlayerIds.contains(c.getActivePlayer().getId().intValue()))
+                .filter(c -> c.getPlayer() != null && allPlayerIds.contains(c.getPlayer().getId().intValue()))
                 .collect(Collectors.toList());
 
         allClients.forEach(c -> {

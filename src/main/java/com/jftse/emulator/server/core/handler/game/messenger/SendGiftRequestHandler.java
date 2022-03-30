@@ -54,19 +54,19 @@ public class SendGiftRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         byte option = c2SSendGiftRequestPacket.getOption();
 
         Product product = productService.findProductByProductItemIndex(c2SSendGiftRequestPacket.getProductIndex());
-        Player sender = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player sender = connection.getClient().getPlayer();
         Player receiver = playerService.findByName(c2SSendGiftRequestPacket.getReceiverName());
 
         if (receiver != null && product != null) {
             Gift gift = new Gift();
             gift.setReceiver(receiver);
-            gift.setSender(connection.getClient().getActivePlayer());
+            gift.setSender(sender);
             gift.setMessage(c2SSendGiftRequestPacket.getMessage());
             gift.setSeen(false);
             gift.setProduct(product);
@@ -191,10 +191,10 @@ public class SendGiftRequestHandler extends AbstractHandler {
             }
             sender = playerService.setMoney(sender, currentGold - price);
             giftService.save(gift);
-            connection.getClient().setActivePlayer(sender);
+            connection.getClient().savePlayer(sender);
 
             Client receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(receiver.getId()))
+                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
                     .findFirst()
                     .orElse(null);
             if (receiverClient != null) {

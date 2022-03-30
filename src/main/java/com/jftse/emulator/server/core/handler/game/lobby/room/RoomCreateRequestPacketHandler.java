@@ -18,7 +18,7 @@ public class RoomCreateRequestPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         // prevent multiple room creations, this might have to be adjusted into a "room join answer"
-        if ((connection.getClient() != null && connection.getClient().getActiveRoom() != null) || connection.getClient().getActivePlayer() == null)
+        if ((connection.getClient() != null && connection.getClient().getActiveRoom() != null) || connection.getClient().getPlayer() == null)
             return;
 
         Room room = new Room();
@@ -34,7 +34,7 @@ public class RoomCreateRequestPacketHandler extends AbstractHandler {
         room.setUnk1(roomCreateRequestPacket.getUnk1());
         room.setSkillFree(roomCreateRequestPacket.isSkillFree());
         room.setQuickSlot(roomCreateRequestPacket.isQuickSlot());
-        room.setLevel(connection.getClient().getActivePlayer().getLevel());
+        room.setLevel(connection.getClient().getPlayer().getLevel());
         room.setLevelRange(roomCreateRequestPacket.getLevelRange());
         room.setBettingType(roomCreateRequestPacket.getBettingType());
         room.setBettingAmount(roomCreateRequestPacket.getBettingAmount());

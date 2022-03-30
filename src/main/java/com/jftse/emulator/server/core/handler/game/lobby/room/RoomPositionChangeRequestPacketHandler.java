@@ -9,6 +9,7 @@ import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacke
 import com.jftse.emulator.server.core.packet.packets.lobby.room.C2SRoomPositionChangeRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPositionChangeAnswerPacket;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 
@@ -25,15 +26,16 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
+        Player player = connection.getClient().getPlayer();
         short positionToClaim = roomPositionChangeRequestPacket.getPosition();
 
         Room room = connection.getClient().getActiveRoom();
         if (room != null) {
             RoomPlayer requestingSlotChangePlayer = room.getRoomPlayerList().stream()
-                    .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
                     .findAny()
                     .orElse(null);
 

@@ -45,7 +45,7 @@ public class SendParcelRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         PlayerPocket item = playerPocketService.findById(c2SSendParcelRequestPacket.getPlayerPocketId().longValue());
@@ -55,14 +55,14 @@ public class SendParcelRequestHandler extends AbstractHandler {
             S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
             connection.sendTCP(s2CSendParcelAnswerPacket);
         } else {
-            Player sender = playerService.findById(connection.getClient().getActivePlayer().getId());
+            Player sender = connection.getClient().getPlayer();
             Player receiver = playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
             if (receiver != null && item != null) {
                 if (item != null) {
                     // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
                     Parcel parcel = new Parcel();
                     parcel.setReceiver(receiver);
-                    parcel.setSender(connection.getClient().getActivePlayer());
+                    parcel.setSender(sender);
                     parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
                     parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
 
@@ -82,7 +82,7 @@ public class SendParcelRequestHandler extends AbstractHandler {
                     playerPocketService.remove(item.getId());
 
                     Client receiverClient = GameManager.getInstance().getClients().stream()
-                            .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(receiver.getId()))
+                            .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
                             .findFirst()
                             .orElse(null);
                     if (receiverClient != null) {

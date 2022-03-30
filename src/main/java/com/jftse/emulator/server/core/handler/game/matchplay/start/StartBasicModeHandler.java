@@ -10,6 +10,7 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.room.ServeInfo;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -33,8 +34,9 @@ public class StartBasicModeHandler extends AbstractHandler {
         List<ServeInfo> serveInfo = new ArrayList<>();
 
         clients.forEach(client -> {
+            Player player = client.getPlayer();
             RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .filter(x -> client.getPlayer() != null && x.getPlayer().getId().equals(player.getId()))
                     .findFirst()
                     .orElse(null);
 

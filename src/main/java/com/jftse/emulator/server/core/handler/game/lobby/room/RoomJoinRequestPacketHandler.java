@@ -12,7 +12,7 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.ClothEquipmentService;
 import com.jftse.emulator.server.core.service.GuildMemberService;
-import com.jftse.emulator.server.core.service.PlayerService;
+import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
@@ -24,12 +24,10 @@ import java.util.Optional;
 public class RoomJoinRequestPacketHandler extends AbstractHandler {
     private C2SRoomJoinRequestPacket roomJoinRequestPacket;
 
-    private final PlayerService playerService;
     private final GuildMemberService guildMemberService;
     private final ClothEquipmentService clothEquipmentService;
 
     public RoomJoinRequestPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
     }
@@ -42,7 +40,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null) {
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
             return;
@@ -78,8 +76,9 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
-        if (!activePlayer.getAccount().getGameMaster()) {
+        Player activePlayer = connection.getClient().getPlayer();
+        Account account = connection.getClient().getAccount();
+        if (!account.getGameMaster()) {
             if (room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
                 S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
                 connection.sendTCP(roomJoinAnswerPacket);
@@ -106,7 +105,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-        if (room.getBannedPlayers().contains(connection.getClient().getActivePlayer())) {
+        if (room.getBannedPlayers().contains(activePlayer.getId())) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
 
@@ -116,7 +115,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
 
         boolean useGmSlot = false;
         int gmSlot = 9;
-        if (activePlayer.getAccount().getGameMaster()) {
+        if (account.getGameMaster()) {
             int i = 0;
             boolean isGmSlotInUse = false;
             for (Short pos : room.getPositions()) {

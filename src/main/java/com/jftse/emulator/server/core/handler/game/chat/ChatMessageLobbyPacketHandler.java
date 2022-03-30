@@ -22,7 +22,7 @@ public class ChatMessageLobbyPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), connection.getClient().getActivePlayer().getName(), chatLobbyReqPacket.getMessage());
+        S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), connection.getClient().getPlayer().getName(), chatLobbyReqPacket.getMessage());
 
         if (CommandManager.getInstance().isCommand(chatLobbyReqPacket.getMessage())) {
             connection.sendTCP(chatLobbyAnswerPacket);
@@ -31,7 +31,7 @@ public class ChatMessageLobbyPacketHandler extends AbstractHandler {
         }
 
         List<Client> clientList = GameManager.getInstance().getClients().stream()
-                .filter(c -> c.isInLobby())
+                .filter(Client::isInLobby)
                 .collect(Collectors.toList());
 
         clientList.forEach(c -> c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatLobbyAnswerPacket));

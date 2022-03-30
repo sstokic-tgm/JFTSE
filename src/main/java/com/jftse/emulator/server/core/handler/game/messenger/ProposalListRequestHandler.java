@@ -4,7 +4,6 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.messenger.C2SProposalListRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CProposalListPacket;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.core.service.messenger.ProposalService;
 import com.jftse.emulator.server.database.model.messenger.Proposal;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -16,11 +15,9 @@ import java.util.List;
 public class ProposalListRequestHandler extends AbstractHandler {
     private C2SProposalListRequestPacket proposalListRequestPacket;
 
-    private final PlayerService playerService;
     private final ProposalService proposalService;
 
     public ProposalListRequestHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         proposalService = ServiceManager.getInstance().getProposalService();
     }
 
@@ -32,12 +29,12 @@ public class ProposalListRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         byte listType = proposalListRequestPacket.getListType();
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
 
         List<Proposal> proposalList = new ArrayList<>();
         switch (listType) {

@@ -42,8 +42,6 @@ public class AuthLoginDataPacketHandler extends AbstractHandler {
             account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
             account = authenticationService.updateAccount(account);
 
-            connection.getClient().setAccount(account);
-
             String token = StringUtils.randomString(16);
             long timestamp = Instant.now().toEpochMilli();
 

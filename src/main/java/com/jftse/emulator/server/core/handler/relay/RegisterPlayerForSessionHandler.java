@@ -38,8 +38,8 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                 Client playerClient = gameSession.getClientByPlayerId(playerId);
                 if (playerClient != null) {
                     Client client = new Client();
+                    client.setPlayer(playerClient.getActivePlayerId());
                     client.setActiveRoom(playerClient.getActiveRoom());
-                    client.setActivePlayer(playerClient.getActivePlayer());
                     client.setActiveGameSession(gameSession);
                     client.setConnection(connection);
                     client.setSpectator((matchplayPlayerIdsInSessionPacket.isSpectator()));

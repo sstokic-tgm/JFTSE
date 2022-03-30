@@ -2,7 +2,6 @@ package com.jftse.emulator.server.core.handler.game.lobby.room;
 
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
@@ -14,7 +13,6 @@ import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPlayerInf
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.ClothEquipmentService;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.core.service.PlayerStatisticService;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
@@ -24,12 +22,10 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import java.util.ArrayList;
 
 public class ClientBackInRoomPacketHandler extends AbstractHandler {
-    private final PlayerService playerService;
     private final PlayerStatisticService playerStatisticService;
     private final ClothEquipmentService clothEquipmentService;
 
     public ClientBackInRoomPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
     }
@@ -41,12 +37,14 @@ public class ClientBackInRoomPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null) {
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null) {
             S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
             connection.sendTCP(disconnectAnswerPacket);
             connection.close();
             return;
         }
+
+        Player player = connection.getClient().getPlayer();
 
         Room currentClientRoom = connection.getClient().getActiveRoom();
         if (currentClientRoom == null) { // shouldn't happen
@@ -57,7 +55,7 @@ public class ClientBackInRoomPacketHandler extends AbstractHandler {
         }
 
         short position = currentClientRoom.getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
                 .findAny()
                 .get()
                 .getPosition();
@@ -71,7 +69,7 @@ public class ClientBackInRoomPacketHandler extends AbstractHandler {
         connection.sendTCP(unsetHostPacket);
 
         currentClientRoom.getRoomPlayerList().forEach(rp -> {
-            if (rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId())) {
+            if (rp.getPlayer().getId().equals(player.getId())) {
                 synchronized (rp) {
                     rp.setReady(false);
                 }
@@ -82,11 +80,9 @@ public class ClientBackInRoomPacketHandler extends AbstractHandler {
             currentClientRoom.setStatus(RoomStatus.NotRunning);
         }
 
-        Player player = playerService.findByIdFetched(connection.getClient().getActivePlayer().getId());
         PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
         player.setPlayerStatistic(playerStatistic);
-        player = playerService.save(player);
-        connection.getClient().setActivePlayer(player);
+        connection.getClient().savePlayer(player);
 
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 

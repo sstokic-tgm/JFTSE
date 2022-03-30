@@ -4,7 +4,6 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CClubMembersListAnswerPacket;
 import com.jftse.emulator.server.core.service.GuildMemberService;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -14,11 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ClubMembersListRequestHandler extends AbstractHandler {
-    private final PlayerService playerService;
     private final GuildMemberService guildMemberService;
 
     public ClubMembersListRequestHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
     }
 
@@ -29,10 +26,10 @@ public class ClubMembersListRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer =connection.getClient().getPlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         if (guildMember != null) {

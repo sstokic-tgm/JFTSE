@@ -44,7 +44,7 @@ public class InventorySellItemCheckRequestHandler extends AbstractHandler {
         byte status = S2CInventorySellItemCheckAnswerPacket.SUCCESS;
         int itemPocketId = inventorySellItemCheckReqPacket.getItemPocketId();
 
-        Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+        Pocket pocket = connection.getClient().getPlayer().getPocket();
         PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, pocket);
 
         if (playerPocket == null) {
@@ -65,17 +65,14 @@ public class InventorySellItemCheckRequestHandler extends AbstractHandler {
                         connection.sendTCP(inventorySellItemAnswerPacket);
                     });
 
+            Player player = connection.getClient().getPlayer();
             playerPocketService.remove(playerPocket.getId());
-            pocket = pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
-            connection.getClient().getActivePlayer().setPocket(pocket);
-
-            Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+            pocket = pocketService.decrementPocketBelongings(player.getPocket());
+            player.setPocket(pocket);
             player = playerService.updateMoney(player, sellPrice);
 
             S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
             connection.sendTCP(shopMoneyAnswerPacket);
-
-            connection.getClient().setActivePlayer(player);
         }
     }
 }

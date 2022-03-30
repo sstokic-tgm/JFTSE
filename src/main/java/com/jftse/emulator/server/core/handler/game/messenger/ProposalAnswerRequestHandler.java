@@ -49,7 +49,7 @@ public class ProposalAnswerRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         Proposal proposal = proposalService.findById(c2SProposalAnswerRequestPacket.getProposalId().longValue());
@@ -111,13 +111,13 @@ public class ProposalAnswerRequestHandler extends AbstractHandler {
             friendService.save(friendOfSender);
             friendService.save(friendOfReceiver);
 
-            Friend myRelation = socialService.getRelationship(connection.getClient().getActivePlayer());
+            Friend myRelation = socialService.getRelationship(connection.getClient().getPlayer());
             if (myRelation != null) {
                 S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(myRelation);
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
                 Client friendRelationClient = GameManager.getInstance().getClients().stream()
-                        .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(myRelation.getFriend().getId()))
+                        .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
                         .findFirst()
                         .orElse(null);
                 Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
@@ -155,7 +155,7 @@ public class ProposalAnswerRequestHandler extends AbstractHandler {
         proposalService.remove(proposal.getId());
 
         Client senderClient = GameManager.getInstance().getClients().stream()
-                .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(proposal.getSender().getId()))
+                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(proposal.getSender().getId()))
                 .findFirst()
                 .orElse(null);
         if (senderClient != null) {

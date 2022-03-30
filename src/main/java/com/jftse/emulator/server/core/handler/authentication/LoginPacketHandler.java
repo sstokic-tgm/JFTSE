@@ -101,8 +101,7 @@ public class LoginPacketHandler extends AbstractHandler {
                 // mark as logged in
                 account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
                 account = authenticationService.updateAccount(account);
-
-                connection.getClient().setAccount(account);
+                connection.getClient().setAccount(account.getId());
 
                 AuthToken existingAuthToken = authTokenService.findAuthTokenByAccountName(account.getUsername());
                 if (existingAuthToken != null) {

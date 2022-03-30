@@ -23,7 +23,7 @@ public class ChallengeProgressRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        List<ChallengeProgress> challengeProgressList = challengeService.findAllByPlayerIdFetched(connection.getClient().getActivePlayer().getId());
+        List<ChallengeProgress> challengeProgressList = challengeService.findAllByPlayerIdFetched(connection.getClient().getPlayer().getId());
 
         S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
         connection.sendTCP(challengeProgressAnswerPacket);

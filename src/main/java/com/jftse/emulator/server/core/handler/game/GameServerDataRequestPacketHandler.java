@@ -35,7 +35,6 @@ import java.util.Map;
 public class GameServerDataRequestPacketHandler extends AbstractHandler {
     private C2SGameServerRequestPacket gameServerRequestPacket;
 
-    private final PlayerService playerService;
     private final HomeService homeService;
     private final PetService petService;
     private final GuildMemberService guildMemberService;
@@ -49,7 +48,6 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
     private final SocialService socialService;
 
     public GameServerDataRequestPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         homeService = ServiceManager.getInstance().getHomeService();
         petService = ServiceManager.getInstance().getPetService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
@@ -72,7 +70,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         Client client = connection.getClient();
-        Player player = client.getActivePlayer();
+        Player player = client.getPlayer();
         Account account = client.getAccount();
 
         byte requestType = gameServerRequestPacket.getRequestType();
@@ -85,7 +83,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
             connection.sendTCP(gameServerAnswerPacket, playerLevelExpPacket);
 
             player.setOnline(true);
-            playerService.save(player);
+            client.savePlayer(player);
 
             List<Friend> friends = socialService.getFriendList(player, EFriendshipState.Friends);
             S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
@@ -98,7 +96,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
                         List<Friend> onlineFriends = socialService.getFriendList(f.getFriend(), EFriendshipState.Friends);
                         S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(onlineFriends);
                         GameManager.getInstance().getClients().stream()
-                                .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(f.getFriend().getId()))
+                                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(f.getFriend().getId()))
                                 .findFirst()
                                 .ifPresent(c -> {
                                     if (c.getConnection() != null && c.getConnection().isConnected()) {
@@ -119,7 +117,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
                 Client friendRelationClient = GameManager.getInstance().getClients().stream()
-                        .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(myRelation.getFriend().getId()))
+                        .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
                         .findFirst()
                         .orElse(null);
                 Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
@@ -138,7 +136,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
 
                             S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
                             GameManager.getInstance().getClients().stream()
-                                    .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(x.getPlayer().getId()))
+                                    .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getPlayer().getId()))
                                     .findFirst()
                                     .ifPresent(c -> {
                                         if (c.getConnection() != null && c.getConnection().isConnected()) {

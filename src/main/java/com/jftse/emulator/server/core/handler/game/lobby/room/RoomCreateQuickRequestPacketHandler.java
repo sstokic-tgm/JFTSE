@@ -3,21 +3,13 @@ package com.jftse.emulator.server.core.handler.game.lobby.room;
 import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.C2SRoomCreateQuickRequestPacket;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class RoomCreateQuickRequestPacketHandler extends AbstractHandler {
     private C2SRoomCreateQuickRequestPacket roomQuickCreateRequestPacket;
-
-    private final PlayerService playerService;
-
-    public RoomCreateQuickRequestPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
-    }
 
     @Override
     public boolean process(Packet packet) {
@@ -34,7 +26,7 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractHandler {
         if (roomQuickCreateRequestPacket.getMode() == GameMode.BATTLEMON)
             return;
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         if (player == null)
             return;
 

@@ -129,9 +129,7 @@ public class RoomStartGamePacketHandler extends AbstractHandler {
                             Packet startGameCancelledPacket = new Packet(PacketOperations.S2CRoomStartGameCancelled.getValueAsChar());
                             startGameCancelledPacket.write((char) 0);
 
-                            threadRoom.getRoomPlayerList().stream()
-                                    .filter(rp -> !rp.isMaster())
-                                    .forEach(rp -> rp.setReady(false));
+                            threadRoom.getRoomPlayerList().forEach(rp -> rp.setReady(false));
                             clientsInRoom.forEach(c -> c.setActiveGameSession(null));
 
                             GameSessionManager.getInstance().removeGameSession(gameSession);
@@ -167,7 +165,7 @@ public class RoomStartGamePacketHandler extends AbstractHandler {
                     .filter(x -> x.getPosition() == 0)
                     .findFirst().orElse(null);
             Client clientToHostGame = GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
-                    .filter(x -> playerInSlot0 != null && x.getActivePlayer() != null && x.getActivePlayer().getId().equals(playerInSlot0.getPlayer().getId()))
+                    .filter(x -> playerInSlot0 != null && x.getPlayer() != null && x.getPlayer().getId().equals(playerInSlot0.getPlayer().getId()))
                     .findFirst()
                     .orElse(connection.getClient());
             Packet setHostPacket = new Packet(PacketOperations.S2CSetHost.getValueAsChar());

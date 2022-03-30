@@ -9,6 +9,7 @@ import com.jftse.emulator.server.core.packet.packets.matchplay.C2SMatchplaySwapQ
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayGivePlayerSkills;
 import com.jftse.emulator.server.core.service.PlayerPocketService;
 import com.jftse.emulator.server.core.service.PocketService;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.networking.packet.Packet;
@@ -33,11 +34,12 @@ public class SwapQuickSlotItemsHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null
-                || connection.getClient().getActiveRoom() == null || connection.getClient().getActivePlayer() == null)
+                || connection.getClient().getActiveRoom() == null || connection.getClient().getPlayer() == null)
             return;
 
+        Player player = connection.getClient().getPlayer();
         RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
                 .findFirst()
                 .orElse(null);
         if (roomPlayer == null)

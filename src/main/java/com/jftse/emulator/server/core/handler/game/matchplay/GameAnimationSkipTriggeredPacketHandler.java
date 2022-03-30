@@ -15,6 +15,7 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CGameSetNameColorAndRemoveBlackBar;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -33,7 +34,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() == null || connection.getClient().getActiveRoom() == null
-                || connection.getClient().getActivePlayer() == null || connection.getClient().getActiveGameSession() == null)
+                || connection.getClient().getPlayer() == null || connection.getClient().getActiveGameSession() == null)
             return;
 
         Room room = connection.getClient().getActiveRoom();
@@ -41,8 +42,10 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractHandler {
             return;
         }
 
+        Player player = connection.getClient().getPlayer();
+
         Optional<RoomPlayer> roomPlayer = room.getRoomPlayerList().stream()
-                .filter(x -> x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .filter(x -> x.getPlayer().getId().equals(player.getId()))
                 .findFirst();
 
         if (roomPlayer.isPresent()) {
@@ -50,7 +53,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractHandler {
             gameAnimationSkipPacket.write((char) 0);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationSkipPacket, connection);
 
-            S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(connection.getClient().getActiveRoom());
+            S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(room);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(playerStatsPacket, connection);
 
             synchronized (room) {

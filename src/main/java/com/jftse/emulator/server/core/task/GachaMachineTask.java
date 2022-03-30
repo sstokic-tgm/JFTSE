@@ -22,7 +22,6 @@ public class GachaMachineTask extends AbstractTask {
     private final Connection connection;
     private final List<String> commandArgumentList;
 
-    private final PlayerService playerService;
     private final ProductService productService;
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
@@ -32,7 +31,6 @@ public class GachaMachineTask extends AbstractTask {
         this.connection = connection;
         this.commandArgumentList = commandArgumentList;
 
-        this.playerService = ServiceManager.getInstance().getPlayerService();
         this.productService = ServiceManager.getInstance().getProductService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
@@ -41,7 +39,7 @@ public class GachaMachineTask extends AbstractTask {
 
     @Override
     public void run() {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         Pocket pocket = pocketService.findById(player.getPocket().getId());
 
         String gachaName = commandArgumentList.get(0);

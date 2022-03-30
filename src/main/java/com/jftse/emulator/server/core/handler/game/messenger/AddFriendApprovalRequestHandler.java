@@ -36,10 +36,10 @@ public class AddFriendApprovalRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         Player targetPlayer = playerService.findByName(c2SAddFriendApprovalRequestPacket.getPlayerName());
 
         List<Friend> friends = friendService.findByPlayer(targetPlayer);
@@ -53,7 +53,7 @@ public class AddFriendApprovalRequestHandler extends AbstractHandler {
         if (c2SAddFriendApprovalRequestPacket.isAccept()) {
             friend.setEFriendshipState(EFriendshipState.Friends);
             Friend newFriend = new Friend();
-            newFriend.setPlayer(connection.getClient().getActivePlayer());
+            newFriend.setPlayer(activePlayer);
             newFriend.setFriend(targetPlayer);
             newFriend.setEFriendshipState(EFriendshipState.Friends);
 
@@ -64,7 +64,7 @@ public class AddFriendApprovalRequestHandler extends AbstractHandler {
             friends = socialService.getFriendList(activePlayer, EFriendshipState.Friends);
             S2CFriendsListAnswerPacket friendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
             GameManager.getInstance().getClients().stream()
-                    .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(activePlayer.getId()))
+                    .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(activePlayer.getId()))
                     .findFirst()
                     .ifPresent(c -> {
                         if (c.getConnection() != null && c.getConnection().isConnected()) {
@@ -76,7 +76,7 @@ public class AddFriendApprovalRequestHandler extends AbstractHandler {
             friends = socialService.getFriendList(targetPlayer, EFriendshipState.Friends);
             S2CFriendsListAnswerPacket targetFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
             GameManager.getInstance().getClients().stream()
-                    .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(targetPlayer.getId()))
+                    .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(targetPlayer.getId()))
                     .findFirst()
                     .ifPresent(c -> {
                         if (c.getConnection() != null && c.getConnection().isConnected()) {

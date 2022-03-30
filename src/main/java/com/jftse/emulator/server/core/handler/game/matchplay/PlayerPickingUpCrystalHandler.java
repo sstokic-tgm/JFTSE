@@ -15,9 +15,10 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.matchplay.C2SMatchplayPlayerPicksUpCrystal;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayGiveRandomSkill;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 public class PlayerPickingUpCrystalHandler extends AbstractHandler {
     private C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket;
@@ -37,12 +38,13 @@ public class PlayerPickingUpCrystalHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null
-                || connection.getClient().getActiveRoom() == null || connection.getClient().getActivePlayer() == null)
+                || connection.getClient().getActiveRoom() == null || connection.getClient().getPlayer() == null)
             return;
 
+        Player player = connection.getClient().getPlayer();
         Room room = connection.getClient().getActiveRoom();
         RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
                 .findFirst()
                 .orElse(null);
         if (roomPlayer == null)
@@ -73,14 +75,14 @@ public class PlayerPickingUpCrystalHandler extends AbstractHandler {
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(randomGuardianSkill, connection);
 
             if (isBattleGame) {
-                ((MatchplayBattleGame) game).getSkillCrystals().stream().collect(Collectors.toList()).forEach(current -> {
+                new ArrayList<>(((MatchplayBattleGame) game).getSkillCrystals()).forEach(current -> {
                     if (current.getId() == skillCrystal.getId()) {
                         ((MatchplayBattleGame) game).getSkillCrystals().remove(current);
                         return;
                     }
                 });
             } else {
-                ((MatchplayGuardianGame) game).getSkillCrystals().stream().collect(Collectors.toList()).forEach(current -> {
+                new ArrayList<>(((MatchplayGuardianGame) game).getSkillCrystals()).forEach(current -> {
                     if (current.getId() == skillCrystal.getId()) {
                         ((MatchplayGuardianGame) game).getSkillCrystals().remove(current);
                         return;

@@ -41,7 +41,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
 
     private final PacketEventHandler packetEventHandler;
 
-    private final PlayerService playerService;
     private final LevelService levelService;
     private final PlayerStatisticService playerStatisticService;
     private final ClothEquipmentService clothEquipmentService;
@@ -53,7 +52,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
     public BasicModeMatchplayPointPacketHandler() {
         packetEventHandler = GameManager.getInstance().getPacketEventHandler();
 
-        playerService = ServiceManager.getInstance().getPlayerService();
         levelService = ServiceManager.getInstance().getLevelService();
         playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
@@ -107,7 +105,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         List<ServeInfo> serveInfo = new ArrayList<>();
         List<Client> clients = new ArrayList<>(gameSession.getClients());
         List<Player> playerList = new ArrayList<>();
-        clients.forEach(c -> playerList.add(c.getActivePlayer()));
+        clients.forEach(c -> playerList.add(c.getPlayer()));
 
         StringBuilder gameLogContent = new StringBuilder();
         if (game.isFinished()) {
@@ -119,7 +117,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
 
         for (Client client : clients) {
             RoomPlayer rp = roomPlayerList.stream()
-                    .filter(x -> x.getPlayer().getId().equals(client.getActivePlayer().getId()))
+                    .filter(x -> x.getPlayer().getId().equals(client.getPlayer().getId()))
                     .findFirst().orElse(null);
             if (rp == null) {
                 continue;
@@ -169,7 +167,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                             .findFirst()
                             .orElse(null);
 
-                    Player player = client.getActivePlayer();
+                    Player player = client.getPlayer();
                     byte oldLevel = player.getLevel();
                     if (playerReward != null) {
                         byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
@@ -177,7 +175,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                             player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                         player.setGold(player.getGold() + playerReward.getRewardGold());
                         player = levelService.setNewLevelStatusPoints(level, player);
-                        client.setActivePlayer(player);
+                        client.savePlayer(player);
 
                         if (wonGame) {
                             this.handleRewardItem(client.getConnection(), playerReward);
@@ -204,17 +202,16 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                     int playerNewRating = playerRatings.get(player.getId());
                     if (playerReward != null)
                         playerReward.setRewardRP(playerRankingPoints);
-                    playerStatistic.setBasicRP(playerNewRating <= 0 ? 0 : playerNewRating);
+                    playerStatistic.setBasicRP(Math.max(playerNewRating, 0));
 
                     playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
 
                     player.setPlayerStatistic(playerStatistic);
-                    player = playerService.save(player);
-                    client.setActivePlayer(player);
+                    client.savePlayer(player);
 
                     rp.setPlayer(player);
                     rp.setReady(false);
-                    byte playerLevel = client.getActivePlayer().getLevel();
+                    byte playerLevel = player.getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);
                     if (playerLevel != oldLevel) {
                         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
@@ -298,7 +295,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
     }
 
     private void handleRewardItem(Connection connection, PlayerReward playerReward) {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         if (playerReward.getRewardProductIndex() < 0)
@@ -308,7 +305,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         if (product == null)
             return;
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         Pocket pocket = player.getPocket();
         PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
         int existingItemCount = 0;
@@ -343,8 +340,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
             pocket = pocketService.incrementPocketBelongings(pocket);
 
         player.setPocket(pocket);
-        player = playerService.save(player);
-        connection.getClient().setActivePlayer(player);
+        connection.getClient().savePlayer(player);
 
         List<PlayerPocket> playerPocketList = new ArrayList<>();
         playerPocketList.add(playerPocket);

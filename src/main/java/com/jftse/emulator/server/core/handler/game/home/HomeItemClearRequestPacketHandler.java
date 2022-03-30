@@ -16,6 +16,7 @@ import com.jftse.emulator.server.core.service.PocketService;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.home.HomeInventory;
 import com.jftse.emulator.server.database.model.item.ItemHouseDeco;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.networking.packet.Packet;
 
@@ -42,21 +43,22 @@ public class HomeItemClearRequestPacketHandler extends AbstractHandler {
     public void handle() {
         AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
+        Player player = connection.getClient().getPlayer();
 
         homeInventoryList.forEach(hil -> {
-            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hil.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), connection.getClient().getActivePlayer().getPocket());
+            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hil.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), player.getPocket());
             ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
 
             // create a new one if null, null indicates that all items are placed
             if (playerPocket == null) {
                 playerPocket = new PlayerPocket();
                 playerPocket.setItemIndex(hil.getItemIndex());
-                playerPocket.setPocket(connection.getClient().getActivePlayer().getPocket());
+                playerPocket.setPocket(player.getPocket());
                 playerPocket.setItemCount(itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1);
                 playerPocket.setCategory(EItemCategory.HOUSE_DECO.getName());
                 playerPocket.setUseType(StringUtils.firstCharToUpperCase(EItemUseType.COUNT.getName().toLowerCase()));
 
-                pocketService.incrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
+                pocketService.incrementPocketBelongings(player.getPocket());
             } else {
                 playerPocket.setItemCount(playerPocket.getItemCount() + (itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1));
             }
@@ -73,7 +75,7 @@ public class HomeItemClearRequestPacketHandler extends AbstractHandler {
         S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
         connection.sendTCP(homeDataPacket);
 
-        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
+        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
         StreamUtils.batches(playerPocketList, 10)
                 .forEach(pocketList -> {
                     S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);

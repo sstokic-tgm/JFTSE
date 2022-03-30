@@ -23,7 +23,7 @@ public class PetDataRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        List<Pet> petList = petService.findAllByPlayerId(connection.getClient().getActivePlayer().getId());
+        List<Pet> petList = petService.findAllByPlayerId(connection.getClient().getPlayer().getId());
 
         S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
         connection.sendTCP(petDataAnswerPacket);

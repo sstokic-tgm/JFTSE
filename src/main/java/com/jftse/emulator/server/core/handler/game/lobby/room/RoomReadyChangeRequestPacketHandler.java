@@ -3,9 +3,9 @@ package com.jftse.emulator.server.core.handler.game.lobby.room;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.room.Room;
-import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.C2SRoomReadyChangeRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
@@ -22,9 +22,10 @@ public class RoomReadyChangeRequestPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         Room room = connection.getClient().getActiveRoom();
-        if (room != null) {
+        Player player = connection.getClient().getPlayer();
+        if (room != null && player != null) {
             room.getRoomPlayerList().stream()
-                    .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
+                    .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
                     .findAny()
                     .ifPresent(rp -> {
                         synchronized (rp) {

@@ -21,7 +21,7 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getActivePlayer().getName(), chatRoomReqPacket.getMessage());
+        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getPlayer().getName(), chatRoomReqPacket.getMessage());
 
         Room room = connection.getClient().getActiveRoom();
         if (room == null) return;
@@ -36,7 +36,7 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
         if (isTeamChat) {
             short senderPos = -1;
             for (RoomPlayer rp : room.getRoomPlayerList()) {
-                if (connection.getClient().getActivePlayer().getId().equals(rp.getPlayer().getId())) {
+                if (connection.getClient().getPlayer().getId().equals(rp.getPlayer().getId())) {
                     senderPos = rp.getPosition();
                     break;
                 }
@@ -45,7 +45,7 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
             if (senderPos < 0) return;
             for (Client c : GameManager.getInstance().getClientsInRoom(room.getRoomId())) {
                 for (RoomPlayer rp : c.getActiveRoom().getRoomPlayerList()) {
-                    if (c.getActivePlayer() != null && c.getActivePlayer().getId().equals(rp.getPlayer().getId()) && areInSameTeam(senderPos, rp.getPosition())) {
+                    if (c.getPlayer() != null && c.getPlayer().getId().equals(rp.getPlayer().getId()) && areInSameTeam(senderPos, rp.getPosition())) {
                         c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomAnswerPacket);
                     }
                 }

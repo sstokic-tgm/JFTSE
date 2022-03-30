@@ -4,7 +4,6 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.inventory.C2SInventoryWearQuickReqPacket;
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryWearQuickAnswerPacket;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.core.service.QuickSlotEquipmentService;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
@@ -14,11 +13,9 @@ public class InventoryWearQuickPacketHandler extends AbstractHandler {
     private C2SInventoryWearQuickReqPacket inventoryWearQuickReqPacket;
 
     private final QuickSlotEquipmentService quickSlotEquipmentService;
-    private final PlayerService playerService;
 
     public InventoryWearQuickPacketHandler() {
         quickSlotEquipmentService = ServiceManager.getInstance().getQuickSlotEquipmentService();
-        playerService = ServiceManager.getInstance().getPlayerService();
     }
 
     @Override
@@ -29,14 +26,12 @@ public class InventoryWearQuickPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
 
         quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, inventoryWearQuickReqPacket.getQuickSlotList());
         player.setQuickSlotEquipment(quickSlotEquipment);
-
-        player = playerService.save(player);
-        connection.getClient().setActivePlayer(player);
+        connection.getClient().savePlayer(player);
 
         S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(inventoryWearQuickReqPacket.getQuickSlotList());
         connection.sendTCP(inventoryWearQuickAnswerPacket);

@@ -5,6 +5,7 @@ import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.C2SRoomFittingRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
@@ -20,15 +21,16 @@ public class RoomFittingRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
+        Player player = connection.getClient().getPlayer();
         boolean fitting = roomFittingRequestPacket.isFitting();
 
         Room room = connection.getClient().getActiveRoom();
         if (room != null) {
             room.getRoomPlayerList().forEach(rp -> {
-                if (rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId())) {
+                if (rp.getPlayer().getId().equals(player.getId())) {
                     synchronized (rp) {
                         rp.setFitting(fitting);
                     }

@@ -39,10 +39,8 @@ public class InventoryItemTimeExpiredPacketHandler extends AbstractHandler {
             if (timeLeft < 0) {
                 playerPocketService.remove(itemPocketId);
 
-                Pocket pocket = connection.getClient().getActivePlayer().getPocket();
-                pocket = pocketService.decrementPocketBelongings(pocket);
-
-                connection.getClient().getActivePlayer().setPocket(pocket);
+                Pocket pocket = connection.getClient().getPlayer().getPocket();
+                pocketService.decrementPocketBelongings(pocket);
 
                 S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemTimeExpiredReqPacket.getItemPocketId());
                 connection.sendTCP(inventoryItemRemoveAnswerPacket);

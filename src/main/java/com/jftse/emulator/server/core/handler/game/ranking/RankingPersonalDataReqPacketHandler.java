@@ -30,7 +30,7 @@ public class RankingPersonalDataReqPacketHandler extends AbstractHandler {
 
         final byte gameMode = rankingPersonalDataRequestPacket.getGameMode();
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         if (activePlayer == null) {
             S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 1, gameMode, new Player(), 0);
             connection.sendTCP(rankingPersonalDataAnswerPacket);

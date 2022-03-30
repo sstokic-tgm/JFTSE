@@ -6,7 +6,6 @@ import com.jftse.emulator.server.shared.module.Client;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
@@ -32,7 +31,7 @@ public class GameSession {
 
     public Client getClientByPlayerId(long playerId) {
         return clients.stream()
-                .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(playerId))
+                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerId))
                 .findFirst()
                 .orElse(null);
     }

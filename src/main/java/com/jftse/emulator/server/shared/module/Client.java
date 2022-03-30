@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.shared.module;
 
 import com.jftse.emulator.server.core.constants.GameMode;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
@@ -17,8 +18,8 @@ public class Client {
 
     private Connection connection;
 
-    private Account account;
-    private Player activePlayer;
+    private Long accountId;
+    private Long activePlayerId;
 
     private ChallengeGame activeChallengeGame;
     private TutorialGame activeTutorialGame;
@@ -37,4 +38,34 @@ public class Client {
 
     private String ip;
     private int port;
+
+    public void setPlayer(Long id) {
+        this.activePlayerId = id;
+    }
+
+    public void setAccount(Long id) {
+        this.accountId = id;
+    }
+
+    public Player getPlayer() {
+        if (this.activePlayerId == null)
+            return null;
+        return ServiceManager.getInstance().getPlayerService().findById(activePlayerId);
+    }
+
+    public void savePlayer(final Player player) {
+        ServiceManager.getInstance().getPlayerService().save(player);
+    }
+
+    public Account getAccount() {
+        if (this.activePlayerId != null) {
+            final Player player = getPlayer();
+            return ServiceManager.getInstance().getAuthenticationService().findAccountById(player.getAccount().getId());
+        }
+        return ServiceManager.getInstance().getAuthenticationService().findAccountById(this.accountId);
+    }
+
+    public void saveAccount(final Account account) {
+        ServiceManager.getInstance().getAuthenticationService().updateAccount(account);
+    }
 }

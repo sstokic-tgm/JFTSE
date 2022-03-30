@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class LotteryService {
 
-    private final PlayerService playerService;
     private final ProductService productService;
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
@@ -47,7 +46,7 @@ public class LotteryService {
     }
 
     public List<PlayerPocket> drawLottery(Connection connection, long playerPocketId, int productIndex) {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
 
         List<PlayerPocket> result = new ArrayList<>();
 
@@ -66,9 +65,7 @@ public class LotteryService {
         result.add(playerPocket);
 
         player.setPocket(playerPocket.getPocket());
-        player = playerService.save(player);
-
-        connection.getClient().setActivePlayer(player);
+        connection.getClient().savePlayer(player);
 
         return result;
     }

@@ -29,7 +29,6 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
 
-    private final PlayerService playerService;
     private final ItemRewardService itemRewardService;
     private final LevelService levelService;
     private final HomeService homeService;
@@ -47,7 +46,8 @@ public class ChallengeService {
         long timeNeeded = connection.getClient().getActiveChallengeGame().getTimeNeeded();
 
         Challenge challenge = findChallengeByChallengeIndex(connection.getClient().getActiveChallengeGame().getChallengeIndex());
-        ChallengeProgress challengeProgress = challengeProgressRepository.findByPlayerAndChallenge(connection.getClient().getActivePlayer(), challenge).orElse(null);
+        Player player = connection.getClient().getPlayer();
+        ChallengeProgress challengeProgress = challengeProgressRepository.findByPlayerAndChallenge(player, challenge).orElse(null);
 
         int rewardExp = 0;
         int rewardGold = 0;
@@ -66,7 +66,7 @@ public class ChallengeService {
             rewardExp = itemRewardService.getRewardExp(disableItemReward, challenge.getRewardExp(), win);
 
             challengeProgress = new ChallengeProgress();
-            challengeProgress.setPlayer(connection.getClient().getActivePlayer());
+            challengeProgress.setPlayer(player);
             challengeProgress.setChallenge(challenge);
             challengeProgress.setSuccess(successCount);
             challengeProgress.setAttempts(1);
@@ -86,10 +86,10 @@ public class ChallengeService {
         }
         challengeProgressRepository.save(challengeProgress);
 
-        List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(connection.getClient().getActivePlayer(), rewardProductList));
+        List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(player, rewardProductList));
 
         // add account home bonuses to exp and gold
-        AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getActivePlayer().getAccount().getId());
+        AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
         if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBasicGame) {
             rewardExp += (rewardExp * (accountHome.getBasicBonusExp() / 100));
             rewardGold += (rewardGold * (accountHome.getBasicBonusGold() / 100));
@@ -103,16 +103,13 @@ public class ChallengeService {
         rewardExp *= 5;
         rewardGold *= 5;
 
-        byte level = levelService.getLevel(rewardExp, connection.getClient().getActivePlayer().getExpPoints(), connection.getClient().getActivePlayer().getLevel());
-
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
-        if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (player.getLevel() < level))
+        byte oldLevel = player.getLevel();
+        byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
+        if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
             player.setExpPoints(player.getExpPoints() + rewardExp);
         player.setGold(player.getGold() + rewardGold);
-
         player = levelService.setNewLevelStatusPoints(level, player);
-
-        connection.getClient().setActivePlayer(player);
+        connection.getClient().savePlayer(player);
 
         S2CChallengeFinishPacket challengeFinishPacket = new S2CChallengeFinishPacket(win, level, rewardExp, rewardGold, (int) Math.ceil((double) timeNeeded / 1000), rewardItemList);
         connection.sendTCP(challengeFinishPacket);

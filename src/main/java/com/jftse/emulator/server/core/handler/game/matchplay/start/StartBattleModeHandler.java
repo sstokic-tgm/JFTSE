@@ -13,6 +13,7 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplaySetPlayerPosition;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayTriggerGuardianServe;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -48,9 +49,11 @@ public class StartBattleModeHandler extends AbstractHandler {
         List<PlayerPositionInfo> positionInfo = new ArrayList<>();
 
         clients.forEach(c -> {
+            Player player = c.getPlayer();
             RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
-                    .findFirst().orElse(null);
+                    .filter(x -> x.getPlayer().getId().equals(player.getId()))
+                    .findFirst()
+                    .orElse(null);
             if (rp == null || rp.getPosition() > 3) {
                 return;
             }

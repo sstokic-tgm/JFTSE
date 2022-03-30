@@ -93,14 +93,14 @@ public class GameManager {
 
     public List<Player> getPlayersInLobby() {
         return clients.stream()
-                .filter(c -> c.isInLobby())
-                .map(Client::getActivePlayer)
+                .filter(Client::isInLobby)
+                .map(Client::getPlayer)
                 .collect(Collectors.toList());
     }
 
     public List<Client> getClientsInLobby() {
         return clients.stream()
-                .filter(c -> c.isInLobby())
+                .filter(Client::isInLobby)
                 .collect(Collectors.toList());
     }
 
@@ -170,7 +170,7 @@ public class GameManager {
         if (client == null)
             return;
 
-        Player activePlayer = serviceManager.getPlayerService().findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         if (activePlayer == null)
             return;
 
@@ -227,7 +227,7 @@ public class GameManager {
             S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) 9);
             getClientsInRoom(room.getRoomId()).forEach(c -> {
                 if (notifyClients) {
-                    if (c.getActivePlayer() != null && !c.getActivePlayer().getId().equals(activePlayer.getId()) && c.getConnection() != null && c.getConnection().isConnected()) {
+                    if (c.getPlayer() != null && !c.getPlayer().getId().equals(activePlayer.getId()) && c.getConnection() != null && c.getConnection().isConnected()) {
                         c.getConnection().sendTCP(roomPlayerInformationPacket, roomPositionChangeAnswerPacket);
                     }
                 }
@@ -235,7 +235,7 @@ public class GameManager {
         } else {
             GameSession gameSession = gameSessionManager.getGameSessionBySessionId(activeGameSession.getSessionId());
             if (gameSession != null) {
-                gameSession.getClients().removeIf(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(activePlayer.getId()));
+                gameSession.getClients().removeIf(c -> c.getPlayer() != null && c.getPlayer().getId().equals(activePlayer.getId()));
             }
             client.setActiveGameSession(null);
         }
@@ -297,7 +297,7 @@ public class GameManager {
             room.getPositions().set(3, RoomPositionState.Locked);
         }
 
-        Player activePlayer = serviceManager.getPlayerService().findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         Friend couple = serviceManager.getSocialService().getRelationship(activePlayer);
 
         RoomPlayer roomPlayer = new RoomPlayer();

@@ -28,7 +28,7 @@ public class InventorySellRequestHandler extends AbstractHandler {
         byte status = S2CInventorySellAnswerPacket.SUCCESS;
         int itemPocketId = inventorySellReqPacket.getItemPocketId();
 
-        PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, connection.getClient().getActivePlayer().getPocket());
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, connection.getClient().getPlayer().getPocket());
 
         if (playerPocket == null) {
             status = S2CInventorySellAnswerPacket.NO_ITEM;
