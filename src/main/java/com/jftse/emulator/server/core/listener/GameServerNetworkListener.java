@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.listener;
 import com.jftse.emulator.server.core.handler.game.BasicGameHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServerManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.packet.packets.S2CServerNoticePacket;
 import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
@@ -23,8 +22,6 @@ import java.util.stream.Collectors;
 public class GameServerNetworkListener implements ConnectionListener {
     @Autowired
     private GameManager gameManager;
-    @Autowired
-    private ServiceManager serviceManager;
 
     @Autowired
     private ServerManager serverManager;
@@ -32,10 +29,10 @@ public class GameServerNetworkListener implements ConnectionListener {
     public void cleanUp() {
         // reset status
         gameManager.getClients().stream().collect(Collectors.toList()).forEach(client -> {
-            Account account = serviceManager.getAuthenticationService().findAccountById(client.getAccount().getId());
+            Account account = client.getAccount();
             if (account.getStatus() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
                 account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-                serviceManager.getAuthenticationService().updateAccount(account);
+                client.saveAccount(account);
             }
 
             gameManager.getClients().remove(client);
