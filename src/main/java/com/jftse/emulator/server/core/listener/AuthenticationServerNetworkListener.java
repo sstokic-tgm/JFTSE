@@ -37,7 +37,7 @@ public class AuthenticationServerNetworkListener implements ConnectionListener {
             case "Broken pipe":
                 break;
             default:
-                log.error(exception.getMessage(), exception);
+                log.error(connection.getRemoteAddressTCP().getAddress().getHostName() + " " + exception.getMessage(), exception);
         }
     }
 
