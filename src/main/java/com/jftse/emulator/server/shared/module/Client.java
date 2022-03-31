@@ -58,10 +58,12 @@ public class Client {
     }
 
     public Account getAccount() {
-        if (this.activePlayerId != null) {
+        if (this.accountId == null && this.activePlayerId != null) {
             final Player player = getPlayer();
             return ServiceManager.getInstance().getAuthenticationService().findAccountById(player.getAccount().getId());
         }
+        if (this.accountId == null)
+            return null;
         return ServiceManager.getInstance().getAuthenticationService().findAccountById(this.accountId);
     }
 

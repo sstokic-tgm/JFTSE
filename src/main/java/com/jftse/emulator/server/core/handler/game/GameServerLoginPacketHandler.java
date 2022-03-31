@@ -55,6 +55,7 @@ public class GameServerLoginPacketHandler extends AbstractHandler {
             // mark as logged in
             account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
             client.saveAccount(account);
+            client.setAccount(account.getId());
 
             connection.setClient(client);
             connection.setHwid(gameServerLoginPacket.getHwid());
