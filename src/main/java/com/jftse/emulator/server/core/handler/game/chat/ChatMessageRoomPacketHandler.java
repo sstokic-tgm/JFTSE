@@ -1,14 +1,20 @@
 package com.jftse.emulator.server.core.handler.game.chat;
 
 import com.jftse.emulator.server.core.command.CommandManager;
+import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.chat.C2SChatRoomReqPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ChatMessageRoomPacketHandler extends AbstractHandler {
     private C2SChatRoomReqPacket chatRoomReqPacket;
@@ -21,10 +27,18 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(chatRoomReqPacket.getType(), connection.getClient().getPlayer().getName(), chatRoomReqPacket.getMessage());
-
         Room room = connection.getClient().getActiveRoom();
         if (room == null) return;
+
+        Long playerId = connection.getClient().getPlayer().getId();
+        RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
+                .filter(rp -> rp.getPlayer().getId() == playerId)
+                .findAny()
+                .orElse(null);
+
+        boolean playerInSecretGmSlot = roomPlayer != null && roomPlayer.getPosition() == MiscConstants.InvisibleGmSlot;
+        byte messageType = playerInSecretGmSlot ? (byte) 2 : chatRoomReqPacket.getType();
+        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(messageType, connection.getClient().getPlayer().getName(), chatRoomReqPacket.getMessage());
 
         if (CommandManager.getInstance().isCommand(chatRoomReqPacket.getMessage())) {
             connection.sendTCP(chatRoomAnswerPacket);
@@ -45,7 +59,8 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
             if (senderPos < 0) return;
             for (Client c : GameManager.getInstance().getClientsInRoom(room.getRoomId())) {
                 for (RoomPlayer rp : c.getActiveRoom().getRoomPlayerList()) {
-                    if (c.getPlayer() != null && c.getPlayer().getId().equals(rp.getPlayer().getId()) && areInSameTeam(senderPos, rp.getPosition())) {
+                    boolean playerCanSeeMessage = areInSameTeam(senderPos, rp.getPosition()) || rp.getPosition() == MiscConstants.InvisibleGmSlot;
+                    if (c.getPlayer() != null && c.getPlayer().getId().equals(rp.getPlayer().getId()) && playerCanSeeMessage) {
                         c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomAnswerPacket);
                     }
                 }
