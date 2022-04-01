@@ -56,7 +56,12 @@ public class RelayServerNetworkListener implements ConnectionListener {
             case "Broken pipe":
                 break;
             default:
-                log.error(connection.getRemoteAddressTCP().getAddress().getHostName() + " " + exception.getMessage(), exception);
+                String hostAddress;
+                if (connection.getRemoteAddressTCP() != null)
+                    hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+                else
+                    hostAddress = "null";
+                log.error(hostAddress + " " + exception.getMessage(), exception);
         }
     }
 
