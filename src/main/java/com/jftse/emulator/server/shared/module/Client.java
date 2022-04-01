@@ -26,15 +26,14 @@ public class Client {
     private Room activeRoom;
     private GameSession activeGameSession;
 
-    private boolean inLobby = false;
-    private boolean isSpectator = false;
+    private volatile boolean inLobby = false;
+    private volatile boolean isSpectator = false;
 
-    private int lobbyGameModeTabFilter = GameMode.ALL;
-    private int lobbyCurrentPlayerListPage = 1;
-    private int lobbyCurrentRoomListPage = -1;
-    private long lastHearBeatTime = 0;
+    private volatile int lobbyGameModeTabFilter = GameMode.ALL;
+    private volatile int lobbyCurrentPlayerListPage = 1;
+    private volatile int lobbyCurrentRoomListPage = -1;
 
-    private boolean usingGachaMachine = false;
+    private volatile boolean usingGachaMachine = false;
 
     private String ip;
     private int port;

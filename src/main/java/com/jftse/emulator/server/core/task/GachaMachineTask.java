@@ -39,6 +39,9 @@ public class GachaMachineTask extends AbstractTask {
 
     @Override
     public void run() {
+        if (connection.getClient() == null)
+            return;
+
         Player player = connection.getClient().getPlayer();
         Pocket pocket = pocketService.findById(player.getPocket().getId());
 
