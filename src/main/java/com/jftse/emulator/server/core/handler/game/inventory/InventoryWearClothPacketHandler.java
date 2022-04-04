@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.handler.game.inventory;
 
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.matchplay.room.Room;
+import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.inventory.C2SInventoryWearClothReqPacket;
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryWearClothAnswerPacket;
 import com.jftse.emulator.server.core.service.ClothEquipmentService;
@@ -28,6 +28,9 @@ public class InventoryWearClothPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
+        if (connection.getClient() == null)
+            return;
+
         Player player = connection.getClient().getPlayer();
         ClothEquipment clothEquipment = player.getClothEquipment();
 
@@ -37,14 +40,12 @@ public class InventoryWearClothPacketHandler extends AbstractHandler {
 
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 
-        Room room = connection.getClient().getActiveRoom();
-        if (room != null) {
-            room.getRoomPlayerList().forEach(rp -> {
-                if (rp.isFitting() && rp.getPlayer().getId().equals(player.getId())) {
-                    rp.setClothEquipment(clothEquipmentService.findClothEquipmentById(clothEquipment.getId()));
-                    rp.setStatusPointsAddedDto(statusPointsAddedDto);
-                }
-            });
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+        if (roomPlayer != null) {
+            if (roomPlayer.isFitting()) {
+                roomPlayer.setClothEquipmentId(clothEquipment.getId());
+                roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
+            }
         }
 
         S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, inventoryWearClothReqPacket, player, statusPointsAddedDto);

@@ -57,7 +57,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     }
 
     public PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
-        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer());
+        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer().getLevel());
         short baseStr = roomPlayer.getPlayer().getStrength();
         short baseSta = roomPlayer.getPlayer().getStamina();
         short baseDex = roomPlayer.getPlayer().getDexterity();

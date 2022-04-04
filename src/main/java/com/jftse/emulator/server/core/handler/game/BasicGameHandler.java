@@ -138,30 +138,25 @@ public class BasicGameHandler {
                         client.savePlayer(player);
                     }
 
-                    if (player != null) {
-                        RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
-                                .filter(x -> x.getPlayer().getId().equals(player.getId()))
-                                .findFirst()
-                                .orElse(null);
-                        if (roomPlayer != null) {
-                            notifyClients = roomPlayer.getPosition() < 4;
-                            if (notifyClients) {
-                                synchronized (currentClientRoom) {
-                                    currentClientRoom.setStatus(RoomStatus.NotRunning);
-                                }
-                                client.setActiveRoom(currentClientRoom);
-
-                                gameSession.getClients().forEach(c -> {
-                                    Room room = c.getActiveRoom();
-                                    if (room != null) {
-                                        if (c.getConnection() != null && c.getConnection().getId() != connection.getId() && c.getConnection().isConnected()) {
-                                            S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                                            c.getConnection().sendTCP(backToRoomPacket);
-                                        }
-                                    }
-                                });
-                                GameSessionManager.getInstance().getGameSessionList().removeIf(gs -> gs.getSessionId() == gameSession.getSessionId());
+                    RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+                    if (roomPlayer != null) {
+                        notifyClients = roomPlayer.getPosition() < 4;
+                        if (notifyClients) {
+                            synchronized (currentClientRoom) {
+                                currentClientRoom.setStatus(RoomStatus.NotRunning);
                             }
+                            client.setActiveRoom(currentClientRoom);
+
+                            gameSession.getClients().forEach(c -> {
+                                Room room = c.getActiveRoom();
+                                if (room != null) {
+                                    if (c.getConnection() != null && c.getConnection().getId() != connection.getId() && c.getConnection().isConnected()) {
+                                        S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                                        c.getConnection().sendTCP(backToRoomPacket);
+                                    }
+                                }
+                            });
+                            GameSessionManager.getInstance().getGameSessionList().removeIf(gs -> gs.getSessionId() == gameSession.getSessionId());
                         }
                     }
                     MatchplayGame game = gameSession.getActiveMatchplayGame();

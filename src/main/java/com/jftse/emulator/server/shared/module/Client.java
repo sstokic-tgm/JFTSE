@@ -2,6 +2,7 @@ package com.jftse.emulator.server.shared.module;
 
 import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
@@ -24,6 +25,7 @@ public class Client {
     private ChallengeGame activeChallengeGame;
     private TutorialGame activeTutorialGame;
     private Room activeRoom;
+    private RoomPlayer roomPlayer;
     private GameSession activeGameSession;
 
     private volatile boolean inLobby = false;
@@ -68,5 +70,16 @@ public class Client {
 
     public void saveAccount(final Account account) {
         ServiceManager.getInstance().getAuthenticationService().updateAccount(account);
+    }
+
+    public RoomPlayer getRoomPlayer() {
+        if (this.activeRoom == null)
+            return null;
+
+        final Room activeRoom = this.activeRoom;
+        return activeRoom.getRoomPlayerList().stream()
+                .filter(p -> p.getPlayerId().equals(this.activePlayerId))
+                .findFirst()
+                .orElse(null);
     }
 }

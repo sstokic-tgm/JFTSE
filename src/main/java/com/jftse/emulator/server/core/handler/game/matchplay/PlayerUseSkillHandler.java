@@ -51,7 +51,7 @@ public class PlayerUseSkillHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null
-                || connection.getClient().getActiveRoom() == null || connection.getClient().getPlayer() == null)
+                || connection.getClient().getPlayer() == null || connection.getClient().getRoomPlayer() == null)
             return;
 
         Player player = connection.getClient().getPlayer();
@@ -66,17 +66,12 @@ public class PlayerUseSkillHandler extends AbstractHandler {
         MatchplayGame game = gameSession.getActiveMatchplayGame();
         if (game == null) return;
 
-        Room room = connection.getClient().getActiveRoom();
-        List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-        RoomPlayer roomPlayer = roomPlayers.stream()
-                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(player.getId()))
-                .findAny()
-                .orElse(null);
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
         Skill skill = skillService.findSkillById((long) anyoneUsesSkill.getSkillIndex() + 1);
 
         if (attackerIsGuardian) {
             if (skill != null) {
-                this.handleSpecialSkillsUseOfGuardians(connection, position, (MatchplayGuardianGame) game, roomPlayers, skill);
+                this.handleSpecialSkillsUseOfGuardians(connection, position, (MatchplayGuardianGame) game, skill);
             }
         } else if (attackerIsPlayer) {
             if (roomPlayer != null) {
@@ -133,7 +128,7 @@ public class PlayerUseSkillHandler extends AbstractHandler {
         }
     }
 
-    private void handleSpecialSkillsUseOfGuardians(Connection connection, byte guardianPos, MatchplayGuardianGame game, List<RoomPlayer> roomPlayers, Skill skill) {
+    private void handleSpecialSkillsUseOfGuardians(Connection connection, byte guardianPos, MatchplayGuardianGame game, Skill skill) {
         // There could be more special skills which need to be handled here
         if (skill.getId() == 29) { // RebirthOne
             this.handleReviveGuardian(connection, game, skill);

@@ -22,7 +22,7 @@ public class GameAnimationReadyToSkipPacketHandler extends AbstractHandler {
         Player player = connection.getClient().getPlayer();
         Room room = connection.getClient().getActiveRoom();
         room.getRoomPlayerList().stream()
-                .filter(x -> x.getPlayer().getId().equals(player.getId()))
+                .filter(x -> x.getPlayerId().equals(player.getId()))
                 .findFirst()
                 .ifPresent(rp -> {
                     synchronized (rp) {

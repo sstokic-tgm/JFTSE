@@ -7,6 +7,7 @@ import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 public class S2CGameSetNameColorAndRemoveBlackBar extends Packet {
@@ -16,7 +17,7 @@ public class S2CGameSetNameColorAndRemoveBlackBar extends Packet {
         if (room == null) {
             this.write((char) 0);
         } else {
-            final ArrayList<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+            final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
             List<RoomPlayer> activePlayers = roomPlayerList.stream()
                     .filter(x -> x.getPosition() < 4)
                     .collect(Collectors.toList());

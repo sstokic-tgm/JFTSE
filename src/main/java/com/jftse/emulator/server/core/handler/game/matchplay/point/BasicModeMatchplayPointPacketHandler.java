@@ -34,6 +34,7 @@ import com.jftse.emulator.server.shared.module.Client;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
@@ -94,7 +95,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         }
 
         boolean isRedTeamServing = game.isRedTeamServing(gameSession.getTimesCourtChanged());
-        List<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
+        ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
 
         List<PlayerReward> playerRewards = new ArrayList<>();
         if (game.isFinished()) {
@@ -116,9 +117,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         }
 
         for (Client client : clients) {
-            RoomPlayer rp = roomPlayerList.stream()
-                    .filter(x -> x.getPlayer().getId().equals(client.getPlayer().getId()))
-                    .findFirst().orElse(null);
+            RoomPlayer rp = client.getRoomPlayer();
             if (rp == null) {
                 continue;
             }
@@ -209,7 +208,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                     player.setPlayerStatistic(playerStatistic);
                     client.savePlayer(player);
 
-                    rp.setPlayer(player);
                     rp.setReady(false);
                     byte playerLevel = player.getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);

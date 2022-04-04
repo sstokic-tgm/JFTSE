@@ -12,8 +12,13 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.ClothEquipmentService;
 import com.jftse.emulator.server.core.service.GuildMemberService;
+import com.jftse.emulator.server.core.service.SocialService;
 import com.jftse.emulator.server.database.model.account.Account;
+import com.jftse.emulator.server.database.model.guild.GuildMember;
+import com.jftse.emulator.server.database.model.messenger.Friend;
+import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
@@ -26,10 +31,12 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
 
     private final GuildMemberService guildMemberService;
     private final ClothEquipmentService clothEquipmentService;
+    private final SocialService socialService;
 
     public RoomJoinRequestPacketHandler() {
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
+        socialService = ServiceManager.getInstance().getSocialService();
     }
 
     @Override
@@ -159,10 +166,17 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
         room.getPositions().set(newPosition, RoomPositionState.InUse);
 
         RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayer(activePlayer);
-        roomPlayer.setGuildMember(guildMemberService.getByPlayer(activePlayer));
-        roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
-        roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
+        roomPlayer.setPlayerId(activePlayer.getId());
+
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        Friend couple = socialService.getRelationship(activePlayer);
+        ClothEquipment clothEquipment = clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
+        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer());
+
+        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
+        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
+        roomPlayer.setClothEquipmentId(clothEquipment.getId());
+        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
         roomPlayer.setPosition((short) newPosition);
         roomPlayer.setMaster(false);
         roomPlayer.setFitting(false);

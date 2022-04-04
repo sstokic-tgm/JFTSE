@@ -6,6 +6,7 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.Room;
+import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomInformationPacket;
@@ -47,18 +48,16 @@ public class ClientBackInRoomPacketHandler extends AbstractHandler {
         Player player = connection.getClient().getPlayer();
 
         Room currentClientRoom = connection.getClient().getActiveRoom();
-        if (currentClientRoom == null) { // shouldn't happen
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+        if (currentClientRoom == null || roomPlayer == null) { // shouldn't happen
             S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
             connection.sendTCP(disconnectAnswerPacket);
             connection.close();
             return;
         }
 
-        short position = currentClientRoom.getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
-                .findAny()
-                .get()
-                .getPosition();
+
+        short position = roomPlayer.getPosition();
 
         Packet backInRoomAckPacket = new Packet(PacketOperations.S2CMatchplayClientBackInRoomAck.getValueAsChar());
         backInRoomAckPacket.write(position);
@@ -68,13 +67,7 @@ public class ClientBackInRoomPacketHandler extends AbstractHandler {
         unsetHostPacket.write((byte) 0);
         connection.sendTCP(unsetHostPacket);
 
-        currentClientRoom.getRoomPlayerList().forEach(rp -> {
-            if (rp.getPlayer().getId().equals(player.getId())) {
-                synchronized (rp) {
-                    rp.setReady(false);
-                }
-            }
-        });
+        roomPlayer.setReady(false);
 
         synchronized (currentClientRoom) {
             currentClientRoom.setStatus(RoomStatus.NotRunning);

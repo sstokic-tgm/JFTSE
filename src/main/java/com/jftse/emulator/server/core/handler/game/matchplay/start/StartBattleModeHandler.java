@@ -8,12 +8,10 @@ import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.PlayerPositionInfo;
-import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplaySetPlayerPosition;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayTriggerGuardianServe;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
-import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -43,17 +41,12 @@ public class StartBattleModeHandler extends AbstractHandler {
     public void handle() {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
-        Room room = connection.getClient().getActiveRoom();
 
         ArrayList<Client> clients = new ArrayList<>(gameSession.getClients());
         List<PlayerPositionInfo> positionInfo = new ArrayList<>();
 
         clients.forEach(c -> {
-            Player player = c.getPlayer();
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> x.getPlayer().getId().equals(player.getId()))
-                    .findFirst()
-                    .orElse(null);
+            RoomPlayer rp = c.getRoomPlayer();
             if (rp == null || rp.getPosition() > 3) {
                 return;
             }

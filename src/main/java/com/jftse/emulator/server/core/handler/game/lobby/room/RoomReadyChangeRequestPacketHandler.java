@@ -7,7 +7,6 @@ import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.C2SRoomReadyChangeRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
-import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
@@ -26,16 +25,9 @@ public class RoomReadyChangeRequestPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         Room room = connection.getClient().getActiveRoom();
-        Player player = connection.getClient().getPlayer();
-        if (room != null && player != null) {
-            room.getRoomPlayerList().stream()
-                    .filter(rp -> rp.getPlayer().getId().equals(player.getId()))
-                    .findAny()
-                    .ifPresent(rp -> {
-                        synchronized (rp) {
-                            rp.setReady(roomReadyChangeRequestPacket.isReady());
-                        }
-                    });
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+        if (room != null && roomPlayer != null) {
+            roomPlayer.setReady(roomReadyChangeRequestPacket.isReady());
 
             S2CRoomPlayerInformationPacket roomPlayerInformationPacket =
                     new S2CRoomPlayerInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
@@ -47,12 +39,8 @@ public class RoomReadyChangeRequestPacketHandler extends AbstractHandler {
                     new S2CRoomPlayerInformationPacket(new ArrayList<>(filteredRoomPlayerList));
 
             GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
-                Long playerId = c.getPlayer().getId();
-                RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                        .filter(rp -> rp.getPlayer().getId() == playerId)
-                        .findAny()
-                        .orElse(null);
-                if (roomPlayer != null && roomPlayer.getPosition() == MiscConstants.InvisibleGmSlot) {
+                RoomPlayer cRP = c.getRoomPlayer();
+                if (cRP != null && cRP.getPosition() == MiscConstants.InvisibleGmSlot) {
                     c.getConnection().sendTCP(roomPlayerInformationPacket);
                 } else {
                     c.getConnection().sendTCP(roomPlayerInformationPacketWithoutInvisibleGm);

@@ -12,7 +12,7 @@ public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
 
         this.write(playerPosition); // not sure if it's the pos
         this.write(player.getLevel());
-        this.write(BattleUtils.calculatePlayerHp(player));
+        this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
 
         // status points
         this.write(player.getStrength());

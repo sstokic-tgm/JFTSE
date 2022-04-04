@@ -7,13 +7,14 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
 @Setter
 public class Room {
     public Room() {
-        bannedPlayers = new ArrayList<>();
-        roomPlayerList = new ArrayList<>();
+        bannedPlayers = new ConcurrentLinkedDeque<>();
+        roomPlayerList = new ConcurrentLinkedDeque<>();
         positions = new ArrayList<>(Arrays.asList(
                 RoomPositionState.Free, RoomPositionState.Free,
                 RoomPositionState.Free, RoomPositionState.Free,
@@ -40,8 +41,8 @@ public class Room {
     private byte map;
     private int ball;
     private String password;
-    private ArrayList<Long> bannedPlayers;
-    private ArrayList<RoomPlayer> roomPlayerList;
+    private ConcurrentLinkedDeque<Long> bannedPlayers;
+    private ConcurrentLinkedDeque<RoomPlayer> roomPlayerList;
     private ArrayList<Short> positions;
     private int status;
 

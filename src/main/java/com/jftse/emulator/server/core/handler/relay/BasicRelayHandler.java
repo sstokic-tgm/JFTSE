@@ -114,13 +114,7 @@ public class BasicRelayHandler {
     }
 
     private boolean tryHandleTimeoutForGuardianGameMatch(Connection connection, Client client, Room room, MatchplayGuardianGame game) {
-        Player player = client.getPlayer();
-        if (player == null) return false;
-
-        RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                .filter(x -> x.getPlayer().getId().equals(player.getId()))
-                .findFirst()
-                .orElse(null);
+        RoomPlayer roomPlayer = client.getRoomPlayer();
         if (roomPlayer == null) return false;
 
         PlayerBattleState playerBattleState = game.getPlayerBattleStates().stream()

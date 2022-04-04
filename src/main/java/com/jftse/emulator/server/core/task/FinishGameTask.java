@@ -130,9 +130,7 @@ public class FinishGameTask extends AbstractTask {
         gameLogContent.append(allPlayersTeamRedDead ? "Blue " : "Red ").append("team won. ");
 
         gameSession.getClients().forEach(client -> {
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getPlayer() != null && x.getPlayer().getId().equals(client.getPlayer().getId()))
-                    .findFirst().orElse(null);
+            RoomPlayer rp = client.getRoomPlayer();
             if (rp == null) {
                 return;
             }
@@ -188,7 +186,6 @@ public class FinishGameTask extends AbstractTask {
                 client.savePlayer(player);
 
                 synchronized (rp) {
-                    rp.setPlayer(player);
                     rp.setReady(false);
                 }
                 byte playerLevel = player.getLevel();
@@ -269,9 +266,7 @@ public class FinishGameTask extends AbstractTask {
                     client.getConnection().sendTCP(msgPacket);
                     client.getConnection().close();
 
-                    RoomPlayer rp = room.getRoomPlayerList().stream()
-                            .filter(x -> client.getPlayer() != null && x.getPlayer().getId().equals(client.getPlayer().getId()))
-                            .findFirst().orElse(null);
+                    RoomPlayer rp = client.getRoomPlayer();
                     if (rp == null) {
                         return;
                     }
@@ -305,9 +300,7 @@ public class FinishGameTask extends AbstractTask {
         gameLogContent.append(wonGame ? "Players " : "Guardians ").append("won. ");
 
         gameSession.getClients().forEach(client -> {
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getPlayer() != null && x.getPlayer().getId().equals(client.getPlayer().getId()))
-                    .findFirst().orElse(null);
+            RoomPlayer rp = client.getRoomPlayer();
             if (rp == null) {
                 return;
             }
@@ -335,7 +328,6 @@ public class FinishGameTask extends AbstractTask {
                 }
 
                 synchronized (rp) {
-                    rp.setPlayer(player);
                     rp.setReady(false);
                 }
                 byte playerLevel = player.getLevel();

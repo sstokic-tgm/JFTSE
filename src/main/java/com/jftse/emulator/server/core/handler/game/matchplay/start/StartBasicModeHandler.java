@@ -5,12 +5,10 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
-import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.room.ServeInfo;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayTriggerServe;
-import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -29,16 +27,11 @@ public class StartBasicModeHandler extends AbstractHandler {
         Packet removeBlackBarsPacket = new Packet(PacketOperations.S2CGameRemoveBlackBars.getValueAsChar());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(removeBlackBarsPacket, connection);
 
-        Room room = connection.getClient().getActiveRoom();
         ArrayList<Client> clients = new ArrayList<>(connection.getClient().getActiveGameSession().getClients());
         List<ServeInfo> serveInfo = new ArrayList<>();
 
         clients.forEach(client -> {
-            Player player = client.getPlayer();
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getPlayer() != null && x.getPlayer().getId().equals(player.getId()))
-                    .findFirst()
-                    .orElse(null);
+            RoomPlayer rp = client.getRoomPlayer();
 
             if (rp != null) {
                 boolean isActivePlayer = rp.getPosition() < 4;

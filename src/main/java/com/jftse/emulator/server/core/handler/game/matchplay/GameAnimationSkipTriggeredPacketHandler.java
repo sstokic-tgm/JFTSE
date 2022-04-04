@@ -45,7 +45,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractHandler {
         Player player = connection.getClient().getPlayer();
 
         Optional<RoomPlayer> roomPlayer = room.getRoomPlayerList().stream()
-                .filter(x -> x.getPlayer().getId().equals(player.getId()))
+                .filter(x -> x.getPlayerId().equals(player.getId()))
                 .findFirst();
 
         if (roomPlayer.isPresent()) {

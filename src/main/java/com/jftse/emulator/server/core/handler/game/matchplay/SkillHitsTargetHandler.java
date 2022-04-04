@@ -122,12 +122,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
 
         PlayerBattleState playerBattleState = null;
 
-        Player player = connection.getClient().getPlayer();
-        RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
-                .filter(p -> p.getPlayer().getId().equals(player.getId()))
-                .findFirst()
-                .orElse(null);
-
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
         try {
             playerBattleState = isBattleGame ?
                     ((MatchplayBattleGame) game).getPlayerCombatSystem().reviveAnyPlayer(skill.getDamage().shortValue(), roomPlayer) :

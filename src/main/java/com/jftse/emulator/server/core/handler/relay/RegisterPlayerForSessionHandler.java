@@ -67,7 +67,7 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                         Room room = client.getActiveRoom();
                         if (room != null) {
                             RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                                    .filter(rp -> rp.getPlayer().getId() == playerId)
+                                    .filter(rp -> rp.getPlayerId() == playerId)
                                     .findAny()
                                     .orElse(null);
                             if (roomPlayer != null) {
