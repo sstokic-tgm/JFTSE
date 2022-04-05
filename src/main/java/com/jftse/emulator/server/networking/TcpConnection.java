@@ -221,7 +221,6 @@ public class TcpConnection {
 
                 int newReceiveIndicator = receiveIndicator + 1;
                 this.receiveIndicator = newReceiveIndicator % 60;
-                log.debug(newReceiveIndicator % 60);
             } else {
                 break;
             }
@@ -234,7 +233,6 @@ public class TcpConnection {
 
             int newReceiveIndicator = receiveIndicator + 1;
             this.receiveIndicator = newReceiveIndicator % 60;
-            log.debug(newReceiveIndicator % 60);
 
             if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
                 log.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
@@ -349,7 +347,6 @@ public class TcpConnection {
 
         int newSendIndicator = sendIndicator + 1;
         this.sendIndicator = newSendIndicator % 60;
-        log.debug(newSendIndicator % 60);
     }
 
     private boolean isValidChecksum(byte[] data) {
