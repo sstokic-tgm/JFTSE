@@ -40,8 +40,8 @@ public class TcpConnection {
     private final Object writeLock = new Object();
 
     private int header1Key = 0;
-    private int sendIndicator = 0;
-    private int receiveIndicator = 0;
+    private volatile int sendIndicator = 0;
+    private volatile int receiveIndicator = 0;
     private final byte[] decryptKey;
     private final byte[] encryptKey;
     private final byte[] serialTable = {
@@ -203,6 +203,7 @@ public class TcpConnection {
             currentObjectLength = packetSize;
 
             if (packetSize + 8 < encryptedData.length) {
+                final int receiveIndicator = this.receiveIndicator;
                 data = decryptBytes(encryptedData, packetSize + 8);
                 packet = new Packet(data);
 
@@ -218,17 +219,22 @@ public class TcpConnection {
                 BitKit.blockCopy(tmp, 0, encryptedData, 0, encryptedData.length);
                 data = decryptBytes(encryptedData, encryptedData.length);
 
-                this.receiveIndicator++;
-                this.receiveIndicator %= 60;
+                int newReceiveIndicator = receiveIndicator + 1;
+                this.receiveIndicator = newReceiveIndicator % 60;
+                log.debug(newReceiveIndicator % 60);
             } else {
                 break;
             }
         }
         if (currentObjectLength + 8 <= encryptedData.length) {
+            final int receiveIndicator = this.receiveIndicator;
+
             data = decryptBytes(encryptedData, currentObjectLength + 8);
             packet = new Packet(data);
-            this.receiveIndicator++;
-            this.receiveIndicator %= 60;
+
+            int newReceiveIndicator = receiveIndicator + 1;
+            this.receiveIndicator = newReceiveIndicator % 60;
+            log.debug(newReceiveIndicator % 60);
 
             if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
                 log.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
@@ -295,6 +301,7 @@ public class TcpConnection {
                 } else {
                     writeBuffer.put(data);
                 }
+                packet = new Packet(data);
                 if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
                     log.info("SEND [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
             }
@@ -332,18 +339,22 @@ public class TcpConnection {
     }
 
     private void createSerial(byte[] data) {
-        int pos = (((this.header1Key << 4) - this.header1Key * 4 + this.sendIndicator) * 2);
+        final int sendIndicator = this.sendIndicator;
+
+        int pos = (((this.header1Key << 4) - this.header1Key * 4 + sendIndicator) * 2);
         short header = BitKit.bytesToShort(serialTable, pos);
 
         data[0] = BitKit.getBytes(header)[0];
         data[1] = BitKit.getBytes(header)[1];
 
-        this.sendIndicator += 1;
-        this.sendIndicator %= 60;
+        int newSendIndicator = sendIndicator + 1;
+        this.sendIndicator = newSendIndicator % 60;
+        log.debug(newSendIndicator % 60);
     }
 
     private boolean isValidChecksum(byte[] data) {
-        int pos = (((this.header1Key << 4) - this.header1Key * 4 + this.receiveIndicator) * 2);
+        final int receiveIndicator = this.receiveIndicator;
+        int pos = (((this.header1Key << 4) - this.header1Key * 4 + receiveIndicator) * 2);
         short serverSerial = BitKit.bytesToShort(serialTable, pos);
 
         byte[] serverSerialData = new byte[]{BitKit.getBytes(serverSerial)[0], BitKit.getBytes(serverSerial)[1]};
