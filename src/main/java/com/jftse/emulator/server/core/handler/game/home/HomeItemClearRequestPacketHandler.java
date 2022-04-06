@@ -54,13 +54,13 @@ public class HomeItemClearRequestPacketHandler extends AbstractHandler {
                 playerPocket = new PlayerPocket();
                 playerPocket.setItemIndex(hil.getItemIndex());
                 playerPocket.setPocket(player.getPocket());
-                playerPocket.setItemCount(itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1);
+                playerPocket.setItemCount(1);
                 playerPocket.setCategory(EItemCategory.HOUSE_DECO.getName());
                 playerPocket.setUseType(StringUtils.firstCharToUpperCase(EItemUseType.COUNT.getName().toLowerCase()));
 
                 pocketService.incrementPocketBelongings(player.getPocket());
             } else {
-                playerPocket.setItemCount(playerPocket.getItemCount() + (itemHouseDeco.getKind().equals(EItemHouseDeco.DECO.getName()) ? 3 : 1));
+                playerPocket.setItemCount(playerPocket.getItemCount() + 1);
             }
 
             playerPocketService.save(playerPocket);

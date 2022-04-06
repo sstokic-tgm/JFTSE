@@ -1,9 +1,15 @@
 package com.jftse.emulator.server.core.service;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusDecorator;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
+import com.jftse.emulator.server.core.life.progression.SimpleExpGoldBonus;
+import com.jftse.emulator.server.core.life.progression.bonuses.BasicHouseBonus;
+import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;
+import com.jftse.emulator.server.core.life.progression.bonuses.GlobalBonus;
 import com.jftse.emulator.server.database.model.challenge.Challenge;
 import com.jftse.emulator.server.database.model.challenge.ChallengeProgress;
-import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.item.Product;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.repository.challenge.ChallengeProgressRepository;
@@ -31,7 +37,6 @@ public class ChallengeService {
 
     private final ItemRewardService itemRewardService;
     private final LevelService levelService;
-    private final HomeService homeService;
 
     public List<ChallengeProgress> findAllByPlayerIdFetched(Long playerId) {
         return challengeProgressRepository.findAllByPlayerIdFetched(playerId);
@@ -89,19 +94,18 @@ public class ChallengeService {
         List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(player, rewardProductList));
 
         // add account home bonuses to exp and gold
-        AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
+        ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(rewardExp, rewardGold);
+        ExpGoldBonusDecorator expGoldBonusDecorator = new SimpleExpGoldBonus(expGoldBonus);
         if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBasicGame) {
-            rewardExp += (rewardExp * (accountHome.getBasicBonusExp() / 100));
-            rewardGold += (rewardGold * (accountHome.getBasicBonusGold() / 100));
+            expGoldBonusDecorator = new BasicHouseBonus(expGoldBonus, connection.getClient().getAccountId());
         }
         else if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBattleGame) {
-            rewardExp += (rewardExp * (accountHome.getBattleBonusExp() / 100));
-            rewardGold += (rewardGold * (accountHome.getBattleBonusGold() / 100));
+            expGoldBonusDecorator = new BattleHouseBonus(expGoldBonus, connection.getClient().getAccountId());
         }
 
-        // global exp & gold boost of *5 hardcoded :D
-        rewardExp *= 5;
-        rewardGold *= 5;
+        expGoldBonusDecorator = new GlobalBonus(expGoldBonusDecorator);
+        rewardExp = expGoldBonusDecorator.calculateExp();
+        rewardGold = expGoldBonusDecorator.calculateGold();
 
         byte oldLevel = player.getLevel();
         byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());

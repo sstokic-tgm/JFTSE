@@ -5,6 +5,9 @@ import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.item.EItemUseType;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusDecorator;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
+import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
@@ -147,12 +150,20 @@ public class FinishGameTask extends AbstractTask {
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
 
+                // add house bonus
+                // TODO: should be moved to getPlayerReward sometime
+                ExpGoldBonusDecorator expGoldBonusDecorator = new BattleHouseBonus(
+                        new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
+
+                int rewardExp = expGoldBonusDecorator.calculateExp();
+                int rewardGold = expGoldBonusDecorator.calculateGold();
+
                 Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
-                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
+                byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
                 if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
-                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
-                player.setGold(player.getGold() + playerReward.getRewardGold());
+                    player.setExpPoints(player.getExpPoints() + rewardExp);
+                player.setGold(player.getGold() + rewardGold);
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.savePlayer(player);
 
@@ -314,12 +325,20 @@ public class FinishGameTask extends AbstractTask {
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
 
+                // add house bonus
+                // TODO: should be moved to getPlayerReward sometime
+                ExpGoldBonusDecorator expGoldBonusDecorator = new BattleHouseBonus(
+                        new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
+
+                int rewardExp = expGoldBonusDecorator.calculateExp();
+                int rewardGold = expGoldBonusDecorator.calculateGold();
+
                 Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
-                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
+                byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
                 if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
-                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
-                player.setGold(player.getGold() + playerReward.getRewardGold());
+                    player.setExpPoints(player.getExpPoints() + rewardExp);
+                player.setGold(player.getGold() + rewardGold);
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.savePlayer(player);
 

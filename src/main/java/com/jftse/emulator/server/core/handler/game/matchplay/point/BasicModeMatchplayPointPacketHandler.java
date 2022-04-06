@@ -6,6 +6,9 @@ import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.constants.ServeType;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.item.EItemUseType;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusDecorator;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
+import com.jftse.emulator.server.core.life.progression.bonuses.BasicHouseBonus;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
@@ -169,10 +172,18 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                     Player player = client.getPlayer();
                     byte oldLevel = player.getLevel();
                     if (playerReward != null) {
-                        byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
+                        // add house bonus
+                        // TODO: should be moved to getPlayerReward sometime
+                        ExpGoldBonusDecorator expGoldBonusDecorator = new BasicHouseBonus(
+                                new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
+
+                        int rewardExp = expGoldBonusDecorator.calculateExp();
+                        int rewardGold = expGoldBonusDecorator.calculateGold();
+
+                        byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
                         if (level != 60)
-                            player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
-                        player.setGold(player.getGold() + playerReward.getRewardGold());
+                            player.setExpPoints(player.getExpPoints() + rewardExp);
+                        player.setGold(player.getGold() + rewardGold);
                         player = levelService.setNewLevelStatusPoints(level, player);
                         client.savePlayer(player);
 

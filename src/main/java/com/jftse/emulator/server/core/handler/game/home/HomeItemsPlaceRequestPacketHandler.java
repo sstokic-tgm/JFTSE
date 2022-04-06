@@ -50,11 +50,7 @@ public class HomeItemsPlaceRequestPacketHandler extends AbstractHandler {
                 if (playerPocket != null) {
                     int itemCount = playerPocket.getItemCount();
 
-                    // those items are deco items -> its placed on the wall
-                    if (itemCount % 3 != 0)
-                        --itemCount;
-                    else
-                        itemCount = 0;
+                    --itemCount;
 
                     if (itemCount == 0) {
                         playerPocketService.remove((long) inventoryItemId);
