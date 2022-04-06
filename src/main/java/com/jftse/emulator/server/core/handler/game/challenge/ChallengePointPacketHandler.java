@@ -24,7 +24,7 @@ public class ChallengePointPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient().getActiveChallengeGame() != null) {
+        if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBasicGame) {
             ((ChallengeBasicGame) connection.getClient().getActiveChallengeGame()).setPoints(challengePointPacket.getPointsPlayer(), challengePointPacket.getPointsNpc());
 
             if (connection.getClient().getActiveChallengeGame().isFinished()) {
