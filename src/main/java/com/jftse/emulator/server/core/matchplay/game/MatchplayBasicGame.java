@@ -116,7 +116,7 @@ public class MatchplayBasicGame extends MatchplayGame {
             }
 
             if (wonGame) {
-                expGoldBonusDecorator = new WonGameBonus(expGoldBonus);
+                expGoldBonusDecorator = new WonGameBonus(expGoldBonusDecorator);
             }
 
             int rewardExp = expGoldBonusDecorator.calculateExp();
