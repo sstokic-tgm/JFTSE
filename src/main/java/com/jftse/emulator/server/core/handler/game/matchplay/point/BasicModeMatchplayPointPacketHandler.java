@@ -6,7 +6,7 @@ import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.constants.ServeType;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.item.EItemUseType;
-import com.jftse.emulator.server.core.life.progression.ExpGoldBonusDecorator;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.bonuses.BasicHouseBonus;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -174,11 +174,11 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                     if (playerReward != null) {
                         // add house bonus
                         // TODO: should be moved to getPlayerReward sometime
-                        ExpGoldBonusDecorator expGoldBonusDecorator = new BasicHouseBonus(
+                        ExpGoldBonus expGoldBonus = new BasicHouseBonus(
                                 new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
 
-                        int rewardExp = expGoldBonusDecorator.calculateExp();
-                        int rewardGold = expGoldBonusDecorator.calculateGold();
+                        int rewardExp = expGoldBonus.calculateExp();
+                        int rewardGold = expGoldBonus.calculateGold();
 
                         byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
                         if (level != 60)

@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.ServeType;
-import com.jftse.emulator.server.core.life.progression.ExpGoldBonusDecorator;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.SimpleExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.bonuses.WonGameBonus;
@@ -106,21 +106,20 @@ public class MatchplayBasicGame extends MatchplayGame {
                 basicExpReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
             }
 
-            ExpGoldBonusImpl expGoldBonus = new ExpGoldBonusImpl(basicExpReward, basicExpReward);
-            ExpGoldBonusDecorator expGoldBonusDecorator = new SimpleExpGoldBonus(expGoldBonus);
+            ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(basicExpReward, basicExpReward);
 
             int playerPositionIndex = this.getPlayerPositionsOrderedByPerformance().indexOf(playerPosition);
             switch (playerPositionIndex) {
-                case 0 -> expGoldBonusDecorator = new SimpleExpGoldBonus(expGoldBonusDecorator, 0.1);
-                case 1 -> expGoldBonusDecorator = new SimpleExpGoldBonus(expGoldBonusDecorator, 0.05);
+                case 0 -> expGoldBonus = new SimpleExpGoldBonus(expGoldBonus, 0.1);
+                case 1 -> expGoldBonus = new SimpleExpGoldBonus(expGoldBonus, 0.05);
             }
 
             if (wonGame) {
-                expGoldBonusDecorator = new WonGameBonus(expGoldBonusDecorator);
+                expGoldBonus = new WonGameBonus(expGoldBonus);
             }
 
-            int rewardExp = expGoldBonusDecorator.calculateExp();
-            int rewardGold = expGoldBonusDecorator.calculateGold();
+            int rewardExp = expGoldBonus.calculateExp();
+            int rewardGold = expGoldBonus.calculateGold();
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(playerPosition);
             playerReward.setRewardExp(rewardExp);

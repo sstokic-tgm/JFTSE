@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.life.progression;
 
 public abstract class ExpGoldBonusDecorator implements ExpGoldBonus {
-    private final ExpGoldBonus wrapper;
+    protected final ExpGoldBonus wrapper;
 
-    protected ExpGoldBonusDecorator(ExpGoldBonus expGoldBonus) {
-        this.wrapper = expGoldBonus;
+    protected ExpGoldBonusDecorator(ExpGoldBonus wrapper) {
+        this.wrapper = wrapper;
     }
 
     @Override

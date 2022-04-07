@@ -95,17 +95,16 @@ public class ChallengeService {
 
         // add account home bonuses to exp and gold
         ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(rewardExp, rewardGold);
-        ExpGoldBonusDecorator expGoldBonusDecorator = new SimpleExpGoldBonus(expGoldBonus);
         if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBasicGame) {
-            expGoldBonusDecorator = new BasicHouseBonus(expGoldBonus, connection.getClient().getAccountId());
+            expGoldBonus = new BasicHouseBonus(expGoldBonus, connection.getClient().getAccountId());
         }
         else if (connection.getClient().getActiveChallengeGame() instanceof ChallengeBattleGame) {
-            expGoldBonusDecorator = new BattleHouseBonus(expGoldBonus, connection.getClient().getAccountId());
+            expGoldBonus = new BattleHouseBonus(expGoldBonus, connection.getClient().getAccountId());
         }
 
-        expGoldBonusDecorator = new GlobalBonus(expGoldBonusDecorator);
-        rewardExp = expGoldBonusDecorator.calculateExp();
-        rewardGold = expGoldBonusDecorator.calculateGold();
+        expGoldBonus = new GlobalBonus(expGoldBonus);
+        rewardExp = expGoldBonus.calculateExp();
+        rewardGold = expGoldBonus.calculateGold();
 
         byte oldLevel = player.getLevel();
         byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());

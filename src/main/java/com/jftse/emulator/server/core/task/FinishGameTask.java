@@ -5,7 +5,7 @@ import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.item.EItemUseType;
-import com.jftse.emulator.server.core.life.progression.ExpGoldBonusDecorator;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -151,12 +151,15 @@ public class FinishGameTask extends AbstractTask {
                         .orElse(this.createEmptyPlayerReward());
 
                 // add house bonus
-                // TODO: should be moved to getPlayerReward sometime
-                ExpGoldBonusDecorator expGoldBonusDecorator = new BattleHouseBonus(
+                // TODO: should be moved to getPlayerReward sometime...
+                ExpGoldBonus expGoldBonus = new BattleHouseBonus(
                         new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
 
-                int rewardExp = expGoldBonusDecorator.calculateExp();
-                int rewardGold = expGoldBonusDecorator.calculateGold();
+                int rewardExp = expGoldBonus.calculateExp();
+                int rewardGold = expGoldBonus.calculateGold();
+                // TODO: ...because of this
+                playerReward.setRewardExp(rewardExp);
+                playerReward.setRewardGold(rewardGold);
 
                 Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
@@ -326,12 +329,15 @@ public class FinishGameTask extends AbstractTask {
                         .orElse(this.createEmptyPlayerReward());
 
                 // add house bonus
-                // TODO: should be moved to getPlayerReward sometime
-                ExpGoldBonusDecorator expGoldBonusDecorator = new BattleHouseBonus(
+                // TODO: should be moved to getPlayerReward sometime...
+                ExpGoldBonus expGoldBonus = new BattleHouseBonus(
                         new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
 
-                int rewardExp = expGoldBonusDecorator.calculateExp();
-                int rewardGold = expGoldBonusDecorator.calculateGold();
+                int rewardExp = expGoldBonus.calculateExp();
+                int rewardGold = expGoldBonus.calculateGold();
+                // TODO: ...because of this
+                playerReward.setRewardExp(rewardExp);
+                playerReward.setRewardGold(rewardGold);
 
                 Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();

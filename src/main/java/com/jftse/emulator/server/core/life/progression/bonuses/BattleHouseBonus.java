@@ -34,7 +34,7 @@ public class BattleHouseBonus extends ExpGoldBonusDecorator {
         if (accountHome == null)
             return 0;
 
-        return exp * (accountHome.getBattleBonusExp() / 100);
+        return (int) (exp * (accountHome.getBattleBonusExp() / 100.0));
     }
 
     private int houseGold(int gold) {
@@ -42,6 +42,6 @@ public class BattleHouseBonus extends ExpGoldBonusDecorator {
         if (accountHome == null)
             return 0;
 
-        return gold * (accountHome.getBattleBonusGold() / 100);
+        return (int) (gold * (accountHome.getBattleBonusGold() / 100.0));
     }
 }
