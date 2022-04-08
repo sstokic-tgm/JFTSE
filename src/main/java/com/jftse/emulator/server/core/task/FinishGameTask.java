@@ -104,10 +104,15 @@ public class FinishGameTask extends AbstractTask {
     }
 
     private void finishBattleGame(Connection connection, MatchplayBattleGame game) {
+        final boolean isFinished = game.isFinished();
+        if (isFinished)
+            return;
+
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
-        game.setFinished(true);
+        if (game.isFinished() == isFinished)
+            game.setFinished(true);
 
         List<PlayerReward> playerRewards = game.getPlayerRewards();
 
@@ -123,6 +128,8 @@ public class FinishGameTask extends AbstractTask {
         List<Player> playerList = new ArrayList<>();
         for (Iterator<Client> it = gameSession.getClients().iterator(); it.hasNext(); )
             playerList.add(it.next().getPlayer());
+
+        addProgressionBonus(playerRewards, gameSession);
 
         StringBuilder gameLogContent = new StringBuilder();
         gameLogContent.append("Battle game finished. ");
@@ -150,23 +157,12 @@ public class FinishGameTask extends AbstractTask {
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
 
-                // add house bonus
-                // TODO: should be moved to getPlayerReward sometime...
-                ExpGoldBonus expGoldBonus = new BattleHouseBonus(
-                        new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
-
-                int rewardExp = expGoldBonus.calculateExp();
-                int rewardGold = expGoldBonus.calculateGold();
-                // TODO: ...because of this
-                playerReward.setRewardExp(rewardExp);
-                playerReward.setRewardGold(rewardGold);
-
                 Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
-                byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
+                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                 if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
-                    player.setExpPoints(player.getExpPoints() + rewardExp);
-                player.setGold(player.getGold() + rewardGold);
+                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.savePlayer(player);
 
@@ -245,10 +241,15 @@ public class FinishGameTask extends AbstractTask {
     }
 
     private void finishGuardianGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
+        final boolean isFinished = game.isFinished();
+        if (isFinished)
+            return;
+
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
-        game.setFinished(true);
+        if (game.isFinished() == isFinished)
+            game.setFinished(true);
 
         Room room = connection.getClient().getActiveRoom();
         synchronized (room) {
@@ -307,6 +308,7 @@ public class FinishGameTask extends AbstractTask {
             int expMultiplier = game.getGuardianStage().getExpMultiplier();
             x.setRewardExp(x.getRewardExp() * expMultiplier);
         });
+        addProgressionBonus(playerRewards, gameSession);
 
         StringBuilder gameLogContent = new StringBuilder();
         gameLogContent.append(game.getCurrentStage().getName()).append(" ");
@@ -328,23 +330,12 @@ public class FinishGameTask extends AbstractTask {
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
 
-                // add house bonus
-                // TODO: should be moved to getPlayerReward sometime...
-                ExpGoldBonus expGoldBonus = new BattleHouseBonus(
-                        new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
-
-                int rewardExp = expGoldBonus.calculateExp();
-                int rewardGold = expGoldBonus.calculateGold();
-                // TODO: ...because of this
-                playerReward.setRewardExp(rewardExp);
-                playerReward.setRewardGold(rewardGold);
-
                 Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
-                byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
+                byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                 if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
-                    player.setExpPoints(player.getExpPoints() + rewardExp);
-                player.setGold(player.getGold() + rewardGold);
+                    player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
+                player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.savePlayer(player);
 
@@ -395,6 +386,34 @@ public class FinishGameTask extends AbstractTask {
         if (game.isFinished() && gameSession.getClients().isEmpty()) {
             GameSessionManager.getInstance().removeGameSession(gameSession);
         }
+    }
+
+    private void addProgressionBonus(List<PlayerReward> playerRewards, GameSession gameSession) {
+        gameSession.getClients().forEach(client -> {
+            RoomPlayer rp = client.getRoomPlayer();
+            if (rp == null) {
+                return;
+            }
+
+            boolean isActivePlayer = rp.getPosition() < 4;
+            if (isActivePlayer) {
+                PlayerReward playerReward = playerRewards.stream()
+                        .filter(x -> x.getPlayerPosition() == rp.getPosition())
+                        .findFirst()
+                        .orElse(this.createEmptyPlayerReward());
+
+                // add house bonus
+                // TODO: should be moved to getPlayerReward sometime...
+                ExpGoldBonus expGoldBonus = new BattleHouseBonus(
+                        new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
+
+                int rewardExp = expGoldBonus.calculateExp();
+                int rewardGold = expGoldBonus.calculateGold();
+                // TODO: ...because of this
+                playerReward.setRewardExp(rewardExp);
+                playerReward.setRewardGold(rewardGold);
+            }
+        });
     }
 
     private PlayerReward createEmptyPlayerReward() {

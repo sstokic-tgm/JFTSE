@@ -91,6 +91,8 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
             game.setPoints((byte) pointsTeamRed, (byte) (pointsTeamBlue + 1));
 
+        final boolean isFinished = game.isFinished();
+
         boolean anyTeamWonSet = setsTeamRead != game.getSetsRedTeam() || setsTeamBlue != game.getSetsBlueTeam();
         if (anyTeamWonSet) {
             gameSession.setTimesCourtChanged(gameSession.getTimesCourtChanged() + 1);
@@ -101,7 +103,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = connection.getClient().getActiveRoom().getRoomPlayerList();
 
         List<PlayerReward> playerRewards = new ArrayList<>();
-        if (game.isFinished()) {
+        if (isFinished) {
             playerRewards = game.getPlayerRewards();
             connection.getClient().getActiveRoom().setStatus(RoomStatus.NotRunning);
         }
@@ -112,7 +114,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         clients.forEach(c -> playerList.add(c.getPlayer()));
 
         StringBuilder gameLogContent = new StringBuilder();
-        if (game.isFinished()) {
+        if (isFinished) {
             gameLogContent.append("Basic game finished. ");
 
             boolean redTeamWon = game.getSetsRedTeam() == 2;
@@ -140,7 +142,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
-            if (!game.isFinished()) {
+            if (!isFinished) {
                 short pointingTeamPosition = -1;
                 if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
                     pointingTeamPosition = 0;
@@ -157,7 +159,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                 }
             }
 
-            if (game.isFinished()) {
+            if (isFinished) {
                 if (isActivePlayer) {
                     boolean wonGame = false;
                     if (isCurrentPlayerInRedTeam && game.getSetsRedTeam() == 2 || !isCurrentPlayerInRedTeam && game.getSetsBlueTeam() == 2) {
@@ -268,7 +270,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
             }
         }
 
-        if (game.isFinished()) {
+        if (isFinished) {
             gameLogContent.append("playtime: ").append(TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded())).append("s");
 
             GameLog gameLog = new GameLog();
@@ -298,7 +300,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
         }
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
-        if (game.isFinished() && gameSession.getClients().isEmpty()) {
+        if (isFinished && gameSession.getClients().isEmpty()) {
             GameSessionManager.getInstance().removeGameSession(gameSession);
         }
     }
