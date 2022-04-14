@@ -78,6 +78,12 @@ public class LoginPacketHandler extends AbstractHandler {
             connection.sendTCP(loginAnswerPacket);
         } else {
             Integer accountStatus = account.getStatus();
+            if (accountStatus.equals((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN)) {
+                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
+                connection.sendTCP(loginAnswerPacket);
+                return;
+            }
+
             if (accountStatus.equals((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID)
                     && account.getBannedUntil() != null && account.getBannedUntil().getTime() < new Date().getTime()) {
                 account.setStatus(0);
