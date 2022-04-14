@@ -134,6 +134,7 @@ public class CommandManager {
         addCommand("arcade", 0, ArcadeModeCommand.class);
         addCommand("random", 0, RandomModeCommand.class);
         addCommand("latency", 0, LatencyCommand.class);
+        addCommand("pointback", 0, PointbackCommand.class);
         addCommand("ban", 1, BanPlayerCommand.class);
         addCommand("unban", 1, UnbanPlayerCommand.class);
         addCommand("sN", 1, ServerNoticeCommand.class);

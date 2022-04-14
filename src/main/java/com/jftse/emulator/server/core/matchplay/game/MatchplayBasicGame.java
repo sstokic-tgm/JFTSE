@@ -22,12 +22,23 @@ import java.util.concurrent.TimeUnit;
 public class MatchplayBasicGame extends MatchplayGame {
     private HashMap<Integer, Integer> individualPointsMadeFromPlayers;
     private ArrayList<Point> playerLocationsOnMap;
+    private boolean[] pointBackVotes;
     private int pointsRedTeam;
     private int pointsBlueTeam;
     private int setsRedTeam;
     private int setsBlueTeam;
     private RoomPlayer servePlayer;
     private RoomPlayer receiverPlayer;
+
+    private HashMap<Integer, Integer> previousIndividualPointsMadeFromPlayers;
+    private int previousPointsRedTeam;
+    private int previousPointsBlueTeam;
+    private int previousSetsRedTeam;
+    private int previousSetsBlueTeam;
+    private short previousServePlayerPosition;
+    private short previousReceiverPlayerPosition;
+    private boolean setDowngraded = false;
+    private boolean pointBackValid = false;
 
     public MatchplayBasicGame(byte players) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -39,13 +50,28 @@ public class MatchplayBasicGame extends MatchplayGame {
                 new Point(20, 75)
         ));
 
+        this.pointsRedTeam = 0;
+        this.pointsBlueTeam = 0;
+        this.setsRedTeam = 0;
+        this.setsBlueTeam = 0;
+        this.setFinished(false);
+        this.pointBackVotes = new boolean[players];
         this.individualPointsMadeFromPlayers = new HashMap<>(players);
         for (int i = 0; i < players; i++) {
             this.individualPointsMadeFromPlayers.put(i, 0);
         }
     }
 
-    public void setPoints(byte pointsRedTeam, byte pointsBlueTeam) {
+    public synchronized void setPoints(byte pointsRedTeam, byte pointsBlueTeam) {
+        this.previousPointsRedTeam = this.pointsRedTeam;
+        this.previousPointsBlueTeam = this.pointsBlueTeam;
+        this.previousSetsRedTeam = this.setsRedTeam;
+        this.previousSetsBlueTeam = this.setsBlueTeam;
+        this.previousIndividualPointsMadeFromPlayers = new HashMap<>(this.individualPointsMadeFromPlayers);
+        this.previousServePlayerPosition = this.servePlayer.getPosition();
+        this.previousReceiverPlayerPosition = this.receiverPlayer.getPosition();
+        this.pointBackValid = true;
+
         this.pointsRedTeam = pointsRedTeam;
         this.pointsBlueTeam = pointsBlueTeam;
 
@@ -72,9 +98,39 @@ public class MatchplayBasicGame extends MatchplayGame {
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             this.setEndTime(cal.getTime());
         }
+        resetPointBackVotes();
     }
 
-    public void increasePerformancePointForPlayer(int playerPosition) {
+    public synchronized void setPointBackVote(int playerPosition) {
+        this.pointBackVotes[playerPosition] = true;
+    }
+
+    public boolean isPointBackAvailable() {
+        for (boolean pointBackVote : this.pointBackVotes) {
+            if (!pointBackVote)
+                return false;
+        }
+        return this.pointBackValid;
+    }
+
+    public synchronized void pointBack() {
+        this.pointsRedTeam = this.previousPointsRedTeam;
+        this.pointsBlueTeam = this.previousPointsBlueTeam;
+        //for example, if downgraded to 40 - 0 from 1 - 0 sets
+        setDowngraded = previousSetsBlueTeam != this.setsBlueTeam || this.previousSetsRedTeam != this.setsRedTeam;
+        this.setsRedTeam = this.previousSetsRedTeam;
+        this.setsBlueTeam = this.previousSetsBlueTeam;
+        this.individualPointsMadeFromPlayers = new HashMap<>(this.previousIndividualPointsMadeFromPlayers);
+
+        resetPointBackVotes();
+        this.pointBackValid = false;
+    }
+
+    private void resetPointBackVotes() {
+        Arrays.fill(this.pointBackVotes, false);
+    }
+
+    public synchronized void increasePerformancePointForPlayer(int playerPosition) {
         int currentPoint = this.getIndividualPointsMadeFromPlayers().getOrDefault(playerPosition, 0);
         this.getIndividualPointsMadeFromPlayers().put(playerPosition, currentPoint + 1);
     }
