@@ -67,9 +67,9 @@ public class PlayerCreatePacketHandler extends AbstractHandler {
                     player.setWillpower(itemChar.getWillpower());
 
                     if (player.getFirstPlayer()) {
-                        player.setStatusPoints((byte) 5);
-                    } else {
                         player.setStatusPoints((byte) (player.getStatusPoints() + 19));
+                    } else {
+                        player.setStatusPoints((byte) 5);
                     }
                 } else {
                     player.setStrength(playerCreatePacket.getStrength());
@@ -78,9 +78,9 @@ public class PlayerCreatePacketHandler extends AbstractHandler {
                     player.setWillpower(playerCreatePacket.getWillpower());
 
                     if (player.getFirstPlayer()) {
-                        player.setStatusPoints(playerCreatePacket.getStatusPoints());
-                    } else {
                         player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 19));
+                    } else {
+                        player.setStatusPoints(playerCreatePacket.getStatusPoints());
                     }
                 }
 
