@@ -66,7 +66,12 @@ public class SkillHitsTargetHandler extends AbstractHandler {
             return;
 
         GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession == null)
+            return;
+
         MatchplayGame game = gameSession.getActiveMatchplayGame();
+        if (game == null)
+            return;
 
         byte skillId = skillHitsTarget.getSkillId();
 

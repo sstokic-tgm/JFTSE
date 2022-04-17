@@ -45,7 +45,12 @@ public class PlayerPickingUpCrystalHandler extends AbstractHandler {
 
         short playerPosition = roomPlayer.getPosition();
         GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession == null)
+            return;
+
         MatchplayGame game = gameSession.getActiveMatchplayGame();
+        if (game == null)
+            return;
 
         boolean isBattleGame = game instanceof MatchplayBattleGame;
 
