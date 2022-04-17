@@ -8,7 +8,6 @@ import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
-import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.matchplay.C2SMatchplayUsesSkill;
@@ -23,8 +22,6 @@ import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.List;
 
 @Log4j2
 public class PlayerUseSkillHandler extends AbstractHandler {
@@ -111,12 +108,9 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                 if (itemCount <= 0) {
 
                     playerPocketService.remove(playerPocket.getId());
-                    pocket = pocketService.decrementPocketBelongings(pocket);
-                    player.setPocket(pocket);
+                    pocketService.decrementPocketBelongings(pocket);
 
                     quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, itemId);
-                    player.setQuickSlotEquipment(quickSlotEquipment);
-                    connection.getClient().savePlayer(player);
 
                     S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(itemId);
                     connection.sendTCP(inventoryItemRemoveAnswerPacket);

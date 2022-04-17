@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.service;
 
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
+import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.database.repository.player.QuickSlotEquipmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class QuickSlotEquipmentService {
     private final QuickSlotEquipmentRepository quickSlotEquipmentRepository;
+    private final PlayerPocketService playerPocketService;
 
     public QuickSlotEquipment save(QuickSlotEquipment quickSlotEquipment) {
         return quickSlotEquipmentRepository.save(quickSlotEquipment);
@@ -41,19 +44,29 @@ public class QuickSlotEquipmentService {
         else if (quickSlotEquipment.getSlot5().equals(quickSlotId))
             quickSlotEquipment.setSlot5(0);
 
-        quickSlotEquipment = save(quickSlotEquipment);
+        save(quickSlotEquipment);
     }
 
-    public void updateQuickSlots(QuickSlotEquipment quickSlotEquipment, List<Integer> quickSlotItems) {
-        quickSlotEquipment = findById(quickSlotEquipment.getId());
+    public void updateQuickSlots(Player player, List<Integer> quickSlotItems) {
+        Pocket pocket = player.getPocket();
+        QuickSlotEquipment quickSlotEquipment = findById(player.getQuickSlotEquipment().getId());
 
-        quickSlotEquipment.setSlot1(quickSlotItems.get(0));
-        quickSlotEquipment.setSlot2(quickSlotItems.get(1));
-        quickSlotEquipment.setSlot3(quickSlotItems.get(2));
-        quickSlotEquipment.setSlot4(quickSlotItems.get(3));
-        quickSlotEquipment.setSlot5(quickSlotItems.get(4));
+        PlayerPocket item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(0), pocket);
+        quickSlotEquipment.setSlot1(item == null ? 0 : item.getId().intValue());
 
-        quickSlotEquipment = save(quickSlotEquipment);
+        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(1), pocket);
+        quickSlotEquipment.setSlot2(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(2), pocket);
+        quickSlotEquipment.setSlot3(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(3), pocket);
+        quickSlotEquipment.setSlot4(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(4), pocket);
+        quickSlotEquipment.setSlot5(item == null ? 0 : item.getId().intValue());
+
+        save(quickSlotEquipment);
     }
 
     public List<Integer> getEquippedQuickSlots(Player player) {

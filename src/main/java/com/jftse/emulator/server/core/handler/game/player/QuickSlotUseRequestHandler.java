@@ -144,13 +144,10 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
         int itemCount = playerPocket.getItemCount() - 1;
         if (itemCount <= 0) {
             playerPocketService.remove(playerPocket.getId());
-            pocket = pocketService.decrementPocketBelongings(pocket);
-            player.setPocket(pocket);
+            pocketService.decrementPocketBelongings(pocket);
 
             QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
             quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, quickSlotUseRequestPacket.getQuickSlotId());
-            player.setQuickSlotEquipment(quickSlotEquipment);
-            connection.getClient().savePlayer(player);
 
             S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(quickSlotUseRequestPacket.getQuickSlotId());
             connection.sendTCP(inventoryItemRemoveAnswerPacket);

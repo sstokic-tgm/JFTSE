@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.service;
 
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.SpecialSlotEquipment;
+import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.database.repository.player.SpecialSlotEquipmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class SpecialSlotEquipmentService {
     private final SpecialSlotEquipmentRepository specialSlotEquipmentRepository;
+    private final PlayerPocketService playerPocketService;
 
     public SpecialSlotEquipment save(SpecialSlotEquipment specialSlotEquipment) {
         return specialSlotEquipmentRepository.save(specialSlotEquipment);
@@ -39,18 +42,26 @@ public class SpecialSlotEquipmentService {
         else if (specialSlotEquipment.getSlot4().equals(specialSlotId))
             specialSlotEquipment.setSlot4(0);
 
-        specialSlotEquipment = save(specialSlotEquipment);
+        save(specialSlotEquipment);
     }
 
-    public void updateSpecialSlots(SpecialSlotEquipment specialSlotEquipment, List<Integer> specialSlotItems) {
-        specialSlotEquipment = findById(specialSlotEquipment.getId());
+    public void updateSpecialSlots(Player player, List<Integer> specialSlotItems) {
+        Pocket pocket = player.getPocket();
+        SpecialSlotEquipment specialSlotEquipment = findById(player.getSpecialSlotEquipment().getId());
 
-        specialSlotEquipment.setSlot1(specialSlotItems.get(0));
-        specialSlotEquipment.setSlot2(specialSlotItems.get(1));
-        specialSlotEquipment.setSlot3(specialSlotItems.get(2));
-        specialSlotEquipment.setSlot4(specialSlotItems.get(3));
+        PlayerPocket item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(0), pocket);
+        specialSlotEquipment.setSlot1(item == null ? 0 : item.getId().intValue());
 
-        specialSlotEquipment = save(specialSlotEquipment);
+        item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(1), pocket);
+        specialSlotEquipment.setSlot2(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(2), pocket);
+        specialSlotEquipment.setSlot3(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(3), pocket);
+        specialSlotEquipment.setSlot4(item == null ? 0 : item.getId().intValue());
+
+        save(specialSlotEquipment);
     }
 
     public List<Integer> getEquippedSpecialSlots(Player player) {

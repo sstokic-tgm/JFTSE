@@ -6,8 +6,9 @@ import com.jftse.emulator.server.core.packet.packets.inventory.C2SInventoryWearS
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryWearSpecialAnswerPacket;
 import com.jftse.emulator.server.core.service.SpecialSlotEquipmentService;
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.database.model.player.SpecialSlotEquipment;
 import com.jftse.emulator.server.networking.packet.Packet;
+
+import java.util.List;
 
 public class InventoryWearSpecialPacketHandler extends AbstractHandler {
     private C2SInventoryWearSpecialRequestPacket inventoryWearSpecialRequestPacket;
@@ -26,14 +27,15 @@ public class InventoryWearSpecialPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
+            return;
+
         Player player = connection.getClient().getPlayer();
-        SpecialSlotEquipment specialSlotEquipment = player.getSpecialSlotEquipment();
 
-        specialSlotEquipmentService.updateSpecialSlots(specialSlotEquipment, inventoryWearSpecialRequestPacket.getSpecialSlotList());
-        player.setSpecialSlotEquipment(specialSlotEquipment);
-        connection.getClient().savePlayer(player);
+        specialSlotEquipmentService.updateSpecialSlots(player, inventoryWearSpecialRequestPacket.getSpecialSlotList());
 
-        S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(inventoryWearSpecialRequestPacket.getSpecialSlotList());
+        List<Integer> specialSlotList = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+        S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(specialSlotList);
         connection.sendTCP(inventoryWearSpecialAnswerPacket);
     }
 }

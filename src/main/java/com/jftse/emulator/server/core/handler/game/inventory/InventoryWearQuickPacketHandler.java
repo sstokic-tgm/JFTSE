@@ -6,8 +6,9 @@ import com.jftse.emulator.server.core.packet.packets.inventory.C2SInventoryWearQ
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryWearQuickAnswerPacket;
 import com.jftse.emulator.server.core.service.QuickSlotEquipmentService;
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.database.model.player.QuickSlotEquipment;
 import com.jftse.emulator.server.networking.packet.Packet;
+
+import java.util.List;
 
 public class InventoryWearQuickPacketHandler extends AbstractHandler {
     private C2SInventoryWearQuickReqPacket inventoryWearQuickReqPacket;
@@ -26,14 +27,15 @@ public class InventoryWearQuickPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
+            return;
+
         Player player = connection.getClient().getPlayer();
-        QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
 
-        quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, inventoryWearQuickReqPacket.getQuickSlotList());
-        player.setQuickSlotEquipment(quickSlotEquipment);
-        connection.getClient().savePlayer(player);
+        quickSlotEquipmentService.updateQuickSlots(player, inventoryWearQuickReqPacket.getQuickSlotList());
 
-        S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(inventoryWearQuickReqPacket.getQuickSlotList());
+        List<Integer> quickSlotList = quickSlotEquipmentService.getEquippedQuickSlots(player);
+        S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(quickSlotList);
         connection.sendTCP(inventoryWearQuickAnswerPacket);
     }
 }

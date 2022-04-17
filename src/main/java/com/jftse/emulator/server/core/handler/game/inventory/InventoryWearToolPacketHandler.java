@@ -6,8 +6,9 @@ import com.jftse.emulator.server.core.packet.packets.inventory.C2SInventoryWearT
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryWearToolAnswerPacket;
 import com.jftse.emulator.server.core.service.ToolSlotEquipmentService;
 import com.jftse.emulator.server.database.model.player.Player;
-import com.jftse.emulator.server.database.model.player.ToolSlotEquipment;
 import com.jftse.emulator.server.networking.packet.Packet;
+
+import java.util.List;
 
 public class InventoryWearToolPacketHandler extends AbstractHandler {
     private C2SInventoryWearToolRequestPacket inventoryWearToolRequestPacket;
@@ -26,14 +27,15 @@ public class InventoryWearToolPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
+            return;
+
         Player player = connection.getClient().getPlayer();
-        ToolSlotEquipment toolSlotEquipment = player.getToolSlotEquipment();
 
-        toolSlotEquipmentService.updateToolSlots(toolSlotEquipment, inventoryWearToolRequestPacket.getToolSlotList());
-        player.setToolSlotEquipment(toolSlotEquipment);
-        connection.getClient().savePlayer(player);
+        toolSlotEquipmentService.updateToolSlots(player, inventoryWearToolRequestPacket.getToolSlotList());
 
-        S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(inventoryWearToolRequestPacket.getToolSlotList());
+        List<Integer> toolSlotList = toolSlotEquipmentService.getEquippedToolSlots(player);
+        S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(toolSlotList);
         connection.sendTCP(inventoryWearToolAnswerPacket);
     }
 }
