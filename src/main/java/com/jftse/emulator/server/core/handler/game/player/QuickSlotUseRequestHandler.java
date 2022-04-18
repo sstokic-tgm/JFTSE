@@ -74,11 +74,12 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
             player.setDexterity(itemChar.getDexterity());
             player.setWillpower(itemChar.getWillpower());
             player.setStatusPoints((byte) (player.getLevel() + 5 - 1));
+            connection.getClient().savePlayer(player);
+
             StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
             S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
-            connection.sendTCP(playerStatusPointChangePacket);
             S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
-            connection.sendTCP(playerInfoPlayStatsPacket);
+            connection.sendTCP(playerStatusPointChangePacket, playerInfoPlayStatsPacket);
         } else if (category.equals("SPECIAL") && itemIndex == 26) {
             Friend playerCouple = socialService.getRelationship(player);
             if (playerCouple == null) {
