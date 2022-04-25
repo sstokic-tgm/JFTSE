@@ -65,6 +65,10 @@ public class ServiceManager {
     @Autowired
     private ItemCharService itemCharService;
     @Autowired
+    private ItemRecipeService itemRecipeService;
+    @Autowired
+    private ItemMaterialService itemMaterialService;
+    @Autowired
     private SocialService socialService;
     @Autowired
     private ChallengeService challengeService;

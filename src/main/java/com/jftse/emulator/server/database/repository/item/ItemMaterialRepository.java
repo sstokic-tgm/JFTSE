@@ -10,4 +10,7 @@ import java.util.List;
 public interface ItemMaterialRepository extends JpaRepository<ItemMaterial, Long> {
     @Query(value = "SELECT im.sellPrice FROM ItemMaterial im WHERE im.itemIndex = :itemIndex")
     List<Integer> getItemSellPriceByItemIndex(@Param("itemIndex") Integer itemIndex);
+
+    @Query(value = "SELECT im.itemIndex FROM ItemMaterial im")
+    List<Integer> findAllItemIndexes();
 }

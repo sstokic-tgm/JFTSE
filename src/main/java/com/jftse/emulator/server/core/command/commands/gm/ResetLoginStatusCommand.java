@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.command.commands.gm;
 
 import com.jftse.emulator.server.core.command.Command;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packet.packets.S2CDCMsgPacket;
+import com.jftse.emulator.server.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
@@ -16,10 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class ServerKickCommand extends Command {
-
-    public ServerKickCommand() {
-        setDescription("Kicks player from server");
+public class ResetLoginStatusCommand extends Command {
+    public ResetLoginStatusCommand() {
+        setDescription("Resets login status of a player");
     }
 
     @Override
@@ -27,14 +26,14 @@ public class ServerKickCommand extends Command {
         if (params.size() < 1) {
             Packet answer;
             if (connection.getClient().isInLobby())
-                answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Use -serverKick <playerName>");
+                answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Use -rsLogin <playerName>");
             else
-                answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Use -serverKick <playerName>");
+                answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Use -rsLogin <playerName>");
             connection.sendTCP(answer);
             return;
         }
 
-        boolean successfullyKicked = false;
+        boolean successfullyReseted = false;
         String playerName = params.get(0);
         final ConcurrentLinkedDeque<Client> clients = GameManager.getInstance().getClients();
         for (Iterator<Client> it = clients.iterator(); it.hasNext(); ) {
@@ -45,32 +44,33 @@ public class ServerKickCommand extends Command {
                 if (activePlayer.getName().equals(playerName) && client.getConnection() != null) {
                     Account account = client.getAccount();
                     if (account != null) {
-                        if (account.getStatus() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID)
+                        if (account.getStatus() == S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN) {
                             account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-                        client.saveAccount(account);
+                            client.saveAccount(account);
+                        }
                     }
 
-                    S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(1);
-                    client.getConnection().sendTCP(msgPacket);
+                    S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+                    client.getConnection().sendTCP(disconnectAnswerPacket);
                     client.getConnection().close();
 
-                    successfullyKicked = true;
+                    successfullyReseted = true;
                     break;
                 }
             }
         }
 
         Packet answer;
-        if (successfullyKicked) {
+        if (successfullyReseted) {
             if (connection.getClient().isInLobby())
-                answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player " + playerName + " has been kicked from the server");
+                answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player " + playerName + " status has been reseted");
             else
-                answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player " + playerName + " has been kicked from the server");
+                answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player " + playerName + " status has been reseted");
         } else {
             if (connection.getClient().isInLobby())
-                answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player " + playerName + " couldn't be kicked from the server");
+                answer = new S2CChatLobbyAnswerPacket((char) 0, "Command", "Player " + playerName + " status couldn't be reseted");
             else
-                answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player " + playerName + " couldn't be kicked from the server");
+                answer = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Player " + playerName + " status couldn't be reseted");
         }
         connection.sendTCP(answer);
     }

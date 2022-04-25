@@ -22,6 +22,7 @@ import lombok.extern.log4j.Log4j2;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Log4j2
 public class LoginPacketHandler extends AbstractHandler {
@@ -109,9 +110,9 @@ public class LoginPacketHandler extends AbstractHandler {
                 connection.getClient().saveAccount(account);
                 connection.getClient().setAccount(account.getId());
 
-                AuthToken existingAuthToken = authTokenService.findAuthTokenByAccountName(account.getUsername());
-                if (existingAuthToken != null) {
-                    authTokenService.remove(existingAuthToken);
+                List<AuthToken> existingAuthTokens = authTokenService.findAuthTokensByAccountName(account.getUsername());
+                if (!existingAuthTokens.isEmpty()) {
+                    existingAuthTokens.forEach(authTokenService::remove);
                 }
 
                 String token = StringUtils.randomString(16);

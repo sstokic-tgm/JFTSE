@@ -3,14 +3,14 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout
-                    pattern="%d{HH:mm:ss,SSS} [%t] %c{1} %-5p %msg%n%throwable"/>
+                    pattern="%d{HH:mm:ss,SSS} [%t] %c{1}[%M] %-5p %msg%n%throwable"/>
         </Console>
 
         <RollingFile name="RollingFile"
                      fileName="logs/server.log"
                      filePattern="logs/server.%d{MM-dd-yyyy}.log.gz">
             <PatternLayout>
-                <pattern>%d{HH:mm:ss,SSS} [%t] %c{1} %-5p %msg%n%throwable</pattern>
+                <pattern>%d{HH:mm:ss,SSS} [%t] %c{1}[%M] %-5p %msg%n%throwable</pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy  size="1GB" />

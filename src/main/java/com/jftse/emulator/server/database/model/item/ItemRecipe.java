@@ -20,4 +20,10 @@ public class ItemRecipe extends Item {
     private String forPlayer;
 
     private Boolean enableParcel;
+
+    private Integer requireGold;
+
+    private String materials;
+
+    private String mutations;
 }

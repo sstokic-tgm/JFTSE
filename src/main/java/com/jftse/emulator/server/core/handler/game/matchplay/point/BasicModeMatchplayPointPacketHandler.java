@@ -189,9 +189,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                         player = levelService.setNewLevelStatusPoints(level, player);
                         client.savePlayer(player);
 
-                        if (wonGame) {
-                            this.handleRewardItem(client.getConnection(), playerReward);
-                        }
+                        this.handleRewardItem(client.getConnection(), playerReward);
                     }
 
                     PlayerStatistic playerStatistic = player.getPlayerStatistic();
@@ -232,10 +230,8 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                         packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                     }
 
-                    if (wonGame) {
-                        S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                        client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
-                    }
+                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
                     S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);

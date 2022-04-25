@@ -139,6 +139,7 @@ public class CommandManager {
         addCommand("unban", 1, UnbanPlayerCommand.class);
         addCommand("sN", 1, ServerNoticeCommand.class);
         addCommand("serverKick", 1, ServerKickCommand.class);
+        addCommand("rsLogin", 1, ResetLoginStatusCommand.class);
         log.info("Commands has been loaded.");
     }
 }

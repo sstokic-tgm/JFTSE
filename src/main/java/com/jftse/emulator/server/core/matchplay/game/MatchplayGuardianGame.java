@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.item.EItemCategory;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.combat.GuardianCombatSystem;
 import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
@@ -207,7 +208,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         setStartTime(cal.getTime());
     }
 
-    public List<PlayerReward> getPlayerRewards() {
+    public List<PlayerReward> getPlayerRewards(boolean wonGame) {
         List<Integer> stageRewards = this.getCurrentStage().getRewards();
         List<PlayerReward> playerRewards = new ArrayList<>();
         this.playerBattleStates.forEach(x -> {
@@ -217,8 +218,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
             playerReward.setRewardGold(this.getGoldPot());
             playerReward.setRewardProductIndex(-1);
 
-            if (stageRewards != null)
-            {
+            if (stageRewards != null) {
                 int rewardsCount = stageRewards.size();
                 if (rewardsCount > 0) {
                     Random r = new Random();
@@ -228,6 +228,19 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     int amount = this.isHardMode() ? 3 : 1;
                     playerReward.setProductRewardAmount(amount);
                 }
+            } else {
+                List<Integer> materialsForReward = ServiceManager.getInstance().getItemMaterialService().findAllItemIndexes();
+                List<Integer> materialsProductIndex = ServiceManager.getInstance().getProductService().findAllProductIndexesByCategoryAndItemIndexList(EItemCategory.MATERIAL.getName(), materialsForReward);
+
+                Random r = new Random();
+                int drawnMaterial = r.nextInt(materialsProductIndex.size() - 1 + 1) + 1;
+
+                playerReward.setRewardProductIndex(materialsProductIndex.get(drawnMaterial - 1));
+
+                final int min = 1;
+                final int max = !wonGame ? 2 : 3;
+                final int amount = r.nextInt(max - min + 1) + min;
+                playerReward.setProductRewardAmount(amount);
             }
 
             playerRewards.add(playerReward);

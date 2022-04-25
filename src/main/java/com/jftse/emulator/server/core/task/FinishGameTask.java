@@ -166,9 +166,7 @@ public class FinishGameTask extends AbstractTask {
                 player = levelService.setNewLevelStatusPoints(level, player);
                 client.savePlayer(player);
 
-                if (wonGame) {
-                    this.handleRewardItem(client.getConnection(), playerReward);
-                }
+                this.handleRewardItem(client.getConnection(), playerReward);
 
                 PlayerStatistic playerStatistic = player.getPlayerStatistic();
                 if (wonGame) {
@@ -207,10 +205,8 @@ public class FinishGameTask extends AbstractTask {
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                 }
 
-                if (wonGame) {
-                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
-                }
+                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
@@ -303,7 +299,7 @@ public class FinishGameTask extends AbstractTask {
             }
         }
 
-        List<PlayerReward> playerRewards = game.getPlayerRewards();
+        List<PlayerReward> playerRewards = game.getPlayerRewards(wonGame);
         playerRewards.forEach(x -> {
             int expMultiplier = game.getGuardianStage().getExpMultiplier();
             x.setRewardExp(x.getRewardExp() * expMultiplier);
@@ -355,10 +351,8 @@ public class FinishGameTask extends AbstractTask {
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                 }
 
-                if (wonGame) {
-                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
-                }
+                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
