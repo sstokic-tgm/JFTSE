@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.command.commands.gm;
 
 import com.jftse.emulator.server.core.command.Command;
 import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatLobbyAnswerPacket;
@@ -56,6 +57,20 @@ public class ResetLoginStatusCommand extends Command {
 
                     successfullyReseted = true;
                     break;
+                }
+            }
+        }
+        if (!successfullyReseted) {
+            Player player = ServiceManager.getInstance().getPlayerService().findByName(playerName);
+            if (player != null) {
+                Account playerAccount = ServiceManager.getInstance().getAuthenticationService().findAccountById(player.getAccount().getId());
+                if (playerAccount != null) {
+                    if (playerAccount.getStatus() == S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN) {
+                        playerAccount.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+                        ServiceManager.getInstance().getAuthenticationService().updateAccount(playerAccount);
+
+                        successfullyReseted = true;
+                    }
                 }
             }
         }
