@@ -7,6 +7,8 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.validation.ValidationException;
 import java.io.IOException;
@@ -26,6 +28,8 @@ import java.util.function.BiPredicate;
 @Setter
 @Log4j2
 public class TcpConnection {
+    private static final Logger packetsLog = LogManager.getLogger("packets-log");
+
     private SocketChannel socketChannel;
     private int keepAliveMillis = 10000;
     private final ByteBuffer readBuffer;
@@ -179,7 +183,7 @@ public class TcpConnection {
             throw new IOException("Unable to read object larger than read buffer: " + currentObjectLength);
 
         if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
-            log.debug("payload - RECV " + BitKit.toString(encryptedData, 0, encryptedData.length) + " bytesRead: " + bytesRead);
+            packetsLog.debug("payload - RECV " + BitKit.toString(encryptedData, 0, encryptedData.length) + " bytesRead: " + bytesRead);
 
         BiPredicate<Integer, Integer> packetSizePosRangeCheck = (l, r) -> l >= r;
         // a read tcp packet may contain multiple nested packets, so we handle that properly
@@ -188,14 +192,14 @@ public class TcpConnection {
                 throw new IOException("Invalid packet size position");
 
             if (!this.isValidChecksum(data)) {
-                log.error("Invalid packet header lets try not to disconnect him...");
+                packetsLog.error("Invalid packet header lets try not to disconnect him...");
                 try {
 
                     this.send(new Packet((char) 0xFA3));
                 } catch (IOException ioe) {
                     throw new IOException("Remote disconnected. This was caused by the last received invalid packet header");
                 }
-                log.debug("Should be still connected, don't disconnect him");
+                packetsLog.debug("Should be still connected, don't disconnect him");
                 return null;
             }
 
@@ -208,7 +212,7 @@ public class TcpConnection {
                 packet = new Packet(data);
 
                 if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
-                    log.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                    packetsLog.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
                 result.add(packet);
 
@@ -235,7 +239,7 @@ public class TcpConnection {
             this.receiveIndicator = newReceiveIndicator % 60;
 
             if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
-                log.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                packetsLog.info("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
         } else {
             packet = null;
         }
@@ -301,7 +305,7 @@ public class TcpConnection {
                 }
                 packet = new Packet(data);
                 if (ConfigService.getInstance().getValue("logging.packets.all.enabled", true))
-                    log.info("SEND [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+                    packetsLog.info("SEND [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
             }
 
             if (!writeToSocket()) {
@@ -384,8 +388,6 @@ public class TcpConnection {
     public void close() {
         try {
             if (socketChannel != null) {
-                socketChannel.socket().shutdownInput();
-                socketChannel.socket().shutdownOutput();
                 socketChannel.close();
                 if (selectionKey != null)
                     selectionKey.selector().wakeup();

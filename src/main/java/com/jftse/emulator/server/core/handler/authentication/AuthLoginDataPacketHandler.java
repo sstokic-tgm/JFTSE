@@ -13,9 +13,11 @@ import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.core.service.AuthenticationService;
 import com.jftse.emulator.server.database.model.auth.AuthToken;
 import com.jftse.emulator.server.networking.packet.Packet;
+import lombok.extern.log4j.Log4j2;
 
 import java.time.Instant;
 
+@Log4j2
 public class AuthLoginDataPacketHandler extends AbstractHandler {
     private C2SAuthLoginPacket authLoginPacket;
 
@@ -41,6 +43,8 @@ public class AuthLoginDataPacketHandler extends AbstractHandler {
         if (account != null && account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
             account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
             account = authenticationService.updateAccount(account);
+
+            log.info(account.getUsername() + " connected");
 
             String token = StringUtils.randomString(16);
             long timestamp = Instant.now().toEpochMilli();

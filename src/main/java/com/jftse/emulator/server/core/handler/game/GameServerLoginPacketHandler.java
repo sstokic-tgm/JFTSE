@@ -11,9 +11,11 @@ import com.jftse.emulator.server.database.model.auth.AuthToken;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Date;
 
+@Log4j2
 public class GameServerLoginPacketHandler extends AbstractHandler {
     private C2SGameServerLoginPacket gameServerLoginPacket;
 
@@ -55,8 +57,10 @@ public class GameServerLoginPacketHandler extends AbstractHandler {
             // mark as logged in
             account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
             client.saveAccount(account);
-            client.setAccount(account.getId());
 
+            log.info(player.getName() + " connected");
+
+            client.setAccount(account.getId());
             connection.setClient(client);
             connection.setHwid(gameServerLoginPacket.getHwid());
 

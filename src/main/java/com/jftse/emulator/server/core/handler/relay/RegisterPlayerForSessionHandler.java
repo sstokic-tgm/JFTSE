@@ -45,6 +45,8 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                     client.setConnection(connection);
                     client.setSpectator((matchplayPlayerIdsInSessionPacket.isSpectator()));
 
+                    log.info(client.getPlayer().getName() + " connected");
+
                     connection.setClient(client);
                     gameSession.getClientsInRelay().add(client);
                     RelayManager.getInstance().addClient(client);

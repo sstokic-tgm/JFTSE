@@ -1,7 +1,9 @@
 package com.jftse.emulator.server.core.listener;
 
 import com.jftse.emulator.server.core.handler.anticheat.BasicAntiCheatHandler;
+import com.jftse.emulator.server.core.handler.authentication.BasicAuthHandler;
 import com.jftse.emulator.server.core.manager.AntiCheatManager;
+import com.jftse.emulator.server.core.manager.ThreadManager;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.ConnectionListener;
 import com.jftse.emulator.server.shared.module.Client;
@@ -26,7 +28,7 @@ public class AntiCheatHeartBeatNetworkListener implements ConnectionListener {
 
         connection.setClient(client);
         antiCheatManager.addClient(client);
-        new BasicAntiCheatHandler().sendWelcomePacket(connection);
+        ThreadManager.getInstance().schedule(() -> new BasicAuthHandler().sendWelcomePacket(connection), 1, TimeUnit.SECONDS);
     }
 
     public void disconnected(Connection connection) {
@@ -38,11 +40,12 @@ public class AntiCheatHeartBeatNetworkListener implements ConnectionListener {
     }
 
     public void onException(Connection connection, Exception exception) {
-        switch ("" + exception.getMessage()) {
+        switch (exception.getMessage()) {
+            case "Socket channel reached EOF.":
+                break;
             case "Connection is closed.":
             case "Connection reset by peer":
             case "Broken pipe":
-                break;
             default:
                 String hostAddress;
                 if (connection.getRemoteAddressTCP() != null)
