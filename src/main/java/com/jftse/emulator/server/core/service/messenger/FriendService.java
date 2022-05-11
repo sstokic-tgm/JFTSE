@@ -32,7 +32,11 @@ public class FriendService {
 
     public Friend findByPlayerIdAndFriendId(long playerId, long friendId) { return friendRepository.findByPlayerIdAndFriendId(playerId, friendId); }
 
-    public long deleteByPlayer(Player player) {
-        return friendRepository.deleteByPlayer(player);
+    public long deleteAllByPlayer(Player player) {
+        return friendRepository.deleteAllByPlayer(player);
+    }
+
+    public long deleteAllByFriend(Player friend) {
+        return friendRepository.deleteAllByFriend(friend);
     }
 }
