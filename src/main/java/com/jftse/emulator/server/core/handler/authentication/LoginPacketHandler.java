@@ -85,12 +85,17 @@ public class LoginPacketHandler extends AbstractHandler {
                 return;
             }
 
-            if (accountStatus.equals((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID)
-                    && account.getBannedUntil() != null && account.getBannedUntil().getTime() < new Date().getTime()) {
-                account.setStatus(0);
-                account.setBannedUntil(null);
-                account.setBanReason(null);
-                accountStatus = 0;
+            if (accountStatus.equals((int) S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID)) {
+                if (account.getBannedUntil() != null && account.getBannedUntil().getTime() < new Date().getTime()) {
+                    account.setStatus(0);
+                    account.setBannedUntil(null);
+                    account.setBanReason(null);
+                    accountStatus = 0;
+                } else {
+                    S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
+                    connection.sendTCP(loginAnswerPacket);
+                    return;
+                }
             }
 
             if (isClientFlagged(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {

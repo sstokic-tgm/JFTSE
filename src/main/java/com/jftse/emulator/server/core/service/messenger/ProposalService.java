@@ -24,7 +24,7 @@ public class ProposalService {
         proposalRepository.deleteById(proposalId);
     }
 
-    public Proposal findById(Long id) { return proposalRepository.findById(id).get(); }
+    public Proposal findById(Long id) { return proposalRepository.findById(id).orElse(null); }
 
     public List<Proposal> findBySender(Player sender) { return proposalRepository.findBySender(sender); }
 

@@ -43,6 +43,7 @@ public class AuthLoginDataPacketHandler extends AbstractHandler {
         if (account != null && account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
             account.setStatus((int) S2CLoginAnswerPacket.ACCOUNT_ALREADY_LOGGED_IN);
             account = authenticationService.updateAccount(account);
+            connection.getClient().setAccount(account.getId());
 
             log.info(account.getUsername() + " connected");
 

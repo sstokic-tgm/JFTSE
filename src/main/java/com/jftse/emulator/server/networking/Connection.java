@@ -78,7 +78,7 @@ public class Connection {
 
         packetSendQueue.add(packets);
         if (packetSendQueue.peek() != null) {
-            for (Packet[] iPackets = packetSendQueue.poll(); packets != null; packets = packetSendQueue.poll()) {
+            for (Packet[] iPackets = packetSendQueue.poll(); iPackets != null; iPackets = packetSendQueue.poll()) {
                 try {
                     length += tcpConnection.send(iPackets);
                 } catch (IOException ioe) {

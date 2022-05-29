@@ -13,4 +13,7 @@ public interface ItemMaterialRepository extends JpaRepository<ItemMaterial, Long
 
     @Query(value = "SELECT im.itemIndex FROM ItemMaterial im")
     List<Integer> findAllItemIndexes();
+
+    @Query(value = "SELECT im.itemIndex FROM ItemMaterial im WHERE name IN :nameList")
+    List<Integer> findAllItemIndexesByNames(@Param("nameList") List<String> materialNames);
 }

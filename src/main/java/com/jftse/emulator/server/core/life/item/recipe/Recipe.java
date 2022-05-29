@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.life.item.recipe;
 import com.jftse.emulator.common.utilities.StringTokenizer;
 import com.jftse.emulator.server.core.item.EItemCategory;
 import com.jftse.emulator.server.core.item.EItemUseType;
-import com.jftse.emulator.server.core.life.item.AbstractItem;
+import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.database.model.item.ItemRecipe;
@@ -14,7 +14,7 @@ import com.jftse.emulator.server.database.model.pocket.Pocket;
 
 import java.util.*;
 
-public class Recipe extends AbstractItem<List<PlayerPocket>> {
+public class Recipe extends BaseItem {
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
     private final ProductService productService;
@@ -232,7 +232,6 @@ public class Recipe extends AbstractItem<List<PlayerPocket>> {
         return true;
     }
 
-    @Override
     public List<PlayerPocket> getResult() {
         return resultPlayerPocketList;
     }

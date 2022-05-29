@@ -112,6 +112,14 @@ public class GameManager {
                 .collect(Collectors.toList());
     }
 
+    public final Connection getConnectionByPlayerId(Long playerId) {
+        return clients.stream()
+                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerId))
+                .findFirst()
+                .map(Client::getConnection)
+                .orElse(null);
+    }
+
     private void setupGlobalTasks() {
         threadManager.newTask(() -> {
             log.info("Queued packet handling started");

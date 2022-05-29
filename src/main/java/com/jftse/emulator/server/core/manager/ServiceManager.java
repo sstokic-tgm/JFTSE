@@ -69,6 +69,8 @@ public class ServiceManager {
     @Autowired
     private ItemMaterialService itemMaterialService;
     @Autowired
+    private ItemSpecialService itemSpecialService;
+    @Autowired
     private SocialService socialService;
     @Autowired
     private ChallengeService challengeService;

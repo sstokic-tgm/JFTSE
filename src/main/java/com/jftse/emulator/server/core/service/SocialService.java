@@ -30,6 +30,13 @@ public class SocialService {
                 .collect(Collectors.toList());
     }
 
+    public List<Friend> getFriendListByFriend(Player player, EFriendshipState friendshipState) {
+        return friendService.findByFriend(player).stream()
+                .filter(x -> x.getEFriendshipState() == friendshipState)
+                .sorted(Comparator.comparing(p -> (!p.getFriend().getOnline())))
+                .collect(Collectors.toList());
+    }
+
     public Friend getRelationship(Player player) {
         return friendService.findByPlayer(player).stream()
                 .filter(x -> x.getEFriendshipState() == EFriendshipState.Relationship)

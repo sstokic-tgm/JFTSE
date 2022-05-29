@@ -105,7 +105,7 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
                                 });
                     });
 
-            List<Friend> friendsWaitingForApproval = socialService.getFriendList(player, EFriendshipState.WaitingApproval);
+            List<Friend> friendsWaitingForApproval = socialService.getFriendListByFriend(player, EFriendshipState.WaitingApproval);
             friendsWaitingForApproval.forEach(f -> {
                 S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(f.getPlayer().getName());
                 connection.sendTCP(s2CFriendRequestNotificationPacket);
