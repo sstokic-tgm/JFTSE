@@ -4,13 +4,11 @@ import com.jftse.emulator.server.core.command.commands.gm.*;
 import com.jftse.emulator.server.core.command.commands.player.*;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
-import com.jftse.emulator.server.core.service.AuthenticationService;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.networking.Connection;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -31,9 +29,6 @@ public class CommandManager {
     private static final char COMMAND_HEADING = '-';
 
     private HashMap<String, Command> registeredCommands;
-
-    @Autowired
-    private AuthenticationService authenticationService;
 
     @PostConstruct
     public void init() {
@@ -96,10 +91,10 @@ public class CommandManager {
             return;
         }
 
-        if (connection.getClient().getAccount() == null)
+        Account account = connection.getClient().getAccount();
+        if (account == null)
             return;
 
-        Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
         if (!account.getGameMaster() && command.getRank() > 0) {
             if (connection.getClient().getActiveRoom() != null) {
                 S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "You do not have permission to use this command");
@@ -139,10 +134,12 @@ public class CommandManager {
         addCommand("arcade", 0, ArcadeModeCommand.class);
         addCommand("random", 0, RandomModeCommand.class);
         addCommand("latency", 0, LatencyCommand.class);
+        addCommand("pointback", 0, PointbackCommand.class);
         addCommand("ban", 1, BanPlayerCommand.class);
         addCommand("unban", 1, UnbanPlayerCommand.class);
         addCommand("sN", 1, ServerNoticeCommand.class);
         addCommand("serverKick", 1, ServerKickCommand.class);
+        addCommand("rsLogin", 1, ResetLoginStatusCommand.class);
         log.info("Commands has been loaded.");
     }
 }

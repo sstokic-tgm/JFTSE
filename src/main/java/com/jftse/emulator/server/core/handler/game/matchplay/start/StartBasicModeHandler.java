@@ -5,7 +5,6 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
-import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.room.ServeInfo;
 import com.jftse.emulator.server.core.packet.PacketOperations;
@@ -28,15 +27,11 @@ public class StartBasicModeHandler extends AbstractHandler {
         Packet removeBlackBarsPacket = new Packet(PacketOperations.S2CGameRemoveBlackBars.getValueAsChar());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(removeBlackBarsPacket, connection);
 
-        Room room = connection.getClient().getActiveRoom();
         ArrayList<Client> clients = new ArrayList<>(connection.getClient().getActiveGameSession().getClients());
         List<ServeInfo> serveInfo = new ArrayList<>();
 
         clients.forEach(client -> {
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
-                    .findFirst()
-                    .orElse(null);
+            RoomPlayer rp = client.getRoomPlayer();
 
             if (rp != null) {
                 boolean isActivePlayer = rp.getPosition() < 4;

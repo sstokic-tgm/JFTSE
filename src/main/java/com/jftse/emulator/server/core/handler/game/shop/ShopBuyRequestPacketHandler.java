@@ -48,7 +48,7 @@ public class ShopBuyRequestPacketHandler extends AbstractHandler {
         Map<Integer, Byte> itemList = shopBuyPacket.getItemList();
         Map<Product, Byte> productList = productService.findProductsByItemList(itemList);
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
 
         int gold = player.getGold();
         int costs = productList.keySet()
@@ -87,7 +87,7 @@ public class ShopBuyRequestPacketHandler extends AbstractHandler {
                         if (product.getGoldBack() != 0)
                             result += product.getGoldBack();
 
-                        Pocket pocket = connection.getClient().getActivePlayer().getPocket();
+                        Pocket pocket = player.getPocket();
 
                         if (product.getItem1() != 0) {
 
@@ -186,7 +186,7 @@ public class ShopBuyRequestPacketHandler extends AbstractHandler {
                             playerPocketList.add(playerPocket);
                         }
 
-                        connection.getClient().getActivePlayer().setPocket(pocket);
+                        player.setPocket(pocket);
                     }
                 } else {
                     productService.createNewPlayer(connection.getClient().getAccount(), product.getForPlayer());
@@ -196,12 +196,10 @@ public class ShopBuyRequestPacketHandler extends AbstractHandler {
             S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.SUCCESS, playerPocketList);
             connection.sendTCP(shopBuyPacketAnswer);
 
-            player = playerService.setMoney(player, result);
+            playerService.setMoney(player, result);
 
             S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
             connection.sendTCP(shopMoneyAnswerPacket);
-
-            connection.getClient().setActivePlayer(player);
         } else {
             S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NEED_MORE_GOLD, null);
             connection.sendTCP(shopBuyPacketAnswer);

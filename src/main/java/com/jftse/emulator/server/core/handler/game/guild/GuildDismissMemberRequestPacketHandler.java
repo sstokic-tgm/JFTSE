@@ -7,7 +7,6 @@ import com.jftse.emulator.server.core.packet.packets.guild.C2SGuildDismissMember
 import com.jftse.emulator.server.core.packet.packets.guild.S2CGuildDismissMemberAnswerPacket;
 import com.jftse.emulator.server.core.service.GuildMemberService;
 import com.jftse.emulator.server.core.service.GuildService;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -17,12 +16,10 @@ import com.jftse.emulator.server.shared.module.Client;
 public class GuildDismissMemberRequestPacketHandler extends AbstractHandler {
     private C2SGuildDismissMemberRequestPacket guildDismissMemberRequestPacket;
 
-    private final PlayerService playerService;
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
 
     public GuildDismissMemberRequestPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         guildService = ServiceManager.getInstance().getGuildService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
     }
@@ -35,10 +32,10 @@ public class GuildDismissMemberRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         if (guildMember != null && guildMember.getMemberRank() > 1) {
@@ -56,7 +53,7 @@ public class GuildDismissMemberRequestPacketHandler extends AbstractHandler {
                     guildService.save(guild);
 
                     Client targetClient = GameManager.getInstance().getClients().stream()
-                            .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(dismissMember.getPlayer().getId()))
+                            .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(dismissMember.getPlayer().getId()))
                             .findFirst()
                             .orElse(null);
 

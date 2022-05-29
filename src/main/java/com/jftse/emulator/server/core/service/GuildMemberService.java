@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class GuildMemberService {
     private final GuildMemberRepository guildMemberRepository;
 
+    public GuildMember findById(Long id) {
+        return guildMemberRepository.findById(id).orElse(null);
+    }
+
     public GuildMember save(GuildMember guildMember) {
         return guildMemberRepository.save(guildMember);
     }

@@ -177,6 +177,8 @@ public enum PacketOperations {
     C2SInventoryItemTimeExpiredRequest(0x1BBC),
     S2CInventoryItemRemoveAnswer(0x1B74),
     C2SQuickSlotUseRequest(0x1BDA),
+    C2SCombineNowRecipe(0x23BE),
+    S2CCombineNowRecipe(0x23BF),
 
     C2SHomeItemsClearReq(0x2552),
     C2SHomeItemsPlaceReq(0x2550),
@@ -461,6 +463,7 @@ public enum PacketOperations {
         C2SMatchplayPlayerUseSkill.handler = PlayerUseSkillHandler.class;
         C2SMatchplaySkillHitsTarget.handler = SkillHitsTargetHandler.class;
         C2SMatchplaySwapQuickSlotItems.handler = SwapQuickSlotItemsHandler.class;
+        C2SCombineNowRecipe.handler = CombineNowRecipeHandler.class;
 
         D2SDevPacket.handler = DevPacketHandler.class;
         C2SUnknown0xE00E.handler = UnknownPacketHandler.class;

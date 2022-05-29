@@ -1,10 +1,17 @@
 package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.ServeType;
+import com.jftse.emulator.server.core.item.EItemCategory;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
+import com.jftse.emulator.server.core.life.progression.SimpleExpGoldBonus;
+import com.jftse.emulator.server.core.life.progression.bonuses.WonGameBonus;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.room.ServeInfo;
+import com.jftse.emulator.server.database.model.item.ItemMaterial;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,18 +19,30 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
 public class MatchplayBasicGame extends MatchplayGame {
     private HashMap<Integer, Integer> individualPointsMadeFromPlayers;
     private ArrayList<Point> playerLocationsOnMap;
+    private boolean[] pointBackVotes;
     private int pointsRedTeam;
     private int pointsBlueTeam;
     private int setsRedTeam;
     private int setsBlueTeam;
     private RoomPlayer servePlayer;
     private RoomPlayer receiverPlayer;
+
+    private HashMap<Integer, Integer> previousIndividualPointsMadeFromPlayers;
+    private int previousPointsRedTeam;
+    private int previousPointsBlueTeam;
+    private int previousSetsRedTeam;
+    private int previousSetsBlueTeam;
+    private short previousServePlayerPosition;
+    private short previousReceiverPlayerPosition;
+    private boolean setDowngraded = false;
+    private boolean pointBackValid = false;
 
     public MatchplayBasicGame(byte players) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -35,13 +54,28 @@ public class MatchplayBasicGame extends MatchplayGame {
                 new Point(20, 75)
         ));
 
+        this.pointsRedTeam = 0;
+        this.pointsBlueTeam = 0;
+        this.setsRedTeam = 0;
+        this.setsBlueTeam = 0;
+        this.setFinished(false);
+        this.pointBackVotes = new boolean[players];
         this.individualPointsMadeFromPlayers = new HashMap<>(players);
         for (int i = 0; i < players; i++) {
             this.individualPointsMadeFromPlayers.put(i, 0);
         }
     }
 
-    public void setPoints(byte pointsRedTeam, byte pointsBlueTeam) {
+    public synchronized void setPoints(byte pointsRedTeam, byte pointsBlueTeam) {
+        this.previousPointsRedTeam = this.pointsRedTeam;
+        this.previousPointsBlueTeam = this.pointsBlueTeam;
+        this.previousSetsRedTeam = this.setsRedTeam;
+        this.previousSetsBlueTeam = this.setsBlueTeam;
+        this.previousIndividualPointsMadeFromPlayers = new HashMap<>(this.individualPointsMadeFromPlayers);
+        this.previousServePlayerPosition = this.servePlayer.getPosition();
+        this.previousReceiverPlayerPosition = this.receiverPlayer.getPosition();
+        this.pointBackValid = true;
+
         this.pointsRedTeam = pointsRedTeam;
         this.pointsBlueTeam = pointsBlueTeam;
 
@@ -68,9 +102,39 @@ public class MatchplayBasicGame extends MatchplayGame {
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             this.setEndTime(cal.getTime());
         }
+        resetPointBackVotes();
     }
 
-    public void increasePerformancePointForPlayer(int playerPosition) {
+    public synchronized void setPointBackVote(int playerPosition) {
+        this.pointBackVotes[playerPosition] = true;
+    }
+
+    public boolean isPointBackAvailable() {
+        for (boolean pointBackVote : this.pointBackVotes) {
+            if (!pointBackVote)
+                return false;
+        }
+        return this.pointBackValid;
+    }
+
+    public synchronized void pointBack() {
+        this.pointsRedTeam = this.previousPointsRedTeam;
+        this.pointsBlueTeam = this.previousPointsBlueTeam;
+        //for example, if downgraded to 40 - 0 from 1 - 0 sets
+        setDowngraded = previousSetsBlueTeam != this.setsBlueTeam || this.previousSetsRedTeam != this.setsRedTeam;
+        this.setsRedTeam = this.previousSetsRedTeam;
+        this.setsBlueTeam = this.previousSetsBlueTeam;
+        this.individualPointsMadeFromPlayers = new HashMap<>(this.previousIndividualPointsMadeFromPlayers);
+
+        resetPointBackVotes();
+        this.pointBackValid = false;
+    }
+
+    private void resetPointBackVotes() {
+        Arrays.fill(this.pointBackVotes, false);
+    }
+
+    public synchronized void increasePerformancePointForPlayer(int playerPosition) {
         int currentPoint = this.getIndividualPointsMadeFromPlayers().getOrDefault(playerPosition, 0);
         this.getIndividualPointsMadeFromPlayers().put(playerPosition, currentPoint + 1);
     }
@@ -102,26 +166,38 @@ public class MatchplayBasicGame extends MatchplayGame {
                 basicExpReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
             }
 
+            ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(basicExpReward, basicExpReward);
+
             int playerPositionIndex = this.getPlayerPositionsOrderedByPerformance().indexOf(playerPosition);
             switch (playerPositionIndex) {
-                case 0 -> basicExpReward += basicExpReward * 0.1;
-                case 1 -> basicExpReward += basicExpReward * 0.05;
+                case 0 -> expGoldBonus = new SimpleExpGoldBonus(expGoldBonus, 0.1);
+                case 1 -> expGoldBonus = new SimpleExpGoldBonus(expGoldBonus, 0.05);
             }
 
             if (wonGame) {
-                basicExpReward += basicExpReward * 0.2;
+                expGoldBonus = new WonGameBonus(expGoldBonus);
             }
 
-            int rewardExp = basicExpReward;
-            int rewardGold = basicExpReward;
+            int rewardExp = expGoldBonus.calculateExp();
+            int rewardGold = expGoldBonus.calculateGold();
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(playerPosition);
             playerReward.setRewardExp(rewardExp);
             playerReward.setRewardGold(rewardGold);
-            if (wonGame) { // TODO: temporarily only
-                playerReward.setRewardProductIndex(57592);
-                playerReward.setProductRewardAmount(1);
-            }
+
+            List<Integer> materialsForReward = ServiceManager.getInstance().getItemMaterialService().findAllItemIndexes();
+            List<Integer> materialsProductIndex = ServiceManager.getInstance().getProductService().findAllProductIndexesByCategoryAndItemIndexList(EItemCategory.MATERIAL.getName(), materialsForReward);
+            materialsProductIndex.add(57592);
+
+            Random rnd = new Random();
+            int drawnMaterial = rnd.nextInt(materialsProductIndex.size() - 1 + 1) + 1;
+
+            playerReward.setRewardProductIndex(materialsProductIndex.get(drawnMaterial - 1));
+
+            final int min = 1;
+            final int max = !wonGame ? 2 : 3;
+            final int amount = rnd.nextInt(max - min + 1) + min;
+            playerReward.setProductRewardAmount(amount);
 
             playerRewards.add(playerReward);
         }

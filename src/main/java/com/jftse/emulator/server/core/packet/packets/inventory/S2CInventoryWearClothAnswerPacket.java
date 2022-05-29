@@ -28,7 +28,7 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write(inventoryWearClothReqPacket.getHat());
             this.write(inventoryWearClothReqPacket.getDye());
 
-            this.write(BattleUtils.calculatePlayerHp(player));
+            this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
 
             // status points
             this.write(player.getStrength());
@@ -90,7 +90,7 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write(inventoryEquippedCloths.get("hat"));
             this.write(inventoryEquippedCloths.get("dye"));
 
-            this.write(BattleUtils.calculatePlayerHp(player));
+            this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
 
             // status points
             this.write(player.getStrength());

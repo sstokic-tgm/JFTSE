@@ -57,7 +57,7 @@ public class DenyParcelRequestHandler extends AbstractHandler {
 
         List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
         Client senderClient = GameManager.getInstance().getClients().stream()
-                .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(parcel.getSender().getId()))
+                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(parcel.getSender().getId()))
                 .findFirst()
                 .orElse(null);
         if (senderClient != null) {

@@ -1,13 +1,15 @@
 package com.jftse.emulator.server.core.listener;
 
+import com.jftse.emulator.server.core.handler.authentication.BasicAuthHandler;
 import com.jftse.emulator.server.core.handler.game.BasicGameHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServerManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.manager.ThreadManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.packet.packets.S2CServerNoticePacket;
 import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.database.model.account.Account;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.ConnectionListener;
 import com.jftse.emulator.server.shared.module.Client;
@@ -23,8 +25,6 @@ import java.util.stream.Collectors;
 public class GameServerNetworkListener implements ConnectionListener {
     @Autowired
     private GameManager gameManager;
-    @Autowired
-    private ServiceManager serviceManager;
 
     @Autowired
     private ServerManager serverManager;
@@ -32,10 +32,10 @@ public class GameServerNetworkListener implements ConnectionListener {
     public void cleanUp() {
         // reset status
         gameManager.getClients().stream().collect(Collectors.toList()).forEach(client -> {
-            Account account = serviceManager.getAuthenticationService().findAccountById(client.getAccount().getId());
+            Account account = client.getAccount();
             if (account.getStatus() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
                 account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-                serviceManager.getAuthenticationService().updateAccount(account);
+                client.saveAccount(account);
             }
 
             gameManager.getClients().remove(client);
@@ -55,12 +55,14 @@ public class GameServerNetworkListener implements ConnectionListener {
         gameManager.addClient(client);
         connection.setClient(client);
 
-        new BasicGameHandler().sendWelcomePacket(connection);
+        ThreadManager.getInstance().schedule(() -> {
+            new BasicAuthHandler().sendWelcomePacket(connection);
 
-        if (serverManager.isServerNoticeIsSet()) {
-            S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(serverManager.getServerNoticeMessage());
-            connection.sendTCP(serverNoticePacket);
-        }
+            if (serverManager.isServerNoticeIsSet()) {
+                S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(serverManager.getServerNoticeMessage());
+                connection.sendTCP(serverNoticePacket);
+            }
+        }, 1, TimeUnit.SECONDS);
     }
 
     public void disconnected(Connection connection) {
@@ -72,13 +74,24 @@ public class GameServerNetworkListener implements ConnectionListener {
     }
 
     public void onException(Connection connection, Exception exception) {
-        switch ("" + exception.getMessage()) {
+        switch (exception.getMessage()) {
+            case "Socket channel reached EOF.":
+                Client client = connection.getClient();
+                if (client != null) {
+                    Player player = client.getPlayer();
+                    log.info((player == null ? "null" : player.getName()) + " disconnected");
+                }
+                break;
             case "Connection is closed.":
             case "Connection reset by peer":
             case "Broken pipe":
-                break;
             default:
-                log.error(exception.getMessage(), exception);
+                String hostAddress;
+                if (connection.getRemoteAddressTCP() != null)
+                    hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+                else
+                    hostAddress = "null";
+                log.error(hostAddress + " " + exception.getMessage(), exception);
         }
     }
 

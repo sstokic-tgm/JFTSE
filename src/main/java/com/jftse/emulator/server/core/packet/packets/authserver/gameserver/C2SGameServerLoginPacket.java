@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 @Getter
 @Setter
 public class C2SGameServerLoginPacket extends Packet {
-    private Integer playerId;
+    private Long playerId;
     private String token;
     private Long timestamp;
     private String accountName;
@@ -18,7 +18,7 @@ public class C2SGameServerLoginPacket extends Packet {
 
     public C2SGameServerLoginPacket(Packet packet) {
         super(packet);
-        this.playerId = this.readInt();
+        this.playerId = (long) this.readInt();
         byte[] tokenBytes = new byte[16];
         for (int i = 0; i < 16; i++)
             tokenBytes[i] = this.readByte();

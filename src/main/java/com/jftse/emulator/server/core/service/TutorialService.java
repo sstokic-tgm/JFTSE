@@ -26,7 +26,6 @@ public class TutorialService {
     private final TutorialRepository tutorialRepository;
     private final TutorialProgressRepository tutorialProgressRepository;
 
-    private final PlayerService playerService;
     private final ItemRewardService itemRewardService;
     private final LevelService levelService;
 
@@ -43,7 +42,8 @@ public class TutorialService {
         long timeNeeded = connection.getClient().getActiveTutorialGame().getTimeNeeded();
 
         Tutorial tutorial = findByTutorialIndex(connection.getClient().getActiveTutorialGame().getTutorialIndex());
-        TutorialProgress tutorialProgress = tutorialProgressRepository.findByPlayerAndTutorial(connection.getClient().getActivePlayer(), tutorial).orElse(null);
+        Player player = connection.getClient().getPlayer();
+        TutorialProgress tutorialProgress = tutorialProgressRepository.findByPlayerAndTutorial(player, tutorial).orElse(null);
 
         int rewardExp = 0;
         int rewardGold = 0;
@@ -55,7 +55,7 @@ public class TutorialService {
             rewardExp = itemRewardService.getRewardExp(false, tutorial.getRewardExp(), true);
 
             tutorialProgress = new TutorialProgress();
-            tutorialProgress.setPlayer(connection.getClient().getActivePlayer());
+            tutorialProgress.setPlayer(player);
             tutorialProgress.setTutorial(tutorial);
             tutorialProgress.setSuccess(1);
             tutorialProgress.setAttempts(1);
@@ -73,18 +73,15 @@ public class TutorialService {
         }
         tutorialProgressRepository.save(tutorialProgress);
 
-        List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(connection.getClient().getActivePlayer(), rewardProductList));
+        List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(player, rewardProductList));
 
-        byte level = levelService.getLevel(rewardExp, connection.getClient().getActivePlayer().getExpPoints(), connection.getClient().getActivePlayer().getLevel());
-
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
-        if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (player.getLevel() < level))
+        byte oldLevel = player.getLevel();
+        byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
+        if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
             player.setExpPoints(player.getExpPoints() + rewardExp);
         player.setGold(player.getGold() + rewardGold);
-
         player = levelService.setNewLevelStatusPoints(level, player);
-
-        connection.getClient().setActivePlayer(player);
+        connection.getClient().savePlayer(player);
 
         S2CTutorialFinishPacket tutorialFinishPacket = new S2CTutorialFinishPacket(true, level, rewardExp, rewardGold, (int) Math.ceil((double) timeNeeded / 1000), rewardItemList);
         connection.sendTCP(tutorialFinishPacket);

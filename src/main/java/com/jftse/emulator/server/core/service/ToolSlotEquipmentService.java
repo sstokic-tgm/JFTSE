@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.service;
 
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.ToolSlotEquipment;
+import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.database.repository.player.ToolSlotEquipmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class ToolSlotEquipmentService {
     private final ToolSlotEquipmentRepository toolSlotEquipmentRepository;
+    private final PlayerPocketService playerPocketService;
 
     public ToolSlotEquipment save(ToolSlotEquipment toolSlotEquipment) {
         return toolSlotEquipmentRepository.save(toolSlotEquipment);
@@ -41,19 +44,29 @@ public class ToolSlotEquipmentService {
         else if (toolSlotEquipment.getSlot5().equals(toolSlotId))
             toolSlotEquipment.setSlot5(0);
 
-        toolSlotEquipment = save(toolSlotEquipment);
+        save(toolSlotEquipment);
     }
 
-    public void updateToolSlots(ToolSlotEquipment toolSlotEquipment, List<Integer> toolSlotItems) {
-        toolSlotEquipment = findById(toolSlotEquipment.getId());
+    public void updateToolSlots(Player player, List<Integer> toolSlotItems) {
+        Pocket pocket = player.getPocket();
+        ToolSlotEquipment toolSlotEquipment = findById(player.getToolSlotEquipment().getId());
 
-        toolSlotEquipment.setSlot1(toolSlotItems.get(0));
-        toolSlotEquipment.setSlot2(toolSlotItems.get(1));
-        toolSlotEquipment.setSlot3(toolSlotItems.get(2));
-        toolSlotEquipment.setSlot4(toolSlotItems.get(3));
-        toolSlotEquipment.setSlot5(toolSlotItems.get(4));
+        PlayerPocket item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(0), pocket);
+        toolSlotEquipment.setSlot1(item == null ? 0 : item.getId().intValue());
 
-        toolSlotEquipment = save(toolSlotEquipment);
+        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(1), pocket);
+        toolSlotEquipment.setSlot2(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(2), pocket);
+        toolSlotEquipment.setSlot3(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(3), pocket);
+        toolSlotEquipment.setSlot4(item == null ? 0 : item.getId().intValue());
+
+        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(4), pocket);
+        toolSlotEquipment.setSlot5(item == null ? 0 : item.getId().intValue());
+
+        save(toolSlotEquipment);
     }
 
     public List<Integer> getEquippedToolSlots(Player player) {

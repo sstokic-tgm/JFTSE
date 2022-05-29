@@ -13,7 +13,9 @@ import com.jftse.emulator.server.core.packet.packets.lobby.S2CLobbyUserListAnswe
 import com.jftse.emulator.server.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.messenger.Friend;
+import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
@@ -93,14 +95,14 @@ public class GameManager {
 
     public List<Player> getPlayersInLobby() {
         return clients.stream()
-                .filter(c -> c.isInLobby())
-                .map(Client::getActivePlayer)
+                .filter(Client::isInLobby)
+                .map(Client::getPlayer)
                 .collect(Collectors.toList());
     }
 
     public List<Client> getClientsInLobby() {
         return clients.stream()
-                .filter(c -> c.isInLobby())
+                .filter(Client::isInLobby)
                 .collect(Collectors.toList());
     }
 
@@ -108,6 +110,14 @@ public class GameManager {
         return clients.stream()
                 .filter(c -> c.getActiveRoom() != null && c.getActiveRoom().getRoomId() == roomId)
                 .collect(Collectors.toList());
+    }
+
+    public final Connection getConnectionByPlayerId(Long playerId) {
+        return clients.stream()
+                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerId))
+                .findFirst()
+                .map(Client::getConnection)
+                .orElse(null);
     }
 
     private void setupGlobalTasks() {
@@ -165,12 +175,12 @@ public class GameManager {
         });
     }
 
-    public void handleRoomPlayerChanges(final Connection connection, final boolean notifyClients) {
+    public synchronized void handleRoomPlayerChanges(final Connection connection, final boolean notifyClients) {
         Client client = connection.getClient();
         if (client == null)
             return;
 
-        Player activePlayer = serviceManager.getPlayerService().findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         if (activePlayer == null)
             return;
 
@@ -178,10 +188,8 @@ public class GameManager {
         if (room == null)
             return;
 
-        ArrayList<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
-        final Optional<RoomPlayer> roomPlayer = roomPlayerList.stream()
-                .filter(rp -> rp.getPlayer().getId().equals(activePlayer.getId()))
-                .findFirst();
+        ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+        final Optional<RoomPlayer> roomPlayer = Optional.ofNullable(client.getRoomPlayer());
 
         final short playerPosition = roomPlayer.isPresent() ? roomPlayer.get().getPosition() : -1;
         final boolean isMaster = roomPlayer.isPresent() && roomPlayer.get().isMaster();
@@ -216,7 +224,7 @@ public class GameManager {
             room.getPositions().set(playerPosition, RoomPositionState.Free);
         }
 
-        roomPlayerList.removeIf(rp -> rp.getPlayer().getId().equals(activePlayer.getId()));
+        roomPlayerList.removeIf(rp -> rp.getPlayerId().equals(activePlayer.getId()));
         if (room.getRoomPlayerList().isEmpty()) {
             removeRoom(room);
         }
@@ -227,7 +235,7 @@ public class GameManager {
             S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) 9);
             getClientsInRoom(room.getRoomId()).forEach(c -> {
                 if (notifyClients) {
-                    if (c.getActivePlayer() != null && !c.getActivePlayer().getId().equals(activePlayer.getId()) && c.getConnection() != null && c.getConnection().isConnected()) {
+                    if (c.getPlayer() != null && !c.getPlayer().getId().equals(activePlayer.getId()) && c.getConnection() != null && c.getConnection().isConnected()) {
                         c.getConnection().sendTCP(roomPlayerInformationPacket, roomPositionChangeAnswerPacket);
                     }
                 }
@@ -235,7 +243,7 @@ public class GameManager {
         } else {
             GameSession gameSession = gameSessionManager.getGameSessionBySessionId(activeGameSession.getSessionId());
             if (gameSession != null) {
-                gameSession.getClients().removeIf(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(activePlayer.getId()));
+                gameSession.getClients().removeIf(c -> c.getPlayer() != null && c.getPlayer().getId().equals(activePlayer.getId()));
             }
             client.setActiveGameSession(null);
         }
@@ -287,7 +295,7 @@ public class GameManager {
         return room.getMode();
     }
 
-    public void internalHandleRoomCreate(final Connection connection, Room room) {
+    public synchronized void internalHandleRoomCreate(final Connection connection, Room room) {
         room.getPositions().set(0, RoomPositionState.InUse);
         room.setAllowBattlemon((byte) 0);
 
@@ -297,15 +305,20 @@ public class GameManager {
             room.getPositions().set(3, RoomPositionState.Locked);
         }
 
-        Player activePlayer = serviceManager.getPlayerService().findById(connection.getClient().getActivePlayer().getId());
-        Friend couple = serviceManager.getSocialService().getRelationship(activePlayer);
+        Player activePlayer = connection.getClient().getPlayer();
 
         RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayer(activePlayer);
-        roomPlayer.setGuildMember(serviceManager.getGuildMemberService().getByPlayer(activePlayer));
-        roomPlayer.setCouple(couple);
-        roomPlayer.setClothEquipment(serviceManager.getClothEquipmentService().findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
-        roomPlayer.setStatusPointsAddedDto(serviceManager.getClothEquipmentService().getStatusPointsFromCloths(roomPlayer.getPlayer()));
+        roomPlayer.setPlayerId(activePlayer.getId());
+
+        GuildMember guildMember = serviceManager.getGuildMemberService().getByPlayer(activePlayer);
+        Friend couple = serviceManager.getSocialService().getRelationship(activePlayer);
+        ClothEquipment clothEquipment = serviceManager.getClothEquipmentService().findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
+        StatusPointsAddedDto statusPointsAddedDto = serviceManager.getClothEquipmentService().getStatusPointsFromCloths(roomPlayer.getPlayer());
+
+        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
+        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
+        roomPlayer.setClothEquipmentId(clothEquipment.getId());
+        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
         roomPlayer.setPosition((short) 0);
         roomPlayer.setMaster(true);
         roomPlayer.setFitting(false);
@@ -364,7 +377,7 @@ public class GameManager {
         return memberList.get(playerPositionInGuild - 1);
     }
 
-    public synchronized boolean isAllowedToChangeMode(Room room) {
+    public boolean isAllowedToChangeMode(Room room) {
         List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
         return activePlayingPlayers.stream().allMatch(x -> x.getPlayer().getLevel() >= configService.getValue("command.room.mode.change.player.level", 60));
     }

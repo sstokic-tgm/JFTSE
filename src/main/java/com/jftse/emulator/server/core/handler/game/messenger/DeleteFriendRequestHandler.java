@@ -6,7 +6,6 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.messenger.C2SDeleteFriendRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CDeleteFriendResponsePacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CFriendsListAnswerPacket;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.core.service.SocialService;
 import com.jftse.emulator.server.core.service.messenger.FriendService;
 import com.jftse.emulator.server.database.model.messenger.EFriendshipState;
@@ -19,12 +18,10 @@ import java.util.List;
 public class DeleteFriendRequestHandler extends AbstractHandler {
     private C2SDeleteFriendRequestPacket c2SDeleteFriendRequestPacket;
 
-    private final PlayerService playerService;
     private final FriendService friendService;
     private final SocialService socialService;
 
     public DeleteFriendRequestHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         friendService = ServiceManager.getInstance().getFriendService();
         socialService = ServiceManager.getInstance().getSocialService();
     }
@@ -37,10 +34,10 @@ public class DeleteFriendRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         Friend friend1 = friendService.findByPlayerIdAndFriendId(activePlayer.getId(), c2SDeleteFriendRequestPacket.getFriendId());
         if (friend1 != null) {
             friendService.remove(friend1.getId());
@@ -55,7 +52,7 @@ public class DeleteFriendRequestHandler extends AbstractHandler {
             List<Friend> friends = socialService.getFriendList(friend2.getPlayer(), EFriendshipState.Friends);
             S2CFriendsListAnswerPacket targetFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
             GameManager.getInstance().getClients().stream()
-                    .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(friend2.getPlayer().getId()))
+                    .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(friend2.getPlayer().getId()))
                     .findFirst()
                     .ifPresent(c -> {
                         if (c.getConnection() != null && c.getConnection().isConnected()) {

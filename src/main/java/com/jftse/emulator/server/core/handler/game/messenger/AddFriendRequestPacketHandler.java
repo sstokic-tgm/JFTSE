@@ -34,10 +34,10 @@ public class AddFriendRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         Player targetPlayer = playerService.findByName(c2SAddFriendRequestPacket.getPlayerName());
         if (targetPlayer == null) {
             S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) -1);
@@ -64,7 +64,7 @@ public class AddFriendRequestPacketHandler extends AbstractHandler {
             S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(player.getName());
 
             GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(targetPlayer.getId()))
+                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(targetPlayer.getId()))
                     .findFirst()
                     .ifPresent(friendClient -> {
                         if (friendClient.getConnection() != null && friendClient.getConnection().isConnected()) {

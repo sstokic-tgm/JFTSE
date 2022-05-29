@@ -23,6 +23,7 @@ import com.jftse.emulator.server.core.service.SkillService;
 import com.jftse.emulator.server.core.task.FinishGameTask;
 import com.jftse.emulator.server.core.task.GuardianServeTask;
 import com.jftse.emulator.server.database.model.battle.*;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
@@ -61,11 +62,16 @@ public class SkillHitsTargetHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null
-                || connection.getClient().getActiveRoom() == null || connection.getClient().getActivePlayer() == null)
+                || connection.getClient().getActiveRoom() == null || connection.getClient().getPlayer() == null)
             return;
 
         GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession == null)
+            return;
+
         MatchplayGame game = gameSession.getActiveMatchplayGame();
+        if (game == null)
+            return;
 
         byte skillId = skillHitsTarget.getSkillId();
 
@@ -121,11 +127,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
 
         PlayerBattleState playerBattleState = null;
 
-        RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
-                .filter(p -> p.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
-                .findFirst()
-                .orElse(null);
-
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
         try {
             playerBattleState = isBattleGame ?
                     ((MatchplayBattleGame) game).getPlayerCombatSystem().reviveAnyPlayer(skill.getDamage().shortValue(), roomPlayer) :
@@ -339,7 +341,7 @@ public class SkillHitsTargetHandler extends AbstractHandler {
                 }
 
                 byte guardianStartPosition = 11;
-                for (int i = 0; i < guardians.stream().count(); i++) {
+                for (int i = 0; i < (long) guardians.size(); i++) {
                     int guardianId = guardians.get(i);
                     if (guardianId == 0) continue;
 

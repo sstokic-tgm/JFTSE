@@ -5,7 +5,6 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.guild.C2SGuildReserveMemberDataRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.guild.S2CGuildReverseMemberAnswerPacket;
 import com.jftse.emulator.server.core.service.GuildMemberService;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
@@ -16,11 +15,9 @@ import java.util.stream.Collectors;
 public class GuildReverseMemberDataRequestPacketHandler extends AbstractHandler {
     private C2SGuildReserveMemberDataRequestPacket c2SGuildReserveMemberDataRequestPacket;
 
-    private final PlayerService playerService;
     private final GuildMemberService guildMemberService;
 
     public GuildReverseMemberDataRequestPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
     }
 
@@ -33,9 +30,9 @@ public class GuildReverseMemberDataRequestPacketHandler extends AbstractHandler 
     @Override
     public void handle() {
         if (c2SGuildReserveMemberDataRequestPacket.getPage() != 0) return;
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null) return;
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null) return;
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         List<GuildMember> reverseMemberList = guildMember.getGuild().getMemberList().stream()

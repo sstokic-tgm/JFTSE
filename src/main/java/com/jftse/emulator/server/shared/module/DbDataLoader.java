@@ -242,7 +242,7 @@ public class DbDataLoader implements CommandLineRunner {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private boolean loadBossGuardian() {
+    public boolean loadBossGuardian() {
         try {
             InputStream itemPartFile = ResourceUtil.getResource("res/BossGuardianInfo_Ini3.xml");
             SAXReader reader = new SAXReader();
@@ -282,7 +282,7 @@ public class DbDataLoader implements CommandLineRunner {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private boolean loadGuardian() {
+    public boolean loadGuardian() {
         try {
             InputStream itemPartFile = ResourceUtil.getResource("res/GuardianInfo.xml");
             SAXReader reader = new SAXReader();
@@ -800,6 +800,31 @@ public class DbDataLoader implements CommandLineRunner {
                 itemRecipe.setForPlayer(itemNode.valueOf("@Character"));
                 itemRecipe.setEnableParcel(!itemNode.valueOf("@EnableParcel").equals("0"));
                 itemRecipe.setName(itemNode.valueOf("@Name_en"));
+                itemRecipe.setRequireGold(Integer.valueOf(itemNode.valueOf("@RequireGold")));
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i <= 5; i++) {
+                    sb
+                            .append(itemNode.valueOf("@Material" + i))
+                            .append("=")
+                            .append(itemNode.valueOf("@Count" + i))
+                            .append(i != 5 ? ";" : "");
+                }
+                itemRecipe.setMaterials(sb.toString());
+
+                sb = new StringBuilder();
+                for (int i = 0; i <= 4; i++) {
+                    sb
+                            .append(itemNode.valueOf("@Mutation" + i))
+                            .append("=")
+                            .append(itemNode.valueOf("@Mutation_Pro" + i))
+                            .append(",")
+                            .append(itemNode.valueOf("@Mutation_MIN" + i))
+                            .append(",")
+                            .append(itemNode.valueOf("@Mutation_MAX" + i))
+                            .append(i != 4 ? ";" : "");
+                }
+                itemRecipe.setMutations(sb.toString());
 
                 itemRecipeRepository.save(itemRecipe);
             }

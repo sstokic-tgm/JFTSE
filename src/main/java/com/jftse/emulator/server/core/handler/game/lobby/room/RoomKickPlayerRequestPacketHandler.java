@@ -37,7 +37,7 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractHandler {
             if (playerToKick != null) {
                 List<Client> clientsInRoom = GameManager.getInstance().getClientsInRoom(room.getRoomId());
                 Client client = clientsInRoom.stream()
-                        .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(playerToKick.getPlayer().getId()))
+                        .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerToKick.getPlayer().getId()))
                         .findFirst()
                         .orElse(null);
 
@@ -51,7 +51,7 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractHandler {
                     S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
                     connection.getServer().sendToTcp(client.getConnection().getId(), roomJoinAnswerPacket);
 
-                    room.getBannedPlayers().add(client.getActivePlayer());
+                    room.getBannedPlayers().add(client.getPlayer().getId());
                 }
             }
         }

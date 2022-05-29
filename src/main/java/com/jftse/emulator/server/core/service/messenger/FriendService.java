@@ -24,7 +24,7 @@ public class FriendService {
         friendRepository.deleteById(friendMemberId);
     }
 
-    public Friend findById(Long id) { return friendRepository.findById(id).get(); }
+    public Friend findById(Long id) { return friendRepository.findById(id).orElse(null); }
 
     public List<Friend> findByPlayer(Player player) { return friendRepository.findByPlayer(player); }
 
@@ -32,7 +32,11 @@ public class FriendService {
 
     public Friend findByPlayerIdAndFriendId(long playerId, long friendId) { return friendRepository.findByPlayerIdAndFriendId(playerId, friendId); }
 
-    public long deleteByPlayer(Player player) {
-        return friendRepository.deleteByPlayer(player);
+    public long deleteAllByPlayer(Player player) {
+        return friendRepository.deleteAllByPlayer(player);
+    }
+
+    public long deleteAllByFriend(Player friend) {
+        return friendRepository.deleteAllByFriend(friend);
     }
 }

@@ -31,19 +31,15 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 public class BasicGameHandler {
-    private final PlayerService playerService;
     private final FriendService friendService;
     private final SocialService socialService;
     private final GuildMemberService guildMemberService;
-    private final AuthenticationService authenticationService;
     private final PlayerStatisticService playerStatisticService;
 
     public BasicGameHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         friendService = ServiceManager.getInstance().getFriendService();
         socialService = ServiceManager.getInstance().getSocialService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
-        authenticationService = ServiceManager.getInstance().getAuthenticationService();
         playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
     }
 
@@ -65,21 +61,22 @@ public class BasicGameHandler {
         if (connection.getClient() == null)
             return;
 
-        if (connection.getClient().getAccount() != null) {
+        final Client client = connection.getClient();
+        Account account = client.getAccount();
+
+        if (account != null) {
             boolean notifyClients = true;
-            Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+            Player player = client.getPlayer();
             if (player != null) {
-                player = playerService.findById(player.getId());
                 player.setOnline(false);
-                player = playerService.save(player);
-                connection.getClient().setActivePlayer(player);
+                client.savePlayer(player);
 
                 List<Friend> friends = friendService.findByPlayer(player);
                 friends.forEach(x -> {
                     List<Friend> friendList = socialService.getFriendList(x.getFriend(), EFriendshipState.Friends);
                     S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
                     GameManager.getInstance().getClients().stream()
-                            .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(x.getFriend().getId()))
+                            .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getFriend().getId()))
                             .findFirst()
                             .ifPresent(c -> {
                                 if (c.getConnection() != null && c.getConnection().isConnected()) {
@@ -97,7 +94,7 @@ public class BasicGameHandler {
 
                                 S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
                                 GameManager.getInstance().getClients().stream()
-                                        .filter(c -> c.getActivePlayer() != null && c.getActivePlayer().getId().equals(x.getPlayer().getId()))
+                                        .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getPlayer().getId()))
                                         .findFirst()
                                         .ifPresent(c -> {
                                             if (c.getConnection() != null && c.getConnection().isConnected()) {
@@ -110,7 +107,7 @@ public class BasicGameHandler {
                 Friend myRelation = socialService.getRelationship(player);
                 if (myRelation != null) {
                     Client friendRelationClient = GameManager.getInstance().getClients().stream()
-                            .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(myRelation.getFriend().getId()))
+                            .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
                             .findFirst()
                             .orElse(null);
                     Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
@@ -121,17 +118,16 @@ public class BasicGameHandler {
                     }
                 }
             }
-            // reset status
-            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+
             if (account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
                 account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-                authenticationService.updateAccount(account);
+                client.saveAccount(account);
             }
 
-            GameSession gameSession = connection.getClient().getActiveGameSession();
+            GameSession gameSession = client.getActiveGameSession();
             if (gameSession != null) {
 
-                Room currentClientRoom = connection.getClient().getActiveRoom();
+                Room currentClientRoom = client.getActiveRoom();
                 if (currentClientRoom != null) {
                     if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
                         PlayerStatistic playerStatistic = player.getPlayerStatistic();
@@ -139,22 +135,17 @@ public class BasicGameHandler {
                         playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
 
                         player.setPlayerStatistic(playerStatistic);
-                        player = playerService.save(player);
-                        connection.getClient().setActivePlayer(player);
+                        client.savePlayer(player);
                     }
 
-                    Player finalPlayer = player;
-                    RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
-                            .filter(x -> x.getPlayer().getId().equals(finalPlayer.getId()))
-                            .findFirst()
-                            .orElse(null);
+                    RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
                     if (roomPlayer != null) {
                         notifyClients = roomPlayer.getPosition() < 4;
                         if (notifyClients) {
                             synchronized (currentClientRoom) {
                                 currentClientRoom.setStatus(RoomStatus.NotRunning);
                             }
-                            connection.getClient().setActiveRoom(currentClientRoom);
+                            client.setActiveRoom(currentClientRoom);
 
                             gameSession.getClients().forEach(c -> {
                                 Room room = c.getActiveRoom();
@@ -174,13 +165,13 @@ public class BasicGameHandler {
                     else if (game instanceof MatchplayGuardianGame)
                         ((MatchplayGuardianGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
 
-                    connection.getClient().setActiveGameSession(null);
+                    client.setActiveGameSession(null);
                 }
             }
             GameManager.getInstance().handleRoomPlayerChanges(connection, notifyClients);
         }
 
-        GameManager.getInstance().removeClient(connection.getClient());
+        GameManager.getInstance().removeClient(client);
         connection.setClient(null);
     }
 }

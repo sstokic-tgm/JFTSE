@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,8 +34,7 @@ public class AuthTokenService {
         return optional.orElse(null);
     }
 
-    public AuthToken findAuthTokenByAccountName(String accountName) {
-        Optional<AuthToken> optional = authTokenRepository.findAuthTokenByAccountName(accountName);
-        return optional.orElse(null);
+    public List<AuthToken> findAuthTokensByAccountName(String accountName) {
+        return authTokenRepository.findAuthTokensByAccountName(accountName);
     }
 }

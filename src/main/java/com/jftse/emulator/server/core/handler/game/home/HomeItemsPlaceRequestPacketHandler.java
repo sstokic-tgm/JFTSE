@@ -10,6 +10,7 @@ import com.jftse.emulator.server.core.service.PlayerPocketService;
 import com.jftse.emulator.server.core.service.PocketService;
 import com.jftse.emulator.server.database.model.home.AccountHome;
 import com.jftse.emulator.server.database.model.home.HomeInventory;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.networking.packet.Packet;
 
@@ -38,26 +39,22 @@ public class HomeItemsPlaceRequestPacketHandler extends AbstractHandler {
     @Override
     public void handle() {
         List<Map<String, Object>> homeItemDataList = homeItemsPlaceReqPacket.getHomeItemDataList();
-
         AccountHome accountHome = homeService.findAccountHomeByAccountId(connection.getClient().getAccount().getId());
+        Player player = connection.getClient().getPlayer();
 
         homeItemDataList.forEach(hidl -> {
             int inventoryItemId = (int) hidl.get("inventoryItemId");
 
             if (inventoryItemId > 0) {
-                PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) inventoryItemId, connection.getClient().getActivePlayer().getPocket());
+                PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) inventoryItemId, player.getPocket());
                 if (playerPocket != null) {
                     int itemCount = playerPocket.getItemCount();
 
-                    // those items are deco items -> its placed on the wall
-                    if (itemCount % 3 != 0)
-                        --itemCount;
-                    else
-                        itemCount = 0;
+                    --itemCount;
 
                     if (itemCount == 0) {
                         playerPocketService.remove((long) inventoryItemId);
-                        pocketService.decrementPocketBelongings(connection.getClient().getActivePlayer().getPocket());
+                        pocketService.decrementPocketBelongings(player.getPocket());
 
                         S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
                         connection.sendTCP(inventoryItemRemoveAnswerPacket);

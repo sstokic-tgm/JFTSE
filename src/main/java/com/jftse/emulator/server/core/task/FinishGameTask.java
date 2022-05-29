@@ -5,6 +5,9 @@ import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.item.EItemUseType;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
+import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
@@ -41,7 +44,6 @@ public class FinishGameTask extends AbstractTask {
 
     private boolean wonGame;
 
-    private final PlayerService playerService;
     private final LevelService levelService;
     private final ClothEquipmentService clothEquipmentService;
     private final ProductService productService;
@@ -56,7 +58,6 @@ public class FinishGameTask extends AbstractTask {
         this.connection = connection;
         this.wonGame = wonGame;
 
-        this.playerService = ServiceManager.getInstance().getPlayerService();
         this.levelService = ServiceManager.getInstance().getLevelService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.productService = ServiceManager.getInstance().getProductService();
@@ -71,7 +72,6 @@ public class FinishGameTask extends AbstractTask {
     public FinishGameTask(Connection connection) {
         this.connection = connection;
 
-        this.playerService = ServiceManager.getInstance().getPlayerService();
         this.levelService = ServiceManager.getInstance().getLevelService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.productService = ServiceManager.getInstance().getProductService();
@@ -104,10 +104,15 @@ public class FinishGameTask extends AbstractTask {
     }
 
     private void finishBattleGame(Connection connection, MatchplayBattleGame game) {
+        final boolean isFinished = game.isFinished();
+        if (isFinished)
+            return;
+
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
-        game.setFinished(true);
+        if (game.isFinished() == isFinished)
+            game.setFinished(true);
 
         List<PlayerReward> playerRewards = game.getPlayerRewards();
 
@@ -122,7 +127,9 @@ public class FinishGameTask extends AbstractTask {
 
         List<Player> playerList = new ArrayList<>();
         for (Iterator<Client> it = gameSession.getClients().iterator(); it.hasNext(); )
-            playerList.add(it.next().getActivePlayer());
+            playerList.add(it.next().getPlayer());
+
+        addProgressionBonus(playerRewards, gameSession);
 
         StringBuilder gameLogContent = new StringBuilder();
         gameLogContent.append("Battle game finished. ");
@@ -133,9 +140,7 @@ public class FinishGameTask extends AbstractTask {
         gameLogContent.append(allPlayersTeamRedDead ? "Blue " : "Red ").append("team won. ");
 
         gameSession.getClients().forEach(client -> {
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
-                    .findFirst().orElse(null);
+            RoomPlayer rp = client.getRoomPlayer();
             if (rp == null) {
                 return;
             }
@@ -152,18 +157,16 @@ public class FinishGameTask extends AbstractTask {
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
 
-                Player player = playerService.findById(client.getActivePlayer().getId());
+                Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
                 byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                 if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
                     player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                 player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
-                client.setActivePlayer(player);
+                client.savePlayer(player);
 
-                if (wonGame) {
-                    this.handleRewardItem(client.getConnection(), playerReward);
-                }
+                this.handleRewardItem(client.getConnection(), playerReward);
 
                 PlayerStatistic playerStatistic = player.getPlayerStatistic();
                 if (wonGame) {
@@ -188,14 +191,12 @@ public class FinishGameTask extends AbstractTask {
                 playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
 
                 player.setPlayerStatistic(playerStatistic);
-                player = playerService.save(player);
-                client.setActivePlayer(player);
+                client.savePlayer(player);
 
                 synchronized (rp) {
-                    rp.setPlayer(player);
                     rp.setReady(false);
                 }
-                byte playerLevel = client.getActivePlayer().getLevel();
+                byte playerLevel = player.getLevel();
                 if (playerLevel != oldLevel) {
                     StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                     rp.setStatusPointsAddedDto(statusPointsAddedDto);
@@ -204,10 +205,8 @@ public class FinishGameTask extends AbstractTask {
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                 }
 
-                if (wonGame) {
-                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
-                }
+                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
@@ -238,10 +237,15 @@ public class FinishGameTask extends AbstractTask {
     }
 
     private void finishGuardianGame(Connection connection, MatchplayGuardianGame game, boolean wonGame) {
+        final boolean isFinished = game.isFinished();
+        if (isFinished)
+            return;
+
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
-        game.setFinished(true);
+        if (game.isFinished() == isFinished)
+            game.setFinished(true);
 
         Room room = connection.getClient().getActiveRoom();
         synchronized (room) {
@@ -273,9 +277,7 @@ public class FinishGameTask extends AbstractTask {
                     client.getConnection().sendTCP(msgPacket);
                     client.getConnection().close();
 
-                    RoomPlayer rp = room.getRoomPlayerList().stream()
-                            .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
-                            .findFirst().orElse(null);
+                    RoomPlayer rp = client.getRoomPlayer();
                     if (rp == null) {
                         return;
                     }
@@ -297,11 +299,12 @@ public class FinishGameTask extends AbstractTask {
             }
         }
 
-        List<PlayerReward> playerRewards = game.getPlayerRewards();
+        List<PlayerReward> playerRewards = game.getPlayerRewards(wonGame);
         playerRewards.forEach(x -> {
             int expMultiplier = game.getGuardianStage().getExpMultiplier();
             x.setRewardExp(x.getRewardExp() * expMultiplier);
         });
+        addProgressionBonus(playerRewards, gameSession);
 
         StringBuilder gameLogContent = new StringBuilder();
         gameLogContent.append(game.getCurrentStage().getName()).append(" ");
@@ -309,9 +312,7 @@ public class FinishGameTask extends AbstractTask {
         gameLogContent.append(wonGame ? "Players " : "Guardians ").append("won. ");
 
         gameSession.getClients().forEach(client -> {
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> client.getActivePlayer() != null && x.getPlayer().getId().equals(client.getActivePlayer().getId()))
-                    .findFirst().orElse(null);
+            RoomPlayer rp = client.getRoomPlayer();
             if (rp == null) {
                 return;
             }
@@ -325,21 +326,20 @@ public class FinishGameTask extends AbstractTask {
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
 
-                Player player = playerService.findById(client.getActivePlayer().getId());
+                Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
                 byte level = levelService.getLevel(playerReward.getRewardExp(), player.getExpPoints(), player.getLevel());
                 if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
                     player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                 player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
-                client.setActivePlayer(player);
+                client.savePlayer(player);
 
                 if (wonGame) {
                     this.handleRewardItem(client.getConnection(), playerReward);
                 }
 
                 synchronized (rp) {
-                    rp.setPlayer(player);
                     rp.setReady(false);
                 }
                 byte playerLevel = player.getLevel();
@@ -351,10 +351,8 @@ public class FinishGameTask extends AbstractTask {
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                 }
 
-                if (wonGame) {
-                    S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                    client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
-                }
+                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
+                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
@@ -384,6 +382,34 @@ public class FinishGameTask extends AbstractTask {
         }
     }
 
+    private void addProgressionBonus(List<PlayerReward> playerRewards, GameSession gameSession) {
+        gameSession.getClients().forEach(client -> {
+            RoomPlayer rp = client.getRoomPlayer();
+            if (rp == null) {
+                return;
+            }
+
+            boolean isActivePlayer = rp.getPosition() < 4;
+            if (isActivePlayer) {
+                PlayerReward playerReward = playerRewards.stream()
+                        .filter(x -> x.getPlayerPosition() == rp.getPosition())
+                        .findFirst()
+                        .orElse(this.createEmptyPlayerReward());
+
+                // add house bonus
+                // TODO: should be moved to getPlayerReward sometime...
+                ExpGoldBonus expGoldBonus = new BattleHouseBonus(
+                        new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
+
+                int rewardExp = expGoldBonus.calculateExp();
+                int rewardGold = expGoldBonus.calculateGold();
+                // TODO: ...because of this
+                playerReward.setRewardExp(rewardExp);
+                playerReward.setRewardGold(rewardGold);
+            }
+        });
+    }
+
     private PlayerReward createEmptyPlayerReward() {
         PlayerReward playerReward = new PlayerReward();
         playerReward.setRewardExp(1);
@@ -392,7 +418,7 @@ public class FinishGameTask extends AbstractTask {
     }
 
     private void handleRewardItem(Connection connection, PlayerReward playerReward) {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         if (playerReward.getRewardProductIndex() < 0)
@@ -402,7 +428,7 @@ public class FinishGameTask extends AbstractTask {
         if (product == null)
             return;
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         Pocket pocket = player.getPocket();
         PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
         boolean existingItem = false;
@@ -433,8 +459,7 @@ public class FinishGameTask extends AbstractTask {
             pocket = pocketService.incrementPocketBelongings(pocket);
 
         player.setPocket(pocket);
-        player = playerService.save(player);
-        connection.getClient().setActivePlayer(player);
+        connection.getClient().savePlayer(player);
 
         List<PlayerPocket> playerPocketList = new ArrayList<>();
         playerPocketList.add(playerPocket);

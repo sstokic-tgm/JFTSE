@@ -12,8 +12,13 @@ import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.ClothEquipmentService;
 import com.jftse.emulator.server.core.service.GuildMemberService;
-import com.jftse.emulator.server.core.service.PlayerService;
+import com.jftse.emulator.server.core.service.SocialService;
+import com.jftse.emulator.server.database.model.account.Account;
+import com.jftse.emulator.server.database.model.guild.GuildMember;
+import com.jftse.emulator.server.database.model.messenger.Friend;
+import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
@@ -24,14 +29,14 @@ import java.util.Optional;
 public class RoomJoinRequestPacketHandler extends AbstractHandler {
     private C2SRoomJoinRequestPacket roomJoinRequestPacket;
 
-    private final PlayerService playerService;
     private final GuildMemberService guildMemberService;
     private final ClothEquipmentService clothEquipmentService;
+    private final SocialService socialService;
 
     public RoomJoinRequestPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
+        socialService = ServiceManager.getInstance().getSocialService();
     }
 
     @Override
@@ -42,7 +47,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null) {
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
             return;
@@ -78,8 +83,9 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
-        if (!activePlayer.getAccount().getGameMaster()) {
+        Player activePlayer = connection.getClient().getPlayer();
+        Account account = connection.getClient().getAccount();
+        if (!account.getGameMaster()) {
             if (room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
                 S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
                 connection.sendTCP(roomJoinAnswerPacket);
@@ -106,7 +112,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-        if (room.getBannedPlayers().contains(connection.getClient().getActivePlayer())) {
+        if (room.getBannedPlayers().contains(activePlayer.getId())) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
 
@@ -116,7 +122,7 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
 
         boolean useGmSlot = false;
         int gmSlot = 9;
-        if (activePlayer.getAccount().getGameMaster()) {
+        if (account.getGameMaster()) {
             int i = 0;
             boolean isGmSlotInUse = false;
             for (Short pos : room.getPositions()) {
@@ -147,7 +153,8 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
         }
 
         Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
-        int newPosition = useGmSlot ? 9 : room.getPositions().indexOf(num.get());
+        int newPosition = useGmSlot ? 9 : room.getPositions().indexOf(num.get());;
+
         if (newPosition == -1) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
@@ -159,10 +166,17 @@ public class RoomJoinRequestPacketHandler extends AbstractHandler {
         room.getPositions().set(newPosition, RoomPositionState.InUse);
 
         RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayer(activePlayer);
-        roomPlayer.setGuildMember(guildMemberService.getByPlayer(activePlayer));
-        roomPlayer.setClothEquipment(clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId()));
-        roomPlayer.setStatusPointsAddedDto(clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer()));
+        roomPlayer.setPlayerId(activePlayer.getId());
+
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        Friend couple = socialService.getRelationship(activePlayer);
+        ClothEquipment clothEquipment = clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
+        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer());
+
+        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
+        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
+        roomPlayer.setClothEquipmentId(clothEquipment.getId());
+        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
         roomPlayer.setPosition((short) newPosition);
         roomPlayer.setMaster(false);
         roomPlayer.setFitting(false);

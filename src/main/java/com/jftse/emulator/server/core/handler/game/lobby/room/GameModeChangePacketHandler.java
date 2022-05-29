@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.core.handler.game.lobby.room;
 
-import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.C2SRoomGameModeChangeRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomListAnswerPacket;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 public class GameModeChangePacketHandler extends AbstractHandler {
@@ -34,8 +34,9 @@ public class GameModeChangePacketHandler extends AbstractHandler {
                 }
             });
 
+            Player player = connection.getClient().getPlayer();
             GameManager.getInstance().getClientsInLobby().forEach(c -> {
-                boolean isActivePlayer = c.getActivePlayer() != null && c.getActivePlayer().getId().equals(connection.getClient().getActivePlayer().getId());
+                boolean isActivePlayer = c.getPlayer() != null && c.getPlayer().getId().equals(player.getId());
                 if (isActivePlayer)
                     return;
 

@@ -81,7 +81,7 @@ public class AcceptParcelRequestHandler extends AbstractHandler {
         playerService.save(sender);
 
         Client senderClient = GameManager.getInstance().getClients().stream()
-                .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(sender.getId()))
+                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(sender.getId()))
                 .findFirst()
                 .orElse(null);
         if (senderClient != null) {

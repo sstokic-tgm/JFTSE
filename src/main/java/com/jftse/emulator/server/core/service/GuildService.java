@@ -32,7 +32,7 @@ public class GuildService {
         return guildRepository.findAllByNameContainingIgnoreCase(name);
     }
 
-    public Guild findById(Long id) { return guildRepository.findById(id).get(); }
+    public Guild findById(Long id) { return guildRepository.findById(id).orElse(null); }
 
     public List<Guild> findAll() { return guildRepository.findAll(); }
 }

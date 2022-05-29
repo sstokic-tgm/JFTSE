@@ -38,11 +38,14 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                 Client playerClient = gameSession.getClientByPlayerId(playerId);
                 if (playerClient != null) {
                     Client client = new Client();
+                    client.setPlayer(playerClient.getActivePlayerId());
+                    client.setAccount(playerClient.getAccountId());
                     client.setActiveRoom(playerClient.getActiveRoom());
-                    client.setActivePlayer(playerClient.getActivePlayer());
                     client.setActiveGameSession(gameSession);
                     client.setConnection(connection);
                     client.setSpectator((matchplayPlayerIdsInSessionPacket.isSpectator()));
+
+                    log.info(client.getPlayer().getName() + " connected");
 
                     connection.setClient(client);
                     gameSession.getClientsInRelay().add(client);
@@ -66,7 +69,7 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
                         Room room = client.getActiveRoom();
                         if (room != null) {
                             RoomPlayer roomPlayer = room.getRoomPlayerList().stream()
-                                    .filter(rp -> rp.getPlayer().getId() == playerId)
+                                    .filter(rp -> rp.getPlayerId() == playerId)
                                     .findAny()
                                     .orElse(null);
                             if (roomPlayer != null) {

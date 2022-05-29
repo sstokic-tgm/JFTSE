@@ -48,8 +48,9 @@ public class PlayerDeletePacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
+        Account account = connection.getClient().getAccount();
         Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
-        if (player != null) {
+        if (account != null && player != null) {
             GuildMember guildMember = guildMemberService.getByPlayer(player);
             if (guildMember != null) {
                 if (guildMember.getMemberRank() != 3) {
@@ -63,7 +64,8 @@ public class PlayerDeletePacketHandler extends AbstractHandler {
                 }
             }
 
-            friendService.deleteByPlayer(player);
+            friendService.deleteAllByPlayer(player);
+            friendService.deleteAllByFriend(player);
             giftService.deleteBySender(player);
             giftService.deleteByReceiver(player);
             messageService.deleteBySender(player);
@@ -78,7 +80,6 @@ public class PlayerDeletePacketHandler extends AbstractHandler {
             S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) 0);
             connection.sendTCP(playerDeleteAnswerPacket);
 
-            Account account = connection.getClient().getAccount();
             List<Player> playerList = playerService.findAllByAccount(account);
             S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList);
             connection.sendTCP(playerListPacket);

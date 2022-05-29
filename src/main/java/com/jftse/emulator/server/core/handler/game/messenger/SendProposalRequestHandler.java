@@ -46,7 +46,7 @@ public class SendProposalRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         PlayerPocket item = playerPocketService.findById(c2SSendProposalRequestPacket.getPlayerPocketId().longValue());
@@ -68,7 +68,7 @@ public class SendProposalRequestHandler extends AbstractHandler {
             return;
         }
 
-        Player sender = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player sender = connection.getClient().getPlayer();
         Player receiver = playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
 
         List<Friend> senderFriend = friendService.findByPlayer(sender);
@@ -88,7 +88,7 @@ public class SendProposalRequestHandler extends AbstractHandler {
 
             Proposal proposal = new Proposal();
             proposal.setReceiver(receiver);
-            proposal.setSender(connection.getClient().getActivePlayer());
+            proposal.setSender(sender);
             proposal.setMessage(c2SSendProposalRequestPacket.getMessage());
             proposal.setSeen(false);
             proposal.setCategory(item.getCategory());
@@ -110,7 +110,7 @@ public class SendProposalRequestHandler extends AbstractHandler {
             }
 
             Client receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(receiver.getId()))
+                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
                     .findFirst()
                     .orElse(null);
             if (receiverClient != null) {

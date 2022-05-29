@@ -3,14 +3,26 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout
-                    pattern="%d{HH:mm:ss,SSS} [%t] %c{1} %-5p %msg%n%throwable"/>
+                    pattern="%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable"/>
         </Console>
 
-        <RollingFile name="RollingFile"
+        <RollingFile name="RollingFileServerLog"
                      fileName="logs/server.log"
                      filePattern="logs/server.%d{MM-dd-yyyy}.log.gz">
             <PatternLayout>
-                <pattern>%d{HH:mm:ss,SSS} [%t] %c{1} %-5p %msg%n%throwable</pattern>
+                <pattern>%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy  size="1GB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+
+        <RollingFile name="RollingFilePacketsLog"
+                     fileName="logs/packets.log"
+                     filePattern="logs/server.%d{MM-dd-yyyy}.log.gz">
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss,SSS} [%t] %C{1} [%M] %-5p %msg%n%throwable</pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy  size="1GB" />
@@ -24,11 +36,15 @@
         <!-- LOG everything at INFO level -->
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="RollingFileServerLog"/>
         </Root>
 
         <!-- LOG "com.ft.emulator*" at TRACE level -->
         <Logger name="com.jftse.emulator" level="trace"></Logger>
+        <Logger name="packets-log" level="trace" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFilePacketsLog"/>
+        </Logger>
     </Loggers>
 
 </Configuration>

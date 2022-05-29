@@ -5,6 +5,7 @@ import com.jftse.emulator.server.database.model.player.ClothEquipment;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.database.repository.item.ItemPartRepository;
 import com.jftse.emulator.server.database.repository.player.ClothEquipmentRepository;
 import com.jftse.emulator.server.core.item.EItemCategory;
@@ -34,46 +35,47 @@ public class ClothEquipmentService {
         return clothEquipment.orElse(null);
     }
 
-    public void updateCloths(ClothEquipment clothEquipment, C2SInventoryWearClothReqPacket inventoryWearClothReqPacket) {
-        clothEquipment = findClothEquipmentById(clothEquipment.getId());
+    public void updateCloths(Player player, C2SInventoryWearClothReqPacket inventoryWearClothReqPacket) {
+        Pocket pocket = player.getPocket();
+        ClothEquipment clothEquipment = findClothEquipmentById(player.getClothEquipment().getId());
 
-        PlayerPocket item = playerPocketService.findById((long) inventoryWearClothReqPacket.getHair());
+        PlayerPocket item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getHair(), pocket);
         clothEquipment.setHair(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getFace());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getFace(), pocket);
         clothEquipment.setFace(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getDress());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getDress(), pocket);
         clothEquipment.setDress(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getPants());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getPants(), pocket);
         clothEquipment.setPants(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getSocks());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getSocks(), pocket);
         clothEquipment.setSocks(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getShoes());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getShoes(), pocket);
         clothEquipment.setShoes(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getGloves());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getGloves(), pocket);
         clothEquipment.setGloves(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getRacket());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getRacket(), pocket);
         clothEquipment.setRacket(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getGlasses());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getGlasses(), pocket);
         clothEquipment.setGlasses(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getBag());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getBag(), pocket);
         clothEquipment.setBag(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getHat());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getHat(), pocket);
         clothEquipment.setHat(item == null ? 0 : item.getItemIndex());
 
-        item = playerPocketService.findById((long) inventoryWearClothReqPacket.getDye());
+        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getDye(), pocket);
         clothEquipment.setDye(item == null ? 0 : item.getItemIndex());
 
-        clothEquipment = save(clothEquipment);
+        save(clothEquipment);
     }
 
     public Map<String, Integer> getEquippedCloths(Player player) {
@@ -82,40 +84,40 @@ public class ClothEquipmentService {
         ClothEquipment clothEquipment = findClothEquipmentById(player.getClothEquipment().getId());
 
         PlayerPocket item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getHair(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("hair", item == null ? 0 : (int) item.getId().longValue());
+        result.put("hair", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getFace(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("face", item == null ? 0 : (int) item.getId().longValue());
+        result.put("face", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getDress(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("dress", item == null ? 0 : (int) item.getId().longValue());
+        result.put("dress", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getPants(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("pants", item == null ? 0 : (int) item.getId().longValue());
+        result.put("pants", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getSocks(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("socks", item == null ? 0 : (int) item.getId().longValue());
+        result.put("socks", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getShoes(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("shoes", item == null ? 0 : (int) item.getId().longValue());
+        result.put("shoes", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getGloves(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("gloves", item == null ? 0 : (int) item.getId().longValue());
+        result.put("gloves", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getRacket(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("racket", item == null ? 0 : (int) item.getId().longValue());
+        result.put("racket", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getGlasses(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("glasses", item == null ? 0 : (int) item.getId().longValue());
+        result.put("glasses", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getBag(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("bag", item == null ? 0 : (int) item.getId().longValue());
+        result.put("bag", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getHat(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("hat", item == null ? 0 : (int) item.getId().longValue());
+        result.put("hat", item == null ? 0 : item.getId().intValue());
 
         item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(clothEquipment.getDye(), EItemCategory.PARTS.getName(), player.getPocket());
-        result.put("dye", item == null ? 0 : (int) item.getId().longValue());
+        result.put("dye", item == null ? 0 : item.getId().intValue());
 
         return result;
     }

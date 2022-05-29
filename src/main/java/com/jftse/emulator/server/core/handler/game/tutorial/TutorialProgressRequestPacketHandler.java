@@ -23,7 +23,7 @@ public class TutorialProgressRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        List<TutorialProgress> tutorialProgressList = tutorialService.findAllByPlayerIdFetched(connection.getClient().getActivePlayer().getId());
+        List<TutorialProgress> tutorialProgressList = tutorialService.findAllByPlayerIdFetched(connection.getClient().getPlayer().getId());
 
         S2CTutorialProgressAnswerPacket tutorialProgressAnswerPacket = new S2CTutorialProgressAnswerPacket(tutorialProgressList);
         connection.sendTCP(tutorialProgressAnswerPacket);

@@ -37,6 +37,7 @@ public class GuardianAttackTask extends AbstractTask {
 
     @Override
     public void run() {
+        if (connection.getClient() == null) return;
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession == null) return;
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getActiveMatchplayGame();

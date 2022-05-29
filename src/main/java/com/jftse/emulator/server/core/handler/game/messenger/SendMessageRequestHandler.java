@@ -31,20 +31,20 @@ public class SendMessageRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         Player receiver = playerService.findByName(c2SSendMessageRequestPacket.getReceiverName());
         if (receiver != null) {
             Message message = new Message();
             message.setReceiver(receiver);
-            message.setSender(connection.getClient().getActivePlayer());
+            message.setSender(connection.getClient().getPlayer());
             message.setMessage(c2SSendMessageRequestPacket.getMessage());
             message.setSeen(false);
             messageService.save(message);
 
             Client receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getActivePlayer() != null && x.getActivePlayer().getId().equals(receiver.getId()))
+                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
                     .findFirst()
                     .orElse(null);
             if (receiverClient != null) {

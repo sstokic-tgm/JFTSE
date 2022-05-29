@@ -4,7 +4,6 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.messenger.C2SMessageListRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CMessageListAnswerPacket;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.core.service.messenger.GiftService;
 import com.jftse.emulator.server.core.service.messenger.MessageService;
 import com.jftse.emulator.server.database.model.messenger.Gift;
@@ -18,12 +17,10 @@ import java.util.List;
 public class MessageListRequestHandler extends AbstractHandler {
     private C2SMessageListRequestPacket messageListRequestPacket;
 
-    private final PlayerService playerService;
     private final MessageService messageService;
     private final GiftService giftService;
 
     public MessageListRequestHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         messageService = ServiceManager.getInstance().getMessageService();
         giftService = ServiceManager.getInstance().getGiftService();
     }
@@ -36,12 +33,12 @@ public class MessageListRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         byte listType = messageListRequestPacket.getListType();
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
 
         switch (listType) {
             case 0 -> {

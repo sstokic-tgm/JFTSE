@@ -18,7 +18,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
         this.write((char) roomPlayerList.size());
         for (RoomPlayer roomPlayer : roomPlayerList) {
             Guild guild = null;
-            if (roomPlayer.getGuildMember() != null && !roomPlayer.getGuildMember().getWaitingForApproval() && roomPlayer.getGuildMember().getGuild() != null)
+            if (roomPlayer.getGuildMemberId() != null && !roomPlayer.getGuildMember().getWaitingForApproval() && roomPlayer.getGuildMember().getGuild() != null)
                 guild = roomPlayer.getGuildMember().getGuild();
 
             Player player = roomPlayer.getPlayer();
@@ -51,7 +51,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             }
 
             this.write((byte) 0);
-            this.write(roomPlayer.getCouple() != null ? roomPlayer.getCouple().getFriend().getName() : "");
+            this.write(roomPlayer.getCoupleId() != null ? roomPlayer.getCouple().getFriend().getName() : "");
             this.write(0);
             this.write((byte) 0);
             this.write((short) 0); // emblem slot 1
@@ -79,7 +79,7 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write((byte) 0);
             this.write((byte) 0);
             // add hp
-            this.write(BattleUtils.calculatePlayerHp(player));
+            this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
             // cloth added status points for shop
             this.write((byte) 0);
             this.write((byte) 0);

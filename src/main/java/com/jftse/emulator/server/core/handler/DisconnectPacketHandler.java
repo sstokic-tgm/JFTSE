@@ -7,20 +7,17 @@ import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
-import com.jftse.emulator.server.core.service.AuthenticationService;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
 import com.jftse.emulator.server.networking.packet.Packet;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DisconnectPacketHandler extends AbstractHandler {
-    private final AuthenticationService authenticationService;
     private final PlayerPocketService playerPocketService;
 
     public DisconnectPacketHandler() {
-        authenticationService = ServiceManager.getInstance().getAuthenticationService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
     }
 
@@ -34,9 +31,10 @@ public class DisconnectPacketHandler extends AbstractHandler {
         if (connection.getClient() == null)
             return;
 
-        if (connection.getClient().getActivePlayer() != null) {
+        if (connection.getClient().getPlayer() != null) {
+            Player player = connection.getClient().getPlayer();
             // reset pocket
-            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(connection.getClient().getActivePlayer().getPocket());
+            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
             StreamUtils.batches(playerPocketList, 20).forEach(pocketList -> {
                 List<Packet> inventoryItemRemoveAnswerPackets = new ArrayList<>();
                 pocketList.forEach(p -> inventoryItemRemoveAnswerPackets.add(new S2CInventoryItemRemoveAnswerPacket((int) p.getId().longValue())));
@@ -46,10 +44,10 @@ public class DisconnectPacketHandler extends AbstractHandler {
 
         if (connection.getClient().getAccount() != null) {
             // reset status
-            Account account = authenticationService.findAccountById(connection.getClient().getAccount().getId());
+            Account account = connection.getClient().getAccount();
             if (account.getStatus().shortValue() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID) {
                 account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-                authenticationService.updateAccount(account);
+                connection.getClient().saveAccount(account);
             }
         }
 

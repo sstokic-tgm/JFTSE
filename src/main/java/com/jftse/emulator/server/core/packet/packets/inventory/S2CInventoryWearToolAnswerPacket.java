@@ -6,9 +6,9 @@ import com.jftse.emulator.server.networking.packet.Packet;
 import java.util.List;
 
 public class S2CInventoryWearToolAnswerPacket extends Packet {
-    public S2CInventoryWearToolAnswerPacket(List<Integer> quickSlotList) {
+    public S2CInventoryWearToolAnswerPacket(List<Integer> toolSlotList) {
         super(PacketOperations.S2CInventoryWearToolAnswer.getValueAsChar());
 
-        quickSlotList.forEach(this::write);
+        toolSlotList.forEach(this::write);
     }
 }

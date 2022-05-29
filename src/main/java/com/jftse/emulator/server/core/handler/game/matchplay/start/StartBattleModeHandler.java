@@ -8,7 +8,6 @@ import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.room.PlayerPositionInfo;
-import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplaySetPlayerPosition;
 import com.jftse.emulator.server.core.packet.packets.matchplay.S2CMatchplayTriggerGuardianServe;
@@ -42,15 +41,12 @@ public class StartBattleModeHandler extends AbstractHandler {
     public void handle() {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         MatchplayBattleGame game = (MatchplayBattleGame) gameSession.getActiveMatchplayGame();
-        Room room = connection.getClient().getActiveRoom();
 
         ArrayList<Client> clients = new ArrayList<>(gameSession.getClients());
         List<PlayerPositionInfo> positionInfo = new ArrayList<>();
 
         clients.forEach(c -> {
-            RoomPlayer rp = room.getRoomPlayerList().stream()
-                    .filter(x -> x.getPlayer().getId().equals(c.getActivePlayer().getId()))
-                    .findFirst().orElse(null);
+            RoomPlayer rp = c.getRoomPlayer();
             if (rp == null || rp.getPosition() > 3) {
                 return;
             }

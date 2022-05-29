@@ -16,13 +16,17 @@ public class OpenGachaCommand extends Command {
 
     @Override
     public void execute(Connection connection, List<String> params) {
+        if (connection.getClient() == null)
+            return;
+
         if ((params.size() < 2 && connection.getClient().getActiveRoom() != null) || (params.size() < 2 && connection.getClient().getActiveRoom() == null)) {
             S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Use -og <\"gacha name\"> <number>");
             connection.sendTCP(chatLobbyAnswerPacket);
             return;
         }
 
-        if (!connection.getClient().isUsingGachaMachine()) {
+        final boolean usingGachaMachine = connection.getClient().isUsingGachaMachine();
+        if (!usingGachaMachine) {
             ThreadManager.getInstance().newTask(new GachaMachineTask(connection, params));
         }
     }

@@ -29,7 +29,7 @@ public class PlayerStatusPointChangePacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
 
         // we can't change; attributes should be server sided
         if (player.getStatusPoints() == 0) {
@@ -46,9 +46,7 @@ public class PlayerStatusPointChangePacketHandler extends AbstractHandler {
                 player.setWillpower(playerStatusPointChangePacket.getWillpower());
                 player.setStatusPoints(playerStatusPointChangePacket.getStatusPoints());
 
-                player = playerService.save(player);
-
-                connection.getClient().setActivePlayer(player);
+                connection.getClient().savePlayer(player);
 
                 StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 

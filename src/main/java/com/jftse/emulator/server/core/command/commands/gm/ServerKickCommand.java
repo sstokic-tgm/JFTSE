@@ -2,12 +2,10 @@ package com.jftse.emulator.server.core.command.commands.gm;
 
 import com.jftse.emulator.server.core.command.Command;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.S2CDCMsgPacket;
 import com.jftse.emulator.server.core.packet.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
-import com.jftse.emulator.server.core.service.AuthenticationService;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
@@ -20,12 +18,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ServerKickCommand extends Command {
 
-    private final AuthenticationService authenticationService;
-
     public ServerKickCommand() {
         setDescription("Kicks player from server");
-
-        this.authenticationService = ServiceManager.getInstance().getAuthenticationService();
     }
 
     @Override
@@ -46,13 +40,14 @@ public class ServerKickCommand extends Command {
         for (Iterator<Client> it = clients.iterator(); it.hasNext(); ) {
             Client client = it.next();
 
-            if (client != null && client.getActivePlayer() != null) {
-                Player activePlayer = client.getActivePlayer();
+            if (client != null && client.getPlayer() != null) {
+                Player activePlayer = client.getPlayer();
                 if (activePlayer.getName().equals(playerName) && client.getConnection() != null) {
-                    Account account = authenticationService.findAccountById(activePlayer.getAccount().getId());
+                    Account account = client.getAccount();
                     if (account != null) {
-                        account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
-                        authenticationService.updateAccount(account);
+                        if (account.getStatus() != S2CLoginAnswerPacket.ACCOUNT_BLOCKED_USER_ID)
+                            account.setStatus((int) S2CLoginAnswerPacket.SUCCESS);
+                        client.saveAccount(account);
                     }
 
                     S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(1);

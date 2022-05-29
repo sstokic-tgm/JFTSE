@@ -8,7 +8,6 @@ import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.emulator.server.core.matchplay.room.GameSession;
-import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.matchplay.C2SMatchplayUsesSkill;
@@ -24,25 +23,17 @@ import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
-
 @Log4j2
 public class PlayerUseSkillHandler extends AbstractHandler {
     private C2SMatchplayUsesSkill anyoneUsesSkill;
 
     private final SkillService skillService;
-    private final AuthenticationService authenticationService;
-    private final PlayerService playerService;
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
 
     public PlayerUseSkillHandler() {
         this.skillService = ServiceManager.getInstance().getSkillService();
-        this.authenticationService = ServiceManager.getInstance().getAuthenticationService();
-        this.playerService = ServiceManager.getInstance().getPlayerService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.quickSlotEquipmentService = ServiceManager.getInstance().getQuickSlotEquipmentService();
@@ -57,8 +48,10 @@ public class PlayerUseSkillHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null
-                || connection.getClient().getActiveRoom() == null || connection.getClient().getActivePlayer() == null)
+                || connection.getClient().getPlayer() == null || connection.getClient().getRoomPlayer() == null)
             return;
+
+        Player player = connection.getClient().getPlayer();
 
         byte position = anyoneUsesSkill.getAttackerPosition();
         boolean attackerIsGuardian = position > 9;
@@ -70,22 +63,17 @@ public class PlayerUseSkillHandler extends AbstractHandler {
         MatchplayGame game = gameSession.getActiveMatchplayGame();
         if (game == null) return;
 
-        Room room = connection.getClient().getActiveRoom();
-        List<RoomPlayer> roomPlayers = room.getRoomPlayerList();
-        RoomPlayer roomPlayer = roomPlayers.stream()
-                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
-                .findAny()
-                .orElse(null);
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
         Skill skill = skillService.findSkillById((long) anyoneUsesSkill.getSkillIndex() + 1);
 
         if (attackerIsGuardian) {
             if (skill != null) {
-                this.handleSpecialSkillsUseOfGuardians(connection, position, (MatchplayGuardianGame) game, roomPlayers, skill);
+                this.handleSpecialSkillsUseOfGuardians(connection, position, (MatchplayGuardianGame) game, skill);
             }
         } else if (attackerIsPlayer) {
             if (roomPlayer != null) {
                 if (anyoneUsesSkill.isQuickSlot()) {
-                    this.handleQuickSlotItemUse(connection, anyoneUsesSkill);
+                    this.handleQuickSlotItemUse(connection, player, anyoneUsesSkill);
                 }
             }
         }
@@ -99,29 +87,18 @@ public class PlayerUseSkillHandler extends AbstractHandler {
         });
     }
 
-    private void handleQuickSlotItemUse(Connection connection, C2SMatchplayUsesSkill playerUseSkill) {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+    private void handleQuickSlotItemUse(Connection connection, Player player, C2SMatchplayUsesSkill playerUseSkill) {
         Pocket pocket = player.getPocket();
 
         QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
-        int itemId = -1;
-        switch (playerUseSkill.getQuickSlotIndex()) {
-            case 0:
-                itemId = quickSlotEquipment.getSlot1();
-                break;
-            case 1:
-                itemId = quickSlotEquipment.getSlot2();
-                break;
-            case 2:
-                itemId = quickSlotEquipment.getSlot3();
-                break;
-            case 3:
-                itemId = quickSlotEquipment.getSlot4();
-                break;
-            case 4:
-                itemId = quickSlotEquipment.getSlot5();
-                break;
-        }
+        int itemId = switch (playerUseSkill.getQuickSlotIndex()) {
+            case 0 -> quickSlotEquipment.getSlot1();
+            case 1 -> quickSlotEquipment.getSlot2();
+            case 2 -> quickSlotEquipment.getSlot3();
+            case 3 -> quickSlotEquipment.getSlot4();
+            case 4 -> quickSlotEquipment.getSlot5();
+            default -> -1;
+        };
 
         if (itemId > -1) {
             PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemId, pocket);
@@ -131,14 +108,9 @@ public class PlayerUseSkillHandler extends AbstractHandler {
                 if (itemCount <= 0) {
 
                     playerPocketService.remove(playerPocket.getId());
-                    pocket = pocketService.decrementPocketBelongings(pocket);
-                    connection.getClient().getActivePlayer().setPocket(pocket);
+                    pocketService.decrementPocketBelongings(pocket);
 
                     quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, itemId);
-                    player.setQuickSlotEquipment(quickSlotEquipment);
-
-                    player = playerService.save(player);
-                    connection.getClient().setActivePlayer(player);
 
                     S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(itemId);
                     connection.sendTCP(inventoryItemRemoveAnswerPacket);
@@ -150,7 +122,7 @@ public class PlayerUseSkillHandler extends AbstractHandler {
         }
     }
 
-    private void handleSpecialSkillsUseOfGuardians(Connection connection, byte guardianPos, MatchplayGuardianGame game, List<RoomPlayer> roomPlayers, Skill skill) {
+    private void handleSpecialSkillsUseOfGuardians(Connection connection, byte guardianPos, MatchplayGuardianGame game, Skill skill) {
         // There could be more special skills which need to be handled here
         if (skill.getId() == 29) { // RebirthOne
             this.handleReviveGuardian(connection, game, skill);

@@ -4,7 +4,6 @@ import com.jftse.emulator.server.core.handler.AbstractHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packet.packets.messenger.C2SParcelListRequestPacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CParcelListPacket;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.core.service.messenger.ParcelService;
 import com.jftse.emulator.server.database.model.messenger.Parcel;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -16,11 +15,9 @@ import java.util.List;
 public class ParcelListRequestHandler extends AbstractHandler {
     private C2SParcelListRequestPacket parcelListRequestPacket;
 
-    private final PlayerService playerService;
     private final ParcelService parcelService;
 
     public ParcelListRequestHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         parcelService = ServiceManager.getInstance().getParcelService();
     }
 
@@ -32,12 +29,12 @@ public class ParcelListRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         byte listType = parcelListRequestPacket.getListType();
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
 
         List<Parcel> parcelList = new ArrayList<>();
         switch (listType) {

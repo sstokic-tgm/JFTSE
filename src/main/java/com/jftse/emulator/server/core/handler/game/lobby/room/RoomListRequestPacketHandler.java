@@ -46,28 +46,29 @@ public class RoomListRequestPacketHandler extends AbstractHandler {
         }
 
         short direction = roomListRequestPacket.getDirection() == 0 ? (short) -1 : (short) 1;
-        short currentLobbyRoomListPage = (short) connection.getClient().getLobbyCurrentRoomListPage();
+        final short currentLobbyRoomListPage = (short) connection.getClient().getLobbyCurrentRoomListPage();
+        short newCurrentLobbyRoomListPage = currentLobbyRoomListPage;
 
         boolean wantsToGoBackOnNegativePage = direction == -1 && currentLobbyRoomListPage == 0;
         if (wantsToGoBackOnNegativePage) {
             direction = 0;
         }
 
-        int currentRoomType = connection.getClient().getLobbyGameModeTabFilter();
+        final int currentRoomType = connection.getClient().getLobbyGameModeTabFilter();
         int availableRoomsCount = (int) GameManager.getInstance().getRooms().stream()
                 .filter(x -> currentRoomType == GameMode.ALL || GameManager.getInstance().getRoomMode(x) == currentRoomType)
                 .count();
 
         int possibleRoomsDisplayed = (currentLobbyRoomListPage + 1) * 5;
         if (direction == -1 || availableRoomsCount > possibleRoomsDisplayed) {
-            currentLobbyRoomListPage += direction;
+            newCurrentLobbyRoomListPage += direction;
         }
 
         if (currentRoomType != gameMode || currentLobbyRoomListPage < 0) {
-            currentLobbyRoomListPage = 0;
+            newCurrentLobbyRoomListPage = 0;
         }
 
-        connection.getClient().setLobbyCurrentRoomListPage(currentLobbyRoomListPage);
+        connection.getClient().setLobbyCurrentRoomListPage(newCurrentLobbyRoomListPage);
         connection.getClient().setLobbyGameModeTabFilter(gameMode);
 
         List<Room> roomList = GameManager.getInstance().getFilteredRoomsForClient(connection.getClient());

@@ -48,8 +48,12 @@ public class ProductService {
     }
 
     public Product findProductByItemAndCategory(int itemIndex, String category) {
-        List<Product> productList = productRepository.findProductsByItem0AndAndCategory(itemIndex, category);
+        List<Product> productList = productRepository.findProductsByItem0AndCategory(itemIndex, category);
         return productList.isEmpty() ? null : productList.get(0);
+    }
+
+    public List<Integer> findAllProductIndexesByCategoryAndItemIndexList(String category, List<Integer> itemIndexList) {
+        return productRepository.findAllProductIndexesByCategoryAndItemIndexList(category, itemIndexList);
     }
 
     public Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList) {

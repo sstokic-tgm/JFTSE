@@ -6,7 +6,6 @@ import com.jftse.emulator.server.core.packet.packets.guild.C2SGuildCreateRequest
 import com.jftse.emulator.server.core.packet.packets.guild.S2CGuildCreateAnswerPacket;
 import com.jftse.emulator.server.core.service.GuildMemberService;
 import com.jftse.emulator.server.core.service.GuildService;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.guild.Guild;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
@@ -20,12 +19,10 @@ public class GuildCreateRequestPacketHandler extends AbstractHandler {
 
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
-    private final PlayerService playerService;
 
     public GuildCreateRequestPacketHandler() {
         guildService = ServiceManager.getInstance().getGuildService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
-        playerService = ServiceManager.getInstance().getPlayerService();
     }
 
     @Override
@@ -36,7 +33,7 @@ public class GuildCreateRequestPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
         String guildName = guildCreateRequestPacket.getName();
@@ -45,7 +42,7 @@ public class GuildCreateRequestPacketHandler extends AbstractHandler {
             return;
         }
 
-        Player activePlayer = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player activePlayer = connection.getClient().getPlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
         if (guildMember != null) {
             connection.sendTCP(new S2CGuildCreateAnswerPacket((char) -2)); // You already have a Club.
@@ -75,8 +72,7 @@ public class GuildCreateRequestPacketHandler extends AbstractHandler {
         guildMemberService.save(guildMember);
 
         activePlayer.setGold(activePlayer.getGold() - 5000);
-        activePlayer = playerService.save(activePlayer);
-        connection.getClient().setActivePlayer(activePlayer);
+        connection.getClient().savePlayer(activePlayer);
 
         guild.setMemberList(List.of(guildMember));
         connection.sendTCP(new S2CGuildCreateAnswerPacket((char) 0));

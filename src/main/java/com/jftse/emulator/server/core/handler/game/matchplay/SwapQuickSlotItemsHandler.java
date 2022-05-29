@@ -33,13 +33,10 @@ public class SwapQuickSlotItemsHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() == null || connection.getClient().getActiveGameSession() == null
-                || connection.getClient().getActiveRoom() == null || connection.getClient().getActivePlayer() == null)
+                || connection.getClient().getActiveRoom() == null || connection.getClient().getPlayer() == null)
             return;
 
-        RoomPlayer roomPlayer = connection.getClient().getActiveRoom().getRoomPlayerList().stream()
-                .filter(rp -> rp.getPlayer().getId().equals(connection.getClient().getActivePlayer().getId()))
-                .findFirst()
-                .orElse(null);
+        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
         if (roomPlayer == null)
             return;
 

@@ -7,7 +7,6 @@ import com.jftse.emulator.server.core.packet.packets.guild.S2CGuildChangeLogoAns
 import com.jftse.emulator.server.core.service.GuildMemberService;
 import com.jftse.emulator.server.core.service.GuildService;
 import com.jftse.emulator.server.core.service.PlayerPocketService;
-import com.jftse.emulator.server.core.service.PlayerService;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
@@ -16,13 +15,11 @@ import com.jftse.emulator.server.networking.packet.Packet;
 public class GuildChangeLogoRequestHandler extends AbstractHandler {
     private C2SGuildChangeLogoRequestPacket c2SGuildChangeLogoRequestPacket;
 
-    private final PlayerService playerService;
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
     private final PlayerPocketService playerPocketService;
 
     public GuildChangeLogoRequestHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         guildService = ServiceManager.getInstance().getGuildService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
@@ -36,10 +33,10 @@ public class GuildChangeLogoRequestHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        if (connection.getClient() == null || connection.getClient().getActivePlayer() == null)
+        if (connection.getClient() == null || connection.getClient().getPlayer() == null)
             return;
 
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
         GuildMember guildMember = guildMemberService.getByPlayer(player);
 
         if (guildMember.getMemberRank() == 3) {

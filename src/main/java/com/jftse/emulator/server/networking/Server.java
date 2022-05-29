@@ -216,11 +216,11 @@ public class Server implements Runnable {
         this.connections.forEach((id, connection) -> {
             if (connection.getTcpConnection().isTimedOut(time)) {
                 connection.notifyTimeout();
-            } /*else {
+            } else {
                 if (connection.getTcpConnection().needsKeepAlive(time)) {
                     connection.sendTCP(new Packet(PacketOperations.C2SHeartbeat.getValueAsChar()));
                 }
-            }*/
+            }
             if (connection.isIdle()) {
                 connection.notifyIdle();
             }
@@ -240,7 +240,7 @@ public class Server implements Runnable {
         shutdown = false;
         while (!shutdown) {
             try {
-                update(10);
+                update(15000); // every 15s
             } catch (IOException ioe) {
                 log.error("Thread exception " + ioe.getMessage(), ioe);
                 close();

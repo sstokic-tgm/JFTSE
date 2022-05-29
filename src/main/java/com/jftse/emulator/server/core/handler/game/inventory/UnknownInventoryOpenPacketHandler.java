@@ -14,7 +14,6 @@ import java.util.Map;
 public class UnknownInventoryOpenPacketHandler extends AbstractHandler {
     private Packet packet;
 
-    private final PlayerService playerService;
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final ToolSlotEquipmentService toolSlotEquipmentService;
@@ -23,7 +22,6 @@ public class UnknownInventoryOpenPacketHandler extends AbstractHandler {
     private final BattlemonSlotEquipmentService battlemonSlotEquipmentService;
 
     public UnknownInventoryOpenPacketHandler() {
-        playerService = ServiceManager.getInstance().getPlayerService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         quickSlotEquipmentService = ServiceManager.getInstance().getQuickSlotEquipmentService();
         toolSlotEquipmentService = ServiceManager.getInstance().getToolSlotEquipmentService();
@@ -40,7 +38,7 @@ public class UnknownInventoryOpenPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        Player player = playerService.findById(connection.getClient().getActivePlayer().getId());
+        Player player = connection.getClient().getPlayer();
 
         if (player != null) {
             StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);

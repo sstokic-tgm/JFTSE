@@ -1,6 +1,12 @@
 package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.item.EItemCategory;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
+import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
+import com.jftse.emulator.server.core.life.progression.SimpleExpGoldBonus;
+import com.jftse.emulator.server.core.life.progression.bonuses.WonGameBonus;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
@@ -57,7 +63,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     }
 
     public PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
-        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer());
+        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer().getLevel());
         short baseStr = roomPlayer.getPlayer().getStrength();
         short baseSta = roomPlayer.getPlayer().getStamina();
         short baseDex = roomPlayer.getPlayer().getDexterity();
@@ -105,29 +111,37 @@ public class MatchplayBattleGame extends MatchplayGame {
                 basicExpReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
             }
 
+            ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(basicExpReward, basicExpReward);
+
             switch (iteration) {
-                case 0:
-                    basicExpReward += basicExpReward * 0.1;
-                    break;
-                case 1:
-                    basicExpReward += basicExpReward * 0.05;
-                    break;
+                case 0 -> expGoldBonus = new SimpleExpGoldBonus(expGoldBonus, 0.1);
+                case 1 -> expGoldBonus = new SimpleExpGoldBonus(expGoldBonus, 0.05);
             }
 
             if (wonGame) {
-                basicExpReward += basicExpReward * 0.2;
+                expGoldBonus = new WonGameBonus(expGoldBonus);
             }
 
-            int rewardExp = basicExpReward;
-            int rewardGold = basicExpReward;
+            int rewardExp = expGoldBonus.calculateExp();
+            int rewardGold = expGoldBonus.calculateGold();
             PlayerReward playerReward = new PlayerReward();
             playerReward.setPlayerPosition(playerPosition);
             playerReward.setRewardExp(rewardExp);
             playerReward.setRewardGold(rewardGold);
-            if (wonGame) { // TODO: temporarily only
-                playerReward.setRewardProductIndex(57592);
-                playerReward.setProductRewardAmount(1);
-            }
+
+            List<Integer> materialsForReward = ServiceManager.getInstance().getItemMaterialService().findAllItemIndexes();
+            List<Integer> materialsProductIndex = ServiceManager.getInstance().getProductService().findAllProductIndexesByCategoryAndItemIndexList(EItemCategory.MATERIAL.getName(), materialsForReward);
+            materialsProductIndex.add(57592);
+
+            Random rnd = new Random();
+            int drawnMaterial = rnd.nextInt(materialsProductIndex.size() - 1 + 1) + 1;
+
+            playerReward.setRewardProductIndex(materialsProductIndex.get(drawnMaterial - 1));
+
+            final int min = 1;
+            final int max = !wonGame ? 2 : 3;
+            final int amount = rnd.nextInt(max - min + 1) + min;
+            playerReward.setProductRewardAmount(amount);
 
             playerRewards.add(playerReward);
 

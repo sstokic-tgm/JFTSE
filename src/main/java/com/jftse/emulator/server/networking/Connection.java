@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
 @Setter
@@ -34,12 +35,16 @@ public class Connection {
     private final int decKey;
     private final int encKey;
 
+    private ConcurrentLinkedDeque<Packet[]> packetSendQueue;
+
     protected Connection(Server server, ConnectionListener connectionListener) {
         this.server = server;
         this.connectionListener = connectionListener;
 
         this.decKey = ConfigService.getInstance().getValue("network.encryption.enabled", false) ? getRandomBigInteger().intValueExact() : 0;
         this.encKey = ConfigService.getInstance().getValue("network.encryption.enabled", false) ? getRandomBigInteger().intValueExact() : 0;
+
+        packetSendQueue = new ConcurrentLinkedDeque<>();
     }
 
     private BigInteger getRandomBigInteger() {
@@ -65,25 +70,37 @@ public class Connection {
         return isConnected;
     }
 
-    public synchronized int sendTCP(Packet... packets) {
+    public int sendTCP(Packet... packets) {
         if (packets == null || packets.length == 0)
             throw new IllegalArgumentException("Packet cannot be null.");
 
-        try {
+        int length = 0;
 
-            return tcpConnection.send(packets);
-        } catch (IOException ioe) {
-            switch ("" + ioe.getMessage()) {
-                case "Connection is closed.":
-                case "Connection reset by peer":
-                case "Broken pipe":
-                    break;
-                default:
-                    log.error("Unable to send packet " + ioe.getMessage(), ioe);
+        packetSendQueue.add(packets);
+        if (packetSendQueue.peek() != null) {
+            for (Packet[] iPackets = packetSendQueue.poll(); iPackets != null; iPackets = packetSendQueue.poll()) {
+                try {
+                    length += tcpConnection.send(iPackets);
+                } catch (IOException ioe) {
+                    switch (ioe.getMessage()) {
+                        case "Connection is closed.":
+                        case "Connection reset by peer":
+                        case "Broken pipe":
+                            break;
+                        default:
+                            log.error("Unable to send packet " + ioe.getMessage(), ioe);
+                    }
+                    length = -1;
+                }
             }
-            close();
-            return 0;
+            if (length == -1) {
+                close();
+                return length;
+            }
+
+            return length;
         }
+        return length;
     }
 
     public synchronized long getLatency() {
