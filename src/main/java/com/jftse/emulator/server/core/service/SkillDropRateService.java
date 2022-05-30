@@ -20,10 +20,9 @@ public class SkillDropRateService {
     public SkillDropRate findSkillDropRateByPlayer(Player player) {
         Byte playerLevel = player.getLevel();
         List<SkillDropRate> skillDropRates = skillDropRateRepository.findAll();
-        SkillDropRate skillDropRate = skillDropRates.stream()
+        return skillDropRates.stream()
                 .filter(x -> x.getFromLevel() <= playerLevel && x.getToLevel() >= playerLevel)
                 .findFirst()
                 .orElse(null);
-        return skillDropRate;
     }
 }

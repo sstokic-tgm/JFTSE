@@ -6,6 +6,7 @@ import com.jftse.emulator.server.core.packet.packets.shop.C2SShopRequestDataPrep
 import com.jftse.emulator.server.core.packet.packets.shop.S2CShopAnswerDataPreparePacket;
 import com.jftse.emulator.server.core.service.ProductService;
 import com.jftse.emulator.server.networking.packet.Packet;
+import com.jftse.emulator.server.shared.module.Client;
 
 public class ShopRequestDataPreparePacketHandler extends AbstractHandler {
     private C2SShopRequestDataPreparePacket shopRequestDataPreparePacket;
@@ -29,6 +30,14 @@ public class ShopRequestDataPreparePacketHandler extends AbstractHandler {
         byte player = shopRequestDataPreparePacket.getPlayer();
 
         int productListSize = productService.getProductListSize(category, part, player);
+
+        Client client = connection.getClient();
+        if (client != null) {
+            final boolean requestedShopDataPrepare = client.isRequestedShopDataPrepare();
+            if (!requestedShopDataPrepare) {
+                client.setRequestedShopDataPrepare(true);
+            }
+        }
 
         S2CShopAnswerDataPreparePacket shopAnswerDataPreparePacket = new S2CShopAnswerDataPreparePacket(category, part, player, productListSize);
         connection.sendTCP(shopAnswerDataPreparePacket);

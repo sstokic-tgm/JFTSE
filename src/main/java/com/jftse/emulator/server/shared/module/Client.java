@@ -37,6 +37,9 @@ public class Client {
 
     private volatile boolean usingGachaMachine = false;
 
+    // hack
+    private volatile boolean requestedShopDataPrepare = false;
+
     private String ip;
     private int port;
 

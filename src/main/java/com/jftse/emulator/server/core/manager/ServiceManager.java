@@ -89,6 +89,8 @@ public class ServiceManager {
     @Autowired
     private GuardianSkillsService guardianSkillsService;
     @Autowired
+    private SkillDropRateService skillDropRateService;
+    @Autowired
     private SkillService skillService;
     @Autowired
     private WillDamageService willDamageService;
