@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.core.listener;
 
 import com.jftse.emulator.server.core.handler.anticheat.BasicAntiCheatHandler;
-import com.jftse.emulator.server.core.handler.authentication.BasicAuthHandler;
 import com.jftse.emulator.server.core.manager.AntiCheatManager;
 import com.jftse.emulator.server.core.manager.ThreadManager;
 import com.jftse.emulator.server.networking.Connection;
@@ -28,7 +27,7 @@ public class AntiCheatHeartBeatNetworkListener implements ConnectionListener {
 
         connection.setClient(client);
         antiCheatManager.addClient(client);
-        ThreadManager.getInstance().schedule(() -> new BasicAuthHandler().sendWelcomePacket(connection), 1, TimeUnit.SECONDS);
+        ThreadManager.getInstance().schedule(() -> new BasicAntiCheatHandler().sendWelcomePacket(connection), 1, TimeUnit.SECONDS);
     }
 
     public void disconnected(Connection connection) {

@@ -41,6 +41,7 @@ public class ACClientRegisterHandler extends AbstractHandler {
                 Client client = connection.getClient();
                 Map<String, Boolean> files = AntiCheatManager.getInstance().getFilesByClient(client);
 
+                str = str.replace("/", "\\");
                 List<String> result = Arrays.asList(str.split(";"));
 
                 if (result.size() == 3) {
