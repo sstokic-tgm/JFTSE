@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -366,9 +367,9 @@ public class GameManager {
     }
 
     public GuildMember getGuildMemberByPlayerPositionInGuild(int playerPositionInGuild, final GuildMember guildMember) {
-        final List<GuildMember> memberList = guildMember.getGuild()
-                .getMemberList()
-                .stream().filter(x -> !x.getWaitingForApproval())
+        final List<GuildMember> memberList = guildMember.getGuild().getMemberList().stream()
+                .filter(x -> !x.getWaitingForApproval())
+                .sorted(Comparator.comparing(GuildMember::getMemberRank).reversed())
                 .collect(Collectors.toList());
         if (memberList.size() < playerPositionInGuild) {
             return null;
@@ -383,30 +384,26 @@ public class GameManager {
     }
 
     public void sendPacketToAllClientsInSameGameSession(Packet packet, Connection connection) {
-        GameSession gameSession = connection.getClient().getActiveGameSession();
+        final GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
-            synchronized (gameSession) {
-                final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClients());
-                clientsInGameSession.forEach(c -> {
-                    if (c.getConnection() != null && c.getConnection().isConnected()) {
-                        c.getConnection().sendTCP(packet);
-                    }
-                });
-            }
+            final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClients());
+            clientsInGameSession.forEach(c -> {
+                if (c.getConnection() != null && c.getConnection().isConnected()) {
+                    c.getConnection().sendTCP(packet);
+                }
+            });
         }
     }
 
     public void sendPacketToAllRelayClientsInSameGameSession(Packet packet, Connection connection) {
-        GameSession gameSession = connection.getClient().getActiveGameSession();
+        final GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession != null) {
-            synchronized (gameSession) {
-                final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClientsInRelay());
-                clientsInGameSession.forEach(c -> {
-                    if (c.getConnection() != null && c.getConnection().isConnected()) {
-                        c.getConnection().sendTCP(packet);
-                    }
-                });
-            }
+            final ArrayList<Client> clientsInGameSession = new ArrayList<>(gameSession.getClientsInRelay());
+            clientsInGameSession.forEach(c -> {
+                if (c.getConnection() != null && c.getConnection().isConnected()) {
+                    c.getConnection().sendTCP(packet);
+                }
+            });
         }
     }
 }

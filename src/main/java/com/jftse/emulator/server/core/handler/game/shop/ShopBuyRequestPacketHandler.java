@@ -160,11 +160,11 @@ public class ShopBuyRequestPacketHandler extends AbstractHandler {
                             playerPocket.setItemIndex(product.getItem0());
                             playerPocket.setUseType(product.getUseType());
 
-                            if (option == 0)
+                            if (option <= 0)
                                 playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
                             else if (option == 1)
                                 playerPocket.setItemCount(product.getUse1());
-                            else if (option == 2)
+                            else
                                 playerPocket.setItemCount(product.getUse2());
 
                             // no idea how itemCount can be null here, but ok

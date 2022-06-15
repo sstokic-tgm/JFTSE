@@ -9,6 +9,7 @@ import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ public class ClubMembersListRequestHandler extends AbstractHandler {
             if (guild != null) {
                 List<GuildMember> guildMembers = guild.getMemberList().stream()
                         .filter(gm -> !gm.getId().equals(guildMember.getId()))
+                        .sorted(Comparator.comparing(GuildMember::getMemberRank).reversed())
                         .collect(Collectors.toList());
 
                 S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);

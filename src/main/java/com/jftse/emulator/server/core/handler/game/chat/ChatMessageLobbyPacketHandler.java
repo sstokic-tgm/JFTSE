@@ -34,6 +34,6 @@ public class ChatMessageLobbyPacketHandler extends AbstractHandler {
                 .filter(Client::isInLobby)
                 .collect(Collectors.toList());
 
-        clientList.forEach(c -> c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatLobbyAnswerPacket));
+        clientList.forEach(c -> c.getConnection().sendTCP(chatLobbyAnswerPacket));
     }
 }

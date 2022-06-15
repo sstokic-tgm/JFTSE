@@ -26,7 +26,11 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractHandler {
         if (connection.getClient() == null)
             return;
 
-        Room room = connection.getClient().getActiveRoom();
+        final RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+        if (roomPlayer == null || !roomPlayer.isMaster())
+            return;
+
+        final Room room = connection.getClient().getActiveRoom();
 
         if (room != null) {
             RoomPlayer playerToKick = room.getRoomPlayerList().stream()
@@ -35,8 +39,8 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractHandler {
                     .orElse(null);
 
             if (playerToKick != null) {
-                List<Client> clientsInRoom = GameManager.getInstance().getClientsInRoom(room.getRoomId());
-                Client client = clientsInRoom.stream()
+                final List<Client> clientsInRoom = GameManager.getInstance().getClientsInRoom(room.getRoomId());
+                final Client client = clientsInRoom.stream()
                         .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerToKick.getPlayer().getId()))
                         .findFirst()
                         .orElse(null);

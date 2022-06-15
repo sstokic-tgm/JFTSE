@@ -32,10 +32,10 @@ public class RegisterPlayerForSessionHandler extends AbstractHandler {
         int playerId = matchplayPlayerIdsInSessionPacket.getPlayerIds().stream().findFirst().orElse(-1);
         int sessionId = matchplayPlayerIdsInSessionPacket.getSessionId();
 
-        GameSession gameSession = GameSessionManager.getInstance().getGameSessionBySessionId(sessionId);
+        final GameSession gameSession = GameSessionManager.getInstance().getGameSessionBySessionId(sessionId);
         if (gameSession != null) {
             if (playerId != -1) {
-                Client playerClient = gameSession.getClientByPlayerId(playerId);
+                final Client playerClient = gameSession.getClientByPlayerId(playerId);
                 if (playerClient != null) {
                     Client client = new Client();
                     client.setPlayer(playerClient.getActivePlayerId());

@@ -22,7 +22,7 @@ public class RelayPacketRequestHandler extends AbstractHandler {
     @Override
     public void handle() {
         if (connection.getClient() != null) {
-            GameSession gameSession = connection.getClient().getActiveGameSession();
+            final GameSession gameSession = connection.getClient().getActiveGameSession();
             if (gameSession != null) {
                 Class<? extends AbstractHandler> handlerClass = PacketOperations.nullableHandlerOf(relayPacket.getPacketId());
 
@@ -44,7 +44,7 @@ public class RelayPacketRequestHandler extends AbstractHandler {
                     }
                 }
 
-                ArrayList<Client> clientList = new ArrayList<>(gameSession.getClientsInRelay());
+                final ArrayList<Client> clientList = new ArrayList<>(gameSession.getClientsInRelay());
                 clientList.forEach(client -> {
                     if (client.getConnection() != null && client.getConnection().isConnected()) {
                         client.getConnection().sendTCP(relayPacket);

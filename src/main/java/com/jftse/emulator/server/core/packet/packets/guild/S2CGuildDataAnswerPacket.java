@@ -5,6 +5,7 @@ import com.jftse.emulator.server.database.model.guild.GuildMember;
 import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.networking.packet.Packet;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,25 +30,30 @@ public class S2CGuildDataAnswerPacket extends Packet {
             this.write(guild.getLogoMarkColor());
             this.write(guild.getName());
 
-            List<GuildMember> memberList = guild.getMemberList();
+            List<GuildMember> memberList = guild.getMemberList().stream()
+                    .sorted(Comparator.comparing(GuildMember::getMemberRank).reversed())
+                    .collect(Collectors.toList());
 
-            GuildMember clubMaster = memberList.stream().filter(gm -> gm.getMemberRank() == 3)
-                    .findFirst().orElse(null);
-            this.write(clubMaster.getPlayer().getName());
+            GuildMember clubMaster = memberList.stream()
+                    .filter(gm -> gm.getMemberRank() == 3)
+                    .findFirst()
+                    .orElse(null);
+            this.write(clubMaster == null ? "NoClubMaster" : clubMaster.getPlayer().getName());
 
-            List<GuildMember> subMasterList =
-                    (List<GuildMember>) memberList.stream().filter(gm -> gm.getMemberRank() == 2)
-                            .collect(Collectors.toList());
+            List<GuildMember> subMasterList = memberList.stream()
+                    .filter(gm -> gm.getMemberRank() == 2)
+                    .collect(Collectors.toList());
             this.write((byte) subMasterList.size());
             for (GuildMember subMaster : subMasterList)
                 this.write(subMaster.getPlayer().getName());
 
-            this.write((byte) memberList.stream().filter(x -> !x.getWaitingForApproval()).count());
+            int activeMemberCount = memberList.stream().filter(x -> !x.getWaitingForApproval()).mapToInt(e -> 1).sum();
+            this.write((byte) activeMemberCount);
             this.write(guild.getMaxMemberCount());
 
-            List<GuildMember> reverseMemberList =
-                    (List<GuildMember>) memberList.stream().filter(GuildMember::getWaitingForApproval)
-                            .collect(Collectors.toList());
+            List<GuildMember> reverseMemberList = memberList.stream()
+                    .filter(GuildMember::getWaitingForApproval)
+                    .collect(Collectors.toList());
             this.write((byte) reverseMemberList.size());
 
             this.write(guild.getLevel());

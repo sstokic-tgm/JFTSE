@@ -8,6 +8,7 @@ import com.jftse.emulator.server.core.matchplay.room.Room;
 import com.jftse.emulator.server.core.matchplay.room.RoomPlayer;
 import com.jftse.emulator.server.core.packet.packets.chat.C2SChatRoomReqPacket;
 import com.jftse.emulator.server.core.packet.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -22,15 +23,16 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
 
     @Override
     public void handle() {
-        Room room = connection.getClient().getActiveRoom();
+        final Room room = connection.getClient().getActiveRoom();
         if (room == null)
             return;
 
-        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+        final Player player = connection.getClient().getPlayer();
+        final RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
 
         boolean playerInSecretGmSlot = roomPlayer != null && roomPlayer.getPosition() == MiscConstants.InvisibleGmSlot;
         byte messageType = playerInSecretGmSlot ? (byte) 2 : chatRoomReqPacket.getType();
-        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(messageType, connection.getClient().getPlayer().getName(), chatRoomReqPacket.getMessage());
+        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(messageType, player.getName(), chatRoomReqPacket.getMessage());
 
         if (CommandManager.getInstance().isCommand(chatRoomReqPacket.getMessage())) {
             connection.sendTCP(chatRoomAnswerPacket);
@@ -50,12 +52,12 @@ public class ChatMessageRoomPacketHandler extends AbstractHandler {
 
                 boolean playerCanSeeMessage = areInSameTeam(senderPos, rp.getPosition()) || rp.getPosition() == MiscConstants.InvisibleGmSlot;
                 if (c.getPlayer() != null && c.getPlayer().getId().equals(rp.getPlayerId()) && playerCanSeeMessage) {
-                    c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomAnswerPacket);
+                    c.getConnection().sendTCP(chatRoomAnswerPacket);
                 }
             }
             connection.sendTCP(chatRoomAnswerPacket); // Send to sender
         } else {
-            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().getServer().sendToTcp(c.getConnection().getId(), chatRoomAnswerPacket));
+            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
         }
     }
 
