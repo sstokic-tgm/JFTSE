@@ -64,6 +64,12 @@ public class SendGiftRequestHandler extends AbstractHandler {
         Player receiver = playerService.findByName(c2SSendGiftRequestPacket.getReceiverName());
 
         if (receiver != null && product != null) {
+            if (!product.getEnabled()) {
+                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) -9, null);
+                connection.sendTCP(s2CSendGiftAnswerPacket);
+                return;
+            }
+
             Gift gift = new Gift();
             gift.setReceiver(receiver);
             gift.setSender(sender);
