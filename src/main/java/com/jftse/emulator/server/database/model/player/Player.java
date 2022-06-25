@@ -72,6 +72,7 @@ public class Player extends AbstractBaseModel {
     private Integer expPoints = 0;
     private Boolean nameChangeAllowed = false;
     private Integer gold = 0;
+    private Integer couplePoints = 0;
     private Byte playerType;
 
     private Byte strength = 0;

@@ -58,9 +58,5 @@ public class UnknownInventoryOpenPacketHandler extends AbstractHandler {
 
             connection.sendTCP(inventoryWearClothAnswerPacket, inventoryWearQuickAnswerPacket, inventoryWearToolAnswerPacket, inventoryWearSpecialAnswerPacket, inventoryWearCardAnswerPacket, inventoryWearBattlemonAnswerPacket);
         }
-
-        Packet answer = new Packet((char) (packet.getPacketId() + 1));
-        answer.write((char) 0);
-        connection.sendTCP(answer);
     }
 }

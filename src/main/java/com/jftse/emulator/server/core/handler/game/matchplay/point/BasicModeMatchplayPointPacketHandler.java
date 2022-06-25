@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.game.matchplay.point;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.GameMode;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
@@ -24,6 +25,7 @@ import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.core.utils.RankingUtils;
 import com.jftse.emulator.server.database.model.log.GameLog;
 import com.jftse.emulator.server.database.model.item.Product;
+import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
@@ -183,10 +185,34 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractHandler {
                         int rewardGold = expGoldBonus.calculateGold();
 
                         byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
-                        if (level != 60)
+                        if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
                             player.setExpPoints(player.getExpPoints() + rewardExp);
                         player.setGold(player.getGold() + rewardGold);
                         player = levelService.setNewLevelStatusPoints(level, player);
+
+                        Friend friend = rp.getCouple();
+                        if (friend != null) {
+                            boolean hasCoupleInTeam = roomPlayerList.stream().anyMatch(roomPlayer -> {
+                                boolean isInRedTeam = game.isRedTeam(roomPlayer.getPosition());
+                                boolean isInBlueTeam = game.isBlueTeam(roomPlayer.getPosition());
+                                if (roomPlayer.getPosition() != rp.getPosition() && (isInRedTeam == isCurrentPlayerInRedTeam || isInBlueTeam == !isCurrentPlayerInRedTeam)) {
+                                    Friend f = roomPlayer.getCouple();
+                                    return f != null && f.getFriend().getId().equals(friend.getPlayer().getId()) && f.getEFriendshipState() == friend.getEFriendshipState();
+                                }
+                                return false;
+                            });
+
+                            if (hasCoupleInTeam) {
+                                int newCouplePoints;
+                                if (wonGame)
+                                    newCouplePoints = player.getCouplePoints() + 5;
+                                else
+                                    newCouplePoints = player.getCouplePoints() + 2;
+
+                                player.setCouplePoints(newCouplePoints);
+                            }
+                        }
+
                         client.savePlayer(player);
 
                         this.handleRewardItem(client.getConnection(), playerReward);

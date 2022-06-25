@@ -9,6 +9,7 @@ import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
+import org.springframework.util.MultiValueMap;
 
 public class QuickSlotUseRequestHandler extends AbstractHandler {
     private C2SQuickSlotUseRequestPacket quickSlotUseRequestPacket;
@@ -36,12 +37,14 @@ public class QuickSlotUseRequestHandler extends AbstractHandler {
         if (baseItem == null)
             return;
 
-        if (!baseItem.processPlayer(player))
-            return;
-        if (!baseItem.processPocket(pocket))
-            return;
+        if (baseItem.processPlayer(player)) {
+            baseItem.processPocket(pocket);
+        }
+        sendPackets(baseItem.getPacketsToSend());
+    }
 
-        baseItem.getPacketsToSend().forEach((playerId, packets) -> {
+    private void sendPackets(MultiValueMap<Long, Packet> packetsToSend) {
+        packetsToSend.forEach((playerId, packets) -> {
             final Connection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
             if (connectionByPlayerId != null)
                 connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));

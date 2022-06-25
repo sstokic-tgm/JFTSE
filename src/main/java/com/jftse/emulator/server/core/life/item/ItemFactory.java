@@ -3,8 +3,7 @@ package com.jftse.emulator.server.core.life.item;
 import com.jftse.emulator.server.core.item.EItemCategory;
 import com.jftse.emulator.server.core.life.item.quick.QuickItem;
 import com.jftse.emulator.server.core.life.item.recipe.Recipe;
-import com.jftse.emulator.server.core.life.item.special.CoupleRing;
-import com.jftse.emulator.server.core.life.item.special.WingOfMemory;
+import com.jftse.emulator.server.core.life.item.special.*;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.service.PlayerPocketService;
 import com.jftse.emulator.server.database.model.item.ItemRecipe;
@@ -45,6 +44,15 @@ public class ItemFactory {
         }
         if (itemSpecial.getItemIndex() == 26) {
             return new CoupleRing(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
+        }
+        if (itemSpecial.getItemIndex() == 15) {
+            return new TrunkSmall(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
+        }
+        if (itemSpecial.getItemIndex() == 16) {
+            return new TrunkMedium(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
+        }
+        if (itemSpecial.getItemIndex() == 17) {
+            return new TrunkLarge(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
         }
 
         return null;

@@ -11,6 +11,7 @@ import com.jftse.emulator.server.core.packet.PacketOperations;
 import com.jftse.emulator.server.core.packet.packets.S2CDisconnectAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.core.packet.packets.lobby.room.S2CRoomPlayerInformationPacket;
+import com.jftse.emulator.server.core.packet.packets.player.S2CCouplePointsDataPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.ClothEquipmentService;
@@ -79,10 +80,12 @@ public class ClientBackInRoomPacketHandler extends AbstractHandler {
 
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 
+        S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
         S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
         S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(playerStatistic);
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(currentClientRoom.getRoomPlayerList()));
+        connection.sendTCP(couplePointsDataPacket);
         connection.sendTCP(playerStatusPointChangePacket, playerInfoPlayStatsPacket);
         connection.sendTCP(roomInformationPacket, roomPlayerInformationPacket);
 

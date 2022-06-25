@@ -13,9 +13,7 @@ import com.jftse.emulator.server.core.packet.packets.messenger.S2CFriendRequestN
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.messenger.S2CRelationshipAnswerPacket;
 import com.jftse.emulator.server.core.packet.packets.pet.S2CPetDataAnswerPacket;
-import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerInfoPlayStatsPacket;
-import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerLevelExpPacket;
-import com.jftse.emulator.server.core.packet.packets.player.S2CPlayerStatusPointChangePacket;
+import com.jftse.emulator.server.core.packet.packets.player.*;
 import com.jftse.emulator.server.core.service.*;
 import com.jftse.emulator.server.database.model.account.Account;
 import com.jftse.emulator.server.database.model.guild.GuildMember;
@@ -24,8 +22,10 @@ import com.jftse.emulator.server.database.model.messenger.EFriendshipState;
 import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.pet.Pet;
 import com.jftse.emulator.server.database.model.player.Player;
+import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
 import com.jftse.emulator.server.database.model.pocket.PlayerPocket;
+import com.jftse.emulator.server.database.model.pocket.Pocket;
 import com.jftse.emulator.server.networking.packet.Packet;
 import com.jftse.emulator.server.shared.module.Client;
 
@@ -46,6 +46,8 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
     private final CardSlotEquipmentService cardSlotEquipmentService;
     private final BattlemonSlotEquipmentService battlemonSlotEquipmentService;
     private final SocialService socialService;
+    private final PocketService pocketService;
+    private final PlayerStatisticService playerStatisticService;
 
     public GameServerDataRequestPacketHandler() {
         homeService = ServiceManager.getInstance().getHomeService();
@@ -59,6 +61,8 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
         cardSlotEquipmentService = ServiceManager.getInstance().getCardSlotEquipmentService();
         battlemonSlotEquipmentService = ServiceManager.getInstance().getBattlemonSlotEquipmentService();
         socialService = ServiceManager.getInstance().getSocialService();
+        pocketService = ServiceManager.getInstance().getPocketService();
+        playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
     }
 
     @Override
@@ -78,9 +82,17 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
         // init data request packets and pass level & exp and home/house data
         if (requestType == 0) {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-            S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
+            connection.sendTCP(gameServerAnswerPacket);
 
-            connection.sendTCP(gameServerAnswerPacket, playerLevelExpPacket);
+            StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+            Pocket pocket = pocketService.findById(player.getPocket().getId());
+            PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+
+            S2CUnknownPlayerInfoDataPacket unknownPlayerInfoDataPacket = new S2CUnknownPlayerInfoDataPacket(player, pocket, statusPointsAddedDto, playerStatistic);
+            S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
+            S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
+            connection.sendTCP(unknownPlayerInfoDataPacket);
+            connection.sendTCP(playerLevelExpPacket, couplePointsDataPacket);
 
             player.setOnline(true);
             client.savePlayer(player);
@@ -164,12 +176,6 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
 
-            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
-            StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
-                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
-                connection.sendTCP(inventoryDataPacket);
-            });
-
             StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
             Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
             List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
@@ -177,6 +183,12 @@ public class GameServerDataRequestPacketHandler extends AbstractHandler {
             List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
             List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
             List<Integer> equippedBattlemonSlots = battlemonSlotEquipmentService.getEquippedBattlemonSlots(player);
+
+            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
+            StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
+                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+                connection.sendTCP(inventoryDataPacket);
+            });
 
             S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
             S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());

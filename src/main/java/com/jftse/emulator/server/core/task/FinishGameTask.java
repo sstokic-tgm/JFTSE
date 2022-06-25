@@ -27,6 +27,7 @@ import com.jftse.emulator.server.core.thread.AbstractTask;
 import com.jftse.emulator.server.core.utils.RankingUtils;
 import com.jftse.emulator.server.database.model.log.GameLog;
 import com.jftse.emulator.server.database.model.item.Product;
+import com.jftse.emulator.server.database.model.messenger.Friend;
 import com.jftse.emulator.server.database.model.player.Player;
 import com.jftse.emulator.server.database.model.player.PlayerStatistic;
 import com.jftse.emulator.server.database.model.player.StatusPointsAddedDto;
@@ -37,6 +38,7 @@ import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.shared.module.Client;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 public class FinishGameTask extends AbstractTask {
@@ -125,6 +127,8 @@ public class FinishGameTask extends AbstractTask {
         gameSession.clearCountDownRunnable();
         gameSession.getRunnableEvents().clear();
 
+        ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+
         List<Player> playerList = new ArrayList<>();
         for (Iterator<Client> it = gameSession.getClients().iterator(); it.hasNext(); )
             playerList.add(it.next().getPlayer());
@@ -164,6 +168,30 @@ public class FinishGameTask extends AbstractTask {
                     player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                 player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
+
+                Friend friend = rp.getCouple();
+                if (friend != null) {
+                    boolean hasCoupleInTeam = roomPlayerList.stream().anyMatch(roomPlayer -> {
+                        boolean isInRedTeam = game.isRedTeam(roomPlayer.getPosition());
+                        boolean isInBlueTeam = game.isBlueTeam(roomPlayer.getPosition());
+                        if (roomPlayer.getPosition() != rp.getPosition() && (isInRedTeam == isCurrentPlayerInRedTeam || isInBlueTeam == !isCurrentPlayerInRedTeam)) {
+                            Friend f = roomPlayer.getCouple();
+                            return f != null && f.getFriend().getId().equals(friend.getPlayer().getId()) && f.getEFriendshipState() == friend.getEFriendshipState();
+                        }
+                        return false;
+                    });
+
+                    if (hasCoupleInTeam) {
+                        int newCouplePoints;
+                        if (wonGame)
+                            newCouplePoints = player.getCouplePoints() + 5;
+                        else
+                            newCouplePoints = player.getCouplePoints() + 2;
+
+                        player.setCouplePoints(newCouplePoints);
+                    }
+                }
+
                 client.savePlayer(player);
 
                 this.handleRewardItem(client.getConnection(), playerReward);
@@ -299,6 +327,8 @@ public class FinishGameTask extends AbstractTask {
             }
         }
 
+        ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+
         List<PlayerReward> playerRewards = game.getPlayerRewards(wonGame);
         playerRewards.forEach(x -> {
             int expMultiplier = game.getGuardianStage().getExpMultiplier();
@@ -333,6 +363,28 @@ public class FinishGameTask extends AbstractTask {
                     player.setExpPoints(player.getExpPoints() + playerReward.getRewardExp());
                 player.setGold(player.getGold() + playerReward.getRewardGold());
                 player = levelService.setNewLevelStatusPoints(level, player);
+
+                Friend friend = rp.getCouple();
+                if (friend != null) {
+                    boolean hasCoupleInTeam = roomPlayerList.stream().anyMatch(roomPlayer -> {
+                        if (roomPlayer.getPosition() != rp.getPosition()) {
+                            Friend f = roomPlayer.getCouple();
+                            return f != null && f.getFriend().getId().equals(friend.getPlayer().getId()) && f.getEFriendshipState() == friend.getEFriendshipState();
+                        }
+                        return false;
+                    });
+
+                    if (hasCoupleInTeam) {
+                        int newCouplePoints;
+                        if (wonGame)
+                            newCouplePoints = player.getCouplePoints() + 5;
+                        else
+                            newCouplePoints = player.getCouplePoints() + 2;
+
+                        player.setCouplePoints(newCouplePoints);
+                    }
+                }
+
                 client.savePlayer(player);
 
                 if (wonGame) {

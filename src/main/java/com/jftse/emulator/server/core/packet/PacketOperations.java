@@ -159,7 +159,7 @@ public enum PacketOperations {
 
     S2CPlayerLevelExpData(0x22B8),
     S2CPlayerInfoPlayStatsData(0x1B6F),
-
+    S2CUnknownPlayerInfoData(0x106D),
     C2SUnknownInventoryOpenRequest(0x237C),
     C2SInventoryWearClothRequest(0x1B63),
     S2CInventoryWearClothAnswer(0x1B64),
@@ -174,12 +174,13 @@ public enum PacketOperations {
     C2SInventoryWearCardRequest(0x1C21),
     S2CInventoryWearCardAnswer(0x1C22),
     S2CInventoryData(0x1B69),
+    S2CInventoryExpandAnswer(0x22C9),
     C2SInventoryItemTimeExpiredRequest(0x1BBC),
     S2CInventoryItemRemoveAnswer(0x1B74),
     C2SQuickSlotUseRequest(0x1BDA),
     C2SCombineNowRecipe(0x23BE),
     S2CCombineNowRecipe(0x23BF),
-
+    S2CExpandCardSlot(0x1DE5),
     C2SHomeItemsClearReq(0x2552),
     C2SHomeItemsPlaceReq(0x2550),
     C2SHomeItemsRemoveReq(0x2551),
@@ -199,6 +200,8 @@ public enum PacketOperations {
     S2CShopAnswerDataPrepare(0x238A),
     C2SShopRequestData(0x2387),
     S2CShopAnswerData(0x2388),
+
+    S2CCouplePoints(0x252D),
 
     C2SOpenGachaReq(0x1F86),
     S2COpenGachaAnswer(0x1F87),
