@@ -28,10 +28,14 @@ public class RoomPlayer {
     }
 
     public GuildMember getGuildMember() {
+        if (guildMemberId == null)
+            return null;
         return ServiceManager.getInstance().getGuildMemberService().findById(guildMemberId);
     }
 
     public Friend getCouple() {
+        if (coupleId == null)
+            return null;
         return ServiceManager.getInstance().getFriendService().findById(coupleId);
     }
 
