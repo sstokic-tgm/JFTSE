@@ -20,11 +20,11 @@
         <java.version>15</java.version>
         <log4j2.version>2.17.1</log4j2.version>
     </properties>
-	
-	<modules>
-		<module>entities</module>
-		<module>emulator</module>
+
+    <modules>
+        <module>entities</module>
+        <module>emulator</module>
         <module>b2b-webservice</module>
     </modules>
-	
+
 </project>
