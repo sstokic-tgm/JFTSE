@@ -39,8 +39,8 @@ public class RankingController {
 
         List<Player> allPlayers = playerRepository.findAllByAlreadyCreatedTrue(
                 PageRequest.of(
-                        page.orElse(1) == 1 ? 0 : page.orElse(1) - 1,
-                        size.orElse(10),
+                        page.orElse(1) == 1 ? 0 : page.orElse(1) - 1, 
+                        size.orElse(10), 
                         Sort.by(gameModeRP).descending().and(Sort.by("created"))
                 )).getContent();
 
