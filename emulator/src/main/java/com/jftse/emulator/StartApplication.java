@@ -20,6 +20,7 @@ import java.io.IOException;
 @SpringBootApplication
 @EntityScan(basePackages = "com.jftse.entities")
 @EnableJpaRepositories(basePackages = "com.jftse.entities")
+@ComponentScan(basePackages = "com.jftse")
 @Log4j2
 public class StartApplication {
     @Autowired
