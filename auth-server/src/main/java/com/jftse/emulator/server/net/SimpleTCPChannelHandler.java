@@ -17,6 +17,8 @@ import lombok.extern.log4j.Log4j2;
 public class SimpleTCPChannelHandler extends TCPHandler {
     private FTConnection connection;
 
+    private static final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY = AttributeKey.newInstance("connection");
+
     public SimpleTCPChannelHandler(final int decryptionKey, final int encryptionKey, final PacketHandlerFactory phf) {
         super(decryptionKey, encryptionKey, phf);
     }
@@ -30,7 +32,7 @@ public class SimpleTCPChannelHandler extends TCPHandler {
         client.setConnection(connection);
         connection.setClient(client);
 
-        ctx.channel().attr(AttributeKey.newInstance("connection")).set(connection);
+        ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecryptionKey(), connection.getEncryptionKey(), 0, 0);
         connection.sendTCP(welcomePacket);
