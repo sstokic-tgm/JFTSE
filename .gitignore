@@ -13,9 +13,9 @@
 *.tar.gz
 *.rar
 
-target/*
+*/target/*
 
-logs/*
+*/logs/*
 
 # User-specific stuff
 .idea/**/workspace.xml

@@ -54,13 +54,32 @@ public class AuctionHouse {
 
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public AuctionHouseInventory placeOffer(Player player, AuctionHouseInventory offer) {
+    public AuctionHouseInventory placeOffer(Player player, AuctionHouseInventory offer) throws ValidationException {
         offer.setPlayerId(player.getId());
         offer.setPocketId(player.getPocket().getId());
         offer.setTradeStatus(TradeStatus.IN_QUEUE);
         offer.setPriceType(PriceType.GOLD);
 
         offer = ahInventoryRepository.save(offer);
+
+        Long pocketId = offer.getPocketId();
+        Pocket pocket = pocketService.findById(pocketId);
+        if (pocket == null)
+            throw new ValidationException("Pocket was not found with the id: " + pocketId);
+
+        PlayerPocket playerPocket = playerPocketService.findById(offer.getPlayerPocketId());
+        if (playerPocket == null)
+            throw new ValidationException("Item not found with the id: " + offer.getPlayerPocketId());
+
+        for (int i = 0; i < offer.getAmount(); i++) {
+            playerPocket = playerPocketService.decrementPocketItemCount(playerPocket);
+        }
+
+        if (playerPocket.getItemCount() == 0) {
+            playerPocketService.remove(playerPocket.getId());
+            pocketService.decrementPocketBelongings(pocket);
+        }
+
         return offer;
     }
 

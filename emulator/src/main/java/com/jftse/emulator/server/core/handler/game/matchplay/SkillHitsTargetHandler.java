@@ -22,7 +22,6 @@ import com.jftse.emulator.server.core.service.SkillService;
 import com.jftse.emulator.server.core.task.FinishGameTask;
 import com.jftse.emulator.server.core.task.GuardianServeTask;
 import com.jftse.entities.database.model.battle.*;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.emulator.server.networking.Connection;
 import com.jftse.emulator.server.networking.packet.Packet;
 import lombok.extern.log4j.Log4j2;
