@@ -39,11 +39,6 @@ public class SimpleTCPChannelHandler extends TCPHandler {
     }
 
     @Override
-    protected void channelRead1(ChannelHandlerContext ctx, Packet packet) throws Exception {
-        log.info("(" + ctx.channel().remoteAddress() + ") SimpleTCPChannelHandler: " + BitKit.toString(packet.getRawPacket(), 0, packet.getRawPacket().length));
-    }
-
-    @Override
     protected void handlerNotFound(ChannelHandlerContext ctx, Packet packet) throws Exception {
         log.warn("(" + ctx.channel().remoteAddress() + ") There is no implementation registered for " + PacketOperations.getNameByValue(packet.getPacketId()) + " packet (id " + String.format("0x%X", (int) packet.getPacketId()) + ")");
     }
@@ -64,11 +59,13 @@ public class SimpleTCPChannelHandler extends TCPHandler {
                 connection.getClient().saveAccount(account);
             }
             connection.setClient(null);
+            ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).set(null);
         }
+        ctx.fireChannelInactive();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        log.info("(" + ctx.channel().remoteAddress() + ") exceptionCaught: " + cause.getMessage());
+        log.warn("(" + ctx.channel().remoteAddress() + ") exceptionCaught: " + cause.getMessage(), cause);
     }
 }

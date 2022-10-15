@@ -22,6 +22,8 @@ public class ServiceManager {
     @Autowired
     private PlayerService playerService;
     @Autowired
+    private PlayerPocketService playerPocketService;
+    @Autowired
     private ClientWhitelistService clientWhitelistService;
     @Autowired
     private ClothEquipmentService clothEquipmentService;

@@ -28,10 +28,8 @@ public class AuthServerStart {
     public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(AuthServerStart.class, args);
 
-        PacketHandlerFactory packetHandlerFactory = PacketHandlerFactory.initFactory();
+        PacketHandlerFactory packetHandlerFactory = PacketHandlerFactory.initFactory(log);
         packetHandlerFactory.autoRegister();
-
-
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(2);
         EventLoopGroup workerGroup = new NioEventLoopGroup(4);
@@ -40,9 +38,9 @@ public class AuthServerStart {
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 300)
-                    .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.SO_TIMEOUT, 12000)
                     .childHandler(new ConnectionInitializer(packetHandlerFactory))
+                    .childOption(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.SO_REUSEADDR, true)
                     .childOption(ChannelOption.SO_RCVBUF, 16384)

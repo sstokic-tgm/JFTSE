@@ -6,6 +6,7 @@ import com.jftse.emulator.server.core.packets.authserver.C2SAuthLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CAuthLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -47,7 +48,8 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
         if (account != null && account.getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             account = authenticationService.updateAccount(account);
-            connection.getClient().setAccount(account.getId());
+            FTClient ftClient = connection.getClient();
+            ftClient.setAccount(account.getId());
 
             log.info(account.getUsername() + " connected");
 

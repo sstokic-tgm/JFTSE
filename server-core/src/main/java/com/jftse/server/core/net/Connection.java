@@ -34,7 +34,7 @@ public abstract class Connection<T extends Client<?>> {
         return encryptionKey;
     }
 
-    public abstract <T extends Client<?>> T getClient();
+    public abstract <C extends Client<?>> C getClient();
 
     public abstract void sendTCP(Packet... packets);
 }

@@ -32,7 +32,6 @@ public abstract class TCPHandler extends SimpleChannelInboundHandler<Packet> {
                 } else {
                     packetNotProcessed(ctx, abstractPacketHandler);
                 }
-                channelRead1(ctx, packet);
             } catch (Exception e) {
                 ctx.fireExceptionCaught(e);
             }
@@ -41,7 +40,6 @@ public abstract class TCPHandler extends SimpleChannelInboundHandler<Packet> {
         }
     }
 
-    protected abstract void channelRead1(ChannelHandlerContext ctx, Packet packet) throws Exception;
     protected abstract void handlerNotFound(ChannelHandlerContext ctx, Packet packet) throws Exception;
     protected void packetProcessed(ChannelHandlerContext ctx, AbstractPacketHandler handler) throws Exception {
         // empty

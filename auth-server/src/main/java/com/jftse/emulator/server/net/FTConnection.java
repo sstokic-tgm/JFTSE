@@ -16,12 +16,10 @@ public class FTConnection extends Connection<FTClient> {
     private String hwid;
     private FTClient client;
 
-    private ConcurrentLinkedDeque<Packet[]> packetSendQueue;
+    private long lastReadTime = 0L;
 
     public FTConnection(ChannelHandlerContext chx, final int decryptionKey, final int encryptionKey) {
         super(chx, decryptionKey, encryptionKey);
-
-        packetSendQueue = new ConcurrentLinkedDeque<>();
     }
 
     @Override
@@ -29,23 +27,9 @@ public class FTConnection extends Connection<FTClient> {
         if (packets == null || packets.length == 0)
             throw new IllegalArgumentException("Packet cannot be null.");
 
-        log.debug("packetSendQueue size = " + packetSendQueue.size());
-        packetSendQueue.add(packets);
-        log.debug("newly added item, packetSendQueue size = " + packetSendQueue.size());
-        if (packetSendQueue.peek() != null) {
-            final int queueSize = packetSendQueue.size();
-            log.debug("queueSize = " + queueSize);
-            for (int i = 0; i < queueSize; i++) {
-                Packet[] packetArray = packetSendQueue.poll();
-                if (packetArray != null) {
-                    log.debug("packetArray size = " + packetArray.length);
-                    for (Packet packet : packetArray) {
-                        chx.write(packet);
-                        log.debug("wrote " + packet.toString());
-                    }
-                    chx.flush();
-                }
-            }
+        for (Packet packet : packets) {
+            chx.write(packet);
         }
+        chx.flush();
     }
 }

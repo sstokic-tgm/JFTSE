@@ -4,6 +4,7 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.player.C2SPlayerDeletePacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerDeleteAnswerPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
@@ -48,44 +49,47 @@ public class PlayerDeletePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        Account account = connection.getClient().getAccount();
-        Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
-        if (account != null && player != null) {
-            GuildMember guildMember = guildMemberService.getByPlayer(player);
-            if (guildMember != null) {
-                if (guildMember.getMemberRank() != 3) {
-                    Guild guild = guildMember.getGuild();
-                    guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
-                    guildService.save(guild);
-                } else {
-                    S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
-                    connection.sendTCP(playerDeleteAnswerPacket);
-                    return;
+        FTClient ftClient = connection.getClient();
+        if (ftClient != null) {
+            Account account = ftClient.getAccount();
+            Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
+            if (account != null && player != null) {
+                GuildMember guildMember = guildMemberService.getByPlayer(player);
+                if (guildMember != null) {
+                    if (guildMember.getMemberRank() != 3) {
+                        Guild guild = guildMember.getGuild();
+                        guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
+                        guildService.save(guild);
+                    } else {
+                        S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
+                        connection.sendTCP(playerDeleteAnswerPacket);
+                        return;
+                    }
                 }
+
+                friendService.deleteAllByPlayer(player);
+                friendService.deleteAllByFriend(player);
+                giftService.deleteBySender(player);
+                giftService.deleteByReceiver(player);
+                messageService.deleteBySender(player);
+                messageService.deleteByReceiver(player);
+                parcelService.deleteBySender(player);
+                parcelService.deleteByReceiver(player);
+                proposalService.deleteBySender(player);
+                proposalService.deleteByReceiver(player);
+
+                playerService.remove(player.getId());
+
+                S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) 0);
+                connection.sendTCP(playerDeleteAnswerPacket);
+
+                List<Player> playerList = playerService.findAllByAccount(account);
+                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList);
+                connection.sendTCP(playerListPacket);
+            } else {
+                S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
+                connection.sendTCP(playerDeleteAnswerPacket);
             }
-
-            friendService.deleteAllByPlayer(player);
-            friendService.deleteAllByFriend(player);
-            giftService.deleteBySender(player);
-            giftService.deleteByReceiver(player);
-            messageService.deleteBySender(player);
-            messageService.deleteByReceiver(player);
-            parcelService.deleteBySender(player);
-            parcelService.deleteByReceiver(player);
-            proposalService.deleteBySender(player);
-            proposalService.deleteByReceiver(player);
-
-            playerService.remove(player.getId());
-
-            S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) 0);
-            connection.sendTCP(playerDeleteAnswerPacket);
-
-            List<Player> playerList = playerService.findAllByAccount(account);
-            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList);
-            connection.sendTCP(playerListPacket);
-        } else {
-            S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
-            connection.sendTCP(playerDeleteAnswerPacket);
         }
     }
 }

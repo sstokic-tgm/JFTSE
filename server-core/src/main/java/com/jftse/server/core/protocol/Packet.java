@@ -232,11 +232,11 @@ public class Packet {
     public String toString() {
         return "Packet{" +
                 "readPosition=" + readPosition +
-                ", checkSerial=" + checkSerial +
-                ", checkSum=" + checkSum +
-                ", packetId=" + packetId +
+                ", checkSerial=" + (int) checkSerial +
+                ", checkSum=" + (int) checkSum +
+                ", packetId=" + String.format("0x%X", (int) packetId) +
                 ", dataLength=" + dataLength +
-                ", data=" + Arrays.toString(data) +
+                ", data=" + BitKit.toString(data, 0, dataLength) +
                 '}';
     }
 }

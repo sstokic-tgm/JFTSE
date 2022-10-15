@@ -29,13 +29,14 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
         this.createSerial(data);
         this.createCheckSum(data);
 
-        log.debug("payload - SEND [" + PacketOperations.getNameByValue(BitKit.bytesToShort(data, 4)) + "] " + BitKit.toString(data, 0, data.length));
-
         if (packetId != PacketOperations.S2CLoginWelcomePacket.getValue()) {
             encryptedData = this.encryptBytes(data, data.length);
             out.writeBytes(encryptedData);
+
+            log.debug("payload - SEND [" + PacketOperations.getNameByValue(packetId) + "] " + BitKit.toString(encryptedData, 0, encryptedData.length));
         } else {
             out.writeBytes(data);
+            log.debug("payload - SEND [" + PacketOperations.getNameByValue(packetId) + "] " + BitKit.toString(data, 0, data.length));
         }
     }
 
