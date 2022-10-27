@@ -1,4 +1,4 @@
-package com.jftse.emulator.server.database.converters;
+package com.jftse.entities.database.converters;
 
 import com.jftse.entities.database.model.log.GameLogType;
 
