@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Scale Set(Black)-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Jasper" ShopIndex="8002" QuantityMin="4" QuantityMax="4" ChansPer="6.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Spinel" ShopIndex="8003" QuantityMin="3" QuantityMax="3" ChansPer="7.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Peridot" ShopIndex="8004" QuantityMin="2" QuantityMax="2" ChansPer="7.3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Tablet of Power" ShopIndex="8006" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Tablet of Stamina" ShopIndex="8007" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Tablet of Dexterity" ShopIndex="8008" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Tablet of Wisdom" ShopIndex="8009" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Earth Elemental Stone" ShopIndex="8010" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Wind Elemental Stone" ShopIndex="8011" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Water Elemental Stone" ShopIndex="8012" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Fire Elemental Stone" ShopIndex="8013" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Scale Headgear(Black)" ShopIndex="57050" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Scale Armor(Black)" ShopIndex="57051" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Scale Leg Armor(Black)" ShopIndex="57052" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Scale Boots(Black)" ShopIndex="57053" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Scale Glove(Black)" ShopIndex="57054" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="19" _Name_="Scale Wing(Black)" ShopIndex="57055" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="20" _Name_="Black Scale Hatchet" ShopIndex="57092" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Jasper" ShopIndex="8002" QuantityMin="4" QuantityMax="4" ChansPer="6.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Spinel" ShopIndex="8003" QuantityMin="3" QuantityMax="3" ChansPer="7.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Peridot" ShopIndex="8004" QuantityMin="2" QuantityMax="2" ChansPer="7.3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Tablet of Power" ShopIndex="8006" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Tablet of Stamina" ShopIndex="8007" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Tablet of Dexterity" ShopIndex="8008" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Tablet of Wisdom" ShopIndex="8009" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Earth Elemental Stone" ShopIndex="8010" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Wind Elemental Stone" ShopIndex="8011" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Water Elemental Stone" ShopIndex="8012" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Fire Elemental Stone" ShopIndex="8013" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Scale Headgear(Black)" ShopIndex="57056" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Scale Armor(Black)" ShopIndex="57057" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Scale Leg Armor(Black)" ShopIndex="57058" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Scale Boots(Black)" ShopIndex="57059" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Scale Glove(Black)" ShopIndex="57060" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="19" _Name_="Scale Wing(Black)" ShopIndex="57061" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="20" _Name_="Black Scale Hatchet" ShopIndex="57093" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Jasper" ShopIndex="8002" QuantityMin="4" QuantityMax="4" ChansPer="6.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Spinel" ShopIndex="8003" QuantityMin="3" QuantityMax="3" ChansPer="7.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Peridot" ShopIndex="8004" QuantityMin="2" QuantityMax="2" ChansPer="7.3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Tablet of Power" ShopIndex="8006" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Tablet of Stamina" ShopIndex="8007" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Tablet of Dexterity" ShopIndex="8008" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Tablet of Wisdom" ShopIndex="8009" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Earth Elemental Stone" ShopIndex="8010" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Wind Elemental Stone" ShopIndex="8011" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Water Elemental Stone" ShopIndex="8012" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Fire Elemental Stone" ShopIndex="8013" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Scale Headgear(Black)" ShopIndex="57062" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Scale Armor(Black)" ShopIndex="57063" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Scale Leg Armor(Black)" ShopIndex="57064" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Scale Boots(Black)" ShopIndex="57065" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Scale Glove(Black)" ShopIndex="57066" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="19" _Name_="Scale Wing(Black)" ShopIndex="57067" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="20" _Name_="Black Scale Hatchet" ShopIndex="57094" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Jasper" ShopIndex="8002" QuantityMin="4" QuantityMax="4" ChansPer="6.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Spinel" ShopIndex="8003" QuantityMin="3" QuantityMax="3" ChansPer="7.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Peridot" ShopIndex="8004" QuantityMin="2" QuantityMax="2" ChansPer="7.3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Tablet of Power" ShopIndex="8006" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Tablet of Stamina" ShopIndex="8007" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Tablet of Dexterity" ShopIndex="8008" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Tablet of Wisdom" ShopIndex="8009" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Earth Elemental Stone" ShopIndex="8010" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Wind Elemental Stone" ShopIndex="8011" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Water Elemental Stone" ShopIndex="8012" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Fire Elemental Stone" ShopIndex="8013" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Scale Headgear(Black)" ShopIndex="57068" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="Scale Armor(Black)" ShopIndex="57069" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Scale Leg Armor(Black)" ShopIndex="57070" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Scale Boots(Black)" ShopIndex="57071" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Scale Glove(Black)" ShopIndex="57072" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="19" _Name_="Scale Wing(Black)" ShopIndex="57073" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="20" _Name_="Black Scale Hatchet" ShopIndex="57095" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Jasper" ShopIndex="8002" QuantityMin="4" QuantityMax="4" ChansPer="6.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Spinel" ShopIndex="8003" QuantityMin="3" QuantityMax="3" ChansPer="7.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Peridot" ShopIndex="8004" QuantityMin="2" QuantityMax="2" ChansPer="7.3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Tablet of Power" ShopIndex="8006" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Tablet of Stamina" ShopIndex="8007" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Tablet of Dexterity" ShopIndex="8008" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Tablet of Wisdom" ShopIndex="8009" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Earth Elemental Stone" ShopIndex="8010" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Wind Elemental Stone" ShopIndex="8011" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Water Elemental Stone" ShopIndex="8012" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Fire Elemental Stone" ShopIndex="8013" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Scale Headgear(Black)" ShopIndex="57074" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="Scale Armor(Black)" ShopIndex="57075" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Scale Leg Armor(Black)" ShopIndex="57076" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Scale Boots(Black)" ShopIndex="57077" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Scale Glove(Black)" ShopIndex="57078" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="19" _Name_="Scale Wing(Black)" ShopIndex="57079" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="20" _Name_="Black Scale Hatchet" ShopIndex="57096" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Jasper" ShopIndex="8002" QuantityMin="4" QuantityMax="4" ChansPer="6.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Spinel" ShopIndex="8003" QuantityMin="3" QuantityMax="3" ChansPer="7.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Peridot" ShopIndex="8004" QuantityMin="2" QuantityMax="2" ChansPer="7.3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Tablet of Power" ShopIndex="8006" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Tablet of Stamina" ShopIndex="8007" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Tablet of Dexterity" ShopIndex="8008" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Tablet of Wisdom" ShopIndex="8009" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Earth Elemental Stone" ShopIndex="8010" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Wind Elemental Stone" ShopIndex="8011" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Water Elemental Stone" ShopIndex="8012" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Fire Elemental Stone" ShopIndex="8013" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Scale Headgear(Black)" ShopIndex="57080" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="Scale Armor(Black)" ShopIndex="57081" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Scale Leg Armor(Black)" ShopIndex="57082" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Scale Boots(Black)" ShopIndex="57083" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Scale Glove(Black)" ShopIndex="57084" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="19" _Name_="Scale Wing(Black)" ShopIndex="57085" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="20" _Name_="Black Scale Hatchet" ShopIndex="57097" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="6" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Jasper" ShopIndex="8002" QuantityMin="4" QuantityMax="4" ChansPer="6.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Spinel" ShopIndex="8003" QuantityMin="3" QuantityMax="3" ChansPer="7.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Peridot" ShopIndex="8004" QuantityMin="2" QuantityMax="2" ChansPer="7.3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Tablet of Power" ShopIndex="8006" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Tablet of Stamina" ShopIndex="8007" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Tablet of Dexterity" ShopIndex="8008" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Tablet of Wisdom" ShopIndex="8009" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Earth Elemental Stone" ShopIndex="8010" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Wind Elemental Stone" ShopIndex="8011" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Water Elemental Stone" ShopIndex="8012" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Fire Elemental Stone" ShopIndex="8013" QuantityMin="2" QuantityMax="2" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Scale Headgear(Black)" ShopIndex="57086" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="Scale Armor(Black)" ShopIndex="57087" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Scale Leg Armor(Black)" ShopIndex="57088" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Scale Boots(Black)" ShopIndex="57089" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Scale Glove(Black)" ShopIndex="57090" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="19" _Name_="Scale Wing(Black)" ShopIndex="57091" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="20" _Name_="Black Scale Hatchet" ShopIndex="57098" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

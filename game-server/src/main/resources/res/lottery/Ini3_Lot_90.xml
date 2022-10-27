@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Heart Bag Coin-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Heart Bag(Passion)" ShopIndex="754" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Heart Bag(Pure)" ShopIndex="50559" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Heart Bag(Warm)" ShopIndex="52351" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Heart Bag(Cool)" ShopIndex="52345" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Heart Bag(Grace)" ShopIndex="52357" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Heart Bag(Passion)" ShopIndex="762" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Heart Bag(Pure)" ShopIndex="50567" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Heart Bag(Warm)" ShopIndex="52352" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Heart Bag(Cool)" ShopIndex="52346" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Heart Bag(Grace)" ShopIndex="52358" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Heart Bag(Passion)" ShopIndex="770" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Heart Bag(Pure)" ShopIndex="50575" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Heart Bag(Warm)" ShopIndex="52353" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Heart Bag(Cool)" ShopIndex="52347" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Heart Bag(Grace)" ShopIndex="52359" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Heart Bag(Passion)" ShopIndex="778" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Heart Bag(Pure)" ShopIndex="50583" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Heart Bag(Warm)" ShopIndex="52354" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Heart Bag(Cool)" ShopIndex="52348" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Heart Bag(Grace)" ShopIndex="52360" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Heart Bag(Passion)" ShopIndex="786" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Heart Bag(Pure)" ShopIndex="50591" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Heart Bag(Warm)" ShopIndex="52355" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Heart Bag(Cool)" ShopIndex="52349" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Heart Bag(Grace)" ShopIndex="52361" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Heart Bag(Passion)" ShopIndex="50320" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Heart Bag(Pure)" ShopIndex="50599" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Heart Bag(Warm)" ShopIndex="52356" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Heart Bag(Cool)" ShopIndex="52350" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Heart Bag(Grace)" ShopIndex="52362" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Heart Bag(Passion)" ShopIndex="54073" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Heart Bag(Pure)" ShopIndex="54074" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Heart Bag(Warm)" ShopIndex="54076" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Heart Bag(Cool)" ShopIndex="54075" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Heart Bag(Grace)" ShopIndex="54077" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

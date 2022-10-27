@@ -1,6 +1,8 @@
 package com.jftse.server.core.codec;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
+import com.jftse.server.core.protocol.JoinedPacket;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.SerialTable;
@@ -23,20 +25,47 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) throws Exception {
-        final int packetId = packet.getPacketId();
-        byte[] data = packet.getRawPacket();
-        byte[] encryptedData;
-        this.createSerial(data);
-        this.createCheckSum(data);
+        boolean logAllPackets = ConfigService.getInstance().getValue("logging.packets.all.enabled", true);
+
+        byte[] data = packet.isJoinedPackets() ? ((JoinedPacket) packet).getJoinedData() : packet.getRawPacket();
+        final int packetId = BitKit.bytesToChar(data, 4);
+        byte[] encryptedResult = new byte[data.length];
 
         if (packetId != PacketOperations.S2CLoginWelcomePacket.getValue()) {
-            encryptedData = this.encryptBytes(data, data.length);
-            out.writeBytes(encryptedData);
+            int destPos = 0;
+            int currentObjectLength = 0;
+            while (true) {
+                final int packetSize = BitKit.bytesToShort(data, 6);
+                currentObjectLength = packetSize;
+                if (packetSize + 8 < data.length) {
+                    createSerial(data);
+                    createCheckSum(data);
+                    byte[] encryptedTmpPacket = encryptBytes(data, packetSize + 8);
+                    BitKit.blockCopy(encryptedTmpPacket, 0, encryptedResult, destPos, encryptedTmpPacket.length);
 
-            log.debug("payload - SEND [" + PacketOperations.getNameByValue(packetId) + "] " + BitKit.toString(encryptedData, 0, encryptedData.length));
+                    destPos += packetSize + 8;
+
+                    byte[] tmp = new byte[data.length - 8 - packetSize];
+                    BitKit.blockCopy(data, packetSize + 8, tmp, 0, tmp.length);
+                    data = new byte[tmp.length];
+                    BitKit.blockCopy(tmp, 0, data, 0, data.length);
+                } else {
+                    break;
+                }
+            }
+            if (currentObjectLength + 8 <= data.length) {
+                createSerial(data);
+                createCheckSum(data);
+                byte[] encryptedPacket = encryptBytes(data, data.length);
+                BitKit.blockCopy(encryptedPacket, 0, encryptedResult, destPos, encryptedPacket.length);
+            }
+            out.writeBytes(encryptedResult);
+            if (logAllPackets)
+                log.debug("SEND payload [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packetId) : String.format("0x%X", packetId)) + "] " + BitKit.toString(encryptedResult, 0, encryptedResult.length));
         } else {
             out.writeBytes(data);
-            log.debug("payload - SEND [" + PacketOperations.getNameByValue(packetId) + "] " + BitKit.toString(data, 0, data.length));
+            if (logAllPackets)
+                log.debug("SEND payload [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packetId) : String.format("0x%X", packetId)) + "] " + BitKit.toString(data, 0, data.length));
         }
     }
 

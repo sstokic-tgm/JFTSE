@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2006 U (http://www.altova.com) by Marie (EMBRACE) -->
+<!--Cn Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Wisdom Robe Hat" ShopIndex="54302" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Wisdom Robe Shirts" ShopIndex="54303" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Wisdom Robe Pants" ShopIndex="54304" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Wisdom Robe Shoes" ShopIndex="54305" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Wisdom Robe Glove" ShopIndex="54306" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Wisdom Rod" ShopIndex="54337" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Wisdom Robe Hat" ShopIndex="54307" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Wisdom Robe Shirts" ShopIndex="54308" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Wisdom Robe Pants" ShopIndex="54309" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Wisdom Robe Shoes" ShopIndex="54310" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Wisdom Robe Glove" ShopIndex="54311" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Wisdom Rod" ShopIndex="54338" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Wisdom Robe Hat" ShopIndex="54312" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Wisdom Robe Shirts" ShopIndex="54313" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Wisdom Robe Pants" ShopIndex="54314" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Wisdom Robe Shoes" ShopIndex="54315" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Wisdom Robe Glove" ShopIndex="54316" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Wisdom Rod" ShopIndex="54339" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Wisdom Robe Hat" ShopIndex="54317" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Wisdom Robe Shirts" ShopIndex="54318" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Wisdom Robe Pants" ShopIndex="54319" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Wisdom Robe Shoes" ShopIndex="54320" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Wisdom Robe Glove" ShopIndex="54321" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Wisdom Rod" ShopIndex="54340" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Wisdom Robe Hat" ShopIndex="54322" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Wisdom Robe Shirts" ShopIndex="54323" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Wisdom Robe Pants" ShopIndex="54324" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Wisdom Robe Shoes" ShopIndex="54325" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Wisdom Robe Glove" ShopIndex="54326" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Wisdom Rod" ShopIndex="54341" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Wisdom Robe Hat" ShopIndex="54327" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Wisdom Robe Shirts" ShopIndex="54328" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Wisdom Robe Pants" ShopIndex="54329" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Wisdom Robe Shoes" ShopIndex="54330" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Wisdom Robe Glove" ShopIndex="54331" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Wisdom Rod" ShopIndex="54342" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Wisdom Robe Hat" ShopIndex="54332" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Wisdom Robe Shirts" ShopIndex="54333" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Wisdom Robe Pants" ShopIndex="54334" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Wisdom Robe Shoes" ShopIndex="54335" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Wisdom Robe Glove" ShopIndex="54336" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Wisdom Rod" ShopIndex="54343" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

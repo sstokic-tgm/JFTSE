@@ -12,6 +12,11 @@ public abstract class Connection<T extends Client<?>> {
     protected final int decryptionKey;
     protected final int encryptionKey;
 
+    protected Connection(final int decryptionKey, final int encryptionKey) {
+        this.decryptionKey = decryptionKey;
+        this.encryptionKey = encryptionKey;
+    }
+
     protected Connection(ChannelHandlerContext chx, final int decryptionKey, final int encryptionKey) {
         this.chx = chx;
         this.decryptionKey = decryptionKey;

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ItemList>
+    <Item Char="0" STR="15" STA="15" DEX="15" WIL="15"/>
+    <Item Char="1" STR="15" STA="15" DEX="15" WIL="15"/>
+    <Item Char="2" STR="10" STA="25" DEX="10" WIL="15"/>
+    <Item Char="3" STR="25" STA="15" DEX="5" WIL="15"/>
+    <Item Char="4" STR="10" STA="10" DEX="25" WIL="15"/>
+    <Item Char="5" STR="5" STA="15" DEX="15" WIL="25"/>
+    <Item Char="6" STR="10" STA="5" DEX="20" WIL="25"/>
+</ItemList>

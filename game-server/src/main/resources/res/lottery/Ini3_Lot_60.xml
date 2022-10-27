@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Cn Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="School Cap" ShopIndex="51616" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Dark Black Cap" ShopIndex="50205" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Japanese School Costume" ShopIndex="50190" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Japanese School Pants" ShopIndex="50191" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Japanese School Shoes" ShopIndex="50192" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="School Bag(Red)" ShopIndex="51617" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="School Bag(Blue)" ShopIndex="51618" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="School Bag(Black)" ShopIndex="51619" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="School Ribbon" ShopIndex="51620" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Japanese School Costume" ShopIndex="50193" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Japanese School Skirts" ShopIndex="50194" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Japanese School Shoes" ShopIndex="50195" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="School Bag(Red)" ShopIndex="51621" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="School Bag(Blue)" ShopIndex="51622" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="School Bag(Black)" ShopIndex="51623" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="School Cap" ShopIndex="51624" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Japanese School Costume" ShopIndex="50196" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Japanese School Skirts" ShopIndex="50197" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Japanese School Shoes" ShopIndex="50198" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="School Bag(Red)" ShopIndex="51625" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="School Bag(Blue)" ShopIndex="51626" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="School Bag(Black)" ShopIndex="51627" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="School Ribbon" ShopIndex="51628" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Japanese School Costume" ShopIndex="50199" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Japanese School Skirts" ShopIndex="50200" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Japanese School Shoes" ShopIndex="50201" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="School Bag(Red)" ShopIndex="51629" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="School Bag(Blue)" ShopIndex="51630" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="School Bag(Black)" ShopIndex="51631" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="School Ribbon" ShopIndex="51632" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Japanese School Costume" ShopIndex="50202" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Japanese School Skirts" ShopIndex="50203" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Japanese School Shoes" ShopIndex="50204" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="School Bag(Red)" ShopIndex="51633" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="School Bag(Blue)" ShopIndex="51634" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="School Bag(Black)" ShopIndex="51635" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="School Ribbon" ShopIndex="51636" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Japanese School Costume" ShopIndex="51182" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Japanese School Skirts" ShopIndex="51183" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Japanese School Shoes" ShopIndex="51184" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="School Bag(Red)" ShopIndex="51637" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="School Bag(Blue)" ShopIndex="51638" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="School Bag(Black)" ShopIndex="51639" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="School Cap" ShopIndex="52867" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Japanese School Costume" ShopIndex="52863" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Japanese School Skirts" ShopIndex="52864" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Japanese School Shoes" ShopIndex="52865" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="School Bag(Red)" ShopIndex="52868" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="School Bag(Blue)" ShopIndex="52869" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="School Bag(Black)" ShopIndex="52870" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

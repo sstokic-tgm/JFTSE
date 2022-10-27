@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Dance Box-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Flash bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="13.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="14.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Star Mic Racket" ShopIndex="57224" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Dance King's Wrist Band" ShopIndex="57336" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Flash bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="13.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="14.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Star Mic Racket" ShopIndex="57225" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Dance King's Wrist Band" ShopIndex="57337" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Flash bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="13.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="14.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Star Mic Racket" ShopIndex="57226" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Dance King's Wrist Band" ShopIndex="57338" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Flash bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="13.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="14.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Star Mic Racket" ShopIndex="57227" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Dance King's Wrist Band" ShopIndex="57339" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Flash bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="13.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="14.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Star Mic Racket" ShopIndex="57228" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Dance King's Wrist Band" ShopIndex="57340" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Flash bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="13.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="14.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Star Mic Racket" ShopIndex="57229" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Dance King's Wrist Band" ShopIndex="57341" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Flash bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="13.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="14.45" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Star Mic Racket" ShopIndex="57230" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Dance King's Wrist Band" ShopIndex="57342" QuantityMin="1" QuantityMax="1" ChansPer="0.05" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

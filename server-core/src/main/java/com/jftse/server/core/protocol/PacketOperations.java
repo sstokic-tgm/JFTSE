@@ -79,8 +79,10 @@ public enum PacketOperations {
     S2CGameSetNameColorAndRemoveBlackBar(0x183A),
     S2CMatchplaySetPlayerPosition(0x184A),
     C2SRelayPacketToAllClients(0x414),
-    C2SMatchplayRegisterPlayerForGameSession(0x3ED),
-    S2CMatchplayAckPlayerInformation(0x3EF),
+    C2SMatchplayRegisterPlayerForRelay(0x3ED),
+    S2CMatchplayAckRelayConnection(0x3EF),
+    C2SGameServerConnectionProblem(0x3F1),
+    C2SMatchplayConnectedToRelay(0x3F3),
     S2CMatchplayStartServe(0x183E),
     S2CMatchplayStartGuardianServe(0x184C),
     C2SMatchplayPoint(0x183F),
@@ -107,7 +109,6 @@ public enum PacketOperations {
     S2CMatchplayIncreaseBreathTimerBy60Seconds(0xC96),
     S2CMatchplayGiveRandomSkill(0x332E),
     S2CMatchplayGiveSpecificSkill(0x18E8),
-    C2SGameServerConnectionProblem(0x3F1),
 
     C2CBallAnimationPacket(0x10E3),
     C2CPlayerAnimationPacket(0x32C9),
@@ -178,6 +179,8 @@ public enum PacketOperations {
     S2CShopAnswerDataPrepare(0x238A),
     C2SShopRequestData(0x2387),
     S2CShopAnswerData(0x2388),
+    C2SShopUnderS2CShopUnderMaintenancePacket(0x2382),
+    S2CShopUnderS2CShopUnderMaintenancePacket(0x2383),
 
     S2CCouplePoints(0x252D),
 

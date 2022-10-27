@@ -1,38 +1,39 @@
 package com.jftse.emulator.server.net;
 
-import com.jftse.emulator.common.utilities.BitKit;
-import com.jftse.entities.database.model.account.Account;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.net.TCPHandler;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+@ChannelHandler.Sharable
 public class SimpleTCPChannelHandler extends TCPHandler {
-    private FTConnection connection;
+    private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
 
-    private static final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY = AttributeKey.newInstance("connection");
+    public SimpleTCPChannelHandler(final AttributeKey<FTConnection> ftConnectionAttributeKey, final PacketHandlerFactory phf) {
+        super(phf);
 
-    public SimpleTCPChannelHandler(final int decryptionKey, final int encryptionKey, final PacketHandlerFactory phf) {
-        super(decryptionKey, encryptionKey, phf);
+        this.FT_CONNECTION_ATTRIBUTE_KEY = ftConnectionAttributeKey;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        log.info("(" + ctx.channel().remoteAddress() + ") Channel Active");
-        connection = new FTConnection(ctx, decryptionKey, encryptionKey);
+        String remoteAddress = ctx.channel().remoteAddress().toString();
+        log.info("(" + remoteAddress + ") Channel Active");
+
+        FTConnection connection = ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).get();
+        connection.setChannelHandlerContext(ctx);
+
         FTClient client = new FTClient();
 
         client.setConnection(connection);
         connection.setClient(client);
-
-        ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecryptionKey(), connection.getEncryptionKey(), 0, 0);
         connection.sendTCP(welcomePacket);
@@ -52,16 +53,11 @@ public class SimpleTCPChannelHandler extends TCPHandler {
     public void channelInactive(ChannelHandlerContext ctx) {
         log.info("(" + ctx.channel().remoteAddress() + ") Channel Inactive");
 
+        FTConnection connection = ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).get();
         if (connection != null && connection.getClient() != null) {
-            Account account = connection.getClient().getAccount();
-            if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
-                account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                connection.getClient().saveAccount(account);
-            }
             connection.setClient(null);
             ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).set(null);
         }
-        ctx.fireChannelInactive();
     }
 
     @Override

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2006 U (http://www.altova.com) by Marie (EMBRACE) -->
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="10.37" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Midium potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Magic Prop" ShopIndex="1016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Panda Figure Cap" ShopIndex="50736" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Bear Figure Cap" ShopIndex="50735" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Piero Hat" ShopIndex="50012" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Pikaro Hat" ShopIndex="50001" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="White Mouse Hat" ShopIndex="50002" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Penguin Hat" ShopIndex="50003" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Lamp Hat" ShopIndex="50004" QuantityMin="1" QuantityMax="1" ChansPer="0.10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Eagle Cap" ShopIndex="50744" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="19" _Name_="Angel Ring" ShopIndex="53080" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="20" _Name_="Devil Horn" ShopIndex="53045" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="10.37" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Midium potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Magic Prop" ShopIndex="1016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Panda Figure Cap" ShopIndex="50746" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Bear Figure Cap" ShopIndex="50745" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Piero Hat" ShopIndex="50026" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Pikaro Hat" ShopIndex="50015" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="White Mouse Hat" ShopIndex="50016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Penguin Hat" ShopIndex="50017" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Lamp Hat" ShopIndex="50018" QuantityMin="1" QuantityMax="1" ChansPer="0.10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Eagle Cap" ShopIndex="50754" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="19" _Name_="Angel Ring" ShopIndex="53084" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="20" _Name_="Devil Horn" ShopIndex="53049" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="10.37" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Midium potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Magic Prop" ShopIndex="1016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Panda Figure Cap" ShopIndex="50756" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Bear Figure Cap" ShopIndex="50755" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Piero Hat" ShopIndex="50040" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Pikaro Hat" ShopIndex="50029" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="White Mouse Hat" ShopIndex="50030" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Penguin Hat" ShopIndex="50031" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Lamp Hat" ShopIndex="50032" QuantityMin="1" QuantityMax="1" ChansPer="0.10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Eagle Cap" ShopIndex="50764" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="19" _Name_="Angel Ring" ShopIndex="53088" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="20" _Name_="Devil Horn" ShopIndex="53053" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="10.37" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Midium potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Magic Prop" ShopIndex="1016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Panda Figure Cap" ShopIndex="50766" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Bear Figure Cap" ShopIndex="50765" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Piero Hat" ShopIndex="50054" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Pikaro Hat" ShopIndex="50043" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="White Mouse Hat" ShopIndex="50044" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Penguin Hat" ShopIndex="50045" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Lamp Hat" ShopIndex="50046" QuantityMin="1" QuantityMax="1" ChansPer="0.10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Eagle Cap" ShopIndex="50774" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="19" _Name_="Angel Ring" ShopIndex="53092" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="20" _Name_="Devil Horn" ShopIndex="53057" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="10.37" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Midium potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Magic Prop" ShopIndex="1016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Panda Figure Cap" ShopIndex="50776" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Bear Figure Cap" ShopIndex="50775" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Piero Hat" ShopIndex="50068" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Pikaro Hat" ShopIndex="50057" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="White Mouse Hat" ShopIndex="50058" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Penguin Hat" ShopIndex="50059" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Lamp Hat" ShopIndex="50060" QuantityMin="1" QuantityMax="1" ChansPer="0.10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Eagle Cap" ShopIndex="50784" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="19" _Name_="Angel Ring" ShopIndex="53096" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="20" _Name_="Devil Horn" ShopIndex="53061" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="10.37" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Midium potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Magic Prop" ShopIndex="1016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Panda Figure Cap" ShopIndex="50786" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Bear Figure Cap" ShopIndex="50785" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Piero Hat" ShopIndex="50311" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Pikaro Hat" ShopIndex="50300" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="White Mouse Hat" ShopIndex="50301" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Penguin Hat" ShopIndex="50302" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Lamp Hat" ShopIndex="50303" QuantityMin="1" QuantityMax="1" ChansPer="0.10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Eagle Cap" ShopIndex="50794" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="19" _Name_="Angel Ring" ShopIndex="53100" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="20" _Name_="Devil Horn" ShopIndex="53065" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="10.37" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="11.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Midium potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Magic Prop" ShopIndex="1016" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Panda Figure Cap" ShopIndex="54089" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Bear Figure Cap" ShopIndex="54088" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Piero Hat" ShopIndex="54111" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Pikaro Hat" ShopIndex="54100" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="White Mouse Hat" ShopIndex="54101" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Penguin Hat" ShopIndex="54102" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Lamp Hat" ShopIndex="54103" QuantityMin="1" QuantityMax="1" ChansPer="0.10" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Eagle Cap" ShopIndex="54097" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="19" _Name_="Angel Ring" ShopIndex="53104" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="20" _Name_="Devil Horn" ShopIndex="53069" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

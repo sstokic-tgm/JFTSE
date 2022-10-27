@@ -25,20 +25,22 @@ import javax.annotation.PreDestroy;
 @ComponentScan(basePackages = "com.jftse")
 @Log4j2
 public class AuthServerStart {
+    private static EventLoopGroup bossGroup;
+    private static EventLoopGroup workerGroup;
+
     public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(AuthServerStart.class, args);
 
         PacketHandlerFactory packetHandlerFactory = PacketHandlerFactory.initFactory(log);
         packetHandlerFactory.autoRegister();
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup(2);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(4);
+        bossGroup = new NioEventLoopGroup(4);
+        workerGroup = new NioEventLoopGroup(4);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 300)
-                    .option(ChannelOption.SO_TIMEOUT, 12000)
                     .childHandler(new ConnectionInitializer(packetHandlerFactory))
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
@@ -46,24 +48,25 @@ public class AuthServerStart {
                     .childOption(ChannelOption.SO_RCVBUF, 16384)
                     .childOption(ChannelOption.SO_SNDBUF, 16384);
 
-            // Bind and start to accept incoming connections.
-            ChannelFuture f = b.bind(5894).sync();// (8)
-            if(f.isSuccess()) {
+            ChannelFuture f = b.bind(5894).sync();
+            if (f.isSuccess()) {
                 log.info(
-                        "\n*************************************\n" +
+                        "\n\n*************************************\n" +
                         "* auth-server successfully started! *\n" +
                         "*************************************");
             }
-            f.channel().closeFuture().sync(); // (10)
+            f.channel().closeFuture().sync();
         } finally {
             log.info("Stopping server");
-            workerGroup.shutdownGracefully();// (11)
-            bossGroup.shutdownGracefully();// (12)
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
         }
     }
 
     @PreDestroy
     public void onExit() {
-        log.info("Server is closing...");
+        log.info("Server exited");
+        workerGroup.shutdownGracefully();
+        bossGroup.shutdownGracefully();
     }
 }

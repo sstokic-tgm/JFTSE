@@ -1,5 +1,6 @@
 package com.jftse.server.core.codec;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
@@ -9,7 +10,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.function.BiPredicate;
 
@@ -34,27 +34,49 @@ public class PacketDecoder extends ByteToMessageDecoder {
             in.resetReaderIndex();
             return;
         }
+        int actualReaderIndex = in.readerIndex();
+
+        boolean logAllPackets = ConfigService.getInstance().getValue("logging.packets.all.enabled", true);
 
         Packet packet;
         byte[] encryptedData = new byte[length];
         in.readBytes(encryptedData);
-        byte[] data = this.decryptBytes(encryptedData, encryptedData.length);
+        byte[] data = decryptBytes(encryptedData, encryptedData.length);
+
+        if (logAllPackets)
+            log.debug("RECV payload " + BitKit.toString(data, 0, data.length) + ", readableBytes: " + length);
+
+        if (!this.isValidChecksum(data)) {
+            log.error("Invalid packet checksum");
+            ctx.writeAndFlush(new Packet(0xFA3));
+            in.resetReaderIndex();
+            return;
+        }
 
         int currentObjectLength = BitKit.bytesToShort(data, 6);
-        if (currentObjectLength < 0)
-            throw new IOException("Invalid object length: " + currentObjectLength);
-        if (currentObjectLength > in.capacity())
-            throw new IOException("Unable to read object larger than read buffer: " + currentObjectLength);
-
-        log.debug("payload - RECV [" + PacketOperations.getNameByValue(BitKit.bytesToShort(data, 4)) + "] " + BitKit.toString(data, 0, data.length) + ", readableBytes: " + length);
+        if (currentObjectLength < 0) {
+            log.error("Invalid object length: " + currentObjectLength);
+            in.resetReaderIndex();
+            return;
+        }
+        if (currentObjectLength > in.capacity()) {
+            log.error("Unable to read object larger than read buffer: " + currentObjectLength);
+            in.resetReaderIndex();
+            return;
+        }
 
         BiPredicate<Integer, Integer> packetSizePosRangeCheck = (l, r) -> l >= r;
         while (true) {
-            if (packetSizePosRangeCheck.test(6, data.length))
-                throw new IOException("Invalid packet size position");
+            if (packetSizePosRangeCheck.test(6, data.length)) {
+                log.error("Invalid packet size position");
+                in.resetReaderIndex();
+                return;
+            }
 
             if (!this.isValidChecksum(data)) {
+                log.error("Invalid packet checksum");
                 ctx.writeAndFlush(new Packet(0xFA3));
+                in.resetReaderIndex();
                 return;
             }
 
@@ -64,6 +86,11 @@ public class PacketDecoder extends ByteToMessageDecoder {
                 final int receiveIndicator = this.receiveIndicator;
                 data = decryptBytes(encryptedData, packetSize + 8);
                 packet = new Packet(data);
+
+                actualReaderIndex += packet.getPacketSize();
+
+                if (logAllPackets)
+                    log.debug("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
 
                 out.add(packet);
 
@@ -85,11 +112,18 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
             data = decryptBytes(encryptedData, currentObjectLength + 8);
             packet = new Packet(data);
+
+            actualReaderIndex += packet.getPacketSize();
+
+            if (logAllPackets)
+                log.debug("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
+
             out.add(packet);
 
             int newReceiveIndicator = receiveIndicator + 1;
             this.receiveIndicator = newReceiveIndicator % 60;
         }
+        in.readerIndex(actualReaderIndex);
     }
 
     private boolean isValidChecksum(byte[] data) {

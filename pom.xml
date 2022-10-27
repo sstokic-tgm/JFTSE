@@ -35,6 +35,9 @@
         <module>auth-server</module>
         <module>commons</module>
         <module>server-core</module>
+        <module>game-server</module>
+        <module>relay-server</module>
+        <module>ac-server</module>
     </modules>
 
 </project>

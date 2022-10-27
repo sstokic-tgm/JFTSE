@@ -11,6 +11,5 @@ public abstract class AbstractPacketHandler {
     protected Connection<?> connection;
 
     public abstract boolean process(Packet packet);
-
     public abstract void handle();
 }

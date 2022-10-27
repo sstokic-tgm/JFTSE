@@ -9,14 +9,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
 public abstract class TCPHandler extends SimpleChannelInboundHandler<Packet> {
-    protected final int decryptionKey;
-    protected final int encryptionKey;
-
     private final PacketHandlerFactory packetHandlerFactory;
 
-    protected TCPHandler(final int decryptionKey, final int encryptionKey, final PacketHandlerFactory packetHandlerFactory) {
-        this.decryptionKey = decryptionKey;
-        this.encryptionKey = encryptionKey;
+    protected TCPHandler(final PacketHandlerFactory packetHandlerFactory) {
         this.packetHandlerFactory = packetHandlerFactory;
     }
 

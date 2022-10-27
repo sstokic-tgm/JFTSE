@@ -20,6 +20,12 @@ public class Packet {
     private char dataLength;
     private byte[] data;
 
+    private boolean joinedPackets = false;
+
+    public Packet(boolean joinedPackets) {
+        this.joinedPackets = joinedPackets;
+    }
+
     public Packet(Packet packet) {
         this.readPosition = packet.readPosition;
         this.checkSerial = packet.checkSerial;
