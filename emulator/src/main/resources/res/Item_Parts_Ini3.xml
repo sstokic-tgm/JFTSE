@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <!--Item Parts Ini3 SV1-->
 <ItemList>
 	<Item Index="1" _Name_="새들 브라운 백(x)" Name_N="Saddle Brown Bag" UseType="N/A" MaxUse="0" Hide="0" Resist="NONE" Char="NIKI" Part="BAG" Level="1" STR="0" STA="0" DEX="0" WIL="0" AddHP="0" AddQuick="0" AddBuff="0" SmashSpeed="0" MoveSpeed="0" ChargeshotSpeed="0" LobSpeed="0" ServeSpeed="0" MAX_STR="0" MAX_STA="0" MAX_DEX="0" MAX_WIL="0" EnchantElement="0" EnableParcel="0" BallSpin="0" ATSS="0" DFSS="0" Socket="0" Gauge="0" GaugeBattle="0"/>

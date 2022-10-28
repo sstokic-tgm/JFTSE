@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2006 U (http://www.altova.com) by 김정은 (EMBRACE) -->
 <!--Ini3 Lottery 1-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Holy shield" ShopIndex="3000" QuantityMin="7" QuantityMax="7" ChansPer="20" Effect="3" ProductOpt="0"/>

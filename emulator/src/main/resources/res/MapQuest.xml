@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <Tables>
 	<Global MapLocation="0" GameType="TUTORIAL" StartIndex="1" EndIndex="11" IndexCondition="0"/>
 	<Global MapLocation="1" GameType="CHALLENGE" StartIndex="1" EndIndex="10" IndexCondition="0"/>

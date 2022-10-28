@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2006 U (http://www.altova.com) by Marie (EMBRACE) -->
 <!--Cn Lottery 1-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Midium potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="11.00" Effect="3" ProductOpt="0"/>

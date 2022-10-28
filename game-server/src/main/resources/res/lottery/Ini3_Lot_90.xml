@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <!--Heart Bag Coin-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="5" QuantityMax="5" ChansPer="35.00" Effect="3" ProductOpt="0"/>

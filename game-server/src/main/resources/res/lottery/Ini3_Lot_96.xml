@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <!--Divinity Gifts I-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Divinity Wing(Rainbow)" ShopIndex="57564" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>

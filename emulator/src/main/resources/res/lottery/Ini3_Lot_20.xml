@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <!--Ini3 Lottery 1-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="20.00" Effect="3" ProductOpt="0"/>

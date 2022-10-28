@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <!--Cn Lottery 1-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>

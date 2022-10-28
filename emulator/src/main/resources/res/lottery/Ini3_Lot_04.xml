@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2006 U (http://www.altova.com) by 김정은 (EMBRACE) -->
 <!--Ini3 Lottery 1-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="25" QuantityMax="25" ChansPer="35.8" Effect="3" ProductOpt="0"/>

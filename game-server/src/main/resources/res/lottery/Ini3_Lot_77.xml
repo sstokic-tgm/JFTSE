@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <!--Rare Box III-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="13" Effect="3" ProductOpt="0"/>

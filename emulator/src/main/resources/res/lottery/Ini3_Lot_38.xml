@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2006 U (http://www.altova.com) by Marie (EMBRACE) -->
 <!--Ini3 Lottery 1-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="9.0" Effect="3" ProductOpt="0"/>

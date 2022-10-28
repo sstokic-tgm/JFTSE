@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- edited with XMLSpy v2006 U (http://www.altova.com) by 황인창 (NpicSoft) -->
 <ItemList>
 	<Item Index="1" _Name_="나무 낚싯대" UseType="Time" MaxUse="365" Kind="FISHING" ToolGrade="0" EnableParcel="0" Icon="Item_Tools00_00" Name_kr="나무 낚싯대" Name_en="Wood Fishing Rod" Name_uk="Wood Fishing Rod" Name_po="Wood Fishing Rod" Name_de="Wood Fishing Rod" Name_fr="Wood Fishing Rod" Name_es="Wood Fishing Rod" Name_it="Wood Fishing Rod" Name_cn="木制钓竿" Name_tw="木製釣竿" Name_jp="ウッディロッド" Name_th="Wood Fishing Rod" Desc_kr="낚시를 하기 위해 필요한 채집도구 (기간제)" Desc_en="Wooden rod used for fishing" Desc_uk="Wooden rod used for fishing" Desc_po="Wooden rod used for fishing" Desc_de="Holzangel zum Fischen" Desc_fr="Une canne à pêche en bois" Desc_es="Caña de madera para pescar." Desc_it="Canna di legno per pescare" Desc_cn="钓鱼必备道具（期限制）" Desc_tw="釣魚時所需的採集道具(有期限)" Desc_jp="釣りをするために必要な採集道具(期限付き)
 " Desc_th="เบ็ดไม้สำหรับตกปลา"/>

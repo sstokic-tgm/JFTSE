@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2006 U (http://www.altova.com) by Marie (EMBRACE) -->
 <!--Solid Guardian Item 호블러드-->
 <GuardianItemList>
 	<GuardianItem Index="1" _Name_="No Item" ShopIndex="0" MaterialIndex="0" QuantityMin="0" QuantityMax="0" ChansPer="20" ProductOpt="0"/>

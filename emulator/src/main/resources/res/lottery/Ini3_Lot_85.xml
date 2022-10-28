@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
 <!--Divinity Set(Purple)-->
 <LotteryItemList>
 	<LotteryItem_Niki Index="1" _Name_="Onyx" ShopIndex="8000" QuantityMin="6" QuantityMax="6" ChansPer="11.0 " Effect="3" ProductOpt="0"/>

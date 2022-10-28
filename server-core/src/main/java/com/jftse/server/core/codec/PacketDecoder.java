@@ -48,7 +48,6 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
         if (!this.isValidChecksum(data)) {
             log.error("Invalid packet checksum");
-            ctx.writeAndFlush(new Packet(0xFA3));
             in.resetReaderIndex();
             return;
         }
@@ -69,14 +68,13 @@ public class PacketDecoder extends ByteToMessageDecoder {
         while (true) {
             if (packetSizePosRangeCheck.test(6, data.length)) {
                 log.error("Invalid packet size position");
-                in.resetReaderIndex();
+                in.readerIndex(actualReaderIndex);
                 return;
             }
 
             if (!this.isValidChecksum(data)) {
                 log.error("Invalid packet checksum");
-                ctx.writeAndFlush(new Packet(0xFA3));
-                in.resetReaderIndex();
+                in.readerIndex(actualReaderIndex);
                 return;
             }
 
