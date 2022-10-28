@@ -93,9 +93,9 @@ public class SimpleTCPChannelHandler extends TCPHandler {
             count = track.getRight();
 
             final long difference = System.currentTimeMillis() - track.getLeft();
-             if (difference < 15000) {
+            if (difference < 7000) {
                 count++;
-            } else if (difference > 60000) {
+            } else if (difference > 20000) {
                 count = 1;
             }
             if (count >= 5) {
