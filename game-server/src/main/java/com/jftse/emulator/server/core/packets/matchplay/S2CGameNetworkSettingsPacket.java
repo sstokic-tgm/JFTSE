@@ -8,13 +8,13 @@ import com.jftse.server.core.protocol.Packet;
 import java.util.List;
 
 public class S2CGameNetworkSettingsPacket extends Packet {
-    public S2CGameNetworkSettingsPacket(String host, int port, Room room, List<FTClient> clientsInRoom) {
+    public S2CGameNetworkSettingsPacket(String host, int port, int gameSessionId, Room room, List<FTClient> clientsInRoom) {
         super(PacketOperations.S2CGameNetworkSettings.getValue());
 
         this.write(host);
         this.write((char) port);
 
-        this.write((int) room.getRoomId()); // session id actually
+        this.write(gameSessionId);
 
         int clientsInRoomSize = clientsInRoom.size();
         int maxClientsInRoom = 4;

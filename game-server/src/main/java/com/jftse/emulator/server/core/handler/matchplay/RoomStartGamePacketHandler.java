@@ -104,7 +104,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
             unsetHostPacket.write((byte) 0);
             c.getConnection().sendTCP(unsetHostPacket);
 
-            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(relayServer.getHost(), relayServer.getPort(), room, clientInRoomLeftShiftList);
+            S2CGameNetworkSettingsPacket gameNetworkSettings = new S2CGameNetworkSettingsPacket(relayServer.getHost(), relayServer.getPort(), gameSessionId, room, clientInRoomLeftShiftList);
             c.getConnection().sendTCP(gameNetworkSettings);
 
             // shift list to the left, so every client has his player id in the first place when doing session register
