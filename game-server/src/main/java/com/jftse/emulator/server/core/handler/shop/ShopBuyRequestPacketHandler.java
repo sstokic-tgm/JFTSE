@@ -5,6 +5,9 @@ import com.jftse.emulator.server.core.packets.shop.C2SShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.converters.PriceTypeConverter;
+import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.auctionhouse.PriceType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
@@ -54,26 +57,64 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
         Map<Integer, Byte> itemList = shopBuyPacket.getItemList();
         Map<Product, Byte> productList = productService.findProductsByItemList(itemList);
 
+        Account account = ftClient.getAccount();
         Player player = ftClient.getPlayer();
 
         int gold = player.getGold();
-        int costs = productList.keySet()
+        int ap = account.getAp();
+
+        int costsGold = productList.entrySet()
                 .stream()
-                .mapToInt(Product::getPrice0)
+                .filter(entry -> entry.getKey().getPriceType().equals(PriceType.GOLD.getName()))
+                .mapToInt(entry -> {
+                    byte option = entry.getValue();
+                    if (option <= 0)
+                        return entry.getKey().getPrice0();
+                    else if (option == 1)
+                        return entry.getKey().getPrice1();
+                    else
+                        return entry.getKey().getPrice2();
+                })
                 .sum();
 
-        int result = gold - costs;
+        int resultGold = gold - costsGold;
+        if (resultGold < 0) {
+            S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NEED_MORE_GOLD, null);
+            connection.sendTCP(shopBuyPacketAnswer);
+            return;
+        }
+
+        int costsAp = productList.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().getPriceType().equals(PriceType.MINT.getName()))
+                .mapToInt(entry -> {
+                    byte option = entry.getValue();
+                    if (option <= 0)
+                        return entry.getKey().getPrice0();
+                    else if (option == 1)
+                        return entry.getKey().getPrice1();
+                    else
+                        return entry.getKey().getPrice2();
+                })
+                .sum();
+
+        int resultAp = ap - costsAp;
+        if (resultAp < 0) {
+            S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NEED_MORE_CASH, null);
+            connection.sendTCP(shopBuyPacketAnswer);
+            return;
+        }
 
         List<PlayerPocket> playerPocketList = new ArrayList<>();
 
-        if (result >= 0) {
+        if (resultGold >= 0 || resultAp >= 0) {
             for (Map.Entry<Product, Byte> data : productList.entrySet()) {
                 Product product = data.getKey();
                 byte option = data.getValue();
 
                 // prevent user from buying pet till it'simplemented
                 if (product.getCategory().equals(EItemCategory.PET_CHAR.getName())) {
-                    result += product.getPrice0();
+                    resultGold += product.getPrice0();
                     continue;
                 }
 
@@ -91,7 +132,7 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
                     } else {
                         // gold back
                         if (product.getGoldBack() != 0)
-                            result += product.getGoldBack();
+                            resultGold += product.getGoldBack();
 
                         Pocket pocket = player.getPocket();
 
@@ -202,13 +243,12 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
             S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.SUCCESS, playerPocketList);
             connection.sendTCP(shopBuyPacketAnswer);
 
-            playerService.setMoney(player, result);
+            playerService.setMoney(player, resultGold);
+            account.setAp(resultAp);
+            ftClient.saveAccount(account);
 
             S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
             connection.sendTCP(shopMoneyAnswerPacket);
-        } else {
-            S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NEED_MORE_GOLD, null);
-            connection.sendTCP(shopBuyPacketAnswer);
         }
     }
 }
