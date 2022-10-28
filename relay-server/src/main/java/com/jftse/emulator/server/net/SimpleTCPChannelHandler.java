@@ -99,12 +99,12 @@ public class SimpleTCPChannelHandler extends TCPHandler {
             count = track.getRight();
 
             final long difference = System.currentTimeMillis() - track.getLeft();
-            if (difference < 2000) {
+             if (difference < 15000) {
                 count++;
-            } else if (difference > 20000) {
+            } else if (difference > 60000) {
                 count = 1;
             }
-            if (count >= 10) {
+            if (count >= 5) {
 				log.info("adding to blocked ip: " + address);
                 blockedIP.add(address);
                 tracker.remove(address);
