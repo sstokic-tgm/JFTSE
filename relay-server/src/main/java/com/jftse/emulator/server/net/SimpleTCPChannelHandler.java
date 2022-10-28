@@ -70,7 +70,7 @@ public class SimpleTCPChannelHandler extends TCPHandler {
         if (connection != null) {
             FTClient client = connection.getClient();
             if (client != null) {
-                RelayManager.getInstance().removeClient(client.getGameSessionId(), client);
+                client.getGameSessionId().ifPresent(sessionId -> RelayManager.getInstance().removeClient(sessionId, client));
             }
 
             connection.setClient(null);
