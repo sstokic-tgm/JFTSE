@@ -121,6 +121,7 @@ public class SimpleTCPChannelHandler extends TCPHandler {
                 count = 1;
             }
             if (count >= 10) {
+				log.info("adding to blocked ip: " + address);
                 blockedIP.add(address);
                 tracker.remove(address);
                 ctx.close();
