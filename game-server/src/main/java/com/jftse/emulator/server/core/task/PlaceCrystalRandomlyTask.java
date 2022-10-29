@@ -69,7 +69,7 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
         S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), point);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
 
-        RunnableEvent runnableEvent = null;
+        RunnableEvent runnableEvent;
         if (isBattleGame)
             runnableEvent = runnableEventHandler.createRunnableEvent(new DespawnCrystalTask(connection, skillCrystal, gameFieldSide), ((MatchplayBattleGame) game).getCrystalDeSpawnInterval());
         else

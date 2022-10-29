@@ -79,6 +79,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
         FTClient ftClient = connection.getClient();
         GameSession gameSession = ftClient.getActiveGameSession();
         MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getMatchplayGame();
+        int gameSessionId = ftClient.getGameSessionId();
 
         boolean isSingles = gameSession.getPlayers() == 2;
         int pointsTeamRed = game.getPointsRedTeam();
@@ -325,7 +326,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
 
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (isFinished && gameSession.getClients().isEmpty()) {
-            GameSessionManager.getInstance().removeGameSession(ftClient.getGameSessionId(), gameSession);
+            GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
         }
     }
 

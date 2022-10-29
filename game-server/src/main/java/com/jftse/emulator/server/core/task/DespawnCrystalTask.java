@@ -13,6 +13,7 @@ import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import com.jftse.server.core.thread.AbstractTask;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 public class DespawnCrystalTask extends AbstractTask {
@@ -58,15 +59,10 @@ public class DespawnCrystalTask extends AbstractTask {
             S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
-            ArrayList<SkillCrystal> skillCrystals = isBattleGame ? ((MatchplayBattleGame) game).getSkillCrystals() : ((MatchplayGuardianGame) game).getSkillCrystals();
-            skillCrystals.stream().collect(Collectors.toList()).forEach(current -> {
-                if (current.getId() == skillCrystal.getId()) {
-                    skillCrystals.remove(current);
-                    return;
-                }
-            });
+            ConcurrentLinkedDeque<SkillCrystal> skillCrystals = isBattleGame ? ((MatchplayBattleGame) game).getSkillCrystals() : ((MatchplayGuardianGame) game).getSkillCrystals();
+            skillCrystals.removeIf(sc -> sc.getId() == skillCrystal.getId());
 
-            RunnableEvent runnableEvent = null;
+            RunnableEvent runnableEvent;
             if (isBattleGame)
                 runnableEvent = runnableEventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection, gameFieldSide), ((MatchplayBattleGame) game).getCrystalSpawnInterval());
             else

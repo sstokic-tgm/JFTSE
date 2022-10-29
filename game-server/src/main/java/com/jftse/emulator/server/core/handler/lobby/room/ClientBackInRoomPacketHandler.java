@@ -10,8 +10,6 @@ import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
@@ -92,13 +90,5 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
         connection.sendTCP(couplePointsDataPacket);
         connection.sendTCP(playerStatusPointChangePacket, playerInfoPlayStatsPacket);
         connection.sendTCP(roomInformationPacket, roomPlayerInformationPacket);
-
-        GameSession gameSession = client.getActiveGameSession();
-        if (gameSession != null) {
-            client.setActiveGameSession(null);
-            if (gameSession.getClients().isEmpty()) {
-                GameSessionManager.getInstance().removeGameSession(client.getGameSessionId(), gameSession);
-            }
-        }
     }
 }

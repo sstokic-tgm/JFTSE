@@ -20,6 +20,7 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -30,10 +31,10 @@ public class MatchplayBattleGame extends MatchplayGame {
     private long crystalDeSpawnInterval;
     private ArrayList<Point> playerLocationsOnMap;
     private ArrayList<PlayerBattleState> playerBattleStates;
-    private ArrayList<SkillCrystal> skillCrystals;
-    private int lastCrystalId;
-    private int lastGuardianServeSide;
-    private int spiderMineIdentifier;
+    private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
+    private volatile int lastCrystalId;
+    private volatile int lastGuardianServeSide;
+    private volatile int spiderMineIdentifier;
     private ArrayList<ScheduledFuture<?>> scheduledFutures;
 
     private final PlayerCombatSystem playerCombatSystem;
@@ -50,7 +51,7 @@ public class MatchplayBattleGame extends MatchplayGame {
                 new Point(20, 75)
         ));
         this.playerBattleStates = new ArrayList<>();
-        this.skillCrystals = new ArrayList<>();
+        this.skillCrystals = new ConcurrentLinkedDeque<>();
         this.lastCrystalId = -1;
         this.lastGuardianServeSide = GameFieldSide.RedTeam;
         this.willDamages = new ArrayList<>();

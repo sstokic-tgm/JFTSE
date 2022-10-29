@@ -118,19 +118,9 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, ftClient.getConnection());
 
             if (isBattleGame) {
-                new ArrayList<>(((MatchplayBattleGame) game).getSkillCrystals()).forEach(current -> {
-                    if (current.getId() == skillCrystal.getId()) {
-                        ((MatchplayBattleGame) game).getSkillCrystals().remove(current);
-                        return;
-                    }
-                });
+                ((MatchplayBattleGame) game).getSkillCrystals().removeIf(sc -> sc.getId() == skillCrystal.getId());
             } else {
-                new ArrayList<>(((MatchplayGuardianGame) game).getSkillCrystals()).forEach(current -> {
-                    if (current.getId() == skillCrystal.getId()) {
-                        ((MatchplayGuardianGame) game).getSkillCrystals().remove(current);
-                        return;
-                    }
-                });
+                ((MatchplayGuardianGame) game).getSkillCrystals().removeIf(sc -> sc.getId() == skillCrystal.getId());
             }
 
             PlaceCrystalRandomlyTask placeCrystalRandomlyTask = isBattleGame ? new PlaceCrystalRandomlyTask(ftClient.getConnection(), gameFieldSide) : new PlaceCrystalRandomlyTask(ftClient.getConnection());

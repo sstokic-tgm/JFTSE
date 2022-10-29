@@ -80,7 +80,8 @@ public class SimpleTCPChannelHandler extends TCPHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        log.warn("(" + ctx.channel().remoteAddress() + ") exceptionCaught: " + cause.getMessage(), cause);
+        if (!cause.getMessage().equals("Connection reset"))
+            log.warn("(" + ctx.channel().remoteAddress() + ") exceptionCaught: " + cause.getMessage(), cause);
     }
 
     private boolean checkIp(ChannelHandlerContext ctx, String remoteAddress) {

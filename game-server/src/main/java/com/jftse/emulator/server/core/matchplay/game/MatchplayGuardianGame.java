@@ -22,6 +22,7 @@ import lombok.Setter;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,13 +40,13 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private ArrayList<Point> playerLocationsOnMap;
     private ArrayList<PlayerBattleState> playerBattleStates;
     private ArrayList<GuardianBattleState> guardianBattleStates;
-    private ArrayList<SkillCrystal> skillCrystals;
+    private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
     private List<WillDamage> willDamages;
-    private int lastCrystalId;
+    private volatile int lastCrystalId;
     private GuardianStage guardianStage;
     private GuardianStage bossGuardianStage;
     private GuardianStage currentStage;
-    private boolean bossBattleActive;
+    private volatile boolean bossBattleActive;
     private int lastGuardianServeSide;
     private int guardianLevelLimit;
     private Date stageStartTime;
@@ -53,7 +54,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private int goldPot;
     private boolean isHardMode;
     private boolean isRandomGuardiansMode;
-    private int spiderMineIdentifier;
+    private volatile int spiderMineIdentifier;
     private ArrayList<ScheduledFuture<?>> scheduledFutures;
 
     private AtomicBoolean stageChangingToBoss;
@@ -71,7 +72,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         ));
         this.playerBattleStates = new ArrayList<>();
         this.guardianBattleStates = new ArrayList<>();
-        this.skillCrystals = new ArrayList<>();
+        this.skillCrystals = new ConcurrentLinkedDeque<>();
         this.lastCrystalId = -1;
         this.willDamages = new ArrayList<>();
         this.lastGuardianServeSide = GameFieldSide.Guardian;
