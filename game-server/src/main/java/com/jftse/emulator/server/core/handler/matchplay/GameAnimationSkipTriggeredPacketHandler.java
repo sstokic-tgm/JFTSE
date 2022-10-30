@@ -43,7 +43,8 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
             return;
 
         Room room = ftClient.getActiveRoom();
-        if (room.getStatus() != RoomStatus.InitializingGame) {
+        int roomStatus = room.getStatus();
+        if (roomStatus != RoomStatus.AnimationSkipped) {
             return;
         }
 
@@ -54,16 +55,18 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
                 .findFirst();
 
         if (roomPlayer.isPresent()) {
+            synchronized (room) {
+                if (room.getStatus() == roomStatus) {
+                    room.setStatus(RoomStatus.Running);
+                }
+            }
+
             Packet gameAnimationSkipPacket = new Packet(PacketOperations.S2CGameAnimationSkip.getValue());
             gameAnimationSkipPacket.write((char) 0);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationSkipPacket, ftClient.getConnection());
 
             S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(room);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(playerStatsPacket, ftClient.getConnection());
-
-            synchronized (room) {
-                room.setStatus(RoomStatus.Running);
-            }
 
             ThreadManager.getInstance().schedule(() -> {
                 FTClient client = connection.getClient();

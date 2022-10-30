@@ -34,7 +34,7 @@ public class ThreadManager {
 
         stpe = new ScheduledThreadPoolExecutor(6, r -> {
             Thread t = new Thread(r);
-            t.setName("ThreadManager-Worker-");
+            t.setName("ThreadManager-Worker");
             return t;
         });
         stpe.setKeepAliveTime(5, TimeUnit.MINUTES);

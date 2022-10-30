@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
+import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -8,7 +9,6 @@ import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.player.Player;
 
 @PacketOperationIdentifier(PacketOperations.C2SGameAnimationSkipReady)
 public class GameAnimationReadyToSkipPacketHandler extends AbstractPacketHandler {
@@ -23,26 +23,25 @@ public class GameAnimationReadyToSkipPacketHandler extends AbstractPacketHandler
         if (ftClient == null || ftClient.getPlayer() == null || ftClient.getActiveRoom() == null)
             return;
 
-        Player player = ftClient.getPlayer();
         Room room = ftClient.getActiveRoom();
-        room.getRoomPlayerList().stream()
-                .filter(x -> x.getPlayerId().equals(player.getId()))
-                .findFirst()
-                .ifPresent(rp -> {
-                    synchronized (rp) {
-                        rp.setGameAnimationSkipReady(true);
-                    }
-                });
+        RoomPlayer roomPlayer = ftClient.getRoomPlayer();
+        if (roomPlayer != null) {
+            if (!roomPlayer.isGameAnimationSkipReady()) {
+                roomPlayer.setGameAnimationSkipReady(true);
+            }
+        }
 
         boolean allPlayerCanSkipAnimation = room.getRoomPlayerList().stream().allMatch(RoomPlayer::isGameAnimationSkipReady);
 
-        if (allPlayerCanSkipAnimation) {
-            Packet gameAnimationAllowSkipPacket = new Packet(PacketOperations.S2CGameAnimationAllowSkip.getValue());
-            gameAnimationAllowSkipPacket.write((char) 0);
-            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
-                if (c.getConnection() != null)
-                    c.getConnection().sendTCP(gameAnimationAllowSkipPacket);
-            });
+        int roomStatus = room.getStatus();
+        if (allPlayerCanSkipAnimation && roomStatus == RoomStatus.InitializingGame) {
+            if (room.getStatus() == roomStatus) {
+                room.setStatus(RoomStatus.AnimationSkipped);
+
+                Packet gameAnimationAllowSkipPacket = new Packet(PacketOperations.S2CGameAnimationAllowSkip.getValue());
+                gameAnimationAllowSkipPacket.write((char) 0);
+                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationAllowSkipPacket, ftClient.getConnection());
+            }
         }
     }
 }

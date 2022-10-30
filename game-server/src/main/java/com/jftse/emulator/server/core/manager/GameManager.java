@@ -130,27 +130,21 @@ public class GameManager {
 
     private void setupGlobalTasks() {
         threadManager.scheduleAtFixedRate(() -> {
-            log.info("Queued packet handling started");
-            while (running) {
-                try {
-                    packetEventHandler.handleQueuedPackets();
-                } catch (Exception ex) {
-                    log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
-                }
+            try {
+                packetEventHandler.handleQueuedPackets();
+            } catch (Exception ex) {
+                log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
             }
         }, 0, 10, TimeUnit.MILLISECONDS);
         threadManager.scheduleAtFixedRate(() -> {
-            log.info("Queued runnable event handling started");
-            while (running) {
-                try {
-                    final ConcurrentHashMap<Integer, GameSession> gameSessions = gameSessionManager.getGameSessionList();
-                    gameSessions.forEach((id, gameSession) -> {
-                        if (gameSession != null)
-                            runnableEventHandler.handleQueuedRunnableEvents(gameSession);
-                    });
-                } catch (Exception ex) {
-                    log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
-                }
+            try {
+                final ConcurrentHashMap<Integer, GameSession> gameSessions = gameSessionManager.getGameSessionList();
+                gameSessions.forEach((id, gameSession) -> {
+                    if (gameSession != null)
+                        runnableEventHandler.handleQueuedRunnableEvents(gameSession);
+                });
+            } catch (Exception ex) {
+                log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
             }
         }, 0, 10, TimeUnit.MILLISECONDS);
     }

@@ -21,7 +21,7 @@ public class RoomPlayer {
     private boolean master;
     private boolean ready;
     private boolean fitting;
-    private boolean gameAnimationSkipReady;
+    private boolean gameAnimationSkipReady = false;
 
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);
