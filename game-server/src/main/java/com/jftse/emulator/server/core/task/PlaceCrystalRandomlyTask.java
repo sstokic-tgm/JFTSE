@@ -50,14 +50,15 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
         Point2D point = isBattleGame ? this.getRandomPoint(gameFieldSide) : this.getRandomPoint();
 
         short crystalId = (short) (isBattleGame ?
-                (((MatchplayBattleGame) game).getLastCrystalId() + 1) :
-                (((MatchplayGuardianGame) game).getLastCrystalId() + 1));
-        if (crystalId > 100) crystalId = 0;
-
-        if (isBattleGame)
-            ((MatchplayBattleGame) game).setLastCrystalId(crystalId);
-        else
-            ((MatchplayGuardianGame) game).setLastCrystalId(crystalId);
+                (((MatchplayBattleGame) game).getLastCrystalId().incrementAndGet()) :
+                (((MatchplayGuardianGame) game).getLastCrystalId().incrementAndGet()));
+        if (crystalId > 100) {
+            crystalId = 0;
+            if (isBattleGame)
+                ((MatchplayBattleGame) game).getLastCrystalId().set(0);
+            else
+                ((MatchplayGuardianGame) game).getLastCrystalId().set(0);
+        }
 
         SkillCrystal skillCrystal = new SkillCrystal();
         skillCrystal.setId(crystalId);

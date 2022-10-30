@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,7 +43,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private ArrayList<GuardianBattleState> guardianBattleStates;
     private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
     private List<WillDamage> willDamages;
-    private volatile int lastCrystalId;
+    private AtomicInteger lastCrystalId;
     private GuardianStage guardianStage;
     private GuardianStage bossGuardianStage;
     private GuardianStage currentStage;
@@ -73,7 +74,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.playerBattleStates = new ArrayList<>();
         this.guardianBattleStates = new ArrayList<>();
         this.skillCrystals = new ConcurrentLinkedDeque<>();
-        this.lastCrystalId = -1;
+        this.lastCrystalId = new AtomicInteger(-1);
         this.willDamages = new ArrayList<>();
         this.lastGuardianServeSide = GameFieldSide.Guardian;
         this.scheduledFutures = new ArrayList<>();

@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @Setter
@@ -32,7 +33,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     private ArrayList<Point> playerLocationsOnMap;
     private ArrayList<PlayerBattleState> playerBattleStates;
     private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
-    private volatile int lastCrystalId;
+    private AtomicInteger lastCrystalId;
     private volatile int lastGuardianServeSide;
     private volatile int spiderMineIdentifier;
     private ArrayList<ScheduledFuture<?>> scheduledFutures;
@@ -52,7 +53,7 @@ public class MatchplayBattleGame extends MatchplayGame {
         ));
         this.playerBattleStates = new ArrayList<>();
         this.skillCrystals = new ConcurrentLinkedDeque<>();
-        this.lastCrystalId = -1;
+        this.lastCrystalId = new AtomicInteger(-1);
         this.lastGuardianServeSide = GameFieldSide.RedTeam;
         this.willDamages = new ArrayList<>();
         this.spiderMineIdentifier = 0;

@@ -24,6 +24,8 @@ public class GameAnimationReadyToSkipPacketHandler extends AbstractPacketHandler
             return;
 
         Room room = ftClient.getActiveRoom();
+        int roomStatus = room.getStatus();
+
         RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer != null) {
             if (!roomPlayer.isGameAnimationSkipReady()) {
@@ -33,7 +35,6 @@ public class GameAnimationReadyToSkipPacketHandler extends AbstractPacketHandler
 
         boolean allPlayerCanSkipAnimation = room.getRoomPlayerList().stream().allMatch(RoomPlayer::isGameAnimationSkipReady);
 
-        int roomStatus = room.getStatus();
         if (allPlayerCanSkipAnimation && roomStatus == RoomStatus.InitializingGame) {
             if (room.getStatus() == roomStatus) {
                 room.setStatus(RoomStatus.AnimationSkipped);

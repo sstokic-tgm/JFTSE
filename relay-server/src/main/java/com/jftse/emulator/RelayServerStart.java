@@ -37,7 +37,7 @@ public class RelayServerStart {
         PacketHandlerFactory packetHandlerFactory = PacketHandlerFactory.initFactory(log);
         packetHandlerFactory.autoRegister();
 
-        bossGroup = new NioEventLoopGroup(4);
+        bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(14);
         try {
             ServerBootstrap b = new ServerBootstrap();
