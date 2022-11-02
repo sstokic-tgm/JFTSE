@@ -4,8 +4,11 @@ import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendGiftRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedGiftNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CSendGiftAnswerPacket;
+import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.auctionhouse.PriceType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -61,6 +64,7 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
 
         Product product = productService.findProductByProductItemIndex(c2SSendGiftRequestPacket.getProductIndex());
         Player sender = ftClient.getPlayer();
+        Account senderAcc = ftClient.getAccount();
         Player receiver = playerService.findByName(c2SSendGiftRequestPacket.getReceiverName());
 
         if (receiver != null && product != null) {
@@ -78,10 +82,29 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
             gift.setProduct(product);
             gift.setUseTypeOption(option);
 
-            Integer currentGold = sender.getGold();
-            Integer price = product.getPrice0();
-            if (price > currentGold) {
-                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) -1, null);
+            int gold = sender.getGold();
+            int ap = senderAcc.getAp();
+
+            int costsGold = 0;
+            int costsAp = 0;
+
+            if (product.getPriceType().equals(PriceType.GOLD.getName())) {
+                costsGold = product.getPrice0();
+            }
+            if (product.getPriceType().equals(PriceType.MINT.getName())) {
+                costsAp = product.getPrice0();
+            }
+
+            int resultGold = gold - costsGold;
+            if (resultGold < 0) {
+                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket(S2CShopBuyPacket.NEED_MORE_GOLD, null);
+                connection.sendTCP(s2CSendGiftAnswerPacket);
+                return;
+            }
+
+            int resultAp = ap - costsAp;
+            if (resultAp < 0) {
+                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket(S2CShopBuyPacket.NEED_MORE_CASH, null);
                 connection.sendTCP(s2CSendGiftAnswerPacket);
                 return;
             }
@@ -93,7 +116,7 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
                 if (!product.getCategory().equals(EItemCategory.HOUSE.getName())) {
                     // gold back
                     if (product.getGoldBack() != 0)
-                        currentGold += product.getGoldBack();
+                        resultGold += product.getGoldBack();
 
                     if (product.getItem1() != 0) {
 
@@ -195,9 +218,11 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
                     playerService.save(receiver);
                 }
             }
-            sender = playerService.setMoney(sender, currentGold - price);
+            sender = playerService.setMoney(sender, resultGold);
             giftService.save(gift);
             ftClient.savePlayer(sender);
+            senderAcc.setAp(resultAp);
+            ftClient.saveAccount(senderAcc);
 
             FTClient receiverClient = GameManager.getInstance().getClients().stream()
                     .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
@@ -214,7 +239,7 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
             // 0 = Item purchase successful, -1 = Not enough gold, -2 = Not enough AP,
             // -3 = Receiver reached maximum number of character, -6 = That user already has the maximum number of this item
             // -8 = That users character model cannot equip this item,  -9 = You cannot send gifts purchases with gold to that character
-            S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) 0, gift);
+            S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket(S2CShopBuyPacket.SUCCESS, gift);
             connection.sendTCP(s2CSendGiftAnswerPacket);
 
             S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
