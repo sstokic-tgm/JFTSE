@@ -66,6 +66,9 @@ public class MatchplayBasicGame extends MatchplayGame {
     }
 
     public synchronized void setPoints(byte pointsRedTeam, byte pointsBlueTeam) {
+        if (this.isFinished())
+            return;
+
         this.previousPointsRedTeam = this.pointsRedTeam;
         this.previousPointsBlueTeam = this.pointsBlueTeam;
         this.previousSetsRedTeam = this.setsRedTeam;

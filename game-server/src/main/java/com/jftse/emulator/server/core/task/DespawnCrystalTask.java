@@ -12,9 +12,7 @@ import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import com.jftse.server.core.thread.AbstractTask;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 public class DespawnCrystalTask extends AbstractTask {
     private final FTConnection connection;
