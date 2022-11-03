@@ -67,35 +67,19 @@ public class PlayerCreatePacketHandler extends AbstractPacketHandler {
                     player.setDexterity(itemChar.getDexterity());
                     player.setWillpower(itemChar.getWillpower());
 
-                    if (player.getFirstPlayer()) {
-                        player.setStatusPoints((byte) (player.getStatusPoints() + 19));
-                    } else {
-                        player.setStatusPoints((byte) 5);
-                    }
+                    player.setStatusPoints((byte) 5);
                 } else {
                     player.setStrength(playerCreatePacket.getStrength());
                     player.setStamina(playerCreatePacket.getStamina());
                     player.setDexterity(playerCreatePacket.getDexterity());
                     player.setWillpower(playerCreatePacket.getWillpower());
 
-                    if (player.getFirstPlayer()) {
-                        player.setStatusPoints((byte) (playerCreatePacket.getStatusPoints() + 19));
-                    } else {
-                        player.setStatusPoints(playerCreatePacket.getStatusPoints());
-                    }
+                    player.setStatusPoints(playerCreatePacket.getStatusPoints());
                 }
 
-                if (player.getFirstPlayer()) {
-                    // make every first new char level 20 - only temporary
-                    player.setLevel((byte) 20);
-                    player.setExpPoints(15623);
-                    player.setGold(100000);
-                } else {
-                    // make every new char level 1 - only temporary
-                    player.setLevel((byte) 1);
-                    player.setExpPoints(0);
-                    player.setGold(10000);
-                }
+                player.setLevel((byte) 1);
+                player.setExpPoints(0);
+                player.setGold(10000);
 
                 player = playerService.save(player);
 
