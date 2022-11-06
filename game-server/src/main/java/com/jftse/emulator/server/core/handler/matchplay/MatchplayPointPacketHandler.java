@@ -61,7 +61,7 @@ public class MatchplayPointPacketHandler extends AbstractPacketHandler {
             if (handler.process(packet))
                 handler.handle();
         } catch (Exception e) {
-            ftClient.getConnection().getChannelHandlerContext().fireExceptionCaught(e);
+            throw e;
         }
     }
 }

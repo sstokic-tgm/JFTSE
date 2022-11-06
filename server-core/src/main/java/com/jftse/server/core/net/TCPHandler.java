@@ -28,7 +28,7 @@ public abstract class TCPHandler extends SimpleChannelInboundHandler<Packet> {
                     packetNotProcessed(ctx, abstractPacketHandler);
                 }
             } catch (Exception e) {
-                ctx.fireExceptionCaught(e);
+                exceptionCaught(ctx, e);
             }
         } else {
             handlerNotFound(ctx, packet);

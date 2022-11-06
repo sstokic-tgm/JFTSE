@@ -111,7 +111,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
                     if (handler.process(packet))
                         handler.handle();
                 } catch (Exception e) {
-                    ftClient.getConnection().getChannelHandlerContext().fireExceptionCaught(e);
+                    throw e;
                 }
             }, 8, TimeUnit.SECONDS);
         }

@@ -80,8 +80,16 @@ public class SimpleTCPChannelHandler extends TCPHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (!cause.getMessage().equals("Connection reset"))
+        if (!cause.getMessage().equals("Connection reset") ||
+                !cause.getMessage().equals("Connection timed out") ||
+                !cause.getMessage().equals("No route to host")) {
             log.warn("(" + ctx.channel().remoteAddress() + ") exceptionCaught: " + cause.getMessage(), cause);
+            FTConnection connection = ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).get();
+            if (connection != null) {
+                channelInactive(ctx);
+                ctx.close();
+            }
+        }
     }
 
     private boolean checkIp(ChannelHandlerContext ctx, String remoteAddress) {

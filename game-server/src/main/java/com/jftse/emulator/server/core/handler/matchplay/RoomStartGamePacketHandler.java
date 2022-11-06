@@ -187,7 +187,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
                         if (prepareBattleMode.process(packet))
                             prepareBattleMode.handle();
                     } catch (Exception e) {
-                        ftClient.getConnection().getChannelHandlerContext().fireExceptionCaught(e);
+                        throw e;
                     }
                 }
                 case GameMode.GUARDIAN -> {
@@ -197,7 +197,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
                         if (prepareGuardianMode.process(packet))
                             prepareGuardianMode.handle();
                     } catch (Exception e) {
-                        ftClient.getConnection().getChannelHandlerContext().fireExceptionCaught(e);
+                        throw e;
                     }
                 }
             }
