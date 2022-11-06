@@ -62,8 +62,13 @@ public class PlayerService {
     }
 
     public Player findByNameFetched(String name) {
-        Optional<Player> player = playerRepository.findAllByNameFetched(name);
-        return player.orElse(null);
+        List<Player> playerList = playerRepository.findAllByNameFetched(name);
+        for (Player player : playerList) {
+            if (player.getName().equals(name)) {
+                return player;
+            }
+        }
+        return null;
     }
 
     public Player updateMoney(Player player, int gold) {

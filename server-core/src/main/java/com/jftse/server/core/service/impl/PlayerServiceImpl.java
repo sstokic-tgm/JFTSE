@@ -77,14 +77,24 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Player findByName(String name) {
         List<Player> playerList = playerRepository.findAllByName(name);
-        return playerList.size() != 0 ? playerList.get(0) : null;
+        for (Player player : playerList) {
+            if (player.getName().equals(name)) {
+                return player;
+            }
+        }
+        return null;
     }
 
 
     @Override
     public Player findByNameFetched(String name) {
-        Optional<Player> player = playerRepository.findAllByNameFetched(name);
-        return player.orElse(null);
+        List<Player> playerList = playerRepository.findAllByNameFetched(name);
+        for (Player player : playerList) {
+            if (player.getName().equals(name)) {
+                return player;
+            }
+        }
+        return null;
     }
 
 

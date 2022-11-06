@@ -37,5 +37,5 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
             + "LEFT JOIN FETCH p.quickSlotEquipment quickSlotEquipment "
             + "LEFT JOIN FETCH p.playerStatistic playerStatistic "
             + "WHERE p.name = :name")
-    Optional<Player> findAllByNameFetched(@Param("name") String name);
+    List<Player> findAllByNameFetched(@Param("name") String name);
 }
