@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.packets.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.server.core.protocol.Packet;
@@ -18,8 +19,9 @@ public class S2CRoomPlayerInformationPacket extends Packet {
         this.write((char) roomPlayerList.size());
         for (RoomPlayer roomPlayer : roomPlayerList) {
             Guild guild = null;
-            if (roomPlayer.getGuildMemberId() != null && !roomPlayer.getGuildMember().getWaitingForApproval() && roomPlayer.getGuildMember().getGuild() != null)
-                guild = roomPlayer.getGuildMember().getGuild();
+            GuildMember guildMember = roomPlayer.getGuildMember();
+            if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
+                guild = guildMember.getGuild();
 
             Player player = roomPlayer.getPlayer();
             ClothEquipment clothEquipment = roomPlayer.getClothEquipment();
