@@ -28,7 +28,7 @@ public class ParcelServiceImpl implements ParcelService {
     }
 
     @Override
-    public Parcel findById(Long id) { return parcelRepository.findById(id).get(); }
+    public Parcel findById(Long id) { return parcelRepository.findById(id).orElse(null); }
 
     @Override
     public List<Parcel> findBySender(Player sender) { return parcelRepository.findBySender(sender); }

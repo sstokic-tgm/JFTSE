@@ -101,7 +101,11 @@ public class PlayerPocketServiceImpl implements PlayerPocketService {
         }
         else { // everything else buy price / 2
             List<Integer> sellPriceResult = productRepository.getItemSellPriceByItemIndexAndCategory(playerPocket.getItemIndex(), playerPocket.getCategory());
-            sellPrice = (int) Math.ceil((double) (sellPriceResult.get(0) / 2) * (double) (1 + (itemCount / (sellPriceResult.get(0) / 2))));
+            int buyPrice = sellPriceResult.get(0);
+            if (buyPrice <= 0)
+                buyPrice = 1;
+
+            sellPrice = (int) Math.ceil((double) (buyPrice / 2) * (double) (1 + (itemCount / (buyPrice / 2))));
         }
         return sellPrice;
     }
