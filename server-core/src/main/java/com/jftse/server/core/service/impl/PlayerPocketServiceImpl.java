@@ -105,7 +105,7 @@ public class PlayerPocketServiceImpl implements PlayerPocketService {
             if (buyPrice <= 0)
                 buyPrice = 1;
 
-            sellPrice = (int) Math.ceil((double) (buyPrice / 2) * (double) (1 + (itemCount / (buyPrice / 2))));
+            sellPrice = (int) Math.ceil((double) (buyPrice / 2) * (1 + (itemCount / (double) (buyPrice / 2))));
         }
         return sellPrice;
     }
