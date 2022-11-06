@@ -211,9 +211,12 @@ public class SimpleTCPChannelHandler extends TCPHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (!cause.getMessage().equals("Connection reset") ||
-                !cause.getMessage().equals("Connection timed out") ||
-                !cause.getMessage().equals("No route to host")) {
+        var shouldHandleException = switch (cause.getMessage()) {
+            case "Connection reset", "Connection timed out", "No route to host" -> false;
+            default -> true;
+        };
+
+        if (shouldHandleException) {
             log.warn("(" + ctx.channel().remoteAddress() + ") exceptionCaught: " + cause.getMessage(), cause);
             FTConnection connection = ctx.channel().attr(FT_CONNECTION_ATTRIBUTE_KEY).get();
             if (connection != null) {
@@ -239,13 +242,13 @@ public class SimpleTCPChannelHandler extends TCPHandler {
             count = track.getRight();
 
             final long difference = System.currentTimeMillis() - track.getLeft();
-             if (difference < 7000) {
+            if (difference < 7000) {
                 count++;
             } else if (difference > 20000) {
                 count = 1;
             }
             if (count >= 5) {
-				log.info("adding to blocked ip: " + address);
+                log.info("adding to blocked ip: " + address);
                 blockedIP.add(address);
                 tracker.remove(address);
                 ctx.close();
