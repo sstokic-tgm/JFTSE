@@ -74,8 +74,10 @@ public class MatchplayBasicGame extends MatchplayGame {
         this.previousSetsRedTeam = this.setsRedTeam;
         this.previousSetsBlueTeam = this.setsBlueTeam;
         this.previousIndividualPointsMadeFromPlayers = new HashMap<>(this.individualPointsMadeFromPlayers);
-        this.previousServePlayerPosition = this.servePlayer.getPosition();
-        this.previousReceiverPlayerPosition = this.receiverPlayer.getPosition();
+        if (this.servePlayer != null)
+            this.previousServePlayerPosition = this.servePlayer.getPosition();
+        if (this.receiverPlayer != null)
+            this.previousReceiverPlayerPosition = this.receiverPlayer.getPosition();
         this.pointBackValid = true;
 
         this.pointsRedTeam = pointsRedTeam;

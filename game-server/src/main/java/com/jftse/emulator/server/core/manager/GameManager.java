@@ -209,7 +209,7 @@ public class GameManager {
 
         if (playerPosition == 9) {
             room.getPositions().set(playerPosition, RoomPositionState.Locked);
-        } else {
+        } else if (playerPosition != -1) {
             room.getPositions().set(playerPosition, RoomPositionState.Free);
         }
 
