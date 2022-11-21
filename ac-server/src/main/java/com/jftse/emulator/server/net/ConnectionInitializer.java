@@ -16,11 +16,11 @@ import java.util.Random;
 @Log4j2
 public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
     private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
-    private final SimpleTCPChannelHandler simpleTCPChannelHandler;
+    private final TCPChannelHandler tcpChannelHandler;
 
     public ConnectionInitializer(final PacketHandlerFactory packetHandlerFactory) {
         FT_CONNECTION_ATTRIBUTE_KEY = AttributeKey.newInstance("connection");
-        this.simpleTCPChannelHandler = new SimpleTCPChannelHandler(FT_CONNECTION_ATTRIBUTE_KEY, packetHandlerFactory);
+        this.tcpChannelHandler = new TCPChannelHandler(FT_CONNECTION_ATTRIBUTE_KEY, packetHandlerFactory);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, log));
         ch.pipeline().addLast("encoder", new PacketEncoder(encryptionKey, log));
-        ch.pipeline().addLast(simpleTCPChannelHandler);
+        ch.pipeline().addLast(tcpChannelHandler);
     }
 
     private BigInteger getRandomBigInteger() {

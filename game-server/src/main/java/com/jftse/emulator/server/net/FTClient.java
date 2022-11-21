@@ -14,6 +14,8 @@ import com.jftse.server.core.net.Client;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @Getter
 @Setter
 public class FTClient extends Client<FTConnection> {
@@ -38,6 +40,12 @@ public class FTClient extends Client<FTConnection> {
 
     // hack
     private volatile boolean requestedShopDataPrepare = false;
+
+    private final AtomicBoolean isClosingConnection;
+
+    public FTClient() {
+        isClosingConnection = new AtomicBoolean(false);
+    }
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;
