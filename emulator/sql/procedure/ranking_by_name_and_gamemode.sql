@@ -36,7 +36,7 @@ BEGIN
 			FROM tempRanking
 		) tr
 	WHERE
-		tr.name = name;
+		tr.name COLLATE utf8_bin = name;
 
 END //
 
