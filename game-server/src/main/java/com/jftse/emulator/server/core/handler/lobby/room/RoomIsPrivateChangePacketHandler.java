@@ -23,7 +23,7 @@ public class RoomIsPrivateChangePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
 
         String password = changeRoomIsPrivateRequestPacket.getPassword();
         Room room = client.getActiveRoom();

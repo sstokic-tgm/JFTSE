@@ -29,7 +29,7 @@ public class InventorySellRequestHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         byte status = S2CInventorySellAnswerPacket.SUCCESS;
         int itemPocketId = inventorySellReqPacket.getItemPocketId();
 

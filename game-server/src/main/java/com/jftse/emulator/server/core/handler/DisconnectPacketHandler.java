@@ -33,7 +33,7 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         if (ftClient != null) {
             Player player = ftClient.getPlayer();
             if (player != null) {

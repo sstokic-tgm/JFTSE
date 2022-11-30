@@ -17,7 +17,7 @@ public class ShopMoneyRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         Player player = ftClient.getPlayer();
 
         S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);

@@ -22,7 +22,7 @@ public class RoomSkillFreeChangePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         Room room = ftClient.getActiveRoom();
         if (room != null) {
             synchronized (room) {

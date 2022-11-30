@@ -53,7 +53,7 @@ public class LotteryServiceImpl implements LotteryService {
 
     @Override
     public List<PlayerPocket> drawLottery(Connection<? extends Client<?>> connection, long playerPocketId, int productIndex) {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         Player player = ftClient.getPlayer();
 
         List<PlayerPocket> result = new ArrayList<>();

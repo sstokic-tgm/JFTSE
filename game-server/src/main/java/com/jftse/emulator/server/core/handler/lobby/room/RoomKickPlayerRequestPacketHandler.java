@@ -28,7 +28,7 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractPacketHandler {
         if (connection.getClient() == null)
             return;
 
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
 
         final RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer == null || !roomPlayer.isMaster())

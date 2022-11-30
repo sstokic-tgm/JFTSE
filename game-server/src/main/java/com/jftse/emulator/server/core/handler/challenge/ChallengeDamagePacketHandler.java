@@ -28,7 +28,7 @@ public class ChallengeDamagePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client.getActiveChallengeGame() != null) {
             ((ChallengeBattleGame) client.getActiveChallengeGame()).setHp(challengeDamagePacket.getPlayer(), challengeDamagePacket.getDmg());
 

@@ -47,7 +47,7 @@ public class TutorialServiceImpl implements TutorialService {
 
     @Override
     public void finishGame(Connection<? extends Client<?>> connection) {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         long timeNeeded = ftClient.getActiveTutorialGame().getTimeNeeded();
 
         Tutorial tutorial = findByTutorialIndex(ftClient.getActiveTutorialGame().getTutorialIndex());

@@ -5,21 +5,9 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.net.Client;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class FTClient extends Client<FTConnection> {
     private Long accountId;
     private Long activePlayerId;
-
-    private final AtomicBoolean isClosingConnection;
-
-    public FTClient() {
-        isClosingConnection = new AtomicBoolean(false);
-    }
-
-    public AtomicBoolean getIsClosingConnection() {
-        return isClosingConnection;
-    }
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;

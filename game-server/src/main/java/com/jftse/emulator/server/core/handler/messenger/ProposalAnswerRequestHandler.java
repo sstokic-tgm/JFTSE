@@ -48,7 +48,7 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 

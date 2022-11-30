@@ -23,7 +23,7 @@ public class RelayPacketRequestHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client != null) {
             if (client.getGameSessionId().isPresent()) {
                 final List<FTClient> clients = RelayManager.getInstance().getClientsInSession(client.getGameSessionId().get());

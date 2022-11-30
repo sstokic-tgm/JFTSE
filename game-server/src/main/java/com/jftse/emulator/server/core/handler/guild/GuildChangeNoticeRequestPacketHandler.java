@@ -33,7 +33,7 @@ public class GuildChangeNoticeRequestPacketHandler extends AbstractPacketHandler
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (connection.getClient() == null || client.getPlayer() == null)
             return;
 

@@ -36,7 +36,7 @@ public class SwapQuickSlotItemsHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         if (ftClient == null || ftClient.getActiveGameSession() == null
                 || ftClient.getActiveRoom() == null || ftClient.getPlayer() == null)
             return;

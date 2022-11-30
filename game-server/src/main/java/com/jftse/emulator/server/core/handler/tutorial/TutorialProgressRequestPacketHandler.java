@@ -27,7 +27,7 @@ public class TutorialProgressRequestPacketHandler extends AbstractPacketHandler 
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         List<TutorialProgress> tutorialProgressList = tutorialService.findAllByPlayerIdFetched(client.getPlayer().getId());
 
         S2CTutorialProgressAnswerPacket tutorialProgressAnswerPacket = new S2CTutorialProgressAnswerPacket(tutorialProgressList);

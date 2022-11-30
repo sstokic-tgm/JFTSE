@@ -26,7 +26,7 @@ public class GuildDataRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client == null || client.getPlayer() == null) {
             connection.sendTCP(new S2CGuildDataAnswerPacket((short) -2, null));
             return;

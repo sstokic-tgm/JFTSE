@@ -33,9 +33,9 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
-        if (ftClient != null) {
-            Player player = ftClient.getPlayer();
+        FTClient client = (FTClient) connection.getClient();
+        if (client != null) {
+            Player player = client.getPlayer();
             if (player != null) {
                 // reset pocket
                 List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
@@ -46,10 +46,10 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
                 });
             }
 
-            Account account = ftClient.getAccount();
+            Account account = client.getAccount();
             if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
                 account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                ftClient.saveAccount(account);
+                client.saveAccount(account);
             }
 
             S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();

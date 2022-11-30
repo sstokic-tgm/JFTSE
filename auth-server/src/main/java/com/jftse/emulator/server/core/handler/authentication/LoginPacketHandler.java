@@ -116,9 +116,9 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 account.setLastLogin(new Date());
                 // mark as logged in
                 account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
-                FTClient ftClient = connection.getClient();
-                ftClient.saveAccount(account);
-                ftClient.setAccount(account.getId());
+                FTClient client = (FTClient) connection.getClient();
+                client.saveAccount(account);
+                client.setAccount(account.getId());
 
                 List<AuthToken> existingAuthTokens = authTokenService.findAuthTokensByAccountName(account.getUsername());
                 if (!existingAuthTokens.isEmpty()) {

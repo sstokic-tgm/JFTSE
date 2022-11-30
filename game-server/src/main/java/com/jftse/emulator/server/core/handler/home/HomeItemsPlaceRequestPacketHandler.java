@@ -42,7 +42,7 @@ public class HomeItemsPlaceRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         List<Map<String, Object>> homeItemDataList = homeItemsPlaceReqPacket.getHomeItemDataList();
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         Player player = client.getPlayer();

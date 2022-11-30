@@ -20,7 +20,7 @@ public class ChallengeHpPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client.getActiveChallengeGame() != null && client.getActiveChallengeGame() instanceof ChallengeBattleGame) {
             ((ChallengeBattleGame) client.getActiveChallengeGame()).setMaxPlayerHp(challengeHpPacket.getPlayerHp());
             ((ChallengeBattleGame) client.getActiveChallengeGame()).setMaxNpcHp(challengeHpPacket.getNpcHp());

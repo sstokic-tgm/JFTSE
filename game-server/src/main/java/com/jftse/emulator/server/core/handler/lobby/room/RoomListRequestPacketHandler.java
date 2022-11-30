@@ -28,7 +28,7 @@ public class RoomListRequestPacketHandler extends AbstractPacketHandler {
         if (connection.getClient() == null)
             return;
 
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
 
         int roomType = roomListRequestPacket.getRoomTypeTab();
         int gameMode;
@@ -76,7 +76,7 @@ public class RoomListRequestPacketHandler extends AbstractPacketHandler {
         client.setLobbyCurrentRoomListPage(newCurrentLobbyRoomListPage);
         client.setLobbyGameModeTabFilter(gameMode);
 
-        List<Room> roomList = GameManager.getInstance().getFilteredRoomsForClient(connection.getClient());
+        List<Room> roomList = GameManager.getInstance().getFilteredRoomsForClient((FTClient) connection.getClient());
         S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(roomList);
         connection.sendTCP(roomListAnswerPacket);
     }

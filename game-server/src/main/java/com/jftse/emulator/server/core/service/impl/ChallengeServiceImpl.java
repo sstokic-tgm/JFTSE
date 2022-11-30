@@ -54,7 +54,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public void finishGame(Connection<? extends Client<?>> connection, boolean win) {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         long timeNeeded = ftClient.getActiveChallengeGame().getTimeNeeded();
 
         Challenge challenge = findChallengeByChallengeIndex(ftClient.getActiveChallengeGame().getChallengeIndex());

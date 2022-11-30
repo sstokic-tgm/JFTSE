@@ -22,7 +22,7 @@ public class TutorialBeginPacketHandler extends AbstractPacketHandler {
     public void handle() {
         int tutorialId = tutorialBeginRequestPacket.getTutorialId();
 
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         client.setActiveTutorialGame(new TutorialGame(tutorialId));
 
         Packet answer = new Packet(PacketOperations.C2STutorialBegin.getValue());

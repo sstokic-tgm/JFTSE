@@ -16,7 +16,7 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         client.setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);

@@ -23,14 +23,14 @@ public class RoomSlotCloseRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
-        if (ftClient == null)
+        FTClient client = (FTClient) connection.getClient();
+        if (client == null)
             return;
 
         boolean deactivate = roomSlotCloseRequestPacket.isDeactivate();
 
         byte slot = roomSlotCloseRequestPacket.getSlot();
-        Room room = ftClient.getActiveRoom();
+        Room room = client.getActiveRoom();
         if (room != null) {
             room.getPositions().set(slot, deactivate ? RoomPositionState.Locked : RoomPositionState.Free);
 

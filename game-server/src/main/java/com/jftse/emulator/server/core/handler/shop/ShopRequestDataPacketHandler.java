@@ -40,7 +40,7 @@ public class ShopRequestDataPacketHandler extends AbstractPacketHandler {
 
         List<Product> productList = productService.getProductList(category, part, player, page);
 
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client != null) {
             final boolean requestedShopDataPrepare = client.isRequestedShopDataPrepare();
             if (requestedShopDataPrepare) {

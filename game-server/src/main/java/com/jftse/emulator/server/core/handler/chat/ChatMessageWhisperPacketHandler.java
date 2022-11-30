@@ -24,7 +24,7 @@ public class ChatMessageWhisperPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         S2CWhisperAnswerPacket whisperAnswerPacket = new S2CWhisperAnswerPacket(client.getPlayer().getName(), whisperReqPacket.getReceiverName(), whisperReqPacket.getMessage());
 
         Optional<FTClient> optClientToWhisper = GameManager.getInstance().getClients().stream()

@@ -34,7 +34,7 @@ public class GuildReverseMemberDataRequestPacketHandler extends AbstractPacketHa
     @Override
     public void handle() {
         if (c2SGuildReserveMemberDataRequestPacket.getPage() != 0) return;
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client == null || client.getPlayer() == null) return;
 
         Player activePlayer = client.getPlayer();

@@ -26,7 +26,7 @@ public class ChatMessageLobbyPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), client.getPlayer().getName(), chatLobbyReqPacket.getMessage());
 
         if (CommandManager.getInstance().isCommand(chatLobbyReqPacket.getMessage())) {

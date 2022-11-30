@@ -35,7 +35,7 @@ public class ChallengeBeginRequestPacketHandler extends AbstractPacketHandler {
 
         Challenge currentChallenge = challengeService.findChallengeByChallengeIndex(challengeId);
 
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (currentChallenge.getGameMode() == GameMode.BASIC)
             client.setActiveChallengeGame(new ChallengeBasicGame(challengeId));
         else if (currentChallenge.getGameMode() == GameMode.BATTLE)

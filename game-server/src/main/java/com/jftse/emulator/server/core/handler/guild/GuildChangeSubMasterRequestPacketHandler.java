@@ -32,7 +32,7 @@ public class GuildChangeSubMasterRequestPacketHandler extends AbstractPacketHand
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client == null || client.getPlayer() == null) {
             connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 0, (short) -1));
             return;

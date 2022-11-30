@@ -51,7 +51,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
         Packet roomStartGameAck = new Packet(PacketOperations.S2CRoomStartGameAck.getValue());
         roomStartGameAck.write((char) 0);
 
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
 
         if (ftClient == null) {
             connection.sendTCP(roomStartGameAck);
@@ -171,7 +171,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
             FTClient clientToHostGame = GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
                     .filter(x -> playerInSlot0 != null && x.getPlayer() != null && x.getPlayer().getId().equals(playerInSlot0.getPlayer().getId()))
                     .findFirst()
-                    .orElse(connection.getClient());
+                    .orElse((FTClient) connection.getClient());
             Packet setHostPacket = new Packet(PacketOperations.S2CSetHost.getValue());
             setHostPacket.write((byte) 1);
             clientToHostGame.getConnection().sendTCP(setHostPacket);

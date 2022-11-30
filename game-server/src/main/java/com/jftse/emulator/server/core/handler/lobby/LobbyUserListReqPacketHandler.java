@@ -25,7 +25,7 @@ public class LobbyUserListReqPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
 
         byte page = lobbyUserListRequestPacket.getPage();
         final int clientLobbyCurrentPlayerListPage = client.getLobbyCurrentPlayerListPage();

@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Setter
@@ -22,11 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FTClient extends Client<FTConnection> {
     private ConcurrentHashMap<String, Boolean> fileList;
 
-    private final AtomicBoolean isClosingConnection;
-
     public FTClient() {
         fileList = new ConcurrentHashMap<>();
-        isClosingConnection = new AtomicBoolean(false);
 
         if (ConfigService.getInstance().getValue("anticheat.enabled", false)) {
             List<String> files = getFiles();

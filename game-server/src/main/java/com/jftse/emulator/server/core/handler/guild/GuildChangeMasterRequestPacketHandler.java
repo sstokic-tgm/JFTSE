@@ -31,7 +31,7 @@ public class GuildChangeMasterRequestPacketHandler extends AbstractPacketHandler
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client == null || client.getPlayer() == null) {
             connection.sendTCP(new S2CGuildChangeMasterAnswerPacket((short) -1));
             return;

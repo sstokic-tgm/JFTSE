@@ -26,7 +26,7 @@ public class RegisterPlayerForSessionHandler extends AbstractPacketHandler {
         int sessionId = matchplayPlayerIdsInSessionPacket.getSessionId();
 
         if (playerId != -1) {
-            FTClient client = connection.getClient();
+            FTClient client = (FTClient) connection.getClient();
             client.setGameSessionId(sessionId);
 
             log.info("playerId " + playerId + " connected for session: " + sessionId);

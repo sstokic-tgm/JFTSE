@@ -27,7 +27,7 @@ public class ChatMessageRoomPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         final Room room = client.getActiveRoom();
         if (room == null)
             return;

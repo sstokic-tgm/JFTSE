@@ -76,7 +76,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         GameSession gameSession = ftClient.getActiveGameSession();
         MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getMatchplayGame();
         int gameSessionId = ftClient.getGameSessionId();

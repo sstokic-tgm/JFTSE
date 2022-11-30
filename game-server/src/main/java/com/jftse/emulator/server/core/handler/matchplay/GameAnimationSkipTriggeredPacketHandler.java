@@ -37,7 +37,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         if (ftClient == null || ftClient.getActiveRoom() == null
                 || ftClient.getPlayer() == null || ftClient.getActiveGameSession() == null)
             return;
@@ -69,7 +69,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(playerStatsPacket, ftClient.getConnection());
 
             ThreadManager.getInstance().schedule(() -> {
-                FTClient client = connection.getClient();
+                FTClient client = (FTClient) connection.getClient();
                 if (client == null) return;
 
                 Room threadRoom = client.getActiveRoom();

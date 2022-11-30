@@ -51,7 +51,7 @@ public class FirstPlayerPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         List<Player> playerList = playerService.findAllByAccount(client.getAccount());
 
         if (playerList.isEmpty()) {

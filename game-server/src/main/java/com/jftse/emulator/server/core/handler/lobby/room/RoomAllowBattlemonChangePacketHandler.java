@@ -22,7 +22,7 @@ public class RoomAllowBattlemonChangePacketHandler extends AbstractPacketHandler
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         Room room = client.getActiveRoom();
         if (room != null) {
             byte allowBattlemon = changeRoomAllowBattlemonRequestPacket.getAllowBattlemon() == 1 ? (byte) 2 : (byte) 0;

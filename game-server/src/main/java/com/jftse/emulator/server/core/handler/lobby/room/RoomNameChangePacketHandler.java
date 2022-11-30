@@ -22,7 +22,7 @@ public class RoomNameChangePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         Room room = client.getActiveRoom();
         if (room != null) {
             synchronized (room) {

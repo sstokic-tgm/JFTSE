@@ -44,7 +44,7 @@ public class HomeItemClearRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
         Player player = client.getPlayer();

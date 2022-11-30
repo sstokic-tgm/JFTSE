@@ -28,7 +28,7 @@ public class ChallengePointPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client.getActiveChallengeGame() instanceof ChallengeBasicGame) {
             ((ChallengeBasicGame) client.getActiveChallengeGame()).setPoints(challengePointPacket.getPointsPlayer(), challengePointPacket.getPointsNpc());
 

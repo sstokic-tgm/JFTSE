@@ -3,11 +3,17 @@ package com.jftse.server.core.net;
 import com.jftse.server.core.protocol.Packet;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class Connection<T extends Client<?>> {
-    protected ChannelHandlerContext chx;
+public abstract class Connection<T extends Client<? extends Connection<T>>> {
+    protected T client;
+    protected ChannelHandlerContext ctx;
+    protected ChannelId id;
+
+    protected AtomicBoolean isClosingConnection = new AtomicBoolean(false);
 
     protected final int decryptionKey;
     protected final int encryptionKey;
@@ -17,18 +23,18 @@ public abstract class Connection<T extends Client<?>> {
         this.encryptionKey = encryptionKey;
     }
 
-    protected Connection(ChannelHandlerContext chx, final int decryptionKey, final int encryptionKey) {
-        this.chx = chx;
+    protected Connection(ChannelHandlerContext ctx, final int decryptionKey, final int encryptionKey) {
+        this.ctx = ctx;
         this.decryptionKey = decryptionKey;
         this.encryptionKey = encryptionKey;
     }
 
     public InetSocketAddress getRemoteAddressTCP() {
-        return (InetSocketAddress) chx.channel().remoteAddress();
+        return (InetSocketAddress) ctx.channel().remoteAddress();
     }
 
     public ChannelFuture close() {
-        return chx.close();
+        return ctx.close();
     }
 
     public final int getDecryptionKey() {
@@ -39,7 +45,34 @@ public abstract class Connection<T extends Client<?>> {
         return encryptionKey;
     }
 
-    public abstract <C extends Client<?>> C getClient();
+    public void setChannelHandlerContext(ChannelHandlerContext chx) {
+        this.ctx = chx;
+        setId(this.ctx.channel().id());
+    }
+
+    public ChannelHandlerContext getChannelHandlerContext() {
+        return ctx;
+    }
+
+    public void setId(ChannelId id) {
+        this.id = id;
+    }
+
+    public ChannelId getId() {
+        return id;
+    }
+
+    public void setClient(T client) {
+        this.client = client;
+    }
+
+    public T getClient() {
+        return this.client;
+    }
+
+    public AtomicBoolean getIsClosingConnection() {
+        return isClosingConnection;
+    }
 
     public abstract void sendTCP(Packet... packets);
 }

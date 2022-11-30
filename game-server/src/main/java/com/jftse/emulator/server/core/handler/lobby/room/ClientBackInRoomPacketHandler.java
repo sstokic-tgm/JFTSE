@@ -40,7 +40,7 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client == null || client.getPlayer() == null) {
             S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
             connection.sendTCP(disconnectAnswerPacket);

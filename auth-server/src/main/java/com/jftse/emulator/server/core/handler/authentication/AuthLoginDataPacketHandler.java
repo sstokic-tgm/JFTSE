@@ -48,8 +48,8 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
         if (account != null && account.getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             account = authenticationService.updateAccount(account);
-            FTClient ftClient = connection.getClient();
-            ftClient.setAccount(account.getId());
+            FTClient client = (FTClient) connection.getClient();
+            client.setAccount(account.getId());
 
             log.info(account.getUsername() + " connected");
 

@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
@@ -40,7 +41,7 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
             InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
             String hostAddress = inetSocketAddress.getAddress().getHostAddress();
 
-            FTClient client = connection.getClient();
+            FTClient client = (FTClient) connection.getClient();
             if (client != null) {
                 ConcurrentHashMap<String, Boolean> files = client.getFileList();
 

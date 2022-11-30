@@ -33,7 +33,7 @@ public class PlayerStatusPointChangePacketHandler extends AbstractPacketHandler 
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         Player player = ftClient.getPlayer();
 
         // we can't change; attributes should be server sided

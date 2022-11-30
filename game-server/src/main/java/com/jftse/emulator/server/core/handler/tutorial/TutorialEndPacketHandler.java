@@ -23,7 +23,7 @@ public class TutorialEndPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         client.getActiveTutorialGame().finishTutorial();
         tutorialService.finishGame(connection);
 

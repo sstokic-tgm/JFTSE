@@ -33,7 +33,7 @@ public class GuildChangeReverseMemberRequestHandler extends AbstractPacketHandle
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 

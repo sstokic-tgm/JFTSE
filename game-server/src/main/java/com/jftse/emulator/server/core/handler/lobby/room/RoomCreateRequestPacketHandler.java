@@ -21,7 +21,7 @@ public class RoomCreateRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         // prevent multiple room creations, this might have to be adjusted into a "room join answer"
         if ((client != null && client.getActiveRoom() != null) || client == null || client.getPlayer() == null)
             return;

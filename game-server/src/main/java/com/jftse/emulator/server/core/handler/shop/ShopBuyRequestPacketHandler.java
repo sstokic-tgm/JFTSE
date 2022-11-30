@@ -52,7 +52,7 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
 
         Map<Integer, Byte> itemList = shopBuyPacket.getItemList();
         Map<Product, Byte> productList = productService.findProductsByItemList(itemList);

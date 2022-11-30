@@ -16,7 +16,7 @@ public class LobbyLeavePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         if (client.isInLobby()) {
             client.setInLobby(false);
         }

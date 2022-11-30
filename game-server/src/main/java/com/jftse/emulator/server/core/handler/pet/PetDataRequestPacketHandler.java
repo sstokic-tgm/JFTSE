@@ -27,7 +27,7 @@ public class PetDataRequestPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         List<Pet> petList = petService.findAllByPlayerId(ftClient.getPlayer().getId());
 
         S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);

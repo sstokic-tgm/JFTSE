@@ -49,7 +49,7 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             return;
         }
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         client.setPlayer(gameServerLoginPacket.getPlayerId());
 
         Player player = client.getPlayer();

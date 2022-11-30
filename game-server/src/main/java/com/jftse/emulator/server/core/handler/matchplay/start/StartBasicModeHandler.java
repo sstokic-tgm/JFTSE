@@ -24,7 +24,7 @@ public class StartBasicModeHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
 
         Packet removeBlackBarsPacket = new Packet(PacketOperations.S2CGameRemoveBlackBars.getValue());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(removeBlackBarsPacket, ftClient.getConnection());

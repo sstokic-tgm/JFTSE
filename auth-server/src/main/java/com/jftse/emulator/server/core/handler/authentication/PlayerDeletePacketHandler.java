@@ -49,9 +49,9 @@ public class PlayerDeletePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = connection.getClient();
-        if (ftClient != null) {
-            Account account = ftClient.getAccount();
+        FTClient client = (FTClient) connection.getClient();
+        if (client != null) {
+            Account account = client.getAccount();
             Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
             if (account != null && player != null) {
                 GuildMember guildMember = guildMemberService.getByPlayer(player);

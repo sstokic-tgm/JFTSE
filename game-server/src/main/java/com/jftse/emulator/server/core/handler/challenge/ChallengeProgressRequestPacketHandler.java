@@ -27,7 +27,7 @@ public class ChallengeProgressRequestPacketHandler extends AbstractPacketHandler
 
     @Override
     public void handle() {
-        FTClient client = connection.getClient();
+        FTClient client = (FTClient) connection.getClient();
         List<ChallengeProgress> challengeProgressList = challengeService.findAllByPlayerIdFetched(client.getPlayer().getId());
 
         S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
