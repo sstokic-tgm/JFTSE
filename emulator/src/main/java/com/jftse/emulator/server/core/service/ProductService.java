@@ -44,7 +44,9 @@ public class ProductService {
     }
 
     public Product findProductByItemAndCategoryAndEnabledIsTrue(int itemIndex, String category) {
-        return this.productRepository.findProductByItem0AndCategoryAndEnabledIsTrue(itemIndex, category);
+        List<Product> productList = this.productRepository.findProductByItem0AndCategoryAndEnabledIsTrue(itemIndex, category);
+        productList.removeIf(p -> p.getItem1() != 0);
+        return productList.isEmpty() ? null : productList.get(0);
     }
 
     public Product findProductByItemAndCategory(int itemIndex, String category) {
