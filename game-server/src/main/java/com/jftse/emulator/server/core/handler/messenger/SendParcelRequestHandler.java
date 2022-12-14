@@ -49,10 +49,16 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
     @Override
     public void handle() {
         FTClient ftClient = (FTClient) connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (ftClient == null)
             return;
 
         PlayerPocket item = playerPocketService.findById(c2SSendParcelRequestPacket.getPlayerPocketId().longValue());
+        if (item == null) {
+            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
+            connection.sendTCP(s2CSendParcelAnswerPacket);
+            return;
+        }
+
         Product product = productService.findProductByItemAndCategoryAndEnabledIsTrue(item.getItemIndex(), item.getCategory());
 
         if (product != null && !product.getEnableParcel()) {
@@ -60,9 +66,18 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
             connection.sendTCP(s2CSendParcelAnswerPacket);
         } else {
             Player sender = ftClient.getPlayer();
-            Player receiver = playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
-            if (receiver != null && item != null) {
-                if (item != null) {
+            if (sender == null) {
+                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
+                connection.sendTCP(s2CSendParcelAnswerPacket);
+                return;
+            }
+
+            if (sender.getLevel() < 20) {
+                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -4);
+                connection.sendTCP(s2CSendParcelAnswerPacket);
+            } else {
+                Player receiver = playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
+                if (receiver != null) {
                     // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
                     Parcel parcel = new Parcel();
                     parcel.setReceiver(receiver);
