@@ -63,6 +63,9 @@ public class ServiceManager {
     private ProfaneWordsService profaneWordsService;
 
     @Autowired
+    private BlockedIPService blockedIPService;
+
+    @Autowired
     private ConfigService configService;
 
     @PostConstruct

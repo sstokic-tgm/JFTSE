@@ -1,9 +1,11 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.server.core.service.BlockedIPService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -18,6 +20,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Log4j2
 public class RelayManager {
     private static RelayManager instance;
+
+    @Autowired
+    private BlockedIPService blockedIPService;
 
     private ConcurrentHashMap<Integer, ConcurrentLinkedDeque<FTClient>> clients;
 

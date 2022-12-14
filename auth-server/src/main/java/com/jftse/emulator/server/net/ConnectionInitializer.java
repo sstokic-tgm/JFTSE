@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.entities.database.model.log.ServerType;
 import com.jftse.server.core.codec.PacketDecoder;
 import com.jftse.server.core.codec.PacketEncoder;
 import com.jftse.server.core.handler.PacketHandlerFactory;
@@ -29,6 +30,8 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         final int encryptionKey = ConfigService.getInstance().getValue("network.encryption.enabled", false) ? getRandomBigInteger().intValueExact() : 0;
 
         FTConnection connection = new FTConnection(decryptionKey, encryptionKey);
+        connection.setServerType(ServerType.AUTH_SERVER);
+
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         ch.pipeline().addLast(new FlushConsolidationHandler());

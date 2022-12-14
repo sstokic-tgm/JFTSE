@@ -1,18 +1,19 @@
 package com.jftse.server.core.net;
 
+import com.jftse.entities.database.model.log.BlockedIP;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.service.BlockedIPService;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -20,7 +21,6 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
     protected final AttributeKey<T> CONNECTION_ATTRIBUTE_KEY;
     private final PacketHandlerFactory packetHandlerFactory;
 
-    private final List<String> blockedIP = new ArrayList<>();
     private final Map<String, Pair<Long, Byte>> tracker = new ConcurrentHashMap<>();
 
     protected TCPHandler(final AttributeKey<T> connectionAttributeKey, final PacketHandlerFactory packetHandlerFactory) {
@@ -92,10 +92,14 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         // empty
     }
 
-    public boolean checkIp(T connection, String remoteAddress, Supplier<Logger> loggerSupplier) {
+    public boolean checkIp(T connection, String remoteAddress, Supplier<BlockedIPService> blockedIPServiceSupplier, Supplier<Logger> loggerSupplier) {
         String address = remoteAddress.substring(1, remoteAddress.lastIndexOf(":"));
 
-        if (blockedIP.contains(address)) {
+        Logger log = loggerSupplier.get();
+        BlockedIPService blockedIPService = blockedIPServiceSupplier.get();
+
+        Optional<BlockedIP> ipOptional = blockedIPService.findBlockedIPByIpAndServerType(address, connection.getServerType());
+        if (ipOptional.isPresent()) {
             connection.close();
             return false;
         }
@@ -114,8 +118,9 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
                 count = 1;
             }
             if (count >= 5) {
-                loggerSupplier.get().info("adding to blocked ip: " + address);
-                blockedIP.add(address);
+                log.info("adding to blocked ip: " + address);
+                BlockedIP ipToBlock = new BlockedIP(address, connection.getServerType());
+                blockedIPService.save(ipToBlock);
                 tracker.remove(address);
                 connection.close();
                 return false;

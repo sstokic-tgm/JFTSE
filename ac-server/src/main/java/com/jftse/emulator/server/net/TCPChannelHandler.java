@@ -7,6 +7,7 @@ import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.net.TCPHandler;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.ClientWhitelistService;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
 import io.netty.channel.ChannelHandler;
@@ -17,11 +18,13 @@ import lombok.extern.log4j.Log4j2;
 @ChannelHandler.Sharable
 public class TCPChannelHandler extends TCPHandler<FTConnection> {
     private final ClientWhitelistService clientWhitelistService;
+    private final BlockedIPService blockedIPService;
 
     public TCPChannelHandler(final AttributeKey<FTConnection> ftConnectionAttributeKey, final PacketHandlerFactory phf) {
         super(ftConnectionAttributeKey, phf);
 
         this.clientWhitelistService = ServiceManager.getInstance().getClientWhitelistService();
+        this.blockedIPService = ServiceManager.getInstance().getBlockedIPService();
     }
 
     @Override
@@ -29,7 +32,7 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
         String remoteAddress = connection.getRemoteAddressTCP().toString();
         log.info("(" + remoteAddress + ") Channel Active");
 
-        if (!checkIp(connection, remoteAddress, () -> log))
+        if (!checkIp(connection, remoteAddress, () -> blockedIPService, () -> log))
             return;
 
         FTClient client = new FTClient();

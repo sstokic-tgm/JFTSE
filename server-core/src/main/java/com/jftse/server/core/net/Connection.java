@@ -1,5 +1,6 @@
 package com.jftse.server.core.net;
 
+import com.jftse.entities.database.model.log.ServerType;
 import com.jftse.server.core.protocol.Packet;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,6 +18,8 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
 
     protected final int decryptionKey;
     protected final int encryptionKey;
+
+    protected ServerType serverType;
 
     protected Connection(final int decryptionKey, final int encryptionKey) {
         this.decryptionKey = decryptionKey;
@@ -72,6 +75,14 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
 
     public AtomicBoolean getIsClosingConnection() {
         return isClosingConnection;
+    }
+
+    public void setServerType(ServerType serverType) {
+        this.serverType = serverType;
+    }
+
+    public ServerType getServerType() {
+        return serverType;
     }
 
     public abstract void sendTCP(Packet... packets);

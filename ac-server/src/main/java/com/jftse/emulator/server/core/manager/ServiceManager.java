@@ -65,6 +65,9 @@ public class ServiceManager {
     private ModuleService moduleService;
 
     @Autowired
+    private BlockedIPService blockedIPService;
+
+    @Autowired
     private ConfigService configService;
 
     @PostConstruct

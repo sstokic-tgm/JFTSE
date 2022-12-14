@@ -104,6 +104,9 @@ public class ServiceManager {
     private GameLogService gameLogService;
 
     @Autowired
+    private BlockedIPService blockedIPService;
+
+    @Autowired
     private ConfigService configService;
 
     @PostConstruct
