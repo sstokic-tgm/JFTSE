@@ -6,6 +6,7 @@ import com.jftse.emulator.server.core.packets.messenger.S2CAcceptParcelAnswer;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.messenger.EParcelType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -48,21 +49,33 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
         if (parcel == null) return;
 
         Player receiver = parcel.getReceiver();
-        synchronized (receiver) {
-            int newGoldReceiver = receiver.getGold() - parcel.getGold();
+        Player sender = parcel.getSender();
+
+        if (receiver.getLevel() < 20) {
+            S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -1);
+            connection.sendTCP(s2CAcceptParcelAnswer);
+            return;
+        }
+
+        if (parcel.getEParcelType().equals(EParcelType.CashOnDelivery)) {
+            final int newGoldReceiver = receiver.getGold() - parcel.getGold();
             if (newGoldReceiver < 0) {
                 S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -2);
                 connection.sendTCP(s2CAcceptParcelAnswer);
                 return;
             }
-
             receiver.setGold(newGoldReceiver);
+
+            final int newGoldSender = sender.getGold() + parcel.getGold();
+            sender.setGold(newGoldSender);
         }
 
-        Player sender = parcel.getSender();
-        synchronized (sender) {
-            int newGoldSender = sender.getGold() + parcel.getGold();
-            sender.setGold(newGoldSender);
+        if (parcel.getEParcelType().equals(EParcelType.Gold)) {
+            final int newGoldSender = sender.getGold() - parcel.getGold();
+            playerService.setMoney(sender, newGoldSender);
+
+            final int newGoldReceiver = receiver.getGold() + parcel.getGold();
+            playerService.setMoney(receiver, newGoldReceiver);
         }
 
         Pocket receiverPocket = receiver.getPocket();

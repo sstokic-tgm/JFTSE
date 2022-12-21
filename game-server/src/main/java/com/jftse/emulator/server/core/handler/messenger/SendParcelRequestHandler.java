@@ -59,6 +59,12 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
             return;
         }
 
+        if (c2SSendParcelRequestPacket.getCashOnDelivery() > 1000000) {
+            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -5);
+            connection.sendTCP(s2CSendParcelAnswerPacket);
+            return;
+        }
+
         Product product = productService.findProductByItemAndCategoryAndEnabledIsTrue(item.getItemIndex(), item.getCategory());
 
         if (product != null && !product.getEnableParcel()) {
@@ -78,6 +84,12 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
             } else {
                 Player receiver = playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
                 if (receiver != null) {
+                    if (receiver.getLevel() < 20) {
+                        S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -4);
+                        connection.sendTCP(s2CSendParcelAnswerPacket);
+                        return;
+                    }
+
                     // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
                     Parcel parcel = new Parcel();
                     parcel.setReceiver(receiver);
@@ -97,6 +109,24 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
                         parcel.setEParcelType(EParcelType.CashOnDelivery);
                     }
 
+                    sender = playerService.updateMoney(sender, -30); // fee 30 gold
+                    if (sender.getGold() < 0) {
+                        playerService.updateMoney(sender, 30);
+                        S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -2);
+                        connection.sendTCP(s2CSendParcelAnswerPacket);
+                        return;
+                    }
+
+                    if (parcel.getEParcelType().equals(EParcelType.Gold)) {
+                        final int newGold = sender.getGold() - parcel.getGold();
+                        if (newGold < 0) {
+                            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -2);
+                            connection.sendTCP(s2CSendParcelAnswerPacket);
+                            return;
+                        }
+                    }
+
+                    playerService.save(sender);
                     parcelService.save(parcel);
                     playerPocketService.remove(item.getId());
 
