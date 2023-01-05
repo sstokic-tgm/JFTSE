@@ -28,13 +28,11 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
-import com.jftse.server.core.thread.ThreadManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -91,13 +89,11 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                 player.setOnline(false);
                 client.savePlayer(player);
 
-                ThreadManager.getInstance().schedule(() -> {
-                    Account account = client.getAccount();
-                    if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
-                        account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                        client.saveAccount(account);
-                    }
-                }, 1, TimeUnit.SECONDS);
+                Account account = client.getAccount();
+                if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+                    account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+                    client.saveAccount(account);
+                }
 
                 List<Friend> friends = ServiceManager.getInstance().getFriendService().findByPlayer(player);
                 friends.forEach(x -> {

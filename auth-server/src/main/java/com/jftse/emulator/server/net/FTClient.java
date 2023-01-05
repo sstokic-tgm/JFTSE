@@ -4,10 +4,15 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.net.Client;
+import com.jftse.server.core.protocol.Packet;
+
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class FTClient extends Client<FTConnection> {
     private Long accountId;
     private Long activePlayerId;
+
+    private final ConcurrentLinkedDeque<Packet> packetsToSendOnFrame = new ConcurrentLinkedDeque<>();
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;
@@ -39,5 +44,9 @@ public class FTClient extends Client<FTConnection> {
 
     public void saveAccount(Account account) {
         ServiceManager.getInstance().getAuthenticationService().updateAccount(account);
+    }
+
+    public ConcurrentLinkedDeque<Packet> getPacketsToSendOnFrame() {
+        return packetsToSendOnFrame;
     }
 }

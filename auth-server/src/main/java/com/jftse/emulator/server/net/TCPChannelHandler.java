@@ -1,12 +1,14 @@
 package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.entities.database.model.account.Account;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.net.TCPHandler;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
+import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
 import io.netty.channel.ChannelHandler;
 import io.netty.util.AttributeKey;
@@ -56,6 +58,11 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
         FTClient client = connection.getClient();
         if (client != null) {
+            Account account = client.getAccount();
+            if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+                account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+                client.saveAccount(account);
+            }
         }
     }
 

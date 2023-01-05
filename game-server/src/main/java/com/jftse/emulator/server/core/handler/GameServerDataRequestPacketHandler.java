@@ -31,7 +31,9 @@ import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,7 @@ import java.util.Map;
 public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
     private C2SGameServerRequestPacket gameServerRequestPacket;
 
+    private final PlayerService playerService;
     private final HomeService homeService;
     private final PetService petService;
     private final GuildMemberService guildMemberService;
@@ -54,6 +57,7 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
     private final PlayerStatisticService playerStatisticService;
 
     public GameServerDataRequestPacketHandler() {
+        playerService = ServiceManager.getInstance().getPlayerService();
         homeService = ServiceManager.getInstance().getHomeService();
         petService = ServiceManager.getInstance().getPetService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
@@ -87,6 +91,17 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
         if (requestType == 0) {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
+
+            // reset pocket
+            List<Player> playerList = playerService.findAllByAccount(account);
+            for (Player p : playerList) {
+                List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(p.getPocket());
+                StreamUtils.batches(playerPocketList, 20).forEach(pocketList -> {
+                    List<Packet> inventoryItemRemoveAnswerPackets = new ArrayList<>();
+                    pocketList.forEach(pocket -> inventoryItemRemoveAnswerPackets.add(new S2CInventoryItemRemoveAnswerPacket((int) pocket.getId().longValue())));
+                    connection.sendTCP(inventoryItemRemoveAnswerPackets.toArray(new Packet[0]));
+                });
+            }
 
             StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
             Pocket pocket = pocketService.findById(player.getPocket().getId());
