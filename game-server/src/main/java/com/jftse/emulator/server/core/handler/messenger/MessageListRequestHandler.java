@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.handler.messenger;
 import com.jftse.emulator.server.core.packets.messenger.C2SMessageListRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CMessageListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.messenger.AbstractMessage;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
@@ -59,6 +60,13 @@ public class MessageListRequestHandler extends AbstractPacketHandler {
                 List<Gift> gifts = giftService.findByReceiver(player);
                 S2CMessageListAnswerPacket messageListAnswerPacket = new S2CMessageListAnswerPacket(listType, gifts);
                 connection.sendTCP(messageListAnswerPacket);
+
+                boolean allSeen = gifts.stream().allMatch(Gift::getSeen);
+                if (!allSeen) {
+                    Packet packet = new Packet((char) 0x2135);
+                    packet.write((byte) 17);
+                    connection.sendTCP(packet);
+                }
 
                 gifts = giftService.findBySender(player);
                 messageListAnswerPacket = new S2CMessageListAnswerPacket((byte) (listType + 1), gifts);
