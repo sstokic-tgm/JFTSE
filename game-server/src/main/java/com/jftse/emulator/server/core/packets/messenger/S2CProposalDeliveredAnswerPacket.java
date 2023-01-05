@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class S2CProposalDeliveredAnswerPacket extends Packet {
     public S2CProposalDeliveredAnswerPacket(byte status) {
-        super(PacketOperations.S2CProposalDeliveredAnswer.getValue());
+        super(PacketOperations.S2CProposalDeliveredAnswer);
 
         this.write(status);
     }

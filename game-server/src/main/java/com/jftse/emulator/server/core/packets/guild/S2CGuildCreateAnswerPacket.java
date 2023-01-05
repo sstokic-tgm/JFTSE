@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CGuildCreateAnswerPacket extends Packet {
     public S2CGuildCreateAnswerPacket(char result) {
-        super(PacketOperations.S2CGuildCreateAnswer.getValue());
+        super(PacketOperations.S2CGuildCreateAnswer);
 
         this.write(result);
     }

@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CInventorySellItemAnswerPacket extends Packet {
     public S2CInventorySellItemAnswerPacket(char itemCount, int itemPocketId) {
-        super(PacketOperations.S2CInventorySellItemAnswer.getValue());
+        super(PacketOperations.S2CInventorySellItemAnswer);
 
         this.write(itemCount);
 

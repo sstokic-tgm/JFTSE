@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 public class S2CParcelListPacket extends Packet {
     public S2CParcelListPacket(byte listType, List<Parcel> parcels) {
-        super(PacketOperations.S2CParcelListAnswer.getValue());
+        super(PacketOperations.S2CParcelListAnswer);
 
         this.write(listType);
         this.write((byte) parcels.size());

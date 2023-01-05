@@ -8,7 +8,7 @@ import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 
 public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
     public S2CGameEndLevelUpPlayerStatsPacket(short playerPosition, Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketOperations.S2CGameEndLevelUpPlayerStats.getValue());
+        super(PacketOperations.S2CGameEndLevelUpPlayerStats);
 
         this.write(playerPosition); // not sure if it's the pos
         this.write(player.getLevel());

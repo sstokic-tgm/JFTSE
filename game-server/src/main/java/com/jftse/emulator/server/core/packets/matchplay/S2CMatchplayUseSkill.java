@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplayUseSkill extends Packet {
     public S2CMatchplayUseSkill(byte attacker, byte target, byte skillId, byte seed, float xTarget, float zTarget, float yTarget) {
-        super(PacketOperations.S2CMatchplayUseSkill.getValue());
+        super(PacketOperations.S2CMatchplayUseSkill);
 
         this.write(attacker);
         this.write(target);

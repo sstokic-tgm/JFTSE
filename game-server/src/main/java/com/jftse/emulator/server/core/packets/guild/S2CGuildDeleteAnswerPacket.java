@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CGuildDeleteAnswerPacket extends Packet {
     public S2CGuildDeleteAnswerPacket(short result) {
-        super(PacketOperations.S2CGuildDeleteAnswer.getValue());
+        super(PacketOperations.S2CGuildDeleteAnswer);
 
         this.write(result);
     }

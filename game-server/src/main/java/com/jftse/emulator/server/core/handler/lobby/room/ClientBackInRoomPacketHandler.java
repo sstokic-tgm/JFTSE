@@ -62,11 +62,11 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
 
         short position = roomPlayer.getPosition();
 
-        Packet backInRoomAckPacket = new Packet(PacketOperations.S2CMatchplayClientBackInRoomAck.getValue());
+        Packet backInRoomAckPacket = new Packet(PacketOperations.S2CMatchplayClientBackInRoomAck);
         backInRoomAckPacket.write(position);
         connection.sendTCP(backInRoomAckPacket);
 
-        Packet unsetHostPacket = new Packet(PacketOperations.S2CUnsetHost.getValue());
+        Packet unsetHostPacket = new Packet(PacketOperations.S2CUnsetHost);
         unsetHostPacket.write((byte) 0);
         connection.sendTCP(unsetHostPacket);
 

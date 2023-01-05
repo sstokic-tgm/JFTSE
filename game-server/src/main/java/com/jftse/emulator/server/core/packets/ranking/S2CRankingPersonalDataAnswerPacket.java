@@ -8,7 +8,7 @@ import com.jftse.entities.database.model.player.PlayerStatistic;
 
 public class S2CRankingPersonalDataAnswerPacket extends Packet {
     public S2CRankingPersonalDataAnswerPacket(char result, byte gameMode, Player player, int ranking) {
-        super(PacketOperations.S2CRankingPersonalDataAnswer.getValue());
+        super(PacketOperations.S2CRankingPersonalDataAnswer);
 
         PlayerStatistic playerStatistic = player.getPlayerStatistic();
 

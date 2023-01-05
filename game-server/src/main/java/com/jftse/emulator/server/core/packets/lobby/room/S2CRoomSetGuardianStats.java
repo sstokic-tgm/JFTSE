@@ -10,7 +10,7 @@ import java.util.List;
 
 public class S2CRoomSetGuardianStats extends Packet {
     public S2CRoomSetGuardianStats(ArrayList<GuardianBattleState> guardianBattleStates, List<Byte> guardians) {
-        super(PacketOperations.S2CRoomSetGuardianStats.getValue());
+        super(PacketOperations.S2CRoomSetGuardianStats);
 
         final ArrayList<GuardianBattleState> finalGuardianBattleStates = new ArrayList<>();
 

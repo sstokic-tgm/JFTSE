@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CFirstPlayerAnswerPacket extends Packet {
     public S2CFirstPlayerAnswerPacket(char result, Long playerId, byte playerType) {
-        super(PacketOperations.S2CLoginFirstPlayerAnswer.getValue());
+        super(PacketOperations.S2CLoginFirstPlayerAnswer);
 
         this.write(result);
         this.write(Math.toIntExact(playerId));

@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class S2CRelationshipAnswerPacket extends Packet {
     public S2CRelationshipAnswerPacket(Friend friend) {
-        super(PacketOperations.S2CRelationshipAnswer.getValue());
+        super(PacketOperations.S2CRelationshipAnswer);
             this.write(friend.getFriend().getId().intValue());
             this.write(friend.getFriend().getName());
             this.write(friend.getFriend().getPlayerType());

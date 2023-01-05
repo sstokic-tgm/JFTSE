@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class S2CSendParcelAnswerPacket extends Packet {
     public S2CSendParcelAnswerPacket(short status) {
-        super(PacketOperations.S2CSendParcelAnswer.getValue());
+        super(PacketOperations.S2CSendParcelAnswer);
 
         this.write(status);
     }

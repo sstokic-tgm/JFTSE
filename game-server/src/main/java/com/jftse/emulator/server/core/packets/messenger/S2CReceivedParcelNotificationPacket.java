@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class S2CReceivedParcelNotificationPacket extends Packet {
     public S2CReceivedParcelNotificationPacket(Parcel parcel) {
-        super(PacketOperations.S2CReceivedParcelNotification.getValue());
+        super(PacketOperations.S2CReceivedParcelNotification);
 
         this.write(parcel.getId().intValue());
         this.write(parcel.getSender().getName());

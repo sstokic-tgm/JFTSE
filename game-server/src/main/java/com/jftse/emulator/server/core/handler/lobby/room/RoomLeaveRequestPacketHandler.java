@@ -21,7 +21,7 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
 
         GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);
 
-        Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer.getValue());
+        Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
         answerPacket.write(0);
         connection.sendTCP(answerPacket);
     }

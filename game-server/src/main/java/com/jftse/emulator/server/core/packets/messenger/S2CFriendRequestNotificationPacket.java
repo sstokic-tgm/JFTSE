@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class S2CFriendRequestNotificationPacket extends Packet {
     public S2CFriendRequestNotificationPacket(String playerName) {
-        super(PacketOperations.S2CFriendRequestNotification.getValue());
+        super(PacketOperations.S2CFriendRequestNotification);
 
         this.write((byte) 1);
         this.write(playerName);

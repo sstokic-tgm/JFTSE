@@ -6,7 +6,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CRoomInformationPacket extends Packet {
     public S2CRoomInformationPacket(Room room) {
-        super(PacketOperations.S2CRoomInformation.getValue());
+        super(PacketOperations.S2CRoomInformation);
 
         this.write(room.getRoomId());
         this.write(room.getRoomName());

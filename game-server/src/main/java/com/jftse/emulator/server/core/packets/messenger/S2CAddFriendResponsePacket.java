@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class S2CAddFriendResponsePacket extends Packet {
     public S2CAddFriendResponsePacket(short result) {
-        super(PacketOperations.S2CAddFriendAnswer.getValue());
+        super(PacketOperations.S2CAddFriendAnswer);
 
         this.write(result);
     }

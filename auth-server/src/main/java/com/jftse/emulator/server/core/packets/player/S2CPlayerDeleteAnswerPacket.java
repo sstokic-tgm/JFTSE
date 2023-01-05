@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CPlayerDeleteAnswerPacket extends Packet {
     public S2CPlayerDeleteAnswerPacket(char result) {
-        super(PacketOperations.S2CPlayerDelete.getValue());
+        super(PacketOperations.S2CPlayerDelete);
 
         this.write(result);
     }

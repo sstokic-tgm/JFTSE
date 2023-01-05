@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class S2CInventoryWearClothAnswerPacket extends Packet {
     public S2CInventoryWearClothAnswerPacket(char status, C2SInventoryWearClothReqPacket inventoryWearClothReqPacket, Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketOperations.S2CInventoryWearClothAnswer.getValue());
+        super(PacketOperations.S2CInventoryWearClothAnswer);
 
         this.write(status); // status
 
@@ -72,7 +72,7 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
     }
 
     public S2CInventoryWearClothAnswerPacket(char status, Map<String, Integer> inventoryEquippedCloths, Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketOperations.S2CInventoryWearClothAnswer.getValue());
+        super(PacketOperations.S2CInventoryWearClothAnswer);
 
         this.write(status); // status
 

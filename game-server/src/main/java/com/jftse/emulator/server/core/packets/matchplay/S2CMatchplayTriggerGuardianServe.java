@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplayTriggerGuardianServe extends Packet {
     public S2CMatchplayTriggerGuardianServe(byte teamSide, byte xOffset, byte ballAngle) {
-        super(PacketOperations.S2CMatchplayStartGuardianServe.getValue());
+        super(PacketOperations.S2CMatchplayStartGuardianServe);
 
         this.write(teamSide);
         this.write(xOffset);

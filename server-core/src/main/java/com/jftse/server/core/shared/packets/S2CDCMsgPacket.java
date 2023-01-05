@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CDCMsgPacket extends Packet {
     public S2CDCMsgPacket(Integer result) {
-        super(PacketOperations.S2CDCMsg.getValue());
+        super(PacketOperations.S2CDCMsg);
 
         this.write(result.shortValue());
     }

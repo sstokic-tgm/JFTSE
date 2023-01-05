@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplayLetCrystalDisappear extends Packet {
     public S2CMatchplayLetCrystalDisappear(short skillIndex) {
-        super(PacketOperations.S2CMatchplayLetCrystalDisappear.getValue());
+        super(PacketOperations.S2CMatchplayLetCrystalDisappear);
 
         this.write(skillIndex);
     }

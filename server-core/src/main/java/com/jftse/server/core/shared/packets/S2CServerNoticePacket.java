@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CServerNoticePacket extends Packet {
     public S2CServerNoticePacket(String message) {
-        super(PacketOperations.S2CServerNotice.getValue());
+        super(PacketOperations.S2CServerNotice);
 
         this.write(message);
     }

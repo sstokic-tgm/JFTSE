@@ -7,7 +7,7 @@ import java.util.List;
 
 public class S2CInventoryWearSpecialAnswerPacket extends Packet {
     public S2CInventoryWearSpecialAnswerPacket(List<Integer> specialSlotList) {
-        super(PacketOperations.S2CInventoryWearSpecialAnswer.getValue());
+        super(PacketOperations.S2CInventoryWearSpecialAnswer);
 
         specialSlotList.forEach(this::write);
     }

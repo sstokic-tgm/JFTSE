@@ -82,111 +82,109 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
         final FTClient client = connection.getClient();
         if (client != null) {
-            Account account = client.getAccount();
-            if (account != null) {
-                boolean notifyClients = true;
+            boolean notifyClients = true;
 
-                if (account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+            Player player = client.getPlayer();
+            if (player != null) {
+                player.setOnline(false);
+                client.savePlayer(player);
+
+                Account account = client.getPlayer().getAccount(); // don't ask why like this, but that way updates are not overwritten
+                if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
                     account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
                     client.saveAccount(account);
                 }
 
-                Player player = client.getPlayer();
-                if (player != null) {
-                    player.setOnline(false);
-                    client.savePlayer(player);
+                List<Friend> friends = ServiceManager.getInstance().getFriendService().findByPlayer(player);
+                friends.forEach(x -> {
+                    List<Friend> friendList = ServiceManager.getInstance().getSocialService().getFriendList(x.getFriend(), EFriendshipState.Friends);
+                    S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
+                    GameManager.getInstance().getClients().stream()
+                            .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getFriend().getId()))
+                            .findFirst()
+                            .ifPresent(c -> {
+                                if (c.getConnection() != null) {
+                                    c.getConnection().sendTCP(friendListAnswerPacket);
+                                }
+                            });
+                });
 
-                    List<Friend> friends = ServiceManager.getInstance().getFriendService().findByPlayer(player);
-                    friends.forEach(x -> {
-                        List<Friend> friendList = ServiceManager.getInstance().getSocialService().getFriendList(x.getFriend(), EFriendshipState.Friends);
-                        S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
-                        GameManager.getInstance().getClients().stream()
-                                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getFriend().getId()))
-                                .findFirst()
-                                .ifPresent(c -> {
-                                    if (c.getConnection() != null) {
-                                        c.getConnection().sendTCP(friendListAnswerPacket);
-                                    }
-                                });
-                    });
+                GuildMember guildMember = ServiceManager.getInstance().getGuildMemberService().getByPlayer(player);
+                if (guildMember != null && guildMember.getGuild() != null) {
+                    guildMember.getGuild().getMemberList().stream()
+                            .filter(x -> x != guildMember)
+                            .forEach(x -> {
+                                List<GuildMember> guildMembers = ServiceManager.getInstance().getSocialService().getGuildMemberList(x.getPlayer());
 
-                    GuildMember guildMember = ServiceManager.getInstance().getGuildMemberService().getByPlayer(player);
-                    if (guildMember != null && guildMember.getGuild() != null) {
-                        guildMember.getGuild().getMemberList().stream()
-                                .filter(x -> x != guildMember)
-                                .forEach(x -> {
-                                    List<GuildMember> guildMembers = ServiceManager.getInstance().getSocialService().getGuildMemberList(x.getPlayer());
-
-                                    S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
-                                    GameManager.getInstance().getClients().stream()
-                                            .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getPlayer().getId()))
-                                            .findFirst()
-                                            .ifPresent(c -> {
-                                                if (c.getConnection() != null ) {
-                                                    c.getConnection().sendTCP(s2CClubMembersListAnswerPacket);
-                                                }
-                                            });
-                                });
-                    }
-
-                    Friend myRelation = ServiceManager.getInstance().getSocialService().getRelationship(player);
-                    if (myRelation != null) {
-                        FTClient friendRelationClient = GameManager.getInstance().getClients().stream()
-                                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
-                                .findFirst()
-                                .orElse(null);
-                        Friend friendRelation = ServiceManager.getInstance().getSocialService().getRelationship(myRelation.getFriend());
-
-                        if (friendRelationClient != null && friendRelation != null) {
-                            S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                            friendRelationClient.getConnection().sendTCP(s2CRelationshipAnswerPacket);
-                        }
-                    }
+                                S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
+                                GameManager.getInstance().getClients().stream()
+                                        .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getPlayer().getId()))
+                                        .findFirst()
+                                        .ifPresent(c -> {
+                                            if (c.getConnection() != null) {
+                                                c.getConnection().sendTCP(s2CClubMembersListAnswerPacket);
+                                            }
+                                        });
+                            });
                 }
 
-                GameSession gameSession = client.getActiveGameSession();
-                if (gameSession != null) {
+                Friend myRelation = ServiceManager.getInstance().getSocialService().getRelationship(player);
+                if (myRelation != null) {
+                    FTClient friendRelationClient = GameManager.getInstance().getClients().stream()
+                            .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
+                            .findFirst()
+                            .orElse(null);
+                    Friend friendRelation = ServiceManager.getInstance().getSocialService().getRelationship(myRelation.getFriend());
 
-                    Room currentClientRoom = client.getActiveRoom();
-                    if (currentClientRoom != null) {
-                        if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
-                            PlayerStatistic playerStatistic = player.getPlayerStatistic();
-                            playerStatistic.setNumberOfDisconnects(playerStatistic.getNumberOfDisconnects() + 1);
-                            playerStatistic = ServiceManager.getInstance().getPlayerStatisticService().save(player.getPlayerStatistic());
-
-                            player.setPlayerStatistic(playerStatistic);
-                            client.savePlayer(player);
-                        }
-
-                        RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
-                        if (roomPlayer != null) {
-                            notifyClients = roomPlayer.getPosition() < 4;
-                            if (notifyClients) {
-                                synchronized (currentClientRoom) {
-                                    currentClientRoom.setStatus(RoomStatus.NotRunning);
-                                }
-                                client.setActiveRoom(currentClientRoom);
-
-                                gameSession.getClients().forEach(c -> {
-                                    Room room = c.getActiveRoom();
-                                    if (room != null) {
-                                        if (c.getConnection() != null && c.getConnection().getId() != connection.getId()) {
-                                            S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-                                            c.getConnection().sendTCP(backToRoomPacket);
-                                        }
-                                    }
-                                });
-                                GameSessionManager.getInstance().getGameSessionList().remove(client.getGameSessionId(), gameSession);
-                            }
-                        }
-                        MatchplayGame game = gameSession.getMatchplayGame();
-                        if (game instanceof MatchplayBattleGame)
-                            ((MatchplayBattleGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
-                        else if (game instanceof MatchplayGuardianGame)
-                            ((MatchplayGuardianGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
-
-                        client.setActiveGameSession(null);
+                    if (friendRelationClient != null && friendRelation != null) {
+                        S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
+                        friendRelationClient.getConnection().sendTCP(s2CRelationshipAnswerPacket);
                     }
+                }
+            }
+
+            GameSession gameSession = client.getActiveGameSession();
+            if (gameSession != null) {
+
+                Room currentClientRoom = client.getActiveRoom();
+                if (currentClientRoom != null) {
+                    if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
+                        PlayerStatistic playerStatistic = player.getPlayerStatistic();
+                        playerStatistic.setNumberOfDisconnects(playerStatistic.getNumberOfDisconnects() + 1);
+                        playerStatistic = ServiceManager.getInstance().getPlayerStatisticService().save(player.getPlayerStatistic());
+
+                        player.setPlayerStatistic(playerStatistic);
+                        client.savePlayer(player);
+                    }
+
+                    RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+                    if (roomPlayer != null) {
+                        notifyClients = roomPlayer.getPosition() < 4;
+                        if (notifyClients) {
+                            synchronized (currentClientRoom) {
+                                currentClientRoom.setStatus(RoomStatus.NotRunning);
+                            }
+                            client.setActiveRoom(currentClientRoom);
+
+                            gameSession.getClients().forEach(c -> {
+                                Room room = c.getActiveRoom();
+                                if (room != null) {
+                                    if (c.getConnection() != null && c.getConnection().getId() != connection.getId()) {
+                                        S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
+                                        c.getConnection().sendTCP(backToRoomPacket);
+                                    }
+                                }
+                            });
+                            GameSessionManager.getInstance().getGameSessionList().remove(client.getGameSessionId(), gameSession);
+                        }
+                    }
+                    MatchplayGame game = gameSession.getMatchplayGame();
+                    if (game instanceof MatchplayBattleGame)
+                        ((MatchplayBattleGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
+                    else if (game instanceof MatchplayGuardianGame)
+                        ((MatchplayGuardianGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
+
+                    client.setActiveGameSession(null);
                 }
                 GameManager.getInstance().handleRoomPlayerChanges(connection, notifyClients);
             }

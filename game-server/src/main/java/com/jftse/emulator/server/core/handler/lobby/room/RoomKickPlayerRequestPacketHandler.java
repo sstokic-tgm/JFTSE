@@ -50,7 +50,7 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractPacketHandler {
                         .orElse(null);
 
                 if (client != null) {
-                    Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer.getValue());
+                    Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
                     answerPacket.write(0);
                     client.getConnection().sendTCP(answerPacket);
 

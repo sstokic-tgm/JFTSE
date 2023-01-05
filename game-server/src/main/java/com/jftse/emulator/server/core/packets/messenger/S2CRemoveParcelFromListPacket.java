@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class S2CRemoveParcelFromListPacket extends Packet {
     public S2CRemoveParcelFromListPacket(Integer parcelId) {
-        super(PacketOperations.S2CRemoveParcelFromListAnswer.getValue());
+        super(PacketOperations.S2CRemoveParcelFromListAnswer);
 
         this.write(parcelId);
     }

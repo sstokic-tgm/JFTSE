@@ -9,7 +9,7 @@ import java.util.List;
 
 public class S2CGameNetworkSettingsPacket extends Packet {
     public S2CGameNetworkSettingsPacket(String host, int port, int gameSessionId, Room room, List<FTClient> clientsInRoom) {
-        super(PacketOperations.S2CGameNetworkSettings.getValue());
+        super(PacketOperations.S2CGameNetworkSettings);
 
         this.write(host);
         this.write((char) port);

@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 public class S2CFriendsListAnswerPacket extends Packet {
     public S2CFriendsListAnswerPacket(List<Friend> friends) {
-        super(PacketOperations.S2CFriendsListAnswer.getValue());
+        super(PacketOperations.S2CFriendsListAnswer);
 
         this.write((byte) friends.size());
         for (Friend friend : friends) {

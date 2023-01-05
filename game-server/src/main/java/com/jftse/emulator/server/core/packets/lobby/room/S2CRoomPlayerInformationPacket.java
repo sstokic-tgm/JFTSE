@@ -14,7 +14,7 @@ import java.util.List;
 
 public class S2CRoomPlayerInformationPacket extends Packet {
     public S2CRoomPlayerInformationPacket(List<RoomPlayer> roomPlayerList) {
-        super(PacketOperations.S2CRoomPlayerInformation.getValue());
+        super(PacketOperations.S2CRoomPlayerInformation);
 
         this.write((char) roomPlayerList.size());
         for (RoomPlayer roomPlayer : roomPlayerList) {

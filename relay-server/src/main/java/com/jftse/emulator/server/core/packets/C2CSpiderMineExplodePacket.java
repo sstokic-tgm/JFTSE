@@ -12,7 +12,7 @@ public class C2CSpiderMineExplodePacket extends Packet {
     private short spiderMineId;
 
     public C2CSpiderMineExplodePacket(byte targetPosition, short spiderMineId) {
-        super(PacketOperations.C2CSpiderMineExplodePacket.getValue());
+        super(PacketOperations.C2CSpiderMineExplodePacket);
 
         this.targetPosition = targetPosition;
         this.spiderMineId = spiderMineId;

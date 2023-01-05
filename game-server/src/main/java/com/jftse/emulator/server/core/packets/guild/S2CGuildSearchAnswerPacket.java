@@ -9,7 +9,7 @@ import java.util.List;
 
 public class S2CGuildSearchAnswerPacket extends Packet {
     public S2CGuildSearchAnswerPacket(List<Guild> guildList) {
-        super(PacketOperations.S2CGuildSearchAnswer.getValue());
+        super(PacketOperations.S2CGuildSearchAnswer);
 
         this.write((byte)guildList.size());
         for (Guild guild : guildList) {

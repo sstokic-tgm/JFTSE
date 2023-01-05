@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class S2CChallengeFinishPacket extends Packet {
     public S2CChallengeFinishPacket(boolean win, byte newLevel, int exp, int gold, int secondsNeeded, List<Map<String, Object>> rewardItemList) {
-        super(PacketOperations.S2CChallengeEnd.getValue());
+        super(PacketOperations.S2CChallengeEnd);
 
         this.write(win, newLevel, exp, gold, secondsNeeded);
 

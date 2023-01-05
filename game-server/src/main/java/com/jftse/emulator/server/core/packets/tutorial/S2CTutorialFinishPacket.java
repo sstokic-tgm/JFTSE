@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class S2CTutorialFinishPacket extends Packet {
     public S2CTutorialFinishPacket(boolean win, byte newLevel, int exp, int gold, int secondsNeeded, List<Map<String, Object>> rewardItemList) {
-        super(PacketOperations.S2CTutorialEnd.getValue());
+        super(PacketOperations.S2CTutorialEnd);
 
         this.write(win, newLevel, exp, gold, secondsNeeded);
 

@@ -41,7 +41,7 @@ public class ChallengeBeginRequestPacketHandler extends AbstractPacketHandler {
         else if (currentChallenge.getGameMode() == GameMode.BATTLE)
             client.setActiveChallengeGame(new ChallengeBattleGame(challengeId));
 
-        Packet answer = new Packet(PacketOperations.C2STutorialBegin.getValue());
+        Packet answer = new Packet(PacketOperations.C2STutorialBegin);
         answer.write((char) 1);
         connection.sendTCP(answer);
     }

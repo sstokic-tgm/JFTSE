@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class S2CGameSetNameColorAndRemoveBlackBar extends Packet {
     public S2CGameSetNameColorAndRemoveBlackBar(Room room) {
-        super(PacketOperations.S2CGameSetNameColorAndRemoveBlackBar.getValue());
+        super(PacketOperations.S2CGameSetNameColorAndRemoveBlackBar);
 
         if (room == null) {
             this.write((char) 0);

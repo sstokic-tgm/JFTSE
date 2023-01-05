@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CHomeItemsRemoveAnswerPacket extends Packet {
     public S2CHomeItemsRemoveAnswerPacket(short result) {
-        super(PacketOperations.S2CHomeItemsRemoveAnswer.getValue());
+        super(PacketOperations.S2CHomeItemsRemoveAnswer);
 
         this.write(result);
     }

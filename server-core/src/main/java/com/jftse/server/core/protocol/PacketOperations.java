@@ -330,13 +330,13 @@ public enum PacketOperations {
         this.value = value;
     }
 
-    public Integer getValue() {
+    public int getValue() {
         return value;
     }
 
     public static PacketOperations getPacketOperationByValue(final int value) {
         for (PacketOperations packetOperation : VALUES) {
-            if (packetOperation.getValue().equals(value)) {
+            if (packetOperation.getValue() == value) {
                 return packetOperation;
             }
         }
@@ -349,7 +349,7 @@ public enum PacketOperations {
 
     public static String getNameByValue(final int value) {
         for (PacketOperations packetOperation : VALUES) {
-            if (packetOperation.getValue().equals(value)) {
+            if (packetOperation.getValue() == value) {
                 return packetOperation.getName();
             }
         }

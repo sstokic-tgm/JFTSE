@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CGuildLeaveAnswerPacket extends Packet {
     public S2CGuildLeaveAnswerPacket(char status) {
-        super(PacketOperations.S2CGuildLeaveAnswer.getValue());
+        super(PacketOperations.S2CGuildLeaveAnswer);
 
         this.write(status);
     }

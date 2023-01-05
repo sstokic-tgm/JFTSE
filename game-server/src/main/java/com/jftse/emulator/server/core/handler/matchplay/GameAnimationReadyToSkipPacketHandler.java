@@ -39,7 +39,7 @@ public class GameAnimationReadyToSkipPacketHandler extends AbstractPacketHandler
             if (room.getStatus() == roomStatus) {
                 room.setStatus(RoomStatus.AnimationSkipped);
 
-                Packet gameAnimationAllowSkipPacket = new Packet(PacketOperations.S2CGameAnimationAllowSkip.getValue());
+                Packet gameAnimationAllowSkipPacket = new Packet(PacketOperations.S2CGameAnimationAllowSkip);
                 gameAnimationAllowSkipPacket.write((char) 0);
                 GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationAllowSkipPacket, ftClient.getConnection());
             }

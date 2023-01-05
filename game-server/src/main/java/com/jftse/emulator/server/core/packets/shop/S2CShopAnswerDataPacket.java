@@ -9,7 +9,7 @@ import java.util.List;
 public class S2CShopAnswerDataPacket extends Packet {
 
     public S2CShopAnswerDataPacket(int pageCount, List<Product> productList) {
-        super(PacketOperations.S2CShopAnswerData.getValue());
+        super(PacketOperations.S2CShopAnswerData);
 
         this.write(pageCount);
 

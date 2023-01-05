@@ -48,7 +48,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        Packet roomStartGameAck = new Packet(PacketOperations.S2CRoomStartGameAck.getValue());
+        Packet roomStartGameAck = new Packet(PacketOperations.S2CRoomStartGameAck);
         roomStartGameAck.write((char) 0);
 
         FTClient ftClient = (FTClient) connection.getClient();
@@ -100,7 +100,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
 
         List<FTClient> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
         clientsInRoom.forEach(c -> {
-            Packet unsetHostPacket = new Packet(PacketOperations.S2CUnsetHost.getValue());
+            Packet unsetHostPacket = new Packet(PacketOperations.S2CUnsetHost);
             unsetHostPacket.write((byte) 0);
             c.getConnection().sendTCP(unsetHostPacket);
 
@@ -130,7 +130,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
                     synchronized (threadRoom) {
                         if (!allReady || roomPlayerSizeChanged || threadRoom.getStatus() == RoomStatus.StartCancelled) {
                             threadRoom.setStatus(RoomStatus.NotRunning);
-                            Packet startGameCancelledPacket = new Packet(PacketOperations.S2CRoomStartGameCancelled.getValue());
+                            Packet startGameCancelledPacket = new Packet(PacketOperations.S2CRoomStartGameCancelled);
                             startGameCancelledPacket.write((char) 0);
 
                             threadRoom.getRoomPlayerList().forEach(rp -> rp.setReady(false));
@@ -172,11 +172,11 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
                     .filter(x -> playerInSlot0 != null && x.getPlayer() != null && x.getPlayer().getId().equals(playerInSlot0.getPlayer().getId()))
                     .findFirst()
                     .orElse((FTClient) connection.getClient());
-            Packet setHostPacket = new Packet(PacketOperations.S2CSetHost.getValue());
+            Packet setHostPacket = new Packet(PacketOperations.S2CSetHost);
             setHostPacket.write((byte) 1);
             clientToHostGame.getConnection().sendTCP(setHostPacket);
 
-            Packet setHostUnknownPacket = new Packet(PacketOperations.S2CSetHostUnknown.getValue());
+            Packet setHostUnknownPacket = new Packet(PacketOperations.S2CSetHostUnknown);
             clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
 
             switch (room.getMode()) {
@@ -202,7 +202,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
                 }
             }
 
-            Packet startGamePacket = new Packet(PacketOperations.S2CRoomStartGame.getValue());
+            Packet startGamePacket = new Packet(PacketOperations.S2CRoomStartGame);
             startGamePacket.write((char) 0);
 
             synchronized (room) {

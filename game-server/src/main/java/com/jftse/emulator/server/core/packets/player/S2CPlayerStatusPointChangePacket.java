@@ -11,7 +11,7 @@ public class S2CPlayerStatusPointChangePacket extends Packet {
      * TODO: reverse this packet structure correctly
      */
     public S2CPlayerStatusPointChangePacket(Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketOperations.S2CPlayerStatusPointChange.getValue());
+        super(PacketOperations.S2CPlayerStatusPointChange);
 
         this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
 

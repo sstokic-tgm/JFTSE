@@ -2,7 +2,6 @@ package com.jftse.server.core.codec;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
-import com.jftse.server.core.protocol.JoinedPacket;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.SerialTable;
@@ -27,7 +26,7 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
     protected void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) throws Exception {
         boolean logAllPackets = ConfigService.getInstance().getValue("logging.packets.all.enabled", true);
 
-        byte[] data = packet.isJoinedPackets() ? ((JoinedPacket) packet).getJoinedData() : packet.getRawPacket();
+        byte[] data = packet.getRawPacket();
         final int packetId = BitKit.bytesToChar(data, 4);
         byte[] encryptedResult = new byte[data.length];
 

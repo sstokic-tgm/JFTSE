@@ -7,7 +7,7 @@ import com.jftse.entities.database.model.player.Player;
 
 public class S2CLobbyUserInfoClothAnswerPacket extends Packet {
     public S2CLobbyUserInfoClothAnswerPacket(char result, Player player) {
-        super(PacketOperations.S2CLobbyUserInfoClothAnswer.getValue());
+        super(PacketOperations.S2CLobbyUserInfoClothAnswer);
 
         this.write(result);
         if (player != null) {

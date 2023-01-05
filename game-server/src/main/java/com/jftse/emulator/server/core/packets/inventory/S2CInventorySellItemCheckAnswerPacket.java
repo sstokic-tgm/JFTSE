@@ -9,7 +9,7 @@ public class S2CInventorySellItemCheckAnswerPacket extends Packet {
     public final static byte IMPOSSIBLE_ITEM = -2;
 
     public S2CInventorySellItemCheckAnswerPacket(byte status) {
-        super(PacketOperations.S2CInventorySellItemCheckAnswer.getValue());
+        super(PacketOperations.S2CInventorySellItemCheckAnswer);
 
         this.write(status);
     }

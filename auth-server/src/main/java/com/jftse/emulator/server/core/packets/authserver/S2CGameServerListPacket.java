@@ -9,7 +9,7 @@ import java.util.List;
 public class S2CGameServerListPacket extends Packet {
 
     public S2CGameServerListPacket(List<GameServer> gameServerList) {
-        super(PacketOperations.S2CGameServerList.getValue());
+        super(PacketOperations.S2CGameServerList);
 
         this.write((byte) gameServerList.size());
 

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class S2CGameDisplayPlayerStatsPacket extends Packet {
     public S2CGameDisplayPlayerStatsPacket(Room room) {
-        super(PacketOperations.S2CGameDisplayPlayerStats.getValue());
+        super(PacketOperations.S2CGameDisplayPlayerStats);
 
         final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
         short gameMode = room.getMode();

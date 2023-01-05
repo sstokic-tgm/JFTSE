@@ -10,7 +10,7 @@ import java.util.List;
 
 public class S2CInventoryDataPacket extends Packet {
     public S2CInventoryDataPacket(List<PlayerPocket> playerPocketList) {
-        super(PacketOperations.S2CInventoryData.getValue());
+        super(PacketOperations.S2CInventoryData);
 
         this.write((char) playerPocketList.size());
 

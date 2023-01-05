@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplayGivePlayerSkills extends Packet {
     public S2CMatchplayGivePlayerSkills(short playerPosition, int leftSkillType, int rightSkillType) {
-        super(PacketOperations.S2CMatchplayGivePlayerSkills.getValue());
+        super(PacketOperations.S2CMatchplayGivePlayerSkills);
 
         this.write(playerPosition);
         this.write(leftSkillType); // Skill type (left slot)

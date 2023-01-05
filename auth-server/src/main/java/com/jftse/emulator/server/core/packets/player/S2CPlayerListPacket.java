@@ -10,7 +10,7 @@ import java.util.List;
 
 public class S2CPlayerListPacket extends Packet {
     public S2CPlayerListPacket(Account account, List<Player> playerList) {
-        super(PacketOperations.S2CPlayerList.getValue());
+        super(PacketOperations.S2CPlayerList);
 
         this.write(0);
         this.write(0);

@@ -7,7 +7,7 @@ import java.awt.geom.Point2D;
 
 public class S2CMatchplayPlaceSkillCrystal extends Packet {
     public S2CMatchplayPlaceSkillCrystal(short skillIndex, Point2D point) {
-        super(PacketOperations.S2CMatchplayPlaceSkillCrystal.getValue());
+        super(PacketOperations.S2CMatchplayPlaceSkillCrystal);
 
         this.write(skillIndex); // Skill index we want to set
         this.write((byte) 0); // Unk

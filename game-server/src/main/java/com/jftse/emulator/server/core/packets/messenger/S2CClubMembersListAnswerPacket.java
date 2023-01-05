@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 public class S2CClubMembersListAnswerPacket extends Packet {
     public S2CClubMembersListAnswerPacket(List<GuildMember> guildMembers) {
-        super(PacketOperations.S2CClubMembersListAnswer.getValue());
+        super(PacketOperations.S2CClubMembersListAnswer);
 
         this.write((byte) guildMembers.size());
         for (GuildMember guildMember : guildMembers) {

@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CShopAnswerDataPreparePacket extends Packet {
     public S2CShopAnswerDataPreparePacket(byte category, byte part, byte player, int size) {
-        super(PacketOperations.S2CShopAnswerDataPrepare.getValue());
+        super(PacketOperations.S2CShopAnswerDataPrepare);
 
         this.write(category);
         this.write(part);

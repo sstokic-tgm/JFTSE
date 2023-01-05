@@ -20,7 +20,7 @@ public class ServerTimeRequestPacketHandler extends AbstractPacketHandler {
     public void handle() {
         Date currentTime = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
 
-        Packet answer = new Packet(PacketOperations.S2CServerTimeAnswer.getValue());
+        Packet answer = new Packet(PacketOperations.S2CServerTimeAnswer);
         answer.write(currentTime);
         connection.sendTCP(answer);
     }

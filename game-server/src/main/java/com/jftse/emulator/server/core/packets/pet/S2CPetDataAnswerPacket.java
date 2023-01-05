@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CPetDataAnswerPacket extends Packet {
     public S2CPetDataAnswerPacket(List<Pet> petList) {
-        super(PacketOperations.S2CPetDataAnswer.getValue());
+        super(PacketOperations.S2CPetDataAnswer);
 
         this.write((byte)petList.size());
 

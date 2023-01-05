@@ -10,7 +10,7 @@ import java.util.List;
 
 public class S2CRoomListAnswerPacket extends Packet {
     public S2CRoomListAnswerPacket(List<Room> roomList) {
-        super(PacketOperations.S2CRoomListAnswer.getValue());
+        super(PacketOperations.S2CRoomListAnswer);
 
         this.write((char) roomList.size());
         for (Room room : roomList) {

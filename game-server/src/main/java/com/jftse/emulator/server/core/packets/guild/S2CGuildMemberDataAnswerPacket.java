@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CGuildMemberDataAnswerPacket extends Packet {
     public S2CGuildMemberDataAnswerPacket(List<GuildMember> guildMemberList) {
-        super(PacketOperations.S2CGuildMemberDataAnswer.getValue());
+        super(PacketOperations.S2CGuildMemberDataAnswer);
 
         this.write((short) 0);
         this.write((byte) guildMemberList.size());

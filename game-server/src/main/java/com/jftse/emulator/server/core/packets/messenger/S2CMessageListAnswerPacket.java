@@ -10,7 +10,7 @@ import java.util.List;
 
 public class S2CMessageListAnswerPacket extends Packet {
     public S2CMessageListAnswerPacket(byte listType, List<? extends AbstractMessage> messageList) {
-        super(PacketOperations.S2CMessageListAnswer.getValue());
+        super(PacketOperations.S2CMessageListAnswer);
 
         this.write(listType);
 

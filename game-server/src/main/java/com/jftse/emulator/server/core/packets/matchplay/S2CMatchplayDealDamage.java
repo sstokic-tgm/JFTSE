@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplayDealDamage extends Packet {
     public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, short targeting, byte skillAnimation, int xKnockbackPosition, int yKnockbackPosition) {
-        super(PacketOperations.S2CMatchplayDamageToPlayer.getValue());
+        super(PacketOperations.S2CMatchplayDamageToPlayer);
 
         this.write(entityPosition);
         this.write(entityHpToSet);

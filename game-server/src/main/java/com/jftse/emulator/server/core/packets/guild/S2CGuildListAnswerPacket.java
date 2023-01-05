@@ -11,7 +11,7 @@ import java.util.List;
 @Log4j2
 public class S2CGuildListAnswerPacket extends Packet {
     public S2CGuildListAnswerPacket(List<Guild> guildList) {
-        super(PacketOperations.S2CGuildListAnswer.getValue());
+        super(PacketOperations.S2CGuildListAnswer);
 
         this.write((byte)guildList.size());
         for (int i = 0; i < guildList.size(); i++)

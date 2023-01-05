@@ -11,7 +11,7 @@ import java.util.List;
 public class S2COpenGachaAnswerPacket extends Packet {
 
     public S2COpenGachaAnswerPacket(List<PlayerPocket> playerPocketList) {
-        super(PacketOperations.S2COpenGachaAnswer.getValue());
+        super(PacketOperations.S2COpenGachaAnswer);
 
         this.write((byte) 0); // status
         this.write((byte) 1); // unknown

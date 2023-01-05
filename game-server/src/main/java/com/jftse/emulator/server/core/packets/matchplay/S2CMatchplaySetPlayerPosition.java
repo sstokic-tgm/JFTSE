@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CMatchplaySetPlayerPosition extends Packet {
     public S2CMatchplaySetPlayerPosition(List<PlayerPositionInfo> positionInfo) {
-        super(PacketOperations.S2CMatchplaySetPlayerPosition.getValue());
+        super(PacketOperations.S2CMatchplaySetPlayerPosition);
 
         this.write((char) positionInfo.size());
         for (PlayerPositionInfo playerPositionInfo : positionInfo) {

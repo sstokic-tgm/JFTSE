@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CMatchplayDisplayItemRewards extends Packet {
     public S2CMatchplayDisplayItemRewards(List<PlayerReward> playerRewardList) {
-        super(PacketOperations.S2CMatchplayDisplayItemRewards.getValue());
+        super(PacketOperations.S2CMatchplayDisplayItemRewards);
 
         this.write((byte) 0); //Unk
         this.write((byte) 0); //Unk

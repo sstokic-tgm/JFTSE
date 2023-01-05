@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class S2CReceivedProposalNotificationPacket extends Packet {
     public S2CReceivedProposalNotificationPacket(Proposal proposal) {
-        super(PacketOperations.S2CReceivedProposalNotification.getValue());
+        super(PacketOperations.S2CReceivedProposalNotification);
 
         this.write(proposal.getId().intValue());
         this.write(proposal.getSender().getName());

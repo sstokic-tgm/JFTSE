@@ -22,7 +22,7 @@ public class S2CShopBuyPacket extends Packet {
     public final static short INVENTORY_FULL = -98;
 
     public S2CShopBuyPacket(short result, List<PlayerPocket> playerPocketList) {
-        super(PacketOperations.S2CShopBuyAnswer.getValue());
+        super(PacketOperations.S2CShopBuyAnswer);
 
         this.write(result);
 

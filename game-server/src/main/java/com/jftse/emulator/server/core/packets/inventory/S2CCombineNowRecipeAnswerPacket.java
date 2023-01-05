@@ -10,7 +10,7 @@ import java.util.List;
 
 public class S2CCombineNowRecipeAnswerPacket extends Packet {
     public S2CCombineNowRecipeAnswerPacket(short status, List<PlayerPocket> playerPocketList) {
-        super(PacketOperations.S2CCombineNowRecipe.getValue());
+        super(PacketOperations.S2CCombineNowRecipe);
 
         this.write(status);
 

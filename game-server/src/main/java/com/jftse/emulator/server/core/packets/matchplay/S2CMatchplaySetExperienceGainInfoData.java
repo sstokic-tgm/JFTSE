@@ -6,7 +6,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplaySetExperienceGainInfoData extends Packet {
     public S2CMatchplaySetExperienceGainInfoData(byte resultTitle, int secondsNeeded, PlayerReward playerReward, byte level) {
-        super(PacketOperations.S2CMatchPlaySetExperienceGainInfoData.getValue());
+        super(PacketOperations.S2CMatchPlaySetExperienceGainInfoData);
 
         this.write(resultTitle); // 0 = Loser, 1 = Winner
         this.write(level); // level

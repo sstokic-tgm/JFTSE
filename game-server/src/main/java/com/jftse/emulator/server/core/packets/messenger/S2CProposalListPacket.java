@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 public class S2CProposalListPacket extends Packet {
     public S2CProposalListPacket(byte listType, List<Proposal> proposals) {
-        super(PacketOperations.S2CProposalListAnswer.getValue());
+        super(PacketOperations.S2CProposalListAnswer);
 
         this.write(listType);
         this.write((byte) proposals.size());

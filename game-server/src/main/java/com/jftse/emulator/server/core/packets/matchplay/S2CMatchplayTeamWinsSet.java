@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplayTeamWinsSet extends Packet {
     public S2CMatchplayTeamWinsSet(byte redTeamSets, byte blueTeamSets) {
-        super(PacketOperations.S2CMatchplayTeamWinsSet.getValue());
+        super(PacketOperations.S2CMatchplayTeamWinsSet);
 
         this.write(redTeamSets);
         this.write(blueTeamSets);

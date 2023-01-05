@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CLobbyUserListAnswerPacket extends Packet {
     public S2CLobbyUserListAnswerPacket(List<Player> playerList) {
-        super(PacketOperations.S2CLobbyUserListAnswer.getValue());
+        super(PacketOperations.S2CLobbyUserListAnswer);
 
         this.write((byte) playerList.size());
 

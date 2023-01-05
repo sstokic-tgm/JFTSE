@@ -4,6 +4,8 @@ import com.jftse.emulator.common.utilities.BitKit;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,10 +22,7 @@ public class Packet {
     private char dataLength;
     private byte[] data;
 
-    private boolean joinedPackets = false;
-
-    public Packet(boolean joinedPackets) {
-        this.joinedPackets = joinedPackets;
+    protected Packet() {
     }
 
     public Packet(Packet packet) {
@@ -38,10 +37,12 @@ public class Packet {
     }
 
     public Packet(byte[] rawData) {
-        this.checkSerial = BitKit.bytesToChar(rawData, 0);
-        this.checkSum = BitKit.bytesToChar(rawData, 2);
-        this.packetId = BitKit.bytesToChar(rawData, 4);
-        this.dataLength = BitKit.bytesToChar(rawData, 6);
+        ByteBuffer buffer = ByteBuffer.wrap(rawData).order(ByteOrder.nativeOrder());
+
+        this.checkSerial = buffer.getChar(0);
+        this.checkSum = buffer.getChar(2);
+        this.packetId = buffer.getChar(4);
+        this.dataLength = buffer.getChar(6);
 
         this.data = new byte[this.dataLength];
         BitKit.blockCopy(rawData, 8, this.data, 0, this.dataLength);
@@ -49,12 +50,16 @@ public class Packet {
 
     public Packet(char packetId) {
         this.packetId = packetId;
+        this.checkSerial = 0;
+        this.checkSum = 0;
         this.dataLength = 0;
         this.data = new byte[16384];
     }
 
-    public Packet(int packetId) {
-        this.packetId = (char) packetId;
+    public Packet(PacketOperations packetOperation) {
+        this.packetId = (char) packetOperation.getValue();
+        this.checkSerial = 0;
+        this.checkSum = 0;
         this.dataLength = 0;
         this.data = new byte[16384];
     }
@@ -155,11 +160,6 @@ public class Packet {
         byte result = this.data[this.readPosition];
         this.readPosition += 1;
         return result;
-    }
-
-    public void readByte(byte element) {
-        element = this.data[this.readPosition];
-        this.readPosition += 1;
     }
 
     public boolean readBoolean() {

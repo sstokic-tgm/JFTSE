@@ -6,7 +6,7 @@ import com.jftse.entities.database.model.player.PlayerStatistic;
 
 public class S2CPlayerInfoPlayStatsPacket extends Packet {
     public S2CPlayerInfoPlayStatsPacket(PlayerStatistic playerStatistic) {
-        super(PacketOperations.S2CPlayerInfoPlayStatsData.getValue());
+        super(PacketOperations.S2CPlayerInfoPlayStatsData);
 
         this.write(playerStatistic.getBasicRecordWin());
         this.write(playerStatistic.getBasicRecordLoss());

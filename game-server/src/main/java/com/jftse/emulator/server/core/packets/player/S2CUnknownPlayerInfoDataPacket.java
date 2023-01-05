@@ -10,7 +10,7 @@ import com.jftse.entities.database.model.pocket.Pocket;
 
 public class S2CUnknownPlayerInfoDataPacket extends Packet {
     public S2CUnknownPlayerInfoDataPacket(Player player, Pocket pocket, StatusPointsAddedDto statusPointsAddedDto, PlayerStatistic playerStatistic) {
-        super(PacketOperations.S2CUnknownPlayerInfoData.getValue());
+        super(PacketOperations.S2CUnknownPlayerInfoData);
 
         this.write(player.getName());
 

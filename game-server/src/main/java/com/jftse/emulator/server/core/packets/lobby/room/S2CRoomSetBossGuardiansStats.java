@@ -11,7 +11,7 @@ import java.util.List;
 
 public class S2CRoomSetBossGuardiansStats extends Packet {
     public S2CRoomSetBossGuardiansStats(ArrayList<GuardianBattleState> guardianBattleStates, BossGuardian bossGuardian, List<Byte> guardians) {
-        super(PacketOperations.S2CRoomSetBossGuardiansStats.getValue());
+        super(PacketOperations.S2CRoomSetBossGuardiansStats);
 
         // prepare determined guardians
         final List<Byte> finalGuardians = new ArrayList<>();

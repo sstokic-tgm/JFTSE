@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CWelcomePacket extends Packet {
     public S2CWelcomePacket(int decKey, int encKey, int decTblIdx, int encTblIdx) {
-        super(PacketOperations.S2CLoginWelcomePacket.getValue());
+        super(PacketOperations.S2CLoginWelcomePacket);
 
         this.write(decKey);
         this.write(encKey);

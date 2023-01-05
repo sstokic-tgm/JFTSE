@@ -6,7 +6,7 @@ import com.jftse.entities.database.model.home.AccountHome;
 
 public class S2CHomeDataPacket extends Packet {
     public S2CHomeDataPacket(AccountHome accountHome) {
-        super(PacketOperations.S2CHomeData.getValue());
+        super(PacketOperations.S2CHomeData);
 
         this.write(accountHome.getLevel());
         this.write(accountHome.getHousingPoints());

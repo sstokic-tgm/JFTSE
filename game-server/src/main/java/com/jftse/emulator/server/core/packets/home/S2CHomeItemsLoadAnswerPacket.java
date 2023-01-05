@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CHomeItemsLoadAnswerPacket extends Packet {
     public S2CHomeItemsLoadAnswerPacket(List<HomeInventory> homeInventoryList) {
-        super(PacketOperations.S2CHomeItemsLoadAnswer.getValue());
+        super(PacketOperations.S2CHomeItemsLoadAnswer);
 
         this.write((char) homeInventoryList.size());
         

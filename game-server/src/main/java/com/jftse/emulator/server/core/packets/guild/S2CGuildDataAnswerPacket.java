@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class S2CGuildDataAnswerPacket extends Packet {
     public S2CGuildDataAnswerPacket(short guildStatus, Guild guild) {
-        super(PacketOperations.S2CGuildDataAnswer.getValue());
+        super(PacketOperations.S2CGuildDataAnswer);
 
         if (guildStatus == -2) {
             this.write(guildStatus);

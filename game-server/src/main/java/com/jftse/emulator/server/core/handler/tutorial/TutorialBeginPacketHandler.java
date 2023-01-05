@@ -25,7 +25,7 @@ public class TutorialBeginPacketHandler extends AbstractPacketHandler {
         FTClient client = (FTClient) connection.getClient();
         client.setActiveTutorialGame(new TutorialGame(tutorialId));
 
-        Packet answer = new Packet(PacketOperations.C2STutorialBegin.getValue());
+        Packet answer = new Packet(PacketOperations.C2STutorialBegin);
         answer.write((char) 1);
         connection.sendTCP(answer);
     }

@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class S2CYouBrokeUpWithYourCoupleAnswer extends Packet {
     public S2CYouBrokeUpWithYourCoupleAnswer() {
-        super(PacketOperations.S2CYouBrokeUpWithYourCoupleAnswer.getValue());
+        super(PacketOperations.S2CYouBrokeUpWithYourCoupleAnswer);
 
         this.write((short) 0);
     }

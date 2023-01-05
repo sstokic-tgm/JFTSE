@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class S2CDeleteFriendResponsePacket extends Packet {
     public S2CDeleteFriendResponsePacket(Player deletedFriend) {
-        super(PacketOperations.S2CDeleteFriendAnswer.getValue());
+        super(PacketOperations.S2CDeleteFriendAnswer);
 
         this.write((byte) 1);
         this.write(deletedFriend.getId().intValue());

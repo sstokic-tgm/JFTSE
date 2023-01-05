@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CGuildReverseMemberAnswerPacket extends Packet {
     public S2CGuildReverseMemberAnswerPacket(List<GuildMember> memberList) {
-        super(PacketOperations.S2CGuildReserveMemberDataAnswer.getValue());
+        super(PacketOperations.S2CGuildReserveMemberDataAnswer);
 
         this.write((short)0);
         this.write((byte)memberList.size());

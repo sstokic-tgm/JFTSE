@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class S2CCancelParcelSendingAnswer extends Packet {
     public S2CCancelParcelSendingAnswer(short status) {
-        super(PacketOperations.S2CCancelParcelSendingAnswer.getValue());
+        super(PacketOperations.S2CCancelParcelSendingAnswer);
 
         this.write(status);
     }

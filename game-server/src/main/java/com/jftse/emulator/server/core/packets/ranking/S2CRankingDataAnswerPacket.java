@@ -10,7 +10,7 @@ import java.util.List;
 
 public class S2CRankingDataAnswerPacket extends Packet {
     public S2CRankingDataAnswerPacket(char result, byte gameMode, int page, List<Player> playerList) {
-        super(PacketOperations.S2CRankingDataAnswer.getValue());
+        super(PacketOperations.S2CRankingDataAnswer);
 
         this.write(result);
 

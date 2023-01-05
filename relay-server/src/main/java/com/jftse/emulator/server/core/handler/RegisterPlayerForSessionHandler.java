@@ -33,13 +33,13 @@ public class RegisterPlayerForSessionHandler extends AbstractPacketHandler {
 
             RelayManager.getInstance().addClient(sessionId, client);
 
-            Packet answer = new Packet(PacketOperations.S2CMatchplayAckRelayConnection.getValue());
+            Packet answer = new Packet(PacketOperations.S2CMatchplayAckRelayConnection);
             answer.write((byte) 0);
             connection.sendTCP(answer);
         } else {
             log.error("playerId is -1");
 
-            Packet answer = new Packet(PacketOperations.S2CMatchplayAckRelayConnection.getValue());
+            Packet answer = new Packet(PacketOperations.S2CMatchplayAckRelayConnection);
             answer.write((byte) 1);
             connection.sendTCP(answer);
 

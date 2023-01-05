@@ -9,7 +9,7 @@ import com.jftse.entities.database.model.player.PlayerStatistic;
 
 public class S2CLobbyUserInfoAnswerPacket extends Packet {
     public S2CLobbyUserInfoAnswerPacket(char result, Player player, Guild guild, Friend couple) {
-        super(PacketOperations.S2CLobbyUserInfoAnswer.getValue());
+        super(PacketOperations.S2CLobbyUserInfoAnswer);
 
         this.write(result);
         if (player != null) {

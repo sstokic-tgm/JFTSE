@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CGuildChatAnswerPacket extends Packet {
     public S2CGuildChatAnswerPacket(String playerName, String message) {
-        super(PacketOperations.S2CGuildChatAnswer.getValue());
+        super(PacketOperations.S2CGuildChatAnswer);
 
         this.write(playerName, message);
     }

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class S2CMatchplaySetGameResultData extends Packet {
     public S2CMatchplaySetGameResultData(List<PlayerReward> playerRewards) {
-        super(PacketOperations.S2CMatchplaySetGameResultData.getValue());
+        super(PacketOperations.S2CMatchplaySetGameResultData);
 
         this.write((byte) playerRewards.size());
         for (PlayerReward playerReward : playerRewards) {

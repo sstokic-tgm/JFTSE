@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CRoomSetGuardians extends Packet {
     public S2CRoomSetGuardians(byte leftMonsterIndex, byte middleMonsterIndex, byte rightMonsterIndex) {
-        super(PacketOperations.S2CRoomSetGuardians.getValue());
+        super(PacketOperations.S2CRoomSetGuardians);
 
         // (GuardianInfo.set)
         this.write(leftMonsterIndex);

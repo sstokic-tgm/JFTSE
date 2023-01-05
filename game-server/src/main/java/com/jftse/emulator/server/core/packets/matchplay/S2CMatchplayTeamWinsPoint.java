@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.Packet;
 
 public class S2CMatchplayTeamWinsPoint extends Packet {
     public S2CMatchplayTeamWinsPoint(short positionOfPointingTeam, byte ballState, byte redTeamPoints, byte blueTeamPoints) {
-        super(PacketOperations.S2CMatchplayTeamWinsPoint.getValue());
+        super(PacketOperations.S2CMatchplayTeamWinsPoint);
 
         this.write(positionOfPointingTeam);
         this.write(ballState);

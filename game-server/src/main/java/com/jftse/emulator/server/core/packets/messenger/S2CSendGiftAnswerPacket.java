@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class S2CSendGiftAnswerPacket extends Packet {
     public S2CSendGiftAnswerPacket(short status, Gift gift) {
-        super(PacketOperations.S2CSendGiftAnswer.getValue());
+        super(PacketOperations.S2CSendGiftAnswer);
 
         this.write(status);
         if (status == 0) {

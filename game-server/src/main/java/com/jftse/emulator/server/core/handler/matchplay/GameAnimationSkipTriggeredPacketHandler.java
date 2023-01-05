@@ -61,7 +61,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
                 }
             }
 
-            Packet gameAnimationSkipPacket = new Packet(PacketOperations.S2CGameAnimationSkip.getValue());
+            Packet gameAnimationSkipPacket = new Packet(PacketOperations.S2CGameAnimationSkip);
             gameAnimationSkipPacket.write((char) 0);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationSkipPacket, ftClient.getConnection());
 
