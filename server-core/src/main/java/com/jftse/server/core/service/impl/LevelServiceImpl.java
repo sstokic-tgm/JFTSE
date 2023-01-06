@@ -42,7 +42,7 @@ public class LevelServiceImpl implements LevelService {
 
     @Override
     public Player setNewLevelStatusPoints(byte level, Player player) {
-        if (level > player.getLevel())
+        if (level > player.getLevel() && player.getLevel() <= 65)
             player.setStatusPoints((byte) (player.getStatusPoints() + 1));
 
         player.setLevel(level);

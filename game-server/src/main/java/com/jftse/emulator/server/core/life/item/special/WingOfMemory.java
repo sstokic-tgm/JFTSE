@@ -46,7 +46,7 @@ public class WingOfMemory extends BaseItem {
         player.setStamina(itemChar.getStamina());
         player.setDexterity(itemChar.getDexterity());
         player.setWillpower(itemChar.getWillpower());
-        player.setStatusPoints((byte) (player.getLevel() + 5 - 1));
+        player.setStatusPoints(player.getLevel() > 65 ? (byte) (65 + 5 - 1) : (byte) (player.getLevel() + 5 - 1));
         player = playerService.save(player);
 
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
