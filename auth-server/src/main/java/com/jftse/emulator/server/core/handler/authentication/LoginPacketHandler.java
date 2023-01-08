@@ -20,12 +20,14 @@ import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.S2CDisconnectAnswerPacket;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @PacketOperationIdentifier(PacketOperations.C2SLoginRequest)
 @Log4j2
@@ -138,7 +140,7 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 connection.sendTCP(loginAnswerPacket);
 
                 S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account));
-                connection.sendTCP(playerListPacket);
+                ThreadManager.getInstance().schedule(() -> connection.sendTCP(playerListPacket), 10, TimeUnit.MILLISECONDS);
 
                 String hostAddress;
                 if (connection.getRemoteAddressTCP() != null)

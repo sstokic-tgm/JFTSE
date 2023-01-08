@@ -89,10 +89,20 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
             int costsAp = 0;
 
             if (product.getPriceType().equals(PriceType.GOLD.getName())) {
-                costsGold = product.getPrice0();
+                if (option <= 0)
+                    costsGold = product.getPrice0();
+                else if (option == 1)
+                    costsGold = product.getPrice1();
+                else
+                    costsGold = product.getPrice2();
             }
             if (product.getPriceType().equals(PriceType.MINT.getName())) {
-                costsAp = product.getPrice0();
+                if (option <= 0)
+                    costsAp = product.getPrice0();
+                else if (option == 1)
+                    costsAp = product.getPrice1();
+                else
+                    costsAp = product.getPrice2();
             }
 
             int resultGold = gold - costsGold;

@@ -186,8 +186,8 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
                     client.setActiveGameSession(null);
                 }
-                GameManager.getInstance().handleRoomPlayerChanges(connection, notifyClients);
             }
+            GameManager.getInstance().handleRoomPlayerChanges(connection, notifyClients);
             GameManager.getInstance().removeClient(client);
         }
     }
