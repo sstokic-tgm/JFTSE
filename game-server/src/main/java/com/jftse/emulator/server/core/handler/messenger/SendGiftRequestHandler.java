@@ -73,6 +73,11 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
                 connection.sendTCP(s2CSendGiftAnswerPacket);
                 return;
             }
+            if (sender.getLevel() < 20) {
+                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) -9, null);
+                connection.sendTCP(s2CSendGiftAnswerPacket);
+                return;
+            }
 
             Gift gift = new Gift();
             gift.setReceiver(receiver);
