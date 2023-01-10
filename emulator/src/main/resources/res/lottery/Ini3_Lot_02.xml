@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="15.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Midium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="9.2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Piero Hat" ShopIndex="50012" QuantityMin="1" QuantityMax="1" ChansPer="1.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Devil Wing" ShopIndex="342" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Angel Wing" ShopIndex="341" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Wooden Baseball Bat" ShopIndex="520" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="15.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Midium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="9.2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Piero Hat" ShopIndex="50026" QuantityMin="1" QuantityMax="1" ChansPer="1.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Devil Wing" ShopIndex="344" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Angel Wing" ShopIndex="343" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Wooden Baseball Bat" ShopIndex="528" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="15.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Midium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="9.2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Piero Hat" ShopIndex="50040" QuantityMin="1" QuantityMax="1" ChansPer="1.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Devil Wing" ShopIndex="346" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Angel Wing" ShopIndex="345" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Wooden Baseball Bat" ShopIndex="536" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="15.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Midium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="9.2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Piero Hat" ShopIndex="50054" QuantityMin="1" QuantityMax="1" ChansPer="1.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Devil Wing" ShopIndex="348" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Angel Wing" ShopIndex="347" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Wooden Baseball Bat" ShopIndex="544" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="15.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Midium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="9.2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Piero Hat" ShopIndex="50068" QuantityMin="1" QuantityMax="1" ChansPer="1.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Devil Wing" ShopIndex="705" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Angel Wing" ShopIndex="704" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Wooden Baseball Bat" ShopIndex="552" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="15.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Midium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="9.2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Piero Hat" ShopIndex="50311" QuantityMin="1" QuantityMax="1" ChansPer="1.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Devil Wing" ShopIndex="50367" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Angel Wing" ShopIndex="50366" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Wooden Baseball Bat" ShopIndex="50279" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="16.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="10" QuantityMax="10" ChansPer="12.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Midium Potion" ShopIndex="3002" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="10" QuantityMax="10" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Leaf of life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="9.2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Piero Hat" ShopIndex="54111" QuantityMin="1" QuantityMax="1" ChansPer="0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Devil Wing" ShopIndex="54081" QuantityMin="1" QuantityMax="1" ChansPer="0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Angel Wing" ShopIndex="54082" QuantityMin="1" QuantityMax="1" ChansPer="0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Wooden Baseball Bat" ShopIndex="52821" QuantityMin="1" QuantityMax="1" ChansPer="0.3" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

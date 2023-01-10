@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="8.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Ring Of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Ring Of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Devil Horn" ShopIndex="53045" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Devil Glove" ShopIndex="53046" QuantityMin="1" QuantityMax="1" ChansPer="3.40" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Devil Red Scarf Suit" ShopIndex="53047" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Devil Shoes" ShopIndex="53048" QuantityMin="1" QuantityMax="1" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Angel Ring" ShopIndex="53080" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Angel Glove" ShopIndex="53081" QuantityMin="1" QuantityMax="1" ChansPer="3.40" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Angel Harp Shirt" ShopIndex="53082" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Angel Shoes" ShopIndex="53083" QuantityMin="1" QuantityMax="1" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="19" _Name_="Peacemaker(Green)" ShopIndex="51879" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="20" _Name_="Peacemaker(Red)" ShopIndex="51885" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="21" _Name_="Peacemaker(Orange)" ShopIndex="51891" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="22" _Name_="Peacemaker(Dark Pink)" ShopIndex="51897" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="23" _Name_="Angel Wing" ShopIndex="341" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="24" _Name_="Devil Wing" ShopIndex="342" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="25" _Name_="Angel Wing(Yellow)" ShopIndex="51360" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Ring Of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Ring Of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Devil Horn" ShopIndex="53049" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Devil Glove" ShopIndex="53050" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Devil Red Scarf Suit" ShopIndex="53051" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Devil Shoes" ShopIndex="53052" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Angel Ring" ShopIndex="53084" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Angel Glove" ShopIndex="53085" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Angel Harp Shirt" ShopIndex="53086" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Angel Shoes" ShopIndex="53087" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="19" _Name_="Peacemaker(Green)" ShopIndex="51880" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="20" _Name_="Peacemaker(Red)" ShopIndex="51886" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="21" _Name_="Peacemaker(Orange)" ShopIndex="51892" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="22" _Name_="Peacemaker(Dark Pink)" ShopIndex="51898" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="23" _Name_="Angel Wing" ShopIndex="343" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="24" _Name_="Devil Wing" ShopIndex="344" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="25" _Name_="Angel Wing(Yellow)" ShopIndex="51361" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Ring Of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Ring Of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Devil Horn" ShopIndex="53053" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Devil Glove" ShopIndex="53054" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Devil Red Scarf Suit" ShopIndex="53055" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Devil Shoes" ShopIndex="53056" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Angel Ring" ShopIndex="53088" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Angel Glove" ShopIndex="53089" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Angel Harp Shirt" ShopIndex="53090" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Angel Shoes" ShopIndex="53091" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="19" _Name_="Peacemaker(Green)" ShopIndex="51881" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="20" _Name_="Peacemaker(Red)" ShopIndex="51887" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="21" _Name_="Peacemaker(Orange)" ShopIndex="51893" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="22" _Name_="Peacemaker(Dark Pink)" ShopIndex="51899" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="23" _Name_="Angel Wing" ShopIndex="345" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="24" _Name_="Devil Wing" ShopIndex="346" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="25" _Name_="Angel Wing(Yellow)" ShopIndex="51362" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Ring Of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Ring Of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Devil Horn" ShopIndex="53057" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Devil Glove" ShopIndex="53058" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Devil Red Scarf Suit" ShopIndex="53059" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Devil Shoes" ShopIndex="53060" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="Angel Ring" ShopIndex="53092" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Angel Glove" ShopIndex="53093" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Angel Harp Shirt" ShopIndex="53094" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Angel Shoes" ShopIndex="53095" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="19" _Name_="Peacemaker(Green)" ShopIndex="51882" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="20" _Name_="Peacemaker(Red)" ShopIndex="51888" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="21" _Name_="Peacemaker(Orange)" ShopIndex="51894" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="22" _Name_="Peacemaker(Dark Pink)" ShopIndex="51900" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="23" _Name_="Angel Wing" ShopIndex="347" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="24" _Name_="Devil Wing " ShopIndex="348" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="25" _Name_="Angel Wing(Yellow)" ShopIndex="51363" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Ring Of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Ring Of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Devil Horn" ShopIndex="53061" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Devil Glove" ShopIndex="53062" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Devil Red Scarf Suit" ShopIndex="53063" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Devil Shoes" ShopIndex="53064" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="Angel Ring" ShopIndex="53096" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Angel Glove" ShopIndex="53097" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Angel Harp Shirt" ShopIndex="53098" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Angel Shoes" ShopIndex="53099" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="19" _Name_="Peacemaker(Green)" ShopIndex="51883" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="20" _Name_="Peacemaker(Red)" ShopIndex="51889" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="21" _Name_="Peacemaker(Orange)" ShopIndex="51895" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="22" _Name_="Peacemaker(Dark Pink)" ShopIndex="51901" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="23" _Name_="Angel Wing" ShopIndex="704" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="24" _Name_="Devil Wing " ShopIndex="705" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="25" _Name_="Angel Wing(Yellow)" ShopIndex="51364" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Ring Of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Ring Of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Devil Horn" ShopIndex="53065" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Devil Glove" ShopIndex="53066" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Devil Red Scarf Suit" ShopIndex="53067" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Devil Shoes" ShopIndex="53068" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="Angel Ring" ShopIndex="53100" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Angel Glove" ShopIndex="53101" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Angel Harp Shirt" ShopIndex="53102" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Angel Shoes" ShopIndex="53103" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="19" _Name_="Peacemaker(Green)" ShopIndex="51884" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="20" _Name_="Peacemaker(Red)" ShopIndex="51890" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="21" _Name_="Peacemaker(Orange)" ShopIndex="51896" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="22" _Name_="Peacemaker(Dark Pink)" ShopIndex="51902" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="23" _Name_="Angel Wing" ShopIndex="50366" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="24" _Name_="Devil Wing" ShopIndex="50367" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="25" _Name_="Angel Wing(Yellow)" ShopIndex="51365" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Rebirth" ShopIndex="4011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Minimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Ring Of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Ring Of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Devil Horn" ShopIndex="53069" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Devil Glove" ShopIndex="53070" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Devil Red Scarf Suit" ShopIndex="53071" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Devil Shoes" ShopIndex="53072" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="Angel Ring" ShopIndex="53104" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Angel Glove" ShopIndex="53105" QuantityMin="1" QuantityMax="1" ChansPer="3.4" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Angel Harp Shirt" ShopIndex="53106" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Angel Shoes" ShopIndex="53107" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="19" _Name_="Peacemaker(Green)" ShopIndex="53006" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="20" _Name_="Peacemaker(Red)" ShopIndex="53007" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="21" _Name_="Peacemaker(Orange)" ShopIndex="53008" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="22" _Name_="Peacemaker(Dark Pink)" ShopIndex="53009" QuantityMin="1" QuantityMax="1" ChansPer="3.22" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="23" _Name_="Devil Wing" ShopIndex="54081" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="24" _Name_="Angel Wing" ShopIndex="54082" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="25" _Name_="Angel Wing(Yellow)" ShopIndex="54083" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

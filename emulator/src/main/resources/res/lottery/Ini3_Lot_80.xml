@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="14.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Dog Costume Mask" ShopIndex="56586" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Dog Costume Suit" ShopIndex="56583" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Dog Costume Shoes" ShopIndex="56584" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Dog Costume Gloves" ShopIndex="56585" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Panda Costume Mask" ShopIndex="56621" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Panda Costume Suit" ShopIndex="56618" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Panda Costume Shoes" ShopIndex="56619" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Panda Costume Gloves" ShopIndex="56620" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Cat Costume Mask" ShopIndex="56551" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Cat Costume Suit" ShopIndex="56548" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Cat Costume Shoes" ShopIndex="56549" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Cat Costume Gloves" ShopIndex="56550" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="19" _Name_="Rabbit Costume Mask" ShopIndex="56516" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="20" _Name_="Rabbit Costume Suit" ShopIndex="56513" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="21" _Name_="Rabbit Costume Shoes" ShopIndex="56514" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="22" _Name_="Rabbit Costume Gloves" ShopIndex="56515" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="23" _Name_="Animal Foot Racket" ShopIndex="56660" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="14.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Dog Costume Mask" ShopIndex="56590" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Dog Costume Suit" ShopIndex="56587" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Dog Costume Shoes" ShopIndex="56588" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Dog Costume Gloves" ShopIndex="56589" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Panda Costume Mask" ShopIndex="56625" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Panda Costume Suit" ShopIndex="56622" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Panda Costume Shoes" ShopIndex="56623" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Panda Costume Gloves" ShopIndex="56624" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Cat Costume Mask" ShopIndex="56555" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Cat Costume Suit" ShopIndex="56552" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Cat Costume Shoes" ShopIndex="56553" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Cat Costume Gloves" ShopIndex="56554" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="19" _Name_="Rabbit Costume Mask" ShopIndex="56520" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="20" _Name_="Rabbit Costume Suit" ShopIndex="56517" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="21" _Name_="Rabbit Costume Shoes" ShopIndex="56518" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="22" _Name_="Rabbit Costume Gloves" ShopIndex="56519" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="23" _Name_="Animal Foot Racket" ShopIndex="56661" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="14.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Dog Costume Mask" ShopIndex="56594" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Dog Costume Suit" ShopIndex="56591" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Dog Costume Shoes" ShopIndex="56592" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Dog Costume Gloves" ShopIndex="56593" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Panda Costume Mask" ShopIndex="56629" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Panda Costume Suit" ShopIndex="56626" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Panda Costume Shoes" ShopIndex="56627" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Panda Costume Gloves" ShopIndex="56628" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Cat Costume Mask" ShopIndex="56559" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Cat Costume Suit" ShopIndex="56556" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Cat Costume Shoes" ShopIndex="56557" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Cat Costume Gloves" ShopIndex="56558" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="19" _Name_="Rabbit Costume Mask" ShopIndex="56524" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="20" _Name_="Rabbit Costume Suit" ShopIndex="56521" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="21" _Name_="Rabbit Costume Shoes" ShopIndex="56522" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="22" _Name_="Rabbit Costume Gloves" ShopIndex="56523" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="23" _Name_="Animal Foot Racket" ShopIndex="56662" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="14.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Dog Costume Mask" ShopIndex="56598" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Dog Costume Suit" ShopIndex="56595" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Dog Costume Shoes" ShopIndex="56596" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Dog Costume Gloves" ShopIndex="56597" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Panda Costume Mask" ShopIndex="56633" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Panda Costume Suit" ShopIndex="56630" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Panda Costume Shoes" ShopIndex="56631" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Panda Costume Gloves" ShopIndex="56632" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="Cat Costume Mask" ShopIndex="56563" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Cat Costume Suit" ShopIndex="56560" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Cat Costume Shoes" ShopIndex="56561" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Cat Costume Gloves" ShopIndex="56562" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="19" _Name_="Rabbit Costume Mask" ShopIndex="56528" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="20" _Name_="Rabbit Costume Suit" ShopIndex="56525" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="21" _Name_="Rabbit Costume Shoes" ShopIndex="56526" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="22" _Name_="Rabbit Costume Gloves" ShopIndex="56527" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="23" _Name_="Animal Foot Racket" ShopIndex="56663" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="14.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Dog Costume Mask" ShopIndex="56602" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Dog Costume Suit" ShopIndex="56599" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Dog Costume Shoes" ShopIndex="56600" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Dog Costume Gloves" ShopIndex="56601" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Panda Costume Mask" ShopIndex="56637" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Panda Costume Suit" ShopIndex="56634" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Panda Costume Shoes" ShopIndex="56635" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Panda Costume Gloves" ShopIndex="56636" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="Cat Costume Mask" ShopIndex="56567" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Cat Costume Suit" ShopIndex="56564" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Cat Costume Shoes" ShopIndex="56565" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Cat Costume Gloves" ShopIndex="56566" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="19" _Name_="Rabbit Costume Mask" ShopIndex="56532" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="20" _Name_="Rabbit Costume Suit" ShopIndex="56529" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="21" _Name_="Rabbit Costume Shoes" ShopIndex="56530" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="22" _Name_="Rabbit Costume Gloves" ShopIndex="56531" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="23" _Name_="Animal Foot Racket" ShopIndex="56664" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="14.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Dog Costume Mask" ShopIndex="56606" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Dog Costume Suit" ShopIndex="56603" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Dog Costume Shoes" ShopIndex="56604" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Dog Costume Gloves" ShopIndex="56605" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Panda Costume Mask" ShopIndex="56641" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Panda Costume Suit" ShopIndex="56638" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Panda Costume Shoes" ShopIndex="56639" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Panda Costume Gloves" ShopIndex="56640" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="Cat Costume Mask" ShopIndex="56571" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Cat Costume Suit" ShopIndex="56568" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Cat Costume Shoes" ShopIndex="56569" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Cat Costume Gloves" ShopIndex="56570" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="19" _Name_="Rabbit Costume Mask" ShopIndex="56536" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="20" _Name_="Rabbit Costume Suit" ShopIndex="56533" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="21" _Name_="Rabbit Costume Shoes" ShopIndex="56534" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="22" _Name_="Rabbit Costume Gloves" ShopIndex="56535" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="23" _Name_="Animal Foot Racket" ShopIndex="56665" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="14.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Ring of Wiseman" ShopIndex="3508" QuantityMin="10" QuantityMax="10" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Dog Costume Mask" ShopIndex="56610" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Dog Costume Suit" ShopIndex="56607" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Dog Costume Shoes" ShopIndex="56608" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Dog Costume Gloves" ShopIndex="56609" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Panda Costume Mask" ShopIndex="56645" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Panda Costume Suit" ShopIndex="56642" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Panda Costume Shoes" ShopIndex="56643" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Panda Costume Gloves" ShopIndex="56644" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="Cat Costume Mask" ShopIndex="56575" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Cat Costume Suit" ShopIndex="56572" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Cat Costume Shoes" ShopIndex="56573" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Cat Costume Gloves" ShopIndex="56574" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="19" _Name_="Rabbit Costume Mask" ShopIndex="56540" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="20" _Name_="Rabbit Costume Suit" ShopIndex="56537" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="21" _Name_="Rabbit Costume Shoes" ShopIndex="56538" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="22" _Name_="Rabbit Costume Gloves" ShopIndex="56539" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="23" _Name_="Animal Foot Racket" ShopIndex="56666" QuantityMin="1" QuantityMax="1" ChansPer="0.50" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

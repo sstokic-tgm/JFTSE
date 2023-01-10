@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Campfire" ShopIndex="1126" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="American Indian Hairband" ShopIndex="52035" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="American Indian Makeup" ShopIndex="52036" QuantityMin="1" QuantityMax="1" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="American Indian Glove" ShopIndex="52037" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="American Indian Upper" ShopIndex="52038" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="American Indian Bottom" ShopIndex="52039" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="American Indian Shoes" ShopIndex="52040" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="American Indian Racket" ShopIndex="52071" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Campfire" ShopIndex="1126" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="American Indian Hairband" ShopIndex="52041" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="American Indian Makeup" ShopIndex="52042" QuantityMin="1" QuantityMax="1" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="American Indian Glove" ShopIndex="52043" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="American Indian Upper" ShopIndex="52044" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="American Indian Bottom" ShopIndex="52045" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="American Indian Shoes" ShopIndex="52046" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="American Indian Racket" ShopIndex="52072" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Campfire" ShopIndex="1126" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="American Indian Hairband" ShopIndex="52047" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="American Indian Makeup" ShopIndex="52048" QuantityMin="1" QuantityMax="1" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="American Indian Glove" ShopIndex="52049" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="American Indian Upper" ShopIndex="52050" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="American Indian Bottom" ShopIndex="52051" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="American Indian Shoes" ShopIndex="52052" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="American Indian Racket" ShopIndex="52073" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Campfire" ShopIndex="1126" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="American Indian Hairband" ShopIndex="52053" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="American Indian Makeup" ShopIndex="52054" QuantityMin="1" QuantityMax="1" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="American Indian Glove" ShopIndex="52055" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="American Indian Upper" ShopIndex="52056" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="American Indian Bottom" ShopIndex="52057" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="American Indian Shoes" ShopIndex="52058" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="American Indian Racket" ShopIndex="52074" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Campfire" ShopIndex="1126" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="American Indian Hairband" ShopIndex="52059" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="American Indian Makeup" ShopIndex="52060" QuantityMin="1" QuantityMax="1" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="American Indian Glove" ShopIndex="52061" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="American Indian Upper" ShopIndex="52062" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="American Indian Bottom" ShopIndex="52063" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="American Indian Shoes" ShopIndex="52064" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="American Indian Racket" ShopIndex="52075" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Campfire" ShopIndex="1126" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="American Indian Hairband" ShopIndex="52065" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="American Indian Makeup" ShopIndex="52066" QuantityMin="1" QuantityMax="1" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="American Indian Glove" ShopIndex="52067" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="American Indian Upper" ShopIndex="52068" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="American Indian Bottom" ShopIndex="52069" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="American Indian Shoes" ShopIndex="52070" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="American Indian Racket" ShopIndex="52076" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="17.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Campfire" ShopIndex="1126" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="American Indian Hairband" ShopIndex="52945" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="American Indian Makeup" ShopIndex="52946" QuantityMin="1" QuantityMax="1" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="American Indian Glove" ShopIndex="52947" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="American Indian Upper" ShopIndex="52948" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="American Indian Bottom" ShopIndex="52949" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="American Indian Shoes" ShopIndex="52950" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="American Indian Racket" ShopIndex="52951" QuantityMin="1" QuantityMax="1" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

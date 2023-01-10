@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Healing(Deluxe)" ShopIndex="3021" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Healing(Big)" ShopIndex="3020" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Healing(Medium)" ShopIndex="3019" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Healing(Small)" ShopIndex="3018" QuantityMin="5" QuantityMax="5" ChansPer="16.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Area Shield" ShopIndex="3022" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Inferno" ShopIndex="3023" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="20" QuantityMax="20" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Onyx" ShopIndex="8000" QuantityMin="10" QuantityMax="10" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Jasper" ShopIndex="8002" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Spinel" ShopIndex="8003" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Peridot" ShopIndex="8004" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Wedding Suit" ShopIndex="52275" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Wedding Pants" ShopIndex="52276" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Wedding Glove" ShopIndex="52277" QuantityMin="1" QuantityMax="1" ChansPer="2.8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Wedding Shoes" ShopIndex="52278" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="19" _Name_="Bouquet Racket" ShopIndex="52313" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="20" _Name_="Wedding Cake" ShopIndex="1132" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="21" _Name_="Baby Bed" ShopIndex="1131" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="22" _Name_="Heart Bag(Passion)" ShopIndex="754" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="23" _Name_="Heart Bag(Pure)" ShopIndex="50559" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="24" _Name_="Heart Bag(Cool)" ShopIndex="52345" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="25" _Name_="Heart Bag(Warm)" ShopIndex="52351" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="26" _Name_="Heart Bag(Grace)" ShopIndex="52357" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Healing(Deluxe)" ShopIndex="3021" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Healing(Big)" ShopIndex="3020" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Healing(Medium)" ShopIndex="3019" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Healing(Small)" ShopIndex="3018" QuantityMin="5" QuantityMax="5" ChansPer="16.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Area Shield" ShopIndex="3022" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Inferno" ShopIndex="3023" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="20" QuantityMax="20" ChansPer="9.8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Onyx" ShopIndex="8000" QuantityMin="10" QuantityMax="10" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Jasper" ShopIndex="8002" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Spinel" ShopIndex="8003" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Peridot" ShopIndex="8004" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Wedding Vail" ShopIndex="52279" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Wedding Mini Top" ShopIndex="52280" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Wedding Mini Dress" ShopIndex="52281" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Wedding Glove" ShopIndex="52282" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="19" _Name_="Wedding Stocking" ShopIndex="52283" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="20" _Name_="Wedding Shoes" ShopIndex="52284" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="21" _Name_="Bouquet Racket" ShopIndex="52314" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="22" _Name_="Wedding Cake" ShopIndex="1132" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="23" _Name_="Baby Bed" ShopIndex="1131" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="24" _Name_="Heart Bag(Passion)" ShopIndex="762" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="25" _Name_="Heart Bag(Pure)" ShopIndex="50567" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="26" _Name_="Heart Bag(Cool)" ShopIndex="52346" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="27" _Name_="Heart Bag(Warm)" ShopIndex="52352" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="28" _Name_="Heart Bag(Grace)" ShopIndex="52358" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Healing(Deluxe)" ShopIndex="3021" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Healing(Big)" ShopIndex="3020" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Healing(Medium)" ShopIndex="3019" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Healing(Small)" ShopIndex="3018" QuantityMin="5" QuantityMax="5" ChansPer="16.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Area Shield" ShopIndex="3022" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Inferno" ShopIndex="3023" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="20" QuantityMax="20" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Onyx" ShopIndex="8000" QuantityMin="10" QuantityMax="10" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Jasper" ShopIndex="8002" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Spinel" ShopIndex="8003" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Peridot" ShopIndex="8004" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Wedding Suit" ShopIndex="52285" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Wedding Pants" ShopIndex="52286" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Wedding Glove" ShopIndex="52287" QuantityMin="1" QuantityMax="1" ChansPer="2.8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Wedding Shoes" ShopIndex="52288" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="19" _Name_="Bouquet Racket" ShopIndex="52315" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="20" _Name_="Wedding Cake" ShopIndex="1132" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="21" _Name_="Baby Bed" ShopIndex="1131" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="22" _Name_="Heart Bag(Passion)" ShopIndex="770" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="23" _Name_="Heart Bag(Pure)" ShopIndex="50575" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="24" _Name_="Heart Bag(Cool)" ShopIndex="52347" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="25" _Name_="Heart Bag(Warm)" ShopIndex="52353" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="26" _Name_="Heart Bag(Grace)" ShopIndex="52359" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Healing(Deluxe)" ShopIndex="3021" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Healing(Big)" ShopIndex="3020" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Healing(Medium)" ShopIndex="3019" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Healing(Small)" ShopIndex="3018" QuantityMin="5" QuantityMax="5" ChansPer="16.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Area Shield" ShopIndex="3022" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Inferno" ShopIndex="3023" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="20" QuantityMax="20" ChansPer="9.8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Onyx" ShopIndex="8000" QuantityMin="10" QuantityMax="10" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Jasper" ShopIndex="8002" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Spinel" ShopIndex="8003" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Peridot" ShopIndex="8004" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="Wedding Vail" ShopIndex="52289" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Wedding Mini Top" ShopIndex="52290" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Wedding Mini Dress" ShopIndex="52291" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Wedding Glove" ShopIndex="52292" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="19" _Name_="Wedding Stocking" ShopIndex="52293" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="20" _Name_="Wedding Shoes" ShopIndex="52294" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="21" _Name_="Bouquet Racket" ShopIndex="52316" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="22" _Name_="Wedding Cake" ShopIndex="1132" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="23" _Name_="Baby Bed" ShopIndex="1131" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="24" _Name_="Heart Bag(Passion)" ShopIndex="778" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="25" _Name_="Heart Bag(Pure)" ShopIndex="50583" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="26" _Name_="Heart Bag(Cool)" ShopIndex="52348" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="27" _Name_="Heart Bag(Warm)" ShopIndex="52354" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="28" _Name_="Heart Bag(Grace)" ShopIndex="52360" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Healing(Deluxe)" ShopIndex="3021" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Healing(Big)" ShopIndex="3020" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Healing(Medium)" ShopIndex="3019" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Healing(Small)" ShopIndex="3018" QuantityMin="5" QuantityMax="5" ChansPer="16.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Area Shield" ShopIndex="3022" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Inferno" ShopIndex="3023" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="20" QuantityMax="20" ChansPer="9.8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Onyx" ShopIndex="8000" QuantityMin="10" QuantityMax="10" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Jasper" ShopIndex="8002" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Spinel" ShopIndex="8003" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Peridot" ShopIndex="8004" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="Wedding Vail" ShopIndex="52295" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Wedding Mini Top" ShopIndex="52296" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Wedding Mini Dress" ShopIndex="52297" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Wedding Glove" ShopIndex="52298" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="19" _Name_="Wedding Stocking" ShopIndex="52299" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="20" _Name_="Wedding Shoes" ShopIndex="52300" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="21" _Name_="Bouquet Racket" ShopIndex="52317" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="22" _Name_="Wedding Cake" ShopIndex="1132" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="23" _Name_="Baby Bed" ShopIndex="1131" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="24" _Name_="Heart Bag(Passion)" ShopIndex="786" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="25" _Name_="Heart Bag(Pure)" ShopIndex="50591" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="26" _Name_="Heart Bag(Cool)" ShopIndex="52349" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="27" _Name_="Heart Bag(Warm)" ShopIndex="52355" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="28" _Name_="Heart Bag(Grace)" ShopIndex="52361" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Healing(Deluxe)" ShopIndex="3021" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Healing(Big)" ShopIndex="3020" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Healing(Medium)" ShopIndex="3019" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Healing(Small)" ShopIndex="3018" QuantityMin="5" QuantityMax="5" ChansPer="16.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Area Shield" ShopIndex="3022" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Inferno" ShopIndex="3023" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="20" QuantityMax="20" ChansPer="9.8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Onyx" ShopIndex="8000" QuantityMin="10" QuantityMax="10" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Jasper" ShopIndex="8002" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Spinel" ShopIndex="8003" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Peridot" ShopIndex="8004" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="Wedding Vail" ShopIndex="52301" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Wedding Mini Top" ShopIndex="52302" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Wedding Mini Dress" ShopIndex="52303" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Wedding Glove" ShopIndex="52304" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="19" _Name_="Wedding Stocking" ShopIndex="52305" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="20" _Name_="Wedding Shoes" ShopIndex="52306" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="21" _Name_="Bouquet Racket" ShopIndex="52318" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="22" _Name_="Wedding Cake" ShopIndex="1132" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="23" _Name_="Baby Bed" ShopIndex="1131" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="24" _Name_="Heart Bag(Passion)" ShopIndex="50320" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="25" _Name_="Heart Bag(Pure)" ShopIndex="50599" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="26" _Name_="Heart Bag(Cool)" ShopIndex="52350" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="27" _Name_="Heart Bag(Warm)" ShopIndex="52356" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="28" _Name_="Heart Bag(Grace)" ShopIndex="52362" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Healing(Deluxe)" ShopIndex="3021" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Healing(Big)" ShopIndex="3020" QuantityMin="5" QuantityMax="5" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Healing(Medium)" ShopIndex="3019" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Healing(Small)" ShopIndex="3018" QuantityMin="5" QuantityMax="5" ChansPer="16.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Area Shield" ShopIndex="3022" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Inferno" ShopIndex="3023" QuantityMin="5" QuantityMax="5" ChansPer="9.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="5" QuantityMax="5" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="20" QuantityMax="20" ChansPer="10.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Onyx" ShopIndex="8000" QuantityMin="10" QuantityMax="10" ChansPer="5.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Moonstone" ShopIndex="8001" QuantityMin="5" QuantityMax="5" ChansPer="4.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Jasper" ShopIndex="8002" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Spinel" ShopIndex="8003" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Peridot" ShopIndex="8004" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="Wedding Suit" ShopIndex="52846" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Wedding Pants" ShopIndex="52847" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Wedding Glove" ShopIndex="52848" QuantityMin="1" QuantityMax="1" ChansPer="2.8" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Wedding Shoes" ShopIndex="52849" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="19" _Name_="Bouquet Racket" ShopIndex="52850" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="20" _Name_="Wedding Cake" ShopIndex="1132" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="21" _Name_="Baby Bed" ShopIndex="1131" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="22" _Name_="Heart Bag(Passion)" ShopIndex="54073" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="23" _Name_="Heart Bag(Pure)" ShopIndex="54074" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="24" _Name_="Heart Bag(Cool)" ShopIndex="54075" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="25" _Name_="Heart Bag(Warm)" ShopIndex="54076" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="26" _Name_="Heart Bag(Grace)" ShopIndex="54077" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

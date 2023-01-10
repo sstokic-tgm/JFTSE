@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Spider Trap" ShopIndex="3014" QuantityMin="50" QuantityMax="50" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Leaf of Life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Shopper Hat" ShopIndex="50011" QuantityMin="7" QuantityMax="7" ChansPer="3.99" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Space Shuttle Bag" ShopIndex="51315" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Fire Extinguisher" ShopIndex="51909" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Monky Bag(Brown)" ShopIndex="749" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Panda Mascot Cap" ShopIndex="50737" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Cat Hairband" ShopIndex="273" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Bold Hat" ShopIndex="50010" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Angel Wing Cap" ShopIndex="50013" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Black Cat Hat" ShopIndex="50007" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Yellow Star Hat" ShopIndex="50008" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Mushroom Hat" ShopIndex="50006" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Banana Hat" ShopIndex="50009" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Brown Round Sunglasses" ShopIndex="631" QuantityMin="7" QuantityMax="7" ChansPer="2.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Red Heart Sunglasses" ShopIndex="50808" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Broken Jail" ShopIndex="1111" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="19" _Name_="Mini Fire Truck" ShopIndex="1113" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="20" _Name_="Fire Hydrant" ShopIndex="1112" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="21" _Name_="Cone" ShopIndex="1110" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Spider Trap" ShopIndex="3014" QuantityMin="50" QuantityMax="50" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Leaf of Life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Shopper Hat" ShopIndex="50025" QuantityMin="7" QuantityMax="7" ChansPer="3.99" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Space Shuttle Bag" ShopIndex="51321" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Fire Extinguisher" ShopIndex="51910" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Monky Bag(Brown)" ShopIndex="757" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Panda Mascot Cap" ShopIndex="50747" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Cat Hairband" ShopIndex="276" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Bold Hat" ShopIndex="50024" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Angel Wing Cap" ShopIndex="50027" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Black Cat Hat" ShopIndex="50021" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Yellow Star Hat" ShopIndex="50022" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Mushroom Hat" ShopIndex="50020" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Banana Hat" ShopIndex="50023" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Brown Round Sunglasses" ShopIndex="639" QuantityMin="7" QuantityMax="7" ChansPer="2.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Red Heart Sunglasses" ShopIndex="52338" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Broken Jail" ShopIndex="1111" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="19" _Name_="Mini Fire Truck" ShopIndex="1113" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="20" _Name_="Fire Hydrant" ShopIndex="1112" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="21" _Name_="Cone" ShopIndex="1110" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Spider Trap" ShopIndex="3014" QuantityMin="50" QuantityMax="50" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Leaf of Life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Shopper Hat" ShopIndex="50039" QuantityMin="7" QuantityMax="7" ChansPer="3.99" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Space Shuttle Bag" ShopIndex="51327" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Fire Extinguisher" ShopIndex="51911" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Monky Bag(Brown)" ShopIndex="765" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Panda Mascot Cap" ShopIndex="50757" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Cat Hairband" ShopIndex="279" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Bold Hat" ShopIndex="50038" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Angel Wing Cap" ShopIndex="50041" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Black Cat Hat" ShopIndex="50035" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Yellow Star Hat" ShopIndex="50036" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Mushroom Hat" ShopIndex="50034" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Banana Hat" ShopIndex="50037" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Brown Round Sunglasses" ShopIndex="645" QuantityMin="7" QuantityMax="7" ChansPer="2.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Red Heart Sunglasses" ShopIndex="52339" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Broken Jail" ShopIndex="1111" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="19" _Name_="Mini Fire Truck" ShopIndex="1113" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="20" _Name_="Fire Hydrant" ShopIndex="1112" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="21" _Name_="Cone" ShopIndex="1110" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Spider Trap" ShopIndex="3014" QuantityMin="50" QuantityMax="50" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Leaf of Life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Shopper Hat" ShopIndex="50053" QuantityMin="7" QuantityMax="7" ChansPer="3.99" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Space Shuttle Bag" ShopIndex="51333" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Fire Extinguisher" ShopIndex="51912" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Monky Bag(Brown)" ShopIndex="773" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Panda Mascot Cap" ShopIndex="50767" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Cat Hairband" ShopIndex="282" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Bold Hat" ShopIndex="50052" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Angel Wing Cap" ShopIndex="50055" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Black Cat Hat" ShopIndex="50049" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Yellow Star Hat" ShopIndex="50050" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Mushroom Hat" ShopIndex="50048" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="Banana Hat" ShopIndex="50051" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Brown Round Sunglasses" ShopIndex="653" QuantityMin="7" QuantityMax="7" ChansPer="2.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Red Heart Sunglasses" ShopIndex="52340" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Broken Jail" ShopIndex="1111" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="19" _Name_="Mini Fire Truck" ShopIndex="1113" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="20" _Name_="Fire Hydrant" ShopIndex="1112" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="21" _Name_="Cone" ShopIndex="1110" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Spider Trap" ShopIndex="3014" QuantityMin="50" QuantityMax="50" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Leaf of Life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Shopper Hat" ShopIndex="50067" QuantityMin="7" QuantityMax="7" ChansPer="3.99" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Space Shuttle Bag" ShopIndex="51339" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Fire Extinguisher" ShopIndex="51913" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Monky Bag(Brown)" ShopIndex="781" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Panda Mascot Cap" ShopIndex="50777" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Cat Hairband" ShopIndex="503" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Bold Hat" ShopIndex="50066" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Angel Wing Cap" ShopIndex="50069" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Black Cat Hat" ShopIndex="50063" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Yellow Star Hat" ShopIndex="50064" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Mushroom Hat" ShopIndex="50062" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="Banana Hat" ShopIndex="50065" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Brown Round Sunglasses" ShopIndex="659" QuantityMin="7" QuantityMax="7" ChansPer="2.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Red Heart Sunglasses" ShopIndex="52341" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Broken Jail" ShopIndex="1111" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="19" _Name_="Mini Fire Truck" ShopIndex="1113" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="20" _Name_="Fire Hydrant" ShopIndex="1112" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="21" _Name_="Cone" ShopIndex="1110" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Spider Trap" ShopIndex="3014" QuantityMin="50" QuantityMax="50" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Leaf of Life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Shopper Hat" ShopIndex="50310" QuantityMin="7" QuantityMax="7" ChansPer="3.99" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Space Shuttle Bag" ShopIndex="51345" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Fire Extinguisher" ShopIndex="51914" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Monky Bag(Brown)" ShopIndex="50315" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Panda Mascot Cap" ShopIndex="50787" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Cat Hairband" ShopIndex="50324" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Bold Hat" ShopIndex="50309" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Angel Wing Cap" ShopIndex="50312" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Black Cat Hat" ShopIndex="50306" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Yellow Star Hat" ShopIndex="50307" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Mushroom Hat" ShopIndex="50305" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="Banana Hat" ShopIndex="50308" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Brown Round Sunglasses" ShopIndex="50296" QuantityMin="7" QuantityMax="7" ChansPer="2.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Red Heart Sunglasses" ShopIndex="52342" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Broken Jail" ShopIndex="1111" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="19" _Name_="Mini Fire Truck" ShopIndex="1113" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="20" _Name_="Fire Hydrant" ShopIndex="1112" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="21" _Name_="Cone" ShopIndex="1110" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Spider Trap" ShopIndex="3014" QuantityMin="50" QuantityMax="50" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Leaf of Life" ShopIndex="4029" QuantityMin="5" QuantityMax="5" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Shopper Hat" ShopIndex="54110" QuantityMin="7" QuantityMax="7" ChansPer="3.99" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Space Shuttle Bag" ShopIndex="54057" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Fire Extinguisher" ShopIndex="54080" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Monky Bag(Brown)" ShopIndex="54063" QuantityMin="1" QuantityMax="1" ChansPer="0.01" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Panda Mascot Cap" ShopIndex="54090" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Cat Hairband" ShopIndex="54116" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Bold Hat" ShopIndex="54109" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Angel Wing Cap" ShopIndex="54112" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Black Cat Hat" ShopIndex="54106" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Yellow Star Hat" ShopIndex="54107" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Mushroom Hat" ShopIndex="54105" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="Banana Hat" ShopIndex="54108" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Brown Round Sunglasses" ShopIndex="54122" QuantityMin="7" QuantityMax="7" ChansPer="2.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Red Heart Sunglasses" ShopIndex="54124" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Broken Jail" ShopIndex="1111" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="19" _Name_="Mini Fire Truck" ShopIndex="1113" QuantityMin="1" QuantityMax="1" ChansPer="3.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="20" _Name_="Fire Hydrant" ShopIndex="1112" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="21" _Name_="Cone" ShopIndex="1110" QuantityMin="1" QuantityMax="1" ChansPer="5.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

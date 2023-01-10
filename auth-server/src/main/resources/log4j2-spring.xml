@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable"/>
+        </Console>
+
+        <RollingFile name="RollingFileServerLog"
+                     fileName="./logs/auth-server.log"
+                     filePattern="./logs/auth-server.%d{MM-dd-yyyy}.log.gz">
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy  size="1GB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+
+        <!-- LOG everything at INFO level -->
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFileServerLog"/>
+        </Root>
+
+        <!-- LOG "com.ft.emulator*" at TRACE level -->
+        <Logger name="com.jftse.emulator" level="trace"></Logger>
+    </Loggers>
+
+</Configuration>
