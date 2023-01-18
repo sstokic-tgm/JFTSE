@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface LevelExpRepository extends JpaRepository<LevelExp, Long> {
     List<LevelExp> findAllByLevel(Byte level);
+    List<LevelExp> findAllByExpValueIsLessThanEqualOrderByExpValueDesc(Integer expValue);
 }
