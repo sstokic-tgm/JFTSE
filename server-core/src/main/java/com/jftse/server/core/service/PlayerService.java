@@ -22,6 +22,8 @@ public interface PlayerService {
 
     int getPlayerRankingByName(String name, byte gameMode);
 
+    int getTutorialProgressSucceededCountByAccount(Long accountId);
+
     Player findById(Long playerId);
 
     Player findByIdFetched(Long playerId);

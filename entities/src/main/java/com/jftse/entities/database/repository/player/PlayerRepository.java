@@ -21,6 +21,21 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query(nativeQuery = true, value = "call ranking_by_name_and_gamemode(:name, :gameMode);")
     int getRankingByNameAndGameMode(@Param("name") String name, @Param("gameMode") byte gameMode);
 
+    @Query(nativeQuery = true, value =
+            "SELECT COUNT(*) as total_entries " +
+            "FROM TutorialProgress AS tp1 " +
+            "JOIN " +
+            "   (SELECT tp2.player_id, COUNT(*) as entries " +
+            "       FROM TutorialProgress AS tp2 " +
+            "       JOIN Player AS pl ON tp2.player_id = pl.id " +
+            "       WHERE tp2.success = 1 AND pl.account_id = :accountId " +
+            "       GROUP BY tp2.player_id " +
+            "       ORDER BY entries DESC " +
+            "   LIMIT 1) as most_entries " +
+            "ON tp1.player_id = most_entries.player_id " +
+            "WHERE tp1.success = 1;")
+    int getTutorialProgressSucceededCount(@Param("accountId") Long accountId);
+
     @Query(value = "FROM Player p "
             + "LEFT JOIN FETCH p.account account "
             + "LEFT JOIN FETCH p.pocket pocket "

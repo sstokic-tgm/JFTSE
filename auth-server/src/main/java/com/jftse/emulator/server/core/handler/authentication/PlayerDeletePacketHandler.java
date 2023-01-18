@@ -84,7 +84,9 @@ public class PlayerDeletePacketHandler extends AbstractPacketHandler {
                 connection.sendTCP(playerDeleteAnswerPacket);
 
                 List<Player> playerList = playerService.findAllByAccount(account);
-                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList);
+                int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
+
+                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
                 connection.sendTCP(playerListPacket);
             } else {
                 S2CPlayerDeleteAnswerPacket playerDeleteAnswerPacket = new S2CPlayerDeleteAnswerPacket((char) -1);
