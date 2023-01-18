@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @PacketOperationIdentifier(PacketOperations.C2SRoomJoin)
 public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
@@ -63,15 +65,6 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
                 .orElse(null);
-
-        // prevent abusive room joins
-        if (room != null && ftClient.getActiveRoom() != null) {
-            Room clientRoom = ftClient.getActiveRoom();
-
-            handleRoomUponJoin(clientRoom, clientRoom.getRoomId());
-
-            return;
-        }
 
         if (room == null) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
@@ -108,6 +101,15 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
                 GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
                 return;
             }
+        }
+
+        // prevent abusive room joins
+        if (ftClient.getActiveRoom() != null) {
+            Room clientRoom = ftClient.getActiveRoom();
+
+            handleRoomUponJoin(clientRoom, clientRoom.getRoomId());
+
+            return;
         }
 
         if ((room.isHardMode() || room.isArcade()) && activePlayer.getLevel() < ConfigService.getInstance().getValue("command.room.mode.change.player.level", 60)) {
@@ -195,6 +197,10 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
     }
 
     private void handleRoomUponJoin(Room room, short roomId) {
+        FTClient client = (FTClient) connection.getClient();
+        short roomPlayerPosition = client.getRoomPlayer().getPosition();
+        boolean shouldUpdateNonGM = roomPlayerPosition != MiscConstants.InvisibleGmSlot || !client.isGameMaster();
+
         S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) 0, (byte) 0, (byte) 0, (byte) 0);
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
 
@@ -205,9 +211,21 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         closeRoomSlots(positions, roomSlotCloseAnswerPackets);
 
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
+
+        List<RoomPlayer> filteredRoomPlayerList = room.getRoomPlayerList().stream()
+                .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
+                .collect(Collectors.toList());
+        S2CRoomPlayerInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
+                new S2CRoomPlayerInformationPacket(new ArrayList<>(filteredRoomPlayerList));
+
         GameManager.getInstance().getClientsInRoom(roomId).forEach(c -> {
-            if (c.getConnection() != null) {
+            RoomPlayer cRP = c.getRoomPlayer();
+            if (c.getConnection() != null && cRP != null && cRP.getPosition() == MiscConstants.InvisibleGmSlot) {
                 c.getConnection().sendTCP(roomPlayerInformationPacket);
+            } else {
+                if (shouldUpdateNonGM) {
+                    c.getConnection().sendTCP(roomPlayerInformationPacketWithoutInvisibleGm);
+                }
             }
         });
         GameManager.getInstance().updateRoomForAllClientsInMultiplayer((FTConnection) connection, room);

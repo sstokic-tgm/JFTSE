@@ -20,6 +20,8 @@ public class FTClient extends Client<FTConnection> {
     private Long accountId;
     private Long activePlayerId;
 
+    private boolean isGameMaster = false;
+
     private ChallengeGame activeChallengeGame;
     private TutorialGame activeTutorialGame;
 
@@ -45,6 +47,10 @@ public class FTClient extends Client<FTConnection> {
 
     public void setAccount(Long id) {
         this.accountId = id;
+        final Account account = getAccount();
+        if (account != null) {
+            isGameMaster = account.getGameMaster();
+        }
     }
 
     public Player getPlayer() {
