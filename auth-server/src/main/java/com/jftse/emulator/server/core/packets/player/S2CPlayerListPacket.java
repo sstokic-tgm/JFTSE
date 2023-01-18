@@ -14,7 +14,7 @@ public class S2CPlayerListPacket extends Packet {
 
         this.write(0);
         this.write(0);
-        this.write((byte) 0);
+        this.write((byte) 11);
         this.write(Math.toIntExact(account.getId()));
         this.write(account.getGameMaster()); // GM
 
