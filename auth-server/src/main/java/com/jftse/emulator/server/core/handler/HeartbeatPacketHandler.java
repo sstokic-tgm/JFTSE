@@ -10,8 +10,11 @@ import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 
 @PacketOperationIdentifier(PacketOperations.C2SHeartbeat)
 public class HeartbeatPacketHandler extends AbstractPacketHandler {
+    private Packet packet;
+
     @Override
     public boolean process(Packet packet) {
+        this.packet = packet;
         return true;
     }
 
@@ -33,6 +36,10 @@ public class HeartbeatPacketHandler extends AbstractPacketHandler {
             while (client.getPacketsToSendOnFrame().peek() != null) {
                 connection.sendTCP(client.getPacketsToSendOnFrame().poll());
             }
+
+            Packet answerHeartBeat = new Packet((char) 0xFF87);
+            answerHeartBeat.write(packet.getClientTimestamp());
+            connection.sendTCP(answerHeartBeat);
         }
     }
 }
