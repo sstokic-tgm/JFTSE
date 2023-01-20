@@ -37,13 +37,23 @@ public class LevelServiceImpl implements LevelService {
 
         LevelExp levelExp = levelExpList.get(0);
 
-        return newExp >= levelExp.getExpValue() ? (byte) (currentLevel + 1) : currentLevel;
+        if (newExp >= levelExp.getExpValue()) {
+            List<LevelExp> newLevelExp = findAllByExpValue(newExp);
+            return (byte) (newLevelExp.get(0).getLevel() + 1);
+        } else {
+            return currentLevel;
+        }
+    }
+
+    @Override
+    public List<LevelExp> findAllByExpValue(Integer expValue) {
+        return levelExpRepository.findAllByExpValueIsLessThanEqualOrderByExpValueDesc(expValue);
     }
 
     @Override
     public Player setNewLevelStatusPoints(byte level, Player player) {
-        if (level > player.getLevel() && player.getLevel() <= 65)
-            player.setStatusPoints((byte) (player.getStatusPoints() + 1));
+        if (level > player.getLevel() && level <= 65)
+            player.setStatusPoints((byte) (player.getStatusPoints() + (level - player.getLevel())));
 
         player.setLevel(level);
 
