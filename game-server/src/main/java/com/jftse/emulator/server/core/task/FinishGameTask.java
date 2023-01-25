@@ -145,11 +145,8 @@ public class FinishGameTask extends AbstractTask {
 
         gameLogContent.append(allPlayersTeamRedDead ? "Blue " : "Red ").append("team won. ");
 
-        gameSession.getClients().forEach(client -> {
+        gameSession.getClients().stream().filter(client -> client.getRoomPlayer() != null).forEach(client -> {
             RoomPlayer rp = client.getRoomPlayer();
-            if (rp == null) {
-                return;
-            }
 
             boolean isActivePlayer = rp.getPosition() < 4;
             if (isActivePlayer) {
@@ -303,15 +300,12 @@ public class FinishGameTask extends AbstractTask {
                     gameLogContent.append("60s. ");
                 gameLogContent.append(game.getCurrentStage().getName()).append(" ");
 
-                gameSession.getClients().forEach(client -> {
+                gameSession.getClients().stream().filter(client -> client.getRoomPlayer() != null).forEach(client -> {
+                    RoomPlayer rp = client.getRoomPlayer();
+
                     S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
                     client.getConnection().sendTCP(msgPacket);
                     client.getConnection().close();
-
-                    RoomPlayer rp = client.getRoomPlayer();
-                    if (rp == null) {
-                        return;
-                    }
 
                     gameLogContent.append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
                 });
@@ -344,11 +338,8 @@ public class FinishGameTask extends AbstractTask {
         gameLogContent.append(game.isBossBattleActive() ? "Boss " : "Guardian ").append("battle finished. ");
         gameLogContent.append(wonGame ? "Players " : "Guardians ").append("won. ");
 
-        gameSession.getClients().forEach(client -> {
+        gameSession.getClients().stream().filter(client -> client.getRoomPlayer() != null).forEach(client -> {
             RoomPlayer rp = client.getRoomPlayer();
-            if (rp == null) {
-                return;
-            }
 
             boolean isActivePlayer = rp.getPosition() < 4;
             if (isActivePlayer) {
