@@ -7,6 +7,6 @@ public class S2CDCMsgPacket extends Packet {
     public S2CDCMsgPacket(Integer result) {
         super(PacketOperations.S2CDCMsg);
 
-        this.write(result.shortValue());
+        this.write(result.byteValue());
     }
 }
