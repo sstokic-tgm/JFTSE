@@ -139,7 +139,8 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.SUCCESS, token, timestamp);
                 connection.sendTCP(loginAnswerPacket);
 
-                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account));
+                int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
+                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account), tutorialCount);
                 ThreadManager.getInstance().schedule(() -> connection.sendTCP(playerListPacket), 10, TimeUnit.MILLISECONDS);
 
                 String hostAddress;

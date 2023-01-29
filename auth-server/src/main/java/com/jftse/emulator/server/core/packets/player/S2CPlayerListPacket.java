@@ -9,12 +9,12 @@ import com.jftse.server.core.protocol.PacketOperations;
 import java.util.List;
 
 public class S2CPlayerListPacket extends Packet {
-    public S2CPlayerListPacket(Account account, List<Player> playerList) {
+    public S2CPlayerListPacket(Account account, List<Player> playerList, int tutorialCount) {
         super(PacketOperations.S2CPlayerList);
 
         this.write(0);
         this.write(0);
-        this.write((byte) 0);
+        this.write((byte) tutorialCount);
         this.write(Math.toIntExact(account.getId()));
         this.write(account.getGameMaster()); // GM
 

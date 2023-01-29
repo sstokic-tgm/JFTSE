@@ -77,7 +77,9 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.SUCCESS, token, timestamp);
             client.getPacketsToSendOnFrame().offer(loginAnswerPacket);
 
-            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account));
+            int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
+
+            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account), tutorialCount);
             client.getPacketsToSendOnFrame().offer(playerListPacket);
         } else {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) -1);

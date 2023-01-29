@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -181,6 +182,8 @@ public class GameManager {
         final Optional<RoomPlayer> roomPlayer = Optional.ofNullable(client.getRoomPlayer());
 
         final short playerPosition = roomPlayer.isPresent() ? roomPlayer.get().getPosition() : -1;
+        boolean shouldUpdateNonGM = playerPosition != MiscConstants.InvisibleGmSlot || !client.isGameMaster();
+
         final boolean isMaster = roomPlayer.isPresent() && roomPlayer.get().isMaster();
         if (isMaster) {
             long slotCount = roomPlayerList.stream().filter(rp -> !rp.isMaster() && rp.getPosition() < 4).count();
@@ -224,7 +227,7 @@ public class GameManager {
             S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) 9);
             getClientsInRoom(room.getRoomId()).forEach(c -> {
                 if (notifyClients) {
-                    if (c.getPlayer() != null && !c.getPlayer().getId().equals(activePlayer.getId()) && c.getConnection() != null) {
+                    if (c.getPlayer() != null && !c.getPlayer().getId().equals(activePlayer.getId()) && c.getConnection() != null && shouldUpdateNonGM) {
                         c.getConnection().sendTCP(roomPlayerInformationPacket, roomPositionChangeAnswerPacket);
                     }
                 }
@@ -239,9 +242,21 @@ public class GameManager {
         client.setActiveRoom(null);
         if (notifyClients) {
             S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(roomPlayerList));
+
+            List<RoomPlayer> filteredRoomPlayerList = roomPlayerList.stream()
+                    .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
+                    .collect(Collectors.toList());
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
+                    new S2CRoomPlayerInformationPacket(new ArrayList<>(filteredRoomPlayerList));
+
             getClientsInRoom(room.getRoomId()).forEach(c -> {
-                if (c.getConnection() != null) {
+                RoomPlayer cRP = c.getRoomPlayer();
+                if (c.getConnection() != null && cRP != null && cRP.getPosition() == MiscConstants.InvisibleGmSlot) {
                     c.getConnection().sendTCP(roomPlayerInformationPacket);
+                } else {
+                    if (shouldUpdateNonGM) {
+                        c.getConnection().sendTCP(roomPlayerInformationPacketWithoutInvisibleGm);
+                    }
                 }
             });
             updateRoomForAllClientsInMultiplayer(connection, room);
@@ -249,9 +264,18 @@ public class GameManager {
     }
 
     public void updateRoomForAllClientsInMultiplayer(final FTConnection connection, final Room room) {
+        FTClient client = connection.getClient();
+
+        short roomPlayerPosition = -1;
+        final RoomPlayer roomPlayer = client.getRoomPlayer();
+        if (roomPlayer != null) {
+            roomPlayerPosition = roomPlayer.getPosition();
+        }
+        boolean shouldUpdateNonGM = roomPlayerPosition != MiscConstants.InvisibleGmSlot || !client.isGameMaster();
+
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
         getClientsInRoom(room.getRoomId()).forEach(c -> {
-            if (c.getConnection() != null) {
+            if (c.getConnection() != null && shouldUpdateNonGM) {
                 c.getConnection().sendTCP(roomInformationPacket);
             }
         });

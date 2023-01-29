@@ -213,6 +213,20 @@ public class Packet {
         return result;
     }
 
+    public long getClientTimestamp() {
+        if (dataLength > 0) {
+            final int oldReadPosition = readPosition;
+            readPosition = dataLength - 8;
+
+            final long clientTimestamp = readLong();
+
+            readPosition = oldReadPosition; // reset read position, getClientTimestamp is a special case method
+
+            return clientTimestamp;
+        }
+        return 0L;
+    }
+
     public byte[] getRawPacket() {
         byte[] packet = new byte[8 + this.dataLength];
 

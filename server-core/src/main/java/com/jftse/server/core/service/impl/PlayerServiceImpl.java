@@ -59,6 +59,10 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.getRankingByNameAndGameMode(name, gameMode);
     }
 
+    @Override
+    public int getTutorialProgressSucceededCountByAccount(Long accountId) {
+        return playerRepository.getTutorialProgressSucceededCount(accountId);
+    }
 
     @Override
     public Player findById(Long playerId) {
