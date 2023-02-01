@@ -12,7 +12,9 @@ import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class WingOfMemory extends BaseItem {
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
@@ -56,6 +58,7 @@ public class WingOfMemory extends BaseItem {
         this.packetsToSend.add(this.localPlayerId, playerStatusPointChangePacket);
         this.packetsToSend.add(this.localPlayerId, playerInfoPlayStatsPacket);
 
+        log.info("Player status points reseted, actual player level: " + player.getLevel() + " ,status points to set: " + (player.getLevel() + 5 - 1));
         return true;
     }
 
@@ -69,6 +72,7 @@ public class WingOfMemory extends BaseItem {
         if (playerPocketWOM == null)
             return false;
 
+        log.info("Player status points reseted, count Wing of Memory before: " + playerPocketWOM.getItemCount());
         int itemCount = playerPocketWOM.getItemCount() - 1;
         if (itemCount <= 0) {
             playerPocketService.remove(playerPocketWOM.getId());
@@ -82,6 +86,7 @@ public class WingOfMemory extends BaseItem {
             playerPocketService.save(playerPocketWOM);
         }
 
+        log.info("Players stat points reseted, count Wing of Memory now left: " + itemCount);
         return true;
     }
 }
