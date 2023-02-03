@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
+
 @Log4j2
 
 public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler {
@@ -419,10 +420,16 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
 
             log.info("Trying to detect special item Ring of EXP");
             RingOfExp ringOfExp = new RingOfExp(specialItemROEXP.getItemIndex(), specialItemROEXP.getName(), "SPECIAL");
-            if (ringOfExp != null) {
-                ringOfExp.processPlayer(player);
+            if (ringOfExp.processPlayer(player)) {
                 if (ringOfExp.processPocket(playerPocket)) {
                     connection.getClient().savePlayer(player);
+
+                    ringOfExp.getPacketsToSend().forEach((playerId, packets) -> {
+                        final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
+                        if (connectionByPlayerId != null)
+                            connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
+                    });
+
                     List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
                     S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
                     connection.sendTCP(inventoryDataPacket);
@@ -434,10 +441,16 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
         } else if (specialItem.getName().equals(specialItemROGold.getName())) {
             log.info("Trying to detect special item Ring of Gold");
             RingOfGold ringOfGold = new RingOfGold(specialItemROGold.getItemIndex(), specialItemROGold.getName(), "SPECIAL");
-            if (ringOfGold != null) {
-                ringOfGold.processPlayer(player);
+            if (ringOfGold.processPlayer(player)) {
                 if (ringOfGold.processPocket(playerPocket)) {
                     connection.getClient().savePlayer(player);
+
+                    ringOfGold.getPacketsToSend().forEach((playerId, packets) -> {
+                        final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
+                        if (connectionByPlayerId != null)
+                            connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
+                    });
+
                     List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
                     S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
                     connection.sendTCP(inventoryDataPacket);

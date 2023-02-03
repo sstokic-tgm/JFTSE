@@ -38,6 +38,7 @@ import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.thread.AbstractTask;
@@ -549,10 +550,16 @@ public class FinishGameTask extends AbstractTask {
 
             log.info("Trying to detect special item Ring of EXP");
             RingOfExp ringOfExp = new RingOfExp(specialItemROEXP.getItemIndex(), specialItemROEXP.getName(), "SPECIAL");
-            if (ringOfExp != null) {
-                ringOfExp.processPlayer(player);
+            if (ringOfExp.processPlayer(player)) {
                 if (ringOfExp.processPocket(playerPocket)) {
                     connection.getClient().savePlayer(player);
+
+                    ringOfExp.getPacketsToSend().forEach((playerId, packets) -> {
+                        final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
+                        if (connectionByPlayerId != null)
+                            connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
+                    });
+
                     List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
                     S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
                     connection.sendTCP(inventoryDataPacket);
@@ -564,10 +571,16 @@ public class FinishGameTask extends AbstractTask {
         } else if (specialItem.getName().equals(specialItemROGold.getName())) {
             log.info("Trying to detect special item Ring of Gold");
             RingOfGold ringOfGold = new RingOfGold(specialItemROGold.getItemIndex(), specialItemROGold.getName(), "SPECIAL");
-            if (ringOfGold != null) {
-                ringOfGold.processPlayer(player);
+            if (ringOfGold.processPlayer(player)) {
                 if (ringOfGold.processPocket(playerPocket)) {
                     connection.getClient().savePlayer(player);
+
+                    ringOfGold.getPacketsToSend().forEach((playerId, packets) -> {
+                        final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
+                        if (connectionByPlayerId != null)
+                            connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
+                    });
+
                     List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
                     S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
                     connection.sendTCP(inventoryDataPacket);
