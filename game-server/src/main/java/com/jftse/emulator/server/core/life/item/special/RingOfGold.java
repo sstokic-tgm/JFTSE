@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.life.item.special;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearSpecialAnswerPacket;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
@@ -19,7 +20,6 @@ public class RingOfGold extends BaseItem {
     private final PlayerPocketService playerPocketService;
     private final PlayerService playerService;
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
-    private final ItemSpecialService itemSpecialService;
 
     public RingOfGold(int itemIndex, String name, String category) {
         super(itemIndex, name, category);
@@ -28,7 +28,6 @@ public class RingOfGold extends BaseItem {
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         playerService = ServiceManager.getInstance().getPlayerService();
         specialSlotEquipmentService = ServiceManager.getInstance().getSpecialSlotEquipmentService();
-        itemSpecialService = ServiceManager.getInstance().getItemSpecialService();
     }
 
     @Override
@@ -48,6 +47,8 @@ public class RingOfGold extends BaseItem {
         pocket = pocketService.findById(pocket.getId());
         if (pocket == null)
             return false;
+
+        List<Integer> playersSpecialSlotsToSet = new ArrayList<>();
 
         Player player = playerService.findById(localPlayerId);
         List<Integer> playersSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
@@ -73,8 +74,12 @@ public class RingOfGold extends BaseItem {
             }
         }
 
-        if (!playerSpecialSlotHasGoldRingEquipped)
+        if (!playerSpecialSlotHasGoldRingEquipped){
+            log.info("Ring of Gold is not equipped in players slot");
             return false;
+        }
+
+        List<Integer> playersEquippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(playerService.findById(localPlayerId));
 
         log.info("Ring of Gold, itemCount before: " + playerPocketROGold.getItemCount());
         int itemCount = playerPocketROGold.getItemCount() - 1;
@@ -82,11 +87,8 @@ public class RingOfGold extends BaseItem {
             playerPocketService.remove(playerPocketROGold.getId());
             pocketService.decrementPocketBelongings(pocket);
 
-            List<Integer> playersSpecialSlotsToSet = new ArrayList<>();
-            List<Integer> playersSpecialSlotsToRemove = specialSlotEquipmentService.getEquippedSpecialSlots(playerService.findById(localPlayerId));
-
-            for (Integer playersSpecialSlot : playersSpecialSlotsToRemove) {
-                if (playersSpecialSlot == (Integer)playerPocketROGold.getId().intValue()){
+            for (Integer playersSpecialSlot : playersEquippedSpecialSlots) {
+                if (playersSpecialSlot == (Integer) playerPocketROGold.getId().intValue()) {
                     log.info("Special Slot value 0 added");
                     playersSpecialSlotsToSet.add(0);
                 } else {
@@ -102,7 +104,19 @@ public class RingOfGold extends BaseItem {
             packetsToSend.add(localPlayerId, inventoryItemRemoveAnswerPacket);
         } else {
             playerPocketROGold.setItemCount(itemCount);
+            playerPocketROGold.setPocket(pocket);
             playerPocketService.save(playerPocketROGold);
+            player.setPocket(pocket);
+
+            List<PlayerPocket> playerPocketList = new ArrayList<>();
+            playerPocketList.add(playerPocketROGold);
+
+            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            packetsToSend.add(localPlayerId, inventoryDataPacket);
+
+            specialSlotEquipmentService.updateSpecialSlots(player, playersEquippedSpecialSlots);
+            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(playersEquippedSpecialSlots);
+            packetsToSend.add(localPlayerId, inventoryWearSpecialAnswerPacket);
         }
         log.info("Ring of Gold, itemCount now: " + itemCount);
         return true;

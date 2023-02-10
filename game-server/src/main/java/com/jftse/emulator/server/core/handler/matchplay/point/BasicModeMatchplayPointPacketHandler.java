@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.matchplay.point;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
 import com.jftse.emulator.server.core.life.item.special.RingOfGold;
 import com.jftse.emulator.server.core.life.room.ServeInfo;
@@ -195,14 +196,14 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
 
                         log.info("EXP/Gold Ring Bonus trying to detect");
                         // Add EXP, Gold Ring Bonus if equipped
-                        ItemSpecial specialItemROEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
+                        ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
                         if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
                             log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
                             rewardExp *= 2;
                             log.info("Reward EXP is now: " + rewardExp);
                         }
 
-                        ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
+                        ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
                         if (handleSpecialWearItem(client.getConnection(), specialItemROGold)) {
                             log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
                             rewardGold *= 2;
@@ -409,15 +410,15 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
     }
 
     private boolean handleSpecialWearItem(FTConnection connection, ItemSpecial specialItem) {
-        ItemSpecial specialItemROEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
-        ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
+        ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
+        ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
+        ItemFactory.SetBackFromMatchplay(true);
 
         Player player = connection.getClient().getPlayer();
         Pocket playerPocket = player.getPocket();
 
         log.info(specialItem.getName() + " equals? " + specialItemROEXP.getName());
         if (specialItem.getName().equals(specialItemROEXP.getName())) {
-
             log.info("Trying to detect special item Ring of EXP");
             RingOfExp ringOfExp = new RingOfExp(specialItemROEXP.getItemIndex(), specialItemROEXP.getName(), "SPECIAL");
             if (ringOfExp.processPlayer(player)) {
@@ -429,10 +430,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-
-                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                    connection.sendTCP(inventoryDataPacket);
                     return true;
                 }
                 return false;
@@ -450,10 +447,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-
-                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                    connection.sendTCP(inventoryDataPacket);
                     return true;
                 }
                 return false;

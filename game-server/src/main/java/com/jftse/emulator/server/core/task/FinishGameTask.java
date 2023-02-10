@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.task;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
 import com.jftse.emulator.server.core.life.item.special.RingOfGold;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
@@ -36,7 +37,6 @@ import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
@@ -459,7 +459,7 @@ public class FinishGameTask extends AbstractTask {
 
                 log.info("EXP/Gold Ring Bonus trying to detect");
                 // Add EXP, Gold Ring Bonus if equipped
-                ItemSpecial specialItemROEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
+                ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
                 if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
                     log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
                     rewardExp *= 2;
@@ -539,8 +539,9 @@ public class FinishGameTask extends AbstractTask {
     }
 
     private boolean handleSpecialWearItem(FTConnection connection, ItemSpecial specialItem) {
-        ItemSpecial specialItemROEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
-        ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
+        ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
+        ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
+        ItemFactory.SetBackFromMatchplay(true);
 
         Player player = connection.getClient().getPlayer();
         Pocket playerPocket = player.getPocket();
@@ -559,10 +560,6 @@ public class FinishGameTask extends AbstractTask {
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-
-                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                    connection.sendTCP(inventoryDataPacket);
                     return true;
                 }
                 return false;
@@ -580,10 +577,6 @@ public class FinishGameTask extends AbstractTask {
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-
-                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                    connection.sendTCP(inventoryDataPacket);
                     return true;
                 }
                 return false;
