@@ -16,7 +16,9 @@ import lombok.extern.log4j.Log4j2;
 public class ItemFactory {
     private static ItemSpecial specialItemRingOfEXP;
     private static ItemSpecial specialItemRingOfGold;
+    private static ItemSpecial specialItemRingOfWiseman;
     private static boolean backToRoomFromMatchplay;
+
 
     private ItemFactory() {
     }
@@ -75,6 +77,9 @@ public class ItemFactory {
             case 2:
                 log.info("Special item: " + specialItemRingOfGold.getName() + " from inMemory");
                 return specialItemRingOfGold;
+            case 3:
+                log.info("Special item: " + specialItemRingOfWiseman.getName() + " from inMemory");
+                return specialItemRingOfWiseman;
             default:
                 return null;
         }
@@ -92,6 +97,7 @@ public class ItemFactory {
         log.info("ItemFactory: " + initCommand);
         this.specialItemRingOfEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
         this.specialItemRingOfGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
+        this.specialItemRingOfWiseman = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(3);
         this.backToRoomFromMatchplay = false;
     }
 }
