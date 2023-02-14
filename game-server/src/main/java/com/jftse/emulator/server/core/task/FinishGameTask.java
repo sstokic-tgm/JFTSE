@@ -462,14 +462,14 @@ public class FinishGameTask extends AbstractTask {
                 ItemSpecial specialItemROEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
                 if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
                     log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
-                    rewardExp *= 2;
+                    // rewardExp *= 2;
                     log.info("Reward EXP is now: " + rewardExp);
                 }
 
                 ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
                 if (handleSpecialWearItem(client.getConnection(), specialItemROGold)) {
                     log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
-                    rewardGold *= 2;
+                    // rewardGold *= 2;
                     log.info("Reward Gold is now: " + rewardGold);
                 }
 
