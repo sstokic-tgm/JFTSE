@@ -227,6 +227,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     playerReward.setRewardProductIndex(itemRewardToGive);
 
                     int amount = this.isHardMode() ? 3 : 1;
+                    if (this.isRandomGuardiansMode())
+                        amount = 1;
                     playerReward.setProductRewardAmount(amount);
                 }
             } else {
