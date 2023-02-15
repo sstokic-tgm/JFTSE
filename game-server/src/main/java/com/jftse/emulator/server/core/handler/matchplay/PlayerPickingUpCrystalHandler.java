@@ -111,7 +111,7 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
                             .orElse(null);
             boolean levelRequired = !isBattleGame && activeRoom.getRoomPlayerList().stream()
                     .filter(rp -> rp.getPlayer() != null)
-                    .allMatch(p -> p.getPlayer().getLevel() == 65);
+                    .allMatch(p -> p.getPlayer().getLevel() >= 65);
 
             int randomSkillIndex = this.getRandomPlayerSkill(player, playerBattleState, levelRequired);
             S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill(playerPicksUpCrystalPacket.getCrystalId(), playerPosition, randomSkillIndex);
