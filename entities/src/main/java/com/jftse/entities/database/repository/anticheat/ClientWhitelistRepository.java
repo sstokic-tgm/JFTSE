@@ -12,7 +12,9 @@ public interface ClientWhitelistRepository extends JpaRepository<ClientWhitelist
     Optional<ClientWhitelist> findByIpAndHwid(String ip, String hwid, Sort sort);
     List<ClientWhitelist> findAllByIpAndHwid(String ip, String hwid, Sort sort);
     Optional<ClientWhitelist> findByIpAndHwidAndFlaggedTrue(String ip, String hwid, Sort sort);
+    Optional<ClientWhitelist> findByHwidAndFlaggedTrue(String hwid, Sort sort);
     List<ClientWhitelist> findAllByIpAndHwidAndFlaggedTrue(String ip, String hwid, Sort sort);
+    List<ClientWhitelist> findAllByHwidAndFlaggedTrue(String hwid, Sort sort);
     Optional<ClientWhitelist> findByIpAndHwidAndAccount(String ip, String hwid, Account account, Sort sort);
     List<ClientWhitelist> findAllByIpAndHwidAndAccount(String ip, String hwid, Account account, Sort sort);
 }

@@ -104,7 +104,7 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 }
             }
 
-            if (isClientFlagged(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
+            if (isClientFlagged(loginPacket.getHwid())) {
                 S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID);
                 connection.sendTCP(loginAnswerPacket);
             } else {
@@ -161,11 +161,8 @@ public class LoginPacketHandler extends AbstractPacketHandler {
         return clientWhitelist != null;
     }
 
-    private boolean isClientFlagged(InetSocketAddress inetSocketAddress, String hwid) {
-        if (inetSocketAddress == null)
-            return false;
-        String hostAddress = inetSocketAddress.getAddress().getHostAddress();
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwidAndFlaggedTrue(hostAddress, hwid);
+    private boolean isClientFlagged(String hwid) {
+        ClientWhitelist clientWhitelist = clientWhitelistService.findByHwidAndFlaggedTrue(hwid);
         return clientWhitelist != null && clientWhitelist.getFlagged();
     }
 

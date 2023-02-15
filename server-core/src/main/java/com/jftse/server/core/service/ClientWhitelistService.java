@@ -10,7 +10,7 @@ public interface ClientWhitelistService {
 
     ClientWhitelist findByIpAndHwid(String ip, String hwid);
 
-    ClientWhitelist findByIpAndHwidAndFlaggedTrue(String ip, String hwid);
+    ClientWhitelist findByHwidAndFlaggedTrue(String hwid);
 
     ClientWhitelist findByIpAndHwidAndAccount(String ip, String hwid, Account account);
 

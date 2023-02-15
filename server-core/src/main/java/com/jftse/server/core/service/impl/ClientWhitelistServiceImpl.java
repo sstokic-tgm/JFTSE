@@ -36,12 +36,12 @@ public class ClientWhitelistServiceImpl implements ClientWhitelistService {
     }
 
     @Override
-    public ClientWhitelist findByIpAndHwidAndFlaggedTrue(String ip, String hwid) {
+    public ClientWhitelist findByHwidAndFlaggedTrue(String hwid) {
         try {
-            Optional<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findByIpAndHwidAndFlaggedTrue(ip, hwid, Sort.by("created").descending());
+            Optional<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findByHwidAndFlaggedTrue(hwid, Sort.by("created").descending());
             return clientWhitelist.orElse(null);
         } catch (Exception e) {
-            List<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findAllByIpAndHwidAndFlaggedTrue(ip, hwid, Sort.by("created").descending());
+            List<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findAllByHwidAndFlaggedTrue(hwid, Sort.by("created").descending());
             return clientWhitelist.isEmpty() ? null : clientWhitelist.get(0);
         }
     }
