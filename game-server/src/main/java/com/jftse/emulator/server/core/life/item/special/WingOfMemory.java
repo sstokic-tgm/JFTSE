@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.life.item.special;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
@@ -13,6 +14,9 @@ import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Log4j2
 public class WingOfMemory extends BaseItem {
@@ -58,7 +62,7 @@ public class WingOfMemory extends BaseItem {
         this.packetsToSend.add(this.localPlayerId, playerStatusPointChangePacket);
         this.packetsToSend.add(this.localPlayerId, playerInfoPlayStatsPacket);
 
-        log.info("Player status points reseted, actual player level: " + player.getLevel() + " ,status points to set: " + (player.getLevel() + 5 - 1));
+        log.info("Player status points reseted by Wing of Memory, actual player level: " + player.getLevel() + " ,status points to set: " + (player.getLevel() + 5 - 1));
         return true;
     }
 
@@ -72,7 +76,8 @@ public class WingOfMemory extends BaseItem {
         if (playerPocketWOM == null)
             return false;
 
-        log.info("Player status points reseted, count Wing of Memory before: " + playerPocketWOM.getItemCount());
+        Player player = playerService.findById(localPlayerId);
+        log.info("Wing of Memory itemCount before: " + playerPocketWOM.getItemCount());
         int itemCount = playerPocketWOM.getItemCount() - 1;
         if (itemCount <= 0) {
             playerPocketService.remove(playerPocketWOM.getId());
@@ -84,9 +89,20 @@ public class WingOfMemory extends BaseItem {
         } else {
             playerPocketWOM.setItemCount(itemCount);
             playerPocketService.save(playerPocketWOM);
+
+            playerPocketWOM.setItemCount(itemCount);
+            playerPocketWOM.setPocket(pocket);
+            playerPocketService.save(playerPocketWOM);
+            player.setPocket(pocket);
+
+            List<PlayerPocket> playerPocketList = new ArrayList<>();
+            playerPocketList.add(playerPocketWOM);
+
+            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            packetsToSend.add(localPlayerId, inventoryDataPacket);
         }
 
-        log.info("Players stat points reseted, count Wing of Memory now left: " + itemCount);
+        log.info("Wing of Memory, itemCount now: " + itemCount);
         return true;
     }
 }
