@@ -465,10 +465,10 @@ public class FinishGameTask extends AbstractTask {
                 ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
                 if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman)) {
                     log.info("Setting Reward EXP multiplied to 1.5, before: " + rewardExp);
-                    rewardExp *= 1.5;
+                    //rewardExp *= 1.5;
 
                     log.info("Setting Reward Gold multiplied to 1.5, before: " + rewardGold);
-                    rewardGold *= 1.5;
+                    //rewardGold *= 1.5;
 
                     isRingOfWisemanActive = true;
                     log.info("Reward EXP is now: " + rewardExp);
@@ -479,14 +479,14 @@ public class FinishGameTask extends AbstractTask {
                     ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
                     if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
                         log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
-                        rewardExp *= 2;
+                        //rewardExp *= 2;
                         log.info("Reward EXP is now: " + rewardExp);
                     }
 
                     ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
                     if (handleSpecialWearItem(client.getConnection(), specialItemROGold)) {
                         log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
-                        rewardGold *= 2;
+                        //rewardGold *= 2;
                         log.info("Reward Gold is now: " + rewardGold);
                     }
                 }
