@@ -138,17 +138,22 @@ public class LotteryServiceImpl implements LotteryService {
     }
 
     private LotteryItemDto pickItemLotteryFromList(List<LotteryItemDto> lotteryItemList) {
-        double sum = lotteryItemList.stream().mapToDouble(LotteryItemDto::getChansPer).sum();
-        double randomNum = random.nextDouble() * sum;
+        int size = lotteryItemList.size();
 
-        double end = 0.0;
-        for (LotteryItemDto lotteryItem : lotteryItemList) {
-            end += lotteryItem.getChansPer();
+        double[] cumProb = new double[size];
+        cumProb[0] = lotteryItemList.get(0).getChansPer() / 100.0;
 
-            if (end >= randomNum)
-                return lotteryItem;
+        for (int i = 1; i < size; i++) {
+            cumProb[i] = cumProb[i - 1] + lotteryItemList.get(i).getChansPer() / 100.0;
         }
-        return null;
+
+        double randomNum = random.nextDouble() * cumProb[cumProb.length - 1];
+
+        int index = Arrays.binarySearch(cumProb, randomNum);
+        if (index < 0) {
+            index = -(index + 1);
+        }
+        return lotteryItemList.get(index);
     }
 
     private PlayerPocket saveWinningItem(Product winningItem, LotteryItemDto lotteryItem, Pocket pocket) {
