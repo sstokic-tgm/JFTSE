@@ -3,8 +3,10 @@ package com.jftse.emulator.server.core.task;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
 import com.jftse.emulator.server.core.life.item.special.RingOfGold;
+import com.jftse.emulator.server.core.life.item.special.RingOfWiseman;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;
@@ -36,7 +38,6 @@ import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
@@ -457,20 +458,37 @@ public class FinishGameTask extends AbstractTask {
                 int rewardExp = expGoldBonus.calculateExp();
                 int rewardGold = expGoldBonus.calculateGold();
 
-                log.info("EXP/Gold Ring Bonus trying to detect");
-                // Add EXP, Gold Ring Bonus if equipped
-                ItemSpecial specialItemROEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
-                if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
-                    log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
-                    // rewardExp *= 2;
+                log.info("EXP/Gold/Wiseman Ring Bonus trying to detect");
+                // Add EXP, Gold or Wiseman Ring Bonus if equipped
+
+                boolean isRingOfWisemanActive = false;
+                ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
+                if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman)) {
+                    log.info("Setting Reward EXP multiplied to 1.5, before: " + rewardExp);
+                    //rewardExp *= 1.5;
+
+                    log.info("Setting Reward Gold multiplied to 1.5, before: " + rewardGold);
+                    //rewardGold *= 1.5;
+
+                    isRingOfWisemanActive = true;
                     log.info("Reward EXP is now: " + rewardExp);
+                    log.info("Reward Gold is now: " + rewardGold);
                 }
 
-                ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
-                if (handleSpecialWearItem(client.getConnection(), specialItemROGold)) {
-                    log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
-                    // rewardGold *= 2;
-                    log.info("Reward Gold is now: " + rewardGold);
+                if (!isRingOfWisemanActive) {
+                    ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
+                    if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
+                        log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
+                        //rewardExp *= 2;
+                        log.info("Reward EXP is now: " + rewardExp);
+                    }
+
+                    ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
+                    if (handleSpecialWearItem(client.getConnection(), specialItemROGold)) {
+                        log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
+                        //rewardGold *= 2;
+                        log.info("Reward Gold is now: " + rewardGold);
+                    }
                 }
 
                 // TODO: ...because of this
@@ -539,15 +557,32 @@ public class FinishGameTask extends AbstractTask {
     }
 
     private boolean handleSpecialWearItem(FTConnection connection, ItemSpecial specialItem) {
-        ItemSpecial specialItemROEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
-        ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
+        ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
+        ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
+        ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
+        ItemFactory.SetBackFromMatchplay(true);
 
         Player player = connection.getClient().getPlayer();
         Pocket playerPocket = player.getPocket();
 
-        log.info(specialItem.getName() + " equals? " + specialItemROEXP.getName());
-        if (specialItem.getName().equals(specialItemROEXP.getName())) {
+        if (specialItem.getName().equals(specialItemROWiseman.getName())) {
+            log.info("Trying to detect special item Ring of Wiseman");
+            RingOfWiseman ringOfWiseman = new RingOfWiseman(specialItemROWiseman.getItemIndex(), specialItemROWiseman.getName(), "SPECIAL");
+            if (ringOfWiseman.processPlayer(player)) {
+                if (ringOfWiseman.processPocket(playerPocket)) {
+                    connection.getClient().savePlayer(player);
 
+                    ringOfWiseman.getPacketsToSend().forEach((playerId, packets) -> {
+                        final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
+                        if (connectionByPlayerId != null)
+                            connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
+                    });
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        } else if (specialItem.getName().equals(specialItemROEXP.getName())) {
             log.info("Trying to detect special item Ring of EXP");
             RingOfExp ringOfExp = new RingOfExp(specialItemROEXP.getItemIndex(), specialItemROEXP.getName(), "SPECIAL");
             if (ringOfExp.processPlayer(player)) {
@@ -559,10 +594,6 @@ public class FinishGameTask extends AbstractTask {
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-
-                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                    connection.sendTCP(inventoryDataPacket);
                     return true;
                 }
                 return false;
@@ -580,10 +611,6 @@ public class FinishGameTask extends AbstractTask {
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-
-                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(playerPocket);
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                    connection.sendTCP(inventoryDataPacket);
                     return true;
                 }
                 return false;
@@ -593,4 +620,3 @@ public class FinishGameTask extends AbstractTask {
         return false;
     }
 }
-

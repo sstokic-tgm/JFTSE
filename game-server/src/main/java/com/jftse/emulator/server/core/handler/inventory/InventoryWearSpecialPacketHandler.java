@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
+import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.packets.inventory.C2SInventoryWearSpecialRequestPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearSpecialAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
@@ -12,6 +13,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.SpecialSlotEquipmentService;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.ArrayList;
 import java.util.List;
 @Log4j2
 
@@ -39,25 +41,34 @@ public class InventoryWearSpecialPacketHandler extends AbstractPacketHandler {
 
         Player player = client.getPlayer();
 
-        boolean doNotUpdateSlotsWhenUnreasonableValues = false;
-        int i = 1;
-        for (Integer slot : inventoryWearSpecialRequestPacket.getSpecialSlotList()) {
-            log.info("C2S WearSpecial slot" + i + " value: " + slot);
-            if (slot < 0)
-                doNotUpdateSlotsWhenUnreasonableValues = true;
-            i++;
+        List<Integer> specialSlotListEquippedServer = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+        List<Integer> specialSlotListEquippedClient = inventoryWearSpecialRequestPacket.getSpecialSlotList();
+
+        LogEquippedSlots(specialSlotListEquippedClient, "C2S received");
+
+        boolean flagBackFromMatchplay = ItemFactory.GetFlagBackFromMatchplay();
+        log.info("Back from matchplay: " + flagBackFromMatchplay);
+        ItemFactory.SetBackFromMatchplay(false);
+
+        S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket;
+
+        if (!flagBackFromMatchplay) {
+            inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(specialSlotListEquippedClient);
+            specialSlotEquipmentService.updateSpecialSlots(player, specialSlotListEquippedClient);
+            LogEquippedSlots(specialSlotListEquippedClient, "S2C sending");
+        } else {
+            inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(specialSlotListEquippedServer);
+            LogEquippedSlots(specialSlotListEquippedServer, "S2C sending");
         }
 
-        if(!doNotUpdateSlotsWhenUnreasonableValues)
-            specialSlotEquipmentService.updateSpecialSlots(player, inventoryWearSpecialRequestPacket.getSpecialSlotList());
+        connection.sendTCP(inventoryWearSpecialAnswerPacket);
+    }
 
-        List<Integer> specialSlotList = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+    public void LogEquippedSlots(List<Integer> equippedSlots, String textSendOrReceive){
         int j = 1;
-        for (Integer slot : specialSlotList) {
-            log.info("S2C sending equipped slots WearSpecial slot" + j + " value: " + slot);
+        for (Integer slotValue : equippedSlots) {
+            log.info(textSendOrReceive + " equipped slots WearSpecial slot" + j + " value: " + slotValue);
             j++;
         }
-        S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(specialSlotList);
-        connection.sendTCP(inventoryWearSpecialAnswerPacket);
     }
 }
