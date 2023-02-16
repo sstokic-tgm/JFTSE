@@ -63,12 +63,8 @@ public class LotteryServiceImpl implements LotteryService {
         List<Product> productList = productService.findProductsByItemList(Stream.of(productIndex).collect(Collectors.toList()));
         List<LotteryItemDto> lotteryItemList = getLotteryItemsByGachaIndex(player.getPlayerType(), productList.get(0).getItem0());
 
-        LotteryItemDto lotteryItem;
-        Product winningItem;
-        do {
-            lotteryItem = pickItemLotteryFromList(lotteryItemList);
-            winningItem = productService.findProductsByItemList(Stream.of(lotteryItem.getShopIndex()).collect(Collectors.toList())).get(0);
-        } while (winningItem.getCategory().equals(EItemCategory.ENCHANT.getName()));
+        LotteryItemDto lotteryItem = pickItemLotteryFromList(lotteryItemList);
+        Product winningItem = productService.findProductsByItemList(Stream.of(lotteryItem.getShopIndex()).collect(Collectors.toList())).get(0);
 
         productList.clear();
         Pocket pocket = pocketService.findById(player.getPocket().getId());
