@@ -19,12 +19,7 @@ public class ItemFactory {
     private static ItemSpecial specialItemRingOfWiseman;
     private static boolean backToRoomFromMatchplay;
 
-
     private ItemFactory() {
-    }
-
-    public ItemFactory(String initCommand) {
-        InitSpecialItemsOnLogin(initCommand);
     }
 
     public static BaseItem getItem(long playerPocketIdOfItem, Pocket pocketOfPlayer) {
@@ -85,19 +80,19 @@ public class ItemFactory {
         }
     }
 
-    public static void SetBackFromMatchplay(boolean backToRoomFromMatchplayToSet) {
+    public static void setBackFromMatchplay(boolean backToRoomFromMatchplayToSet) {
         backToRoomFromMatchplay = backToRoomFromMatchplayToSet;
     }
 
-    public static boolean GetFlagBackFromMatchplay() {
+    public static boolean getFlagBackFromMatchplay() {
         return backToRoomFromMatchplay;
     }
 
-    public void InitSpecialItemsOnLogin(String initCommand) {
+    public static void initSpecialItemsOnLogin(String initCommand) {
         log.info("ItemFactory: " + initCommand);
-        this.specialItemRingOfEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
-        this.specialItemRingOfGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
-        this.specialItemRingOfWiseman = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(3);
-        this.backToRoomFromMatchplay = false;
+        specialItemRingOfEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
+        specialItemRingOfGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
+        specialItemRingOfWiseman = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(3);
+        backToRoomFromMatchplay = false;
     }
 }

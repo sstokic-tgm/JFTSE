@@ -50,7 +50,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
-
 public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler {
     private C2SMatchplayPointPacket matchplayPointPacket;
 
@@ -431,7 +430,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
         ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
         ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
         ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
-        ItemFactory.SetBackFromMatchplay(true);
+        ItemFactory.setBackFromMatchplay(true);
 
         Player player = connection.getClient().getPlayer();
         Pocket playerPocket = player.getPocket();

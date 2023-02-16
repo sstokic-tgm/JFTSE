@@ -21,7 +21,7 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
         client.setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);
-        ItemFactory.SetBackFromMatchplay(false);
+        ItemFactory.setBackFromMatchplay(false);
 
         Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
         answerPacket.write(0);

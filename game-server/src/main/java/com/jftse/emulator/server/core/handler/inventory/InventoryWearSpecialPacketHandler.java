@@ -13,10 +13,9 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.SpecialSlotEquipmentService;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
 import java.util.List;
-@Log4j2
 
+@Log4j2
 @PacketOperationIdentifier(PacketOperations.C2SInventoryWearSpecialRequest)
 public class InventoryWearSpecialPacketHandler extends AbstractPacketHandler {
     private C2SInventoryWearSpecialRequestPacket inventoryWearSpecialRequestPacket;
@@ -44,27 +43,27 @@ public class InventoryWearSpecialPacketHandler extends AbstractPacketHandler {
         List<Integer> specialSlotListEquippedServer = specialSlotEquipmentService.getEquippedSpecialSlots(player);
         List<Integer> specialSlotListEquippedClient = inventoryWearSpecialRequestPacket.getSpecialSlotList();
 
-        LogEquippedSlots(specialSlotListEquippedClient, "C2S received");
+        logEquippedSlots(specialSlotListEquippedClient, "C2S received");
 
-        boolean flagBackFromMatchplay = ItemFactory.GetFlagBackFromMatchplay();
+        boolean flagBackFromMatchplay = ItemFactory.getFlagBackFromMatchplay();
         log.info("Back from matchplay: " + flagBackFromMatchplay);
-        ItemFactory.SetBackFromMatchplay(false);
+        ItemFactory.setBackFromMatchplay(false);
 
         S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket;
 
         if (!flagBackFromMatchplay) {
             inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(specialSlotListEquippedClient);
             specialSlotEquipmentService.updateSpecialSlots(player, specialSlotListEquippedClient);
-            LogEquippedSlots(specialSlotListEquippedClient, "S2C sending");
+            logEquippedSlots(specialSlotListEquippedClient, "S2C sending");
         } else {
             inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(specialSlotListEquippedServer);
-            LogEquippedSlots(specialSlotListEquippedServer, "S2C sending");
+            logEquippedSlots(specialSlotListEquippedServer, "S2C sending");
         }
 
         connection.sendTCP(inventoryWearSpecialAnswerPacket);
     }
 
-    public void LogEquippedSlots(List<Integer> equippedSlots, String textSendOrReceive){
+    public void logEquippedSlots(List<Integer> equippedSlots, String textSendOrReceive){
         int j = 1;
         for (Integer slotValue : equippedSlots) {
             log.info(textSendOrReceive + " equipped slots WearSpecial slot" + j + " value: " + slotValue);

@@ -560,7 +560,7 @@ public class FinishGameTask extends AbstractTask {
         ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
         ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
         ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
-        ItemFactory.SetBackFromMatchplay(true);
+        ItemFactory.setBackFromMatchplay(true);
 
         Player player = connection.getClient().getPlayer();
         Pocket playerPocket = player.getPocket();
