@@ -313,6 +313,11 @@ public enum PacketOperations {
     S2CRankingPersonalDataAnswer(0x206E),
     S2CRankingDataAnswer(0x2070),
 
+    C2STournamentListReq(0x26AF),
+    S2CTournamentListAnswer(0x26B0),
+    C2STournamentJoinReq(0x26AD),
+    S2CTournamentJoinAnswer(0x26AE),
+
     S2CDCMsg(0x2329),
 
     C2SUnknown0xE00E(0xE00E),
