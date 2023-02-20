@@ -6,6 +6,8 @@ import com.jftse.emulator.server.core.packets.messenger.S2CAcceptParcelAnswer;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.log.GameLog;
+import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.messenger.EParcelType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -17,6 +19,7 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.service.GameLogService;
 import com.jftse.server.core.service.ParcelService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
@@ -31,10 +34,13 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
     private final PlayerService playerService;
     private final PlayerPocketService playerPocketService;
 
+    private final GameLogService gameLogService;
+
     public AcceptParcelRequestHandler() {
         parcelService = ServiceManager.getInstance().getParcelService();
         playerService = ServiceManager.getInstance().getPlayerService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
+        gameLogService = ServiceManager.getInstance().getGameLogService();
     }
 
     @Override
@@ -48,8 +54,28 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
         Parcel parcel = parcelService.findById(c2SAcceptParcelRequest.getParcelId().longValue());
         if (parcel == null) return;
 
+        FTClient ftClient = (FTClient) connection.getClient();
+        if (ftClient == null)
+            return;
+
+        Player player = ftClient.getPlayer();
+        if (player == null)
+            return;
+
         Player receiver = parcel.getReceiver();
         Player sender = parcel.getSender();
+
+        if (!receiver.getId().equals(player.getId())) {
+            S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -1);
+            connection.sendTCP(s2CAcceptParcelAnswer);
+
+            GameLog gameLog = new GameLog();
+            gameLog.setGameLogType(GameLogType.BANABLE);
+            gameLog.setContent("receiver not same like accepting player! parcelId: " + parcel.getId() + ", receiverId: " + receiver.getId() + ", accepting playerId: " + player.getId());
+            gameLogService.save(gameLog);
+
+            return;
+        }
 
         if (receiver.getLevel() < 20) {
             S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -1);

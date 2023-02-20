@@ -5,6 +5,8 @@ import com.jftse.emulator.server.core.packets.messenger.S2CParcelListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedParcelNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CSendParcelAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.log.GameLog;
+import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -16,10 +18,7 @@ import com.jftse.entities.database.model.messenger.Parcel;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.service.ParcelService;
-import com.jftse.server.core.service.PlayerPocketService;
-import com.jftse.server.core.service.PlayerService;
-import com.jftse.server.core.service.ProductService;
+import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 
 import java.util.List;
@@ -33,11 +32,14 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
     private final PlayerPocketService playerPocketService;
     private final ParcelService parcelService;
 
+    private final GameLogService gameLogService;
+
     public SendParcelRequestHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         productService = ServiceManager.getInstance().getProductService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         parcelService = ServiceManager.getInstance().getParcelService();
+        gameLogService = ServiceManager.getInstance().getGameLogService();
     }
 
     @Override
@@ -75,6 +77,18 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
             if (sender == null) {
                 S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
                 connection.sendTCP(s2CSendParcelAnswerPacket);
+                return;
+            }
+
+            if (!sender.getPocket().getId().equals(item.getPocket().getId())) {
+                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
+                connection.sendTCP(s2CSendParcelAnswerPacket);
+
+                GameLog gameLog = new GameLog();
+                gameLog.setGameLogType(GameLogType.BANABLE);
+                gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requesting player pocketId: " + sender.getPocket().getId() + ", requesting playerId: " + sender.getId());
+                gameLogService.save(gameLog);
+
                 return;
             }
 

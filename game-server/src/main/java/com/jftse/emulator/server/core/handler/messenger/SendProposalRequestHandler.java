@@ -6,6 +6,8 @@ import com.jftse.emulator.server.core.packets.messenger.S2CProposalDeliveredAnsw
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedProposalNotificationPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.log.GameLog;
+import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -17,10 +19,7 @@ import com.jftse.entities.database.model.messenger.Proposal;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.service.FriendService;
-import com.jftse.server.core.service.PlayerPocketService;
-import com.jftse.server.core.service.PlayerService;
-import com.jftse.server.core.service.ProposalService;
+import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 
 import java.util.List;
@@ -34,11 +33,14 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
     private final PlayerService playerService;
     private final FriendService friendService;
 
+    private final GameLogService gameLogService;
+
     public SendProposalRequestHandler() {
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         proposalService = ServiceManager.getInstance().getProposalService();
         playerService = ServiceManager.getInstance().getPlayerService();
         friendService = ServiceManager.getInstance().getFriendService();
+        gameLogService = ServiceManager.getInstance().getGameLogService();
     }
 
     @Override
@@ -50,7 +52,7 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
     @Override
     public void handle() {
         FTClient ftClient = (FTClient) connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (ftClient == null)
             return;
 
         PlayerPocket item = playerPocketService.findById(c2SSendProposalRequestPacket.getPlayerPocketId().longValue());
@@ -73,6 +75,21 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
         }
 
         Player sender = ftClient.getPlayer();
+        if (sender == null)
+            return;
+
+        if (!sender.getPocket().getId().equals(item.getPocket().getId())) {
+            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -2);
+            connection.sendTCP(proposalDeliveredAnswerPacket);
+
+            GameLog gameLog = new GameLog();
+            gameLog.setGameLogType(GameLogType.BANABLE);
+            gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requesting player pocketId: " + sender.getPocket().getId() + ", requesting playerId: " + sender.getId());
+            gameLogService.save(gameLog);
+
+            return;
+        }
+
         Player receiver = playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
 
         List<Friend> senderFriend = friendService.findByPlayer(sender);
