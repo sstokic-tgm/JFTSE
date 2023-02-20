@@ -86,7 +86,7 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
 
                 GameLog gameLog = new GameLog();
                 gameLog.setGameLogType(GameLogType.BANABLE);
-                gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requesting player pocketId: " + sender.getPocket().getId() + ", requesting playerId: " + sender.getId());
+                gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requested playerPocketId: " + item.getId() + ", requesting player pocketId: " + sender.getPocket().getId() + ", requesting playerId: " + sender.getId());
                 gameLogService.save(gameLog);
 
                 return;

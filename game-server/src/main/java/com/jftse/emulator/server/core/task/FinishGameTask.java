@@ -318,6 +318,10 @@ public class FinishGameTask extends AbstractTask {
                     gameLogContent.append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
                 });
                 gameLogContent.append("playtime: ").append(timeNeededSeconds).append("s");
+                if (game.isHardMode())
+                    gameLogContent.append("; ").append("hard mode");
+                if (game.isRandomGuardiansMode())
+                    gameLogContent.append("; ").append("random mode");
 
                 GameLog gameLog = new GameLog();
                 gameLog.setGameLogType(GameLogType.BANABLE);
@@ -424,6 +428,10 @@ public class FinishGameTask extends AbstractTask {
         });
 
         gameLogContent.append("playtime: ").append(TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded())).append("s");
+        if (game.isHardMode())
+            gameLogContent.append("; ").append("hard mode");
+        if (game.isRandomGuardiansMode())
+            gameLogContent.append("; ").append("random mode");
 
         GameLog gameLog = new GameLog();
         gameLog.setGameLogType(GameLogType.GUARDIAN_GAME);
