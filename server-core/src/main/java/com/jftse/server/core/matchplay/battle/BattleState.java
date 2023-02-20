@@ -3,7 +3,7 @@ package com.jftse.server.core.matchplay.battle;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
@@ -23,7 +23,7 @@ public class BattleState {
     protected boolean shieldActive;
     protected boolean miniamActive;
     protected boolean apollonFlashActive;
-    protected LinkedBlockingDeque<SkillUse> skillUseDeque;
+    protected ConcurrentHashMap<Integer, SkillUse> quickSlotSkillUseMap;
 
     protected BattleState(short position, int hp, int str, int sta, int dex, int will) {
         this();
@@ -43,6 +43,6 @@ public class BattleState {
         miniamActive = false;
         apollonFlashActive = false;
 
-        skillUseDeque = new LinkedBlockingDeque<>();
+        quickSlotSkillUseMap = new ConcurrentHashMap<>();
     }
 }

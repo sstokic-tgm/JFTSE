@@ -1,11 +1,14 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayUsesSkill;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayUseSkill;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.log.GameLog;
+import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -15,6 +18,8 @@ import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
+import com.jftse.server.core.matchplay.battle.PlayerBattleState;
+import com.jftse.server.core.matchplay.battle.SkillUse;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.entities.database.model.player.Player;
@@ -22,10 +27,8 @@ import com.jftse.entities.database.model.player.QuickSlotEquipment;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.service.PlayerPocketService;
-import com.jftse.server.core.service.PocketService;
-import com.jftse.server.core.service.QuickSlotEquipmentService;
-import com.jftse.server.core.service.SkillService;
+import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import lombok.extern.log4j.Log4j2;
 
@@ -39,11 +42,14 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
     private final PlayerPocketService playerPocketService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
 
+    private final GameLogService gameLogService;
+
     public PlayerUseSkillHandler() {
         this.skillService = ServiceManager.getInstance().getSkillService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.quickSlotEquipmentService = ServiceManager.getInstance().getQuickSlotEquipmentService();
+        this.gameLogService = ServiceManager.getInstance().getGameLogService();
     }
 
     @Override
@@ -59,11 +65,15 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
                 || ftClient.getPlayer() == null || ftClient.getRoomPlayer() == null)
             return;
 
+        long skillUseTimestamp = System.currentTimeMillis();
         Player player = ftClient.getPlayer();
 
-        byte position = anyoneUsesSkill.getAttackerPosition();
-        boolean attackerIsGuardian = position > 9;
-        boolean attackerIsPlayer = position < 4;
+        byte attackerPosition = anyoneUsesSkill.getAttackerPosition();
+        byte targetPosition = anyoneUsesSkill.getTargetPosition();
+        boolean isQuickSlot = anyoneUsesSkill.isQuickSlot();
+
+        boolean attackerIsGuardian = attackerPosition > 9;
+        boolean attackerIsPlayer = attackerPosition < 4;
         GameSession gameSession = ftClient.getActiveGameSession();
         // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
         if (gameSession == null) return;
@@ -73,26 +83,73 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
         RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         Skill skill = skillService.findSkillById((long) anyoneUsesSkill.getSkillIndex() + 1);
+        SkillUse skillUse = null;
+        if (skill != null)
+            skillUse = new SkillUse(skill, attackerPosition, targetPosition, isQuickSlot, skillUseTimestamp, false);
 
         if (attackerIsGuardian) {
             if (skill != null) {
-                this.handleSpecialSkillsUseOfGuardians(ftClient.getConnection(), position, (MatchplayGuardianGame) game, skill);
+                this.handleSpecialSkillsUseOfGuardians(ftClient.getConnection(), attackerPosition, (MatchplayGuardianGame) game, skill);
             }
         } else if (attackerIsPlayer) {
             if (roomPlayer != null) {
-                if (anyoneUsesSkill.isQuickSlot()) {
+                if (isQuickSlot) {
+                    if (!isQsUseValid(skillUseTimestamp, player, skill, skillUse, game, attackerPosition))
+                        return;
+
                     this.handleQuickSlotItemUse(ftClient.getConnection(), player, anyoneUsesSkill);
                 }
             }
         }
 
         S2CMatchplayUseSkill packet =
-                new S2CMatchplayUseSkill(position, anyoneUsesSkill.getTargetPosition(), anyoneUsesSkill.getSkillIndex(), anyoneUsesSkill.getSeed(), anyoneUsesSkill.getXTarget(), anyoneUsesSkill.getZTarget(), anyoneUsesSkill.getYTarget());
+                new S2CMatchplayUseSkill(attackerPosition, targetPosition, anyoneUsesSkill.getSkillIndex(), anyoneUsesSkill.getSeed(), anyoneUsesSkill.getXTarget(), anyoneUsesSkill.getZTarget(), anyoneUsesSkill.getYTarget());
         gameSession.getClients().forEach(c -> {
             if (c.getConnection().getId() != ftClient.getConnection().getId()) {
                 c.getConnection().sendTCP(packet);
             }
         });
+    }
+
+    private boolean isQsUseValid(long skillUseTimestamp, Player player, Skill skill, SkillUse skillUse, MatchplayGame game, byte attackerPosition) {
+        PlayerBattleState playerBattleState;
+        if (game instanceof MatchplayGuardianGame) {
+            playerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
+                    .filter(pbs -> pbs.getPosition() == attackerPosition)
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            playerBattleState = ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
+                    .filter(pbs -> pbs.getPosition() == attackerPosition)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (playerBattleState != null && skillUse != null) {
+            int quickSlotIndex = anyoneUsesSkill.getQuickSlotIndex();
+            SkillUse lastSkillUse = playerBattleState.getQuickSlotSkillUseMap().get(quickSlotIndex);
+            if (lastSkillUse == null) {
+                playerBattleState.getQuickSlotSkillUseMap().put(quickSlotIndex, skillUse);
+            } else {
+                long diff = skillUseTimestamp - lastSkillUse.getTimestamp();
+                long coolingTime = game instanceof MatchplayGuardianGame ? skill.getGdCoolingTime().longValue() : skill.getCoolingTime().longValue();
+                if (diff < coolingTime) {
+                    S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
+                    connection.sendTCP(msgPacket);
+
+                    GameLog gameLog = new GameLog();
+                    gameLog.setGameLogType(GameLogType.BANABLE);
+                    gameLog.setContent(player.getId() + " used " + skill.getName() + " before cooldown has passed. QS cooldown: " + coolingTime + ", cooldown difference: " + diff);
+                    gameLogService.save(gameLog);
+
+                    connection.close();
+
+                    return false;
+                } else {
+                    playerBattleState.getQuickSlotSkillUseMap().put(quickSlotIndex, skillUse);
+                }
+            }
+        }
+        return true;
     }
 
     private void handleQuickSlotItemUse(FTConnection connection, Player player, C2SMatchplayUsesSkill playerUseSkill) {
