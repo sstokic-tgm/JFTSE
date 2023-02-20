@@ -149,7 +149,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
 
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), (short) 0, skillHitsTarget.getSkillId(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }
@@ -274,9 +274,9 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
             }
         }
 
-        byte skillToApply = this.getSkillToApply(skill);
+        Skill skillToApply = this.getSkillToApply(skill);
         S2CMatchplayDealDamage damageToPlayerPacket =
-                new S2CMatchplayDealDamage(targetPosition, newHealth, (short) 0, skillToApply, skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
+                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply.getTargeting().shortValue(), skillToApply.getId().byteValue(), skillHitsTarget.getXKnockbackPosition(), skillHitsTarget.getYKnockbackPosition());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         return true;
     }
@@ -293,17 +293,25 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
         }
     }
 
-    private byte getSkillToApply(Skill skill) {
+    private Skill getSkillToApply(Skill skill) {
         boolean targetHittingHimself = skillHitsTarget.getAttackerPosition() == skillHitsTarget.getTargetPosition();
         if (skill != null && skill.getId() == 64 && targetHittingHimself) {
-            return 3;
+            log.debug("skill.getId() == 64 && targetHittingHimself return 3");
+            return skillService.findSkillById(3L);
         }
 
         if (!skillHitsTarget.isApplySkillEffect()) {
-            return 3;
+            log.debug("!skillHitsTarget.isApplySkillEffect() return 3");
+            return skillService.findSkillById(3L);
         }
 
-        return skillHitsTarget.getSkillId();
+        Skill skillToApply = skillService.findSkillById((long) skillHitsTarget.getSkillId());
+        if (skillToApply == null && skillHitsTarget.getSkillId() == 0) {
+            skillToApply = new Skill();
+            skillToApply.setId(0L);
+            skillToApply.setTargeting(0);
+        }
+        return skillToApply;
     }
 
     private void handleAnyTeamDead(FTConnection connection, MatchplayBattleGame game) {

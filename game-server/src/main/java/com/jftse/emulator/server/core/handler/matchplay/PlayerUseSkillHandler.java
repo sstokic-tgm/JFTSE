@@ -159,7 +159,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
         if (guardianBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage((short) guardianBattleState.getPosition(), (short) guardianBattleState.getCurrentHealth().get(), (short) 0, skill.getId().byteValue(), 0, 0);
+                    new S2CMatchplayDealDamage((short) guardianBattleState.getPosition(), (short) guardianBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }
