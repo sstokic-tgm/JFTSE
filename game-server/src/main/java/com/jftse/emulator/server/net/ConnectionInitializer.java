@@ -8,11 +8,13 @@ import com.jftse.server.core.handler.PacketHandlerFactory;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.flush.FlushConsolidationHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import java.math.BigInteger;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
@@ -34,6 +36,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
+        ch.pipeline().addLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS));
         ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, log));
         ch.pipeline().addLast("encoder", new PacketEncoder(encryptionKey, log));

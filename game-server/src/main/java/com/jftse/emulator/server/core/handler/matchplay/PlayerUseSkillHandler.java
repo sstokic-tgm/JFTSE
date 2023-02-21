@@ -7,6 +7,7 @@ import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayUseSkill;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -28,6 +29,7 @@ import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import lombok.extern.log4j.Log4j2;
@@ -41,6 +43,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
+    private final AuthenticationService authenticationService;
 
     private final GameLogService gameLogService;
 
@@ -49,6 +52,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.quickSlotEquipmentService = ServiceManager.getInstance().getQuickSlotEquipmentService();
+        this.authenticationService = ServiceManager.getInstance().getAuthenticationService();
         this.gameLogService = ServiceManager.getInstance().getGameLogService();
     }
 
@@ -139,7 +143,14 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
                     GameLog gameLog = new GameLog();
                     gameLog.setGameLogType(GameLogType.BANABLE);
                     gameLog.setContent(player.getId() + " used " + skill.getName() + " before cooldown has passed. QS cooldown: " + coolingTime + ", cooldown difference: " + diff);
-                    gameLogService.save(gameLog);
+                    gameLog = gameLogService.save(gameLog);
+
+                    Account account = authenticationService.findAccountById(player.getAccount().getId());
+                    if (account != null) {
+                        account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID);
+                        account.setBanReason("gameLogId: " + gameLog.getId());
+                        authenticationService.updateAccount(account);
+                    }
 
                     connection.close();
 
