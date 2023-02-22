@@ -47,6 +47,8 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
     private final GameLogService gameLogService;
 
+    private final static int TIMESTAMP_DELTA = 100;
+
     public PlayerUseSkillHandler() {
         this.skillService = ServiceManager.getInstance().getSkillService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
@@ -69,7 +71,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
                 || ftClient.getPlayer() == null || ftClient.getRoomPlayer() == null)
             return;
 
-        long skillUseTimestamp = System.currentTimeMillis();
+        long skillUseTimestamp = System.currentTimeMillis() + TIMESTAMP_DELTA;
         Player player = ftClient.getPlayer();
 
         byte attackerPosition = anyoneUsesSkill.getAttackerPosition();
@@ -137,6 +139,13 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
                 long diff = skillUseTimestamp - lastSkillUse.getTimestamp();
                 long coolingTime = game instanceof MatchplayGuardianGame ? skill.getGdCoolingTime().longValue() : skill.getCoolingTime().longValue();
                 if (diff < coolingTime) {
+                    playerBattleState.getQuickSlotSkillUseNoCDDetects().getAndIncrement();
+                } else {
+                    playerBattleState.getQuickSlotSkillUseNoCDDetects().set(0);
+                }
+                playerBattleState.getQuickSlotSkillUseMap().put(quickSlotIndex, skillUse);
+
+                if (playerBattleState.getQuickSlotSkillUseNoCDDetects().get() >= 3) {
                     S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
                     connection.sendTCP(msgPacket);
 
@@ -155,8 +164,6 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
                     connection.close();
 
                     return false;
-                } else {
-                    playerBattleState.getQuickSlotSkillUseMap().put(quickSlotIndex, skillUse);
                 }
             }
         }

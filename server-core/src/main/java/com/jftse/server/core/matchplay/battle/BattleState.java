@@ -24,6 +24,7 @@ public class BattleState {
     protected boolean miniamActive;
     protected boolean apollonFlashActive;
     protected ConcurrentHashMap<Integer, SkillUse> quickSlotSkillUseMap;
+    protected AtomicInteger quickSlotSkillUseNoCDDetects;
 
     protected BattleState(short position, int hp, int str, int sta, int dex, int will) {
         this();
@@ -44,5 +45,6 @@ public class BattleState {
         apollonFlashActive = false;
 
         quickSlotSkillUseMap = new ConcurrentHashMap<>();
+        quickSlotSkillUseNoCDDetects = new AtomicInteger(0);
     }
 }
