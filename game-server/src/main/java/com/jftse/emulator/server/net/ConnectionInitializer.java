@@ -10,6 +10,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.EventExecutorGroup;
+import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
 import lombok.extern.log4j.Log4j2;
 
 import java.math.BigInteger;
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
     private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
     private final TCPChannelHandler tcpChannelHandler;
+    private final EventExecutorGroup group = new UnorderedThreadPoolEventExecutor(8);
 
     public ConnectionInitializer(final PacketHandlerFactory packetHandlerFactory) {
         FT_CONNECTION_ATTRIBUTE_KEY = AttributeKey.newInstance("connection");
@@ -40,7 +43,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, log));
         ch.pipeline().addLast("encoder", new PacketEncoder(encryptionKey, log));
-        ch.pipeline().addLast(tcpChannelHandler);
+        ch.pipeline().addLast(group, tcpChannelHandler);
     }
 
     private BigInteger getRandomBigInteger() {
