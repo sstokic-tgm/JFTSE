@@ -4,17 +4,14 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.net.Client;
-import com.jftse.server.core.protocol.Packet;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FTClient extends Client<FTConnection> {
     private Long accountId;
     private Long activePlayerId;
 
-    private boolean isGameMaster = false;
-
-    private final ConcurrentLinkedDeque<Packet> packetsToSendOnFrame = new ConcurrentLinkedDeque<>();
+    private final AtomicBoolean isClientAlive = new AtomicBoolean(false);
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;
@@ -22,10 +19,6 @@ public class FTClient extends Client<FTConnection> {
 
     public void setAccount(Long id) {
         this.accountId = id;
-        final Account account = getAccount();
-        if (account != null) {
-            isGameMaster = account.getGameMaster();
-        }
     }
 
     public Player getPlayer() {
@@ -52,7 +45,7 @@ public class FTClient extends Client<FTConnection> {
         ServiceManager.getInstance().getAuthenticationService().updateAccount(account);
     }
 
-    public ConcurrentLinkedDeque<Packet> getPacketsToSendOnFrame() {
-        return packetsToSendOnFrame;
+    public AtomicBoolean isClientAlive() {
+        return isClientAlive;
     }
 }

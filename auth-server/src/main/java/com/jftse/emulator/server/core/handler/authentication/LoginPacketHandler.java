@@ -5,7 +5,6 @@ import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.authserver.C2SLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
-import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
@@ -20,14 +19,12 @@ import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.S2CDisconnectAnswerPacket;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
-import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @PacketOperationIdentifier(PacketOperations.C2SLoginRequest)
 @Log4j2
@@ -138,10 +135,6 @@ public class LoginPacketHandler extends AbstractPacketHandler {
 
                 S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.SUCCESS, token, timestamp);
                 connection.sendTCP(loginAnswerPacket);
-
-                int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
-                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account), tutorialCount);
-                ThreadManager.getInstance().schedule(() -> connection.sendTCP(playerListPacket), 10, TimeUnit.MILLISECONDS);
 
                 String hostAddress;
                 if (connection.getRemoteAddressTCP() != null)

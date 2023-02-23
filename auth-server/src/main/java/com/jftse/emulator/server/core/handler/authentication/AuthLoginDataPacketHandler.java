@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler.authentication;
 
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.authserver.C2SAuthLoginPacket;
@@ -11,8 +10,7 @@ import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
-import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.entities.database.model.pocket.Pocket;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
@@ -21,14 +19,12 @@ import com.jftse.server.core.service.AuthTokenService;
 import com.jftse.server.core.service.AuthenticationService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
-import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
-import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @PacketOperationIdentifier(PacketOperations.C2SAuthLoginData)
 @Log4j2
@@ -75,12 +71,19 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             authTokenService.save(authToken);
 
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.SUCCESS, token, timestamp);
-            client.getPacketsToSendOnFrame().offer(loginAnswerPacket);
+            connection.sendTCP(loginAnswerPacket);
 
             int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
 
-            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerService.findAllByAccount(account), tutorialCount);
-            client.getPacketsToSendOnFrame().offer(playerListPacket);
+            List<Player> playerList = playerService.findAllByAccount(account);
+            boolean hasNewChar = playerList.stream().anyMatch(p -> DateUtils.isSameDay(p.getCreated(), new Date()) && !p.getAlreadyCreated());
+
+            if (hasNewChar) {
+                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+                connection.sendTCP(playerListPacket);
+            }
+            S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
+            connection.sendTCP(gameServerListPacket);
         } else {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) -1);
             connection.sendTCP(authLoginAnswerPacket);

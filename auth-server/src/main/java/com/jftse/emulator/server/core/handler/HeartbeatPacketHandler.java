@@ -33,9 +33,6 @@ public class HeartbeatPacketHandler extends AbstractPacketHandler {
                     connection.close();
                 }
             }
-            while (client.getPacketsToSendOnFrame().peek() != null) {
-                connection.sendTCP(client.getPacketsToSendOnFrame().poll());
-            }
 
             Packet answerHeartBeat = new Packet((char) 0xFF87);
             answerHeartBeat.write(packet.getClientTimestamp());
