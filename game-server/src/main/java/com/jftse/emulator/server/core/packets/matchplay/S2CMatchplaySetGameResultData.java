@@ -7,7 +7,7 @@ import com.jftse.server.core.protocol.Packet;
 import java.util.List;
 
 public class S2CMatchplaySetGameResultData extends Packet {
-    public S2CMatchplaySetGameResultData(List<PlayerReward> playerRewards) {
+    public S2CMatchplaySetGameResultData(List<PlayerReward> playerRewards, List<Short> bonusResultGameData) {
         super(PacketOperations.S2CMatchplaySetGameResultData);
 
         this.write((byte) playerRewards.size());
@@ -15,7 +15,14 @@ public class S2CMatchplaySetGameResultData extends Packet {
             this.write(playerReward.getPlayerPosition());
             this.write(playerReward.getRewardExp()); // EXP
             this.write(playerReward.getRewardGold()); // GOLD
-            this.write(0); // Bonuses
+            /******* Bonus *******/
+            //this.write((byte) 0); // 0000 0001 = PF, 0000 0010 = GB, 0000 0100 = Time, 0000 1000 = matchplay, 0001 0000 = Lv up, ...
+            //this.write((byte) 1); // 0000 0001 = Couple Bonus
+            //this.write((byte) 31); // 0000 0001 = EXP Bonus, 0000 0010 = Gold Bonus, 0000 1000 = Ring Wiseman, 0000 0100 = Event
+            this.write(bonusResultGameData.get(0).byteValue()); // 0000 0001 = PF, 0000 0010 = GB, 0000 0100 = Time, 0000 1000 = matchplay, 0001 0000 = Lv up, ...
+            this.write(bonusResultGameData.get(1).byteValue()); // 0000 0001 = Couple Bonus
+            this.write(bonusResultGameData.get(2).byteValue()); // 0000 0001 = EXP Bonus, 0000 0010 = Gold Bonus, 0000 1000 = Ring Wiseman, 0000 0100 = Event
+
         }
     }
 }

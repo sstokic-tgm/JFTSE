@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.matchplay.point;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
 import com.jftse.emulator.server.core.life.item.special.RingOfGold;
@@ -52,6 +53,9 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler {
     private C2SMatchplayPointPacket matchplayPointPacket;
+    private short bonusResultGameDataBasic = 0;
+    private short bonusResultGameDataCouple = 0;
+    private short bonusResultGameDataSpecial = 0;
 
     private final PacketEventHandler packetEventHandler;
 
@@ -87,6 +91,8 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
         GameSession gameSession = ftClient.getActiveGameSession();
         MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getMatchplayGame();
         int gameSessionId = ftClient.getGameSessionId();
+
+        ArrayList<Short> bonusResultGameData = new ArrayList<>();
 
         boolean isSingles = gameSession.getPlayers() == 2;
         int pointsTeamRed = game.getPointsRedTeam();
@@ -178,6 +184,9 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         wonGame = true;
                     }
 
+                    if(!isSingles)
+                        bonusResultGameDataBasic |= BonusIconHighlightValues.TeamBonus;
+
                     PlayerReward playerReward = playerRewards.stream()
                             .filter(x -> x.getPlayerPosition() == rp.getPosition())
                             .findFirst()
@@ -253,6 +262,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                                     newCouplePoints = player.getCouplePoints() + 2;
 
                                 player.setCouplePoints(newCouplePoints);
+                                bonusResultGameDataCouple |= BonusIconHighlightValues.CoupleBonus;
                             }
                         }
 
@@ -292,6 +302,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                     byte playerLevel = player.getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);
                     if (playerLevel != oldLevel) {
+                        bonusResultGameDataBasic |= BonusIconHighlightValues.LevelBonus;
                         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                         rp.setStatusPointsAddedDto(statusPointsAddedDto);
 
@@ -302,11 +313,15 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                     S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
                     client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
-                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
+
+                    bonusResultGameData.add(bonusResultGameDataBasic);
+                    bonusResultGameData.add(bonusResultGameDataCouple);
+                    bonusResultGameData.add(bonusResultGameDataSpecial);
+                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, bonusResultGameData);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                 }
 
-                S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
+                S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards, bonusResultGameData);
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                 S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
@@ -447,6 +462,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
+                    bonusResultGameDataSpecial |= BonusIconHighlightValues.WisemanBonus;
                     return true;
                 }
                 return false;
@@ -464,6 +480,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
+                    bonusResultGameDataSpecial |= BonusIconHighlightValues.ExpBonus;
                     return true;
                 }
                 return false;
@@ -481,6 +498,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
+                    bonusResultGameDataSpecial |= BonusIconHighlightValues.GoldBonus;
                     return true;
                 }
                 return false;
