@@ -8,8 +8,6 @@ import com.jftse.server.core.handler.PacketHandlerFactory;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.flush.FlushConsolidationHandler;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -41,7 +39,6 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
-        ch.pipeline().addLast("netty-logger", new LoggingHandler(LogLevel.DEBUG));
         ch.pipeline().addLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS));
         ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, log));

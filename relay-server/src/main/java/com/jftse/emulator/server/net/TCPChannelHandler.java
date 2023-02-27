@@ -9,6 +9,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
@@ -62,13 +63,15 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
     @Override
     public void exceptionCaught(FTConnection connection, Throwable cause) throws Exception {
-        var shouldHandleException = switch (cause.getMessage()) {
-            case "Connection reset", "Connection timed out", "No route to host" -> false;
-            default -> true;
-        };
+        if (!cause.equals(ReadTimeoutException.INSTANCE)) {
+            var shouldHandleException = switch (cause.getMessage()) {
+                case "Connection reset", "Connection timed out", "No route to host" -> false;
+                default -> true;
+            };
 
-        if (shouldHandleException) {
-            log.warn("(" + connection.getRemoteAddressTCP().toString() + ") exceptionCaught: " + cause.getMessage(), cause);
+            if (shouldHandleException) {
+                log.warn("(" + connection.getRemoteAddressTCP().toString() + ") exceptionCaught: " + cause.getMessage(), cause);
+            }
         }
     }
 }

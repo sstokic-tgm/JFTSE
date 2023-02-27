@@ -24,7 +24,7 @@ public class HeartbeatPacketHandler extends AbstractPacketHandler {
         if (client != null) {
             Account account = client.getAccount();
             if (account != null) {
-                if (account.getStatus() == AuthenticationServiceImpl.SUCCESS) {
+                if (!connection.getIsClosingConnection().get() && account.getStatus() == AuthenticationServiceImpl.SUCCESS) {
                     account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
                     client.saveAccount(account);
                 }
