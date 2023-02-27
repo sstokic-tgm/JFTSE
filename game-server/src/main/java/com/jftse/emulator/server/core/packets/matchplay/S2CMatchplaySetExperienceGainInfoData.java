@@ -28,9 +28,20 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write(0); // Unk
         this.write(0); // Unk
 
+        // TODO NOTE: do not change the packet structure without reversing it first
+        this.write(0); // Bonus (1 = Perfect, ...)
+
+        this.write((byte) 0);
+
+        this.write(0);
+        this.write(0);
+        this.write(0);
+
         /******* Bonus *******/
-        this.write(bonusResultGameData.get(0).byteValue()); // 0000 0001 = PF, 0000 0010 = GB, 0000 0100 = Time, 0000 1000 = matchplay, 0001 0000 = Lv up, ...
-        this.write(bonusResultGameData.get(1).byteValue()); // 0000 0001 = Couple Bonus
-        this.write(bonusResultGameData.get(2).byteValue()); // 0000 0001 = EXP Bonus, 0000 0010 = Gold Bonus, 0000 1000 = Ring Wiseman, 0000 0100 = Event
+        // bonus here is 3 bytes long, if this has to be replaced with an int, like in S2CMatchplaySetGameResultData mentioned, int is 4 bytes long, so here is missing a byte
+        // also bonusResultGameData should/must be inside playerReward in this case
+        // this.write(bonusResultGameData.get(0).byteValue()); // 0000 0001 = PF, 0000 0010 = GB, 0000 0100 = Time, 0000 1000 = matchplay, 0001 0000 = Lv up, ...
+        // this.write(bonusResultGameData.get(1).byteValue()); // 0000 0001 = Couple Bonus
+        // this.write(bonusResultGameData.get(2).byteValue()); // 0000 0001 = EXP Bonus, 0000 0010 = Gold Bonus, 0000 1000 = Ring Wiseman, 0000 0100 = Event
     }
 }
