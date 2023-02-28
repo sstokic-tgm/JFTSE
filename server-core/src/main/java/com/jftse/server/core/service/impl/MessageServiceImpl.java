@@ -24,11 +24,11 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void remove(Long messageId) {
-        messageRepository.deleteById(messageId);
+        messageRepository.findById(messageId).ifPresent(m -> messageRepository.deleteById(m.getId()));
     }
 
     @Override
-    public Message findById(Long id) { return messageRepository.findById(id).get(); }
+    public Message findById(Long id) { return messageRepository.findById(id).orElse(null); }
 
     @Override
     public List<Message> findBySender(Player sender) { return messageRepository.findBySender(sender); }

@@ -13,6 +13,7 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
     protected T client;
     protected ChannelHandlerContext ctx;
     protected ChannelId id;
+    protected InetSocketAddress remoteAddress;
 
     protected AtomicBoolean isClosingConnection = new AtomicBoolean(false);
 
@@ -33,7 +34,9 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
     }
 
     public InetSocketAddress getRemoteAddressTCP() {
-        return (InetSocketAddress) ctx.channel().remoteAddress();
+        if (remoteAddress == null)
+            remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        return remoteAddress;
     }
 
     public ChannelFuture close() {

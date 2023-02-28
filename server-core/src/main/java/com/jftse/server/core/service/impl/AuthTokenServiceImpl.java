@@ -24,7 +24,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
 
     @Override
     public void remove(AuthToken authToken) {
-        authTokenRepository.deleteById(authToken.getId());
+        authTokenRepository.findById(authToken.getId()).ifPresent(at -> authTokenRepository.deleteById(at.getId()));
     }
 
     @Override
