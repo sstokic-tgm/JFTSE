@@ -53,9 +53,6 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler {
     private C2SMatchplayPointPacket matchplayPointPacket;
-    private short bonusResultGameDataBasic = 0;
-    private short bonusResultGameDataCouple = 0;
-    private short bonusResultGameDataSpecial = 0;
 
     private final PacketEventHandler packetEventHandler;
 
@@ -91,8 +88,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
         GameSession gameSession = ftClient.getActiveGameSession();
         MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getMatchplayGame();
         int gameSessionId = ftClient.getGameSessionId();
-
-        ArrayList<Short> bonusResultGameData = new ArrayList<>();
 
         boolean isSingles = gameSession.getPlayers() == 2;
         int pointsTeamRed = game.getPointsRedTeam();
@@ -184,9 +179,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         wonGame = true;
                     }
 
-                    if(!isSingles)
-                        bonusResultGameDataBasic |= BonusIconHighlightValues.TeamBonus;
-
                     PlayerReward playerReward = playerRewards.stream()
                             .filter(x -> x.getPlayerPosition() == rp.getPosition())
                             .findFirst()
@@ -195,6 +187,10 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                     Player player = client.getPlayer();
                     byte oldLevel = player.getLevel();
                     if (playerReward != null) {
+
+                        if (!isSingles)
+                            playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.TeamBonus);
+
                         // add house bonus
                         // TODO: should be moved to getPlayerReward sometime
                         ExpGoldBonus expGoldBonus = new BasicHouseBonus(
@@ -208,7 +204,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
 
                         boolean isRingOfWisemanActive = false;
                         ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
-                        if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman)) {
+                        if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman, playerReward)) {
                             log.info("Setting Reward EXP multiplied to 1.5, before: " + rewardExp);
                             //rewardExp *= 1.5;
 
@@ -222,14 +218,14 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
 
                         if (!isRingOfWisemanActive) {
                             ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
-                            if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
+                            if (handleSpecialWearItem(client.getConnection(), specialItemROEXP, playerReward)) {
                                 log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
                                 //rewardExp *= 2;
                                 log.info("Reward EXP is now: " + rewardExp);
                             }
 
                             ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
-                            if (handleSpecialWearItem(client.getConnection(), specialItemROGold)) {
+                            if (handleSpecialWearItem(client.getConnection(), specialItemROGold, playerReward)) {
                                 log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
                                 //rewardGold *= 2;
                                 log.info("Reward Gold is now: " + rewardGold);
@@ -262,7 +258,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                                     newCouplePoints = player.getCouplePoints() + 2;
 
                                 player.setCouplePoints(newCouplePoints);
-                                bonusResultGameDataCouple |= BonusIconHighlightValues.CoupleBonus;
+                                playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.CoupleBonus << 8));
                             }
                         }
 
@@ -302,7 +298,9 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                     byte playerLevel = player.getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);
                     if (playerLevel != oldLevel) {
-                        bonusResultGameDataBasic |= BonusIconHighlightValues.LevelBonus;
+                        if (playerReward != null)
+                            playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.LevelBonus);
+
                         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                         rp.setStatusPointsAddedDto(statusPointsAddedDto);
 
@@ -313,15 +311,11 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                     S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
                     client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
-
-                    bonusResultGameData.add(bonusResultGameDataBasic);
-                    bonusResultGameData.add(bonusResultGameDataCouple);
-                    bonusResultGameData.add(bonusResultGameDataSpecial);
-                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, bonusResultGameData);
+                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                 }
 
-                S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards, bonusResultGameData);
+                S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
                 packetEventHandler.push(packetEventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
 
                 S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
@@ -441,7 +435,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
         connection.sendTCP(inventoryDataPacket);
     }
 
-    private boolean handleSpecialWearItem(FTConnection connection, ItemSpecial specialItem) {
+    private boolean handleSpecialWearItem(FTConnection connection, ItemSpecial specialItem, PlayerReward playerReward) {
         ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
         ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
         ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
@@ -462,7 +456,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-                    bonusResultGameDataSpecial |= BonusIconHighlightValues.WisemanBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.WisemanBonus << 16));
                     return true;
                 }
                 return false;
@@ -480,7 +474,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-                    bonusResultGameDataSpecial |= BonusIconHighlightValues.ExpBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.ExpBonus << 16));
                     return true;
                 }
                 return false;
@@ -498,7 +492,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-                    bonusResultGameDataSpecial |= BonusIconHighlightValues.GoldBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.GoldBonus << 16));
                     return true;
                 }
                 return false;

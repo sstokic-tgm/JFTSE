@@ -12,4 +12,5 @@ public class PlayerReward {
     private int rewardRP;
     private int rewardProductIndex;
     private int productRewardAmount;
+    private int activeBonuses = 0;
 }

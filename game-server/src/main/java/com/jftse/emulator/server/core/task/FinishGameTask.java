@@ -53,9 +53,6 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class FinishGameTask extends AbstractTask {
     private final FTConnection connection;
-    private short bonusResultGameDataBasic = 0;
-    private short bonusResultGameDataCouple = 0;
-    private short bonusResultGameDataSpecial = 0;
 
     private boolean wonGame;
 
@@ -131,8 +128,6 @@ public class FinishGameTask extends AbstractTask {
         if (isFinished)
             return;
 
-        ArrayList<Short> bonusResultGameData = new ArrayList<>();
-
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         game.setEndTime(cal.getTime());
 
@@ -162,6 +157,7 @@ public class FinishGameTask extends AbstractTask {
         StringBuilder gameLogContent = new StringBuilder();
         gameLogContent.append("Battle game finished. ");
 
+        boolean isSingles = gameSession.getPlayers() == 2;
         boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth().get() < 1);
         boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth().get() < 1);
 
@@ -181,6 +177,9 @@ public class FinishGameTask extends AbstractTask {
                         .filter(x -> x.getPlayerPosition() == rp.getPosition())
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
+
+                if (!isSingles)
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.TeamBonus);
 
                 Player player = client.getPlayer();
                 byte oldLevel = player.getLevel();
@@ -210,7 +209,7 @@ public class FinishGameTask extends AbstractTask {
                             newCouplePoints = player.getCouplePoints() + 2;
 
                         player.setCouplePoints(newCouplePoints);
-                        bonusResultGameDataCouple |= BonusIconHighlightValues.CoupleBonus;
+                        playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.CoupleBonus << 8));
                     }
                 }
 
@@ -248,7 +247,8 @@ public class FinishGameTask extends AbstractTask {
                 }
                 byte playerLevel = player.getLevel();
                 if (playerLevel != oldLevel) {
-                    bonusResultGameDataBasic |= BonusIconHighlightValues.LevelBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.LevelBonus);
+
                     StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                     rp.setStatusPointsAddedDto(statusPointsAddedDto);
 
@@ -259,19 +259,15 @@ public class FinishGameTask extends AbstractTask {
                 S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
                 client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
-
-                bonusResultGameData.add(bonusResultGameDataBasic);
-                bonusResultGameData.add(bonusResultGameDataCouple);
-                bonusResultGameData.add(bonusResultGameDataSpecial);
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
-                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, bonusResultGameData);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                 client.getConnection().sendTCP(setExperienceGainInfoData);
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
 
-            S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards, bonusResultGameData);
+            S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
             client.getConnection().sendTCP(setGameResultData);
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
@@ -411,7 +407,7 @@ public class FinishGameTask extends AbstractTask {
                             newCouplePoints = player.getCouplePoints() + 2;
 
                         player.setCouplePoints(newCouplePoints);
-                        bonusResultGameDataCouple |= BonusIconHighlightValues.CoupleBonus;
+                        playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.CoupleBonus << 8));
                     }
                 }
 
@@ -426,7 +422,8 @@ public class FinishGameTask extends AbstractTask {
                 }
                 byte playerLevel = player.getLevel();
                 if (playerLevel != oldLevel) {
-                    bonusResultGameDataBasic |= BonusIconHighlightValues.LevelBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.LevelBonus);
+
                     StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                     rp.setStatusPointsAddedDto(statusPointsAddedDto);
 
@@ -437,17 +434,14 @@ public class FinishGameTask extends AbstractTask {
                 S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
                 client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
-                bonusResultGameData.add(bonusResultGameDataBasic);
-                bonusResultGameData.add(bonusResultGameDataCouple);
-                bonusResultGameData.add(bonusResultGameDataSpecial);
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
-                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, bonusResultGameData);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
                 client.getConnection().sendTCP(setExperienceGainInfoData);
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
-            S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards, bonusResultGameData);
+            S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
             client.getConnection().sendTCP(setGameResultData);
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
@@ -499,7 +493,7 @@ public class FinishGameTask extends AbstractTask {
 
                 boolean isRingOfWisemanActive = false;
                 ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
-                if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman)) {
+                if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman, playerReward)) {
                     log.info("Setting Reward EXP multiplied to 1.5, before: " + rewardExp);
                     //rewardExp *= 1.5;
 
@@ -513,14 +507,14 @@ public class FinishGameTask extends AbstractTask {
 
                 if (!isRingOfWisemanActive) {
                     ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
-                    if (handleSpecialWearItem(client.getConnection(), specialItemROEXP)) {
+                    if (handleSpecialWearItem(client.getConnection(), specialItemROEXP, playerReward)) {
                         log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
                         //rewardExp *= 2;
                         log.info("Reward EXP is now: " + rewardExp);
                     }
 
                     ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
-                    if (handleSpecialWearItem(client.getConnection(), specialItemROGold)) {
+                    if (handleSpecialWearItem(client.getConnection(), specialItemROGold, playerReward)) {
                         log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
                         //rewardGold *= 2;
                         log.info("Reward Gold is now: " + rewardGold);
@@ -592,7 +586,7 @@ public class FinishGameTask extends AbstractTask {
         connection.sendTCP(inventoryDataPacket);
     }
 
-    private boolean handleSpecialWearItem(FTConnection connection, ItemSpecial specialItem) {
+    private boolean handleSpecialWearItem(FTConnection connection, ItemSpecial specialItem, PlayerReward playerReward) {
         ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
         ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
         ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
@@ -613,7 +607,7 @@ public class FinishGameTask extends AbstractTask {
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-                    bonusResultGameDataSpecial |= BonusIconHighlightValues.WisemanBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.WisemanBonus << 16));
                     return true;
                 }
                 return false;
@@ -631,7 +625,7 @@ public class FinishGameTask extends AbstractTask {
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-                    bonusResultGameDataSpecial |= BonusIconHighlightValues.ExpBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.ExpBonus << 16));
                     return true;
                 }
                 return false;
@@ -649,7 +643,7 @@ public class FinishGameTask extends AbstractTask {
                         if (connectionByPlayerId != null)
                             connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
                     });
-                    bonusResultGameDataSpecial |= BonusIconHighlightValues.GoldBonus;
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.GoldBonus << 16));
                     return true;
                 }
                 return false;

@@ -4,10 +4,8 @@ import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
 
-import java.util.ArrayList;
-
 public class S2CMatchplaySetExperienceGainInfoData extends Packet {
-    public S2CMatchplaySetExperienceGainInfoData(byte resultTitle, int secondsNeeded, PlayerReward playerReward, byte level, ArrayList<Short> bonusResultGameData) {
+    public S2CMatchplaySetExperienceGainInfoData(byte resultTitle, int secondsNeeded, PlayerReward playerReward, byte level) {
         super(PacketOperations.S2CMatchPlaySetExperienceGainInfoData);
 
         this.write(resultTitle); // 0 = Loser, 1 = Winner
@@ -28,8 +26,7 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write(0); // Unk
         this.write(0); // Unk
 
-        // TODO NOTE: do not change the packet structure without reversing it first
-        this.write(0); // Bonus (1 = Perfect, ...)
+        this.write(playerReward != null ? playerReward.getActiveBonuses() : 0); // Bonus (1 = Perfect, ...)
 
         this.write((byte) 0);
 
