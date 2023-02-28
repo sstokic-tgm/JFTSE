@@ -202,7 +202,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         int rewardExp = expGoldBonus.calculateExp();
                         int rewardGold = expGoldBonus.calculateGold();
 
-                        if (playerReward.getRewardExp() != rewardExpSimple || playerReward.getRewardGold() != rewardGoldSimple) {
+                        if (rewardExpSimple != rewardExp || rewardGoldSimple != rewardGold) {
                             playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.HouseBonus);
                         }
 
