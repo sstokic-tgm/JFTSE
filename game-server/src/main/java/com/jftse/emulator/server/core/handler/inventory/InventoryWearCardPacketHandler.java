@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
+import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.packets.inventory.C2SInventoryWearCardRequestPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearCardAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
@@ -38,6 +39,14 @@ public class InventoryWearCardPacketHandler extends AbstractPacketHandler {
         Player player = client.getPlayer();
 
         cardSlotEquipmentService.updateCardSlots(player, inventoryWearCardRequestPacket.getCardSlotList());
+
+        RoomPlayer roomPlayer = client.getRoomPlayer();
+        if (roomPlayer != null) {
+            if (roomPlayer.isFitting()) {
+                player = client.getPlayer();
+                roomPlayer.setCardSlotEquipmentId(player.getCardSlotEquipment().getId());
+            }
+        }
 
         List<Integer> cardSlotList = cardSlotEquipmentService.getEquippedCardSlots(player);
         S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(cardSlotList);

@@ -9,6 +9,7 @@ import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.player.*;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -19,12 +20,11 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
-import com.jftse.entities.database.model.player.ClothEquipment;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.service.CardSlotEquipmentService;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.SocialService;
+import com.jftse.server.core.service.SpecialSlotEquipmentService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,11 +38,15 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
 
     private final GuildMemberService guildMemberService;
     private final ClothEquipmentServiceImpl clothEquipmentService;
+    private final SpecialSlotEquipmentService specialSlotEquipmentService;
+    private final CardSlotEquipmentService cardSlotEquipmentService;
     private final SocialService socialService;
 
     public RoomJoinRequestPacketHandler() {
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
+        specialSlotEquipmentService = ServiceManager.getInstance().getSpecialSlotEquipmentService();
+        cardSlotEquipmentService = ServiceManager.getInstance().getCardSlotEquipmentService();
         socialService = ServiceManager.getInstance().getSocialService();
     }
 
@@ -179,11 +183,15 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
         Friend couple = socialService.getRelationship(activePlayer);
         ClothEquipment clothEquipment = clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
+        SpecialSlotEquipment specialSlotEquipment = specialSlotEquipmentService.findById(roomPlayer.getPlayer().getSpecialSlotEquipment().getId());
+        CardSlotEquipment cardSlotEquipment = cardSlotEquipmentService.findById(roomPlayer.getPlayer().getCardSlotEquipment().getId());
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer());
 
         roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
         roomPlayer.setCoupleId(couple == null ? null : couple.getId());
         roomPlayer.setClothEquipmentId(clothEquipment.getId());
+        roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
+        roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
         roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
         roomPlayer.setPosition((short) newPosition);
         roomPlayer.setMaster(false);

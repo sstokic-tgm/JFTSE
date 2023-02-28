@@ -15,9 +15,7 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
-import com.jftse.entities.database.model.player.ClothEquipment;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.entities.database.model.player.*;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.thread.ThreadManager;
@@ -326,11 +324,15 @@ public class GameManager {
         GuildMember guildMember = serviceManager.getGuildMemberService().getByPlayer(activePlayer);
         Friend couple = serviceManager.getSocialService().getRelationship(activePlayer);
         ClothEquipment clothEquipment = serviceManager.getClothEquipmentService().findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
+        SpecialSlotEquipment specialSlotEquipment = serviceManager.getSpecialSlotEquipmentService().findById(roomPlayer.getPlayer().getSpecialSlotEquipment().getId());
+        CardSlotEquipment cardSlotEquipment = serviceManager.getCardSlotEquipmentService().findById(roomPlayer.getPlayer().getCardSlotEquipment().getId());
         StatusPointsAddedDto statusPointsAddedDto = serviceManager.getClothEquipmentService().getStatusPointsFromCloths(roomPlayer.getPlayer());
 
         roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
         roomPlayer.setCoupleId(couple == null ? null : couple.getId());
         roomPlayer.setClothEquipmentId(clothEquipment.getId());
+        roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
+        roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
         roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
         roomPlayer.setPosition((short) 0);
         roomPlayer.setMaster(true);

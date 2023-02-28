@@ -9,6 +9,8 @@ import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class RoomPlayer {
@@ -16,6 +18,8 @@ public class RoomPlayer {
     private Long guildMemberId;
     private Long coupleId;
     private Long clothEquipmentId;
+    private Long specialSlotEquipmentId;
+    private Long cardSlotEquipmentId;
     private StatusPointsAddedDto statusPointsAddedDto;
     private short position;
     private boolean master;
@@ -41,5 +45,13 @@ public class RoomPlayer {
 
     public ClothEquipment getClothEquipment() {
         return ServiceManager.getInstance().getClothEquipmentService().findClothEquipmentById(clothEquipmentId);
+    }
+
+    public List<Integer> getSpecialSlotEquipment() {
+        return ServiceManager.getInstance().getSpecialSlotEquipmentService().getEquippedSpecialSlots(getPlayer());
+    }
+
+    public List<Integer> getCardSlotEquipment() {
+        return ServiceManager.getInstance().getCardSlotEquipmentService().getEquippedCardSlots(getPlayer());
     }
 }

@@ -252,7 +252,7 @@ public class FinishGameTask extends AbstractTask {
                 client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
-                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
                 client.getConnection().sendTCP(setExperienceGainInfoData);
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
@@ -427,7 +427,7 @@ public class FinishGameTask extends AbstractTask {
                 client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
-                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
                 client.getConnection().sendTCP(setExperienceGainInfoData);
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
@@ -472,13 +472,20 @@ public class FinishGameTask extends AbstractTask {
                         .findFirst()
                         .orElse(this.createEmptyPlayerReward());
 
-                // add house bonus
                 // TODO: should be moved to getPlayerReward sometime...
-                ExpGoldBonus expGoldBonus = new BattleHouseBonus(
-                        new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
+                ExpGoldBonus expGoldBonusSimple = new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold());
 
+                int rewardExpSimple = expGoldBonusSimple.calculateExp();
+                int rewardGoldSimple = expGoldBonusSimple.calculateGold();
+
+                // add house bonus
+                ExpGoldBonus expGoldBonus = new BattleHouseBonus(expGoldBonusSimple, client.getAccountId());
                 int rewardExp = expGoldBonus.calculateExp();
                 int rewardGold = expGoldBonus.calculateGold();
+
+                if (rewardExpSimple != rewardExp || rewardGoldSimple != rewardGold) {
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.HouseBonus);
+                }
 
                 log.info("EXP/Gold/Wiseman Ring Bonus trying to detect");
                 // Add EXP, Gold or Wiseman Ring Bonus if equipped
@@ -487,10 +494,10 @@ public class FinishGameTask extends AbstractTask {
                 ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
                 if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman, playerReward)) {
                     log.info("Setting Reward EXP multiplied to 1.5, before: " + rewardExp);
-                    //rewardExp *= 1.5;
+                    rewardExp *= 1.5;
 
                     log.info("Setting Reward Gold multiplied to 1.5, before: " + rewardGold);
-                    //rewardGold *= 1.5;
+                    rewardGold *= 1.5;
 
                     isRingOfWisemanActive = true;
                     log.info("Reward EXP is now: " + rewardExp);
@@ -501,14 +508,14 @@ public class FinishGameTask extends AbstractTask {
                     ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
                     if (handleSpecialWearItem(client.getConnection(), specialItemROEXP, playerReward)) {
                         log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
-                        //rewardExp *= 2;
+                        rewardExp *= 2;
                         log.info("Reward EXP is now: " + rewardExp);
                     }
 
                     ItemSpecial specialItemROGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
                     if (handleSpecialWearItem(client.getConnection(), specialItemROGold, playerReward)) {
                         log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
-                        //rewardGold *= 2;
+                        rewardGold *= 2;
                         log.info("Reward Gold is now: " + rewardGold);
                     }
                 }

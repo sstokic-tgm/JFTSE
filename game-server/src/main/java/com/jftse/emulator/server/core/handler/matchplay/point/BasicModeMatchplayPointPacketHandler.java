@@ -191,13 +191,20 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         if (!isSingles)
                             playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.TeamBonus);
 
-                        // add house bonus
                         // TODO: should be moved to getPlayerReward sometime
-                        ExpGoldBonus expGoldBonus = new BasicHouseBonus(
-                                new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold()), client.getAccountId());
+                        ExpGoldBonus expGoldBonusSimple = new ExpGoldBonusImpl(playerReward.getRewardExp(), playerReward.getRewardGold());
 
+                        int rewardExpSimple = expGoldBonusSimple.calculateExp();
+                        int rewardGoldSimple = expGoldBonusSimple.calculateGold();
+
+                        // add house bonus
+                        ExpGoldBonus expGoldBonus = new BasicHouseBonus(expGoldBonusSimple, client.getAccountId());
                         int rewardExp = expGoldBonus.calculateExp();
                         int rewardGold = expGoldBonus.calculateGold();
+
+                        if (playerReward.getRewardExp() != rewardExpSimple || playerReward.getRewardGold() != rewardGoldSimple) {
+                            playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.HouseBonus);
+                        }
 
                         log.info("EXP/Gold/Wiseman Ring Bonus trying to detect");
                         // Add EXP, Gold or Wiseman Ring Bonus if equipped
@@ -206,10 +213,10 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                         ItemSpecial specialItemROWiseman = ItemFactory.getSpecialItemInMemoryById(3);
                         if (handleSpecialWearItem(client.getConnection(), specialItemROWiseman, playerReward)) {
                             log.info("Setting Reward EXP multiplied to 1.5, before: " + rewardExp);
-                            //rewardExp *= 1.5;
+                            rewardExp *= 1.5;
 
                             log.info("Setting Reward Gold multiplied to 1.5, before: " + rewardGold);
-                            //rewardGold *= 1.5;
+                            rewardGold *= 1.5;
 
                             isRingOfWisemanActive = true;
                             log.info("Reward EXP is now: " + rewardExp);
@@ -220,14 +227,14 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                             ItemSpecial specialItemROEXP = ItemFactory.getSpecialItemInMemoryById(1);
                             if (handleSpecialWearItem(client.getConnection(), specialItemROEXP, playerReward)) {
                                 log.info("Setting Reward EXP multiplied to 2, before: " + rewardExp);
-                                //rewardExp *= 2;
+                                rewardExp *= 2;
                                 log.info("Reward EXP is now: " + rewardExp);
                             }
 
                             ItemSpecial specialItemROGold = ItemFactory.getSpecialItemInMemoryById(2);
                             if (handleSpecialWearItem(client.getConnection(), specialItemROGold, playerReward)) {
                                 log.info("Setting Reward Gold multiplied to 2, before: " + rewardGold);
-                                //rewardGold *= 2;
+                                rewardGold *= 2;
                                 log.info("Reward Gold is now: " + rewardGold);
                             }
                         }
@@ -311,7 +318,7 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                     S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
                     client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
 
-                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel);
+                    S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
                     packetEventHandler.push(packetEventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
                 }
 
