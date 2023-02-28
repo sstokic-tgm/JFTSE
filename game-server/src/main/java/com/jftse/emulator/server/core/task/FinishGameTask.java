@@ -69,11 +69,7 @@ public class FinishGameTask extends AbstractTask {
     public FinishGameTask(FTConnection connection, boolean wonGame) {
         this.connection = connection;
         this.wonGame = wonGame;
-        /*
-        bonusResultGameDataBasicByte = 0;
-        bonusResultGameDataCoupleByte = 0;
-        bonusResultGameDataSpecialByte = 0;
-        */
+
         this.levelService = ServiceManager.getInstance().getLevelService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.productService = ServiceManager.getInstance().getProductService();
@@ -87,11 +83,7 @@ public class FinishGameTask extends AbstractTask {
 
     public FinishGameTask(FTConnection connection) {
         this.connection = connection;
-        /*
-        bonusResultGameDataBasicByte = 0;
-        bonusResultGameDataCoupleByte = 0;
-        bonusResultGameDataSpecialByte = 0;
-         */
+
         this.levelService = ServiceManager.getInstance().getLevelService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.productService = ServiceManager.getInstance().getProductService();
