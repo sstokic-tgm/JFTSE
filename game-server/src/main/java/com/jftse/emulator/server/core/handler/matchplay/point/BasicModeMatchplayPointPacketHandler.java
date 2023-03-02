@@ -305,9 +305,6 @@ public class BasicModeMatchplayPointPacketHandler extends AbstractPacketHandler 
                     byte playerLevel = player.getLevel();
                     byte resultTitle = (byte) (wonGame ? 1 : 0);
                     if (playerLevel != oldLevel) {
-                        if (playerReward != null)
-                            playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.LevelBonus);
-
                         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                         rp.setStatusPointsAddedDto(statusPointsAddedDto);
 

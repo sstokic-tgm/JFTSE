@@ -239,8 +239,6 @@ public class FinishGameTask extends AbstractTask {
                 }
                 byte playerLevel = player.getLevel();
                 if (playerLevel != oldLevel) {
-                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.LevelBonus);
-
                     StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                     rp.setStatusPointsAddedDto(statusPointsAddedDto);
 
@@ -414,8 +412,6 @@ public class FinishGameTask extends AbstractTask {
                 }
                 byte playerLevel = player.getLevel();
                 if (playerLevel != oldLevel) {
-                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.LevelBonus);
-
                     StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
                     rp.setStatusPointsAddedDto(statusPointsAddedDto);
 
