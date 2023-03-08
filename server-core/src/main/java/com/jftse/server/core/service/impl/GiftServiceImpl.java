@@ -24,11 +24,11 @@ public class GiftServiceImpl implements GiftService {
 
     @Override
     public void remove(Long giftId) {
-        giftRepository.deleteById(giftId);
+        giftRepository.findById(giftId).ifPresent(g -> giftRepository.deleteById(g.getId()));
     }
 
     @Override
-    public Gift findById(Long id) { return giftRepository.findById(id).get(); }
+    public Gift findById(Long id) { return giftRepository.findById(id).orElse(null); }
 
     @Override
     public List<Gift> findBySender(Player sender) { return giftRepository.findBySender(sender); }

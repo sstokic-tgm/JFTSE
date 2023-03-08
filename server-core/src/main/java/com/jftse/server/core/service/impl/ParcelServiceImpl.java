@@ -24,7 +24,7 @@ public class ParcelServiceImpl implements ParcelService {
 
     @Override
     public void remove(Long parcelId) {
-        parcelRepository.deleteById(parcelId);
+        parcelRepository.findById(parcelId).ifPresent(p -> parcelRepository.deleteById(p.getId()));
     }
 
     @Override
