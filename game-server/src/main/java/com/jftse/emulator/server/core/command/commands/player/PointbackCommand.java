@@ -9,7 +9,7 @@ import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.life.room.ServeInfo;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.event.PacketEvent;
-import com.jftse.emulator.server.core.matchplay.event.PacketEventHandler;
+import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayTeamWinsPoint;
@@ -25,13 +25,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class PointbackCommand extends Command {
-    private final PacketEventHandler packetEventHandler;
+    private final EventHandler eventHandler;
 
 
     public PointbackCommand() {
         setDescription("vote to reset points to last one");
 
-        packetEventHandler = GameManager.getInstance().getPacketEventHandler();
+        eventHandler = GameManager.getInstance().getEventHandler();
     }
 
     @Override
@@ -45,9 +45,9 @@ public class PointbackCommand extends Command {
         GameSession gameSession = connection.getClient().getActiveGameSession();
         if (gameSession.getMatchplayGame() instanceof MatchplayBasicGame) {
             MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getMatchplayGame();
-            final boolean isFinished = game.isFinished();
+            final boolean isFinished = game.getFinished().get();
 
-            if (isFinished || (game.getSetsBlueTeam() == 0 && game.getSetsRedTeam() == 0 && game.getPointsBlueTeam() == 0 & game.getPointsRedTeam() == 0))
+            if (isFinished || (game.getSetsBlueTeam().get() == 0 && game.getSetsRedTeam().get() == 0 && game.getPointsBlueTeam().get() == 0 & game.getPointsRedTeam().get() == 0))
                 return;
 
             boolean isSingles = gameSession.getPlayers() == 2;
@@ -74,13 +74,14 @@ public class PointbackCommand extends Command {
             if (game.isPointBackAvailable()) {
                 game.pointBack();
                 pointsBackSuccess = true;
-                if (game.isSetDowngraded()) {
+                if (game.getSetDowngraded().get()) {
                     setsDownGraded = true;
                 }
-                Optional<PacketEvent> packetEvent = packetEventHandler.getServer_packetEventList().stream()
+                Optional<PacketEvent> packetEvent = eventHandler.getFireableDeque().stream()
+                        .map(x -> (PacketEvent) x)
                         .filter(pe -> !pe.isFired() && pe.getPacketEventType() == PacketEventType.FIRE_DELAYED && pe.getPacket() instanceof S2CMatchplayTriggerServe)
                         .findFirst();
-                packetEvent.ifPresent(event -> packetEventHandler.remove(event, PacketEventHandler.ServerClient.SERVER));
+                packetEvent.ifPresent(eventHandler::remove);
             }
 
             if (setsDownGraded) {
@@ -105,12 +106,12 @@ public class PointbackCommand extends Command {
 
 
                     byte serveType = ServeType.None;
-                    if (rp.getPosition() == game.getPreviousServePlayerPosition()) {
+                    if (rp.getPosition() == game.getPreviousServePlayerPosition().get()) {
                         serveType = ServeType.ServeBall;
-                        game.setServePlayer(rp);
-                    } else if (rp.getPosition() == game.getPreviousReceiverPlayerPosition()) {
+                        game.getServePlayer().set(rp);
+                    } else if (rp.getPosition() == game.getPreviousReceiverPlayerPosition().get()) {
                         serveType = ServeType.ReceiveBall;
-                        game.setReceiverPlayer(rp);
+                        game.getReceiverPlayer().set(rp);
                     }
 
                     ServeInfo playerServeInfo = new ServeInfo();
@@ -119,12 +120,12 @@ public class PointbackCommand extends Command {
                     playerServeInfo.setServeType(serveType);
                     serveInfos.add(playerServeInfo);
 
-                    S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint((byte) 0, (byte) 0, (byte) game.getPointsRedTeam(), (byte) game.getPointsBlueTeam());
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                    S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint((byte) 0, (byte) 0, (byte) game.getPointsRedTeam().get(), (byte) game.getPointsBlueTeam().get());
+                    eventHandler.push(eventHandler.createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0));
 
                     if (setsDownGraded) {
-                        S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet((byte) game.getSetsRedTeam(), (byte) game.getSetsBlueTeam());
-                        packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTeamWinsSet, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                        S2CMatchplayTeamWinsSet matchplayTeamWinsSet = new S2CMatchplayTeamWinsSet((byte) game.getSetsRedTeam().get(), (byte) game.getSetsBlueTeam().get());
+                        eventHandler.push(eventHandler.createPacketEvent(client, matchplayTeamWinsSet, PacketEventType.DEFAULT, 0));
                     }
                 }
             }
@@ -132,21 +133,18 @@ public class PointbackCommand extends Command {
             if (serveInfos.size() > 0) {
                 if (!isSingles) {
                     game.setPlayerLocationsForDoubles(serveInfos);
-                    ServeInfo receiver = serveInfos.stream()
+                    Optional<ServeInfo> receiver = serveInfos.stream()
                             .filter(x -> x.getServeType() == ServeType.ReceiveBall)
-                            .findFirst()
-                            .orElse(null);
-                    if (receiver != null) {
-                        roomPlayerList.stream()
-                                .filter(x -> x.getPosition() == receiver.getPlayerPosition())
-                                .findFirst()
-                                .ifPresent(game::setReceiverPlayer);
-                    }
+                            .findFirst();
+                    receiver.flatMap(serveInfo -> roomPlayerList.stream()
+                                    .filter(x -> x.getPosition() == serveInfo.getPlayerPosition())
+                                    .findFirst())
+                            .ifPresent(rp -> game.getReceiverPlayer().set(rp));
                 }
 
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfos);
                 for (FTClient client : clients)
-                    packetEventHandler.push(packetEventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.DEFAULT, 0), PacketEventHandler.ServerClient.SERVER);
+                    eventHandler.push(eventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.DEFAULT, 0));
             }
 
             if (pointsBackSuccess) {

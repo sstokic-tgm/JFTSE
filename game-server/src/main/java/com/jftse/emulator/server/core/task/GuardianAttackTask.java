@@ -3,8 +3,8 @@ package com.jftse.emulator.server.core.task;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
-import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayGiveSpecificSkill;
 import com.jftse.emulator.server.net.FTConnection;
@@ -25,14 +25,14 @@ public class GuardianAttackTask extends AbstractTask {
 
     private final GuardianSkillsService guardianSkillsService;
 
-    private final RunnableEventHandler runnableEventHandler;
+    private final EventHandler eventHandler;
 
     public GuardianAttackTask(FTConnection connection) {
         this.connection = connection;
 
         this.guardianSkillsService = ServiceManager.getInstance().getGuardianSkillsService();
 
-        runnableEventHandler = GameManager.getInstance().getRunnableEventHandler();
+        eventHandler = GameManager.getInstance().getEventHandler();
     }
 
     @Override
@@ -49,8 +49,8 @@ public class GuardianAttackTask extends AbstractTask {
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
         });
 
-        RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(new GuardianAttackTask(connection), MatchplayGuardianGame.guardianAttackLoopTime);
-        gameSession.getRunnableEvents().add(runnableEvent);
+        RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianAttackTask(connection), MatchplayGuardianGame.guardianAttackLoopTime);
+        eventHandler.push(runnableEvent);
     }
 
     private int getRandomGuardianSkillBasedOnProbability(int btItemId) {
@@ -79,6 +79,7 @@ public class GuardianAttackTask extends AbstractTask {
                 .filter(x -> x.getFrom() <= randValue && x.getTo() >= randValue)
                 .findFirst()
                 .orElse(null);
+        assert skillDrop != null;
         final GuardianBtItem guardianBtItem = guardianBtItemList.getGuardianBtItems().get(skillDrop.getId());
         return guardianBtItem.getSkillIndex();
     }

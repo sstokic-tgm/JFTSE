@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetBossGuardiansStats;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplaySkillHitsTarget;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage;
@@ -13,7 +14,6 @@ import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
-import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.life.room.GameSession;
@@ -50,7 +50,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
     private final GuardianService guardianService;
     private final BossGuardianService bossGuardianService;
 
-    private final RunnableEventHandler runnableEventHandler;
+    private final EventHandler eventHandler;
 
     public SkillHitsTargetHandler() {
         random = new Random();
@@ -59,7 +59,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
         this.guardianService = ServiceManager.getInstance().getGuardianService();
         this.bossGuardianService = ServiceManager.getInstance().getBossGuardianService();
 
-        runnableEventHandler = GameManager.getInstance().getRunnableEventHandler();
+        eventHandler = GameManager.getInstance().getEventHandler();
     }
 
     @Override
@@ -288,8 +288,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 .orElse(null);
         if (guardianBattleState != null && !guardianBattleState.isLooted()) {
             guardianBattleState.setLooted(true);
-            game.setExpPot(game.getExpPot() + guardianBattleState.getExp());
-            game.setGoldPot(game.getGoldPot() + guardianBattleState.getGold());
+            game.getExpPot().getAndAdd(guardianBattleState.getExp());
+            game.getGoldPot().getAndAdd(guardianBattleState.getGold());
         }
     }
 
@@ -318,7 +318,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
         boolean allPlayersTeamRedDead = game.getPlayerBattleStates().stream().filter(x -> game.isRedTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth().get() < 1);
         boolean allPlayersTeamBlueDead = game.getPlayerBattleStates().stream().filter(x -> game.isBlueTeam(x.getPosition())).allMatch(x -> x.getCurrentHealth().get() < 1);
 
-        if ((allPlayersTeamRedDead || allPlayersTeamBlueDead) && !game.isFinished()) {
+        if ((allPlayersTeamRedDead || allPlayersTeamBlueDead) && !game.getFinished().get()) {
             ThreadManager.getInstance().newTask(new FinishGameTask(connection));
         }
     }
@@ -328,15 +328,15 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
         boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
         boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
-        boolean triggerBossBattle = game.isHardMode() && timePlayingInSeconds < 300 || timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
-        boolean isBossBattleActive = game.isBossBattleActive();
-        if ((hasBossGuardianStage || game.isHardMode()) && allGuardiansDead && triggerBossBattle && !isBossBattleActive) {
+        boolean triggerBossBattle = game.getIsHardMode().get() && timePlayingInSeconds < 300 || timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
+        boolean isBossBattleActive = game.getBossBattleActive().get();
+        if ((hasBossGuardianStage || game.getIsHardMode().get()) && allGuardiansDead && triggerBossBattle && !isBossBattleActive) {
             if (game.getStageChangingToBoss().compareAndSet(false, true)) {
-                game.setBossBattleActive(true);
+                game.getBossBattleActive().set(true);
                 GameSession gameSession = connection.getClient().getActiveGameSession();
                 gameSession.clearCountDownRunnable();
 
-                if (!hasBossGuardianStage && game.isHardMode()) {
+                if (!hasBossGuardianStage && game.getIsHardMode().get()) {
                     GuardianStage guardianStage = game.getGuardianStage();
                     guardianStage.setBossGuardian((int) (Math.random() * 7) + 1);
                     game.setBossGuardianStage(guardianStage);
@@ -345,7 +345,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 game.setCurrentStage(game.getBossGuardianStage());
 
                 int activePlayingPlayersCount = game.getPlayerBattleStates().size();
-                List<Byte> guardians = game.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit());
+                List<Byte> guardians = game.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit().get());
                 byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
                 game.getGuardianBattleStates().clear();
 
@@ -353,7 +353,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
                 game.getGuardianBattleStates().add(bossGuardianBattleState);
 
-                if (game.isHardMode() && !hasBossGuardianStage) {
+                if (game.getIsHardMode().get() && !hasBossGuardianStage) {
                     game.fillRemainingGuardianSlots(true, game, game.getBossGuardianStage(), guardians);
                     guardians.set(2, (byte) 0);
                 }
@@ -363,14 +363,14 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     int guardianId = guardians.get(i);
                     if (guardianId == 0) continue;
 
-                    if (game.isRandomGuardiansMode()) {
+                    if (game.getIsRandomGuardiansMode().get()) {
                         guardianId = (int) (Math.random() * 72 + 1);
                         guardians.set(i, (byte) guardianId);
                     }
 
                     short guardianPosition = (short) (i + guardianStartPosition);
                     Guardian guardian = guardianService.findGuardianById((long) guardianId);
-                    GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.isHardMode(), guardian, guardianPosition, activePlayingPlayersCount);
+                    GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
                     game.getGuardianBattleStates().add(guardianBattleState);
                 }
                 game.getStageChangingToBoss().compareAndSet(true, false);
@@ -381,19 +381,19 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
                 GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
 
-                RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
-                gameSession.getRunnableEvents().add(runnableEvent);
+                RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
+                eventHandler.push(runnableEvent);
             }
 
-        } else if (allGuardiansDead && !game.isFinished() && !stageChangingToBoss) {
-            ThreadManager.getInstance().newTask(new FinishGameTask(connection, true));
+        } else if (allGuardiansDead && !game.getFinished().get() && !stageChangingToBoss) {
+            ThreadManager.getInstance().newTask(new FinishGameTask(connection));
         }
     }
 
     private void handleAllPlayersDead(FTConnection connection, MatchplayGuardianGame game) {
         boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
-        if (allPlayersDead && !game.isFinished()) {
-            ThreadManager.getInstance().newTask(new FinishGameTask(connection, false));
+        if (allPlayersDead && !game.getFinished().get()) {
+            ThreadManager.getInstance().newTask(new FinishGameTask(connection));
         }
     }
 }

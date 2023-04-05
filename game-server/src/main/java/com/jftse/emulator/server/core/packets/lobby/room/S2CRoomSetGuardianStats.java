@@ -7,9 +7,10 @@ import com.jftse.server.core.protocol.PacketOperations;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class S2CRoomSetGuardianStats extends Packet {
-    public S2CRoomSetGuardianStats(ArrayList<GuardianBattleState> guardianBattleStates, List<Byte> guardians) {
+    public S2CRoomSetGuardianStats(ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates, List<Byte> guardians) {
         super(PacketOperations.S2CRoomSetGuardianStats);
 
         final ArrayList<GuardianBattleState> finalGuardianBattleStates = new ArrayList<>();

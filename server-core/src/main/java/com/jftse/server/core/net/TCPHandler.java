@@ -41,7 +41,7 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         AbstractPacketHandler abstractPacketHandler = packetHandlerFactory.getHandler(PacketOperations.getPacketOperationByValue(packet.getPacketId()));
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
 
-        if (connection != null) {
+        if (connection != null && !connection.getIsClosingConnection().get()) {
             if (abstractPacketHandler != null) {
                 abstractPacketHandler.setConnection(connection);
                 try {

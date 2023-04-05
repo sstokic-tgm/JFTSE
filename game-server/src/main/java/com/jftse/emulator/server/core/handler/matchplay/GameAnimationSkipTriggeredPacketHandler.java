@@ -1,18 +1,12 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.server.core.constants.RoomStatus;
-import com.jftse.emulator.server.core.handler.matchplay.start.StartBasicModeHandler;
-import com.jftse.emulator.server.core.handler.matchplay.start.StartBattleModeHandler;
-import com.jftse.emulator.server.core.handler.matchplay.start.StartGuardianModeHandler;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameSetNameColorAndRemoveBlackBar;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
-import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
-import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
-import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -80,39 +74,12 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
                 S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
                 GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setNameColorAndRemoveBlackBarPacket, client.getConnection());
 
-                AbstractPacketHandler handler;
                 GameSession gameSession = client.getActiveGameSession();
                 MatchplayGame game = gameSession.getMatchplayGame();
                 if (game == null)
                     return;
 
-                if (game instanceof MatchplayBasicGame) {
-                    handler = new StartBasicModeHandler();
-                } else if (game instanceof MatchplayBattleGame) {
-                    handler = new StartBattleModeHandler();
-                } else if (game instanceof MatchplayGuardianGame) {
-                    handler = new StartGuardianModeHandler();
-                } else { // default
-                    handler = new AbstractPacketHandler() {
-                        @Override
-                        public boolean process(Packet packet) {
-                            return false;
-                        }
-
-                        @Override
-                        public void handle() {
-                            // empty
-                        }
-                    };
-                }
-
-                try {
-                    handler.setConnection(connection);
-                    if (handler.process(packet))
-                        handler.handle();
-                } catch (Exception e) {
-                    throw e;
-                }
+                game.getHandleable().onStart(client);
             }, 8, TimeUnit.SECONDS);
         }
     }

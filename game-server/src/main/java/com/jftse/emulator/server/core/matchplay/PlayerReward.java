@@ -7,10 +7,22 @@ import lombok.Setter;
 @Setter
 public class PlayerReward {
     private int playerPosition;
-    private int rewardExp;
-    private int rewardGold;
-    private int rewardRP;
-    private int rewardProductIndex;
-    private int productRewardAmount;
-    private int activeBonuses = 0;
+    private int exp;
+    private int gold;
+    private int couplePoints;
+    private int rankingPoints;
+    private int productIndex;
+    private int productAmount;
+    private int activeBonuses;
+
+    public PlayerReward(int playerPosition) {
+        this.playerPosition = playerPosition;
+        this.exp = 0;
+        this.gold = 0;
+        this.couplePoints = 0;
+        this.rankingPoints = 0;
+        this.productIndex = 0;
+        this.productAmount = 0;
+        this.activeBonuses = 0;
+    }
 }

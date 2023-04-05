@@ -67,22 +67,14 @@ public class RingOfWiseman extends BaseItem {
             return false;
         }
 
-        boolean playerSpecialSlotHasWisemanRingEquipped = false;
-        long idOfWisemanRingInPlayersPocket = playerPocketROWiseman.getId();
+        int idOfWisemanRingInPlayersPocket = playerPocketROWiseman.getId().intValue();
         log.info("Ring of Wiseman in players pocket has id: " + idOfWisemanRingInPlayersPocket + " and item index: " + playerPocketROWiseman.getItemIndex());
-        for (Integer idSpecialSlot : playersSpecialSlots) {
-            if (idSpecialSlot == idOfWisemanRingInPlayersPocket) {
-                playerSpecialSlotHasWisemanRingEquipped = true;
-                break;
-            }
-        }
+        boolean playerSpecialSlotHasWisemanRingEquipped = playersSpecialSlots.contains(idOfWisemanRingInPlayersPocket);
 
         if (!playerSpecialSlotHasWisemanRingEquipped){
             log.info("Ring of Wiseman is not equipped in players slot");
             return false;
         }
-
-        List<Integer> playersEquippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(playerService.findById(localPlayerId));
 
         log.info("Ring of Wiseman, itemCount before: " + playerPocketROWiseman.getItemCount());
         int itemCount = playerPocketROWiseman.getItemCount() - 1;
@@ -90,8 +82,8 @@ public class RingOfWiseman extends BaseItem {
             playerPocketService.remove(playerPocketROWiseman.getId());
             pocketService.decrementPocketBelongings(pocket);
 
-            for (Integer playersSpecialSlot : playersEquippedSpecialSlots) {
-                if (playersSpecialSlot == (Integer) playerPocketROWiseman.getId().intValue()) {
+            for (Integer playersSpecialSlot : playersSpecialSlots) {
+                if (playersSpecialSlot == playerPocketROWiseman.getId().intValue()) {
                     log.info("Special Slot value 0 added");
                     playersSpecialSlotsToSet.add(0);
                 } else {
@@ -117,8 +109,8 @@ public class RingOfWiseman extends BaseItem {
             S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
             packetsToSend.add(localPlayerId, inventoryDataPacket);
 
-            specialSlotEquipmentService.updateSpecialSlots(player, playersEquippedSpecialSlots);
-            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(playersEquippedSpecialSlots);
+            specialSlotEquipmentService.updateSpecialSlots(player, playersSpecialSlots);
+            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(playersSpecialSlots);
             packetsToSend.add(localPlayerId, inventoryWearSpecialAnswerPacket);
         }
         log.info("Ring of Wiseman, itemCount now: " + itemCount);

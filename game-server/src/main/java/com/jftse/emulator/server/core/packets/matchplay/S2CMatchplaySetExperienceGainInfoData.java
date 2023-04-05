@@ -17,18 +17,18 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write(resultTitle); // 0 = Loser, 1 = Winner
         this.write(playerLevel); // level
 
-        this.write(playerReward != null ? playerReward.getRewardExp() : 0); // EXP BASIC
-        this.write(playerReward != null ? playerReward.getRewardGold() : 0); // GOLD BASIC
+        this.write(playerReward != null ? playerReward.getExp() : 0); // EXP BASIC
+        this.write(playerReward != null ? playerReward.getGold() : 0); // GOLD BASIC
         this.write(0); // EXP BONUS
         this.write(0); // GOLD BONUS
-        this.write(playerReward != null ? playerReward.getRewardExp() : 0); // EXP TOTAL -> current exp + won exp
-        this.write(playerReward != null ? playerReward.getRewardGold() : 0); // GOLD TOTAL -> current gold + won gold
+        this.write(playerReward != null ? playerReward.getExp() : 0); // EXP TOTAL -> current exp + won exp
+        this.write(playerReward != null ? playerReward.getGold() : 0); // GOLD TOTAL -> current gold + won gold
 
         this.write((byte) 0); // perfects
         this.write((byte) 0); // guards
 
         this.write(secondsNeeded); // Playtime in seconds
-        this.write(playerReward != null ? playerReward.getRewardRP() : 0); // Ranking point reward
+        this.write(playerReward != null ? playerReward.getRankingPoints() : 0); // Ranking point reward
         this.write(0); // Unk
         this.write(0); // Unk
 

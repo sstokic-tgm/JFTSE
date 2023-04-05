@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PacketEvent {
+public class PacketEvent implements Fireable {
     private FTConnection sender;
     private FTClient client;
     private Packet packet;
@@ -22,12 +22,19 @@ public class PacketEvent {
     private long eventFireTime;
     private boolean fired = false;
 
+    @Override
     public void fire() {
         fired = true;
         sender.sendTCP(packet);
     }
 
+    @Override
     public boolean shouldFire(long currentTime) {
         return currentTime - packetTimestamp > eventFireTime;
+    }
+
+    @Override
+    public Fireable getSelf() {
+        return this;
     }
 }

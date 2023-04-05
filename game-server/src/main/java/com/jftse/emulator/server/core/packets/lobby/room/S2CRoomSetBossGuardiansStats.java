@@ -8,9 +8,10 @@ import com.jftse.entities.database.model.battle.BossGuardian;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class S2CRoomSetBossGuardiansStats extends Packet {
-    public S2CRoomSetBossGuardiansStats(ArrayList<GuardianBattleState> guardianBattleStates, BossGuardian bossGuardian, List<Byte> guardians) {
+    public S2CRoomSetBossGuardiansStats(ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates, BossGuardian bossGuardian, List<Byte> guardians) {
         super(PacketOperations.S2CRoomSetBossGuardiansStats);
 
         // prepare determined guardians

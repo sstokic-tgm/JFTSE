@@ -24,8 +24,8 @@ public class S2CMatchplayDisplayItemRewards extends Packet {
                 this.write(0);
                 this.write(0);
             } else {
-                this.write(playerReward.getRewardProductIndex());
-                this.write(playerReward.getProductRewardAmount());
+                this.write(playerReward.getProductIndex());
+                this.write(playerReward.getProductAmount());
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
-import com.jftse.emulator.server.core.handler.matchplay.prepare.PrepareBattleMode;
-import com.jftse.emulator.server.core.handler.matchplay.prepare.PrepareGuardianMode;
+import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerInformationPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameNetworkSettingsPacket;
@@ -87,11 +86,14 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
         Integer gameSessionId = GameSessionManager.getInstance().addGameSession(gameSession);
 
         gameSession.setPlayers(room.getPlayers());
+        MatchplayGame game;
         switch (room.getMode()) {
-            case GameMode.BASIC -> gameSession.setMatchplayGame(new MatchplayBasicGame(room.getPlayers()));
-            case GameMode.BATTLE -> gameSession.setMatchplayGame(new MatchplayBattleGame());
-            case GameMode.GUARDIAN -> gameSession.setMatchplayGame(new MatchplayGuardianGame());
+            case GameMode.BASIC -> game = new MatchplayBasicGame(room.getPlayers());
+            case GameMode.BATTLE -> game = new MatchplayBattleGame();
+            case GameMode.GUARDIAN -> game = new MatchplayGuardianGame();
+            default -> throw new IllegalStateException("room mode not supported: " + room.getMode());
         }
+        gameSession.setMatchplayGame(game);
 
         clientsInRoom.forEach(c -> {
             c.setActiveGameSession(gameSessionId);
@@ -179,28 +181,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
             Packet setHostUnknownPacket = new Packet(PacketOperations.S2CSetHostUnknown);
             clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
 
-            switch (room.getMode()) {
-                case GameMode.BATTLE -> {
-                    PrepareBattleMode prepareBattleMode = new PrepareBattleMode();
-                    try {
-                        prepareBattleMode.setConnection(connection);
-                        if (prepareBattleMode.process(packet))
-                            prepareBattleMode.handle();
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-                case GameMode.GUARDIAN -> {
-                    PrepareGuardianMode prepareGuardianMode = new PrepareGuardianMode();
-                    try {
-                        prepareGuardianMode.setConnection(connection);
-                        if (prepareGuardianMode.process(packet))
-                            prepareGuardianMode.handle();
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            }
+            game.getHandleable().onPrepare(ftClient);
 
             Packet startGamePacket = new Packet(PacketOperations.S2CRoomStartGame);
             startGamePacket.write((char) 0);

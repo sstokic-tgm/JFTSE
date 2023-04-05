@@ -7,8 +7,7 @@ import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.core.matchplay.event.PacketEventHandler;
-import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
+import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
@@ -33,7 +32,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,9 +47,7 @@ public class GameManager {
     @Autowired
     private GameSessionManager gameSessionManager;
     @Autowired
-    private PacketEventHandler packetEventHandler;
-    @Autowired
-    private RunnableEventHandler runnableEventHandler;
+    private EventHandler eventHandler;
     @Autowired
     private ServiceManager serviceManager;
 
@@ -58,15 +57,17 @@ public class GameManager {
     @Autowired
     private ThreadManager threadManager;
 
-    private boolean running;
+    private AtomicBoolean running;
     private ConcurrentLinkedDeque<FTClient> clients;
     private ConcurrentLinkedDeque<Room> rooms;
+
+    private Future<?> eventHandlerTask;
 
     @PostConstruct
     public void init() {
         instance = this;
 
-        running = true;
+        running = new AtomicBoolean(true);
         setupGlobalTasks();
 
         clients = new ConcurrentLinkedDeque<>();
@@ -77,7 +78,12 @@ public class GameManager {
 
     @PreDestroy
     public void onExit() {
-        running = false;
+        if (running.compareAndSet(true, false)) {
+            if (eventHandlerTask != null && eventHandlerTask.cancel(true))
+                log.info("EventHandlerTask cancelled");
+
+            log.info("GameManager stopped");
+        }
     }
 
     public static GameManager getInstance() {
@@ -128,24 +134,17 @@ public class GameManager {
     }
 
     private void setupGlobalTasks() {
-        threadManager.scheduleAtFixedRate(() -> {
-            try {
-                packetEventHandler.handleQueuedPackets();
-            } catch (Exception ex) {
-                log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
+        eventHandlerTask = threadManager.submit(() -> {
+            while (running.get()) {
+                try {
+                    eventHandler.handleQueuedEvents();
+                    TimeUnit.MILLISECONDS.sleep(100);
+                } catch (Exception ex) {
+                    log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
+                }
             }
-        }, 0, 10, TimeUnit.MILLISECONDS);
-        threadManager.scheduleAtFixedRate(() -> {
-            try {
-                final ConcurrentHashMap<Integer, GameSession> gameSessions = gameSessionManager.getGameSessionList();
-                gameSessions.forEach((id, gameSession) -> {
-                    if (gameSession != null)
-                        runnableEventHandler.handleQueuedRunnableEvents(gameSession);
-                });
-            } catch (Exception ex) {
-                log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
-            }
-        }, 0, 10, TimeUnit.MILLISECONDS);
+            log.info("EventHandlerTask stopped");
+        });
     }
 
     public void refreshLobbyPlayerListForAllClients() {

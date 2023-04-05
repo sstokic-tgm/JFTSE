@@ -64,22 +64,14 @@ public class RingOfExp extends BaseItem {
             return false;
         }
 
-        boolean playerSpecialSlotHasExpRingEquipped = false;
-        long idOfEXPRingInPlayersPocket = playerPocketROExp.getId();
+        int idOfEXPRingInPlayersPocket = playerPocketROExp.getId().intValue();
         log.info("Ring of EXP in players pocket has id: " + idOfEXPRingInPlayersPocket + " and item index: " + playerPocketROExp.getItemIndex());
-        for (Integer idSpecialSlot : playersSpecialSlots) {
-            if (idSpecialSlot == idOfEXPRingInPlayersPocket) {
-                playerSpecialSlotHasExpRingEquipped = true;
-                break;
-            }
-        }
+        boolean playerSpecialSlotHasExpRingEquipped = playersSpecialSlots.contains(idOfEXPRingInPlayersPocket);
 
         if (!playerSpecialSlotHasExpRingEquipped){
             log.info("Ring of EXP is not equipped in players slot");
             return false;
         }
-
-        List<Integer> playersEquippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(playerService.findById(localPlayerId));
 
         log.info("Ring of EXP, itemCount before: " + playerPocketROExp.getItemCount());
         int itemCount = playerPocketROExp.getItemCount() - 1;
@@ -87,8 +79,8 @@ public class RingOfExp extends BaseItem {
             playerPocketService.remove(playerPocketROExp.getId());
             pocketService.decrementPocketBelongings(pocket);
 
-            for (Integer playersSpecialSlot : playersEquippedSpecialSlots) {
-                if (playersSpecialSlot == (Integer) playerPocketROExp.getId().intValue()) {
+            for (Integer playersSpecialSlot : playersSpecialSlots) {
+                if (playersSpecialSlot == playerPocketROExp.getId().intValue()) {
                     log.info("Special Slot value 0 added");
                     playersSpecialSlotsToSet.add(0);
                 } else {
@@ -114,8 +106,8 @@ public class RingOfExp extends BaseItem {
             S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
             packetsToSend.add(localPlayerId, inventoryDataPacket);
 
-            specialSlotEquipmentService.updateSpecialSlots(player, playersEquippedSpecialSlots);
-            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(playersEquippedSpecialSlots);
+            specialSlotEquipmentService.updateSpecialSlots(player, playersSpecialSlots);
+            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(playersSpecialSlots);
             packetsToSend.add(localPlayerId, inventoryWearSpecialAnswerPacket);
         }
         log.info("Ring of EXP, itemCount now: " + itemCount);

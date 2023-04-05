@@ -14,11 +14,6 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class ItemFactory {
-    private static ItemSpecial specialItemRingOfEXP;
-    private static ItemSpecial specialItemRingOfGold;
-    private static ItemSpecial specialItemRingOfWiseman;
-    private static boolean backToRoomFromMatchplay;
-
     private ItemFactory() {
     }
 
@@ -45,6 +40,15 @@ public class ItemFactory {
     private static BaseItem getSpecificSpecialItem(PlayerPocket playerPocketItem) {
         ItemSpecial itemSpecial = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(playerPocketItem.getItemIndex());
 
+        if (itemSpecial.getItemIndex() == 1) {
+            return new RingOfExp(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
+        }
+        if (itemSpecial.getItemIndex() == 2) {
+            return new RingOfGold(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
+        }
+        if (itemSpecial.getItemIndex() == 3) {
+            return new RingOfWiseman(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
+        }
         if (itemSpecial.getItemIndex() == 6) {
             return new WingOfMemory(itemSpecial.getItemIndex(), itemSpecial.getName(), playerPocketItem.getCategory());
         }
@@ -62,37 +66,5 @@ public class ItemFactory {
         }
 
         return null;
-    }
-
-    public static ItemSpecial getSpecialItemInMemoryById(int idOfSpecialItem) {
-        switch (idOfSpecialItem) {
-            case 1:
-                log.info("Special item: " + specialItemRingOfEXP.getName() + " from inMemory");
-                return specialItemRingOfEXP;
-            case 2:
-                log.info("Special item: " + specialItemRingOfGold.getName() + " from inMemory");
-                return specialItemRingOfGold;
-            case 3:
-                log.info("Special item: " + specialItemRingOfWiseman.getName() + " from inMemory");
-                return specialItemRingOfWiseman;
-            default:
-                return null;
-        }
-    }
-
-    public static void setBackFromMatchplay(boolean backToRoomFromMatchplayToSet) {
-        backToRoomFromMatchplay = backToRoomFromMatchplayToSet;
-    }
-
-    public static boolean getFlagBackFromMatchplay() {
-        return backToRoomFromMatchplay;
-    }
-
-    public static void initSpecialItemsOnLogin(String initCommand) {
-        log.info("ItemFactory: " + initCommand);
-        specialItemRingOfEXP = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(1);
-        specialItemRingOfGold = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(2);
-        specialItemRingOfWiseman = ServiceManager.getInstance().getItemSpecialService().findByItemIndex(3);
-        backToRoomFromMatchplay = false;
     }
 }

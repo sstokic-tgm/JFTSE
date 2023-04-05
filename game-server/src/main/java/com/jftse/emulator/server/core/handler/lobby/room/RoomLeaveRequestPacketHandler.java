@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
-import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -21,7 +20,6 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
         client.setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);
-        ItemFactory.setBackFromMatchplay(false);
 
         Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
         answerPacket.write(0);

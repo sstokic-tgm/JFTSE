@@ -180,10 +180,8 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                         }
                     }
                     MatchplayGame game = gameSession.getMatchplayGame();
-                    if (game instanceof MatchplayBattleGame)
-                        ((MatchplayBattleGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
-                    else if (game instanceof MatchplayGuardianGame)
-                        ((MatchplayGuardianGame) game).getScheduledFutures().forEach(sf -> sf.cancel(false));
+                    game.getScheduledFutures().forEach(sf -> sf.cancel(false));
+                    game.getScheduledFutures().clear();
 
                     client.setActiveGameSession(null);
                 }

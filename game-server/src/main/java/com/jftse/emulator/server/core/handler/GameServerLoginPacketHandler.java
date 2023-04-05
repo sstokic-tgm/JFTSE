@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler;
 
-import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.gameserver.C2SGameServerLoginPacket;
 import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerLoginPacket;
@@ -71,8 +70,6 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
             connection.sendTCP(gameServerLoginAnswerPacket);
-
-            ItemFactory.initSpecialItemsOnLogin("initiated");
 
             authTokenService.remove(authToken);
         } else {

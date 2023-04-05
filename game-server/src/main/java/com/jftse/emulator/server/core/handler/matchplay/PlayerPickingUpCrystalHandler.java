@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.utilities.StringTokenizer;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayPlayerPicksUpCrystal;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayGiveSpecificSkill;
 import com.jftse.emulator.server.net.FTClient;
@@ -10,7 +11,6 @@ import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
-import com.jftse.emulator.server.core.matchplay.event.RunnableEventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.life.room.GameSession;
@@ -38,12 +38,12 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
 
     private final SkillDropRateService skillDropRateService;
 
-    private final RunnableEventHandler runnableEventHandler;
+    private final EventHandler eventHandler;
 
     public PlayerPickingUpCrystalHandler() {
         skillDropRateService = ServiceManager.getInstance().getSkillDropRateService();
 
-        runnableEventHandler = GameManager.getInstance().getRunnableEventHandler();
+        eventHandler = GameManager.getInstance().getEventHandler();
     }
 
     @Override
@@ -124,10 +124,10 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
             }
 
             PlaceCrystalRandomlyTask placeCrystalRandomlyTask = isBattleGame ? new PlaceCrystalRandomlyTask(ftClient.getConnection(), gameFieldSide) : new PlaceCrystalRandomlyTask(ftClient.getConnection());
-            long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval();
+            long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval().get() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get();
 
-            RunnableEvent runnableEvent = runnableEventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);
-            gameSession.getRunnableEvents().add(runnableEvent);
+            RunnableEvent runnableEvent = eventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);
+            eventHandler.push(runnableEvent);
         }
     }
 

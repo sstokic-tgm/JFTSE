@@ -13,8 +13,8 @@ public class S2CMatchplaySetGameResultData extends Packet {
         this.write((byte) playerRewards.size());
         for (PlayerReward playerReward : playerRewards) {
             this.write(playerReward.getPlayerPosition());
-            this.write(playerReward.getRewardExp()); // EXP
-            this.write(playerReward.getRewardGold()); // GOLD
+            this.write(playerReward.getExp()); // EXP
+            this.write(playerReward.getGold()); // GOLD
 
             // 0000 0001 = PF, 0000 0010 = GB, 0000 0100 = Time, 0000 1000 = matchplay, 0001 0000 = Lv up, ...
             // 0000 0001 = Couple Bonus

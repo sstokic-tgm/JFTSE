@@ -1,16 +1,20 @@
 package com.jftse.emulator.server.core.matchplay.game;
 
+import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.SimpleExpGoldBonus;
-import com.jftse.emulator.server.core.life.progression.bonuses.WonGameBonus;
+import com.jftse.emulator.server.core.life.progression.bonuses.*;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
+import com.jftse.emulator.server.core.matchplay.MatchplayHandleable;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
+import com.jftse.emulator.server.core.matchplay.handler.MatchplayBattleModeHandler;
 import com.jftse.emulator.server.core.utils.BattleUtils;
+import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.matchplay.battle.SkillCrystal;
@@ -21,44 +25,48 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Setter
 public class MatchplayBattleGame extends MatchplayGame {
-    private long crystalSpawnInterval;
-    private long crystalDeSpawnInterval;
-    private ArrayList<Point> playerLocationsOnMap;
-    private ArrayList<PlayerBattleState> playerBattleStates;
+    private AtomicLong crystalSpawnInterval;
+    private AtomicLong crystalDeSpawnInterval;
+    private List<Point> playerLocationsOnMap;
+    private ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates;
     private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
     private AtomicInteger lastCrystalId;
-    private volatile int lastGuardianServeSide;
-    private volatile int spiderMineIdentifier;
-    private ArrayList<ScheduledFuture<?>> scheduledFutures;
+    private AtomicInteger lastGuardianServeSide;
+    private AtomicInteger spiderMineIdentifier;
 
     private final PlayerCombatSystem playerCombatSystem;
 
     public MatchplayBattleGame() {
+        super();
+
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        this.setStartTime(cal.getTime());
-        this.crystalSpawnInterval = 0;
-        this.crystalDeSpawnInterval = 0;
-        this.playerLocationsOnMap = new ArrayList<>(Arrays.asList(
+        this.startTime = new AtomicReference<>(cal.getTime());
+
+        this.crystalSpawnInterval = new AtomicLong(0);
+        this.crystalDeSpawnInterval = new AtomicLong(0);
+        this.playerLocationsOnMap = List.of(
                 new Point(20, -125),
                 new Point(-20, 125),
                 new Point(-20, -75),
-                new Point(20, 75)
-        ));
-        this.playerBattleStates = new ArrayList<>();
+                new Point(20, 75));
+
+        this.playerBattleStates = new ConcurrentLinkedDeque<>();
         this.skillCrystals = new ConcurrentLinkedDeque<>();
         this.lastCrystalId = new AtomicInteger(-1);
-        this.lastGuardianServeSide = GameFieldSide.RedTeam;
+        this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.RedTeam);
         this.willDamages = new ArrayList<>();
-        this.spiderMineIdentifier = 0;
-        this.scheduledFutures = new ArrayList<>();
-        this.setFinished(false);
+        this.spiderMineIdentifier = new AtomicInteger(0);
+        this.scheduledFutures = new ConcurrentLinkedDeque<>();
+        this.finished = new AtomicBoolean(false);
 
         playerCombatSystem = new PlayerCombatSystem(this);
     }
@@ -125,10 +133,10 @@ public class MatchplayBattleGame extends MatchplayGame {
 
             int rewardExp = expGoldBonus.calculateExp();
             int rewardGold = expGoldBonus.calculateGold();
-            PlayerReward playerReward = new PlayerReward();
+            PlayerReward playerReward = new PlayerReward(playerPosition);
             playerReward.setPlayerPosition(playerPosition);
-            playerReward.setRewardExp(rewardExp);
-            playerReward.setRewardGold(rewardGold);
+            playerReward.setExp(rewardExp);
+            playerReward.setGold(rewardGold);
 
             List<Integer> materialsForReward = ServiceManager.getInstance().getItemMaterialService().findAllItemIndexes();
             List<Integer> materialsProductIndex = ServiceManager.getInstance().getProductService().findAllProductIndexesByCategoryAndItemIndexList(EItemCategory.MATERIAL.getName(), materialsForReward);
@@ -137,12 +145,12 @@ public class MatchplayBattleGame extends MatchplayGame {
             Random rnd = new Random();
             int drawnMaterial = rnd.nextInt(materialsProductIndex.size() - 1 + 1) + 1;
 
-            playerReward.setRewardProductIndex(materialsProductIndex.get(drawnMaterial - 1));
+            playerReward.setProductIndex(materialsProductIndex.get(drawnMaterial - 1));
 
             final int min = 1;
             final int max = !wonGame ? 2 : 3;
             final int amount = rnd.nextInt(max - min + 1) + min;
-            playerReward.setProductRewardAmount(amount);
+            playerReward.setProductAmount(amount);
 
             playerRewards.add(playerReward);
 
@@ -153,17 +161,106 @@ public class MatchplayBattleGame extends MatchplayGame {
     }
 
     @Override
-    public long getTimeNeeded() {
-        return getEndTime().getTime() - getStartTime().getTime();
+    public void addBonusesToRewards(ConcurrentLinkedDeque<RoomPlayer> roomPlayers, List<PlayerReward> playerRewards) {
+        final boolean isSingles = roomPlayers.stream().filter(rp -> rp.getPosition() < 4).count() == 2;
+
+        final boolean allPlayersTeamRedDead = this.getPlayerBattleStates().stream()
+                .filter(x -> this.isRedTeam(x.getPosition()))
+                .allMatch(x -> x.getCurrentHealth().get() < 1);
+        final boolean allPlayersTeamBlueDead = this.getPlayerBattleStates().stream()
+                .filter(x -> this.isBlueTeam(x.getPosition()))
+                .allMatch(x -> x.getCurrentHealth().get() < 1);
+
+        for (RoomPlayer rp : roomPlayers) {
+            boolean wonGame = false;
+
+            final boolean isActivePlayer = rp.getPosition() < 4;
+            final boolean isCurrentPlayerInRedTeam = this.isRedTeam(rp.getPosition());
+
+            if (isActivePlayer) {
+                PlayerReward playerReward = playerRewards.stream()
+                        .filter(pr -> pr.getPlayerPosition() == rp.getPosition())
+                        .findFirst()
+                        .orElse(new PlayerReward(rp.getPosition()));
+
+                if (isCurrentPlayerInRedTeam && allPlayersTeamBlueDead || !isCurrentPlayerInRedTeam && allPlayersTeamRedDead) {
+                    wonGame = true;
+                }
+
+                if (!isSingles)
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.TeamBonus);
+
+                ExpGoldBonus expGoldBonusSimple = new ExpGoldBonusImpl(playerReward.getExp(), playerReward.getGold());
+                int rewardExpSimple = expGoldBonusSimple.calculateExp();
+                int rewardGoldSimple = expGoldBonusSimple.calculateGold();
+
+                // add house bonus
+                ExpGoldBonus expGoldBonus = new BattleHouseBonus(expGoldBonusSimple, rp.getPlayer().getAccount().getId());
+                int rewardExp = expGoldBonus.calculateExp();
+                int rewardGold = expGoldBonus.calculateGold();
+
+                if (rewardExpSimple != rewardExp || rewardGoldSimple != rewardGold) {
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | BonusIconHighlightValues.HouseBonus);
+                }
+
+                // add exp, gold or wiseman ring bonus if equipped
+                if (!rp.isRingOfWisemanEquipped()) {
+                    if (rp.isRingOfExpEquipped()) {
+                        expGoldBonus = new RingOfExpBonus(expGoldBonus);
+                        rewardExp = expGoldBonus.calculateExp();
+                        rewardGold = expGoldBonus.calculateGold();
+
+                        playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.ExpBonus << 16));
+                    }
+                    if (rp.isRingOfGoldEquipped()) {
+                        expGoldBonus = new RingOfGoldBonus(expGoldBonus);
+                        rewardExp = expGoldBonus.calculateExp();
+                        rewardGold = expGoldBonus.calculateGold();
+
+                        playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.GoldBonus << 16));
+                    }
+                } else {
+                    expGoldBonus = new RingOfWisemanBonus(expGoldBonus);
+                    rewardExp = expGoldBonus.calculateExp();
+                    rewardGold = expGoldBonus.calculateGold();
+
+                    playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.WisemanBonus << 16));
+                }
+
+                playerReward.setExp(rewardExp);
+                playerReward.setGold(rewardGold);
+
+                // add couple bonus
+                Friend friend = rp.getCouple();
+                if (friend != null) {
+                    final boolean hasCoupleInTeam = roomPlayers.stream()
+                            .filter(roomPlayer -> roomPlayer.getPosition() != rp.getPosition())
+                            .anyMatch(roomPlayer -> {
+                                final boolean isInRedTeam = this.isRedTeam(roomPlayer.getPosition());
+                                final boolean isInBlueTeam = this.isBlueTeam(roomPlayer.getPosition());
+                                if (isInRedTeam == isCurrentPlayerInRedTeam || isInBlueTeam == !isCurrentPlayerInRedTeam) {
+                                    Friend f = roomPlayer.getCouple();
+                                    return f != null && f.getFriend().getId().equals(friend.getPlayer().getId()) && f.getEFriendshipState() == friend.getEFriendshipState();
+                                }
+                                return false;
+                            });
+                    if (hasCoupleInTeam) {
+                        int newCouplePoints = 0;
+                        if (wonGame)
+                            newCouplePoints = 5;
+                        else
+                            newCouplePoints = 2;
+
+                        playerReward.setCouplePoints(newCouplePoints);
+                        playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.CoupleBonus << 8));
+                    }
+                }
+            }
+        }
     }
 
     @Override
-    public boolean isRedTeam(int playerPos) {
-        return playerPos == 0 || playerPos == 2;
-    }
-
-    @Override
-    public boolean isBlueTeam(int playerPos) {
-        return playerPos == 1 || playerPos == 3;
+    protected MatchplayHandleable createHandler() {
+        return new MatchplayBattleModeHandler(this);
     }
 }

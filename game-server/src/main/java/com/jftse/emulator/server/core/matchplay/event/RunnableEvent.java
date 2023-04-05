@@ -10,18 +10,25 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RunnableEvent {
+public class RunnableEvent implements Fireable {
     private Runnable runnable;
     private long runnableTimeStamp;
     private long eventFireTime;
     private boolean fired = false;
 
+    @Override
     public void fire() {
         fired = true;
         ThreadManager.getInstance().newTask(runnable);
     }
 
+    @Override
     public boolean shouldFire(long currentTime) {
         return currentTime - runnableTimeStamp > eventFireTime;
+    }
+
+    @Override
+    public Fireable getSelf() {
+        return this;
     }
 }

@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class GameSession {
     public GameSession() {
         clients = new ConcurrentLinkedDeque<>();
-        runnableEvents = new ConcurrentLinkedDeque<>();
     }
 
     private MatchplayGame matchplayGame;
@@ -22,7 +21,6 @@ public class GameSession {
     private long timeLastBallWasHit = -1;
     private int timesCourtChanged = 0;
     private ConcurrentLinkedDeque<FTClient> clients;
-    private ConcurrentLinkedDeque<RunnableEvent> runnableEvents;
     private volatile RunnableEvent countDownRunnable;
 
     public FTClient getClientByPlayerId(long playerId) {
@@ -34,7 +32,6 @@ public class GameSession {
 
     public void clearCountDownRunnable() {
         if (this.getCountDownRunnable() != null) {
-            this.getRunnableEvents().remove(this.getCountDownRunnable());
             this.setCountDownRunnable(null);
         }
     }
