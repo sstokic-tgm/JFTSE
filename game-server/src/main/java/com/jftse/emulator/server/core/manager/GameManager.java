@@ -138,7 +138,7 @@ public class GameManager {
             while (running.get()) {
                 try {
                     eventHandler.handleQueuedEvents();
-                    TimeUnit.MILLISECONDS.sleep(100);
+                    TimeUnit.MILLISECONDS.sleep(50);
                 } catch (Exception ex) {
                     log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
                 }

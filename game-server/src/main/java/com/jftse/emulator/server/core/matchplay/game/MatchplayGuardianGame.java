@@ -249,14 +249,16 @@ public class MatchplayGuardianGame extends MatchplayGame {
             if (stageRewards != null) {
                 int rewardsCount = stageRewards.size();
                 if (rewardsCount > 0) {
-                    Random r = new Random();
-                    int itemRewardToGive = stageRewards.get(r.nextInt(rewardsCount));
-                    playerReward.setProductIndex(itemRewardToGive);
+                    if (wonGame) {
+                        Random r = new Random();
+                        int itemRewardToGive = stageRewards.get(r.nextInt(rewardsCount));
+                        playerReward.setProductIndex(itemRewardToGive);
 
-                    int amount = this.getIsHardMode().get() ? 3 : 1;
-                    if (this.getIsRandomGuardiansMode().get())
-                        amount = 1;
-                    playerReward.setProductAmount(amount);
+                        int amount = this.getIsHardMode().get() ? 3 : 1;
+                        if (this.getIsRandomGuardiansMode().get())
+                            amount = 1;
+                        playerReward.setProductAmount(amount);
+                    }
                 }
             } else {
                 List<Integer> materialsForReward = ServiceManager.getInstance().getItemMaterialService().findAllItemIndexes();
@@ -271,6 +273,11 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 final int max = !wonGame ? 2 : 3;
                 final int amount = r.nextInt(max - min + 1) + min;
                 playerReward.setProductAmount(amount);
+            }
+
+            if (!wonGame) {
+                playerReward.setExp(playerReward.getExp() / 2);
+                playerReward.setGold(playerReward.getGold() / 2);
             }
 
             playerRewards.add(playerReward);
