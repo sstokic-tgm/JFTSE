@@ -91,7 +91,15 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.Guardian);
         this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.finished = new AtomicBoolean(false);
-
+        this.crystalSpawnInterval = new AtomicLong(0);
+        this.crystalDeSpawnInterval = new AtomicLong(0);
+        this.guardianLevelLimit = new AtomicInteger(0);
+        this.bossBattleActive = new AtomicBoolean(false);
+        this.expPot = new AtomicInteger(0);
+        this.goldPot = new AtomicInteger(0);
+        this.isHardMode = new AtomicBoolean(false);
+        this.isRandomGuardiansMode = new AtomicBoolean(false);
+        this.spiderMineIdentifier = new AtomicInteger(0);
         this.stageChangingToBoss = new AtomicBoolean(false);
 
         playerCombatSystem = new PlayerCombatSystem(this);

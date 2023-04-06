@@ -70,6 +70,15 @@ public class MatchplayBasicGame extends MatchplayGame {
         this.setsBlueTeam = new AtomicInteger(0);
         this.finished = new AtomicBoolean(false);
         this.pointBackVotes = new ConcurrentHashMap<>(players);
+        this.previousIndividualPointsMadeFromPlayers = new ConcurrentHashMap<>(players);
+        this.previousPointsRedTeam = new AtomicInteger(0);
+        this.previousPointsBlueTeam = new AtomicInteger(0);
+        this.previousSetsRedTeam = new AtomicInteger(0);
+        this.previousSetsBlueTeam = new AtomicInteger(0);
+        this.previousServePlayerPosition = new AtomicInteger(0);
+        this.previousReceiverPlayerPosition = new AtomicInteger(0);
+        this.servePlayer = new AtomicReference<>();
+        this.receiverPlayer = new AtomicReference<>();
         this.individualPointsMadeFromPlayers = new ConcurrentHashMap<>(players);
         for (int i = 0; i < players; i++) {
             this.individualPointsMadeFromPlayers.put(i, 0);

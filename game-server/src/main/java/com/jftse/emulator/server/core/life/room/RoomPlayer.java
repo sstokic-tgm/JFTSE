@@ -63,6 +63,9 @@ public class RoomPlayer {
             return false;
 
         final PlayerPocket pp = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocketByItemIndexAndCategoryAndPocket(1, EItemCategory.SPECIAL.getName(), player.getPocket());
+        if (pp == null)
+            return false;
+
         final List<Integer> equippedSpecialItems = ServiceManager.getInstance().getSpecialSlotEquipmentService().getEquippedSpecialSlots(player);
 
         return equippedSpecialItems.contains(pp.getId().intValue());
@@ -74,6 +77,9 @@ public class RoomPlayer {
             return false;
 
         final PlayerPocket pp = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocketByItemIndexAndCategoryAndPocket(2, EItemCategory.SPECIAL.getName(), player.getPocket());
+        if (pp == null)
+            return false;
+
         final List<Integer> equippedSpecialItems = ServiceManager.getInstance().getSpecialSlotEquipmentService().getEquippedSpecialSlots(player);
 
         return equippedSpecialItems.contains(pp.getId().intValue());
@@ -85,6 +91,9 @@ public class RoomPlayer {
             return false;
 
         final PlayerPocket pp = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocketByItemIndexAndCategoryAndPocket(3, EItemCategory.SPECIAL.getName(), player.getPocket());
+        if (pp == null)
+            return false;
+
         final List<Integer> equippedSpecialItems = ServiceManager.getInstance().getSpecialSlotEquipmentService().getEquippedSpecialSlots(player);
 
         return equippedSpecialItems.contains(pp.getId().intValue());

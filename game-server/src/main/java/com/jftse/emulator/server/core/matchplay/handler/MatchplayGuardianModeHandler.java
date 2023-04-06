@@ -121,7 +121,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             return;
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        if (game.getEndTime().get() == null)
+        if (game.getEndTime() == null)
             game.setEndTime(new AtomicReference<>(cal.getTime()));
         else
             game.getEndTime().set(cal.getTime());
