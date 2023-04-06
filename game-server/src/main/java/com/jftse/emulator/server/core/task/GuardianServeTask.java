@@ -34,12 +34,6 @@ public class GuardianServeTask extends AbstractTask {
         S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setNameColorAndRemoveBlackBarPacket, connection);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, connection);
-        gameSession.getClients().forEach(c -> {
-            if (c != null && c.getConnection() != null) {
-                c.getConnection().sendTCP(setNameColorAndRemoveBlackBarPacket);
-                c.getConnection().sendTCP(triggerGuardianServePacket);
-            }
-        });
         game.resetStageStartTime();
         ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession, game.getBossGuardianStage()));
     }
