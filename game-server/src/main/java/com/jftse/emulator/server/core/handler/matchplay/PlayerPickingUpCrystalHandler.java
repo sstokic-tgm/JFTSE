@@ -127,6 +127,7 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
             long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval().get() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get();
 
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);
+            gameSession.getFireables().push(runnableEvent);
             eventHandler.push(runnableEvent);
         }
     }

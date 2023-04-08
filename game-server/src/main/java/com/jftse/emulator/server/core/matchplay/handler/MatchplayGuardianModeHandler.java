@@ -129,6 +129,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         activeRoom.setStatus(RoomStatus.NotRunning);
 
         gameSession.clearCountDownRunnable();
+        gameSession.getFireables().forEach(f -> f.setCancelled(true));
+        gameSession.getFireables().clear();
 
         final boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         final boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
@@ -252,9 +254,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 player.setCouplePoints(player.getCouplePoints() + playerReward.getCouplePoints());
                 client.savePlayer(player);
 
-                if (wonGame) {
-                    game.addRewardItemToPocket(client, playerReward);
-                }
+                game.addRewardItemToPocket(client, playerReward);
 
                 rp.setReady(false);
                 byte playerLevel = player.getLevel();

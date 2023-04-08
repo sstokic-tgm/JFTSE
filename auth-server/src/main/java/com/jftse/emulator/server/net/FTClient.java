@@ -48,4 +48,8 @@ public class FTClient extends Client<FTConnection> {
     public AtomicBoolean isClientAlive() {
         return isClientAlive;
     }
+
+    public Long getAccountId() {
+        return accountId;
+    }
 }

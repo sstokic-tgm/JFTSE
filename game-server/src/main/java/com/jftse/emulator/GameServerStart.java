@@ -18,6 +18,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.annotation.PreDestroy;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @SpringBootApplication
 @EntityScan(basePackages = "com.jftse.entities")
@@ -69,7 +71,14 @@ public class GameServerStart {
     @PreDestroy
     public void onExit() {
         log.info("Server exited");
-        workerGroup.shutdownGracefully();
-        bossGroup.shutdownGracefully();
+        gameManager.onExit();
+        Future<?> workerGroupFuture = workerGroup.shutdownGracefully();
+        Future<?> bossGroupFuture = bossGroup.shutdownGracefully();
+        try {
+            workerGroupFuture.get();
+            bossGroupFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Error while exiting server: " + e.getMessage(), e);
+        }
     }
 }

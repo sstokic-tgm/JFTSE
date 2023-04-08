@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.life.room;
 
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
+import com.jftse.emulator.server.core.matchplay.event.Fireable;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.net.FTClient;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class GameSession {
     public GameSession() {
         clients = new ConcurrentLinkedDeque<>();
+        fireables = new ConcurrentLinkedDeque<>();
     }
 
     private MatchplayGame matchplayGame;
@@ -21,6 +23,7 @@ public class GameSession {
     private long timeLastBallWasHit = -1;
     private int timesCourtChanged = 0;
     private ConcurrentLinkedDeque<FTClient> clients;
+    private ConcurrentLinkedDeque<Fireable> fireables;
     private volatile RunnableEvent countDownRunnable;
 
     public FTClient getClientByPlayerId(long playerId) {
@@ -32,6 +35,8 @@ public class GameSession {
 
     public void clearCountDownRunnable() {
         if (this.getCountDownRunnable() != null) {
+            this.getFireables().remove(this.getCountDownRunnable());
+            this.getCountDownRunnable().setCancelled(true);
             this.setCountDownRunnable(null);
         }
     }

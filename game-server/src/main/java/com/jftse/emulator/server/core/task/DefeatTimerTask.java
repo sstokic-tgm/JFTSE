@@ -30,6 +30,7 @@ public class DefeatTimerTask extends AbstractTask {
         if (guardianStage.getDefeatTimerInSeconds() > -1) {
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new FinishGameTask(connection), TimeUnit.SECONDS.toMillis(guardianStage.getDefeatTimerInSeconds()));
 
+            gameSession.getFireables().push(runnableEvent);
             eventHandler.push(runnableEvent);
             gameSession.setCountDownRunnable(runnableEvent);
         }

@@ -235,7 +235,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
         final boolean stageChangingToBoss = this.stageChangingToBoss.get();
         final boolean allGuardiansDead = this.guardianBattleStates.stream().allMatch(x -> x.getCurrentHealth().get() < 1);
-        final boolean wonGame = allGuardiansDead && !finished.get() && !stageChangingToBoss;
+        final boolean wonGame = allGuardiansDead && finished.get() && !stageChangingToBoss;
 
         this.playerBattleStates.forEach(x -> {
             PlayerReward playerReward = new PlayerReward(x.getPosition());

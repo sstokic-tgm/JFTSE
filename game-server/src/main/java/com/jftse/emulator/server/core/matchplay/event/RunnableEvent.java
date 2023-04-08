@@ -15,6 +15,7 @@ public class RunnableEvent implements Fireable {
     private long runnableTimeStamp;
     private long eventFireTime;
     private boolean fired = false;
+    private boolean cancelled = false;
 
     @Override
     public void fire() {

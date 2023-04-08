@@ -21,6 +21,7 @@ public class PacketEvent implements Fireable {
     private PacketEventType packetEventType; // unused as of current state, might be useful later on
     private long eventFireTime;
     private boolean fired = false;
+    private boolean cancelled = false;
 
     @Override
     public void fire() {

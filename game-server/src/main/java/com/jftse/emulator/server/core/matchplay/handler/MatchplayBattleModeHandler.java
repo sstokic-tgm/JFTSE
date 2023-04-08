@@ -107,6 +107,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
             RunnableEvent placeCrystalEventRedTeam = eventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(ftClient.getConnection(), GameFieldSide.RedTeam), crystalDeSpawnInterval);
             RunnableEvent placeCrystalEventBlueTeam = eventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(ftClient.getConnection(), GameFieldSide.BlueTeam), crystalDeSpawnInterval);
 
+            gameSession.getFireables().push(placeCrystalEventRedTeam);
+            gameSession.getFireables().push(placeCrystalEventBlueTeam);
             eventHandler.push(placeCrystalEventRedTeam);
             eventHandler.push(placeCrystalEventBlueTeam);
         }
@@ -134,6 +136,9 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
             game.getEndTime().set(cal.getTime());
 
         activeRoom.setStatus(RoomStatus.NotRunning);
+
+        gameSession.getFireables().forEach(f -> f.setCancelled(true));
+        gameSession.getFireables().clear();
 
         StringBuilder gameLogContent = new StringBuilder();
         gameLogContent.append("Battle game finished. ");

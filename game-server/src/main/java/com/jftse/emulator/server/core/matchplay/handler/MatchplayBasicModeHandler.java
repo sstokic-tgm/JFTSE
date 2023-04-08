@@ -117,6 +117,9 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
 
         activeRoom.setStatus(RoomStatus.NotRunning);
 
+        gameSession.getFireables().forEach(f -> f.setCancelled(true));
+        gameSession.getFireables().clear();
+
         StringBuilder gameLogContent = new StringBuilder();
 
         gameLogContent.append("Basic game finished. ");

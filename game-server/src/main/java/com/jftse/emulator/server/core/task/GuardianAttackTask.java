@@ -50,6 +50,7 @@ public class GuardianAttackTask extends AbstractTask {
         });
 
         RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianAttackTask(connection), MatchplayGuardianGame.guardianAttackLoopTime);
+        gameSession.getFireables().push(runnableEvent);
         eventHandler.push(runnableEvent);
     }
 

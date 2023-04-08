@@ -382,6 +382,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
 
                 RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
+                gameSession.getFireables().push(runnableEvent);
                 eventHandler.push(runnableEvent);
             }
 

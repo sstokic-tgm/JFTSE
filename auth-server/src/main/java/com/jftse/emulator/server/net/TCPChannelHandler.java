@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.net;
 
+import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -39,6 +40,8 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
         client.setConnection(connection);
         connection.setClient(client);
 
+        AuthenticationManager.getInstance().addClient(client);
+
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecryptionKey(), connection.getEncryptionKey(), 0, 0);
         connection.sendTCP(welcomePacket);
     }
@@ -64,6 +67,7 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                 account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
                 client.saveAccount(account);
             }
+            AuthenticationManager.getInstance().removeClient(client);
         }
     }
 

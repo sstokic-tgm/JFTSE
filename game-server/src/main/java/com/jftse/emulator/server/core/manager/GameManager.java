@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -76,11 +75,19 @@ public class GameManager {
         log.info(this.getClass().getSimpleName() + " initialized");
     }
 
-    @PreDestroy
     public void onExit() {
         if (running.compareAndSet(true, false)) {
-            if (eventHandlerTask != null && eventHandlerTask.cancel(true))
+            if (eventHandlerTask != null && eventHandlerTask.cancel(false))
                 log.info("EventHandlerTask cancelled");
+
+            log.info("Closing all connections");
+            for (FTClient client : clients) {
+                client.getConnection().close();
+            }
+            log.info("All connections closed");
+
+            rooms.clear();
+            clients.clear();
 
             log.info("GameManager stopped");
         }
@@ -145,6 +152,7 @@ public class GameManager {
             }
             log.info("EventHandlerTask stopped");
         });
+        log.info("EventHandlerTask started");
     }
 
     public void refreshLobbyPlayerListForAllClients() {

@@ -5,6 +5,7 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.protocol.Packet;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Service
 @Getter
 @Setter
+@Log4j2
 public class EventHandler {
     private ConcurrentLinkedDeque<Fireable> fireableDeque;
 
@@ -73,6 +75,11 @@ public class EventHandler {
                 if (!fireable.isFired() && fireable.shouldFire(currentTime)) {
                     fireable.fire();
                     it.remove();
+                    log.info("Fired fireable: " + fireable.getSelf().getClass().getSimpleName());
+                }
+                if (fireable.isCancelled()) {
+                    it.remove();
+                    log.info("Removed cancelled fireable: " + fireable.getSelf().getClass().getSimpleName());
                 }
             }
         }

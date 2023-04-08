@@ -66,6 +66,7 @@ public class DespawnCrystalTask extends AbstractTask {
             else
                 runnableEvent = eventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection), ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get());
 
+            gameSession.getFireables().push(runnableEvent);
             eventHandler.push(runnableEvent);
         }
     }
