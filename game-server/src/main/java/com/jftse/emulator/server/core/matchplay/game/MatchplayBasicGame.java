@@ -58,7 +58,7 @@ public class MatchplayBasicGame extends MatchplayGame {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.startTime = new AtomicReference<>(cal.getTime());
 
-        this.playerLocationsOnMap = List.of(
+        this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -125),
                 new Point(-20, 125),
                 new Point(-20, -75),
@@ -79,6 +79,7 @@ public class MatchplayBasicGame extends MatchplayGame {
         this.previousReceiverPlayerPosition = new AtomicInteger(0);
         this.servePlayer = new AtomicReference<>();
         this.receiverPlayer = new AtomicReference<>();
+        this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.individualPointsMadeFromPlayers = new ConcurrentHashMap<>(players);
         for (int i = 0; i < players; i++) {
             this.individualPointsMadeFromPlayers.put(i, 0);

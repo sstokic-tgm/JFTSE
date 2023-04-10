@@ -79,7 +79,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.startTime = new AtomicReference<>(cal.getTime());
         this.stageStartTime = new AtomicReference<>(cal.getTime());
-        this.playerLocationsOnMap = List.of(
+        this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -75),
                 new Point(-20, -75));
 

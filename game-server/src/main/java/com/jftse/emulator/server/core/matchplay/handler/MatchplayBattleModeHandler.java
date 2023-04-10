@@ -243,7 +243,7 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
 
                 playerStatistic.setBattleRP(Math.max(playerNewRating, 0));
 
-                playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+                playerStatistic = playerStatisticService.save(playerStatistic);
 
                 player.setPlayerStatistic(playerStatistic);
                 client.savePlayer(player);

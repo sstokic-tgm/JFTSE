@@ -11,12 +11,12 @@ public class RingOfWisemanBonus extends ExpGoldBonusDecorator {
     @Override
     public int calculateExp() {
         int calculatedExp = super.calculateExp();
-        return (int) (calculatedExp + (calculatedExp * 1.5));
+        return (int) (calculatedExp * 1.5);
     }
 
     @Override
     public int calculateGold() {
         int calculatedGold = super.calculateGold();
-        return (int) (calculatedGold + (calculatedGold * 1.5));
+        return (int) (calculatedGold * 1.5);
     }
 }

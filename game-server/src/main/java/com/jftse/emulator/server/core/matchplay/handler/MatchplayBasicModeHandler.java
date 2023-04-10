@@ -220,7 +220,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
 
                 playerStatistic.setBasicRP(Math.max(playerNewRating, 0));
 
-                playerStatistic = playerStatisticService.save(player.getPlayerStatistic());
+                playerStatistic = playerStatisticService.save(playerStatistic);
 
                 player.setPlayerStatistic(playerStatistic);
                 client.savePlayer(player);

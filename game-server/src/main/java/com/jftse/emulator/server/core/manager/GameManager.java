@@ -12,11 +12,13 @@ import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,6 +63,7 @@ public class GameManager {
     private ConcurrentLinkedDeque<Room> rooms;
 
     private Future<?> eventHandlerTask;
+    private Future<?> loggedInClientTask;
 
     @PostConstruct
     public void init() {
@@ -78,7 +81,9 @@ public class GameManager {
     public void onExit() {
         if (running.compareAndSet(true, false)) {
             if (eventHandlerTask != null && eventHandlerTask.cancel(false))
-                log.info("EventHandlerTask cancelled");
+                log.info("EventHandlerTask stopped");
+            if (loggedInClientTask != null && loggedInClientTask.cancel(false))
+                log.info("LoggedInClientTask stopped");
 
             log.info("Closing all connections");
             for (FTClient client : clients) {
@@ -153,6 +158,31 @@ public class GameManager {
             log.info("EventHandlerTask stopped");
         });
         log.info("EventHandlerTask started");
+
+        loggedInClientTask = threadManager.scheduleAtFixedRate(() -> {
+            log.info("Checking for logged in clients...");
+            if (running.get()) {
+                int changes = 0;
+                final List<Account> loggedInAccounts = serviceManager.getAuthenticationService().findByStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
+                if (loggedInAccounts.isEmpty()) {
+                    log.info("No logged in accounts found");
+                    return;
+                }
+
+                for (Account account : loggedInAccounts) {
+                    final Optional<FTClient> client = clients.stream()
+                            .filter(c -> c.getAccountId().equals(account.getId()))
+                            .findFirst();
+                    if (client.isEmpty()) {
+                        log.info("Account {} is not connected to the server anymore, setting status to {}", account.getUsername(), AuthenticationServiceImpl.SUCCESS);
+                        account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+                        serviceManager.getAuthenticationService().updateAccount(account);
+                        changes++;
+                    }
+                }
+                log.info("Checking for logged in clients finished with {} changes", changes);
+            }
+        }, 40, TimeUnit.SECONDS);
     }
 
     public void refreshLobbyPlayerListForAllClients() {

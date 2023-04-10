@@ -85,6 +85,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public List<Account> findByStatus(Integer status) {
+        return accountRepository.findByStatus(status);
+    }
+
+    @Override
     public List<GameServer> getGameServerList() {
         return gameServerRepository.findAllFetched();
     }

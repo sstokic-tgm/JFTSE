@@ -19,6 +19,8 @@ public interface AuthenticationService {
 
     Account findAccountById(Long id);
 
+    List<Account> findByStatus(Integer status);
+
     List<GameServer> getGameServerList();
 
     GameServer getGameServerByPort(Integer port);

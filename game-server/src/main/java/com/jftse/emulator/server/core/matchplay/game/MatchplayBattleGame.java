@@ -53,7 +53,7 @@ public class MatchplayBattleGame extends MatchplayGame {
 
         this.crystalSpawnInterval = new AtomicLong(0);
         this.crystalDeSpawnInterval = new AtomicLong(0);
-        this.playerLocationsOnMap = List.of(
+        this.playerLocationsOnMap = Arrays.asList(
                 new Point(20, -125),
                 new Point(-20, 125),
                 new Point(-20, -75),

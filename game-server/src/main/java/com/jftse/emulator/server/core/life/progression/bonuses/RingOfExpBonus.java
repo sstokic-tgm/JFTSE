@@ -11,12 +11,11 @@ public class RingOfExpBonus extends ExpGoldBonusDecorator {
     @Override
     public int calculateExp() {
         int calculatedExp = super.calculateExp();
-        return calculatedExp + (calculatedExp * 2);
+        return calculatedExp * 2;
     }
 
     @Override
     public int calculateGold() {
-        int calculatedGold = super.calculateGold();
-        return calculatedGold + (calculatedGold * 2);
+        return super.calculateGold();
     }
 }
