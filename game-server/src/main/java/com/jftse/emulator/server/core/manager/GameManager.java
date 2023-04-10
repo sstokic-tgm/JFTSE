@@ -177,6 +177,15 @@ public class GameManager {
                         log.info("Account {} is not connected to the server anymore, setting status to {}", account.getUsername(), AuthenticationServiceImpl.SUCCESS);
                         account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
                         serviceManager.getAuthenticationService().updateAccount(account);
+
+                        final List<Player> players = serviceManager.getPlayerService().findAllByAccount(account);
+                        players.stream()
+                                .filter(Player::getOnline)
+                                .forEach(p -> {
+                                    p.setOnline(false);
+                                    serviceManager.getPlayerService().save(p);
+                                });
+
                         changes++;
                     }
                 }
