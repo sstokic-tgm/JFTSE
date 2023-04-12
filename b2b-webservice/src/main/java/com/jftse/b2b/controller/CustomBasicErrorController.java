@@ -1,6 +1,7 @@
 package com.jftse.b2b.controller;
 
 import com.jftse.b2b.exception.ApiError;
+import com.jftse.emulator.common.exception.ValidationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -130,6 +131,12 @@ public class CustomBasicErrorController extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleException(Exception ex) {
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    protected ResponseEntity<Object> handleValidationException(ValidationException ex) {
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getLocalizedMessage());
         return buildResponseEntity(apiError);
     }

@@ -34,6 +34,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findAllByCategoryAndEnabledAndItem0InAndItem1Is(String category, Boolean enabled, List<Integer> item0, Integer item1, Pageable pageable);
 
+    List<Product> findAllByPrice0Between(Integer minPrice, Integer maxPrice, Pageable pageable);
+
     long countProductsByCategoryAndEnabled(String category, Boolean enabled);
 
     long countProductsByCategoryAndEnabledAndPriceType(String category, Boolean enabled, String priceType);
