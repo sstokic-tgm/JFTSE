@@ -1,6 +1,7 @@
 package com.jftse.entities.database.model.account;
 
 import com.jftse.entities.database.model.AbstractBaseModel;
+import com.jftse.entities.database.model.ServerType;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
@@ -26,4 +27,5 @@ public class Account extends AbstractBaseModel {
 
     private String banReason;
     private Date bannedUntil;
+    private ServerType loggedInServer;
 }

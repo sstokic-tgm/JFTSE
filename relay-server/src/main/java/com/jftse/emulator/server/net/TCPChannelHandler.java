@@ -13,6 +13,8 @@ import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
+import java.net.InetSocketAddress;
+
 @Log4j2
 @ChannelHandler.Sharable
 public class TCPChannelHandler extends TCPHandler<FTConnection> {
@@ -26,7 +28,8 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
     @Override
     public void connected(FTConnection connection) {
-        String remoteAddress = connection.getRemoteAddressTCP().toString();
+        InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+        String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
         log.info("(" + remoteAddress + ") Channel Active");
 
         if (!checkIp(connection, remoteAddress, () -> blockedIPService, () -> log))
@@ -43,7 +46,9 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
     @Override
     public void handlerNotFound(FTConnection connection, Packet packet) throws Exception {
-        log.warn("(" + connection.getRemoteAddressTCP().toString() + ") There is no implementation registered for " + PacketOperations.getNameByValue(packet.getPacketId()) + " packet (id " + String.format("0x%X", (int) packet.getPacketId()) + ")");
+        InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+        String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
+        log.warn("(" + remoteAddress + ") There is no implementation registered for " + PacketOperations.getNameByValue(packet.getPacketId()) + " packet (id " + String.format("0x%X", (int) packet.getPacketId()) + ")");
     }
 
     @Override
@@ -53,7 +58,9 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
     @Override
     public void disconnected(FTConnection connection) {
-        log.info("(" + connection.getRemoteAddressTCP().toString() + ") Channel Inactive");
+        InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+        String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
+        log.info("(" + remoteAddress + ") Channel Inactive");
 
         FTClient client = connection.getClient();
         if (client != null) {
@@ -70,7 +77,9 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
             };
 
             if (shouldHandleException) {
-                log.warn("(" + connection.getRemoteAddressTCP().toString() + ") exceptionCaught: " + cause.getMessage(), cause);
+                InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+                String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
+                log.warn("(" + remoteAddress + ") exceptionCaught: " + cause.getMessage(), cause);
             }
         }
     }

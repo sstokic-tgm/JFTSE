@@ -37,8 +37,8 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        if (connection.getRemoteAddressTCP() != null) {
-            InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+        InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+        if (inetSocketAddress != null) {
             String hostAddress = inetSocketAddress.getAddress().getHostAddress();
 
             FTClient client = (FTClient) connection.getClient();

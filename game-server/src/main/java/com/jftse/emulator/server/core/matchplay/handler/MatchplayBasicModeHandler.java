@@ -319,7 +319,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                     boolean shouldPlayerSwitchServingSide = game.shouldSwitchServingSide(isSingles, isRedTeamServing, anyTeamWonSet, rp.getPosition());
                     if (shouldPlayerSwitchServingSide) {
                         Point playerLocation = game.getPlayerLocationsOnMap().get(rp.getPosition());
-                        game.getPlayerLocationsOnMap().set(rp.getPosition(), game.invertPointY(playerLocation));
+                        game.getPlayerLocationsOnMap().set(rp.getPosition(), game.invertPointX(playerLocation));
                     }
                 }
 
@@ -362,7 +362,8 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 if (!isSingles) {
                     game.setPlayerLocationsForDoubles(serveInfo);
                     serveInfo.stream()
-                            .filter(x -> x.getServeType() == ServeType.ReceiveBall).findFirst()
+                            .filter(x -> x.getServeType() == ServeType.ReceiveBall)
+                            .findFirst()
                             .flatMap(receiver -> roomPlayerList.stream()
                                     .filter(x -> x.getPosition() == receiver.getPlayerPosition())
                                     .findFirst())

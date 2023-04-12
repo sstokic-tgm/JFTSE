@@ -55,7 +55,9 @@ public class LoginPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        if (configService.getValue("anticheat.enabled", false) && !isClientValid(connection.getRemoteAddressTCP(), loginPacket.getHwid())) {
+        InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+        String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
+        if (configService.getValue("anticheat.enabled", false) && !isClientValid(inetSocketAddress, loginPacket.getHwid())) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
 
@@ -105,7 +107,7 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID);
                 connection.sendTCP(loginAnswerPacket);
             } else {
-                if (configService.getValue("anticheat.enabled", false) && !linkAccountToClientWhitelist(connection.getRemoteAddressTCP(), loginPacket.getHwid(), account)) {
+                if (configService.getValue("anticheat.enabled", false) && !linkAccountToClientWhitelist(inetSocketAddress, loginPacket.getHwid(), account)) {
                     S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket((short) -80);
                     connection.sendTCP(loginAnswerPacket);
                     return;
@@ -137,8 +139,8 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 connection.sendTCP(loginAnswerPacket);
 
                 String hostAddress;
-                if (connection.getRemoteAddressTCP() != null)
-                    hostAddress = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+                if (inetSocketAddress != null)
+                    hostAddress = inetSocketAddress.getAddress().getHostAddress();
                 else
                     hostAddress = "null";
                 log.info(account.getUsername() + " has logged in from " + hostAddress + " with hwid " + loginPacket.getHwid());

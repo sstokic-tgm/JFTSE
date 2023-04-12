@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.manager;
 
+import com.google.protobuf.Empty;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
@@ -16,10 +17,16 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
+import com.jftse.proto.auth.ClientServiceGrpc;
+import com.jftse.proto.auth.FTClientList;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.thread.ThreadManager;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.netty.channel.ChannelFutureListener;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -27,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -65,15 +71,22 @@ public class GameManager {
     private Future<?> eventHandlerTask;
     private Future<?> loggedInClientTask;
 
+    private ManagedChannel rpcChannelAuthServer;
+
     @PostConstruct
     public void init() {
         instance = this;
 
-        running = new AtomicBoolean(true);
-        setupGlobalTasks();
+        rpcChannelAuthServer = ManagedChannelBuilder.forTarget("localhost:9898")
+                .usePlaintext()
+                .build();
 
         clients = new ConcurrentLinkedDeque<>();
         rooms = new ConcurrentLinkedDeque<>();
+
+        running = new AtomicBoolean(true);
+
+        setupGlobalTasks();
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }
@@ -93,6 +106,10 @@ public class GameManager {
 
             rooms.clear();
             clients.clear();
+
+            log.info("Closing RPC channel");
+            if (rpcChannelAuthServer != null && !rpcChannelAuthServer.isShutdown())
+                rpcChannelAuthServer.shutdownNow();
 
             log.info("GameManager stopped");
         }
@@ -162,10 +179,27 @@ public class GameManager {
         loggedInClientTask = threadManager.scheduleAtFixedRate(() -> {
             log.info("Checking for logged in clients...");
             if (running.get()) {
-                int changes = 0;
                 final List<Account> loggedInAccounts = serviceManager.getAuthenticationService().findByStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
+                final List<FTClient> clients = new ArrayList<>(this.clients);
+
+                ClientServiceGrpc.ClientServiceBlockingStub stub = ClientServiceGrpc.newBlockingStub(rpcChannelAuthServer);
+                log.info("[rpc] " + "Requesting online client list from auth server...");
+                FTClientList clientList = stub.getClientList(Empty.getDefaultInstance());
+                log.info("[rpc] Received online client list from auth server with size {}", clientList.getClientsList().size());
+
+                final List<com.jftse.proto.auth.FTClient> clientsFromAuthServer = clientList.getClientsList();
+
+                clientsFromAuthServer.forEach(c -> {
+                    final boolean isAlreadyLoggedInAuthServer = loggedInAccounts.removeIf(a -> a.getId() == c.getAccountId());
+                    if (!isAlreadyLoggedInAuthServer) {
+                        FTClient client = new FTClient();
+                        client.setAccountId(c.getAccountId());
+                        clients.add(client);
+                    }
+                });
+
                 if (loggedInAccounts.isEmpty()) {
-                    log.info("No logged in accounts found");
+                    log.info("No stuck logged in accounts found in game server");
                     return;
                 }
 
@@ -174,24 +208,44 @@ public class GameManager {
                             .filter(c -> c.getAccountId().equals(account.getId()))
                             .findFirst();
                     if (client.isEmpty()) {
-                        log.info("Account {} is not connected to the server anymore, setting status to {}", account.getUsername(), AuthenticationServiceImpl.SUCCESS);
-                        account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                        serviceManager.getAuthenticationService().updateAccount(account);
+                        resetLoginStatusByAccount(account);
+                    } else {
+                        FTClient ftClient = client.get();
+                        FTConnection ftConnection = ftClient.getConnection();
+                        if (ftConnection == null) {
+                            resetLoginStatusByAccount(account);
 
-                        final List<Player> players = serviceManager.getPlayerService().findAllByAccount(account);
-                        players.stream()
-                                .filter(Player::getOnline)
-                                .forEach(p -> {
-                                    p.setOnline(false);
-                                    serviceManager.getPlayerService().save(p);
-                                });
+                            removeClient(ftClient);
+                            continue;
+                        }
 
-                        changes++;
+                        ftConnection.sendTCP(new Packet(PacketOperations.C2SHeartbeat)).addListener((ChannelFutureListener) future -> {
+                            if (!future.isSuccess()) {
+                                resetLoginStatusByAccount(account);
+
+                                future.channel().close();
+                                removeClient(ftClient);
+                            }
+                        });
                     }
                 }
-                log.info("Checking for logged in clients finished with {} changes", changes);
+                log.info("Checking for logged in clients finished");
             }
         }, 40, TimeUnit.SECONDS);
+    }
+
+    private void resetLoginStatusByAccount(Account account) {
+        log.info("Account {} is not connected to the server anymore, setting status to {}", account.getUsername(), AuthenticationServiceImpl.SUCCESS);
+        account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+        serviceManager.getAuthenticationService().updateAccount(account);
+
+        final List<Player> players = serviceManager.getPlayerService().findAllByAccount(account);
+        players.stream()
+                .filter(Player::getOnline)
+                .forEach(p -> {
+                    p.setOnline(false);
+                    serviceManager.getPlayerService().save(p);
+                });
     }
 
     public void refreshLobbyPlayerListForAllClients() {

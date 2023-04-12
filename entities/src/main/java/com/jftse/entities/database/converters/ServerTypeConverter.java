@@ -1,6 +1,6 @@
 package com.jftse.entities.database.converters;
 
-import com.jftse.entities.database.model.log.ServerType;
+import com.jftse.entities.database.model.ServerType;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

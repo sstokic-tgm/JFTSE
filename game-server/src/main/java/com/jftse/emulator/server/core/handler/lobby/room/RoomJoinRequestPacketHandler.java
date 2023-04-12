@@ -165,7 +165,7 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         }
 
         Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
-        int newPosition = useGmSlot ? 9 : room.getPositions().indexOf(num.get());;
+        int newPosition = useGmSlot ? 9 : room.getPositions().indexOf(num.get());
 
         if (newPosition == -1) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);

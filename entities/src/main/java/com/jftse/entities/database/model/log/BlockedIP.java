@@ -1,6 +1,7 @@
 package com.jftse.entities.database.model.log;
 
 import com.jftse.entities.database.model.AbstractBaseModel;
+import com.jftse.entities.database.model.ServerType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

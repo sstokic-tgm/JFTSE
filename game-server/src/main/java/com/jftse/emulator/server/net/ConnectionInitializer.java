@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.common.service.ConfigService;
-import com.jftse.entities.database.model.log.ServerType;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.server.core.codec.PacketDecoder;
 import com.jftse.server.core.codec.PacketEncoder;
 import com.jftse.server.core.handler.PacketHandlerFactory;

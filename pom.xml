@@ -38,6 +38,7 @@
         <module>game-server</module>
         <module>relay-server</module>
         <module>ac-server</module>
+        <module>commons-proto</module>
     </modules>
 
 </project>

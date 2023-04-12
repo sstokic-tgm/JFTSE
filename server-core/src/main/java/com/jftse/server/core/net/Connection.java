@@ -1,6 +1,6 @@
 package com.jftse.server.core.net;
 
-import com.jftse.entities.database.model.log.ServerType;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.server.core.protocol.Packet;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -34,8 +34,12 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
     }
 
     public InetSocketAddress getRemoteAddressTCP() {
+        if (ctx == null)
+            return null;
+
         if (remoteAddress == null)
             remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+
         return remoteAddress;
     }
 
@@ -54,6 +58,7 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
     public void setChannelHandlerContext(ChannelHandlerContext chx) {
         this.ctx = chx;
         setId(this.ctx.channel().id());
+        remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
     }
 
     public ChannelHandlerContext getChannelHandlerContext() {
@@ -88,5 +93,5 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
         return serverType;
     }
 
-    public abstract void sendTCP(Packet... packets);
+    public abstract ChannelFuture sendTCP(Packet... packets);
 }
