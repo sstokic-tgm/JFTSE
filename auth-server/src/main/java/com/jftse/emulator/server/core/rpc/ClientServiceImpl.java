@@ -17,9 +17,13 @@ public class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImplBase {
         final ConcurrentLinkedDeque<FTClient> clients = AuthenticationManager.getInstance().getClients();
 
         FTClientList.Builder clientListBuilder = FTClientList.newBuilder();
-        for (FTClient client : clients) {
+        for (final FTClient client : clients) {
+            final Long accountId = client.getAccountId();
+            if (accountId == null)
+                continue;
+
             com.jftse.proto.auth.FTClient ftClient = com.jftse.proto.auth.FTClient.newBuilder()
-                    .setAccountId(client.getAccountId())
+                    .setAccountId(accountId)
                     .build();
 
             clientListBuilder.addClients(ftClient);
