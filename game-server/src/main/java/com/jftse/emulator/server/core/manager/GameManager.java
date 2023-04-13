@@ -219,13 +219,13 @@ public class GameManager {
 
                     for (Account account : loggedInAccounts) {
                         final Optional<FTClient> client = clients.stream()
-                                .filter(c -> c.getAccountId().equals(account.getId()))
+                                .filter(c -> c.getAccountId() != null && c.getAccountId().equals(account.getId()))
                                 .findFirst();
                         if (client.isEmpty()) {
                             resetLoginStatusByAccount(account);
                         } else {
-                            FTClient ftClient = client.get();
-                            FTConnection ftConnection = ftClient.getConnection();
+                            final FTClient ftClient = client.get();
+                            final FTConnection ftConnection = ftClient.getConnection();
                             if (ftConnection == null) {
                                 resetLoginStatusByAccount(account);
 
