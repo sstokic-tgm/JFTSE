@@ -26,7 +26,7 @@ public class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImplBase {
                     .setAccountId(accountId)
                     .build();
 
-            clientListBuilder.addClients(ftClient);
+            clientListBuilder.addClient(ftClient);
         }
 
         FTClientList clientList = clientListBuilder.build();

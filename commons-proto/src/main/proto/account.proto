@@ -12,7 +12,7 @@ message FTClient {
 }
 
 message FTClientList {
-  repeated FTClient clients = 1;
+  repeated FTClient client = 1;
 }
 
 service ClientService {

@@ -78,7 +78,8 @@ public class PointbackCommand extends Command {
                     setsDownGraded = true;
                 }
                 Optional<PacketEvent> packetEvent = eventHandler.getFireableDeque().stream()
-                        .map(x -> (PacketEvent) x)
+                        .filter(f -> f instanceof PacketEvent)
+                        .map(f -> (PacketEvent) f)
                         .filter(pe -> !pe.isFired() && pe.getPacketEventType() == PacketEventType.FIRE_DELAYED && pe.getPacket() instanceof S2CMatchplayTriggerServe)
                         .findFirst();
                 packetEvent.ifPresent(eventHandler::remove);

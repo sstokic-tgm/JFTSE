@@ -199,9 +199,9 @@ public class GameManager {
                     ClientServiceGrpc.ClientServiceBlockingStub stub = ClientServiceGrpc.newBlockingStub(rpcChannelAuthServer);
                     log.info("[rpc] Requesting online client list from auth server...");
                     FTClientList clientList = stub.getClientList(Empty.getDefaultInstance());
-                    log.info("[rpc] Received online client list from auth server with size {}", clientList.getClientsList().size());
+                    log.info("[rpc] Received online client list from auth server with size {}", clientList.getClientCount());
 
-                    final List<com.jftse.proto.auth.FTClient> clientsFromAuthServer = clientList.getClientsList();
+                    final List<com.jftse.proto.auth.FTClient> clientsFromAuthServer = clientList.getClientList();
 
                     clientsFromAuthServer.forEach(c -> {
                         final boolean isAlreadyLoggedInAuthServer = loggedInAccounts.removeIf(a -> a.getId() == c.getAccountId());
