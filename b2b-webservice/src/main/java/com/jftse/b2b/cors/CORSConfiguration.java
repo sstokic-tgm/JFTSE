@@ -1,19 +1,17 @@
 package com.jftse.b2b.cors;
 
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@ControllerAdvice
-public class CORSConfiguration {
-
-    @CrossOrigin(
-            origins = "*",
-            methods = {RequestMethod.GET},
-            allowedHeaders = {"Content-Type", "X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"},
-            maxAge = 3600)
-    @ResponseBody
-    public void handleCorsConfiguration() {
+@Configuration
+public class CORSConfiguration implements WebMvcConfigurer {
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/v1/**")
+                .allowedMethods("GET")
+                .allowedOrigins("*")
+                .allowedHeaders("*")
+                .maxAge(3600);
     }
 }
