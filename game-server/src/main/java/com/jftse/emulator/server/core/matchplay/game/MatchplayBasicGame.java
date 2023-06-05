@@ -97,7 +97,7 @@ public class MatchplayBasicGame extends MatchplayGame {
         this.previousPointsBlueTeam.set(this.pointsBlueTeam.get());
         this.previousSetsRedTeam.set(this.setsRedTeam.get());
         this.previousSetsBlueTeam.set(this.setsBlueTeam.get());
-        this.previousIndividualPointsMadeFromPlayers.putAll(this.individualPointsMadeFromPlayers);
+        this.previousIndividualPointsMadeFromPlayers = new ConcurrentHashMap<>(this.individualPointsMadeFromPlayers);
         if (this.servePlayer.get() != null)
             this.previousServePlayerPosition.set(this.servePlayer.get().getPosition());
         if (this.receiverPlayer.get() != null)
@@ -149,7 +149,7 @@ public class MatchplayBasicGame extends MatchplayGame {
         this.setDowngraded.set(this.previousSetsRedTeam.get() != this.setsRedTeam.get() || this.previousSetsBlueTeam.get() != this.setsBlueTeam.get());
         this.setsRedTeam.set(this.previousSetsRedTeam.get());
         this.setsBlueTeam.set(this.previousSetsBlueTeam.get());
-        this.individualPointsMadeFromPlayers.putAll(this.previousIndividualPointsMadeFromPlayers);
+        this.individualPointsMadeFromPlayers = new ConcurrentHashMap<>(this.previousIndividualPointsMadeFromPlayers);
 
         resetPointBackVotes();
         this.pointBackValid.set(false);
