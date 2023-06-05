@@ -24,6 +24,7 @@ import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.packets.matchplay.*;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
 import com.jftse.emulator.server.core.utils.RankingUtils;
+import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
@@ -89,10 +90,11 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
             positionInfo.add(playerPositionInfo);
         });
 
-        int servingPositionXOffset = random.nextInt(7);
+        byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
+        byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
 
         S2CMatchplaySetPlayerPosition setPlayerPositionPacket = new S2CMatchplaySetPlayerPosition(positionInfo);
-        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) servingPositionXOffset, (byte) 0);
+        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, servingPositionXOffset, servingPositionYOffset);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setPlayerPositionPacket, ftClient.getConnection());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, ftClient.getConnection());
 
@@ -303,15 +305,17 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
     @Override
     public void onPoint(FTClient ftClient, C2SMatchplayPointPacket matchplayPointPacket) {
         boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide().get() == GameFieldSide.BlueTeam;
-        int servingPositionXOffset = random.nextInt(7);
+
+        byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
+        byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
 
         S2CMatchplayTriggerGuardianServe triggerGuardianServePacket;
         if (!lastGuardianServeWasOnBlueTeamsSide) {
             game.getLastGuardianServeSide().set(GameFieldSide.BlueTeam);
-            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.BlueTeam, (byte) servingPositionXOffset, (byte) 0);
+            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.BlueTeam, servingPositionXOffset, servingPositionYOffset);
         } else {
             game.getLastGuardianServeSide().set(GameFieldSide.RedTeam);
-            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, (byte) servingPositionXOffset, (byte) 0);
+            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe((byte) GameFieldSide.RedTeam, servingPositionXOffset, servingPositionYOffset);
         }
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, ftClient.getConnection());
     }

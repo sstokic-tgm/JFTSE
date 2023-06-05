@@ -26,6 +26,7 @@ import com.jftse.emulator.server.core.packets.matchplay.*;
 import com.jftse.emulator.server.core.task.DefeatTimerTask;
 import com.jftse.emulator.server.core.task.GuardianAttackTask;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
+import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.battle.Guardian;
@@ -79,9 +80,10 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     public void onStart(FTClient ftClient) {
         final GameSession gameSession = ftClient.getActiveGameSession();
 
-        int servingPositionXOffset = random.nextInt(7);
+        byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
+        byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
 
-        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
+        S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, servingPositionXOffset, servingPositionYOffset);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, ftClient.getConnection());
 
         game.resetStageStartTime();
@@ -368,15 +370,17 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     @Override
     public void onPoint(FTClient ftClient, C2SMatchplayPointPacket matchplayPointPacket) {
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide().get() == GameFieldSide.Guardian;
-        int servingPositionXOffset = random.nextInt(7);
+
+        byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
+        byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
 
         S2CMatchplayTriggerGuardianServe triggerGuardianServePacket;
         if (!lastGuardianServeWasOnGuardianSide) {
             game.getLastGuardianServeSide().set(GameFieldSide.Guardian);
-            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, (byte) servingPositionXOffset, (byte) 0);
+            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, servingPositionXOffset, servingPositionYOffset);
         } else {
             game.getLastGuardianServeSide().set(GameFieldSide.Players);
-            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, (byte) servingPositionXOffset, (byte) 0);
+            triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Players, servingPositionXOffset, servingPositionYOffset);
         }
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, ftClient.getConnection());
     }
