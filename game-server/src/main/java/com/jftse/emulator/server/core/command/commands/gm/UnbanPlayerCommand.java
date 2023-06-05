@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.command.commands.gm;
 
-import com.jftse.emulator.server.core.command.Command;
+import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
@@ -14,7 +14,7 @@ import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 
 import java.util.List;
 
-public class UnbanPlayerCommand extends Command {
+public class UnbanPlayerCommand extends AbstractCommand {
 
     private final AuthenticationService authenticationService;
     private final PlayerService playerService;

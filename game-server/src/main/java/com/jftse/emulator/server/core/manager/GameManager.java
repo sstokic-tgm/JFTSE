@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.google.protobuf.Empty;
+import com.jftse.emulator.common.scripting.ScriptManager;
+import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
@@ -74,6 +76,8 @@ public class GameManager {
 
     private ManagedChannel rpcChannelAuthServer;
 
+    private Optional<ScriptManager> scriptManager;
+
     @PostConstruct
     public void init() {
         instance = this;
@@ -86,6 +90,8 @@ public class GameManager {
 
         clients = new ConcurrentLinkedDeque<>();
         rooms = new ConcurrentLinkedDeque<>();
+
+        scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
 
         running = new AtomicBoolean(true);
 

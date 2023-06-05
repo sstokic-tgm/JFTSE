@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.command.commands.player;
 
-import com.jftse.emulator.server.core.command.Command;
+import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.ServeType;
 import com.jftse.emulator.server.core.life.room.GameSession;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class PointbackCommand extends Command {
+public class PointbackCommand extends AbstractCommand {
     private final EventHandler eventHandler;
 
 

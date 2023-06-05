@@ -1,7 +1,10 @@
 package com.jftse.emulator.server.core.command;
 
+import com.jftse.emulator.common.scripting.ScriptFile;
+import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.server.core.command.commands.gm.*;
 import com.jftse.emulator.server.core.command.commands.player.*;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTConnection;
@@ -12,10 +15,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import javax.script.Bindings;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,9 +37,12 @@ public class CommandManager {
     public void init() {
         instance = this;
 
-        registeredCommands = new HashMap<>();
+        registeredCommands = new LinkedHashMap<>();
 
+        log.info("Loading commands...");
         registerCommands();
+        registerScriptFileCommands();
+        log.info("Commands has been loaded.");
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }
@@ -53,7 +59,7 @@ public class CommandManager {
     public void handle(FTConnection connection, String content) {
         if (connection.getClient() != null) {
             try {
-                handleInternal(connection, content);
+                executeCommand(connection, content);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
@@ -69,7 +75,7 @@ public class CommandManager {
         return commandArgumentList;
     }
 
-    private void handleInternal(FTConnection connection, String content) {
+    private void executeCommand(FTConnection connection, String content) {
         List<String> commandArgumentList = getCommandArgumentList(content);
 
         String commandName = commandArgumentList.get(0);
@@ -77,7 +83,7 @@ public class CommandManager {
 
         commandArgumentList.remove(0);
 
-        final Command command = registeredCommands.get(commandName);
+        final AbstractCommand command = (AbstractCommand) registeredCommands.get(commandName);
         if (command == null) {
             if (connection.getClient().getActiveRoom() != null) {
                 S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Command '" + commandName + "' is not available");
@@ -106,35 +112,49 @@ public class CommandManager {
         command.execute(connection, commandArgumentList);
     }
 
-    private void addCommand(String commandName, int rank, Class<? extends Command> commandClass) {
+    private void registerCommand(String commandName, int rank, AbstractCommand command) {
         if (registeredCommands.containsKey(commandName)) {
             log.error("Error on register command with name: " + commandName + ". Already exists.");
             return;
         }
 
-        try {
-            Command commandInstance = commandClass.getDeclaredConstructor().newInstance();
-            commandInstance.setRank(rank);
-
-            registeredCommands.put(commandName, commandInstance);
-            log.info("Registered command -" + commandName);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
-        }
+        command.setRank(rank);
+        registeredCommands.put(commandName, command);
+        log.info("Registered command -" + commandName);
     }
 
     private void registerCommands() {
-        log.info("Loading commands...");
-        addCommand("og", 0, OpenGachaCommand.class);
-        addCommand("hard", 0, HardModeCommand.class);
-        addCommand("arcade", 0, ArcadeModeCommand.class);
-        addCommand("random", 0, RandomModeCommand.class);
-        addCommand("pointback", 0, PointbackCommand.class);
-        addCommand("ban", 1, BanPlayerCommand.class);
-        addCommand("unban", 1, UnbanPlayerCommand.class);
-        addCommand("sN", 1, ServerNoticeCommand.class);
-        addCommand("serverKick", 1, ServerKickCommand.class);
-        addCommand("rsLogin", 1, ResetLoginStatusCommand.class);
-        log.info("Commands has been loaded.");
+        registerCommand("og", 0, new OpenGachaCommand());
+        registerCommand("hard", 0, new HardModeCommand());
+        registerCommand("arcade", 0, new ArcadeModeCommand());
+        registerCommand("random", 0, new RandomModeCommand());
+        registerCommand("pointback", 0, new PointbackCommand());
+        registerCommand("ban", 1, new BanPlayerCommand());
+        registerCommand("unban", 1, new UnbanPlayerCommand());
+        registerCommand("sN", 1, new ServerNoticeCommand());
+        registerCommand("serverKick", 1, new ServerKickCommand());
+        registerCommand("rsLogin", 1, new ResetLoginStatusCommand());
+    }
+
+    private void registerScriptFileCommands() {
+        Optional<ScriptManager> scriptManager = GameManager.getInstance().getScriptManager();
+        if (scriptManager.isPresent()) {
+            ScriptManager sm = scriptManager.get();
+            List<ScriptFile> scriptFiles = sm.getScriptFiles("COMMAND");
+            for (ScriptFile scriptFile : scriptFiles) {
+                try {
+                    Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+                    bindings.put("gameManager", GameManager.getInstance());
+                    bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
+                    bindings.put("commandManager", this);
+                    sm.eval(scriptFile, bindings);
+
+                    AbstractCommand command = (AbstractCommand) sm.getScriptEngine().get("impl");
+                    registerCommand(command.getCommandName(), command.getRank(), command);
+                } catch (Exception e) {
+                    log.error("Error on register command from script: " + scriptFile.getFile().getName().split("_")[1].split("\\.")[0] + ". ScriptException: " + e.getMessage());
+                }
+            }
+        }
     }
 }

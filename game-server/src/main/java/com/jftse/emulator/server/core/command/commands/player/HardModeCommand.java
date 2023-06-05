@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.command.commands.player;
 
-import com.jftse.emulator.server.core.command.Command;
+import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -10,7 +10,7 @@ import com.jftse.server.core.constants.GameMode;
 
 import java.util.List;
 
-public class HardModeCommand extends Command {
+public class HardModeCommand extends AbstractCommand {
 
     public HardModeCommand() {
         setDescription("Gives every guardian a boost on their stats and spawns 3 guardians");

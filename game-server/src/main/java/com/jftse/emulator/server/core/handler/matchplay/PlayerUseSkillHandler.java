@@ -47,7 +47,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
     private final GameLogService gameLogService;
 
-    private final static int TIMESTAMP_DELTA = 100;
+    private static final int TIMESTAMP_DELTA = 100;
 
     public PlayerUseSkillHandler() {
         this.skillService = ServiceManager.getInstance().getSkillService();

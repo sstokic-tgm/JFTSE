@@ -11,13 +11,15 @@ import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
-import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 import java.util.Random;
 
-@Log4j2
 public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
+    private static final Logger packetLogger = LogManager.getLogger("PacketLogger");
+
     private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
     private final TCPChannelHandler tcpChannelHandler;
     private final EventExecutorGroup group = new UnorderedThreadPoolEventExecutor(8);
@@ -38,8 +40,8 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         ch.pipeline().addLast(new FlushConsolidationHandler());
-        ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, log));
-        ch.pipeline().addLast("encoder", new PacketEncoder(encryptionKey, log));
+        ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, packetLogger));
+        ch.pipeline().addLast("encoder", new PacketEncoder(encryptionKey, packetLogger));
         ch.pipeline().addLast(group, tcpChannelHandler);
     }
 

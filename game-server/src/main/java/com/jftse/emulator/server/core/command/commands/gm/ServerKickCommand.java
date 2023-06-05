@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.command.commands.gm;
 
-import com.jftse.emulator.server.core.command.Command;
+import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class ServerKickCommand extends Command {
+public class ServerKickCommand extends AbstractCommand {
 
     public ServerKickCommand() {
         setDescription("Kicks player from server");

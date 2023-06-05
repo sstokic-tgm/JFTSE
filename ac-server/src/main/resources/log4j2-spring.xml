@@ -8,27 +8,50 @@
 
         <RollingFile name="RollingFileServerLog"
                      fileName="./logs/ac-server.log"
-                     filePattern="./logs/ac-server.%d{MM-dd-yyyy}.log.gz">
+                     filePattern="./logs/ac-server.%d{yyyy-MM-dd}.log.gz">
             <PatternLayout>
                 <pattern>%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable</pattern>
             </PatternLayout>
-            <Policies>
-                <SizeBasedTriggeringPolicy  size="1GB" />
-            </Policies>
-            <DefaultRolloverStrategy max="5" />
+            <DefaultRolloverStrategy>
+                <Delete basePath="./logs" maxDepth="1">
+                    <IfFileName glob="ac-server-*.log.gz">
+                        <IfLastModified age="7d"/>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <TimeBasedTriggeringPolicy/>
+        </RollingFile>
+
+        <RollingFile name="RollingFilePacketsLog"
+                     fileName="./logs/packets.log"
+                     filePattern="./logs/packets-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable</pattern>
+            </PatternLayout>
+            <DefaultRolloverStrategy>
+                <Delete basePath="./logs" maxDepth="1">
+                    <IfFileName glob="packets-*.log.gz">
+                        <IfLastModified age="7d"/>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <TimeBasedTriggeringPolicy/>
         </RollingFile>
     </Appenders>
 
     <Loggers>
 
-        <!-- LOG everything at INFO level -->
+        <!-- LOG everything at TRACE level -->
         <Root level="info">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFileServerLog"/>
         </Root>
 
-        <!-- LOG "com.ft.emulator*" at TRACE level -->
-        <Logger name="com.jftse.emulator" level="trace"></Logger>
+        <Logger name="com.jftse.emulator" level="trace"/>
+
+        <Logger name="PacketLogger" level="trace" additivity="false">
+            <AppenderRef ref="RollingFilePacketsLog"/>
+        </Logger>
     </Loggers>
 
 </Configuration>

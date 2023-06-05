@@ -2,6 +2,7 @@ package com.jftse.server.core.codec;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
+import com.jftse.emulator.common.utilities.LogConfigurator;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.SerialTable;
@@ -37,6 +38,9 @@ public class PacketDecoder extends ByteToMessageDecoder {
         int actualReaderIndex = in.readerIndex();
 
         boolean logAllPackets = ConfigService.getInstance().getValue("logging.packets.all.enabled", true);
+
+        boolean logPacketsToConsole = ConfigService.getInstance().getValue("logging.packets.console-output.enabled", true);
+        LogConfigurator.setConsoleOutput("PacketLogger", logPacketsToConsole);
 
         Packet packet;
         byte[] encryptedData = new byte[length];

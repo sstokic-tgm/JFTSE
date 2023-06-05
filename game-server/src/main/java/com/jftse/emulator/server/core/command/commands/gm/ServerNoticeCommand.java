@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.command.commands.gm;
 
-import com.jftse.emulator.server.core.command.Command;
+import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
@@ -10,7 +10,7 @@ import com.jftse.server.core.shared.packets.S2CServerNoticePacket;
 
 import java.util.List;
 
-public class ServerNoticeCommand extends Command {
+public class ServerNoticeCommand extends AbstractCommand {
 
     public ServerNoticeCommand() {
         setDescription("Sets and sends a server notice");

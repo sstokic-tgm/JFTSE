@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.command.commands.player;
 
-import com.jftse.emulator.server.core.command.Command;
+import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -10,7 +10,7 @@ import com.jftse.server.core.constants.GameMode;
 
 import java.util.List;
 
-public class ArcadeModeCommand extends Command {
+public class ArcadeModeCommand extends AbstractCommand {
 
     public ArcadeModeCommand() {
         setDescription("Arcade mode...");

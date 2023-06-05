@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.command.commands.gm;
 
-import com.jftse.emulator.server.core.command.Command;
+import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class ResetLoginStatusCommand extends Command {
+public class ResetLoginStatusCommand extends AbstractCommand {
     public ResetLoginStatusCommand() {
         setDescription("Resets login status of a player");
     }
