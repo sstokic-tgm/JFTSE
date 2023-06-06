@@ -21,9 +21,16 @@ public abstract class ScriptManagerFactory {
             if (url == null)
                 return Optional.of(ScriptManager.getInstance());
 
+            Path p;
+            try {
+                p = Paths.get(url.toURI());
+            } catch (FileSystemNotFoundException e) {
+                p = Paths.get(pathToScriptFolder).toAbsolutePath();
+            }
+
             logger.get().info("Loading scripts...");
 
-            Files.walkFileTree(Paths.get(url.toURI()), new FileVisitor<>() {
+            Files.walkFileTree(p, new FileVisitor<>() {
                 private Path preVisitDir;
 
                 @Override
@@ -63,11 +70,8 @@ public abstract class ScriptManagerFactory {
                     return FileVisitResult.CONTINUE;
                 }
             });
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             logger.get().error("Failed finding scripts: " + e.getMessage(), e);
-            return Optional.of(ScriptManager.getInstance());
-        } catch (URISyntaxException e) {
-            logger.get().error(e.getMessage(), e);
             return Optional.of(ScriptManager.getInstance());
         }
 
