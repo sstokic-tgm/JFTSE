@@ -109,6 +109,9 @@ public class ServiceManager {
     @Autowired
     private ConfigService configService;
 
+    @Autowired
+    private GameEventService gameEventService;
+
     @PostConstruct
     public void init() {
         instance = this;
