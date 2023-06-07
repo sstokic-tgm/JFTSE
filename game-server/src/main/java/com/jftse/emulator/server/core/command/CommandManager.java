@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.script.Bindings;
-import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -112,12 +111,7 @@ public class CommandManager {
         command.execute(connection, commandArgumentList);
     }
 
-    private void registerCommand(String commandName, int rank, AbstractCommand command) {
-        if (registeredCommands.containsKey(commandName)) {
-            log.error("Error on register command with name: " + commandName + ". Already exists.");
-            return;
-        }
-
+    public void registerCommand(String commandName, int rank, AbstractCommand command) {
         command.setRank(rank);
         registeredCommands.put(commandName, command);
         log.info("Registered command -" + commandName);
@@ -134,6 +128,7 @@ public class CommandManager {
         registerCommand("sN", 1, new ServerNoticeCommand());
         registerCommand("serverKick", 1, new ServerKickCommand());
         registerCommand("rsLogin", 1, new ResetLoginStatusCommand());
+        registerCommand("reloadScripts", 1, new ReloadScriptsCommand());
     }
 
     private void registerScriptFileCommands() {
@@ -143,18 +138,22 @@ public class CommandManager {
             List<ScriptFile> scriptFiles = sm.getScriptFiles("COMMAND");
             for (ScriptFile scriptFile : scriptFiles) {
                 try {
-                    Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
-                    bindings.put("gameManager", GameManager.getInstance());
-                    bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
-                    bindings.put("commandManager", this);
-                    sm.eval(scriptFile, bindings);
-
-                    AbstractCommand command = (AbstractCommand) sm.getScriptEngine().get("impl");
+                    AbstractCommand command = getAbstractCommandObj(scriptFile, sm);
                     registerCommand(command.getCommandName(), command.getRank(), command);
                 } catch (Exception e) {
                     log.error("Error on register command from script: " + scriptFile.getFile().getName().split("_")[1].split("\\.")[0] + ". ScriptException: " + e.getMessage());
                 }
             }
         }
+    }
+
+    public AbstractCommand getAbstractCommandObj(ScriptFile scriptFile, ScriptManager sm) throws Exception {
+        Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+        bindings.put("gameManager", GameManager.getInstance());
+        bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
+        bindings.put("commandManager", this);
+        sm.eval(scriptFile, bindings);
+
+        return (AbstractCommand) sm.getScriptEngine().get("impl");
     }
 }
