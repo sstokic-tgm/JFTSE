@@ -128,11 +128,14 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/scripts</outputDirectory>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>src/main/resources/scripts</directory>
-                                    <filtering>true</filtering>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>scripts/**</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>
