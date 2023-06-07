@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 
 public class PointbackCommand extends AbstractCommand {
     private final EventHandler eventHandler;
@@ -145,7 +146,7 @@ public class PointbackCommand extends AbstractCommand {
 
                 S2CMatchplayTriggerServe matchplayTriggerServe = new S2CMatchplayTriggerServe(serveInfos);
                 for (FTClient client : clients)
-                    eventHandler.push(eventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.DEFAULT, 0));
+                    eventHandler.push(eventHandler.createPacketEvent(client, matchplayTriggerServe, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(6)));
             }
 
             if (pointsBackSuccess) {
