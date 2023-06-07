@@ -102,6 +102,8 @@ public class ServiceManager {
     private ModuleService moduleService;
     @Autowired
     private GameLogService gameLogService;
+    @Autowired
+    private CommandLogService commandLogService;
 
     @Autowired
     private BlockedIPService blockedIPService;

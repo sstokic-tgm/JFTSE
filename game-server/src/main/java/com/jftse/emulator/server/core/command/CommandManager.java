@@ -7,8 +7,10 @@ import com.jftse.emulator.server.core.command.commands.player.*;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.log.CommandLog;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -108,11 +110,13 @@ public class CommandManager {
             }
             return;
         }
+        logCommand(connection.getClient(), command, commandArgumentList);
         command.execute(connection, commandArgumentList);
     }
 
     public void registerCommand(String commandName, int rank, AbstractCommand command) {
         command.setRank(rank);
+        command.setCommandName(commandName);
         registeredCommands.put(commandName, command);
         log.info("Registered command -" + commandName);
     }
@@ -145,6 +149,17 @@ public class CommandManager {
                 }
             }
         }
+    }
+
+    private void logCommand(FTClient client, AbstractCommand command, List<String> commandArgumentList) {
+        StringBuilder sb = new StringBuilder();
+        commandArgumentList.forEach(s -> sb.append(s).append(" "));
+
+        CommandLog commandLog = new CommandLog();
+        commandLog.setCommand(command.getCommandName());
+        commandLog.setArguments(sb.toString());
+        commandLog.setPlayer(client.getPlayer());
+        GameManager.getInstance().getServiceManager().getCommandLogService().save(commandLog);
     }
 
     public AbstractCommand getAbstractCommandObj(ScriptFile scriptFile, ScriptManager sm) throws Exception {
