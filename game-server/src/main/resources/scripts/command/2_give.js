@@ -6,7 +6,7 @@ var impl = new CommandAdapter({
         return 1;
     },
     getCommandName: function () {
-        return "give2";
+        return "give";
     },
     getDescription: function () {
         return "Gives item, exp, gold or ap to a player";
@@ -16,14 +16,14 @@ var impl = new CommandAdapter({
         let currentPlayerScriptable = new (Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl"))(connection.getClient());
 
         if (params.length < 1) {
-            currentPlayerScriptable.sendChat("Command", "Usage: -give2 <ap|gold|exp|item>");
+            currentPlayerScriptable.sendChat("Command", "Use -give <ap|gold|exp|item>");
             return;
         }
 
         let giveType = params[0];
         if (giveType === "ap" || giveType === "gold" || giveType === "exp") {
             if (params.length < 3) {
-                currentPlayerScriptable.sendChat("Command", "Usage: -give2 <ap|gold|exp> <amount> <player>");
+                currentPlayerScriptable.sendChat("Command", "Use -give <ap|gold|exp> <amount> <player>");
                 return;
             }
             let playerName = params[2];
@@ -64,8 +64,8 @@ var impl = new CommandAdapter({
         }
         if (giveType === "item") {
             if (params.length < 4) {
-                currentPlayerScriptable.sendChat("Command", "Usage: -give2 item <productIndex> <amount> <player>");
-                currentPlayerScriptable.sendChat("Command", "Usage: -give2 item <itemIndex> <category> <amount> <player>");
+                currentPlayerScriptable.sendChat("Command", "Use -give item <productIndex> <amount> <player>");
+                currentPlayerScriptable.sendChat("Command", "Use -give item <itemIndex> <category> <amount> <player>");
                 return;
             }
             if (params.length === 4) {

@@ -6,7 +6,7 @@ var impl = new CommandAdapter({
         return 1;
     },
     getCommandName: function () {
-        return "sendGift";
+        return "gift";
     },
     getDescription: function () {
         return "Sends gift to a player";
@@ -16,7 +16,7 @@ var impl = new CommandAdapter({
         let currentPlayerScriptable = new (Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl"))(connection.getClient());
 
         if (params.length < 4) {
-            currentPlayerScriptable.sendChat("Command", "Usage: -sendGift <playerName> <productIndex> <amount> <message>");
+            currentPlayerScriptable.sendChat("Command", "Use -gift <playerName> <productIndex> <amount> <message>");
             return;
         }
         let playerName = params[0];
