@@ -159,4 +159,15 @@ public class PlayerScriptableImpl implements PlayerScriptable {
         if (client.getConnection() != null)
             client.getConnection().sendTCP(packet);
     }
+
+    @Override
+    public void sendChat(String name, String message, Integer chatMode) {
+        if (client == null)
+            return;
+
+        char cm = (char) (chatMode == null || chatMode == 0 ? 0 : chatMode);
+        Packet packet = client.isInLobby() && client.getActiveRoom() == null ? new S2CChatLobbyAnswerPacket(cm, name, message) : new S2CChatRoomAnswerPacket((byte) cm, name, message);
+        if (client.getConnection() != null)
+            client.getConnection().sendTCP(packet);
+    }
 }

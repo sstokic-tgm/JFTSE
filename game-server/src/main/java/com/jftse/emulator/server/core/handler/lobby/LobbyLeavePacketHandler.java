@@ -17,11 +17,18 @@ public class LobbyLeavePacketHandler extends AbstractPacketHandler {
     @Override
     public void handle() {
         FTClient client = (FTClient) connection.getClient();
+
+        while (!client.getIsJoiningOrLeavingLobby().compareAndSet(false, true)) { }
+
         if (client.isInLobby()) {
             client.setInLobby(false);
         }
         client.setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();
+
+        System.out.println("LobbyLeavePacketHandler " + client.isInLobby());
+
+        client.getIsJoiningOrLeavingLobby().set(false);
     }
 }
