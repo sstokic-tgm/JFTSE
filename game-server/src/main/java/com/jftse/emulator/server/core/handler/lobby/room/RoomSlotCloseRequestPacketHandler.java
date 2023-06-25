@@ -27,6 +27,10 @@ public class RoomSlotCloseRequestPacketHandler extends AbstractPacketHandler {
         if (client == null)
             return;
 
+        if (!client.getIsClosingSlot().compareAndSet(false, true)) {
+            return;
+        }
+
         boolean deactivate = roomSlotCloseRequestPacket.isDeactivate();
 
         byte slot = roomSlotCloseRequestPacket.getSlot();
@@ -41,5 +45,7 @@ public class RoomSlotCloseRequestPacketHandler extends AbstractPacketHandler {
                 }
             });
         }
+
+        client.getIsClosingSlot().set(false);
     }
 }

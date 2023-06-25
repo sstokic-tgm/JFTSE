@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @Setter
@@ -23,11 +25,11 @@ public class RoomPlayer {
     private Long specialSlotEquipmentId;
     private Long cardSlotEquipmentId;
     private StatusPointsAddedDto statusPointsAddedDto;
-    private short position;
-    private boolean master;
-    private boolean ready;
-    private boolean fitting;
-    private boolean gameAnimationSkipReady = false;
+    private AtomicInteger position = new AtomicInteger(0);
+    private AtomicBoolean master = new AtomicBoolean(false);
+    private AtomicBoolean ready = new AtomicBoolean(false);
+    private AtomicBoolean fitting = new AtomicBoolean(false);
+    private AtomicBoolean gameAnimationSkipReady = new AtomicBoolean(false);
 
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);
@@ -97,5 +99,45 @@ public class RoomPlayer {
         final List<Integer> equippedSpecialItems = ServiceManager.getInstance().getSpecialSlotEquipmentService().getEquippedSpecialSlots(player);
 
         return equippedSpecialItems.contains(pp.getId().intValue());
+    }
+
+    public boolean isMaster() {
+        return master.get();
+    }
+
+    public boolean isReady() {
+        return ready.get();
+    }
+
+    public boolean isFitting() {
+        return fitting.get();
+    }
+
+    public boolean isGameAnimationSkipReady() {
+        return gameAnimationSkipReady.get();
+    }
+
+    public void setMaster(boolean master) {
+        this.master.set(master);
+    }
+
+    public void setReady(boolean ready) {
+        this.ready.set(ready);
+    }
+
+    public void setFitting(boolean fitting) {
+        this.fitting.set(fitting);
+    }
+
+    public void setGameAnimationSkipReady(boolean gameAnimationSkipReady) {
+        this.gameAnimationSkipReady.set(gameAnimationSkipReady);
+    }
+
+    public short getPosition() {
+        return (short) position.get();
+    }
+
+    public void setPosition(short position) {
+        this.position.set(position);
     }
 }

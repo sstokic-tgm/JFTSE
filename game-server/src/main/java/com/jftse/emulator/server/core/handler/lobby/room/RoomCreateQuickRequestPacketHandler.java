@@ -38,6 +38,10 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         if (player == null)
             return;
 
+        if (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
+            return;
+        }
+
         byte playerSize = roomQuickCreateRequestPacket.getPlayers();
 
         Room room = new Room();
@@ -65,5 +69,7 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         room.setMap((byte) 1);
 
         GameManager.getInstance().internalHandleRoomCreate(client.getConnection(), room);
+
+        client.getIsJoiningOrLeavingRoom().set(false);
     }
 }

@@ -65,6 +65,10 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
+        if (!ftClient.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
+            return;
+        }
+
         Room room = GameManager.getInstance().getRooms().stream()
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
@@ -202,6 +206,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         ftClient.setInLobby(false);
 
         handleRoomUponJoin(room, roomJoinRequestPacket.getRoomId());
+
+        ftClient.getIsJoiningOrLeavingRoom().set(false);
     }
 
     private void handleRoomUponJoin(Room room, short roomId) {

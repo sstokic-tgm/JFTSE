@@ -17,6 +17,11 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
     @Override
     public void handle() {
         FTClient client = (FTClient) connection.getClient();
+
+        if (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
+            return;
+        }
+
         client.setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);
@@ -24,5 +29,7 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
         Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
         answerPacket.write(0);
         connection.sendTCP(answerPacket);
+
+        client.getIsJoiningOrLeavingRoom().set(false);
     }
 }

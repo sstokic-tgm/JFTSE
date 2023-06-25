@@ -18,7 +18,13 @@ public class LobbyLeavePacketHandler extends AbstractPacketHandler {
     public void handle() {
         FTClient client = (FTClient) connection.getClient();
 
-        while (!client.getIsJoiningOrLeavingLobby().compareAndSet(false, true)) { }
+        if (client.getIsJoiningOrLeavingRoom().get()) {
+            return;
+        }
+
+        if (!client.getIsJoiningOrLeavingLobby().compareAndSet(false, true)) {
+            return;
+        }
 
         if (client.isInLobby()) {
             client.setInLobby(false);
@@ -26,8 +32,6 @@ public class LobbyLeavePacketHandler extends AbstractPacketHandler {
         client.setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();
-
-        System.out.println("LobbyLeavePacketHandler " + client.isInLobby());
 
         client.getIsJoiningOrLeavingLobby().set(false);
     }

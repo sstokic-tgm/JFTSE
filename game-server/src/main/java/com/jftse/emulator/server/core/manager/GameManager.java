@@ -430,10 +430,6 @@ public class GameManager {
     }
 
     public synchronized void internalHandleRoomCreate(final FTConnection connection, Room room) {
-        FTClient client = connection.getClient();
-
-        while (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) { }
-
         room.getPositions().set(0, RoomPositionState.InUse);
         room.setAllowBattlemon((byte) 0);
 
@@ -493,8 +489,6 @@ public class GameManager {
                 c.getConnection().sendTCP(roomSlotCloseAnswerPackets.toArray(Packet[]::new));
             }
         });
-
-        client.getIsJoiningOrLeavingRoom().set(false);
     }
 
     public synchronized short getRoomId() {

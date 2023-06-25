@@ -26,6 +26,10 @@ public class RoomCreateRequestPacketHandler extends AbstractPacketHandler {
         if ((client != null && client.getActiveRoom() != null) || client == null || client.getPlayer() == null)
             return;
 
+        if (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
+            return;
+        }
+
         Room room = new Room();
         room.setRoomId(GameManager.getInstance().getRoomId());
         room.setRoomName(roomCreateRequestPacket.getRoomName());
@@ -47,5 +51,7 @@ public class RoomCreateRequestPacketHandler extends AbstractPacketHandler {
         room.setMap((byte) 1);
 
         GameManager.getInstance().internalHandleRoomCreate(client.getConnection(), room);
+
+        client.getIsJoiningOrLeavingRoom().set(false);
     }
 }

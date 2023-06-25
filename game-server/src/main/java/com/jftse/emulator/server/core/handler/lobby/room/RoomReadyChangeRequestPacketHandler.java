@@ -29,6 +29,11 @@ public class RoomReadyChangeRequestPacketHandler extends AbstractPacketHandler {
     @Override
     public void handle() {
         FTClient ftClient = (FTClient) connection.getClient();
+
+        if (!ftClient.getIsGoingReady().compareAndSet(false, true)) {
+            return;
+        }
+
         Room room = ftClient.getActiveRoom();
         RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (room != null && roomPlayer != null) {
@@ -52,5 +57,7 @@ public class RoomReadyChangeRequestPacketHandler extends AbstractPacketHandler {
                 }
             });
         }
+
+        ftClient.getIsGoingReady().set(false);
     }
 }

@@ -45,6 +45,8 @@ public class FTClient extends Client<FTConnection> {
 
     private AtomicBoolean isJoiningOrLeavingLobby = new AtomicBoolean(false);
     private AtomicBoolean isJoiningOrLeavingRoom = new AtomicBoolean(false);
+    private AtomicBoolean isGoingReady = new AtomicBoolean(false);
+    private AtomicBoolean isClosingSlot = new AtomicBoolean(false);
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;
