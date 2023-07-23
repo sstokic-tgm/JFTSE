@@ -326,7 +326,12 @@ public enum PacketOperations {
     D2SDevPacket(0x555),
 
     C2SAntiCheatClientRegister(0x9791),
-    C2SAntiCheatClientModuleReq(0x9795);
+    C2SAntiCheatHeartbeat(0x9792),
+    S2CAntiCheatHeartbeat(0x9793),
+    C2SAntiCheatClientModuleReq(0x9795),
+    C2SAntiCheatFTGlobalVarsReq(0x9796),
+    S2CAntiCheatFTGlobalVarsReq(0x9797),
+    C2SAntiCheatFTGlobalVarsSet(0x9798);
 
     private final int value;
     private static final PacketOperations[] VALUES = values();

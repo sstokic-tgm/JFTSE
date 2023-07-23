@@ -1,6 +1,7 @@
 package com.jftse.emulator;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.manager.ACManager;
 import com.jftse.emulator.server.net.ConnectionInitializer;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import io.netty.bootstrap.ServerBootstrap;
@@ -18,6 +19,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.annotation.PreDestroy;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @SpringBootApplication
 @EntityScan(basePackages = "com.jftse.entities")
@@ -30,6 +33,9 @@ public class ACServerStart {
 
     @Autowired
     private ConfigService configService;
+
+    @Autowired
+    private ACManager acManager;
 
     public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(ACServerStart.class, args);
@@ -69,7 +75,14 @@ public class ACServerStart {
     @PreDestroy
     public void onExit() {
         log.info("Server exited");
-        workerGroup.shutdownGracefully();
-        bossGroup.shutdownGracefully();
+        acManager.onExit();
+        Future<?> workerGroupFuture = workerGroup.shutdownGracefully();
+        Future<?> bossGroupFuture = bossGroup.shutdownGracefully();
+        try {
+            workerGroupFuture.get();
+            bossGroupFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Error while exiting server: " + e.getMessage(), e);
+        }
     }
 }

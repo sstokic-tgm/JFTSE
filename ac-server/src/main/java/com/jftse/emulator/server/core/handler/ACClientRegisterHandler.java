@@ -37,6 +37,8 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
+        FTConnection connection = (FTConnection) this.connection;
+
         InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
         if (inetSocketAddress != null) {
             String hostAddress = inetSocketAddress.getAddress().getHostAddress();
@@ -55,9 +57,9 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
                             .ifPresent(f -> f.setValue(true));
                     boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
 
-                    if (valid) {
+                    if (!valid) {
                         Packet unknownAnswer = new Packet((char) 0x9791);
-                        unknownAnswer.write((byte) 0);
+                        unknownAnswer.write((byte) 1);
                         connection.sendTCP(unknownAnswer);
                     }
                 } else {
@@ -67,6 +69,7 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
                         if (clientWhitelist != null && !clientWhitelist.getIsAuthenticated()) {
                             String hwid = result.get(0);
 
+                            connection.setHwid(hwid);
                             clientWhitelist.setHwid(hwid);
                             clientWhitelist.setIsAuthenticated(true);
                             clientWhitelistService.save(clientWhitelist);

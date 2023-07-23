@@ -25,18 +25,13 @@ public class HeartbeatPacketHandler extends AbstractPacketHandler {
             Account account = ftClient.getAccount();
             if (account != null) {
                 if (!connection.getIsClosingConnection().get() && account.getStatus() == AuthenticationServiceImpl.SUCCESS) {
-                    account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
-                    ftClient.saveAccount(account);
+                    connection.close();
                 }
                 account = ftClient.getAccount();
                 if (account != null && account.getStatus() == AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
                     connection.close();
                 }
             }
-
-            Packet answerHeartBeat = new Packet((char) 0xFF87);
-            answerHeartBeat.write(packet.getClientTimestamp());
-            connection.sendTCP(answerHeartBeat);
         }
     }
 }

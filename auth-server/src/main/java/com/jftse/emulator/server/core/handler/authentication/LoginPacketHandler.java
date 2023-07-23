@@ -6,6 +6,7 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.authserver.C2SLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
 import com.jftse.entities.database.model.auth.AuthToken;
@@ -56,7 +57,6 @@ public class LoginPacketHandler extends AbstractPacketHandler {
     @Override
     public void handle() {
         InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
-        String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
         if (configService.getValue("anticheat.enabled", false) && !isClientValid(inetSocketAddress, loginPacket.getHwid())) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
@@ -120,6 +120,8 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 FTClient client = (FTClient) connection.getClient();
                 client.saveAccount(account);
                 client.setAccount(account.getId());
+
+                ((FTConnection) connection).setHwid(loginPacket.getHwid());
 
                 List<AuthToken> existingAuthTokens = authTokenService.findAuthTokensByAccountName(account.getUsername());
                 if (!existingAuthTokens.isEmpty()) {
