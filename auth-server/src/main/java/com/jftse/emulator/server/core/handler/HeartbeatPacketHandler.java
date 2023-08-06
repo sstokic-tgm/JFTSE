@@ -23,14 +23,8 @@ public class HeartbeatPacketHandler extends AbstractPacketHandler {
         FTClient client = (FTClient) connection.getClient();
         if (client != null) {
             Account account = client.getAccount();
-            if (account != null) {
-                if (!connection.getIsClosingConnection().get() && account.getStatus() == AuthenticationServiceImpl.SUCCESS) {
-                    connection.close();
-                }
-                account = client.getAccount();
-                if (account != null && account.getStatus() == AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
-                    connection.close();
-                }
+            if (account != null && account.getStatus() == AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+                connection.close();
             }
         }
     }
