@@ -18,10 +18,6 @@ public class LobbyJoinPacketHandler extends AbstractPacketHandler {
     public void handle() {
         FTClient client = (FTClient) connection.getClient();
 
-        if (client.getIsJoiningOrLeavingRoom().get()) {
-            return;
-        }
-
         if (!client.getIsJoiningOrLeavingLobby().compareAndSet(false, true)) {
             return;
         }

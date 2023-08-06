@@ -78,6 +78,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(new ArrayList<>(GameManager.getInstance().getRooms()));
 
+            resetIsJoiningOrLeavingRoom(ftClient);
+
             connection.sendTCP(roomJoinAnswerPacket, roomListAnswerPacket);
             return;
         }
@@ -85,6 +87,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         if (room.getStatus() != RoomStatus.NotRunning) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -1, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
+
+            resetIsJoiningOrLeavingRoom(ftClient);
 
             GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
             return;
@@ -97,6 +101,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
                 S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
                 connection.sendTCP(roomJoinAnswerPacket);
 
+                resetIsJoiningOrLeavingRoom(ftClient);
+
                 GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
                 return;
             }
@@ -105,6 +111,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             if (!anyPositionAvailable) {
                 S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
                 connection.sendTCP(roomJoinAnswerPacket);
+
+                resetIsJoiningOrLeavingRoom(ftClient);
 
                 GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
                 return;
@@ -117,12 +125,16 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
 
             handleRoomUponJoin(clientRoom, clientRoom.getRoomId());
 
+            resetIsJoiningOrLeavingRoom(ftClient);
+
             return;
         }
 
         if ((room.isHardMode() || room.isArcade()) && activePlayer.getLevel() < ConfigService.getInstance().getValue("command.room.mode.change.player.level", 60)) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
+
+            resetIsJoiningOrLeavingRoom(ftClient);
 
             GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
             return;
@@ -131,6 +143,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         if (room.getBannedPlayers().contains(activePlayer.getId())) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
+
+            resetIsJoiningOrLeavingRoom(ftClient);
 
             GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
             return;
@@ -155,6 +169,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
                 S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
                 connection.sendTCP(roomJoinAnswerPacket);
 
+                resetIsJoiningOrLeavingRoom(ftClient);
+
                 GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
                 return;
             }
@@ -163,6 +179,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         if (activePlayer.getLevel() < (room.getLevel() - room.getLevelRange()) && activePlayer.getLevel() > room.getLevel()) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
+
+            resetIsJoiningOrLeavingRoom(ftClient);
 
             GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
             return;
@@ -174,6 +192,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         if (newPosition == -1) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
+
+            resetIsJoiningOrLeavingRoom(ftClient);
 
             GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
             return;
@@ -257,5 +277,9 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             i++;
         }
         connection.sendTCP(roomSlotCloseAnswerPackets.toArray(Packet[]::new));
+    }
+
+    private void resetIsJoiningOrLeavingRoom(FTClient ftClient) {
+        ftClient.getIsJoiningOrLeavingRoom().set(false);
     }
 }
