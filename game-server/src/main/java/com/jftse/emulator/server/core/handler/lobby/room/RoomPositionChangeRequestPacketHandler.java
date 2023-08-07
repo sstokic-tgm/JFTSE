@@ -3,8 +3,8 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomPositionChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerInformationPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPositionChangeAnswerPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomReadyChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -14,7 +14,6 @@ import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @PacketOperationIdentifier(PacketOperations.C2SRoomPositionChange)
@@ -68,12 +67,9 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractPacketHandle
             roomPlayerList.forEach(rp -> {
                 synchronized (rp) {
                     rp.setReady(false);
-                }
-            });
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(roomPlayerList));
-            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
-                if (c.getConnection() != null) {
-                    c.getConnection().sendTCP(roomPlayerInformationPacket);
+
+                    S2CRoomReadyChangeAnswerPacket roomReadyChangePacket = new S2CRoomReadyChangeAnswerPacket(rp.getPosition(), rp.isReady());
+                    GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomReadyChangePacket, ftClient.getConnection());
                 }
             });
         }
