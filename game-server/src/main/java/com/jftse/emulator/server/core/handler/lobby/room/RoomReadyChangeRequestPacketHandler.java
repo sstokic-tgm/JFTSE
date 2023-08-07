@@ -5,7 +5,6 @@ import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomReadyChangeAnswe
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
@@ -29,9 +28,8 @@ public class RoomReadyChangeRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
-        Room room = ftClient.getActiveRoom();
         RoomPlayer roomPlayer = ftClient.getRoomPlayer();
-        if (room != null && roomPlayer != null) {
+        if (roomPlayer != null) {
             roomPlayer.setReady(roomReadyChangeRequestPacket.isReady());
 
             S2CRoomReadyChangeAnswerPacket roomReadyChangeAnswerPacket = new S2CRoomReadyChangeAnswerPacket(roomPlayer.getPosition(), roomPlayer.isReady());

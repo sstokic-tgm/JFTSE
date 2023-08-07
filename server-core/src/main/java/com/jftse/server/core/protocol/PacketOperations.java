@@ -36,8 +36,11 @@ public enum PacketOperations {
     C2SRoomIsPrivateChange(0x178E),
     C2SRoomLevelRangeChange(0x178F),
     C2SRoomSkillFreeChange(0x1795),
+    S2CRoomSkillFreeChange(0x1796),
     C2SRoomAllowBattlemonChange(0x1793),
+    S2CRoomAllowBattlemonChange(0x1794),
     C2SRoomQuickSlotChange(0x17A2),
+    S2CRoomQuickSlotChange(0x17A3),
     C2SRoomJoin(0x138B),
     S2CRoomJoinAnswer(0x138C),
     C2SRoomLeave(0x1771),
@@ -53,6 +56,8 @@ public enum PacketOperations {
     C2SLobbyUserListRequest(0x1707),
     S2CLobbyUserListAnswer(0x1708),
 
+    C2SRoomUserInfoRequest(0x139A),
+    S2CRoomUserInfoAnswer(0x139B),
     C2SLobbyUserInfoRequest(0x139C),
     S2CLobbyUserInfoAnswer(0x139D),
     C2SLobbyUserInfoClothRequest(0x1BDF),
@@ -128,6 +133,8 @@ public enum PacketOperations {
     C2SRoomSlotCloseReq(0x1D4C),
     S2CRoomSlotCloseAnswer(0x1D4E),
     C2SRoomFittingReq(0x1D60),
+    S2CRoomFittingAnswer(0x1D61),
+    S2CRoomFittingPlayerInfo(0x1D62),
 
     S2CUnknownRoomJoin(0x189D),
 

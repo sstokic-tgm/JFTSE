@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomQuickSlotChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomQuickSlotChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -29,12 +29,8 @@ public class RoomQuickSlotChangePacketHandler extends AbstractPacketHandler {
                 room.setQuickSlot(changeRoomQuickSlotRequestPacket.isQuickSlot());
             }
 
-            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
-                if (c.getConnection() != null) {
-                    c.getConnection().sendTCP(roomInformationPacket);
-                }
-            });
+            S2CRoomQuickSlotChangeAnswerPacket roomQuickSlotChangeAnswerPacket = new S2CRoomQuickSlotChangeAnswerPacket(room.isQuickSlot());
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomQuickSlotChangeAnswerPacket, client.getConnection());
         }
     }
 }

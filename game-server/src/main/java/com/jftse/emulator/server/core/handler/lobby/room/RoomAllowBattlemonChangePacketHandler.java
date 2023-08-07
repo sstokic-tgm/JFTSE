@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomAllowBattlemonChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomAllowBattlemonChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -31,12 +31,8 @@ public class RoomAllowBattlemonChangePacketHandler extends AbstractPacketHandler
                 room.setAllowBattlemon((byte) 0);
             }
 
-            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
-                if (c.getConnection() != null) {
-                    c.getConnection().sendTCP(roomInformationPacket);
-                }
-            });
+            S2CRoomAllowBattlemonChangeAnswerPacket roomAllowBattlemonChangeAnswerPacket = new S2CRoomAllowBattlemonChangeAnswerPacket(room.getAllowBattlemon());
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomAllowBattlemonChangeAnswerPacket, client.getConnection());
         }
     }
 }

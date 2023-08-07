@@ -5,6 +5,7 @@ import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.ClothEquipment;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.item.EItemCategory;
@@ -49,6 +50,10 @@ public class RoomPlayer {
 
     public ClothEquipment getClothEquipment() {
         return ServiceManager.getInstance().getClothEquipmentService().findClothEquipmentById(clothEquipmentId);
+    }
+
+    public PlayerStatistic getPlayerStatistic() {
+        return ServiceManager.getInstance().getPlayerStatisticService().findPlayerStatisticById(getPlayer().getPlayerStatistic().getId());
     }
 
     public List<Integer> getSpecialSlotEquipment() {

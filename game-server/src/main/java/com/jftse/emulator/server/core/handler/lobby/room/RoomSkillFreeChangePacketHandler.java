@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomSkillFreeChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSkillFreeChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -29,12 +29,8 @@ public class RoomSkillFreeChangePacketHandler extends AbstractPacketHandler {
                 room.setSkillFree(changeRoomSkillFreeRequestPacket.isSkillFree());
             }
 
-            S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
-                if (c.getConnection() != null) {
-                    c.getConnection().sendTCP(roomInformationPacket);
-                }
-            });
+            S2CRoomSkillFreeChangeAnswerPacket skillFreeChangeAnswerPacket = new S2CRoomSkillFreeChangeAnswerPacket(room.isSkillFree());
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(skillFreeChangeAnswerPacket, ftClient.getConnection());
         }
     }
 }
