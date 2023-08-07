@@ -531,4 +531,16 @@ public class GameManager {
             });
         }
     }
+
+    public void sendPacketToAllClientsInSameRoom(Packet packet, FTConnection connection) {
+        final Room room = connection.getClient().getActiveRoom();
+        if (room != null) {
+            final List<FTClient> clientsInRoom = new ArrayList<>(getClientsInRoom(room.getRoomId()));
+            clientsInRoom.forEach(c -> {
+                if (c.getConnection() != null) {
+                    c.getConnection().sendTCP(packet);
+                }
+            });
+        }
+    }
 }

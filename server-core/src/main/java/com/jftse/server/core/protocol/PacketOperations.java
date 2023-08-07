@@ -61,6 +61,7 @@ public enum PacketOperations {
     S2CRoomInformation(0x177A),
 
     C2SRoomReadyChange(0x1775),
+    S2CRoomReadyChange(0x1776),
     C2SRoomTriggerStartGame(0x177B),
 
     // Not really sure what this does but it let the annoying "Starting game..." window disappear for room master
