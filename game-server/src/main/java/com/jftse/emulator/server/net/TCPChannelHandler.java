@@ -8,8 +8,6 @@ import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
-import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
-import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayBackToRoom;
 import com.jftse.emulator.server.core.packets.messenger.S2CClubMembersListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
@@ -164,8 +162,9 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                         client.savePlayer(player);
                     }
 
-                    RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
+                    RoomPlayer roomPlayer = client.getRoomPlayer();
                     if (roomPlayer != null) {
+                        roomPlayer.getConnectedToRelay().compareAndSet(true, false);
                         notifyClients = roomPlayer.getPosition() < 4;
                         if (notifyClients) {
                             synchronized (currentClientRoom) {

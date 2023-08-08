@@ -93,7 +93,7 @@ public enum PacketOperations {
     S2CMatchplayStartGuardianServe(0x184C),
     C2SMatchplayPoint(0x183F),
     S2CMatchplayTeamWinsPoint(0x1840),
-    S2CMatchplayTeamWinsSet(0x1842 ),
+    S2CMatchplayTeamWinsSet(0x1842),
     S2CMatchplayEndBasicGame(0x26FC), // Not really sure if name really corresponds to packet.
     S2CMatchplayDisplayItemRewards(0x1DB6),
     S2CMatchPlaySetExperienceGainInfoData(0x1846),

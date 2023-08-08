@@ -8,4 +8,6 @@ public abstract class RoomStatus {
     public final static int AnimationSkipped = 5;
     public final static int Running = 6;
     public final static int NotRunning = -1;
+    public final static int RelayConnectionFailed = -2;
+    public final static int RelayConnectionSuccess = 7;
 }

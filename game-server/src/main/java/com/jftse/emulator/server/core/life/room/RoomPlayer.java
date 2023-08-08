@@ -31,6 +31,7 @@ public class RoomPlayer {
     private AtomicBoolean ready = new AtomicBoolean(false);
     private AtomicBoolean fitting = new AtomicBoolean(false);
     private AtomicBoolean gameAnimationSkipReady = new AtomicBoolean(false);
+    private AtomicBoolean connectedToRelay = new AtomicBoolean(false);
 
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);

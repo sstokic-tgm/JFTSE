@@ -75,6 +75,7 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
 
         roomPlayer.setReady(false);
         roomPlayer.setGameAnimationSkipReady(false);
+        roomPlayer.getConnectedToRelay().set(false);
 
         synchronized (currentClientRoom) {
             currentClientRoom.setStatus(RoomStatus.NotRunning);
