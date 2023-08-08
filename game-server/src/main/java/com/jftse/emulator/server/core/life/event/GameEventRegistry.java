@@ -46,6 +46,18 @@ public class GameEventRegistry {
 
     public void registerEvent(ScriptFile scriptFile, GameEventScriptable event, boolean enabled) {
         GameEventMetadata gameEventMetadata = new GameEventMetadata(scriptFile.getId(), event.getName(), event.getType(), event.getDesc(), enabled, event);
+
+        Optional<SGameEvent> optGameEvent = gameEventService.findById(scriptFile.getId());
+        if (optGameEvent.isEmpty()) {
+            SGameEvent gameEvent = new SGameEvent();
+            gameEvent.setId(scriptFile.getId());
+            gameEvent.setName(event.getName());
+            gameEvent.setType(event.getType());
+            gameEvent.setDescription(event.getDesc());
+            gameEvent.setEnabled(enabled);
+            gameEventService.save(gameEvent);
+        }
+
         registeredEvents.computeIfAbsent(event.getType(), m -> new ArrayList<>()).add(gameEventMetadata);
         log.info("Registered event: " + event.getName() + " (" + event.getType() + ")");
     }
@@ -72,8 +84,46 @@ public class GameEventRegistry {
     }
 
     private boolean isEventEnabled(Long id) {
-        List<SGameEvent> gameEventList = gameEventService.findAllEnabled();
-        return !gameEventList.isEmpty() && gameEventList.stream().anyMatch(gameEvent -> gameEvent.getId().equals(id));
+        Optional<SGameEvent> gameEvent = gameEventService.findById(id);
+        if (gameEvent.isEmpty()) {
+            return false;
+        }
+        return gameEvent.get().getEnabled();
+    }
+
+    private boolean isEventEnabled(SGameEvent gameEvent) {
+        if (gameEvent == null) {
+            return false;
+        }
+        return gameEvent.getEnabled();
+    }
+
+    public boolean isEventValid(Long id) {
+        Optional<SGameEvent> gameEvent = gameEventService.findById(id);
+        if (gameEvent.isPresent()) {
+            SGameEvent ge = gameEvent.get();
+
+            if (isEventEnabled(ge)) {
+                Date now = new Date();
+
+                Date startDate = ge.getStartDate();
+                Date endDate = ge.getEndDate();
+                if (startDate != null && endDate != null) {
+                    int afterStartDt = now.compareTo(startDate);
+                    int beforeEndDt = now.compareTo(endDate);
+                    return afterStartDt >= 0 && beforeEndDt <= 0;
+                } else if (startDate != null) {
+                    int afterStartDt = now.compareTo(startDate);
+                    return afterStartDt >= 0;
+                } else if (endDate != null) {
+                    int beforeEndDt = now.compareTo(endDate);
+                    return beforeEndDt <= 0;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void enableEvent(Long id) {
@@ -82,8 +132,9 @@ public class GameEventRegistry {
             eventMetadata.setEnabled(true);
             Optional<SGameEvent> gameEvent = gameEventService.findById(id);
             if (gameEvent.isPresent()) {
-                gameEvent.get().setEnabled(true);
-                gameEventService.save(gameEvent.get());
+                SGameEvent ge = gameEvent.get();
+                ge.setEnabled(true);
+                gameEventService.save(ge);
             }
         }
     }
@@ -94,8 +145,9 @@ public class GameEventRegistry {
             eventMetadata.setEnabled(false);
             Optional<SGameEvent> gameEvent = gameEventService.findById(id);
             if (gameEvent.isPresent()) {
-                gameEvent.get().setEnabled(false);
-                gameEventService.save(gameEvent.get());
+                SGameEvent ge = gameEvent.get();
+                ge.setEnabled(false);
+                gameEventService.save(ge);
             }
         }
     }
@@ -111,11 +163,11 @@ public class GameEventRegistry {
         return null;
     }
 
-    public void triggerEventWithType(final GameEventType eventType, final FTClient client) {
+    public void triggerEventWithType(final GameEventType eventType, final FTClient client, Object... args) {
         final List<GameEventMetadata> eventMetadataList = registeredEvents.getOrDefault(eventType.getName(), Collections.emptyList());
         for (GameEventMetadata eventMetadata : eventMetadataList) {
-            if (eventMetadata.isEnabled() && isEventEnabled(eventMetadata.getId())) {
-                eventMetadata.getEvent().onEvent(client);
+            if (eventMetadata.isEnabled() && isEventValid(eventMetadata.getId())) {
+                eventMetadata.getEvent().onEvent(client, args);
             }
         }
     }

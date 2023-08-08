@@ -133,6 +133,7 @@ public class CommandManager {
         registerCommand("serverKick", 1, new ServerKickCommand());
         registerCommand("rsLogin", 1, new ResetLoginStatusCommand());
         registerCommand("reloadScripts", 1, new ReloadScriptsCommand());
+        registerCommand("event", 1, new EventCommand());
     }
 
     private void registerScriptFileCommands() {

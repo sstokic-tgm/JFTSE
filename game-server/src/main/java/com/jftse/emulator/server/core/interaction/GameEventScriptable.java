@@ -6,5 +6,5 @@ public interface GameEventScriptable {
     String getName();
     String getType();
     String getDesc();
-    void onEvent(FTClient client);
+    void onEvent(FTClient client, Object... args);
 }
