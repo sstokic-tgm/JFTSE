@@ -87,7 +87,7 @@ public enum PacketOperations {
     C2SRelayPacketToAllClients(0x414),
     C2SMatchplayRegisterPlayerForRelay(0x3ED),
     S2CMatchplayAckRelayConnection(0x3EF),
-    C2SGameServerConnectionProblem(0x3F1),
+    C2SRelayServerConnectionProblem(0x3F1),
     C2SMatchplayConnectedToRelay(0x3F3),
     S2CMatchplayStartServe(0x183E),
     S2CMatchplayStartGuardianServe(0x184C),

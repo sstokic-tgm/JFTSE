@@ -7,6 +7,6 @@ public class S2CGameServerLoginPacket extends Packet {
     public S2CGameServerLoginPacket(char result, byte unk0) {
         super(PacketOperations.S2CGameLoginData);
         this.write(result);
-        this.write(unk0);
+        this.write(unk0); // game server type
     }
 }

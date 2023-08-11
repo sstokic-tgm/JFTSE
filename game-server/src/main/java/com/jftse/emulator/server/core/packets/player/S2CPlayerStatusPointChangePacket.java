@@ -13,7 +13,7 @@ public class S2CPlayerStatusPointChangePacket extends Packet {
     public S2CPlayerStatusPointChangePacket(Player player, StatusPointsAddedDto statusPointsAddedDto) {
         super(PacketOperations.S2CPlayerStatusPointChange);
 
-        this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
+        this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
 
         // status points
         this.write(player.getStrength());
@@ -40,7 +40,7 @@ public class S2CPlayerStatusPointChangePacket extends Packet {
         this.write((byte) 0);
         this.write((byte) 0);
         //??
-        this.write(0);
+        this.write(statusPointsAddedDto.getAddHp());
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);
