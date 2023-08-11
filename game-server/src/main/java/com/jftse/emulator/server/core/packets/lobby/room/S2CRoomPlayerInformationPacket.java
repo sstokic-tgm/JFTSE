@@ -60,9 +60,9 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write((short) 0); // emblem slot 2
             this.write((short) 0); // emblem slot 3
             this.write((short) 0); // emblem slot 4
-            this.write(0);
 
-            /* start - status points */
+            this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
+
             // status points
             this.write(player.getStrength());
             this.write(player.getStamina());
@@ -81,14 +81,14 @@ public class S2CRoomPlayerInformationPacket extends Packet {
             this.write((byte) 0);
             this.write((byte) 0);
             // add hp
-            this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
+            this.write(0);
             // cloth added status points for shop
             this.write((byte) 0);
             this.write((byte) 0);
             this.write((byte) 0);
             this.write((byte) 0);
             //??
-            this.write(statusPointsAddedDto.getAddHp());
+            this.write(0);
             this.write((byte) 0);
             this.write((byte) 0);
             this.write((byte) 0);

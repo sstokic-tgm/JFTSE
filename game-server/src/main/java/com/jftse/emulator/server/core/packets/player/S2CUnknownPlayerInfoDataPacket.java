@@ -37,7 +37,8 @@ public class S2CUnknownPlayerInfoDataPacket extends Packet {
         this.write(player.getExpPoints());
         this.write(0); // perfect(s)
         this.write(0); // guard break(s)
-        this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
+
+        this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
 
         // status points
         this.write(player.getStrength());
@@ -56,19 +57,19 @@ public class S2CUnknownPlayerInfoDataPacket extends Packet {
         // ??
         this.write((byte) 0);
         this.write((byte) 0);
-
-        this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
-        // status points
-        this.write(player.getStrength());
-        this.write(player.getStamina());
-        this.write(player.getDexterity());
-        this.write(player.getWillpower());
-        // cloth added status points
-        this.write(statusPointsAddedDto.getAddHp());
-        this.write(statusPointsAddedDto.getStrength());
-        this.write(statusPointsAddedDto.getStamina());
-        this.write(statusPointsAddedDto.getDexterity());
-        this.write(statusPointsAddedDto.getWillpower());
+        // add hp
+        this.write(0);
+        // cloth added status points for shop
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        //??
+        this.write(0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
         // ??
         for (int i = 5; i < 13; ++i) {
             this.write((byte) 0);
