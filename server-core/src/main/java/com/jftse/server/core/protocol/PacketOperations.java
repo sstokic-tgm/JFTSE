@@ -326,9 +326,15 @@ public enum PacketOperations {
     C2STournamentJoinReq(0x26AD),
     S2CTournamentJoinAnswer(0x26AE),
 
+    C2SChatHousePosition(0x190A),
+    S2CChatHousePosition(0x190B),
+    C2SChatCourtMove(0x18A2),
+    S2CChatCourtMove(0x18A3),
+    C2SChatHouseMove(0x18A5),
+    S2CChatHouseMove(0x18A6),
+
     S2CDCMsg(0x2329),
 
-    C2SUnknown0xE00E(0xE00E),
     C2SUnknown0x1071(0x1071),
 
     D2SDevPacket(0x555),
