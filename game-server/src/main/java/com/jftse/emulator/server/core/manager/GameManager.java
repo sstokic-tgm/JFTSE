@@ -6,6 +6,7 @@ import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
+import com.jftse.emulator.server.core.constants.RoomType;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -423,7 +424,7 @@ public class GameManager {
     }
 
     public int getRoomMode(final Room room) {
-        if (room.getAllowBattlemon() == 2) {
+        if (room.getRoomType() == RoomType.BATTLEMON) {
             return GameMode.BATTLEMON;
         }
         return room.getMode();
@@ -466,11 +467,12 @@ public class GameManager {
         connection.getClient().setActiveRoom(room);
         connection.getClient().setInLobby(false);
 
-        S2CRoomCreateAnswerPacket roomCreateAnswerPacket = new S2CRoomCreateAnswerPacket((char) 0, (byte) 0, (byte) 0, (byte) 0);
+        S2CRoomCreateAnswerPacket roomCreateAnswerPacket = new S2CRoomCreateAnswerPacket((char) 0, room.getRoomType(), room.getMode(), room.getMap());
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
         S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
 
-        connection.sendTCP(roomCreateAnswerPacket, roomInformationPacket);
+        connection.sendTCP(roomCreateAnswerPacket);
+        connection.sendTCP(roomInformationPacket);
         connection.sendTCP(roomPlayerInformationPacket);
 
         updateLobbyRoomListForAllClients(connection);

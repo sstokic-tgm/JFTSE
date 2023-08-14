@@ -7,14 +7,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class C2SRoomCreateQuickRequestPacket extends Packet {
-    private byte allowBattlemon;
+    private byte roomType;
     private byte mode;
     private byte players;
 
     public C2SRoomCreateQuickRequestPacket(Packet packet) {
         super(packet);
 
-        this.allowBattlemon = this.readByte();
+        this.roomType = this.readByte();
         this.mode = this.readByte();
         this.players = this.readByte();
     }

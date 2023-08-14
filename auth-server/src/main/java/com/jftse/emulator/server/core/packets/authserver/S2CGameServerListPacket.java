@@ -14,7 +14,7 @@ public class S2CGameServerListPacket extends Packet {
         this.write((byte) gameServerList.size());
 
         for (GameServer gameServer : gameServerList) {
-            this.write((byte) 0);  // ?
+            this.write((byte) Math.toIntExact(gameServer.getId()));
             this.write((short) Math.toIntExact(gameServer.getId()));
             this.write(gameServer.getGameServerType().getType());
             this.write(gameServer.getHost());

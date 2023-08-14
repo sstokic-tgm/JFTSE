@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
+import com.jftse.emulator.server.core.constants.RoomType;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomCreateQuickRequestPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.constants.GameMode;
@@ -31,7 +32,7 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         if (client == null)
             return;
 
-        if (roomQuickCreateRequestPacket.getMode() == GameMode.BATTLEMON)
+        if (roomQuickCreateRequestPacket.getRoomType() == RoomType.BATTLEMON)
             return;
 
         Player player = client.getPlayer();
@@ -47,7 +48,8 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         Room room = new Room();
         room.setRoomId(GameManager.getInstance().getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
-        room.setAllowBattlemon(roomQuickCreateRequestPacket.getAllowBattlemon());
+        room.setRoomType(roomQuickCreateRequestPacket.getRoomType());
+        room.setAllowBattlemon(room.getRoomType() == 2 ? (byte) 1 : (byte) 0);
 
         room.setMode(roomQuickCreateRequestPacket.getMode());
         room.setRule((byte) 0);
@@ -58,7 +60,6 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
             room.setPlayers(playerSize == 0 ? 2 : playerSize);
 
         room.setPrivate(false);
-        room.setUnk1((byte) 0);
         room.setSkillFree(false);
         room.setQuickSlot(false);
         room.setLevel(player.getLevel());
@@ -66,7 +67,7 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         room.setBettingType('0');
         room.setBettingAmount(0);
         room.setBall(1);
-        room.setMap((byte) 1);
+        room.setMap((byte) 0);
 
         GameManager.getInstance().internalHandleRoomCreate(client.getConnection(), room);
 

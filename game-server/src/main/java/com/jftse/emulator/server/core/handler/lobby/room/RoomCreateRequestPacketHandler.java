@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
+import com.jftse.emulator.server.core.constants.RoomType;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomCreateRequestPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -26,6 +27,9 @@ public class RoomCreateRequestPacketHandler extends AbstractPacketHandler {
         if ((client != null && client.getActiveRoom() != null) || client == null || client.getPlayer() == null)
             return;
 
+        if (roomCreateRequestPacket.getRoomType() == RoomType.BATTLEMON)
+            return;
+
         if (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
             return;
         }
@@ -33,14 +37,14 @@ public class RoomCreateRequestPacketHandler extends AbstractPacketHandler {
         Room room = new Room();
         room.setRoomId(GameManager.getInstance().getRoomId());
         room.setRoomName(roomCreateRequestPacket.getRoomName());
-        room.setAllowBattlemon((byte) 0);
+        room.setRoomType(roomCreateRequestPacket.getRoomType());
+        room.setAllowBattlemon(room.getRoomType() == 2 ? (byte) 1 : (byte) 0);
 
         room.setMode(roomCreateRequestPacket.getMode());
         room.setRule(roomCreateRequestPacket.getRule());
         room.setPlayers(roomCreateRequestPacket.getPlayers());
         room.setPrivate(roomCreateRequestPacket.isPrivate());
         room.setPassword(roomCreateRequestPacket.getPassword());
-        room.setUnk1(roomCreateRequestPacket.getUnk1());
         room.setSkillFree(roomCreateRequestPacket.isSkillFree());
         room.setQuickSlot(roomCreateRequestPacket.isQuickSlot());
         room.setLevel(client.getPlayer().getLevel());
@@ -48,7 +52,7 @@ public class RoomCreateRequestPacketHandler extends AbstractPacketHandler {
         room.setBettingType(roomCreateRequestPacket.getBettingType());
         room.setBettingAmount(roomCreateRequestPacket.getBettingAmount());
         room.setBall(roomCreateRequestPacket.getBall());
-        room.setMap((byte) 1);
+        room.setMap(roomCreateRequestPacket.getMapId());
 
         GameManager.getInstance().internalHandleRoomCreate(client.getConnection(), room);
 

@@ -8,12 +8,12 @@ import lombok.Setter;
 @Setter
 public class C2SRoomCreateRequestPacket extends Packet {
     private String roomName;
-    private byte allowBattlemon;
+    private byte roomType;
     private byte mode;
     private byte rule;
     private byte players;
     private boolean isPrivate;
-    private byte unk1;
+    private byte mapId;
     private boolean skillFree;
     private boolean quickSlot;
     private byte levelRange;
@@ -26,12 +26,12 @@ public class C2SRoomCreateRequestPacket extends Packet {
         super(packet);
 
         this.roomName = this.readUnicodeString();
-        this.allowBattlemon = this.readByte();
+        this.roomType = this.readByte();
         this.mode = this.readByte();
         this.rule = this.readByte();
         this.players = this.readByte();
         this.isPrivate = this.readByte() == 1;
-        this.unk1 = this.readByte();
+        this.mapId = this.readByte();
         this.skillFree = this.readByte() == 1;
         this.quickSlot = this.readByte() == 1;
         this.levelRange = this.readByte();

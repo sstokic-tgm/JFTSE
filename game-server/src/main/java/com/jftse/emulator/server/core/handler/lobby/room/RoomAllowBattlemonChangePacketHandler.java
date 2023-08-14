@@ -25,7 +25,7 @@ public class RoomAllowBattlemonChangePacketHandler extends AbstractPacketHandler
         FTClient client = (FTClient) connection.getClient();
         Room room = client.getActiveRoom();
         if (room != null) {
-            byte allowBattlemon = changeRoomAllowBattlemonRequestPacket.getAllowBattlemon() == 1 ? (byte) 2 : (byte) 0;
+            byte allowBattlemon = changeRoomAllowBattlemonRequestPacket.getAllowBattlemon();
             // disable battlemon
             synchronized (room) {
                 room.setAllowBattlemon((byte) 0);

@@ -23,7 +23,7 @@ public class S2CRoomListAnswerPacket extends Packet {
                     .count();
             this.write(room.getRoomId());
             this.write(room.getRoomName());
-            this.write(room.getAllowBattlemon());
+            this.write(room.getRoomType());
             this.write(room.getMode());
             this.write(room.getRule());
             this.write((byte) 0); // betting mode
@@ -34,7 +34,7 @@ public class S2CRoomListAnswerPacket extends Packet {
             this.write(room.isPrivate());
             this.write(room.getLevel());
             this.write(room.getLevelRange());
-            this.write((byte) 0); // allow battlemon
+            this.write(room.getAllowBattlemon()); // allow battlemon
             this.write(room.getMap());
             this.write(room.isSkillFree());
             this.write(room.isQuickSlot());

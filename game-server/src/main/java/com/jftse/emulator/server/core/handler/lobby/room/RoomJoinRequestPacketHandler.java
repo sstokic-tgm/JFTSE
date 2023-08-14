@@ -5,6 +5,7 @@ import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.constants.RoomType;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
@@ -235,10 +236,11 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         short roomPlayerPosition = client.getRoomPlayer().getPosition();
         boolean shouldUpdateNonGM = roomPlayerPosition != MiscConstants.InvisibleGmSlot || !client.isGameMaster();
 
-        S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) 0, (byte) 0, (byte) 0, (byte) 0);
+        S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) 0, room.getRoomType(), room.getMode(), room.getMap());
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
 
-        connection.sendTCP(roomJoinAnswerPacket, roomInformationPacket);
+        connection.sendTCP(roomJoinAnswerPacket);
+        connection.sendTCP(roomInformationPacket);
 
         final ArrayList<Short> positions = room.getPositions();
         List<Packet> roomSlotCloseAnswerPackets = new ArrayList<>();
