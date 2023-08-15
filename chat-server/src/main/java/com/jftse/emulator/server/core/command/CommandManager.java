@@ -123,10 +123,6 @@ public class CommandManager {
 
     private void registerCommands() {
         registerCommand("og", 0, new OpenGachaCommand());
-        registerCommand("hard", 0, new HardModeCommand());
-        registerCommand("arcade", 0, new ArcadeModeCommand());
-        registerCommand("random", 0, new RandomModeCommand());
-        registerCommand("pointback", 0, new PointbackCommand());
         registerCommand("ban", 1, new BanPlayerCommand());
         registerCommand("unban", 1, new UnbanPlayerCommand());
         registerCommand("sN", 1, new ServerNoticeCommand());

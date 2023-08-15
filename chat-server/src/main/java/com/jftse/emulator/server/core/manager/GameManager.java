@@ -4,14 +4,12 @@ import com.google.protobuf.Empty;
 import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
-import com.jftse.emulator.server.core.constants.MiscConstants;
-import com.jftse.emulator.server.core.constants.RoomType;
+import com.jftse.emulator.server.core.constants.ChatMode;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
-import com.jftse.emulator.server.core.packets.chat.house.S2CChatHousePositionPacket;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
@@ -22,7 +20,6 @@ import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.proto.auth.ClientServiceGrpc;
 import com.jftse.proto.auth.FTClientList;
-import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
@@ -386,17 +383,18 @@ public class GameManager {
         final int clientRoomModeFilter = client.getLobbyGameModeTabFilter();
         final int currentRoomListPage = Math.max(client.getLobbyCurrentRoomListPage(), 0);
         return getRooms().stream()
-                .filter(r -> clientRoomModeFilter == GameMode.ALL || getRoomMode(r) == clientRoomModeFilter)
+                .filter(r -> clientRoomModeFilter == ChatMode.ALL || getChatMode(r) == clientRoomModeFilter)
                 .skip(currentRoomListPage * 5L)
                 .limit(5)
                 .collect(Collectors.toList());
     }
 
-    public int getRoomMode(final Room room) {
-        if (room.getRoomType() == RoomType.BATTLEMON) {
-            return GameMode.BATTLEMON;
-        }
-        return room.getMode();
+    public int getChatMode(final Room room) {
+        return switch (room.getMode()) {
+            case 0 -> ChatMode.CHAT;
+            case 1 -> ChatMode.MY_HOME;
+            default -> ChatMode.ALL;
+        };
     }
 
     public synchronized void internalHandleRoomCreate(final FTConnection connection, Room room) {

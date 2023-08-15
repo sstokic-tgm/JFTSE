@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.net;
 
+import com.jftse.emulator.server.core.constants.ChatMode;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -9,7 +10,6 @@ import com.jftse.emulator.server.core.singleplay.challenge.ChallengeGame;
 import com.jftse.emulator.server.core.singleplay.tutorial.TutorialGame;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.net.Client;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,7 +34,7 @@ public class FTClient extends Client<FTConnection> {
     private volatile boolean inLobby = false;
     private volatile boolean isSpectator = false;
 
-    private volatile int lobbyGameModeTabFilter = GameMode.ALL;
+    private volatile int lobbyGameModeTabFilter = ChatMode.ALL;
     private volatile int lobbyCurrentPlayerListPage = 1;
     private volatile int lobbyCurrentRoomListPage = -1;
 
