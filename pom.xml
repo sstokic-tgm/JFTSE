@@ -36,6 +36,7 @@
         <module>commons</module>
         <module>server-core</module>
         <module>game-server</module>
+		<module>chat-server</module>
         <module>relay-server</module>
         <module>ac-server</module>
         <module>commons-proto</module>
