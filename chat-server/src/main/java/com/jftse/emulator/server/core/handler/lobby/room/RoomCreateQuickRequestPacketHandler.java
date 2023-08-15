@@ -70,7 +70,7 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         room.setBettingAmount(0);
         room.setBall(1);
 
-        if (room.getRoomType() == 1 && room.getMode() == 1) {
+        if (room.getMode() == 1) {
             AccountHome accountHome = homeService.findAccountHomeByAccountId(player.getAccount().getId());
             if (accountHome != null) {
                 room.setMap(accountHome.getLevel());

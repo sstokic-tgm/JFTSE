@@ -1,6 +1,9 @@
 package com.jftse.emulator.server.core.life.room;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.chat.house.S2CChatHouseMovePacket;
+import com.jftse.emulator.server.core.packets.chat.house.S2CChatHousePositionPacket;
+import com.jftse.emulator.server.core.packets.chat.square.S2CChatSquareMovePacket;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.ClothEquipment;
@@ -15,6 +18,7 @@ import lombok.Setter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Setter
@@ -32,6 +36,10 @@ public class RoomPlayer {
     private AtomicBoolean fitting = new AtomicBoolean(false);
     private AtomicBoolean gameAnimationSkipReady = new AtomicBoolean(false);
     private AtomicBoolean connectedToRelay = new AtomicBoolean(false);
+
+    private AtomicReference<S2CChatHousePositionPacket> lastHousePositionPacket = new AtomicReference<>();
+    private AtomicReference<S2CChatHouseMovePacket> lastHouseMovePacket = new AtomicReference<>();
+    private AtomicReference<S2CChatSquareMovePacket> lastSquareMovePacket = new AtomicReference<>();
 
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);

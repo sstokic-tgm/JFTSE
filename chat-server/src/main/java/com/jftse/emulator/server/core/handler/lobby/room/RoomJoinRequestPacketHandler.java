@@ -1,16 +1,14 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
-import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.packets.chat.house.S2CChatHouseMovePacket;
 import com.jftse.emulator.server.core.packets.chat.house.S2CChatHousePositionPacket;
+import com.jftse.emulator.server.core.packets.chat.square.S2CChatSquareMovePacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeItemsLoadAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
-import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.home.HomeInventory;
 import com.jftse.entities.database.model.player.*;
@@ -243,6 +241,30 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
 
         GameManager.getInstance().updateLobbyRoomListForAllClients(client.getConnection());
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();
+
+        for (final RoomPlayer roomPlayer : room.getRoomPlayerList()) {
+            if (roomPlayer.getPlayerId().equals(client.getActivePlayerId())) {
+                continue;
+            }
+
+            if (room.getMode() == 0) {
+                S2CChatSquareMovePacket chatSquareMovePacket = roomPlayer.getLastSquareMovePacket().get();
+                if (chatSquareMovePacket != null) {
+                    connection.sendTCP(chatSquareMovePacket);
+                }
+            }
+
+            if (room.getMode() == 1) {
+                S2CChatHousePositionPacket chatHousePositionPacket = roomPlayer.getLastHousePositionPacket().get();
+                S2CChatHouseMovePacket chatHouseMovePacket = roomPlayer.getLastHouseMovePacket().get();
+                if (chatHousePositionPacket != null) {
+                    connection.sendTCP(chatHousePositionPacket);
+                }
+                if (chatHouseMovePacket != null) {
+                    connection.sendTCP(chatHouseMovePacket);
+                }
+            }
+        }
     }
 
     private void resetIsJoiningOrLeavingRoom(FTClient ftClient) {

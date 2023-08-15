@@ -31,6 +31,8 @@ public class ChatHouseMovePacketHandler extends AbstractPacketHandler {
             return;
 
         S2CChatHouseMovePacket answerHouseMovePacket = new S2CChatHouseMovePacket(roomPlayer.getPosition(), chatHouseMovePacket.getUnk1(), chatHouseMovePacket.getUnk2(), chatHouseMovePacket.getX(), chatHouseMovePacket.getY(), chatHouseMovePacket.getAnimationType(), chatHouseMovePacket.getUnk3());
+        roomPlayer.getLastHouseMovePacket().set(answerHouseMovePacket);
+
         GameManager.getInstance().sendPacketToAllClientsInSameRoom(answerHouseMovePacket, client.getConnection());
     }
 }
