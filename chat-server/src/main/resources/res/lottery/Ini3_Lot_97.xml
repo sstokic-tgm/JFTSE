@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Blue Capsule-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Hair Dye(Elder)" ShopIndex="57743" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Hair Dye(Golden)" ShopIndex="57749" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Hair Dye(Metal)" ShopIndex="57755" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Hair Dye(Candy)" ShopIndex="57761" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="JFTSE Modulator(Red)" ShopIndex="57767" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="JFTSE Modulator(Yellow)" ShopIndex="57774" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="JFTSE Modulator(Blue)" ShopIndex="57781" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="JFTSE Modulator(Purple)" ShopIndex="57788" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Healing (Deluxe)" ShopIndex="3021" QuantityMin="10" QuantityMax="10" ChansPer="15.9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Area Shield" ShopIndex="3022" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Clown's Candy" ShopIndex="57830" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Hair Dye(Elder)" ShopIndex="57744" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Hair Dye(Golden)" ShopIndex="57750" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Hair Dye(Metal)" ShopIndex="57756" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Hair Dye(Candy)" ShopIndex="57762" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="JFTSE Modulator(Red)" ShopIndex="57768" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="JFTSE Modulator(Yellow)" ShopIndex="57775" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="JFTSE Modulator(Blue)" ShopIndex="57782" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="JFTSE Modulator(Purple)" ShopIndex="57789" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Healing (Deluxe)" ShopIndex="3021" QuantityMin="10" QuantityMax="10" ChansPer="15.9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Area Shield" ShopIndex="3022" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Clown's Candy" ShopIndex="57831" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Hair Dye(Elder)" ShopIndex="57745" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Hair Dye(Golden)" ShopIndex="57751" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Hair Dye(Metal)" ShopIndex="57757" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Hair Dye(Candy)" ShopIndex="57763" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="JFTSE Modulator(Red)" ShopIndex="57769" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="JFTSE Modulator(Yellow)" ShopIndex="57776" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="JFTSE Modulator(Blue)" ShopIndex="57783" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="JFTSE Modulator(Purple)" ShopIndex="57790" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Healing (Deluxe)" ShopIndex="3021" QuantityMin="10" QuantityMax="10" ChansPer="15.9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Area Shield" ShopIndex="3022" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Clown's Candy" ShopIndex="57832" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Hair Dye(Elder)" ShopIndex="57746" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Hair Dye(Golden)" ShopIndex="57752" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Hair Dye(Metal)" ShopIndex="57758" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Hair Dye(Candy)" ShopIndex="57764" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="JFTSE Modulator(Red)" ShopIndex="57770" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="JFTSE Modulator(Yellow)" ShopIndex="57777" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="JFTSE Modulator(Blue)" ShopIndex="57784" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="JFTSE Modulator(Purple)" ShopIndex="57791" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Healing (Deluxe)" ShopIndex="3021" QuantityMin="10" QuantityMax="10" ChansPer="15.9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Area Shield" ShopIndex="3022" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Clown's Candy" ShopIndex="57833" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Hair Dye(Elder)" ShopIndex="57747" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Hair Dye(Golden)" ShopIndex="57753" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Hair Dye(Metal)" ShopIndex="57759" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Hair Dye(Candy)" ShopIndex="57765" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="JFTSE Modulator(Red)" ShopIndex="57771" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="JFTSE Modulator(Yellow)" ShopIndex="57778" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="JFTSE Modulator(Blue)" ShopIndex="57785" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="JFTSE Modulator(Purple)" ShopIndex="57792" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Healing (Deluxe)" ShopIndex="3021" QuantityMin="10" QuantityMax="10" ChansPer="15.9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Area Shield" ShopIndex="3022" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Clown's Candy" ShopIndex="57834" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Hair Dye(Elder)" ShopIndex="57748" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Hair Dye(Golden)" ShopIndex="57754" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Hair Dye(Metal)" ShopIndex="57760" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Hair Dye(Candy)" ShopIndex="57766" QuantityMin="30" QuantityMax="30" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="JFTSE Modulator(Red)" ShopIndex="57772" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="JFTSE Modulator(Yellow)" ShopIndex="57779" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="JFTSE Modulator(Blue)" ShopIndex="57786" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="JFTSE Modulator(Purple)" ShopIndex="57793" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Healing (Deluxe)" ShopIndex="3021" QuantityMin="10" QuantityMax="10" ChansPer="15.9" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Area Shield" ShopIndex="3022" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Clown's Candy" ShopIndex="57835" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="JFTSE Modulator(Red)" ShopIndex="57773" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="JFTSE Modulator(Yellow)" ShopIndex="57780" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="JFTSE Modulator(Blue)" ShopIndex="57787" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="JFTSE Modulator(Purple)" ShopIndex="57794" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Healing (Deluxe)" ShopIndex="3021" QuantityMin="10" QuantityMax="10" ChansPer="16" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Area Shield" ShopIndex="3022" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Crab trap" ShopIndex="3014" QuantityMin="10" QuantityMax="10" ChansPer="20.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Clown's Candy" ShopIndex="57836" QuantityMin="1" QuantityMax="1" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

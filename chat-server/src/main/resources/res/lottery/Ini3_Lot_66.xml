@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Cn Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Hellion Leather Hat" ShopIndex="55237" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Hellion Bloody Shirts" ShopIndex="55238" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Hellion Wild Pants" ShopIndex="55239" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Hellion Fire Boots" ShopIndex="55240" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Hellion Leather Glove" ShopIndex="55241" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Sheriff Racket" ShopIndex="52113" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Hellion Leather Hat" ShopIndex="55242" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Hellion Bloody Shirts" ShopIndex="55243" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Hellion Wild Pants" ShopIndex="55244" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Hellion Fire Boots" ShopIndex="55245" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Hellion Leather Glove" ShopIndex="55246" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Sheriff Racket" ShopIndex="52114" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Hellion Leather Hat" ShopIndex="55247" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Hellion Bloody Shirts" ShopIndex="55248" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Hellion Wild Pants" ShopIndex="55249" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Hellion Fire Boots" ShopIndex="55250" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Hellion Leather Glove" ShopIndex="55251" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Sheriff Racket" ShopIndex="52115" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Hellion Leather Hat" ShopIndex="55252" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Hellion Bloody Shirts" ShopIndex="55253" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Hellion Wild Pants" ShopIndex="55254" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Hellion Fire Boots" ShopIndex="55255" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Hellion Leather Glove" ShopIndex="55256" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Sheriff Racket" ShopIndex="52116" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Hellion Leather Hat" ShopIndex="55257" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Hellion Bloody Shirts" ShopIndex="55258" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Hellion Wild Pants" ShopIndex="55259" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Hellion Fire Boots" ShopIndex="55260" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Hellion Leather Glove" ShopIndex="55261" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Sheriff Racket" ShopIndex="52117" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Hellion Leather Hat" ShopIndex="55262" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Hellion Bloody Shirts" ShopIndex="55263" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Hellion Wild Pants" ShopIndex="55264" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Hellion Fire Boots" ShopIndex="55265" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Hellion Leather Glove" ShopIndex="55266" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Sheriff Racket" ShopIndex="52118" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Hellion Leather Hat" ShopIndex="55267" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Hellion Bloody Shirts" ShopIndex="55268" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Hellion Wild Pants" ShopIndex="55269" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Hellion Fire Boots" ShopIndex="55270" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Hellion Leather Glove" ShopIndex="55271" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Sheriff Racket" ShopIndex="52838" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

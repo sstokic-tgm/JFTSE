@@ -328,10 +328,16 @@ public enum PacketOperations {
 
     C2SChatHousePosition(0x190A),
     S2CChatHousePosition(0x190B),
-    C2SChatCourtMove(0x18A2),
-    S2CChatCourtMove(0x18A3),
+    C2SChatSquareMove(0x18A2),
+    S2CChatSquareMove(0x18A3),
     C2SChatHouseMove(0x18A5),
     S2CChatHouseMove(0x18A6),
+
+    C2SChatHouseShakeTreeRequest(0x2C29),
+    S2CChatHouseShakeTreeAnswer(0x2C2A),
+
+    S2CRoomPlayerInformationWithPosition(0x1396),
+    S2CLeaveRoomWithPosition(0x1398),
 
     S2CDCMsg(0x2329),
 

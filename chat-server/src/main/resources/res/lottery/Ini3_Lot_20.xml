@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Party Hat" ShopIndex="50534" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Rudolph Horn" ShopIndex="157" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Santa Claus Hat" ShopIndex="52519" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Santa Claus Coat" ShopIndex="52520" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Santa's Beard" ShopIndex="50540" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Santa Claus Glove" ShopIndex="52522" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Santa Claus Shoes" ShopIndex="52521" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Santa Claus Sled Bag" ShopIndex="52523" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Baby Santa Bag" ShopIndex="50546" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Party Hat" ShopIndex="50535" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Rudolph Horn" ShopIndex="162" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Santa Claus Hat" ShopIndex="52524" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Santa Claus Coat" ShopIndex="52525" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Santa's Beard" ShopIndex="50541" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Santa Claus Glove" ShopIndex="52527" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Santa Claus Shoes" ShopIndex="52526" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Santa Claus Sled Bag" ShopIndex="52528" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Baby Santa Bag" ShopIndex="50547" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Party Hat" ShopIndex="50536" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Rudolph Horn" ShopIndex="168" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Santa Claus Hat" ShopIndex="52529" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Santa Claus Coat" ShopIndex="52530" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Santa's Beard" ShopIndex="50542" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Santa Claus Glove" ShopIndex="52532" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Santa Claus Shoes" ShopIndex="52531" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Santa Claus Sled Bag" ShopIndex="52533" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Baby Santa Bag" ShopIndex="50548" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Party Hat" ShopIndex="50537" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Rudolph Horn" ShopIndex="174" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Santa Claus Hat" ShopIndex="52534" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Santa Claus Coat" ShopIndex="52535" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Santa's Beard" ShopIndex="50543" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Santa Claus Glove" ShopIndex="52537" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Santa Claus Shoes" ShopIndex="52536" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Santa Claus Sled Bag" ShopIndex="52538" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Baby Santa Bag" ShopIndex="50549" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Party Hat" ShopIndex="50538" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Rudolph Horn" ShopIndex="500" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Santa Claus Hat" ShopIndex="52539" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Santa Claus Coat" ShopIndex="52540" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Santa's Beard" ShopIndex="50544" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Santa Claus Glove" ShopIndex="52542" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Santa Claus Shoes" ShopIndex="52541" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Santa Claus Sled Bag" ShopIndex="52543" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Baby Santa Bag" ShopIndex="50550" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="20.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Party Hat" ShopIndex="50539" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Rudolph Horn" ShopIndex="50321" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Santa Claus Hat" ShopIndex="52544" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Santa Claus Coat" ShopIndex="52545" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Santa's Beard" ShopIndex="50545" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Santa Claus Glove" ShopIndex="52547" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Santa Claus Shoes" ShopIndex="52546" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Santa Claus Sled Bag" ShopIndex="52548" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Baby Santa Bag" ShopIndex="50551" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Mini Tree" ShopIndex="1147" QuantityMin="1" QuantityMax="1" ChansPer="25.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Party Hat" ShopIndex="54118" QuantityMin="1" QuantityMax="1" ChansPer="15.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Santa Claus Hat" ShopIndex="52773" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Santa Claus Coat" ShopIndex="52774" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Santa's Beard" ShopIndex="54119" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Santa Claus Glove" ShopIndex="52776" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Santa Claus Shoes" ShopIndex="52775" QuantityMin="1" QuantityMax="1" ChansPer="12.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Santa Claus Sled Bag" ShopIndex="52777" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Baby Santa Bag" ShopIndex="54079" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

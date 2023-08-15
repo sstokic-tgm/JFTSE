@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="1" QuantityMax="1" ChansPer="99.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Bone Hat" ShopIndex="51534" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="1" QuantityMax="1" ChansPer="99.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Bone Hat" ShopIndex="51539" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="1" QuantityMax="1" ChansPer="99.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Bone Hat" ShopIndex="51544" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="1" QuantityMax="1" ChansPer="99.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Bone Hat" ShopIndex="51549" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="1" QuantityMax="1" ChansPer="99.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Bone Hat" ShopIndex="51554" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="1" QuantityMax="1" ChansPer="99.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Bone Hat" ShopIndex="51559" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="1" QuantityMax="1" ChansPer="99.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Bone Hat" ShopIndex="52930" QuantityMin="1" QuantityMax="1" ChansPer="1.0" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Cn Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Brave Chain Helmet" ShopIndex="54204" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Brave Chain Armer" ShopIndex="54205" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Brave Chain Leg Armer" ShopIndex="54206" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Brave Chain Shoes" ShopIndex="54207" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Brave Chain Glove" ShopIndex="54208" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Brave Lance" ShopIndex="54239" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Brave Chain Helmet" ShopIndex="54209" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Brave Chain Armer" ShopIndex="54210" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Brave Chain Leg Armer" ShopIndex="54211" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Brave Chain Shoes" ShopIndex="54212" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Brave Chain Glove" ShopIndex="54213" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Brave Lance" ShopIndex="54240" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Brave Chain Helmet" ShopIndex="54214" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Brave Chain Armer" ShopIndex="54215" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Brave Chain Leg Armer" ShopIndex="54216" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Brave Chain Shoes" ShopIndex="54217" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Brave Chain Glove" ShopIndex="54218" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Brave Lance" ShopIndex="54241" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Brave Chain Helmet" ShopIndex="54219" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Brave Chain Armer" ShopIndex="54220" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Brave Chain Leg Armer" ShopIndex="54221" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Brave Chain Shoes" ShopIndex="54222" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Brave Chain Glove" ShopIndex="54223" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Brave Lance" ShopIndex="54242" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Brave Chain Helmet" ShopIndex="54224" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Brave Chain Armer" ShopIndex="54225" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Brave Chain Leg Armer" ShopIndex="54226" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Brave Chain Shoes" ShopIndex="54227" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Brave Chain Glove" ShopIndex="54228" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Brave Lance" ShopIndex="54243" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Brave Chain Helmet" ShopIndex="54229" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Brave Chain Armer" ShopIndex="54230" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Brave Chain Leg Armer" ShopIndex="54231" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Brave Chain Shoes" ShopIndex="54232" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Brave Chain Glove" ShopIndex="54233" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Brave Lance" ShopIndex="54244" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Healing (Small)" ShopIndex="3018" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="7.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="10" QuantityMax="10" ChansPer="6.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Brave Chain Helmet" ShopIndex="54234" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Brave Chain Armer" ShopIndex="54235" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Brave Chain Leg Armer" ShopIndex="54236" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Brave Chain Shoes" ShopIndex="54237" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Brave Chain Glove" ShopIndex="54238" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Brave Lance" ShopIndex="54245" QuantityMin="1" QuantityMax="1" ChansPer="10.00" Effect="3" ProductOpt="0"/>
+</LotteryItemList>
