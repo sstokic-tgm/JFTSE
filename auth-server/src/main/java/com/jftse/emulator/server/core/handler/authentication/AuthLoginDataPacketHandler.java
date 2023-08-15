@@ -78,10 +78,10 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             List<Player> playerList = playerService.findAllByAccount(account);
             boolean hasNewChar = playerList.stream().anyMatch(p -> DateUtils.isSameDay(p.getCreated(), new Date()) && !p.getAlreadyCreated());
 
-            if (hasNewChar) {
-                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
-                connection.sendTCP(playerListPacket);
-            }
+            //if (hasNewChar) {
+            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+            connection.sendTCP(playerListPacket);
+            //}
             S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
             connection.sendTCP(gameServerListPacket);
         } else {
