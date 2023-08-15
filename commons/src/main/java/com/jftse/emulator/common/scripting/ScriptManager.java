@@ -85,7 +85,7 @@ public class ScriptManager {
     }
 
     public List<ScriptFile> getScriptFiles(String type) {
-        return scripts.get(type);
+        return scripts.getOrDefault(type, new ArrayList<>());
     }
 
     public ConcurrentHashMap<String, List<ScriptFile>> getScripts() {
