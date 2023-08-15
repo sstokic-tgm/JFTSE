@@ -70,8 +70,6 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
             connection.sendTCP(gameServerLoginAnswerPacket);
-
-            authTokenService.remove(authToken);
         } else {
             AuthToken authTokenToRemove = authTokenService.findAuthToken(gameServerLoginPacket.getToken());
             if (authTokenToRemove != null) {
