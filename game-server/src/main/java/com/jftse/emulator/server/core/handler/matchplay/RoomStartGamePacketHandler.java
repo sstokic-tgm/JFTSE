@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerInformationPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameNetworkSettingsPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.constants.GameMode;
@@ -138,7 +138,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
 
                             GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
 
-                            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(threadRoom.getRoomPlayerList()));
+                            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(threadRoom.getRoomPlayerList()));
                             GameManager.getInstance().getClientsInRoom(threadRoom.getRoomId()).forEach(c -> {
                                 if (c.getConnection() != null) {
                                     c.getConnection().sendTCP(roomPlayerInformationPacket);

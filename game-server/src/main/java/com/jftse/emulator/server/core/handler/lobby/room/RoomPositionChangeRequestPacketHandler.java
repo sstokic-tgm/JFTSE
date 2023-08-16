@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomPositionChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerInformationPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPositionChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -71,7 +71,7 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractPacketHandle
                 }
             });
 
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(roomPlayerList));
+            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(roomPlayerList));
             GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomPlayerInformationPacket, ftClient.getConnection());
         }
     }

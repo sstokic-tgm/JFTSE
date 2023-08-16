@@ -5,7 +5,6 @@ import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomStatus;
-import com.jftse.emulator.server.core.constants.RoomType;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
@@ -246,13 +245,13 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         List<Packet> roomSlotCloseAnswerPackets = new ArrayList<>();
         closeRoomSlots(positions, roomSlotCloseAnswerPackets);
 
-        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
+        S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
 
         List<RoomPlayer> filteredRoomPlayerList = room.getRoomPlayerList().stream()
                 .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
                 .collect(Collectors.toList());
-        S2CRoomPlayerInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
-                new S2CRoomPlayerInformationPacket(new ArrayList<>(filteredRoomPlayerList));
+        S2CRoomPlayerListInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
+                new S2CRoomPlayerListInformationPacket(new ArrayList<>(filteredRoomPlayerList));
 
         GameManager.getInstance().getClientsInRoom(roomId).forEach(c -> {
             RoomPlayer cRP = c.getRoomPlayer();

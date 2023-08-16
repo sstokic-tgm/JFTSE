@@ -345,7 +345,7 @@ public class GameManager {
 
         final GameSession activeGameSession = client.getActiveGameSession();
         if (activeGameSession == null) {
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(roomPlayerList));
+            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(roomPlayerList));
             S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) 9);
             getClientsInRoom(room.getRoomId()).forEach(c -> {
                 if (notifyClients) {
@@ -363,13 +363,13 @@ public class GameManager {
         }
         client.setActiveRoom(null);
         if (notifyClients) {
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(roomPlayerList));
+            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(roomPlayerList));
 
             List<RoomPlayer> filteredRoomPlayerList = roomPlayerList.stream()
                     .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
                     .collect(Collectors.toList());
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
-                    new S2CRoomPlayerInformationPacket(new ArrayList<>(filteredRoomPlayerList));
+            S2CRoomPlayerListInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
+                    new S2CRoomPlayerListInformationPacket(new ArrayList<>(filteredRoomPlayerList));
 
             getClientsInRoom(room.getRoomId()).forEach(c -> {
                 RoomPlayer cRP = c.getRoomPlayer();
@@ -469,7 +469,7 @@ public class GameManager {
 
         S2CRoomCreateAnswerPacket roomCreateAnswerPacket = new S2CRoomCreateAnswerPacket((char) 0, room.getRoomType(), room.getMode(), room.getMap());
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
-        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
+        S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
 
         connection.sendTCP(roomCreateAnswerPacket);
         connection.sendTCP(roomInformationPacket);

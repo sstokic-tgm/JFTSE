@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerInformationPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
 import com.jftse.emulator.server.core.packets.player.S2CCouplePointsDataPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
@@ -91,13 +91,13 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
         S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player, statusPointsAddedDto);
         S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(playerStatistic);
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
-        S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(new ArrayList<>(currentClientRoom.getRoomPlayerList()));
+        S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(currentClientRoom.getRoomPlayerList()));
 
         List<RoomPlayer> filteredRoomPlayerList = currentClientRoom.getRoomPlayerList().stream()
                 .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
                 .collect(Collectors.toList());
-        S2CRoomPlayerInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
-                new S2CRoomPlayerInformationPacket(new ArrayList<>(filteredRoomPlayerList));
+        S2CRoomPlayerListInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
+                new S2CRoomPlayerListInformationPacket(new ArrayList<>(filteredRoomPlayerList));
 
         connection.sendTCP(couplePointsDataPacket);
         connection.sendTCP(playerStatusPointChangePacket, playerInfoPlayStatsPacket);
