@@ -333,8 +333,8 @@ public enum PacketOperations {
     C2SChatHouseMove(0x18A5),
     S2CChatHouseMove(0x18A6),
 
-    C2SChatHouseShakeTreeRequest(0x2C29),
-    S2CChatHouseShakeTreeAnswer(0x2C2A),
+    C2SShakeTreeRequest(0x2C29),
+    S2CShakeTreeAnswer(0x2C2A),
 
     S2CRoomPlayerInformationWithPosition(0x1396),
     S2CLeaveRoomWithPosition(0x1398),

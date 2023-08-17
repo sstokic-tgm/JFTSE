@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @Setter
@@ -47,6 +48,8 @@ public class FTClient extends Client<FTConnection> {
     private AtomicBoolean isJoiningOrLeavingRoom = new AtomicBoolean(false);
     private AtomicBoolean isGoingReady = new AtomicBoolean(false);
     private AtomicBoolean isClosingSlot = new AtomicBoolean(false);
+
+    private AtomicInteger currentRequestType = new AtomicInteger(0);
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;

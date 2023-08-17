@@ -32,11 +32,13 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Log4j2
 @PacketOperationIdentifier(PacketOperations.C2SGameReceiveData)
 public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
     private C2SGameServerRequestPacket gameServerRequestPacket;
@@ -87,11 +89,15 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
 
         byte requestType = gameServerRequestPacket.getRequestType();
 
+        while (client.getCurrentRequestType().get() != requestType) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
+        }
+
         // init data request packets and pass level & exp and home/house data
         if (requestType == 0) {
-            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
-
             // reset pocket
             List<Player> playerList = playerService.findAllByAccount(account);
             for (Player p : playerList) {
@@ -111,7 +117,8 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
             S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
             S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
             connection.sendTCP(unknownPlayerInfoDataPacket);
-            connection.sendTCP(playerLevelExpPacket, couplePointsDataPacket);
+            connection.sendTCP(playerLevelExpPacket);
+            connection.sendTCP(couplePointsDataPacket);
 
             player.setOnline(true);
             client.savePlayer(player);
@@ -125,10 +132,12 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
 
             S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
             connection.sendTCP(petDataAnswerPacket);
-        } else if (requestType == 1) {
+
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
 
+            client.getCurrentRequestType().incrementAndGet();
+        } else if (requestType == 1) {
             List<Friend> friends = socialService.getFriendList(player, EFriendshipState.Friends);
             S2CFriendsListAnswerPacket s2CFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
             connection.sendTCP(s2CFriendsListAnswerPacket);
@@ -181,12 +190,14 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
                                     .ifPresent(c -> c.getConnection().sendTCP(s2CClubMembersListAnswerPacket));
                         });
             }
-        }
-        // pass inventory & equipped items
-        else if (requestType == 2) {
+
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
 
+            client.getCurrentRequestType().incrementAndGet();
+        }
+        // pass inventory & equipped items
+        else if (requestType == 2) {
             StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
             Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
             List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
@@ -210,13 +221,24 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
             S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
             S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(equippedBattlemonSlots);
 
-            connection.sendTCP(
-                    playerStatusPointChangePacket, playerInfoPlayStatsPacket, inventoryWearClothAnswerPacket,
-                    inventoryWearQuickAnswerPacket, inventoryWearToolAnswerPacket, inventoryWearSpecialAnswerPacket,
-                    inventoryWearCardAnswerPacket, inventoryWearBattlemonAnswerPacket);
+            connection.sendTCP(playerStatusPointChangePacket);
+            connection.sendTCP(playerInfoPlayStatsPacket);
+            connection.sendTCP(inventoryWearClothAnswerPacket);
+            connection.sendTCP(inventoryWearQuickAnswerPacket);
+            connection.sendTCP(inventoryWearToolAnswerPacket);
+            connection.sendTCP(inventoryWearSpecialAnswerPacket);
+            connection.sendTCP(inventoryWearCardAnswerPacket);
+            connection.sendTCP(inventoryWearBattlemonAnswerPacket);
+
+            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
+            connection.sendTCP(gameServerAnswerPacket);
+
+            client.getCurrentRequestType().incrementAndGet();
         } else {
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);
+
+            client.getCurrentRequestType().incrementAndGet();
         }
     }
 }
