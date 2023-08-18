@@ -4,6 +4,7 @@ import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.housing.FruitReward;
 import com.jftse.emulator.server.core.life.housing.FruitTree;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.house.C2SShakeTreeSuccessPacket;
 import com.jftse.emulator.server.core.packets.chat.house.S2CHousingRewardItemPacket;
@@ -64,8 +65,8 @@ public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
         if (fruitReward == null) {
             S2CShakeTreeFailPacket shakeTreeFailPacket = new S2CShakeTreeFailPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
             S2CShakeTreeSuccessPacket shakeTreeSuccessPacket = new S2CShakeTreeSuccessPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-            connection.sendTCP(shakeTreeFailPacket);
-            connection.sendTCP(shakeTreeSuccessPacket);
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeFailPacket, client.getConnection());
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeSuccessPacket, client.getConnection());
             return;
         }
 
@@ -73,8 +74,8 @@ public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
         if (item == null) {
             S2CShakeTreeFailPacket shakeTreeFailPacket = new S2CShakeTreeFailPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
             S2CShakeTreeSuccessPacket shakeTreeSuccessPacket = new S2CShakeTreeSuccessPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-            connection.sendTCP(shakeTreeFailPacket);
-            connection.sendTCP(shakeTreeSuccessPacket);
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeFailPacket, client.getConnection());
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeSuccessPacket, client.getConnection());
             return;
         }
 
@@ -118,6 +119,6 @@ public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
             connection.sendTCP(housingRewardItemPacket);
         }
         S2CShakeTreeSuccessPacket shakeTreeSuccessPacket = new S2CShakeTreeSuccessPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-        connection.sendTCP(shakeTreeSuccessPacket);
+        GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeSuccessPacket, client.getConnection());
     }
 }
