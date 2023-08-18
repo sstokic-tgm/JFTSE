@@ -1,6 +1,7 @@
 package com.jftse.server.core.service.impl;
 
 import com.jftse.emulator.common.utilities.ResourceUtil;
+import com.jftse.entities.database.model.item.ItemMaterial;
 import com.jftse.entities.database.repository.item.ItemMaterialRepository;
 import com.jftse.server.core.service.ItemMaterialService;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +51,10 @@ public class ItemMaterialServiceImpl implements ItemMaterialService {
 
         List<Integer> itemIndexes = itemMaterialRepository.findAllItemIndexesByNames(names);
         return new ArrayList<>(itemIndexes);
+    }
+
+    @Override
+    public Optional<ItemMaterial> findByItemIndex(Integer itemIndex) {
+        return itemMaterialRepository.findByItemIndex(itemIndex);
     }
 }

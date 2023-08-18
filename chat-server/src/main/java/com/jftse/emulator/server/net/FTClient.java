@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.server.core.constants.ChatMode;
+import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -31,6 +32,8 @@ public class FTClient extends Client<FTConnection> {
     private Room activeRoom;
     private RoomPlayer roomPlayer;
     private Integer gameSessionId;
+
+    private FruitManager fruitManager;
 
     private volatile boolean inLobby = false;
     private volatile boolean isSpectator = false;

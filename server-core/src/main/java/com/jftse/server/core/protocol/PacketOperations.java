@@ -335,6 +335,12 @@ public enum PacketOperations {
 
     C2SShakeTreeRequest(0x2C29),
     S2CShakeTreeAnswer(0x2C2A),
+    C2SShakeTreeSuccess(0x2C3E),
+    S2CShakeTreeSuccess(0x2C42),
+    C2SShakeTreeFail(0x2C30),
+    S2CShakeTreeFail(0x2C3D),
+
+    S2CHousingRewardItem(0x25E4),
 
     S2CRoomPlayerInformationWithPosition(0x1396),
     S2CLeaveRoomWithPosition(0x1398),

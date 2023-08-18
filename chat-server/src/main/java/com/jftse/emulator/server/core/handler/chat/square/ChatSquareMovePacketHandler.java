@@ -30,6 +30,9 @@ public class ChatSquareMovePacketHandler extends AbstractPacketHandler {
         if (roomPlayer == null)
             return;
 
+        if (roomPlayer.isFitting())
+            return;
+
         S2CChatSquareMovePacket answerSquareMovePacket = new S2CChatSquareMovePacket(roomPlayer.getPosition(), chatSquareMovePacket.getUnk1(), chatSquareMovePacket.getX2(), chatSquareMovePacket.getY2());
         roomPlayer.getLastSquareMovePacket().set(answerSquareMovePacket);
 

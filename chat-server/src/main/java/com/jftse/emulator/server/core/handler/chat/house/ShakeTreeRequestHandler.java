@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.chat.house;
 
+import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.house.C2SShakeTreeRequestPacket;
@@ -29,6 +30,10 @@ public class ShakeTreeRequestHandler extends AbstractPacketHandler {
         RoomPlayer roomPlayer = client.getRoomPlayer();
         if (roomPlayer == null)
             return;
+
+        FruitManager fruitManager = new FruitManager();
+        fruitManager.init(shakeTreeRequestPacket.getXPos(), shakeTreeRequestPacket.getYPos());
+        client.setFruitManager(fruitManager);
 
         S2CShakeTreeAnswerPacket shakeTreeAnswerPacket = new S2CShakeTreeAnswerPacket(roomPlayer.getPosition(), shakeTreeRequestPacket.getXPos(), shakeTreeRequestPacket.getYPos(), (byte) 1);
         GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeAnswerPacket, client.getConnection());
