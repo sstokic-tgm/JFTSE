@@ -1,9 +1,9 @@
 package com.jftse.emulator.server.core.life.room;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.chat.house.S2CChatHouseMovePacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CChatHousePositionPacket;
-import com.jftse.emulator.server.core.packets.chat.square.S2CChatSquareMovePacket;
+import com.jftse.emulator.server.core.packets.chat.house.C2SChatHouseMovePacket;
+import com.jftse.emulator.server.core.packets.chat.house.C2SChatHousePositionPacket;
+import com.jftse.emulator.server.core.packets.chat.square.C2SChatSquareMovePacket;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.ClothEquipment;
@@ -37,9 +37,9 @@ public class RoomPlayer {
     private AtomicBoolean gameAnimationSkipReady = new AtomicBoolean(false);
     private AtomicBoolean connectedToRelay = new AtomicBoolean(false);
 
-    private AtomicReference<S2CChatHousePositionPacket> lastHousePositionPacket = new AtomicReference<>();
-    private AtomicReference<S2CChatHouseMovePacket> lastHouseMovePacket = new AtomicReference<>();
-    private AtomicReference<S2CChatSquareMovePacket> lastSquareMovePacket = new AtomicReference<>();
+    private AtomicReference<C2SChatHousePositionPacket> lastHousePositionPacket = new AtomicReference<>();
+    private AtomicReference<C2SChatHouseMovePacket> lastHouseMovePacket = new AtomicReference<>();
+    private AtomicReference<C2SChatSquareMovePacket> lastSquareMovePacket = new AtomicReference<>();
 
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);

@@ -2,8 +2,11 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.packets.chat.house.C2SChatHouseMovePacket;
+import com.jftse.emulator.server.core.packets.chat.house.C2SChatHousePositionPacket;
 import com.jftse.emulator.server.core.packets.chat.house.S2CChatHouseMovePacket;
 import com.jftse.emulator.server.core.packets.chat.house.S2CChatHousePositionPacket;
+import com.jftse.emulator.server.core.packets.chat.square.C2SChatSquareMovePacket;
 import com.jftse.emulator.server.core.packets.chat.square.S2CChatSquareMovePacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeItemsLoadAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
@@ -25,7 +28,6 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -248,20 +250,26 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             }
 
             if (room.getMode() == 0) {
-                S2CChatSquareMovePacket chatSquareMovePacket = roomPlayer.getLastSquareMovePacket().get();
+                C2SChatSquareMovePacket chatSquareMovePacket = roomPlayer.getLastSquareMovePacket().get();
                 if (chatSquareMovePacket != null) {
-                    connection.sendTCP(chatSquareMovePacket);
+                    S2CChatSquareMovePacket chatSquareMovePacketAnswer = new S2CChatSquareMovePacket(roomPlayer.getPosition(), (byte) 1, chatSquareMovePacket.getX2(), chatSquareMovePacket.getY2());
+                    connection.sendTCP(chatSquareMovePacketAnswer);
                 }
             }
 
             if (room.getMode() == 1) {
-                S2CChatHousePositionPacket chatHousePositionPacket = roomPlayer.getLastHousePositionPacket().get();
-                S2CChatHouseMovePacket chatHouseMovePacket = roomPlayer.getLastHouseMovePacket().get();
+                C2SChatHousePositionPacket chatHousePositionPacket = roomPlayer.getLastHousePositionPacket().get();
+                C2SChatHouseMovePacket chatHouseMovePacket = roomPlayer.getLastHouseMovePacket().get();
                 if (chatHousePositionPacket != null) {
-                    connection.sendTCP(chatHousePositionPacket);
+                    S2CChatHousePositionPacket chatHousePositionPacketAnswer = new S2CChatHousePositionPacket(roomPlayer.getPosition(), chatHousePositionPacket.getLevel(), chatHousePositionPacket.getX(), chatHousePositionPacket.getY());
+                    connection.sendTCP(chatHousePositionPacketAnswer);
                 }
                 if (chatHouseMovePacket != null) {
-                    connection.sendTCP(chatHouseMovePacket);
+                    byte level = chatHousePositionPacket == null ? (byte) 0 : chatHousePositionPacket.getLevel();
+                    S2CChatHousePositionPacket chatHousePositionPacketAnswer = new S2CChatHousePositionPacket(roomPlayer.getPosition(), level, chatHouseMovePacket.getX(), chatHouseMovePacket.getY());
+                    S2CChatHouseMovePacket chatHouseMovePacketAnswer = new S2CChatHouseMovePacket(roomPlayer.getPosition(), chatHouseMovePacket.getUnk1(), chatHouseMovePacket.getUnk2(), chatHouseMovePacket.getX(), chatHouseMovePacket.getY(), chatHouseMovePacket.getAnimationType(), chatHouseMovePacket.getUnk3());
+                    connection.sendTCP(chatHousePositionPacketAnswer);
+                    connection.sendTCP(chatHouseMovePacketAnswer);
                 }
             }
         }
