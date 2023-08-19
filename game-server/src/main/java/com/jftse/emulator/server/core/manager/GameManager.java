@@ -262,7 +262,7 @@ public class GameManager {
     private void resetLoginStatusByAccount(Account account) {
         log.info("Account {} is not connected to the server anymore, setting status to {}", account.getUsername(), AuthenticationServiceImpl.SUCCESS);
         account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-        account.setLoggedInServer(null);
+        account.setLoggedInServer(ServerType.NONE);
         serviceManager.getAuthenticationService().updateAccount(account);
 
         final List<Player> players = serviceManager.getPlayerService().findAllByAccount(account);

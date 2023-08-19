@@ -12,6 +12,7 @@ import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayBackToRoom;
 import com.jftse.emulator.server.core.packets.messenger.S2CClubMembersListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
@@ -97,7 +98,7 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                 Account account = client.getAccount();
                 if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
                     account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                    account.setLoggedInServer(null);
+                    account.setLoggedInServer(ServerType.NONE);
                     client.saveAccount(account);
                 }
 

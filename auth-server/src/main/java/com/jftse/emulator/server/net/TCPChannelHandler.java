@@ -2,6 +2,7 @@ package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
@@ -72,7 +73,7 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
             Account account = client.getAccount();
             if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
                 account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                account.setLoggedInServer(null);
+                account.setLoggedInServer(ServerType.NONE);
                 client.saveAccount(account);
             }
             AuthenticationManager.getInstance().removeClient(client);
