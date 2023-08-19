@@ -5,6 +5,7 @@ import com.jftse.emulator.server.core.packets.gameserver.C2SGameServerLoginPacke
 import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerLoginPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
@@ -60,6 +61,7 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
             account.setLastLogin(new Date());
             // mark as logged in
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
+            account.setLoggedInServer(ServerType.GAME_SERVER);
             client.saveAccount(account);
 
             log.info(player.getName() + " connected");

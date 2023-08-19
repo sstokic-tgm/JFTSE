@@ -1,5 +1,6 @@
 package com.jftse.server.core.service;
 
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.gameserver.GameServer;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,8 @@ public interface AuthenticationService {
     Account findAccountById(Long id);
 
     List<Account> findByStatus(Integer status);
+
+    List<Account> findByStatusAndLoggedInServer(Integer status, ServerType loggedInServer);
 
     List<GameServer> getGameServerList();
 

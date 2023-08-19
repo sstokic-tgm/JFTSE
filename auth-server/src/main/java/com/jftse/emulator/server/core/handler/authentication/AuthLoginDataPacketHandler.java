@@ -8,6 +8,7 @@ import com.jftse.emulator.server.core.packets.authserver.S2CGameServerListPacket
 import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
@@ -55,6 +56,7 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             connection.sendTCP(authLoginAnswerPacket);
 
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
+            account.setLoggedInServer(ServerType.AUTH_SERVER);
             account = authenticationService.updateAccount(account);
             FTClient client = (FTClient) connection.getClient();
             client.setAccount(account.getId());

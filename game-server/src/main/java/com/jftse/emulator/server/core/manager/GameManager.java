@@ -16,6 +16,7 @@ import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
@@ -190,7 +191,7 @@ public class GameManager {
             log.info("Checking for logged in clients...");
             try {
                 if (running.get()) {
-                    final List<Account> loggedInAccounts = serviceManager.getAuthenticationService().findByStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
+                    final List<Account> loggedInAccounts = serviceManager.getAuthenticationService().findByStatusAndLoggedInServer((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN, ServerType.GAME_SERVER);
                     final List<FTClient> clients = new ArrayList<>(this.clients);
 
                     ConnectivityState state = rpcChannelAuthServer.getState(true);
@@ -261,6 +262,7 @@ public class GameManager {
     private void resetLoginStatusByAccount(Account account) {
         log.info("Account {} is not connected to the server anymore, setting status to {}", account.getUsername(), AuthenticationServiceImpl.SUCCESS);
         account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+        account.setLoggedInServer(null);
         serviceManager.getAuthenticationService().updateAccount(account);
 
         final List<Player> players = serviceManager.getPlayerService().findAllByAccount(account);

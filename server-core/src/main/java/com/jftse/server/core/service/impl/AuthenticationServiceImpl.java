@@ -1,6 +1,7 @@
 package com.jftse.server.core.service.impl;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.gameserver.GameServer;
 import com.jftse.entities.database.repository.account.AccountRepository;
@@ -87,6 +88,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public List<Account> findByStatus(Integer status) {
         return accountRepository.findByStatus(status);
+    }
+
+    @Override
+    public List<Account> findByStatusAndLoggedInServer(Integer status, ServerType loggedInServer) {
+        return accountRepository.findByStatusAndLoggedInServer(status, loggedInServer);
     }
 
     @Override

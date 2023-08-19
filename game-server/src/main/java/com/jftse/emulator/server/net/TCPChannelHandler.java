@@ -97,6 +97,7 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                 Account account = client.getAccount();
                 if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
                     account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+                    account.setLoggedInServer(null);
                     client.saveAccount(account);
                 }
 
