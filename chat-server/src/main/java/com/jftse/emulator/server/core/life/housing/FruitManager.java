@@ -10,25 +10,60 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class FruitManager {
     private final List<FruitDrop> fruitDrops;
     private final Random random;
 
+    public final static double MINIMUM_FRUIT_SPAWN_TIME = 33.0; // seconds
+    public final static double MAXIMUM_FRUIT_SPAWN_TIME = 34.0; // seconds
+    public final static int MAXIMUM_FRUITS_PER_TREE = 3;
+
     private FruitTree fruitTree;
+    private final List<FruitTree> fruitTrees;
 
     public FruitManager() {
         fruitDrops = new ArrayList<>();
+        fruitTrees = new ArrayList<>();
         random = new Random();
     }
 
-    public void init(short x, short y) {
-        fruitTree = new FruitTree(x, y);
+    public boolean init(short x, short y) {
+        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        fruitTree = fruitTrees.stream()
+                .filter(ft -> ft.getX() == x && ft.getY() == y)
+                .findFirst()
+                .orElse(null);
+
+        if (fruitTree == null) {
+            fruitTree = new FruitTree(x, y);
+        } else {
+            if (fruitTree.getLastFruitPickTime() != null) {
+                long timeDifferenceMillis = currentTime.getTimeInMillis() - fruitTree.getLastFruitPickTime().getTimeInMillis();
+                double timeDifferenceSeconds = timeDifferenceMillis / 1000.0;
+
+                int fruitsToAdd = (int) (timeDifferenceSeconds / MINIMUM_FRUIT_SPAWN_TIME);
+                if (fruitsToAdd > 0) {
+                    int maxFruitsToAdd = Math.min((int) (timeDifferenceSeconds / MAXIMUM_FRUIT_SPAWN_TIME), MAXIMUM_FRUITS_PER_TREE);
+                    fruitTree.setAvailableFruits(Math.min(fruitTree.getAvailableFruits() + maxFruitsToAdd, MAXIMUM_FRUITS_PER_TREE));
+                }
+            }
+
+            if (fruitTree.getAvailableFruits() == 0) {
+                return false;
+            }
+        }
+
+        if (!fruitTrees.contains(fruitTree)) {
+            fruitTrees.add(fruitTree);
+        }
+
+        if (!fruitDrops.isEmpty()) {
+            fruitDrops.clear();
+        }
 
         Optional<Path> fruitDropPath = ResourceUtil.getPath("housing/FruitingItem.xml");
         if (fruitDropPath.isPresent()) {
@@ -61,18 +96,22 @@ public class FruitManager {
                     ItemMaterial item = ServiceManager.getInstance().getItemMaterialService().findByItemIndex(itemIndex).orElse(null);
 
                     ItemProbability itemProbability = new ItemProbability(score, probability, item);
-                    fruitDrops.stream()
-                            .filter(fd -> fd.getSong() == song)
-                            .findFirst()
-                            .ifPresent(fd -> fd.addProbability(itemProbability));
+                    for (FruitDrop fruitDrop : fruitDrops) {
+                        if (fruitDrop.getSong() == song) {
+                            fruitDrop.addProbability(itemProbability);
+                        }
+                    }
                 }
 
             } catch (DocumentException e) {
                 log.error("Failed to load fruit drop data", e);
+                return false;
             }
         } else {
             log.error("FruitingItem.xml not found");
+            return false;
         }
+        return true;
     }
 
     public void addFruitDrop(FruitDrop fruitDrop) {
@@ -80,6 +119,9 @@ public class FruitManager {
     }
 
     public FruitTree pickRandomItem(int song, int score) {
+        fruitTree.setLastFruitPickTime(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+        fruitTree.setAvailableFruits(fruitTree.getAvailableFruits() - 1);
+
         List<ItemProbability> applicableItems = findApplicableItems(song, score);
 
         if (applicableItems.isEmpty()) {
@@ -99,7 +141,10 @@ public class FruitManager {
     private List<ItemProbability> findApplicableItems(int song, int score) {
         List<ItemProbability> applicableItems = new ArrayList<>();
 
-        int totalProbability = fruitDrops.stream().filter(fd -> fd.getSong() == song && fd.getScore() <= score).mapToInt(FruitDrop::getProbability).sum();
+        int totalProbability = fruitDrops.stream()
+                .filter(fd -> fd.getSong() == song && fd.getScore() <= score)
+                .mapToInt(FruitDrop::getProbability)
+                .sum();
         int randomValue = random.nextInt(totalProbability) + 1;
 
         for (FruitDrop fruitDrop : fruitDrops) {
@@ -112,6 +157,70 @@ public class FruitManager {
                     applicableItems.addAll(itemProbabilities);
                     break;
                 }
+            }
+        }
+
+        return applicableItems;
+    }
+
+    private List<ItemProbability> findApplicableItems2(int song, int score) {
+        List<ItemProbability> applicableItems = new ArrayList<>();
+
+        final int maxScore = 100;
+        final int difference = maxScore - score;
+        final int lowerBound = Math.max(0, score - difference);
+
+        List<FruitDrop> applicableFruitDrops = fruitDrops.stream()
+                .filter(fd -> fd.getSong() == song && fd.getScore() <= score && fd.getScore() >= lowerBound)
+                .collect(Collectors.toList());
+
+        int totalAdjustedProbability = applicableFruitDrops.stream()
+                .mapToInt(FruitDrop::getProbability)
+                .sum();
+        int randomValue = random.nextInt(totalAdjustedProbability) + 1;
+
+        for (FruitDrop fruitDrop : applicableFruitDrops) {
+            randomValue -= fruitDrop.getProbability();
+            if (randomValue <= 0) {
+                List<ItemProbability> itemProbabilities = fruitDrop.getItemProbabilities();
+                log.info(itemProbabilities.size());
+                itemProbabilities.forEach(ip -> ip.setQuantity(fruitDrop.getItemCount()));
+
+                applicableItems.addAll(itemProbabilities);
+                break;
+            }
+        }
+
+        return applicableItems;
+    }
+
+    private List<ItemProbability> findApplicableItems3(int song, int score) {
+        List<ItemProbability> applicableItems = new ArrayList<>();
+
+        List<FruitDrop> applicableFruitDrops = fruitDrops.stream()
+                .filter(fd -> fd.getSong() == song && fd.getScore() <= score)
+                .collect(Collectors.toList());
+
+        int maxPossibleProbability = applicableFruitDrops.stream()
+                .mapToInt(FruitDrop::getProbability)
+                .max()
+                .orElse(0);
+
+        int totalAdjustedProbability = applicableFruitDrops.stream()
+                .mapToInt(fd -> (int) (fd.getProbability() * (1.0 - (fd.getScore() / 100.0) + (fd.getProbability() / maxPossibleProbability))))
+                .sum();
+
+        int randomValue = random.nextInt(totalAdjustedProbability) + 1;
+
+        for (FruitDrop fruitDrop : applicableFruitDrops) {
+            int adjustedProbability = (int) (fruitDrop.getProbability() * (1.0 - (fruitDrop.getScore() / 100.0) + (fruitDrop.getProbability() / maxPossibleProbability)));
+            randomValue -= adjustedProbability;
+            if (randomValue <= 0) {
+                List<ItemProbability> itemProbabilities = fruitDrop.getItemProbabilities();
+                itemProbabilities.forEach(ip -> ip.setQuantity(fruitDrop.getItemCount()));
+
+                applicableItems.addAll(itemProbabilities);
+                break;
             }
         }
 
@@ -134,5 +243,9 @@ public class FruitManager {
 
     public FruitTree getFruitTree() {
         return fruitTree;
+    }
+
+    public List<FruitTree> getFruitTrees() {
+        return fruitTrees;
     }
 }

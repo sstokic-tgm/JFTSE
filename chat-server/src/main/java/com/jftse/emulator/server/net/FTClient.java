@@ -33,7 +33,7 @@ public class FTClient extends Client<FTConnection> {
     private RoomPlayer roomPlayer;
     private Integer gameSessionId;
 
-    private FruitManager fruitManager;
+    private FruitManager fruitManager = new FruitManager();
 
     private volatile boolean inLobby = false;
     private volatile boolean isSpectator = false;

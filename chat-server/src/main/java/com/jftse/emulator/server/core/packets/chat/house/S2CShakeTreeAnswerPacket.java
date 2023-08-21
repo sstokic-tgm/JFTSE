@@ -4,7 +4,7 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CShakeTreeAnswerPacket extends Packet {
-    public S2CShakeTreeAnswerPacket(short position, short x, short y, byte available) {
+    public S2CShakeTreeAnswerPacket(short position, short x, short y, boolean available) {
         super(PacketOperations.S2CShakeTreeAnswer);
 
         this.write(position);

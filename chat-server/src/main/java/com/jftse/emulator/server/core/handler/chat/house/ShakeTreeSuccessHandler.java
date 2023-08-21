@@ -55,9 +55,6 @@ public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
             return;
 
         FruitManager fruitManager = client.getFruitManager();
-        if (fruitManager == null) {
-            return;
-        }
 
         FruitTree fruitTree = fruitManager.pickRandomItem(shakeTreeSuccessPacket.getSong(), shakeTreeSuccessPacket.getScore());
 

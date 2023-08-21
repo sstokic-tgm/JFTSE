@@ -13,4 +13,13 @@ public class S2CShakeTreeFailPacket extends Packet {
         this.write(fruitTree.getY());
         this.write(unk1);
     }
+
+    public S2CShakeTreeFailPacket(short position, short x, short y, short unk1) {
+        super(PacketOperations.S2CShakeTreeFail);
+
+        this.write(position);
+        this.write(x);
+        this.write(y);
+        this.write(unk1);
+    }
 }

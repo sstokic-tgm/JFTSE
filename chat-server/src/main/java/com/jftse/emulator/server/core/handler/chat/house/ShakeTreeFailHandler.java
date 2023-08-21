@@ -29,9 +29,6 @@ public class ShakeTreeFailHandler extends AbstractPacketHandler {
             return;
 
         FruitManager fruitManager = client.getFruitManager();
-        if (fruitManager == null) {
-            return;
-        }
 
         FruitTree fruitTree = fruitManager.getFruitTree();
         if (fruitTree == null) {
