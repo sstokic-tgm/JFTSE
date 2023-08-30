@@ -2,7 +2,9 @@ package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.packets.messenger.C2SSendMessageRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -21,9 +23,12 @@ public class SendMessageRequestHandler extends AbstractPacketHandler {
     private final PlayerService playerService;
     private final MessageService messageService;
 
+    private final RProducerService rProducerService;
+
     public SendMessageRequestHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         messageService = ServiceManager.getInstance().getMessageService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -47,13 +52,13 @@ public class SendMessageRequestHandler extends AbstractPacketHandler {
             message.setSeen(false);
             messageService.save(message);
 
-            FTClient receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
-                    .findFirst()
-                    .orElse(null);
-            if (receiverClient != null) {
-                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
-                receiverClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+            S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
+
+            FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
+            if (receiverConnection != null) {
+                receiverConnection.sendTCP(s2CReceivedMessageNotificationPacket);
+            } else {
+                rProducerService.send("playerId", receiver.getId(), s2CReceivedMessageNotificationPacket);
             }
         }
     }

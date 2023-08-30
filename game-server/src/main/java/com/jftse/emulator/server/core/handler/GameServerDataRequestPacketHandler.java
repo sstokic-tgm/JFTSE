@@ -13,8 +13,10 @@ import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPack
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
 import com.jftse.emulator.server.core.packets.pet.S2CPetDataAnswerPacket;
 import com.jftse.emulator.server.core.packets.player.*;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.home.AccountHome;
@@ -36,6 +38,7 @@ import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnsw
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @PacketOperationIdentifier(PacketOperations.C2SGameReceiveData)
 public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
@@ -56,6 +59,8 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
 
+    private final RProducerService rProducerService;
+
     public GameServerDataRequestPacketHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         homeService = ServiceManager.getInstance().getHomeService();
@@ -71,6 +76,7 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
         socialService = ServiceManager.getInstance().getSocialService();
         pocketService = ServiceManager.getInstance().getPocketService();
         playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -146,10 +152,12 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
                     .forEach(f -> {
                         List<Friend> onlineFriends = socialService.getFriendList(f.getFriend(), EFriendshipState.Friends);
                         S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(onlineFriends);
-                        GameManager.getInstance().getClients().stream()
-                                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(f.getFriend().getId()))
-                                .findFirst()
-                                .ifPresent(c -> c.getConnection().sendTCP(friendListAnswerPacket));
+                        FTConnection friendConnection = GameManager.getInstance().getConnectionByPlayerId(f.getFriend().getId());
+                        if (friendConnection != null) {
+                            friendConnection.sendTCP(friendListAnswerPacket);
+                        } else {
+                            rProducerService.send("playerId", f.getFriend().getId(), friendListAnswerPacket);
+                        }
                     });
 
             List<Friend> friendsWaitingForApproval = socialService.getFriendListByFriend(player, EFriendshipState.WaitingApproval);
@@ -163,14 +171,13 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
                 S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(myRelation);
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
-                FTClient friendRelationClient = GameManager.getInstance().getClients().stream()
-                        .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
-                        .findFirst()
-                        .orElse(null);
+                FTConnection friendRelationClient = GameManager.getInstance().getConnectionByPlayerId(myRelation.getFriend().getId());
                 Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
                 if (friendRelationClient != null && friendRelation != null) {
                     s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                    friendRelationClient.getConnection().sendTCP(s2CRelationshipAnswerPacket);
+                    friendRelationClient.sendTCP(s2CRelationshipAnswerPacket);
+                } else if (friendRelation != null) {
+                    rProducerService.send("playerId", friendRelation.getPlayer().getId(), s2CRelationshipAnswerPacket);
                 }
             }
 
@@ -182,10 +189,12 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
                             List<GuildMember> guildMembers = socialService.getGuildMemberList(x.getPlayer());
 
                             S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
-                            GameManager.getInstance().getClients().stream()
-                                    .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getPlayer().getId()))
-                                    .findFirst()
-                                    .ifPresent(c -> c.getConnection().sendTCP(s2CClubMembersListAnswerPacket));
+                            FTConnection guildMemberConnection = GameManager.getInstance().getConnectionByPlayerId(x.getPlayer().getId());
+                            if (guildMemberConnection != null) {
+                                guildMemberConnection.sendTCP(s2CClubMembersListAnswerPacket);
+                            } else {
+                                rProducerService.send("playerId", x.getPlayer().getId(), s2CClubMembersListAnswerPacket);
+                            }
                         });
             }
 

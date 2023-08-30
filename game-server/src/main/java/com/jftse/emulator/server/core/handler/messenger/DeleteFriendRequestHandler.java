@@ -3,7 +3,9 @@ package com.jftse.emulator.server.core.handler.messenger;
 import com.jftse.emulator.server.core.packets.messenger.C2SDeleteFriendRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CDeleteFriendResponsePacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -25,9 +27,12 @@ public class DeleteFriendRequestHandler extends AbstractPacketHandler {
     private final FriendService friendService;
     private final SocialService socialService;
 
+    private final RProducerService rProducerService;
+
     public DeleteFriendRequestHandler() {
         friendService = ServiceManager.getInstance().getFriendService();
         socialService = ServiceManager.getInstance().getSocialService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -56,14 +61,12 @@ public class DeleteFriendRequestHandler extends AbstractPacketHandler {
 
             List<Friend> friends = socialService.getFriendList(friend2.getPlayer(), EFriendshipState.Friends);
             S2CFriendsListAnswerPacket targetFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
-            GameManager.getInstance().getClients().stream()
-                    .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(friend2.getPlayer().getId()))
-                    .findFirst()
-                    .ifPresent(c -> {
-                        if (c.getConnection() != null) {
-                            c.getConnection().sendTCP(targetFriendsListAnswerPacket);
-                        }
-                    });
+            FTConnection friendConnection = GameManager.getInstance().getConnectionByPlayerId(friend2.getPlayer().getId());
+            if (friendConnection != null) {
+                friendConnection.sendTCP(targetFriendsListAnswerPacket);
+            } else {
+                rProducerService.send("playerId", friend2.getPlayer().getId(), targetFriendsListAnswerPacket);
+            }
         }
     }
 }

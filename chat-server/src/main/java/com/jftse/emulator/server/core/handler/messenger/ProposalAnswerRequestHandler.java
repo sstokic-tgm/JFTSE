@@ -4,7 +4,9 @@ import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SProposalAnswerRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -32,12 +34,15 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
     private final PlayerPocketService playerPocketService;
     private final SocialService socialService;
 
+    private final RProducerService rProducerService;
+
     public ProposalAnswerRequestHandler() {
         proposalService = ServiceManager.getInstance().getProposalService();
         friendService = ServiceManager.getInstance().getFriendService();
         messageService = ServiceManager.getInstance().getMessageService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         socialService = ServiceManager.getInstance().getSocialService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -116,14 +121,14 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
                 S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(myRelation);
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
-                FTClient friendRelationClient = GameManager.getInstance().getClients().stream()
-                        .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
-                        .findFirst()
-                        .orElse(null);
+                FTConnection friendRelationConnection = GameManager.getInstance().getConnectionByPlayerId(myRelation.getFriend().getId());
                 Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
-                if (friendRelationClient != null && friendRelation != null) {
+                if (friendRelationConnection != null && friendRelation != null) {
                     s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                    friendRelationClient.getConnection().sendTCP(s2CRelationshipAnswerPacket);
+                    friendRelationConnection.sendTCP(s2CRelationshipAnswerPacket);
+                } else if (friendRelation != null) {
+                    s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
+                    rProducerService.send("playerId", friendRelation.getPlayer().getId(), s2CRelationshipAnswerPacket);
                 }
             }
 
@@ -154,17 +159,18 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
         messageService.save(message);
         proposalService.remove(proposal.getId());
 
-        FTClient senderClient = GameManager.getInstance().getClients().stream()
-                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(proposal.getSender().getId()))
-                .findFirst()
-                .orElse(null);
-        if (senderClient != null) {
-            S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
-            senderClient.getConnection().sendTCP(s2CReceivedMessageNotificationPacket);
+        S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
 
-            List<PlayerPocket> senderItems = playerPocketService.getPlayerPocketItems(proposal.getSender().getPocket());
-            S2CInventoryDataPacket senderInventoryPacket = new S2CInventoryDataPacket(senderItems);
-            senderClient.getConnection().sendTCP(senderInventoryPacket);
+        List<PlayerPocket> senderItems = playerPocketService.getPlayerPocketItems(proposal.getSender().getPocket());
+        S2CInventoryDataPacket senderInventoryPacket = new S2CInventoryDataPacket(senderItems);
+
+        FTConnection senderConnection = GameManager.getInstance().getConnectionByPlayerId(proposal.getSender().getId());
+        if (senderConnection != null) {
+            senderConnection.sendTCP(s2CReceivedMessageNotificationPacket);
+            senderConnection.sendTCP(senderInventoryPacket);
+        } else {
+            rProducerService.send("playerId", proposal.getSender().getId(), s2CReceivedMessageNotificationPacket);
+            rProducerService.send("playerId", proposal.getSender().getId(), senderInventoryPacket);
         }
     }
 }

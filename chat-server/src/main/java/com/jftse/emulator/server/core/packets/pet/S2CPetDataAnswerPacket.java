@@ -35,8 +35,8 @@ public class S2CPetDataAnswerPacket extends Packet {
                                 pet.getPetStatistic().getBattleRecordLoss(),
                                 pet.getPetStatistic().getConsecutiveWins(),
                                 0, // ?
-                                pet.getPetStatistic().getTotalGames(),
                                 pet.getPetStatistic().getNumberOfDisconnects(),
+                                pet.getPetStatistic().getTotalGames(),
                                 0, // ?
                                 0) // ?
         );

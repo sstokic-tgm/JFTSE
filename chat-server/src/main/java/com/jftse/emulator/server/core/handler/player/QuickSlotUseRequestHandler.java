@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.player;
 
 import com.jftse.emulator.server.core.packets.player.C2SQuickSlotUseRequestPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -18,7 +19,10 @@ import org.springframework.util.MultiValueMap;
 public class QuickSlotUseRequestHandler extends AbstractPacketHandler {
     private C2SQuickSlotUseRequestPacket quickSlotUseRequestPacket;
 
+    private final RProducerService rProducerService;
+
     public QuickSlotUseRequestHandler() {
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -51,8 +55,11 @@ public class QuickSlotUseRequestHandler extends AbstractPacketHandler {
     private void sendPackets(MultiValueMap<Long, Packet> packetsToSend) {
         packetsToSend.forEach((playerId, packets) -> {
             final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
-            if (connectionByPlayerId != null)
-                connectionByPlayerId.sendTCP(packets.toArray(Packet[]::new));
+            if (connectionByPlayerId != null) {
+                packets.forEach(connectionByPlayerId::sendTCP);
+            } else {
+                packets.forEach(packet -> rProducerService.send("playerId", playerId, packet));
+            }
         });
     }
 }

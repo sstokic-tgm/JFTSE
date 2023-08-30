@@ -63,7 +63,7 @@ public class MessageListRequestHandler extends AbstractPacketHandler {
 
                 boolean allSeen = gifts.stream().allMatch(Gift::getSeen);
                 if (!allSeen) {
-                    Packet packet = new Packet((char) 0x2135);
+                    Packet packet = new Packet(PacketOperations.S2CYouGotPresentMessage);
                     packet.write((byte) 17);
                     connection.sendTCP(packet);
                 }

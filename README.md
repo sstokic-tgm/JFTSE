@@ -32,6 +32,7 @@ Since it's cross-platform I will not provide download links otherwise I will blo
 | JDK / OpenJDK | 15 / 15 |
 | Maven | ≥ 3.6.3 |
 | MySQL | 8.0 |
+| RabbitMQ | 3.12 |
 | Any Java capable IDE [^1] | Any Version |
 | Fantasy Tennis Thai | 1.706 |
 
@@ -41,7 +42,7 @@ Since it's cross-platform I will not provide download links otherwise I will blo
 
 ## Project structure
 
-The project is divided into 11 modules:
+The project is divided into 12 modules:
 
 ----------------
 * **emulator** - Old emulator, will be removed in the future
@@ -55,8 +56,85 @@ The project is divided into 11 modules:
 * **chat-server** - Chat server implementation (chat lobby & rooms)
 * **relay-server** - Relay server implementation (match interaction between players has to be broadcast to all players in the match)
 * **ac-server** - Anti-cheat server implementation (JFTSE only)
+* **docker** - Docker files for the server (needed and not needed ones for running the server)
 
 ## Installation
+
+### Installing docker
+
+For downloading and installing docker on your host, please refer to the official documentation: [Get Docker | Docker Documentation](https://docs.docker.com/get-docker/)
+
+Using WSL2 (with Ubuntu 20.04) is recommended for Windows users which are developing on Windows. ([How to install Linux on Windows with WSL](https://learn.microsoft.com/en-us/windows/wsl/install))
+
+After WSL2 is installed, you can install docker inside WSL2 with the following commands: (those commands can be run on any Linux distribution with apt package manager)
+```
+# Update the apt package index
+sudo apt-get update
+sudo apt-get upgrade
+
+# Install packages to allow apt to use a repository over HTTPS:
+sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
+
+# Add Docker’s official GPG key:
+sudo mkdir -p /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Update the apt package index and install the latest version of Docker Engine and containerd
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+# Check if docker is running
+sudo service docker status
+```
+
+### Setting up the RabbitMQ server
+
+For downloading and installing RabbitMQ on your host, please refer to the official documentation: [ Downloading and Installing RabbitMQ
+— RabbitMQ](https://www.rabbitmq.com/download.html)
+
+We **recommend** using the docker image for RabbitMQ, since it's the easiest way to get it up and running.  
+You can find the docker setup in the **docker** folder of the root project directory. There is a **docker-compose.yml** file which contains the configuration for the RabbitMQ server. The subfolder **rabbitmq** contains the configuration files and the **Dockerfile** for the RabbitMQ server.
+
+#### Building the RabbitMQ server
+
+To build the RabbitMQ server, you have to execute the following command in the **docker** folder of the root project directory:
+```
+docker compose build --no-cache rabbitmq
+```
+
+#### Running the RabbitMQ server
+
+To run the RabbitMQ server, you have to execute the following command in the **docker** folder of the root project directory:
+```
+docker compose up rabbitmq -d
+```
+
+The RabbitMQ server is now running and is reachable through port 5672 and the 15672 port (management interface). The management interface is a web interface and can be accessed through your browser (localhost:15672). The default username and password is **guest**.
+
+#### Configuring the RabbitMQ server
+
+It is recommended to adjust the **definitions.json** file in the **rabbitmq** folder inside the **docker** folder of the root project directory.  
+The file contains configuration for users, vhosts and permissions (refer to official documentation for all available options). Currently the default configuration is used, which is **not recommended for production use**.
+
+Therefore you should adjust the configuration to your needs. Getting a hashed password for a user is easy and can be done inside the rabbitmq container.  
+First you need to connect to your running rabbitmq container:
+```
+docker exec -it rabbitmq-server bash
+```
+Then you can use the **rabbitmqctl** command to generate a hashed password for a user:
+```
+rabbitmqctl hash_password <password>
+```
+
+With **CTRL + C** or typing **exit** you can exit the container.
+
+The output of the command is the hashed password, which you can use in the **definitions.json** file.  
+That same password and username (defined in **definitions.json**) has to be used in the **application.properties** file of the **chat-server** and **game-server** module. The host and port inside **application.properties** has not to be adjusted unless you changed the host and port configuration of the RabbitMQ server.
+
+You need to restart the RabbitMQ server after you adjusted the **definitions.json** file:
+```
+docker compose restart rabbitmq
+```
 
 ### Building the server itself
 

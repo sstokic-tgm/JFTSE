@@ -1,5 +1,7 @@
 package com.jftse.emulator.server.core.packets.messenger;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.entities.database.model.account.Account;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.guild.GuildMember;
@@ -19,7 +21,17 @@ public class S2CClubMembersListAnswerPacket extends Packet {
             this.write(guildMember.getPlayer().getId().intValue());
             this.write(guildMember.getPlayer().getName());
             this.write(guildMember.getPlayer().getPlayerType());
-            this.write(guildMember.getPlayer().getOnline() ? (short) 0 : (short) -1); // -1 offline, 0 online, 1...n game server id => game server id indicator
+
+            if (!guildMember.getPlayer().getOnline()) {
+                this.write((short) -1);
+            } else {
+                Account account = ServiceManager.getInstance().getAuthenticationService().findAccountById(guildMember.getPlayer().getAccount().getId());
+                if (account == null) {
+                    this.write((short) -1);
+                } else {
+                    this.write((short) account.getLoggedInServer().getValue());
+                }
+            }
         }
     }
 }

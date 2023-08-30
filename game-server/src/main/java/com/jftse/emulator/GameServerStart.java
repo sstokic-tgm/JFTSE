@@ -10,6 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +27,7 @@ import java.util.concurrent.Future;
 @EnableJpaRepositories(basePackages = "com.jftse.entities")
 @ComponentScan(basePackages = "com.jftse")
 @Log4j2
+@EnableRabbit
 public class GameServerStart {
     private static EventLoopGroup bossGroup;
     private static EventLoopGroup workerGroup;

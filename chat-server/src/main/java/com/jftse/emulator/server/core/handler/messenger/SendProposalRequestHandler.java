@@ -5,7 +5,9 @@ import com.jftse.emulator.server.core.packets.messenger.C2SSendProposalRequestPa
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalDeliveredAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedProposalNotificationPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -35,12 +37,15 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
 
     private final GameLogService gameLogService;
 
+    private final RProducerService rProducerService;
+
     public SendProposalRequestHandler() {
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         proposalService = ServiceManager.getInstance().getProposalService();
         playerService = ServiceManager.getInstance().getPlayerService();
         friendService = ServiceManager.getInstance().getFriendService();
         gameLogService = ServiceManager.getInstance().getGameLogService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -130,13 +135,13 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
                 connection.sendTCP(s2CInventoryDataPacket);
             }
 
-            FTClient receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
-                    .findFirst()
-                    .orElse(null);
-            if (receiverClient != null) {
-                S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket = new S2CReceivedProposalNotificationPacket(proposal);
-                receiverClient.getConnection().sendTCP(s2CReceivedProposalNotificationPacket);
+            S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket = new S2CReceivedProposalNotificationPacket(proposal);
+
+            FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
+            if (receiverConnection != null) {
+                receiverConnection.sendTCP(s2CReceivedProposalNotificationPacket);
+            } else {
+                rProducerService.send("playerId", receiver.getId(), s2CReceivedProposalNotificationPacket);
             }
 
             List<Proposal> sentProposals = proposalService.findBySender(sender);

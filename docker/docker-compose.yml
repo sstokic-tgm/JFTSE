@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    container_name: rabbitmq-server
+    hostname: rabbitmq-server
+    volumes:
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - rabbitmq-network
+
+networks:
+  rabbitmq-network:
+    driver: bridge

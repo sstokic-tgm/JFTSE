@@ -4,7 +4,9 @@ import com.jftse.emulator.server.core.packets.messenger.C2SSendParcelRequestPack
 import com.jftse.emulator.server.core.packets.messenger.S2CParcelListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedParcelNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CSendParcelAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -34,12 +36,15 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
 
     private final GameLogService gameLogService;
 
+    private final RProducerService rProducerService;
+
     public SendParcelRequestHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         productService = ServiceManager.getInstance().getProductService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         parcelService = ServiceManager.getInstance().getParcelService();
         gameLogService = ServiceManager.getInstance().getGameLogService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -144,13 +149,13 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
                     parcelService.save(parcel);
                     playerPocketService.remove(item.getId());
 
-                    FTClient receiverClient = GameManager.getInstance().getClients().stream()
-                            .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
-                            .findFirst()
-                            .orElse(null);
-                    if (receiverClient != null) {
-                        S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket = new S2CReceivedParcelNotificationPacket(parcel);
-                        receiverClient.getConnection().sendTCP(s2CReceivedParcelNotificationPacket);
+                    S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket = new S2CReceivedParcelNotificationPacket(parcel);
+
+                    FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
+                    if (receiverConnection != null) {
+                        receiverConnection.sendTCP(s2CReceivedParcelNotificationPacket);
+                    } else {
+                        rProducerService.send("playerId", receiver.getId(), s2CReceivedParcelNotificationPacket);
                     }
 
                     // TODO: Handle fee

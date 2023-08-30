@@ -26,6 +26,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>15</java.version>
         <log4j2.version>2.17.1</log4j2.version>
+        <spring-amqp.version>2.2.22.RELEASE</spring-amqp.version>
+        <spring-rabbit.version>2.2.22.RELEASE</spring-rabbit.version>
     </properties>
 
     <modules>

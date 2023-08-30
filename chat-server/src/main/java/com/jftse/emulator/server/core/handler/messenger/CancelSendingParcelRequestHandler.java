@@ -4,7 +4,9 @@ import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SCancelParcelSendingRequest;
 import com.jftse.emulator.server.core.packets.messenger.S2CCancelParcelSendingAnswer;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -25,9 +27,12 @@ public class CancelSendingParcelRequestHandler extends AbstractPacketHandler {
     private final ParcelService parcelService;
     private final PlayerPocketService playerPocketService;
 
+    private final RProducerService rProducerService;
+
     public CancelSendingParcelRequestHandler() {
         parcelService = ServiceManager.getInstance().getParcelService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -63,13 +68,13 @@ public class CancelSendingParcelRequestHandler extends AbstractPacketHandler {
         S2CCancelParcelSendingAnswer s2CCancelParcelSendingAnswer = new S2CCancelParcelSendingAnswer((short) 0);
         connection.sendTCP(s2CCancelParcelSendingAnswer);
 
-        FTClient receiverClient = GameManager.getInstance().getClients().stream()
-                .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(parcel.getReceiver().getId()))
-                .findFirst()
-                .orElse(null);
-        if (receiverClient != null) {
-            S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
-            receiverClient.getConnection().sendTCP(s2CRemoveParcelFromListPacket);
+        S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
+
+        FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(parcel.getReceiver().getId());
+        if (receiverConnection != null) {
+            receiverConnection.sendTCP(s2CRemoveParcelFromListPacket);
+        } else {
+            rProducerService.send("playerId", parcel.getReceiver().getId(), s2CRemoveParcelFromListPacket);
         }
     }
 }

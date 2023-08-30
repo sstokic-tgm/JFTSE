@@ -6,7 +6,9 @@ import com.jftse.emulator.server.core.packets.messenger.S2CReceivedGiftNotificat
 import com.jftse.emulator.server.core.packets.messenger.S2CSendGiftAnswerPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auctionhouse.PriceType;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -40,12 +42,15 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
     private final PlayerPocketService playerPocketService;
     private final GiftService giftService;
 
+    private final RProducerService rProducerService;
+
     public SendGiftRequestHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         productService = ServiceManager.getInstance().getProductService();
         pocketService = ServiceManager.getInstance().getPocketService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         giftService = ServiceManager.getInstance().getGiftService();
+        rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -239,16 +244,16 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
             senderAcc.setAp(resultAp);
             ftClient.saveAccount(senderAcc);
 
-            FTClient receiverClient = GameManager.getInstance().getClients().stream()
-                    .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(receiver.getId()))
-                    .findFirst()
-                    .orElse(null);
-            if (receiverClient != null) {
-                S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket = new S2CReceivedGiftNotificationPacket(gift);
-                receiverClient.getConnection().sendTCP(s2CReceivedGiftNotificationPacket);
+            S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket = new S2CReceivedGiftNotificationPacket(gift);
+            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
 
-                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                receiverClient.getConnection().sendTCP(inventoryDataPacket);
+            FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
+            if (receiverConnection != null) {
+                receiverConnection.sendTCP(s2CReceivedGiftNotificationPacket);
+                receiverConnection.sendTCP(inventoryDataPacket);
+            } else {
+                rProducerService.send("playerId", receiver.getId(), s2CReceivedGiftNotificationPacket);
+                rProducerService.send("playerId", receiver.getId(), inventoryDataPacket);
             }
 
             // 0 = Item purchase successful, -1 = Not enough gold, -2 = Not enough AP,

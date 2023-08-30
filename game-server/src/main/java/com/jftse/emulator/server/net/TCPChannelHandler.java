@@ -12,6 +12,7 @@ import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayBackToRoom;
 import com.jftse.emulator.server.core.packets.messenger.S2CClubMembersListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
@@ -34,6 +35,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Optional;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -106,14 +108,12 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                 friends.forEach(x -> {
                     List<Friend> friendList = ServiceManager.getInstance().getSocialService().getFriendList(x.getFriend(), EFriendshipState.Friends);
                     S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
-                    GameManager.getInstance().getClients().stream()
-                            .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getFriend().getId()))
-                            .findFirst()
-                            .ifPresent(c -> {
-                                if (c.getConnection() != null) {
-                                    c.getConnection().sendTCP(friendListAnswerPacket);
-                                }
-                            });
+                    FTConnection friendConnection = GameManager.getInstance().getConnectionByPlayerId(x.getFriend().getId());
+                    if (friendConnection != null) {
+                        friendConnection.sendTCP(friendListAnswerPacket);
+                    } else {
+                        RProducerService.getInstance().send("playerId", x.getFriend().getId(), friendListAnswerPacket);
+                    }
                 });
 
                 GuildMember guildMember = ServiceManager.getInstance().getGuildMemberService().getByPlayer(player);
@@ -124,28 +124,26 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                                 List<GuildMember> guildMembers = ServiceManager.getInstance().getSocialService().getGuildMemberList(x.getPlayer());
 
                                 S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
-                                GameManager.getInstance().getClients().stream()
-                                        .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(x.getPlayer().getId()))
-                                        .findFirst()
-                                        .ifPresent(c -> {
-                                            if (c.getConnection() != null) {
-                                                c.getConnection().sendTCP(s2CClubMembersListAnswerPacket);
-                                            }
-                                        });
+                                FTConnection guildMemberConnection = GameManager.getInstance().getConnectionByPlayerId(x.getPlayer().getId());
+                                if (guildMemberConnection != null) {
+                                    guildMemberConnection.sendTCP(s2CClubMembersListAnswerPacket);
+                                } else {
+                                    RProducerService.getInstance().send("playerId", x.getPlayer().getId(), s2CClubMembersListAnswerPacket);
+                                }
                             });
                 }
 
                 Friend myRelation = ServiceManager.getInstance().getSocialService().getRelationship(player);
                 if (myRelation != null) {
-                    FTClient friendRelationClient = GameManager.getInstance().getClients().stream()
-                            .filter(x -> x.getPlayer() != null && x.getPlayer().getId().equals(myRelation.getFriend().getId()))
-                            .findFirst()
-                            .orElse(null);
+                    FTConnection friendRelationClient = GameManager.getInstance().getConnectionByPlayerId(myRelation.getFriend().getId());
                     Friend friendRelation = ServiceManager.getInstance().getSocialService().getRelationship(myRelation.getFriend());
 
                     if (friendRelationClient != null && friendRelation != null) {
                         S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                        friendRelationClient.getConnection().sendTCP(s2CRelationshipAnswerPacket);
+                        friendRelationClient.sendTCP(s2CRelationshipAnswerPacket);
+                    } else if (friendRelation != null) {
+                        S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
+                        RProducerService.getInstance().send("playerId", friendRelation.getPlayer().getId(), s2CRelationshipAnswerPacket);
                     }
                 }
             }
