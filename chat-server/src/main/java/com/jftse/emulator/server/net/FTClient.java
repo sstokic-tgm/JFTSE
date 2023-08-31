@@ -2,11 +2,9 @@ package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.server.core.constants.ChatMode;
 import com.jftse.emulator.server.core.life.housing.FruitManager;
-import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeGame;
 import com.jftse.emulator.server.core.singleplay.tutorial.TutorialGame;
 import com.jftse.entities.database.model.account.Account;
@@ -31,7 +29,6 @@ public class FTClient extends Client<FTConnection> {
 
     private Room activeRoom;
     private RoomPlayer roomPlayer;
-    private Integer gameSessionId;
 
     private FruitManager fruitManager = new FruitManager();
 
@@ -99,15 +96,5 @@ public class FTClient extends Client<FTConnection> {
                 .filter(p -> p.getPlayerId().equals(this.activePlayerId))
                 .findFirst()
                 .orElse(null);
-    }
-
-    public GameSession getActiveGameSession() {
-        if (this.gameSessionId == null)
-            return null;
-        return GameSessionManager.getInstance().getGameSessionBySessionId(this.gameSessionId);
-    }
-
-    public void setActiveGameSession(Integer gameSessionId) {
-        this.gameSessionId = gameSessionId;
     }
 }

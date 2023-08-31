@@ -34,6 +34,7 @@ import com.jftse.entities.database.model.battle.GuardianStage;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.item.EItemCategory;
@@ -62,6 +63,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     private final WillDamageService willDamageService;
     private final GuardianService guardianService;
     private final GuardianStageService guardianStageService;
+    private final PlayerStatisticService playerStatisticService;
 
     public MatchplayGuardianModeHandler(MatchplayGuardianGame game) {
         this.game = game;
@@ -74,6 +76,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         this.willDamageService = ServiceManager.getInstance().getWillDamageService();
         this.guardianService = ServiceManager.getInstance().getGuardianService();
         this.guardianStageService = ServiceManager.getInstance().getGuardianStageService();
+        this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
     }
 
     @Override
@@ -257,6 +260,38 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 client.savePlayer(player);
 
                 game.addRewardItemToPocket(client, playerReward);
+
+                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+                if (wonGame) {
+                    playerStatistic.setGuardianRecordWin(playerStatistic.getGuardianRecordWin() + 1);
+                } else {
+                    playerStatistic.setGuardianRecordLoss(playerStatistic.getGuardianRecordLoss() + 1);
+                }
+
+                final ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = game.getGuardianBattleStates();
+                final List<Integer> guardianRewardRankingPointList = guardianBattleStates.stream()
+                        .filter(GuardianBattleState::isLooted)
+                        .map(GuardianBattleState::getRewardRankingPoint)
+                        .collect(Collectors.toList());
+
+                if (wonGame) {
+                    final int guardianRewardRankingPointSum = guardianRewardRankingPointList.stream()
+                            .mapToInt(v -> {
+                                if (game.getIsHardMode().get()) {
+                                    return (int) (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.won.ranking-point.multiplier", 1.0));
+                                }
+                                return v;
+                            })
+                            .sum();
+
+                    playerReward.setRankingPoints(guardianRewardRankingPointSum);
+                }
+                playerStatistic.setGuardianRP(playerStatistic.getGuardianRP() + playerReward.getRankingPoints());
+
+                playerStatistic = playerStatisticService.save(playerStatistic);
+
+                player.setPlayerStatistic(playerStatistic);
+                client.savePlayer(player);
 
                 rp.setReady(false);
                 byte playerLevel = player.getLevel();

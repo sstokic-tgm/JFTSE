@@ -4,6 +4,7 @@ import com.jftse.entities.database.model.AbstractIdBaseModel;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @Getter
@@ -25,4 +26,7 @@ public class GuardianBase extends AbstractIdBaseModel {
     private Integer rewardExp;
     private Integer rewardGold;
     private Integer btItemID;
+
+    @Column(columnDefinition = "int DEFAULT 0")
+    private Integer rewardRankingPoint = 0;
 }

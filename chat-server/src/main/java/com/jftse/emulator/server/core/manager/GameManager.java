@@ -5,11 +5,8 @@ import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.ChatMode;
-import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
-import com.jftse.emulator.server.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
@@ -53,10 +50,6 @@ import java.util.stream.Collectors;
 public class GameManager {
     private static GameManager instance;
 
-    @Autowired
-    private GameSessionManager gameSessionManager;
-    @Autowired
-    private EventHandler eventHandler;
     @Autowired
     private ServiceManager serviceManager;
 
@@ -171,19 +164,6 @@ public class GameManager {
     }
 
     private void setupGlobalTasks() {
-        eventHandlerTask = threadManager.submit(() -> {
-            while (running.get()) {
-                try {
-                    eventHandler.handleQueuedEvents();
-                    TimeUnit.MILLISECONDS.sleep(50);
-                } catch (Exception ex) {
-                    log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
-                }
-            }
-            log.info("EventHandlerTask stopped");
-        });
-        log.info("EventHandlerTask started");
-
         loggedInClientTask = threadManager.scheduleAtFixedRate(() -> {
             log.info("Checking for logged in clients...");
             try {
@@ -465,23 +445,6 @@ public class GameManager {
         }
 
         return memberList.get(playerPositionInGuild - 1);
-    }
-
-    public boolean isAllowedToChangeMode(Room room) {
-        List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
-        return activePlayingPlayers.stream().allMatch(x -> x.getPlayer().getLevel() >= configService.getValue("command.room.mode.change.player.level", 60));
-    }
-
-    public void sendPacketToAllClientsInSameGameSession(Packet packet, FTConnection connection) {
-        final GameSession gameSession = connection.getClient().getActiveGameSession();
-        if (gameSession != null) {
-            final ArrayList<FTClient> clientsInGameSession = new ArrayList<>(gameSession.getClients());
-            clientsInGameSession.forEach(c -> {
-                if (c.getConnection() != null) {
-                    c.getConnection().sendTCP(packet);
-                }
-            });
-        }
     }
 
     public void sendPacketToAllClientsInSameRoom(Packet packet, FTConnection connection) {

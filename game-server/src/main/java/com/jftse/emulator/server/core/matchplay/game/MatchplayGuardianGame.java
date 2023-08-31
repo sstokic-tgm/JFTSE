@@ -201,7 +201,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     public GuardianBattleState createGuardianBattleState(boolean isHardMode, GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
         if (isHardMode) {
-            return new GuardianBattleState(guardian.getId().intValue(), guardian.getBtItemID(), guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold());
+            return new GuardianBattleState(guardian.getId().intValue(), guardian.getBtItemID(), guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
         }
 
         int extraHp = guardian.getHpPer() * activePlayingPlayersCount;
@@ -214,7 +214,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         int totalSta = guardian.getBaseSta() + extraSta;
         int totalDex = guardian.getBaseDex() + extraDex;
         int totalWill = guardian.getBaseWill() + extraWill;
-        return new GuardianBattleState(guardian.getId().intValue(), guardian.getBtItemID(), guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold());
+        return new GuardianBattleState(guardian.getId().intValue(), guardian.getBtItemID(), guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
     }
 
     public long getStageTimePlayingInSeconds() {
