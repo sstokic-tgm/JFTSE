@@ -332,7 +332,10 @@ public class GameManager {
                     if (cRP != null && ftConnection != null) {
                         S2CLeaveRoomWithPositionPacket leaveRoomWithPositionPacket = new S2CLeaveRoomWithPositionPacket(cRP.getPosition());
                         ftConnection.sendTCP(leaveRoomWithPositionPacket);
-                        ftConnection.sendTCP(roomLeaveAnswer);
+
+                        if (!cRP.getPlayerId().equals(client.getActivePlayerId())) {
+                            ftConnection.sendTCP(roomLeaveAnswer);
+                        }
                     }
                     c.setActiveRoom(null);
                 });

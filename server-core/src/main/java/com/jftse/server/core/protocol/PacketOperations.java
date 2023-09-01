@@ -67,6 +67,7 @@ public enum PacketOperations {
 
     C2SRoomReadyChange(0x1775),
     S2CRoomReadyChange(0x1776),
+    S2CRoomReadyChange2(0x1784),
     C2SRoomTriggerStartGame(0x177B),
 
     // Not really sure what this does but it let the annoying "Starting game..." window disappear for room master
@@ -128,6 +129,7 @@ public enum PacketOperations {
     C2SRoomPositionChange(0x1785),
     C2SRoomKickPlayer(0x178B),
     S2CRoomPositionChangeAnswer(0x1786),
+    S2CRoomPositionSwap(0x1787),
     C2SRoomMapChange(0x1788),
     S2CRoomMapChangeAnswer(0x1789),
     C2SRoomSlotCloseReq(0x1D4C),

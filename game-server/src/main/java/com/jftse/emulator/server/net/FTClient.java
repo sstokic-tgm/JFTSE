@@ -48,6 +48,7 @@ public class FTClient extends Client<FTConnection> {
     private AtomicBoolean isJoiningOrLeavingRoom = new AtomicBoolean(false);
     private AtomicBoolean isGoingReady = new AtomicBoolean(false);
     private AtomicBoolean isClosingSlot = new AtomicBoolean(false);
+    private AtomicBoolean isChangingSlot = new AtomicBoolean(false);
 
     private AtomicInteger currentRequestType = new AtomicInteger(0);
 

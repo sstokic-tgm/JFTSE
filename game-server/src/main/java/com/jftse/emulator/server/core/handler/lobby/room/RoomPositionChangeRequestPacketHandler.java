@@ -2,9 +2,7 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomPositionChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPositionChangeAnswerPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -14,7 +12,6 @@ import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @PacketOperationIdentifier(PacketOperations.C2SRoomPositionChange)
@@ -33,6 +30,10 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractPacketHandle
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 
+        if (!ftClient.getIsChangingSlot().compareAndSet(false, true)) {
+            return;
+        }
+
         short positionToClaim = roomPositionChangeRequestPacket.getPosition();
 
         Room room = ftClient.getActiveRoom();
@@ -41,6 +42,7 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractPacketHandle
             if (requestingSlotChangePlayer != null) {
                 short requestingSlotChangePlayerOldPosition = requestingSlotChangePlayer.getPosition();
                 if (requestingSlotChangePlayerOldPosition == positionToClaim) {
+                    ftClient.getIsChangingSlot().set(false);
                     return;
                 }
 
@@ -49,53 +51,50 @@ public class RoomPositionChangeRequestPacketHandler extends AbstractPacketHandle
                 if (slotIsInUse && !requestingSlotChangePlayerIsMaster) {
                     S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "You cannot claim this players slot");
                     connection.sendTCP(chatRoomAnswerPacket);
+                    ftClient.getIsChangingSlot().set(false);
                     return;
                 }
 
-                boolean freeOldPosition = true;
                 RoomPlayer playerInSlotToClaim = room.getRoomPlayerList().stream().filter(x -> x.getPosition() == positionToClaim).findAny().orElse(null);
+
                 if (playerInSlotToClaim != null) {
-                    freeOldPosition = false;
-                    internalHandleRoomPositionChange(room, playerInSlotToClaim, false,
-                            playerInSlotToClaim.getPosition(), requestingSlotChangePlayerOldPosition);
+                    if (requestingSlotChangePlayerOldPosition == 9) {
+                        room.getPositions().set(requestingSlotChangePlayerOldPosition, RoomPositionState.Locked);
+                    }
+
+                    playerInSlotToClaim.setPosition(requestingSlotChangePlayerOldPosition);
+                    requestingSlotChangePlayer.setPosition(positionToClaim);
+
+                    S2CRoomPositionSwapPacket roomPositionSwapPacket = new S2CRoomPositionSwapPacket(requestingSlotChangePlayerOldPosition, positionToClaim);
+                    GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomPositionSwapPacket, ftClient.getConnection());
+
+                    for (RoomPlayer roomPlayer : room.getRoomPlayerList()) {
+                        synchronized (roomPlayer) {
+                            roomPlayer.setReady(false);
+                        }
+
+                        S2CRoomReadyChangeAnswerPacket roomReadyChangeAnswerPacket = new S2CRoomReadyChangeAnswerPacket(roomPlayer.getPosition(), roomPlayer.isReady());
+                        GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomReadyChangeAnswerPacket, ftClient.getConnection());
+                    }
+
+                } else {
+                    if (requestingSlotChangePlayerOldPosition == 9) {
+                        room.getPositions().set(requestingSlotChangePlayerOldPosition, RoomPositionState.Locked);
+                    } else {
+                        room.getPositions().set(requestingSlotChangePlayerOldPosition, RoomPositionState.Free);
+                    }
+
+                    room.getPositions().set(positionToClaim, RoomPositionState.InUse);
+
+                    synchronized (requestingSlotChangePlayer) {
+                        requestingSlotChangePlayer.setPosition(positionToClaim);
+                    }
+
+                    S2CRoomPositionChangeAnswerPacket roomPositionChangePacket = new S2CRoomPositionChangeAnswerPacket((char) 0, requestingSlotChangePlayerOldPosition, positionToClaim);
+                    GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomPositionChangePacket, ftClient.getConnection());
                 }
-
-                internalHandleRoomPositionChange(room, requestingSlotChangePlayer, freeOldPosition,
-                        requestingSlotChangePlayerOldPosition, positionToClaim);
-            }
-
-            ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
-            roomPlayerList.forEach(rp -> {
-                synchronized (rp) {
-                    rp.setReady(false);
-                }
-            });
-
-            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(roomPlayerList));
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomPlayerInformationPacket, ftClient.getConnection());
-        }
-    }
-
-    private void internalHandleRoomPositionChange(Room room, RoomPlayer roomPlayer, boolean freeOldPosition, short oldPosition, short newPosition) {
-        if (freeOldPosition) {
-            if (oldPosition == 9) {
-                room.getPositions().set(oldPosition, RoomPositionState.Locked);
-            } else {
-                room.getPositions().set(oldPosition, RoomPositionState.Free);
             }
         }
-
-        room.getPositions().set(newPosition, RoomPositionState.InUse);
-
-        synchronized (roomPlayer) {
-            roomPlayer.setPosition(newPosition);
-        }
-
-        S2CRoomPositionChangeAnswerPacket roomPositionChangePacket = new S2CRoomPositionChangeAnswerPacket((char) 0, oldPosition, newPosition);
-        GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
-            if (c.getConnection() != null) {
-                c.getConnection().sendTCP(roomPositionChangePacket);
-            }
-        });
+        ftClient.getIsChangingSlot().set(false);
     }
 }

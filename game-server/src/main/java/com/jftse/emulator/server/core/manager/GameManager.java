@@ -43,9 +43,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -306,7 +304,6 @@ public class GameManager {
         final Optional<RoomPlayer> roomPlayer = Optional.ofNullable(client.getRoomPlayer());
 
         final short playerPosition = roomPlayer.isPresent() ? roomPlayer.get().getPosition() : -1;
-        boolean shouldUpdateNonGM = playerPosition != MiscConstants.InvisibleGmSlot || !client.isGameMaster();
 
         final boolean isMaster = roomPlayer.isPresent() && roomPlayer.get().isMaster();
         if (isMaster) {
@@ -316,22 +313,23 @@ public class GameManager {
                         .filter(rp -> !rp.isMaster() && rp.getPosition() < 4)
                         .findFirst()
                         .ifPresent(rp -> {
-                            synchronized (rp) {
-                                rp.setMaster(true);
-                                rp.setReady(false);
-                            }
+                            rp.setMaster(true);
+                            rp.setReady(false);
                         });
             } else {
                 roomPlayerList.stream()
                         .filter(rp -> !rp.isMaster())
                         .findFirst()
                         .ifPresent(rp -> {
-                            synchronized (rp) {
-                                rp.setMaster(true);
-                                rp.setReady(false);
-                            }
+                            rp.setMaster(true);
+                            rp.setReady(false);
                         });
             }
+        }
+
+        if (isMaster) {
+            roomPlayer.get().setMaster(false);
+            roomPlayer.get().setReady(false);
         }
 
         if (playerPosition == 9) {
@@ -347,15 +345,8 @@ public class GameManager {
 
         final GameSession activeGameSession = client.getActiveGameSession();
         if (activeGameSession == null) {
-            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(roomPlayerList));
-            S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, playerPosition, (short) 9);
-            getClientsInRoom(room.getRoomId()).forEach(c -> {
-                if (notifyClients) {
-                    if (c.getPlayer() != null && !c.getPlayer().getId().equals(activePlayer.getId()) && c.getConnection() != null && shouldUpdateNonGM) {
-                        c.getConnection().sendTCP(roomPlayerInformationPacket, roomPositionChangeAnswerPacket);
-                    }
-                }
-            });
+            S2CLeaveRoomWithPositionPacket leaveRoomWithPositionPacket = new S2CLeaveRoomWithPositionPacket(playerPosition);
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(leaveRoomWithPositionPacket, connection);
         } else {
             GameSession gameSession = gameSessionManager.getGameSessionBySessionId(client.getGameSessionId());
             if (gameSession != null) {
@@ -363,28 +354,36 @@ public class GameManager {
             }
             client.setActiveGameSession(null);
         }
-        client.setActiveRoom(null);
-        if (notifyClients) {
-            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(roomPlayerList));
 
-            List<RoomPlayer> filteredRoomPlayerList = roomPlayerList.stream()
-                    .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
-                    .collect(Collectors.toList());
-            S2CRoomPlayerListInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
-                    new S2CRoomPlayerListInformationPacket(new ArrayList<>(filteredRoomPlayerList));
-
-            getClientsInRoom(room.getRoomId()).forEach(c -> {
-                RoomPlayer cRP = c.getRoomPlayer();
-                if (c.getConnection() != null && cRP != null && cRP.getPosition() == MiscConstants.InvisibleGmSlot) {
-                    c.getConnection().sendTCP(roomPlayerInformationPacket);
-                } else {
-                    if (shouldUpdateNonGM) {
-                        c.getConnection().sendTCP(roomPlayerInformationPacketWithoutInvisibleGm);
+        if (playerPosition != -1) {
+            if (notifyClients) {
+                S2CLeaveRoomWithPositionPacket leaveRoomWithPositionPacket = new S2CLeaveRoomWithPositionPacket(playerPosition);
+                getClientsInRoom(room.getRoomId()).forEach(c -> {
+                    if (c.getPlayer() != null && c.getConnection() != null) {
+                        c.getConnection().sendTCP(leaveRoomWithPositionPacket);
                     }
-                }
-            });
-            updateRoomForAllClientsInMultiplayer(connection, room);
+                });
+                updateRoomForAllClientsInMultiplayer(connection, room);
+            }
         }
+
+        if (isMaster) {
+            RoomPlayer newMaster = roomPlayerList.stream().filter(RoomPlayer::isMaster).findFirst().orElse(null);
+            if (newMaster != null) {
+                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(newMaster);
+                S2CRoomFittingPlayerInfoPacket roomFittingPlayerInfoPacket = new S2CRoomFittingPlayerInfoPacket(newMaster.getPosition(), newMaster);
+                S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, newMaster.getPosition(), newMaster.getPosition());
+                getClientsInRoom(room.getRoomId()).forEach(c -> {
+                    if (c.getConnection() != null && !c.getActivePlayerId().equals(activePlayer.getId())) {
+                        c.getConnection().sendTCP(roomFittingPlayerInfoPacket);
+                        c.getConnection().sendTCP(roomPlayerInformationPacket);
+                        c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
+                    }
+                });
+            }
+        }
+
+        client.setActiveRoom(null);
     }
 
     public void updateRoomForAllClientsInMultiplayer(final FTConnection connection, final Room room) {
@@ -479,20 +478,6 @@ public class GameManager {
 
         updateLobbyRoomListForAllClients(connection);
         refreshLobbyPlayerListForAllClients();
-
-        List<Packet> roomSlotCloseAnswerPackets = new ArrayList<>();
-        // TODO: Temporarily. Delete these lines if spectators work
-        for (int i = 5; i < 9; i++) {
-            connection.getClient().getActiveRoom().getPositions().set(i, RoomPositionState.Locked);
-            S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
-            roomSlotCloseAnswerPackets.add(roomSlotCloseAnswerPacket);
-        }
-
-        getClientsInRoom(room.getRoomId()).forEach(c -> {
-            if (c.getConnection() != null) {
-                c.getConnection().sendTCP(roomSlotCloseAnswerPackets.toArray(Packet[]::new));
-            }
-        });
     }
 
     public synchronized short getRoomId() {
