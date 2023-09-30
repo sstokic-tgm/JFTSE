@@ -10,12 +10,51 @@ services:
     volumes:
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    restart: always
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
     networks:
+      - rabbitmq-network
+
+  mysql-db:
+    build:
+      context: ./mysql-db
+      dockerfile: Dockerfile
+    container_name: mysql-db-server
+    hostname: mysql-db-server
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    restart: always
+    ports:
+      - "3306:3306"
+    networks:
+      - db-network
+
+  emulator:
+    build:
+      context: ..
+      dockerfile: docker/emulator/Dockerfile
+    container_name: emulator-server
+    hostname: emulator-server
+    depends_on:
+      - "mysql-db"
+      - "rabbitmq"
+    ports:
+      - "5894:5894"
+      - "5895:5895"
+      - "5896:5896"
+      - "5897:5897"
+      - "3724:3724"
+    networks:
+      - db-network
       - rabbitmq-network
 
 networks:
   rabbitmq-network:
     driver: bridge
+    name: rabbitmq-network
+  db-network:
+    driver: bridge
+    name: db-network

@@ -1,15 +1,18 @@
-version: "3.9"
+version: '3.8'
 services:
   db:
     build:
       context: ..
       dockerfile: docker/db/Dockerfile
+    container_name: db-server
+    hostname: db-server
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 123456
     ports:
       - "3306:3306"
+    networks:
+      - db-network
   server:
     build:
       context: ..
@@ -23,3 +26,7 @@ services:
       - "5895:5895"
       - "5896:5896"
       - "3724:3724"
+networks:
+  db-network:
+    driver: bridge
+    name: db-network

@@ -27,14 +27,14 @@ It is completely open source; community involvement is highly encouraged.
 
 Since it's cross-platform I will not provide download links otherwise I will bloat this. If you use Windows then download them for Windows. If for Linux then download them for Linux.
 
-| Name | Version |
-|------|---------|
-| JDK / OpenJDK | 15 / 15 |
-| Maven | ≥ 3.6.3 |
-| MySQL | 8.0 |
-| RabbitMQ | 3.12 |
+| Name | Version     |
+|------|-------------|
+| JDK / OpenJDK | 21 / 21     |
+| Maven | ≥ 3.6.3     |
+| MySQL | 8.0         |
+| RabbitMQ | 3.12        |
 | Any Java capable IDE [^1] | Any Version |
-| Fantasy Tennis Thai | 1.706 |
+| Fantasy Tennis Thai | 1.706       |
 
 * Also you need a Git CLI or GUI. Doesn't matter which one.
 

@@ -36,9 +36,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final ConfigService configService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Override
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -52,7 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             Account account = optionalAccount.get();
 
             if (configService.getValue("password.encryption.enabled", false)) {
-                if (passwordEncoder.matches(password, account.getPassword()))
+                if (passwordEncoder().matches(password, account.getPassword()))
                     return SUCCESS;
                 else
                     return ACCOUNT_INVALID_PASSWORD;

@@ -8,6 +8,7 @@ import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -28,4 +29,13 @@ public class Account extends AbstractBaseModel {
     private String banReason;
     private Date bannedUntil;
     private ServerType loggedInServer;
+
+    @Column(nullable = false, columnDefinition = "bit(1) DEFAULT 1")
+    private Boolean active = true;
+
+    private Boolean banned = false;
+
+    @ManyToMany(cascade = CascadeType.MERGE)
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private Set<Role> roles;
 }
