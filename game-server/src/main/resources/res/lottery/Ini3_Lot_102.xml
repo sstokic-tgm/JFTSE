@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Titan Capsule-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Titan Sword (Fire)" ShopIndex="57877" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="2" _Name_="Titan Sword (Ice)" ShopIndex="57884" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="3" _Name_="Titan Sword (Earth)" ShopIndex="57891" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="4" _Name_="Titan Sword (Wind)" ShopIndex="57898" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="5" _Name_="Monslava Wing (Fire)" ShopIndex="57905" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="6" _Name_="Monslava Wing (Ice)" ShopIndex="57912" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="7" _Name_="Monslava Wing (Earth)" ShopIndex="57919" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="8" _Name_="Monslava Wing (Wind)" ShopIndex="57926" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="9" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.2" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="10" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="29.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="11" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="12" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="13" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="14" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Niki Index="15" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Monslava Wing (Fire)" ShopIndex="57906" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Monslava Wing (Ice)" ShopIndex="57913" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Monslava Wing (Earth)" ShopIndex="57920" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="57927" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Titan Sword (Fire)" ShopIndex="57878" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Titan Sword (Ice)" ShopIndex="57885" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Titan Sword (Earth)" ShopIndex="57892" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Titan Sword (Wind)" ShopIndex="57899" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.2" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="29.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Monslava Wing (Fire)" ShopIndex="57907" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Monslava Wing (Ice)" ShopIndex="57914" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Monslava Wing (Earth)" ShopIndex="57921" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="57928" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Titan Sword (Fire)" ShopIndex="57879" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Titan Sword (Ice)" ShopIndex="57886" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Titan Sword (Earth)" ShopIndex="57893" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Titan Sword (Wind)" ShopIndex="57900" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.2" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="29.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="1" _Name_="Monslava Wing (Fire)" ShopIndex="57908" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="2" _Name_="Monslava Wing (Ice)" ShopIndex="57915" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="3" _Name_="Monslava Wing (Earth)" ShopIndex="57922" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="57929" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="5" _Name_="Titan Sword (Fire)" ShopIndex="57880" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="6" _Name_="Titan Sword (Ice)" ShopIndex="57887" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="7" _Name_="Titan Sword (Earth)" ShopIndex="57894" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="8" _Name_="Titan Sword (Wind)" ShopIndex="57901" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="9" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.2" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="10" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="29.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="11" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="12" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="13" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="14" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Lucy Index="15" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="1" _Name_="Monslava Wing (Fire)" ShopIndex="57909" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="2" _Name_="Monslava Wing (Ice)" ShopIndex="57916" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="3" _Name_="Monslava Wing (Earth)" ShopIndex="57923" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="578930" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="5" _Name_="Titan Sword (Fire)" ShopIndex="57881" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="6" _Name_="Titan Sword (Ice)" ShopIndex="57888" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="7" _Name_="Titan Sword (Earth)" ShopIndex="57895" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="8" _Name_="Titan Sword (Wind)" ShopIndex="57902" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="9" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.2" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="10" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="29.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="11" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="12" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="13" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="14" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="15" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="1" _Name_="Monslava Wing (Fire)" ShopIndex="57910" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="2" _Name_="Monslava Wing (Ice)" ShopIndex="57917" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="3" _Name_="Monslava Wing (Earth)" ShopIndex="57924" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="57931" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="5" _Name_="Titan Sword (Fire)" ShopIndex="57882" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="6" _Name_="Titan Sword (Ice)" ShopIndex="57889" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="7" _Name_="Titan Sword (Earth)" ShopIndex="57896" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="8" _Name_="Titan Sword (Wind)" ShopIndex="57903" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="9" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.2" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="10" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="29.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="11" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="12" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="13" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="14" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Pochi Index="15" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="1" _Name_="Monslava Wing (Fire)" ShopIndex="57911" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="2" _Name_="Monslava Wing (Ice)" ShopIndex="57918" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="3" _Name_="Monslava Wing (Earth)" ShopIndex="57925" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="57932" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="5" _Name_="Titan Sword (Fire)" ShopIndex="57883" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="6" _Name_="Titan Sword (Ice)" ShopIndex="57890" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="7" _Name_="Titan Sword (Earth)" ShopIndex="57897" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="8" _Name_="Titan Sword (Wind)" ShopIndex="57904" QuantityMin="1" QuantityMax="1" ChansPer="0.1" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="9" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.2" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="10" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="29.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="11" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="12" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="13" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="14" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Al Index="15" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
+</LotteryItemList>
