@@ -278,7 +278,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                     final int guardianRewardRankingPointSum = guardianRewardRankingPointList.stream()
                             .mapToInt(v -> {
                                 if (game.getIsHardMode().get() && !game.getIsRandomGuardiansMode().get()) {
-                                    return (int) (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.won.ranking-point.multiplier", 1.0));
+                                    return (int) (v + (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.won.ranking-point.multiplier", 1.0)));
                                 }
                                 return v;
                             })
