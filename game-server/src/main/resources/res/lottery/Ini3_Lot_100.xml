@@ -49,7 +49,7 @@
 	<LotteryItem_Shua Index="1" _Name_="Monslava Wing (Fire)" ShopIndex="57909" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="4" ProductOpt="1"/>
 	<LotteryItem_Shua Index="2" _Name_="Monslava Wing (Ice)" ShopIndex="57916" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="4" ProductOpt="1"/>
 	<LotteryItem_Shua Index="3" _Name_="Monslava Wing (Earth)" ShopIndex="57923" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="4" ProductOpt="1"/>
-	<LotteryItem_Shua Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="578930" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="4" ProductOpt="1"/>
+	<LotteryItem_Shua Index="4" _Name_="Monslava Wing (Wind)" ShopIndex="57930" QuantityMin="1" QuantityMax="1" ChansPer="5" Effect="4" ProductOpt="1"/>
 	<LotteryItem_Shua Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="20.0" Effect="4" ProductOpt="1"/>
 	<LotteryItem_Shua Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
 	<LotteryItem_Shua Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="10.0" Effect="4" ProductOpt="1"/>
