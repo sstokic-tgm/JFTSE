@@ -69,9 +69,14 @@ public class GuardianSkillsServiceImpl implements GuardianSkillsService {
         for (Guardian2Maps guard : guardians) {
             List<Skill2Guardians> guardianSkillList = skill2GuardiansRepository.findAllByGuardian(guard);
             for (Skill2Guardians skill : guardianSkillList) {
-                final boolean existing = skill2Guardians.stream()
-                        .anyMatch(s2g -> s2g.getSkill().getId().equals(skill.getSkill().getId()));
-                if (!existing) {
+                Optional<Skill2Guardians> existingSkill = skill2Guardians.stream()
+                        .filter(s2g -> s2g.getSkill().getId().equals(skill.getSkill().getId()))
+                        .findFirst();
+
+                if (existingSkill.isEmpty()) {
+                    skill2Guardians.add(skill);
+                } else {
+                    skill2Guardians.remove(existingSkill.get());
                     skill2Guardians.add(skill);
                 }
             }

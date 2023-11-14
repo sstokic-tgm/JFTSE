@@ -364,28 +364,29 @@ public class MatchplayGuardianGame extends MatchplayGame {
             if (!stageRewards.isEmpty()) {
                 if (wonGame) {
                     if (isBoss)
-                        stageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()));
+                        stageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()) || !p.getCategory().equals(EItemCategory.PARTS.getName()));
 
-                    int itemRewardToGive = random.nextInt(stageRewards.size());
-                    playerReward.setProductIndex(stageRewards.get(itemRewardToGive).getProductIndex());
+                    if (!stageRewards.isEmpty()) {
+                        int itemRewardToGive = random.nextInt(stageRewards.size());
+                        playerReward.setProductIndex(stageRewards.get(itemRewardToGive).getProductIndex());
 
-                    int amount = this.getIsHardMode().get() ? 3 : 1;
-                    if (this.getIsRandomGuardiansMode().get())
-                        amount = 1;
+                        int amount = this.getIsHardMode().get() ? 3 : 1;
+                        if (this.getIsRandomGuardiansMode().get())
+                            amount = 1;
 
-                    if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
-                        amount = 1;
+                        if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
+                            amount = 1;
 
-                    if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.MATERIAL.getName())) {
-                        final int min = 1;
-                        final int max = 3;
-                        amount = random.nextInt(max - min + 1) + min;
+                        if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.MATERIAL.getName())) {
+                            final int min = 1;
+                            final int max = 3;
+                            amount = random.nextInt(max - min + 1) + min;
+                        }
+                        playerReward.setProductAmount(amount);
                     }
-
-                    playerReward.setProductAmount(amount);
                 } else {
                     final List<Product> loosingStageRewards = stageRewards.stream()
-                            .filter(p -> p.getCategory().equals(EItemCategory.MATERIAL.getName()))
+                            .filter(p -> p.getCategory().equals(EItemCategory.MATERIAL.getName()) || p.getCategory().equals(EItemCategory.QUICK.getName()))
                             .toList();
 
                     if (!loosingStageRewards.isEmpty()) {
