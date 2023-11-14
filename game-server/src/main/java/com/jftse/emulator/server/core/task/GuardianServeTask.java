@@ -30,6 +30,9 @@ public class GuardianServeTask extends AbstractTask {
         if (gameSession == null) return;
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getMatchplayGame();
 
+        if (!game.getStageChangingToBoss().compareAndSet(true, false))
+            return;
+
         byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
         byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
 
@@ -38,6 +41,6 @@ public class GuardianServeTask extends AbstractTask {
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setNameColorAndRemoveBlackBarPacket, connection);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, connection);
         game.resetStageStartTime();
-        ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession, game.getBossGuardianStage()));
+        ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession));
     }
 }

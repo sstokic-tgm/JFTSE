@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetBossGuardiansStats;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplaySkillHitsTarget;
@@ -9,6 +10,8 @@ import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayIncreaseBrea
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplaySpawnBossBattle;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.battle.*;
+import com.jftse.entities.database.model.scenario.MScenarios;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -24,10 +27,6 @@ import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.battle.BossGuardian;
-import com.jftse.entities.database.model.battle.Guardian;
-import com.jftse.entities.database.model.battle.GuardianStage;
-import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BossGuardianService;
 import com.jftse.server.core.service.GuardianService;
@@ -35,6 +34,8 @@ import com.jftse.server.core.service.SkillService;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
+import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +53,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
 
     private final EventHandler eventHandler;
 
+    private final JdbcUtil jdbcUtil;
+
     public SkillHitsTargetHandler() {
         random = new Random();
 
@@ -60,6 +63,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
         this.bossGuardianService = ServiceManager.getInstance().getBossGuardianService();
 
         eventHandler = GameManager.getInstance().getEventHandler();
+
+        jdbcUtil = ServiceManager.getInstance().getJdbcUtil();
     }
 
     @Override
@@ -286,11 +291,147 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 .filter(x -> x.getPosition() == guardianPos)
                 .findFirst()
                 .orElse(null);
-        if (guardianBattleState != null && !guardianBattleState.isLooted()) {
-            guardianBattleState.setLooted(true);
-            game.getExpPot().getAndAdd(guardianBattleState.getExp());
-            game.getGoldPot().getAndAdd(guardianBattleState.getGold());
+        if (guardianBattleState != null) {
+            if (guardianBattleState.getLooted().compareAndSet(false, true)) {
+                handlePotsIncrease(game, guardianBattleState);
+            }
         }
+    }
+
+    private void handlePotsIncrease(MatchplayGuardianGame game, GuardianBattleState guardianBattleState) {
+        final boolean isBoss = game.getMap().getIsBossStage() && game.getBossBattleActive().get();
+
+        jdbcUtil.execute(em -> {
+            TypedQuery<Guardian2Maps> query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
+                    "WHERE g2m.guardian.id = :guardianId AND g2m.map.id = :mapId AND g2m.status.id = 1 AND g2m.scenario.id = :scenarioId",
+                    Guardian2Maps.class);
+            query.setParameter("guardianId", (long) guardianBattleState.getId());
+            query.setParameter("mapId", game.getMap().getId());
+            query.setParameter("scenarioId", game.getScenario().getId());
+            List<Guardian2Maps> guardian2MapsList = query.getResultList();
+
+            Guardian2Maps guardian = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
+            if (guardian != null) {
+                TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                        "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 4 AND sr.role.id = 2", SGuardianMultiplier.class);
+                queryExp.setParameter("guardId", guardian.getId());
+
+                TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                        "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 4 AND sr.role.id = 3", SGuardianMultiplier.class);
+                queryGold.setParameter("guardId", guardian.getId());
+
+                final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
+                final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
+                SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
+                SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
+
+                double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
+                double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+                game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
+                game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
+            } else {
+                if (isBoss) {
+                    query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
+                                    "WHERE g2m.bossGuardian.id = :guardianId AND g2m.map.id = :mapId AND g2m.status.id = 1 AND g2m.scenario.id = :scenarioId",
+                            Guardian2Maps.class);
+                    query.setParameter("guardianId", (long) guardianBattleState.getId());
+                    query.setParameter("mapId", game.getMap().getId());
+                    query.setParameter("scenarioId", game.getScenario().getId());
+                    guardian2MapsList.clear();
+                    guardian2MapsList = query.getResultList();
+
+                    Guardian2Maps bossGuardian = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
+                    if (bossGuardian != null) {
+                        TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                                "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                                "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 2", SGuardianMultiplier.class);
+                        queryExp.setParameter("guardId", bossGuardian.getId());
+
+                        TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                                "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                                "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 3", SGuardianMultiplier.class);
+                        queryGold.setParameter("guardId", bossGuardian.getId());
+
+                        final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
+                        final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
+                        SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
+                        SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
+
+                        double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
+                        double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+                        game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
+                        game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
+                    }
+                } else {
+                    if (game.getIsHardMode().get()) {
+                        query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
+                                        "WHERE g2m.guardian.id = :guardianId AND g2m.status.id = 1",
+                                Guardian2Maps.class);
+                        query.setParameter("guardianId", (long) guardianBattleState.getId());
+                        guardian2MapsList.clear();
+                        guardian2MapsList = query.getResultList();
+
+                        Guardian2Maps guardian2Maps = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
+                        if (guardian2Maps != null && guardian2Maps.getGuardian() != null) {
+                            TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                                    "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                                    "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 2", SGuardianMultiplier.class);
+                            queryExp.setParameter("guardId", guardian2Maps.getId());
+
+                            TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                                    "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                                    "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 3", SGuardianMultiplier.class);
+                            queryGold.setParameter("guardId", guardian2Maps.getId());
+
+                            final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
+                            final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
+                            SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
+                            SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
+
+                            double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
+                            double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+                            game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
+                            game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
+                        }
+                        if (guardian2Maps == null) {
+                            query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
+                                            "WHERE g2m.bossGuardian.id = :guardianId AND g2m.status.id = 1",
+                                    Guardian2Maps.class);
+                            query.setParameter("guardianId", (long) guardianBattleState.getId());
+                            guardian2MapsList.clear();
+                            guardian2MapsList = query.getResultList();
+
+                            Guardian2Maps bossGuardian = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
+                            if (bossGuardian != null && bossGuardian.getBossGuardian() != null) {
+                                TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                                        "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 2", SGuardianMultiplier.class);
+                                queryExp.setParameter("guardId", bossGuardian.getId());
+
+                                TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                                        "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 3", SGuardianMultiplier.class);
+                                queryGold.setParameter("guardId", bossGuardian.getId());
+
+                                final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
+                                final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
+
+                                SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
+                                SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
+
+                                double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
+                                double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+
+                                game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
+                                game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private Skill getSkillToApply(Skill skill) {
@@ -324,70 +465,116 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
     }
 
     private void handleAllGuardiansDead(FTConnection connection, MatchplayGuardianGame game) {
-        boolean stageChangingToBoss = game.getStageChangingToBoss().get();
-        boolean hasBossGuardianStage = game.getBossGuardianStage() != null;
-        boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
-        long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
-        boolean triggerBossBattle = game.getIsHardMode().get() && timePlayingInSeconds < 300 || timePlayingInSeconds < game.getGuardianStage().getBossTriggerTimerInSeconds();
-        boolean isBossBattleActive = game.getBossBattleActive().get();
-        if ((hasBossGuardianStage || game.getIsHardMode().get()) && allGuardiansDead && triggerBossBattle && !isBossBattleActive) {
-            if (game.getStageChangingToBoss().compareAndSet(false, true)) {
-                game.getBossBattleActive().set(true);
-                GameSession gameSession = connection.getClient().getActiveGameSession();
-                gameSession.clearCountDownRunnable();
+        final boolean isHardMode = game.getIsHardMode().get();
+        final boolean stageChangingToBoss = game.getStageChangingToBoss().get();
+        final boolean hasBossGuardianStage = game.getMap().getIsBossStage();
+        final boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
+        final long timePlayingInSeconds = game.getStageTimePlayingInSeconds();
+        final boolean triggerBossBattle = game.getIsHardMode().get() && timePlayingInSeconds < 300 || (game.getMap().getTriggerBossTime() != null && timePlayingInSeconds < TimeUnit.MINUTES.toSeconds(game.getMap().getTriggerBossTime()));
+        final boolean isBossBattleActive = game.getBossBattleActive().get();
 
-                if (!hasBossGuardianStage && game.getIsHardMode().get()) {
-                    GuardianStage guardianStage = game.getGuardianStage();
-                    guardianStage.setBossGuardian((int) (Math.random() * 7) + 1);
-                    game.setBossGuardianStage(guardianStage);
-                }
+        final boolean canEnterBossBattle = (hasBossGuardianStage || isHardMode) && allGuardiansDead && triggerBossBattle && !isBossBattleActive;
+        if (canEnterBossBattle) {
+            if (!game.getStageChangingToBoss().compareAndSet(false, true))
+                return;
 
-                game.setCurrentStage(game.getBossGuardianStage());
-
-                int activePlayingPlayersCount = game.getPlayerBattleStates().size();
-                List<Byte> guardians = game.determineGuardians(game.getBossGuardianStage(), game.getGuardianLevelLimit().get());
-                byte bossGuardianIndex = game.getBossGuardianStage().getBossGuardian().byteValue();
-                game.getGuardianBattleStates().clear();
-
-                BossGuardian bossGuardian = this.bossGuardianService.findBossGuardianById((long) bossGuardianIndex);
-                GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
-                game.getGuardianBattleStates().add(bossGuardianBattleState);
-
-                if (game.getIsHardMode().get() && !hasBossGuardianStage) {
-                    game.fillRemainingGuardianSlots(true, game, game.getBossGuardianStage(), guardians);
-                    guardians.set(2, (byte) 0);
-                }
-
-                byte guardianStartPosition = 11;
-                for (int i = 0; i < (long) guardians.size(); i++) {
-                    int guardianId = guardians.get(i);
-                    if (guardianId == 0) continue;
-
-                    if (game.getIsRandomGuardiansMode().get()) {
-                        guardianId = (int) (Math.random() * 72 + 1);
-                        guardians.set(i, (byte) guardianId);
-                    }
-
-                    short guardianPosition = (short) (i + guardianStartPosition);
-                    Guardian guardian = guardianService.findGuardianById((long) guardianId);
-                    GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
-                    game.getGuardianBattleStates().add(guardianBattleState);
-                }
+            if (!game.getBossBattleActive().compareAndSet(false, true)) {
                 game.getStageChangingToBoss().compareAndSet(true, false);
-
-                S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardianIndex, guardians.get(0), guardians.get(1));
-                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
-
-                S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
-                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
-
-                RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
-                gameSession.getFireables().push(runnableEvent);
-                eventHandler.push(runnableEvent);
+                return;
             }
 
-        } else if (allGuardiansDead && !game.getFinished().get() && !stageChangingToBoss) {
-            ThreadManager.getInstance().newTask(new FinishGameTask(connection));
+            GameSession gameSession = connection.getClient().getActiveGameSession();
+            gameSession.clearCountDownRunnable();
+
+            MScenarios bossBattleScenario = ServiceManager.getInstance().getScenarioService().getDefaultScenarioByGameMode(MScenarios.GameMode.BOSS_BATTLE);
+            game.setScenario(bossBattleScenario);
+
+            final Guardian2Maps[] bossGuardianArr = { null };
+
+            if (!hasBossGuardianStage && isHardMode) {
+                game.getGuardiansInStage().removeIf(g2m -> g2m.getSide() == Guardian2Maps.Side.MIDDLE);
+
+                jdbcUtil.execute(em -> {
+                    TypedQuery<Guardian2Maps> query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
+                            "WHERE g2m.bossGuardian IS NOT NULL AND g2m.guardian IS NULL AND g2m.scenario.id = :scenarioId", Guardian2Maps.class);
+                    query.setParameter("scenarioId", game.getScenario().getId());
+
+                    List<Guardian2Maps> bossGuardians = query.getResultList();
+                    if (bossGuardians.isEmpty()) {
+                        log.error("Boss guardians not found for scenarioId: " + game.getScenario().getId());
+                        return;
+                    }
+
+                    bossGuardianArr[0] = bossGuardians.get(random.nextInt(bossGuardians.size()));
+
+                    TypedQuery<Guardian2Maps> q = em.createQuery("SELECT g FROM Guardian2Maps g WHERE g.scenario.id = :scenarioId AND g.status.id = 1", Guardian2Maps.class);
+                    q.setParameter("scenarioId", bossBattleScenario.getId());
+                    List<Guardian2Maps> guardian2Maps = q.getResultList();
+
+                    final List<Guardian2Maps> filteredList = new ArrayList<>();
+                    filteredList.add(bossGuardianArr[0]);
+
+                    for (Guardian2Maps g2m : guardian2Maps) {
+                        if (filteredList.stream().anyMatch(f -> f.getGuardian() != null && f.getGuardian().getId().equals(g2m.getGuardian().getId()))) {
+                            continue;
+                        }
+                        if (filteredList.stream().anyMatch(f -> f.getBossGuardian() != null && f.getBossGuardian().getId().equals(g2m.getBossGuardian().getId()))) {
+                            continue;
+                        }
+
+                        filteredList.add(g2m);
+                    }
+                    game.getGuardiansInBossStage().addAll(filteredList);
+                });
+            }
+
+            int activePlayingPlayersCount = game.getPlayerBattleStates().size();
+            List<Byte> guardians = game.determineGuardians(game.getGuardiansInBossStage(), game.getGuardianLevelLimit().get());
+            game.getGuardianBattleStates().clear();
+
+            BossGuardian bossGuardian = game.getGuardiansInBossStage().stream()
+                    .filter(x -> x.getSide() == Guardian2Maps.Side.MIDDLE && x.getBossGuardian() != null)
+                    .findFirst()
+                    .map(Guardian2Maps::getBossGuardian)
+                    .orElse(bossGuardianService.findBossGuardianById(1L));
+            bossGuardian = bossGuardianService.findBossGuardianById(bossGuardian.getId());
+
+            GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
+            game.getGuardianBattleStates().add(bossGuardianBattleState);
+
+            if (!hasBossGuardianStage && isHardMode) {
+                game.fillRemainingGuardianSlots(true, game, game.getGuardiansInBossStage(), guardians);
+            }
+            byte guardianStartPosition = 11;
+
+            for (int i = 0; i < (long) guardians.size(); i++) {
+                int guardianId = guardians.get(i);
+                if (guardianId == 0) continue;
+
+                if (game.getIsRandomGuardiansMode().get()) {
+                    guardianId = (int) (Math.random() * 72 + 1);
+                    guardians.set(i, (byte) guardianId);
+                }
+
+                short guardianPosition = (short) (i + guardianStartPosition);
+                Guardian guardian = guardianService.findGuardianById((long) guardianId);
+                GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
+                game.getGuardianBattleStates().add(guardianBattleState);
+            }
+
+            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardian.getId().byteValue(), guardians.get(0), guardians.get(1));
+            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
+
+            S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
+            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
+
+            RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
+            gameSession.getFireables().push(runnableEvent);
+            eventHandler.push(runnableEvent);
+        } else {
+            if (allGuardiansDead && !game.getFinished().get() && !stageChangingToBoss) {
+                ThreadManager.getInstance().newTask(new FinishGameTask(connection));
+            }
         }
     }
 

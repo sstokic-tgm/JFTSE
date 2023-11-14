@@ -83,8 +83,6 @@ public class ServiceManager {
     @Autowired
     private GuardianService guardianService;
     @Autowired
-    private GuardianStageService guardianStageService;
-    @Autowired
     private BossGuardianService bossGuardianService;
     @Autowired
     private GuardianSkillsService guardianSkillsService;

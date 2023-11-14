@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;
@@ -17,11 +18,11 @@ import com.jftse.emulator.server.core.matchplay.combat.GuardianCombatSystem;
 import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
 import com.jftse.emulator.server.core.matchplay.handler.MatchplayGuardianModeHandler;
 import com.jftse.emulator.server.core.utils.BattleUtils;
-import com.jftse.entities.database.model.battle.Guardian;
-import com.jftse.entities.database.model.battle.GuardianBase;
-import com.jftse.entities.database.model.battle.GuardianStage;
-import com.jftse.entities.database.model.battle.WillDamage;
+import com.jftse.entities.database.model.battle.*;
+import com.jftse.entities.database.model.item.Product;
+import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.messenger.Friend;
+import com.jftse.entities.database.model.scenario.MScenarios;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
@@ -29,6 +30,7 @@ import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.TypedQuery;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -39,7 +41,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -55,9 +56,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
     private List<WillDamage> willDamages;
     private AtomicInteger lastCrystalId;
-    private GuardianStage guardianStage;
-    private GuardianStage bossGuardianStage;
-    private GuardianStage currentStage;
     private AtomicBoolean bossBattleActive;
     private AtomicInteger lastGuardianServeSide;
     private AtomicInteger guardianLevelLimit;
@@ -70,8 +68,15 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     private AtomicBoolean stageChangingToBoss;
 
+    private MScenarios scenario;
+    private SMaps map;
+    private List<Guardian2Maps> guardiansInStage;
+    private List<Guardian2Maps> guardiansInBossStage;
+
     private final PlayerCombatSystem playerCombatSystem;
     private final GuardianCombatSystem guardianCombatSystem;
+
+    private final Random random;
 
     public MatchplayGuardianGame() {
         super();
@@ -104,12 +109,17 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
         playerCombatSystem = new PlayerCombatSystem(this);
         guardianCombatSystem = new GuardianCombatSystem(this);
+
+        this.guardiansInStage = new ArrayList<>();
+        this.guardiansInBossStage = new ArrayList<>();
+
+        random = new Random();
     }
 
-    public List<Byte> determineGuardians(GuardianStage guardianStage, int guardianLevelLimit) {
-        List<Guardian> guardiansLeft = this.getFilteredGuardians(guardianStage.getGuardiansLeft(), guardianLevelLimit);
-        List<Guardian> guardiansRight = this.getFilteredGuardians(guardianStage.getGuardiansRight(), guardianLevelLimit);
-        List<Guardian> guardiansMiddle = this.getFilteredGuardians(guardianStage.getGuardiansMiddle(), guardianLevelLimit);
+    public List<Byte> determineGuardians(List<Guardian2Maps> guardian2Maps, int guardianLevelLimit) {
+        List<Guardian> guardiansLeft = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.LEFT);
+        List<Guardian> guardiansRight = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.RIGHT);
+        List<Guardian> guardiansMiddle = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.MIDDLE);
 
         byte leftGuardian = this.getRandomGuardian(guardiansLeft, new ArrayList<>());
         byte rightGuardian = this.getRandomGuardian(guardiansRight, List.of(leftGuardian));
@@ -124,65 +134,83 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public byte getRandomGuardian(List<Guardian> guardians, List<Byte> idsToIgnore) {
-        byte guardianId = 0;
-        if (guardians.size() > 0) {
-            int amountsOfGuardiansToChooseFrom = guardians.size();
-            if (amountsOfGuardiansToChooseFrom == 1) {
-                return guardians.get(0).getId().byteValue();
-            }
-
-            Random r = new Random();
-            int guardianIndex = r.nextInt(amountsOfGuardiansToChooseFrom);
-            guardianId = guardians.get(guardianIndex).getId().byteValue();
-            if (idsToIgnore.contains(guardianId)) {
-                return getRandomGuardian(guardians, idsToIgnore);
-            }
+        if (guardians.isEmpty()) {
+            return 0;
         }
 
-        return guardianId;
+        List<Byte> guardianIds = guardians.stream()
+                .map(Guardian::getId)
+                .map(Long::byteValue)
+                .toList();
+
+        List<Byte> filteredGuardianIds = guardianIds.stream()
+                .filter(x -> !idsToIgnore.contains(x))
+                .toList();
+
+        if (filteredGuardianIds.isEmpty()) {
+            return 0;
+        }
+
+        int randomIndex = random.nextInt(filteredGuardianIds.size());
+        return filteredGuardianIds.get(randomIndex);
     }
 
-    public List<Guardian> getFilteredGuardians(List<Integer> ids, int guardianLevelLimit) {
-        if (ids == null) {
+    public List<Guardian> getFilteredGuardians(List<Guardian2Maps> guardian2Maps, int guardianLevelLimit, Guardian2Maps.Side side) {
+        if (guardian2Maps.isEmpty()) {
             return new ArrayList<>();
         }
 
-        List<Guardian> guardians = ServiceManager.getInstance().getGuardianService().findGuardiansByIds(ids);
-        int lowestGuardianLevel = guardians.stream().min(Comparator.comparingInt(GuardianBase::getLevel)).get().getLevel();
+        final List<Guardian> guardians = new ArrayList<>();
+        for (Guardian2Maps guardian2Map : guardian2Maps) {
+            if (guardian2Map.getGuardian() == null || guardian2Map.getSide() != side) {
+                continue;
+            }
+
+            Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
+            if (guardian != null) {
+                guardians.add(guardian);
+            }
+        }
+
+        int lowestGuardianLevel = guardians.stream()
+                .mapToInt(Guardian::getLevel)
+                .min()
+                .orElse(0);
         if (guardianLevelLimit < lowestGuardianLevel) {
             guardianLevelLimit = lowestGuardianLevel;
         }
 
         final int finalGuardianLevelLimit = guardianLevelLimit;
-        return ServiceManager.getInstance().getGuardianService().findGuardiansByIds(ids).stream()
+        return guardians.stream()
                 .filter(x -> x.getLevel() <= finalGuardianLevelLimit)
                 .collect(Collectors.toList());
     }
 
-    public void fillRemainingGuardianSlots(boolean forceFill, MatchplayGuardianGame game, GuardianStage guardianStage, List<Byte> guardians) {
+    public void fillRemainingGuardianSlots(boolean forceFill, MatchplayGuardianGame game, List<Guardian2Maps> guardian2Maps, List<Byte> guardians) {
         int totalAvailableGuardianSlots = 3;
         int activeGuardianSlots = forceFill ? 0 : (int) guardians.stream().filter(x -> x != 0).count();
         int remainingGuardianSlots = totalAvailableGuardianSlots - activeGuardianSlots;
         if (game.getIsHardMode().get() && remainingGuardianSlots != 0) {
-            List<Guardian> allGuardians = getAllGuardiansFromStage(guardianStage);
+            List<Guardian> allGuardians = getAllGuardiansFromGuardian2Maps(guardian2Maps);
             for (int i = activeGuardianSlots; i < totalAvailableGuardianSlots; i++) {
                 guardians.set(i, getRandomGuardian(allGuardians, guardians));
             }
         }
     }
 
-    public List<Guardian> getAllGuardiansFromStage(GuardianStage guardianStage) {
-        List<Integer> guardiansLeft = guardianStage.getGuardiansLeft();
-        List<Integer> guardiansMiddle = guardianStage.getGuardiansMiddle();
-        List<Integer> guardiansRight = guardianStage.getGuardiansRight();
-        List<Integer> allGuardianIdsOfStage = Stream.of(
-                        guardiansLeft != null ? guardiansLeft : new ArrayList<Integer>(),
-                        guardiansMiddle != null ? guardiansMiddle : new ArrayList<Integer>(),
-                        guardiansRight != null ? guardiansRight : new ArrayList<Integer>())
-                .flatMap(Collection::stream)
-                .distinct()
-                .collect(Collectors.toList());
-        return ServiceManager.getInstance().getGuardianService().findGuardiansByIds(allGuardianIdsOfStage);
+    public List<Guardian> getAllGuardiansFromGuardian2Maps(List<Guardian2Maps> guardian2Maps) {
+        final List<Guardian> guardians = new ArrayList<>();
+        for (Guardian2Maps guardian2Map : guardian2Maps) {
+            if (guardian2Map.getGuardian() == null) {
+                continue;
+            }
+
+            Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
+            if (guardian != null) {
+                guardians.add(guardian);
+            }
+        }
+        return guardians;
     }
 
     public PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
@@ -230,7 +258,93 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public List<PlayerReward> getPlayerRewards() {
-        List<Integer> stageRewards = this.getCurrentStage().getRewards();
+        final boolean isBoss = map.getIsBossStage() && bossBattleActive.get();
+
+        JdbcUtil jdbcUtil = ServiceManager.getInstance().getJdbcUtil();
+
+        final List<Integer> lootedGuardians = this.guardianBattleStates.stream()
+                .filter(x -> x.getCurrentHealth().get() < 1 && x.getLooted().get())
+                .map(GuardianBattleState::getId)
+                .toList();
+
+        final List<Guardian2Maps> guardian2Maps = this.guardiansInStage.stream()
+                .filter(x -> x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue()))
+                .toList();
+
+        final List<Guardian2Maps> guardian2MapsBoss = new ArrayList<>();
+        if (isBoss) {
+            final List<Guardian2Maps> tmp = this.guardiansInBossStage.stream()
+                    .filter(x -> x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue()))
+                    .toList();
+            guardian2MapsBoss.addAll(tmp);
+        }
+
+        final List<Product> stageRewards = new ArrayList<>();
+        final List<SGuardianMultiplier> expMultipliers = new ArrayList<>();
+        final List<SGuardianMultiplier> goldMultipliers = new ArrayList<>();
+
+        jdbcUtil.execute(em -> {
+            TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                    "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 6 AND sr.role.id = 2", SGuardianMultiplier.class);
+            queryExp.setParameter("mapId", this.map.getId());
+            expMultipliers.addAll(queryExp.getResultList());
+
+            TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                    "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 6 AND sr.role.id = 3", SGuardianMultiplier.class);
+            queryGold.setParameter("mapId", this.map.getId());
+            goldMultipliers.addAll(queryGold.getResultList());
+
+            TypedQuery<Product> queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
+                    "ON p.productIndex = sr.id_f " +
+                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 3 AND sr.role.id = 1", Product.class);
+            queryProduct.setParameter("mapId", this.map.getId());
+            List<Product> products = queryProduct.getResultList();
+
+            stageRewards.addAll(products);
+
+            queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
+                    "ON p.productIndex = sr.id_f " +
+                    "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id = 1 AND sr.role.id = 1", Product.class);
+            final List<Long> guardian2MapIds = guardian2Maps.stream()
+                    .filter(x -> x.getGuardian() != null)
+                    .map(Guardian2Maps::getId)
+                    .toList();
+            queryProduct.setParameter("guardianList", guardian2MapIds);
+            List<Product> guardianProducts = queryProduct.getResultList();
+
+            if (isBoss) {
+                queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
+                        "ON p.productIndex = sr.id_f " +
+                        "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id = 1 AND sr.role.id = 1", Product.class);
+                final List<Long> guardian2MapIdsBoss = guardian2MapsBoss.stream()
+                        .filter(x -> x.getGuardian() != null)
+                        .map(Guardian2Maps::getId)
+                        .toList();
+                queryProduct.setParameter("guardianList", guardian2MapIdsBoss);
+                final List<Product> tmp = queryProduct.getResultList();
+
+                guardianProducts.addAll(tmp);
+
+                final List<Long> bossGuardiansIds = this.guardiansInBossStage.stream()
+                        .filter(x -> x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue()))
+                        .map(Guardian2Maps::getId)
+                        .toList();
+
+                queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
+                        "ON p.productIndex = sr.id_f " +
+                        "WHERE sr.id_t IN :bossGuardianList AND sr.status.id = 1 AND sr.relationship.id = 2 AND sr.role.id = 1", Product.class);
+                queryProduct.setParameter("bossGuardianList", bossGuardiansIds);
+                List<Product> bossGuardianProducts = queryProduct.getResultList();
+                stageRewards.addAll(bossGuardianProducts);
+            }
+            stageRewards.addAll(guardianProducts);
+        });
+
+        SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
+        SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
+
         List<PlayerReward> playerRewards = new ArrayList<>();
 
         final boolean stageChangingToBoss = this.stageChangingToBoss.get();
@@ -241,38 +355,50 @@ public class MatchplayGuardianGame extends MatchplayGame {
             PlayerReward playerReward = new PlayerReward(x.getPosition());
             playerReward.setPlayerPosition(x.getPosition());
 
-            int expMultiplier = getGuardianStage().getExpMultiplier();
-            playerReward.setExp(this.getExpPot().get() * expMultiplier);
-            playerReward.setGold(this.getGoldPot().get());
+            double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
+            double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+            playerReward.setExp((int) (this.getExpPot().get() * expMultiplier));
+            playerReward.setGold((int) (this.getGoldPot().get() * goldMultiplier));
             playerReward.setProductIndex(-1);
 
-            if (stageRewards != null) {
-                int rewardsCount = stageRewards.size();
-                if (rewardsCount > 0) {
-                    if (wonGame) {
-                        Random r = new Random();
-                        int itemRewardToGive = stageRewards.get(r.nextInt(rewardsCount));
-                        playerReward.setProductIndex(itemRewardToGive);
+            if (!stageRewards.isEmpty()) {
+                if (wonGame) {
+                    if (isBoss)
+                        stageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()));
 
-                        int amount = this.getIsHardMode().get() ? 3 : 1;
-                        if (this.getIsRandomGuardiansMode().get())
-                            amount = 1;
+                    int itemRewardToGive = random.nextInt(stageRewards.size());
+                    playerReward.setProductIndex(stageRewards.get(itemRewardToGive).getProductIndex());
+
+                    int amount = this.getIsHardMode().get() ? 3 : 1;
+                    if (this.getIsRandomGuardiansMode().get())
+                        amount = 1;
+
+                    if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
+                        amount = 1;
+
+                    if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.MATERIAL.getName())) {
+                        final int min = 1;
+                        final int max = 3;
+                        amount = random.nextInt(max - min + 1) + min;
+                    }
+
+                    playerReward.setProductAmount(amount);
+                } else {
+                    final List<Product> loosingStageRewards = stageRewards.stream()
+                            .filter(p -> p.getCategory().equals(EItemCategory.MATERIAL.getName()))
+                            .toList();
+
+                    if (!loosingStageRewards.isEmpty()) {
+                        int itemRewardToGiveLoosing = random.nextInt(loosingStageRewards.size());
+                        playerReward.setProductIndex(loosingStageRewards.get(itemRewardToGiveLoosing).getProductIndex());
+
+                        final int min = 1;
+                        final int max = 2;
+                        int amount = random.nextInt(max - min + 1) + min;
+
                         playerReward.setProductAmount(amount);
                     }
                 }
-            } else {
-                List<Integer> materialsForReward = ServiceManager.getInstance().getItemMaterialService().findAllItemIndexes();
-                List<Integer> materialsProductIndex = ServiceManager.getInstance().getProductService().findAllProductIndexesByCategoryAndItemIndexList(EItemCategory.MATERIAL.getName(), materialsForReward);
-
-                Random r = new Random();
-                int drawnMaterial = r.nextInt(materialsProductIndex.size() - 1 + 1) + 1;
-
-                playerReward.setProductIndex(materialsProductIndex.get(drawnMaterial - 1));
-
-                final int min = 1;
-                final int max = !wonGame ? 2 : 3;
-                final int amount = r.nextInt(max - min + 1) + min;
-                playerReward.setProductAmount(amount);
             }
 
             if (!wonGame) {

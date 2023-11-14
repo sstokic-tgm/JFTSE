@@ -4,6 +4,7 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
@@ -30,26 +31,30 @@ import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.battle.Guardian;
-import com.jftse.entities.database.model.battle.GuardianStage;
+import com.jftse.entities.database.model.battle.Guardian2Maps;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
+import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.scenario.MScenarios;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.thread.ThreadManager;
+import lombok.extern.log4j.Log4j2;
 
+import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
+@Log4j2
 public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     private final MatchplayGuardianGame game;
 
@@ -62,8 +67,11 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     private final ClothEquipmentService clothEquipmentService;
     private final WillDamageService willDamageService;
     private final GuardianService guardianService;
-    private final GuardianStageService guardianStageService;
+    private final ScenarioService scenarioService;
     private final PlayerStatisticService playerStatisticService;
+    private final MapService mapService;
+
+    private final JdbcUtil jdbcUtil;
 
     public MatchplayGuardianModeHandler(MatchplayGuardianGame game) {
         this.game = game;
@@ -75,8 +83,11 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.willDamageService = ServiceManager.getInstance().getWillDamageService();
         this.guardianService = ServiceManager.getInstance().getGuardianService();
-        this.guardianStageService = ServiceManager.getInstance().getGuardianStageService();
+        this.scenarioService = ServiceManager.getInstance().getScenarioService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
+        this.mapService = ServiceManager.getInstance().getMapService();
+
+        this.jdbcUtil = ServiceManager.getInstance().getJdbcUtil();
     }
 
     @Override
@@ -107,7 +118,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         }
 
         ThreadManager.getInstance().newTask(new GuardianAttackTask(ftClient.getConnection()));
-        ThreadManager.getInstance().newTask(new DefeatTimerTask(ftClient.getConnection(), gameSession, game.getGuardianStage()));
+        ThreadManager.getInstance().newTask(new DefeatTimerTask(ftClient.getConnection(), gameSession));
     }
 
     @Override
@@ -149,8 +160,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             final long timeNeededSeconds = TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded());
             final List<Integer> stages = List.of(9, 10, 13, 14);
 
-            boolean underSixty = (timeNeededSeconds < 60) && !stages.contains(game.getCurrentStage().getMapId());
-            boolean underNinety = (timeNeededSeconds < 90) && stages.contains(game.getCurrentStage().getMapId());
+            boolean underSixty = (timeNeededSeconds < 60) && !stages.contains(game.getMap().getMap());
+            boolean underNinety = (timeNeededSeconds < 90) && stages.contains(game.getMap().getMap());
 
             if (underSixty || underNinety) {
                 gameLogContent.append("Boss Guardian finished before ");
@@ -158,7 +169,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                     gameLogContent.append("90s. ");
                 if (underSixty)
                     gameLogContent.append("60s. ");
-                gameLogContent.append(game.getCurrentStage().getName()).append(" ");
+                gameLogContent.append(game.getMap().getName()).append(" ");
 
                 for (FTClient client : clients) {
                     RoomPlayer rp = client.getRoomPlayer();
@@ -195,7 +206,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
         gameLogContent = new StringBuilder();
 
-        gameLogContent.append(game.getCurrentStage().getName()).append(" ");
+        gameLogContent.append(game.getMap().getName()).append(" ");
         gameLogContent.append(game.getBossBattleActive().get() ? "Boss " : "Guardian ").append("battle finished. ");
         gameLogContent.append(wonGame ? "Players " : "Guardians ").append("won. ");
 
@@ -270,9 +281,9 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
                 final ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = game.getGuardianBattleStates();
                 final List<Integer> guardianRewardRankingPointList = guardianBattleStates.stream()
-                        .filter(GuardianBattleState::isLooted)
+                        .filter(g -> g.getLooted().get())
                         .map(GuardianBattleState::getRewardRankingPoint)
-                        .collect(Collectors.toList());
+                        .toList();
 
                 if (wonGame) {
                     final int guardianRewardRankingPointSum = guardianRewardRankingPointList.stream()
@@ -352,18 +363,43 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         float averagePlayerLevel = this.getAveragePlayerLevel(new ArrayList<>(roomPlayers));
         this.handleMonsLavaMap(ftClient.getConnection(), room, averagePlayerLevel);
 
-        GuardianStage guardianStage = guardianStageService.getGuardianStages().stream()
-                .filter(x -> x.getMapId() == room.getMap() && !x.getIsBossStage())
-                .findFirst()
-                .orElse(null);
-        game.setGuardianStage(guardianStage);
-        game.setCurrentStage(guardianStage);
+        MScenarios scenario = scenarioService.getDefaultScenarioByGameMode(MScenarios.GameMode.GUARDIAN);
+        if (scenario == null) {
+            log.error("No default scenario found for game mode: " + MScenarios.GameMode.GUARDIAN);
+            return;
+        }
+        game.setScenario(scenario);
 
-        GuardianStage bossGuardianStage = guardianStageService.getGuardianStages().stream()
-                .filter(x -> x.getMapId() == room.getMap() && x.getIsBossStage())
-                .findFirst()
-                .orElse(null);
-        game.setBossGuardianStage(bossGuardianStage);
+        Optional<SMaps> map = mapService.findByMap((int) room.getMap());
+        if (map.isEmpty()) {
+            log.error("No map found for mapId: " + room.getMap());
+            return;
+        }
+        game.setMap(map.get());
+
+        jdbcUtil.execute(em -> {
+            TypedQuery<Guardian2Maps> q = em.createQuery("SELECT g FROM Guardian2Maps g WHERE g.map.id = :mapId AND g.scenario.id = :scenarioId AND g.status.id = 1", Guardian2Maps.class);
+            q.setParameter("mapId", game.getMap().getId());
+            q.setParameter("scenarioId", game.getScenario().getId());
+            List<Guardian2Maps> guardian2Maps = q.getResultList();
+            game.getGuardiansInStage().addAll(guardian2Maps);
+        });
+
+        if (game.getMap().getIsBossStage()) {
+            MScenarios bossScenario = scenarioService.getDefaultScenarioByGameMode(MScenarios.GameMode.BOSS_BATTLE);
+            if (bossScenario == null) {
+                log.error("No default scenario found for game mode: " + MScenarios.GameMode.BOSS_BATTLE);
+                return;
+            }
+
+            jdbcUtil.execute(em -> {
+                TypedQuery<Guardian2Maps> q = em.createQuery("SELECT g FROM Guardian2Maps g WHERE g.map.id = :mapId AND g.scenario.id = :scenarioId AND g.status.id = 1", Guardian2Maps.class);
+                q.setParameter("mapId", game.getMap().getId());
+                q.setParameter("scenarioId", bossScenario.getId());
+                List<Guardian2Maps> guardian2Maps = q.getResultList();
+                game.getGuardiansInBossStage().addAll(guardian2Maps);
+            });
+        }
 
         int guardianLevelLimit = this.getGuardianLevelLimit(averagePlayerLevel);
         game.getGuardianLevelLimit().set(guardianLevelLimit);
@@ -375,10 +411,10 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
         int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
         byte guardianStartPosition = 10;
-        List<Byte> guardians = game.determineGuardians(game.getGuardianStage(), game.getGuardianLevelLimit().get());
+        List<Byte> guardians = game.determineGuardians(game.getGuardiansInStage(), game.getGuardianLevelLimit().get());
 
         if (room.isHardMode()) {
-            game.fillRemainingGuardianSlots(false, game, guardianStage, guardians);
+            game.fillRemainingGuardianSlots(false, game, game.getGuardiansInStage(), guardians);
         }
 
         for (int i = 0; i < (long) guardians.size(); i++) {
@@ -421,15 +457,14 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     }
 
     private float getAveragePlayerLevel(final List<RoomPlayer> roomPlayers) {
-        List<RoomPlayer> activePlayingPlayers = roomPlayers.stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
-        List<Integer> playerLevels = activePlayingPlayers.stream().map(x -> (int) x.getPlayer().getLevel()).collect(Collectors.toList());
+        List<RoomPlayer> activePlayingPlayers = roomPlayers.stream().filter(x -> x.getPosition() < 4).toList();
+        List<Integer> playerLevels = activePlayingPlayers.stream().map(x -> (int) x.getPlayer().getLevel()).toList();
         int levelSum = playerLevels.stream().reduce(0, Integer::sum);
         return (float) (levelSum / activePlayingPlayers.size());
     }
 
     private void handleMonsLavaMap(FTConnection connection, Room room, float averagePlayerLevel) {
         boolean isMonsLava = room.getMap() == 7 || room.getMap() == 8;
-        final Random random = new Random();
         int monsLavaBProbability = random.nextInt(101);
         if (isMonsLava && averagePlayerLevel >= 40 && monsLavaBProbability <= 26) {
             room.setMap((byte) 8); // MonsLavaB

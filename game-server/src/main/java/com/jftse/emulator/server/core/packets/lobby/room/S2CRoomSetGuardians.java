@@ -4,12 +4,12 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CRoomSetGuardians extends Packet {
-    public S2CRoomSetGuardians(byte leftMonsterIndex, byte middleMonsterIndex, byte rightMonsterIndex) {
+    public S2CRoomSetGuardians(byte firstMonsterIndex, byte secondMonsterIndex, byte thirdMonsterIndex) {
         super(PacketOperations.S2CRoomSetGuardians);
 
         // (GuardianInfo.set)
-        this.write(leftMonsterIndex);
-        this.write(middleMonsterIndex);
-        this.write(rightMonsterIndex);
+        this.write(firstMonsterIndex);
+        this.write(secondMonsterIndex);
+        this.write(thirdMonsterIndex);
     }
 }

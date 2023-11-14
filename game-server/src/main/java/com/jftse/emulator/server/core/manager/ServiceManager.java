@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.server.core.service.*;
 import lombok.Getter;
@@ -83,8 +84,6 @@ public class ServiceManager {
     @Autowired
     private GuardianService guardianService;
     @Autowired
-    private GuardianStageService guardianStageService;
-    @Autowired
     private BossGuardianService bossGuardianService;
     @Autowired
     private GuardianSkillsService guardianSkillsService;
@@ -94,6 +93,10 @@ public class ServiceManager {
     private SkillService skillService;
     @Autowired
     private WillDamageService willDamageService;
+    @Autowired
+    private ScenarioService scenarioService;
+    @Autowired
+    private MapService mapService;
 
     @Autowired
     private ProfaneWordsService profaneWordsService;
@@ -110,6 +113,9 @@ public class ServiceManager {
 
     @Autowired
     private ConfigService configService;
+
+    @Autowired
+    private JdbcUtil jdbcUtil;
 
     @Autowired
     private GameEventService gameEventService;
