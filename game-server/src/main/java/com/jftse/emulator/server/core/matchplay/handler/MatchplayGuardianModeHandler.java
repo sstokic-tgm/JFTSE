@@ -443,7 +443,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         S2CRoomSetGuardians roomSetGuardians = new S2CRoomSetGuardians(guardians.get(0), guardians.get(1), guardians.get(2));
         S2CRoomSetGuardianStats roomSetGuardianStats = new S2CRoomSetGuardianStats(game.getGuardianBattleStates(), guardians);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(roomSetGuardians, ftClient.getConnection());
-        ThreadManager.getInstance().schedule(() -> GameManager.getInstance().sendPacketToAllClientsInSameGameSession(roomSetGuardianStats, ftClient.getConnection()), 1, TimeUnit.SECONDS);
+        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(roomSetGuardianStats, ftClient.getConnection());
     }
 
     @Override
