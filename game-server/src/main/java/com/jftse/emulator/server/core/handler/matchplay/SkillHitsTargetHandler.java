@@ -299,12 +299,16 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
     }
 
     private void handlePotsIncrease(MatchplayGuardianGame game, GuardianBattleState guardianBattleState) {
-        final boolean isBoss = game.getMap().getIsBossStage() && game.getBossBattleActive().get();
-
         jdbcUtil.execute(em -> {
-            TypedQuery<Guardian2Maps> query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
-                    "WHERE g2m.guardian.id = :guardianId AND g2m.map.id = :mapId AND g2m.status.id = 1 AND g2m.scenario.id = :scenarioId",
-                    Guardian2Maps.class);
+            String qlGetGuardianByMapAndScenario =
+                    "SELECT g2m FROM Guardian2Maps g2m " +
+                    "WHERE g2m.map.id = :mapId AND g2m.status.id = 1 AND g2m.scenario.id = :scenarioId ";
+            if (guardianBattleState.isBoss())
+                qlGetGuardianByMapAndScenario += "AND g2m.bossGuardian.id = :guardianId ";
+            else
+                qlGetGuardianByMapAndScenario += "AND g2m.guardian.id = :guardianId ";
+
+            TypedQuery<Guardian2Maps> query = em.createQuery(qlGetGuardianByMapAndScenario, Guardian2Maps.class);
             query.setParameter("guardianId", (long) guardianBattleState.getId());
             query.setParameter("mapId", game.getMap().getId());
             query.setParameter("scenarioId", game.getScenario().getId());
@@ -312,18 +316,21 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
 
             Guardian2Maps guardian = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
             if (guardian != null) {
-                TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
+                String qlGetMultiplierByGuardAndRole =
+                        "SELECT sgm FROM SRelationships sr " +
                         "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 4 AND sr.role.id = 2", SGuardianMultiplier.class);
-                queryExp.setParameter("guardId", guardian.getId());
+                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id IN (4, 5) AND sr.role.id = :roleId";
 
-                TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
-                        "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 4 AND sr.role.id = 3", SGuardianMultiplier.class);
-                queryGold.setParameter("guardId", guardian.getId());
+                TypedQuery<SGuardianMultiplier> queryMultiplier = em.createQuery(qlGetMultiplierByGuardAndRole, SGuardianMultiplier.class);
+                queryMultiplier.setParameter("guardId", guardian.getId());
+                queryMultiplier.setParameter("roleId", 2L);
+                final List<SGuardianMultiplier> expMultipliers = queryMultiplier.getResultList();
 
-                final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
-                final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
+                queryMultiplier = em.createQuery(qlGetMultiplierByGuardAndRole, SGuardianMultiplier.class);
+                queryMultiplier.setParameter("guardId", guardian.getId());
+                queryMultiplier.setParameter("roleId", 3L);
+                final List<SGuardianMultiplier> goldMultipliers = queryMultiplier.getResultList();
+
                 SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
                 SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
 
@@ -332,103 +339,44 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
                 game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
             } else {
-                if (isBoss) {
-                    query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
-                                    "WHERE g2m.bossGuardian.id = :guardianId AND g2m.map.id = :mapId AND g2m.status.id = 1 AND g2m.scenario.id = :scenarioId",
-                            Guardian2Maps.class);
-                    query.setParameter("guardianId", (long) guardianBattleState.getId());
-                    query.setParameter("mapId", game.getMap().getId());
-                    query.setParameter("scenarioId", game.getScenario().getId());
-                    guardian2MapsList.clear();
-                    guardian2MapsList = query.getResultList();
+                String qlGetGuardianByGuardian =
+                        "SELECT g2m FROM Guardian2Maps g2m " +
+                        "WHERE g2m.status.id = 1 ";
+                if (guardianBattleState.isBoss())
+                    qlGetGuardianByGuardian += "AND g2m.bossGuardian.id = :guardianId ";
+                else
+                    qlGetGuardianByGuardian += "AND g2m.guardian.id = :guardianId ";
 
-                    Guardian2Maps bossGuardian = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
-                    if (bossGuardian != null) {
-                        TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
-                                "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                                "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 2", SGuardianMultiplier.class);
-                        queryExp.setParameter("guardId", bossGuardian.getId());
+                query = em.createQuery(qlGetGuardianByGuardian, Guardian2Maps.class);
+                query.setParameter("guardianId", (long) guardianBattleState.getId());
 
-                        TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
-                                "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                                "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 3", SGuardianMultiplier.class);
-                        queryGold.setParameter("guardId", bossGuardian.getId());
+                guardian2MapsList.clear();
+                guardian2MapsList = query.getResultList();
 
-                        final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
-                        final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
-                        SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
-                        SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
+                guardian = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
+                if (guardian != null) {
+                    String qlGetMultiplierByGuardAndRole =
+                            "SELECT sgm FROM SRelationships sr " +
+                            "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
+                            "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id IN (4, 5) AND sr.role.id = :roleId";
 
-                        double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
-                        double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
-                        game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
-                        game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
-                    }
-                } else {
-                    if (game.getIsHardMode().get()) {
-                        query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
-                                        "WHERE g2m.guardian.id = :guardianId AND g2m.status.id = 1",
-                                Guardian2Maps.class);
-                        query.setParameter("guardianId", (long) guardianBattleState.getId());
-                        guardian2MapsList.clear();
-                        guardian2MapsList = query.getResultList();
+                    TypedQuery<SGuardianMultiplier> queryMultiplier = em.createQuery(qlGetMultiplierByGuardAndRole, SGuardianMultiplier.class);
+                    queryMultiplier.setParameter("guardId", guardian.getId());
+                    queryMultiplier.setParameter("roleId", 2L);
+                    final List<SGuardianMultiplier> expMultipliers = queryMultiplier.getResultList();
 
-                        Guardian2Maps guardian2Maps = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
-                        if (guardian2Maps != null && guardian2Maps.getGuardian() != null) {
-                            TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
-                                    "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                                    "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 2", SGuardianMultiplier.class);
-                            queryExp.setParameter("guardId", guardian2Maps.getId());
+                    queryMultiplier = em.createQuery(qlGetMultiplierByGuardAndRole, SGuardianMultiplier.class);
+                    queryMultiplier.setParameter("guardId", guardian.getId());
+                    queryMultiplier.setParameter("roleId", 3L);
+                    final List<SGuardianMultiplier> goldMultipliers = queryMultiplier.getResultList();
 
-                            TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
-                                    "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                                    "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 3", SGuardianMultiplier.class);
-                            queryGold.setParameter("guardId", guardian2Maps.getId());
+                    SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
+                    SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
 
-                            final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
-                            final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
-                            SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
-                            SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
-
-                            double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
-                            double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
-                            game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
-                            game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
-                        }
-                        if (guardian2Maps == null) {
-                            query = em.createQuery("SELECT g2m FROM Guardian2Maps g2m " +
-                                            "WHERE g2m.bossGuardian.id = :guardianId AND g2m.status.id = 1",
-                                    Guardian2Maps.class);
-                            query.setParameter("guardianId", (long) guardianBattleState.getId());
-                            guardian2MapsList.clear();
-                            guardian2MapsList = query.getResultList();
-
-                            Guardian2Maps bossGuardian = guardian2MapsList.isEmpty() ? null : guardian2MapsList.get(0);
-                            if (bossGuardian != null && bossGuardian.getBossGuardian() != null) {
-                                TypedQuery<SGuardianMultiplier> queryExp = em.createQuery("SELECT sgm FROM SRelationships sr " +
-                                        "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 2", SGuardianMultiplier.class);
-                                queryExp.setParameter("guardId", bossGuardian.getId());
-
-                                TypedQuery<SGuardianMultiplier> queryGold = em.createQuery("SELECT sgm FROM SRelationships sr " +
-                                        "LEFT JOIN FETCH SGuardianMultiplier sgm ON sgm.id = sr.id_f " +
-                                        "WHERE sr.id_t = :guardId AND sr.status.id = 1 AND sr.relationship.id = 5 AND sr.role.id = 3", SGuardianMultiplier.class);
-                                queryGold.setParameter("guardId", bossGuardian.getId());
-
-                                final List<SGuardianMultiplier> expMultipliers = queryExp.getResultList();
-                                final List<SGuardianMultiplier> goldMultipliers = queryGold.getResultList();
-
-                                SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
-                                SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
-
-                                double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
-                                double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
-
-                                game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
-                                game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
-                            }
-                        }
-                    }
+                    double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
+                    double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+                    game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
+                    game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
                 }
             }
         });
@@ -529,7 +477,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
             }
 
             int activePlayingPlayersCount = game.getPlayerBattleStates().size();
-            List<Byte> guardians = game.determineGuardians(game.getGuardiansInBossStage(), game.getGuardianLevelLimit().get());
+            List<GuardianBase> guardians = game.determineGuardians(game.getGuardiansInBossStage(), game.getGuardianLevelLimit().get());
             game.getGuardianBattleStates().clear();
 
             BossGuardian bossGuardian = game.getGuardiansInBossStage().stream()
@@ -547,22 +495,26 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
             }
             byte guardianStartPosition = 11;
 
-            for (int i = 0; i < (long) guardians.size(); i++) {
-                int guardianId = guardians.get(i);
-                if (guardianId == 0) continue;
+            for (int i = 0; i <  guardians.size(); i++) {
+                GuardianBase guardianBase = guardians.get(i);
+                if (guardianBase == null) continue;
 
                 if (game.getIsRandomGuardiansMode().get()) {
-                    guardianId = (int) (Math.random() * 72 + 1);
-                    guardians.set(i, (byte) guardianId);
+                    guardianBase.setId((long) (Math.random() * 72 + 1));
+                    guardians.set(i, guardianBase);
                 }
 
                 short guardianPosition = (short) (i + guardianStartPosition);
-                Guardian guardian = guardianService.findGuardianById((long) guardianId);
-                GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
+                if (guardianBase instanceof Guardian) {
+                    guardianBase = guardianService.findGuardianById(guardianBase.getId());
+                } else {
+                    guardianBase = bossGuardianService.findBossGuardianById(guardianBase.getId());
+                }
+                GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardianBase, guardianPosition, activePlayingPlayersCount);
                 game.getGuardianBattleStates().add(guardianBattleState);
             }
 
-            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardian.getId().byteValue(), guardians.get(0), guardians.get(1));
+            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardian, guardians.get(0), guardians.get(1));
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
 
             S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);

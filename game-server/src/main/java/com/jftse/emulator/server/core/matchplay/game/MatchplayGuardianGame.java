@@ -116,64 +116,74 @@ public class MatchplayGuardianGame extends MatchplayGame {
         random = new Random();
     }
 
-    public List<Byte> determineGuardians(List<Guardian2Maps> guardian2Maps, int guardianLevelLimit) {
-        List<Guardian> guardiansLeft = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.LEFT);
-        List<Guardian> guardiansRight = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.RIGHT);
-        List<Guardian> guardiansMiddle = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.MIDDLE);
+    public List<GuardianBase> determineGuardians(List<Guardian2Maps> guardian2Maps, int guardianLevelLimit) {
+        List<GuardianBase> guardiansLeft = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.LEFT);
+        List<GuardianBase> guardiansRight = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.RIGHT);
+        List<GuardianBase> guardiansMiddle = this.getFilteredGuardians(guardian2Maps, guardianLevelLimit, Guardian2Maps.Side.MIDDLE);
 
-        byte leftGuardian = this.getRandomGuardian(guardiansLeft, new ArrayList<>());
-        byte rightGuardian = this.getRandomGuardian(guardiansRight, List.of(leftGuardian));
-        byte middleGuardian = this.getRandomGuardian(guardiansMiddle, Arrays.asList(leftGuardian, rightGuardian));
-        if (middleGuardian != 0) {
+        GuardianBase leftGuardian = this.getRandomGuardian(guardiansLeft, new ArrayList<>());
+        GuardianBase rightGuardian = this.getRandomGuardian(guardiansRight, List.of(leftGuardian));
+        GuardianBase middleGuardian = this.getRandomGuardian(guardiansMiddle, Arrays.asList(leftGuardian, rightGuardian));
+        if (middleGuardian != null) {
             return Arrays.asList(middleGuardian, rightGuardian, leftGuardian);
-        } else if (rightGuardian != 0) {
-            return Arrays.asList(rightGuardian, leftGuardian, (byte) 0);
+        } else if (rightGuardian != null) {
+            return Arrays.asList(rightGuardian, leftGuardian, null);
         }
 
-        return Arrays.asList(leftGuardian, (byte) 0, (byte) 0);
+        return Arrays.asList(leftGuardian, null, null);
     }
 
-    public byte getRandomGuardian(List<Guardian> guardians, List<Byte> idsToIgnore) {
+    public GuardianBase getRandomGuardian(List<GuardianBase> guardians, List<GuardianBase> guardiansToIgnore) {
         if (guardians.isEmpty()) {
-            return 0;
+            return null;
         }
 
-        List<Byte> guardianIds = guardians.stream()
-                .map(Guardian::getId)
-                .map(Long::byteValue)
+        List<Long> idToIgnore = guardiansToIgnore.stream()
+                .map(GuardianBase::getId)
                 .toList();
 
-        List<Byte> filteredGuardianIds = guardianIds.stream()
-                .filter(x -> !idsToIgnore.contains(x))
+        List<GuardianBase> filteredGuardianIds = guardians.stream()
+                .filter(x -> !idToIgnore.contains(x.getId()))
                 .toList();
 
         if (filteredGuardianIds.isEmpty()) {
-            return 0;
+            return null;
         }
 
         int randomIndex = random.nextInt(filteredGuardianIds.size());
         return filteredGuardianIds.get(randomIndex);
     }
 
-    public List<Guardian> getFilteredGuardians(List<Guardian2Maps> guardian2Maps, int guardianLevelLimit, Guardian2Maps.Side side) {
+    public List<GuardianBase> getFilteredGuardians(List<Guardian2Maps> guardian2Maps, int guardianLevelLimit, Guardian2Maps.Side side) {
         if (guardian2Maps.isEmpty()) {
             return new ArrayList<>();
         }
 
-        final List<Guardian> guardians = new ArrayList<>();
+        final List<GuardianBase> guardians = new ArrayList<>();
         for (Guardian2Maps guardian2Map : guardian2Maps) {
-            if (guardian2Map.getGuardian() == null || guardian2Map.getSide() != side) {
+            if (guardian2Map.getSide() != side) {
+                continue;
+            }
+            if (guardian2Map.getGuardian() == null && guardian2Map.getBossGuardian() == null) {
                 continue;
             }
 
-            Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
-            if (guardian != null) {
-                guardians.add(guardian);
+            if (guardian2Map.getGuardian() != null) {
+                Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
+                if (guardian != null) {
+                    guardians.add(guardian);
+                }
+            }
+            if (guardian2Map.getBossGuardian() != null) {
+                BossGuardian bossGuardian = ServiceManager.getInstance().getBossGuardianService().findBossGuardianById(guardian2Map.getBossGuardian().getId());
+                if (bossGuardian != null) {
+                    guardians.add(bossGuardian);
+                }
             }
         }
 
         int lowestGuardianLevel = guardians.stream()
-                .mapToInt(Guardian::getLevel)
+                .mapToInt(GuardianBase::getLevel)
                 .min()
                 .orElse(0);
         if (guardianLevelLimit < lowestGuardianLevel) {
@@ -186,28 +196,36 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .collect(Collectors.toList());
     }
 
-    public void fillRemainingGuardianSlots(boolean forceFill, MatchplayGuardianGame game, List<Guardian2Maps> guardian2Maps, List<Byte> guardians) {
+    public void fillRemainingGuardianSlots(boolean forceFill, MatchplayGuardianGame game, List<Guardian2Maps> guardian2Maps, List<GuardianBase> guardians) {
         int totalAvailableGuardianSlots = 3;
-        int activeGuardianSlots = forceFill ? 0 : (int) guardians.stream().filter(x -> x != 0).count();
+        int activeGuardianSlots = forceFill ? 0 : (int) guardians.stream().filter(Objects::nonNull).count();
         int remainingGuardianSlots = totalAvailableGuardianSlots - activeGuardianSlots;
         if (game.getIsHardMode().get() && remainingGuardianSlots != 0) {
-            List<Guardian> allGuardians = getAllGuardiansFromGuardian2Maps(guardian2Maps);
+            List<GuardianBase> allGuardians = getAllGuardiansFromGuardian2Maps(guardian2Maps);
             for (int i = activeGuardianSlots; i < totalAvailableGuardianSlots; i++) {
                 guardians.set(i, getRandomGuardian(allGuardians, guardians));
             }
         }
     }
 
-    public List<Guardian> getAllGuardiansFromGuardian2Maps(List<Guardian2Maps> guardian2Maps) {
-        final List<Guardian> guardians = new ArrayList<>();
+    public List<GuardianBase> getAllGuardiansFromGuardian2Maps(List<Guardian2Maps> guardian2Maps) {
+        final List<GuardianBase> guardians = new ArrayList<>();
         for (Guardian2Maps guardian2Map : guardian2Maps) {
-            if (guardian2Map.getGuardian() == null) {
+            if (guardian2Map.getGuardian() == null && guardian2Map.getBossGuardian() == null) {
                 continue;
             }
 
-            Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
-            if (guardian != null) {
-                guardians.add(guardian);
+            if (guardian2Map.getGuardian() != null) {
+                Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
+                if (guardian != null) {
+                    guardians.add(guardian);
+                }
+            }
+            if (guardian2Map.getBossGuardian() != null) {
+                BossGuardian bossGuardian = ServiceManager.getInstance().getBossGuardianService().findBossGuardianById(guardian2Map.getBossGuardian().getId());
+                if (bossGuardian != null) {
+                    guardians.add(bossGuardian);
+                }
             }
         }
         return guardians;
@@ -229,7 +247,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     public GuardianBattleState createGuardianBattleState(boolean isHardMode, GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
         if (isHardMode) {
-            return new GuardianBattleState(guardian.getId().intValue(), guardian.getBtItemID(), guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+            return new GuardianBattleState(guardian, guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
         }
 
         int extraHp = guardian.getHpPer() * activePlayingPlayersCount;
@@ -242,7 +260,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         int totalSta = guardian.getBaseSta() + extraSta;
         int totalDex = guardian.getBaseDex() + extraDex;
         int totalWill = guardian.getBaseWill() + extraWill;
-        return new GuardianBattleState(guardian.getId().intValue(), guardian.getBtItemID(), guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+        return new GuardianBattleState(guardian, guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
     }
 
     public long getStageTimePlayingInSeconds() {
@@ -269,12 +287,14 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
         final List<Guardian2Maps> guardian2Maps = this.guardiansInStage.stream()
                 .filter(x -> x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue()))
+                .filter(x -> x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue()))
                 .toList();
 
         final List<Guardian2Maps> guardian2MapsBoss = new ArrayList<>();
         if (isBoss) {
             final List<Guardian2Maps> tmp = this.guardiansInBossStage.stream()
                     .filter(x -> x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue()))
+                    .filter(x -> x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue()))
                     .toList();
             guardian2MapsBoss.addAll(tmp);
         }
@@ -298,46 +318,33 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
             TypedQuery<Product> queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
                     "ON p.productIndex = sr.id_f " +
-                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 3 AND sr.role.id = 1", Product.class);
+                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 7 AND sr.role.id = 1", Product.class);
             queryProduct.setParameter("mapId", this.map.getId());
             List<Product> products = queryProduct.getResultList();
 
             stageRewards.addAll(products);
 
-            queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
+            String qlGetGuardiansForProducts =
+                    "SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
                     "ON p.productIndex = sr.id_f " +
-                    "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id = 1 AND sr.role.id = 1", Product.class);
+                    "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id IN (1,2) AND sr.role.id = 1";
+
+            queryProduct = em.createQuery(qlGetGuardiansForProducts, Product.class);
             final List<Long> guardian2MapIds = guardian2Maps.stream()
-                    .filter(x -> x.getGuardian() != null)
                     .map(Guardian2Maps::getId)
                     .toList();
             queryProduct.setParameter("guardianList", guardian2MapIds);
             List<Product> guardianProducts = queryProduct.getResultList();
 
             if (isBoss) {
-                queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
-                        "ON p.productIndex = sr.id_f " +
-                        "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id = 1 AND sr.role.id = 1", Product.class);
+                queryProduct = em.createQuery(qlGetGuardiansForProducts, Product.class);
                 final List<Long> guardian2MapIdsBoss = guardian2MapsBoss.stream()
-                        .filter(x -> x.getGuardian() != null)
                         .map(Guardian2Maps::getId)
                         .toList();
                 queryProduct.setParameter("guardianList", guardian2MapIdsBoss);
                 final List<Product> tmp = queryProduct.getResultList();
 
                 guardianProducts.addAll(tmp);
-
-                final List<Long> bossGuardiansIds = this.guardiansInBossStage.stream()
-                        .filter(x -> x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue()))
-                        .map(Guardian2Maps::getId)
-                        .toList();
-
-                queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
-                        "ON p.productIndex = sr.id_f " +
-                        "WHERE sr.id_t IN :bossGuardianList AND sr.status.id = 1 AND sr.relationship.id = 2 AND sr.role.id = 1", Product.class);
-                queryProduct.setParameter("bossGuardianList", bossGuardiansIds);
-                List<Product> bossGuardianProducts = queryProduct.getResultList();
-                stageRewards.addAll(bossGuardianProducts);
             }
             stageRewards.addAll(guardianProducts);
         });
@@ -367,7 +374,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                         stageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()) || !p.getCategory().equals(EItemCategory.PARTS.getName()));
 
                     if (!stageRewards.isEmpty()) {
-                        int itemRewardToGive = random.nextInt(stageRewards.size());
+                        final int itemRewardToGive = random.nextInt(stageRewards.size());
                         playerReward.setProductIndex(stageRewards.get(itemRewardToGive).getProductIndex());
 
                         int amount = this.getIsHardMode().get() ? 3 : 1;
@@ -382,6 +389,12 @@ public class MatchplayGuardianGame extends MatchplayGame {
                             final int max = 3;
                             amount = random.nextInt(max - min + 1) + min;
                         }
+
+                        if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.QUICK.getName())) {
+                            final int min = 5;
+                            final int max = 100;
+                            amount = random.nextInt(max - min + 1) + min;
+                        }
                         playerReward.setProductAmount(amount);
                     }
                 } else {
@@ -390,12 +403,18 @@ public class MatchplayGuardianGame extends MatchplayGame {
                             .toList();
 
                     if (!loosingStageRewards.isEmpty()) {
-                        int itemRewardToGiveLoosing = random.nextInt(loosingStageRewards.size());
+                        final int itemRewardToGiveLoosing = random.nextInt(loosingStageRewards.size());
                         playerReward.setProductIndex(loosingStageRewards.get(itemRewardToGiveLoosing).getProductIndex());
 
                         final int min = 1;
                         final int max = 2;
                         int amount = random.nextInt(max - min + 1) + min;
+
+                        if (loosingStageRewards.get(itemRewardToGiveLoosing).getCategory().equals(EItemCategory.QUICK.getName())) {
+                            final int minQuick = 5;
+                            final int maxQuick = 50;
+                            amount = random.nextInt(maxQuick - minQuick + 1) + minQuick;
+                        }
 
                         playerReward.setProductAmount(amount);
                     }

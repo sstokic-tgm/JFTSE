@@ -30,8 +30,10 @@ import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
 import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.battle.BossGuardian;
 import com.jftse.entities.database.model.battle.Guardian;
 import com.jftse.entities.database.model.battle.Guardian2Maps;
+import com.jftse.entities.database.model.battle.GuardianBase;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.map.SMaps;
@@ -67,6 +69,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     private final ClothEquipmentService clothEquipmentService;
     private final WillDamageService willDamageService;
     private final GuardianService guardianService;
+    private final BossGuardianService bossGuardianService;
     private final ScenarioService scenarioService;
     private final PlayerStatisticService playerStatisticService;
     private final MapService mapService;
@@ -83,6 +86,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.willDamageService = ServiceManager.getInstance().getWillDamageService();
         this.guardianService = ServiceManager.getInstance().getGuardianService();
+        this.bossGuardianService = ServiceManager.getInstance().getBossGuardianService();
         this.scenarioService = ServiceManager.getInstance().getScenarioService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         this.mapService = ServiceManager.getInstance().getMapService();
@@ -411,24 +415,28 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
         int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
         byte guardianStartPosition = 10;
-        List<Byte> guardians = game.determineGuardians(game.getGuardiansInStage(), game.getGuardianLevelLimit().get());
+        List<GuardianBase> guardians = game.determineGuardians(game.getGuardiansInStage(), game.getGuardianLevelLimit().get());
 
         if (room.isHardMode()) {
             game.fillRemainingGuardianSlots(false, game, game.getGuardiansInStage(), guardians);
         }
 
-        for (int i = 0; i < (long) guardians.size(); i++) {
-            int guardianId = guardians.get(i);
-            if (guardianId == 0) continue;
+        for (int i = 0; i < guardians.size(); i++) {
+            GuardianBase guardianBase = guardians.get(i);
+            if (guardianBase == null) continue;
 
             if (game.getIsRandomGuardiansMode().get()) {
-                guardianId = (int) (Math.random() * 72 + 1);
-                guardians.set(i, (byte) guardianId);
+                guardianBase.setId((long) (Math.random() * 72 + 1));
+                guardians.set(i, guardianBase);
             }
 
             short guardianPosition = (short) (i + guardianStartPosition);
-            Guardian guardian = guardianService.findGuardianById((long) guardianId);
-            GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardian, guardianPosition, activePlayingPlayersCount);
+            if (guardianBase instanceof Guardian) {
+                guardianBase = guardianService.findGuardianById(guardianBase.getId());
+            } else {
+                guardianBase = bossGuardianService.findBossGuardianById(guardianBase.getId());
+            }
+            GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardianBase, guardianPosition, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(guardianBattleState);
         }
 
