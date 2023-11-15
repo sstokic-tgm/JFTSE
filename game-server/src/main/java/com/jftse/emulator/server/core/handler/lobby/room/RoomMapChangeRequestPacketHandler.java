@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomMapChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
@@ -26,6 +27,15 @@ public class RoomMapChangeRequestPacketHandler extends AbstractPacketHandler {
         Room room = client.getActiveRoom();
         if (room != null) {
             synchronized (room) {
+                if (ConfigService.getInstance().getValue("game.map.allow.snowmoon", false)) {
+                    if (room.getPreviousMap() == 3 && roomMapChangeRequestPacket.getMap() == 5) {
+                        roomMapChangeRequestPacket.setMap((byte) 4);
+                    }
+                    if (room.getPreviousMap() == 5 && roomMapChangeRequestPacket.getMap() == 3) {
+                        roomMapChangeRequestPacket.setMap((byte) 4);
+                    }
+                }
+                room.setPreviousMap(roomMapChangeRequestPacket.getMap());
                 room.setMap(roomMapChangeRequestPacket.getMap());
             }
 

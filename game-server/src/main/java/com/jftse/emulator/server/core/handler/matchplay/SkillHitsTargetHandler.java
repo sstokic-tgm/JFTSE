@@ -518,7 +518,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
 
             S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
+            ThreadManager.getInstance().schedule(() -> GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection), 1, TimeUnit.SECONDS);
 
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
             gameSession.getFireables().push(runnableEvent);

@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.SimpleExpGoldBonus;
@@ -14,6 +15,8 @@ import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
 import com.jftse.emulator.server.core.matchplay.handler.MatchplayBattleModeHandler;
 import com.jftse.emulator.server.core.utils.BattleUtils;
+import com.jftse.entities.database.model.item.Product;
+import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
@@ -21,6 +24,7 @@ import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.TypedQuery;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -44,6 +48,12 @@ public class MatchplayBattleGame extends MatchplayGame {
     private AtomicInteger spiderMineIdentifier;
 
     private final PlayerCombatSystem playerCombatSystem;
+
+    private SMaps map;
+
+    private final JdbcUtil jdbcUtil;
+
+    private final Random random = new Random();
 
     public MatchplayBattleGame() {
         super();
@@ -69,6 +79,8 @@ public class MatchplayBattleGame extends MatchplayGame {
         this.finished = new AtomicBoolean(false);
 
         playerCombatSystem = new PlayerCombatSystem(this);
+
+        this.jdbcUtil = ServiceManager.getInstance().getJdbcUtil();
     }
 
     public PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
@@ -98,6 +110,17 @@ public class MatchplayBattleGame extends MatchplayGame {
     public List<PlayerReward> getPlayerRewards() {
         int secondsPlayed = (int) Math.ceil((double) this.getTimeNeeded() / 1000);
         List<PlayerReward> playerRewards = new ArrayList<>();
+
+        final List<Product> mapRewards = new ArrayList<>();
+        jdbcUtil.execute(em -> {
+            TypedQuery<Product> queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
+                    "ON p.productIndex = sr.id_f " +
+                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 3 AND sr.role.id = 1", Product.class);
+            queryProduct.setParameter("mapId", this.map.getId());
+            List<Product> products = queryProduct.getResultList();
+
+            mapRewards.addAll(products);
+        });
 
         int iteration = 0;
         for (int playerPosition : this.getPlayerPositionsOrderedByHighestHealth()) {
@@ -138,18 +161,22 @@ public class MatchplayBattleGame extends MatchplayGame {
             playerReward.setExp(rewardExp);
             playerReward.setGold(rewardGold);
 
-            List<Integer> materialsForReward = ServiceManager.getInstance().getItemMaterialService().findAllItemIndexes();
-            List<Integer> materialsProductIndex = ServiceManager.getInstance().getProductService().findAllProductIndexesByCategoryAndItemIndexList(EItemCategory.MATERIAL.getName(), materialsForReward);
-            materialsProductIndex.add(57592);
+            final int itemRewardToGive = random.nextInt(mapRewards.size());
+            playerReward.setProductIndex(mapRewards.get(itemRewardToGive).getProductIndex());
 
-            Random rnd = new Random();
-            int drawnMaterial = rnd.nextInt(materialsProductIndex.size() - 1 + 1) + 1;
+            int min = 1;
+            int max = !wonGame ? 2 : 3;
+            int amount = random.nextInt(max - min + 1) + min;
 
-            playerReward.setProductIndex(materialsProductIndex.get(drawnMaterial - 1));
+            if (mapRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
+                amount = 1;
 
-            final int min = 1;
-            final int max = !wonGame ? 2 : 3;
-            final int amount = rnd.nextInt(max - min + 1) + min;
+            if (mapRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.QUICK.getName())) {
+                min = 5;
+                max = !wonGame ? 30 : 50;
+                amount = random.nextInt(max - min + 1) + min;
+            }
+
             playerReward.setProductAmount(amount);
 
             playerRewards.add(playerReward);

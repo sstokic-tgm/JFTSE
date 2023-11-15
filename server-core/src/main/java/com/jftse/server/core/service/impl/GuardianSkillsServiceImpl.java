@@ -30,15 +30,17 @@ public class GuardianSkillsServiceImpl implements GuardianSkillsService {
     private final Guardian2MapsRepository guardian2MapsRepository;
 
     @Override
-    public Skill getRandomGuardianSkillBasedOnProbability(int btItemId, int guardianId, MScenarios scenario, SMaps map) {
+    public Skill getRandomGuardianSkillBasedOnProbability(int btItemId, int guardianId, boolean isBoss, MScenarios scenario, SMaps map) {
         final List<Skill2Guardians> skill2Guardians = skill2GuardiansRepository.findAllByBtItemId(btItemId);
         assert !skill2Guardians.isEmpty() : "Skill2Guardians with btItemId " + btItemId + " not found";
 
-        List<Guardian2Maps> guardians = guardian2MapsRepository.findAllByMapAndGuardianAndScenario(map.getId(), (long) guardianId, scenario.getId());
-        List<Guardian2Maps> bossGuardians = guardian2MapsRepository.findAllByMapAndBossGuardianAndScenario(map.getId(), (long) guardianId, scenario.getId());
-
-        addGuardianSkillsToSkills(skill2Guardians, guardians);
-        addGuardianSkillsToSkills(skill2Guardians, bossGuardians);
+        if (!isBoss) {
+            List<Guardian2Maps> guardians = guardian2MapsRepository.findAllByMapAndGuardianAndScenario(map.getId(), (long) guardianId, scenario.getId());
+            addGuardianSkillsToSkills(skill2Guardians, guardians);
+        } else {
+            List<Guardian2Maps> bossGuardians = guardian2MapsRepository.findAllByMapAndBossGuardianAndScenario(map.getId(), (long) guardianId, scenario.getId());
+            addGuardianSkillsToSkills(skill2Guardians, bossGuardians);
+        }
 
         final double totalChance = skill2Guardians.stream()
                 .map(Skill2Guardians::getChance)

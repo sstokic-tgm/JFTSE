@@ -26,6 +26,7 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
+import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
@@ -35,6 +36,7 @@ import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
 import java.util.*;
@@ -43,6 +45,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Log4j2
 public class MatchplayBasicModeHandler implements MatchplayHandleable {
     private final MatchplayBasicGame game;
     private final EventHandler eventHandler;
@@ -53,6 +56,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
     private final PlayerStatisticService playerStatisticService;
     private final ClothEquipmentService clothEquipmentService;
     private final ProductService productService;
+    private final MapService mapService;
 
     public MatchplayBasicModeHandler(MatchplayBasicGame game) {
         this.game = game;
@@ -64,6 +68,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.productService = ServiceManager.getInstance().getProductService();
+        this.mapService = ServiceManager.getInstance().getMapService();
     }
 
     @Override
@@ -267,7 +272,14 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
 
     @Override
     public void onPrepare(final FTClient ftClient) {
+        Room room = ftClient.getActiveRoom();
 
+        Optional<SMaps> map = mapService.findByMap((int) room.getMap());
+        if (map.isEmpty()) {
+            log.error("No map found for mapId: " + room.getMap());
+            return;
+        }
+        game.setMap(map.get());
     }
 
     @Override

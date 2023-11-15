@@ -29,6 +29,7 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
+import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
@@ -37,6 +38,7 @@ import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
+import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
 import java.util.*;
@@ -46,10 +48,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+@Log4j2
 public class MatchplayBattleModeHandler implements MatchplayHandleable {
     private final MatchplayBattleGame game;
 
-    private final Random random;
 
     private final GameLogService gameLogService;
     private final EventHandler eventHandler;
@@ -59,9 +61,10 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
     private final ClothEquipmentService clothEquipmentService;
     private final WillDamageService willDamageService;
 
+    private final MapService mapService;
+
     public MatchplayBattleModeHandler(MatchplayBattleGame game) {
         this.game = game;
-        this.random = new Random();
         this.gameLogService = ServiceManager.getInstance().getGameLogService();
         this.eventHandler = GameManager.getInstance().getEventHandler();
         this.levelService = ServiceManager.getInstance().getLevelService();
@@ -69,6 +72,7 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.willDamageService = ServiceManager.getInstance().getWillDamageService();
+        this.mapService = ServiceManager.getInstance().getMapService();
     }
 
     @Override
@@ -300,6 +304,13 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
             if (roomPlayer.getPosition() < 4)
                 game.getPlayerBattleStates().add(game.createPlayerBattleState(roomPlayer));
         });
+
+        Optional<SMaps> map = mapService.findByMap((int) room.getMap());
+        if (map.isEmpty()) {
+            log.error("No map found for mapId: " + room.getMap());
+            return;
+        }
+        game.setMap(map.get());
     }
 
     @Override

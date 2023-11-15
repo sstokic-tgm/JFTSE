@@ -46,6 +46,8 @@ public class Room {
     private ArrayList<Short> positions;
     private int status;
 
+    private byte previousMap = 0;
+
     // Guardian
     private boolean isHardMode; // Guardians are very strong
     private boolean isArcade; // You have to play against all guardians there are
