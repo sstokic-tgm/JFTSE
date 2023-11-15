@@ -161,20 +161,13 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
         final List<GuardianBase> guardians = new ArrayList<>();
         for (Guardian2Maps guardian2Map : guardian2Maps) {
-            if (guardian2Map.getSide() != side) {
-                continue;
-            }
-            if (guardian2Map.getGuardian() == null && guardian2Map.getBossGuardian() == null) {
-                continue;
-            }
-
-            if (guardian2Map.getGuardian() != null) {
+            if (guardian2Map.getGuardian() != null && guardian2Map.getSide() == side) {
                 Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
                 if (guardian != null) {
                     guardians.add(guardian);
                 }
             }
-            if (guardian2Map.getBossGuardian() != null) {
+            if (guardian2Map.getBossGuardian() != null && guardian2Map.getSide() == side) {
                 BossGuardian bossGuardian = ServiceManager.getInstance().getBossGuardianService().findBossGuardianById(guardian2Map.getBossGuardian().getId());
                 if (bossGuardian != null) {
                     guardians.add(bossGuardian);
@@ -211,10 +204,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
     public List<GuardianBase> getAllGuardiansFromGuardian2Maps(List<Guardian2Maps> guardian2Maps) {
         final List<GuardianBase> guardians = new ArrayList<>();
         for (Guardian2Maps guardian2Map : guardian2Maps) {
-            if (guardian2Map.getGuardian() == null && guardian2Map.getBossGuardian() == null) {
-                continue;
-            }
-
             if (guardian2Map.getGuardian() != null) {
                 Guardian guardian = ServiceManager.getInstance().getGuardianService().findGuardianById(guardian2Map.getGuardian().getId());
                 if (guardian != null) {

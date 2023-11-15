@@ -472,6 +472,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
 
                         filteredList.add(g2m);
                     }
+                    game.getGuardiansInBossStage().clear();
                     game.getGuardiansInBossStage().addAll(filteredList);
                 });
             }
@@ -487,13 +488,12 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     .orElse(bossGuardianService.findBossGuardianById(1L));
             bossGuardian = bossGuardianService.findBossGuardianById(bossGuardian.getId());
 
-            GuardianBattleState bossGuardianBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
-            game.getGuardianBattleStates().add(bossGuardianBattleState);
+            guardians.set(0, bossGuardian);
 
             if (!hasBossGuardianStage && isHardMode) {
                 game.fillRemainingGuardianSlots(true, game, game.getGuardiansInBossStage(), guardians);
             }
-            byte guardianStartPosition = 11;
+            byte guardianStartPosition = 10;
 
             for (int i = 0; i <  guardians.size(); i++) {
                 GuardianBase guardianBase = guardians.get(i);
@@ -514,10 +514,9 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 game.getGuardianBattleStates().add(guardianBattleState);
             }
 
-            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(bossGuardian, guardians.get(0), guardians.get(1));
+            S2CMatchplaySpawnBossBattle matchplaySpawnBossBattle = new S2CMatchplaySpawnBossBattle(guardians.get(0), guardians.get(1), guardians.get(2));
+            S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), guardians);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(matchplaySpawnBossBattle, connection);
-
-            S2CRoomSetBossGuardiansStats setBossGuardiansStats = new S2CRoomSetBossGuardiansStats(game.getGuardianBattleStates(), bossGuardian, guardians);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setBossGuardiansStats, connection);
 
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
