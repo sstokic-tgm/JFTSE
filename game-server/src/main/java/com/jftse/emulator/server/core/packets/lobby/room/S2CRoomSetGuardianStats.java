@@ -17,9 +17,11 @@ public class S2CRoomSetGuardianStats extends Packet {
 
         // sort by determined guardians
         guardians.forEach(g -> {
-            for (GuardianBattleState guardianBattleState : guardianBattleStates) {
-                if (guardianBattleState.getId() == g.getId()) {
-                    finalGuardianBattleStates.add(guardianBattleState);
+            if (g != null) {
+                for (GuardianBattleState guardianBattleState : guardianBattleStates) {
+                    if (guardianBattleState.getId() == g.getId()) {
+                        finalGuardianBattleStates.add(guardianBattleState);
+                    }
                 }
             }
         });

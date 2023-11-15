@@ -25,11 +25,13 @@ public class S2CRoomSetBossGuardiansStats extends Packet {
 
         // sort by determined guardians
         finalGuardians.forEach(g -> {
-            for (Iterator<GuardianBattleState> it = guardianBattleStates.iterator(); it.hasNext(); ) {
-                GuardianBattleState guardianBattleState = it.next();
+            if (g != null) {
+                for (Iterator<GuardianBattleState> it = guardianBattleStates.iterator(); it.hasNext(); ) {
+                    GuardianBattleState guardianBattleState = it.next();
 
-                if (g.getId().intValue() == guardianBattleState.getId())
-                    finalGuardianBattleStates.add(guardianBattleState);
+                    if (g.getId().intValue() == guardianBattleState.getId())
+                        finalGuardianBattleStates.add(guardianBattleState);
+                }
             }
         });
 
