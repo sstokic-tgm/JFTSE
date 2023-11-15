@@ -9,8 +9,8 @@ public class S2CRoomSetGuardians extends Packet {
         super(PacketOperations.S2CRoomSetGuardians);
 
         // (GuardianInfo.set)
-        this.write(firstMonster.getId().byteValue());
-        this.write(secondMonster.getId().byteValue());
-        this.write(thirdMonster.getId().byteValue());
+        this.write(firstMonster == null ? (byte) 0 : firstMonster.getId().byteValue());
+        this.write(secondMonster == null ? (byte) 0 : secondMonster.getId().byteValue());
+        this.write(thirdMonster == null ? (byte) 0 : thirdMonster.getId().byteValue());
     }
 }
