@@ -139,6 +139,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         List<Long> idToIgnore = guardiansToIgnore.stream()
+                .filter(Objects::nonNull)
                 .map(GuardianBase::getId)
                 .toList();
 
