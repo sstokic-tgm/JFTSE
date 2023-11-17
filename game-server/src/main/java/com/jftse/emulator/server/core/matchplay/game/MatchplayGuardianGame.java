@@ -361,7 +361,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
             if (!stageRewards.isEmpty()) {
                 if (wonGame) {
                     if (isBoss)
-                        stageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()) || !p.getCategory().equals(EItemCategory.PARTS.getName()));
+                        stageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()));
 
                     if (!stageRewards.isEmpty()) {
                         final int itemRewardToGive = random.nextInt(stageRewards.size());
