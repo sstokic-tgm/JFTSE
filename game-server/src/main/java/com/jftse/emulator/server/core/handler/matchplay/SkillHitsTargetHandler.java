@@ -488,19 +488,23 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     .orElse(bossGuardianService.findBossGuardianById(1L));
             bossGuardian = bossGuardianService.findBossGuardianById(bossGuardian.getId());
 
-            guardians.set(0, bossGuardian);
-
             if (!hasBossGuardianStage && isHardMode) {
                 game.fillRemainingGuardianSlots(true, game, game.getGuardiansInBossStage(), guardians);
             }
+
+            guardians.set(0, bossGuardian);
+
+            GuardianBattleState bossBattleState = game.createGuardianBattleState(false, bossGuardian, (short) 10, activePlayingPlayersCount);
+            game.getGuardianBattleStates().add(bossBattleState);
+
             byte guardianStartPosition = 10;
 
-            for (int i = 0; i <  guardians.size(); i++) {
+            for (int i = 1; i <  guardians.size(); i++) {
                 GuardianBase guardianBase = guardians.get(i);
                 if (guardianBase == null) continue;
 
                 if (game.getIsRandomGuardiansMode().get()) {
-                    guardianBase.setId((long) (Math.random() * 72 + 1));
+                    guardianBase.setId(random.nextLong(72) + 1);
                     guardians.set(i, guardianBase);
                 }
 
