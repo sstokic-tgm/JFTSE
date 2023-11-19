@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -22,5 +24,10 @@ public class ScenarioServiceImpl implements ScenarioService {
     @Override
     public MScenarios getDefaultScenarioByGameMode(MScenarios.GameMode gameMode) {
         return scenariosRepository.findAllByIsDefaultAndGameMode(true, gameMode).stream().findFirst().orElse(null);
+    }
+
+    @Override
+    public MScenarios getDefaultScenarioByMapAndGameMode(Long mapId, MScenarios.GameMode gameMode) {
+        return scenariosRepository.findAllByMapsAndGameModeAndIsDefault(Set.of(mapId), gameMode, true).stream().findFirst().orElse(null);
     }
 }

@@ -426,15 +426,13 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
             if (!game.getStageChangingToBoss().compareAndSet(false, true))
                 return;
 
-            if (!game.getBossBattleActive().compareAndSet(false, true)) {
-                game.getStageChangingToBoss().compareAndSet(true, false);
+            if (!game.getBossBattleActive().compareAndSet(false, true))
                 return;
-            }
 
             GameSession gameSession = connection.getClient().getActiveGameSession();
             gameSession.clearCountDownRunnable();
 
-            MScenarios bossBattleScenario = ServiceManager.getInstance().getScenarioService().getDefaultScenarioByGameMode(MScenarios.GameMode.BOSS_BATTLE);
+            MScenarios bossBattleScenario = ServiceManager.getInstance().getScenarioService().getDefaultScenarioByMapAndGameMode(game.getMap().getId(), MScenarios.GameMode.BOSS_BATTLE);
             game.setScenario(bossBattleScenario);
 
             final Guardian2Maps[] bossGuardianArr = { null };

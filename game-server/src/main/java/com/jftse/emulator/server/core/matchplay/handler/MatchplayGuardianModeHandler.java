@@ -367,12 +367,6 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         float averagePlayerLevel = this.getAveragePlayerLevel(new ArrayList<>(roomPlayers));
         this.handleMonsLavaMap(ftClient.getConnection(), room, averagePlayerLevel);
 
-        MScenarios scenario = scenarioService.getDefaultScenarioByGameMode(MScenarios.GameMode.GUARDIAN);
-        if (scenario == null) {
-            log.error("No default scenario found for game mode: " + MScenarios.GameMode.GUARDIAN);
-            return;
-        }
-        game.setScenario(scenario);
 
         Optional<SMaps> map = mapService.findByMap((int) room.getMap());
         if (map.isEmpty()) {
@@ -380,6 +374,13 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             return;
         }
         game.setMap(map.get());
+
+        MScenarios scenario = scenarioService.getDefaultScenarioByMapAndGameMode(game.getMap().getId(), MScenarios.GameMode.GUARDIAN);
+        if (scenario == null) {
+            log.error("No default scenario found for game mode: " + MScenarios.GameMode.GUARDIAN);
+            return;
+        }
+        game.setScenario(scenario);
 
         jdbcUtil.execute(em -> {
             TypedQuery<Guardian2Maps> q = em.createQuery("SELECT g FROM Guardian2Maps g WHERE g.map.id = :mapId AND g.scenario.id = :scenarioId AND g.status.id = 1", Guardian2Maps.class);
@@ -390,7 +391,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         });
 
         if (game.getMap().getIsBossStage()) {
-            MScenarios bossScenario = scenarioService.getDefaultScenarioByGameMode(MScenarios.GameMode.BOSS_BATTLE);
+            MScenarios bossScenario = scenarioService.getDefaultScenarioByMapAndGameMode(game.getMap().getId(), MScenarios.GameMode.BOSS_BATTLE);
             if (bossScenario == null) {
                 log.error("No default scenario found for game mode: " + MScenarios.GameMode.BOSS_BATTLE);
                 return;

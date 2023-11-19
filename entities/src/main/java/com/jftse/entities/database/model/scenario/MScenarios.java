@@ -2,10 +2,12 @@ package com.jftse.entities.database.model.scenario;
 
 import com.jftse.entities.database.model.AbstractBaseModel;
 import com.jftse.entities.database.model.KStatus;
+import com.jftse.entities.database.model.map.SMaps;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,6 +28,12 @@ public class MScenarios extends AbstractBaseModel {
 
     @Enumerated(EnumType.STRING)
     private GameMode gameMode;
+
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinTable(name = "Map_2_Scenarios",
+            joinColumns = @JoinColumn(name = "scenario_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "map_id", referencedColumnName = "id"))
+    private Set<SMaps> maps;
 
     public enum GameMode {
         BASIC, BATTLE, GUARDIAN, BOSS_BATTLE
