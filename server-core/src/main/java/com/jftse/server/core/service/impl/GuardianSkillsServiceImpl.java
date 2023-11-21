@@ -67,6 +67,21 @@ public class GuardianSkillsServiceImpl implements GuardianSkillsService {
         return skill2Guardian.getSkill();
     }
 
+    @Override
+    public List<Skill2Guardians> findAllByBtItemId(Integer btItemId) {
+        return skill2GuardiansRepository.findAllByBtItemId(btItemId);
+    }
+
+    @Override
+    public List<Skill2Guardians> getSkillsByMapAndGuardianAndScenario(Long mapId, Long guardianId, Long scenarioId) {
+        return skill2GuardiansRepository.findAllByMapAndGuardianAndScenario(mapId, guardianId, scenarioId);
+    }
+
+    @Override
+    public List<Skill2Guardians> getSkillsByMapAndBossGuardianAndScenario(Long mapId, Long guardianId, Long scenarioId) {
+        return skill2GuardiansRepository.findAllByMapAndBossGuardianAndScenario(mapId, guardianId, scenarioId);
+    }
+
     private void addGuardianSkillsToSkills(List<Skill2Guardians> skill2Guardians, List<Guardian2Maps> guardians) {
         for (Guardian2Maps guard : guardians) {
             List<Skill2Guardians> guardianSkillList = skill2GuardiansRepository.findAllByGuardian(guard);

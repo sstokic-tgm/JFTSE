@@ -20,6 +20,7 @@ import com.jftse.emulator.server.core.matchplay.MatchplayHandleable;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
+import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardians;
@@ -151,6 +152,15 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         gameSession.clearCountDownRunnable();
         gameSession.getFireables().forEach(f -> f.setCancelled(true));
         gameSession.getFireables().clear();
+
+        if (game.isAdvancedBossGuardianMode()) {
+            PhaseManager phaseManager = game.getPhaseManager();
+            phaseManager.end();
+            if (phaseManager.getUpdateTask() != null) {
+                phaseManager.getUpdateTask().cancel(true);
+                phaseManager.setUpdateTask(null);
+            }
+        }
 
         final boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         final boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
@@ -391,7 +401,17 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         });
 
         if (game.getMap().getIsBossStage()) {
-            MScenarios bossScenario = scenarioService.getDefaultScenarioByMapAndGameMode(game.getMap().getId(), MScenarios.GameMode.BOSS_BATTLE);
+
+            MScenarios.GameMode gameMode;
+
+            // mons only
+            if (Arrays.asList(8L, 9L).contains(game.getMap().getId())) {
+                gameMode = MScenarios.GameMode.BOSS_BATTLE_V2;
+            } else {
+                gameMode = MScenarios.GameMode.BOSS_BATTLE;
+            }
+
+            MScenarios bossScenario = scenarioService.getDefaultScenarioByMapAndGameMode(game.getMap().getId(), gameMode);
             if (bossScenario == null) {
                 log.error("No default scenario found for game mode: " + MScenarios.GameMode.BOSS_BATTLE);
                 return;

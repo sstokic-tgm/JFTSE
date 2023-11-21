@@ -75,6 +75,10 @@ public class ThreadManager {
         return stpe.schedule(runnable, delay, timeUnit);
     }
 
+    public ScheduledFuture<?> schedule(Runnable runnable, long delay) {
+        return stpe.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+    }
+
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit timeUnit) {
         return stpe.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
     }

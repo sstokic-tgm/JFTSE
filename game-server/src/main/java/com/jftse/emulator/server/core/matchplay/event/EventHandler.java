@@ -72,7 +72,7 @@ public class EventHandler {
             Iterator<Fireable> it = fireableDeque.iterator();
             while (it.hasNext()) {
                 Fireable fireable = it.next();
-                if (!fireable.isFired() && fireable.shouldFire(currentTime)) {
+                if (!fireable.isFired() && fireable.shouldFire(currentTime) && !fireable.isCancelled()) {
                     fireable.fire();
                     it.remove();
                     log.info("Fired fireable: " + fireable.getSelf().getClass().getSimpleName());

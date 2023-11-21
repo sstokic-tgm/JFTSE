@@ -4,15 +4,25 @@ import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
+import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
+import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
+import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameSetNameColorAndRemoveBlackBar;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayTriggerGuardianServe;
 import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.thread.AbstractTask;
 import com.jftse.server.core.thread.ThreadManager;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Random;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+@Log4j2
 public class GuardianServeTask extends AbstractTask {
     private final FTConnection connection;
 
@@ -26,13 +36,16 @@ public class GuardianServeTask extends AbstractTask {
 
     @Override
     public void run() {
-        if (connection.getClient() == null) return;
-        GameSession gameSession = connection.getClient().getActiveGameSession();
+        FTClient client = connection.getClient();
+        if (client == null) return;
+
+        GameSession gameSession = client.getActiveGameSession();
         if (gameSession == null) return;
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getMatchplayGame();
 
-        if (!game.getStageChangingToBoss().compareAndSet(true, false))
+        if (!game.getStageChangingToBoss().get()) {
             return;
+        }
 
         byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
         byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
@@ -43,5 +56,27 @@ public class GuardianServeTask extends AbstractTask {
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, connection);
         game.resetStageStartTime();
         ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession));
+        ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+
+        if (game.isAdvancedBossGuardianMode()) {
+            final PhaseManager phaseManager = game.getPhaseManager();
+            phaseManager.start();
+            Future<?> updateTask = ThreadManager.getInstance().submit(() -> {
+                phaseManager.getIsRunning().set(true);
+
+                while (phaseManager.getIsRunning().get()) {
+                    try {
+                        phaseManager.update(connection);
+
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+                        log.error("updateTask exception", e);
+                    }
+                }
+            });
+            game.getPhaseManager().setUpdateTask(updateTask);
+        }
+
+        game.getStageChangingToBoss().compareAndSet(true, false);
     }
 }

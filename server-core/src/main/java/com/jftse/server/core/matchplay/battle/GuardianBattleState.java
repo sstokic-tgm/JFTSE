@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Setter
-public class GuardianBattleState extends BattleState {
+public class GuardianBattleState extends BattleState implements BossBattleable<GuardianBattleState> {
     private final int id;
     private final int btItemId;
     private final boolean isBoss;
@@ -30,5 +30,10 @@ public class GuardianBattleState extends BattleState {
         this.gold = gold;
         this.rewardRankingPoint = rewardRankingPoint;
         this.looted = new AtomicBoolean(false);
+    }
+
+    @Override
+    public GuardianBattleState self() {
+        return this;
     }
 }

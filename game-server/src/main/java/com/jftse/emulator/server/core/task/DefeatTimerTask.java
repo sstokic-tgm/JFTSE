@@ -35,7 +35,7 @@ public class DefeatTimerTask extends AbstractTask {
         if (scenario.getGameMode() == MScenarios.GameMode.GUARDIAN && map.getPlayTime() != null) {
             playTime = map.getPlayTime();
         }
-        if (scenario.getGameMode() == MScenarios.GameMode.BOSS_BATTLE && map.getBossPlayTime() != null) {
+        if ((scenario.getGameMode() == MScenarios.GameMode.BOSS_BATTLE || scenario.getGameMode() == MScenarios.GameMode.BOSS_BATTLE_V2) && map.getBossPlayTime() != null) {
             playTime = map.getBossPlayTime();
         }
 

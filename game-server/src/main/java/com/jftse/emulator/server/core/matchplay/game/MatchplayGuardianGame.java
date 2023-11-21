@@ -1,5 +1,8 @@
 package com.jftse.emulator.server.core.matchplay.game;
 
+import com.jftse.emulator.common.scripting.ScriptFile;
+import com.jftse.emulator.common.scripting.ScriptManager;
+import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.jdbc.JdbcUtil;
@@ -10,12 +13,15 @@ import com.jftse.emulator.server.core.life.progression.bonuses.RingOfExpBonus;
 import com.jftse.emulator.server.core.life.progression.bonuses.RingOfGoldBonus;
 import com.jftse.emulator.server.core.life.progression.bonuses.RingOfWisemanBonus;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.MatchplayHandleable;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.combat.GuardianCombatSystem;
 import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
+import com.jftse.emulator.server.core.matchplay.guardian.AdvancedGuardianState;
+import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.matchplay.handler.MatchplayGuardianModeHandler;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.entities.database.model.battle.*;
@@ -24,13 +30,17 @@ import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.scenario.MScenarios;
 import com.jftse.server.core.item.EItemCategory;
+import com.jftse.emulator.server.core.matchplay.guardian.BossBattlePhaseable;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import javax.persistence.TypedQuery;
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -44,6 +54,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@Log4j2
 public class MatchplayGuardianGame extends MatchplayGame {
     private final short guardianHealPercentage = 5; // Balancing purposes. Only ever heal 5% of guardians hp.
     public final static long guardianAttackLoopTime = TimeUnit.SECONDS.toMillis(8);
@@ -72,6 +83,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private SMaps map;
     private List<Guardian2Maps> guardiansInStage;
     private List<Guardian2Maps> guardiansInBossStage;
+
+    private boolean isAdvancedBossGuardianMode;
+    private PhaseManager phaseManager;
 
     private final PlayerCombatSystem playerCombatSystem;
     private final GuardianCombatSystem guardianCombatSystem;
@@ -112,6 +126,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
         this.guardiansInStage = new ArrayList<>();
         this.guardiansInBossStage = new ArrayList<>();
+
+        this.isAdvancedBossGuardianMode = false;
 
         random = new Random();
     }
@@ -250,6 +266,13 @@ public class MatchplayGuardianGame extends MatchplayGame {
         int totalSta = guardian.getBaseSta() + extraSta;
         int totalDex = guardian.getBaseDex() + extraDex;
         int totalWill = guardian.getBaseWill() + extraWill;
+
+        if (isAdvancedBossGuardianMode) {
+            AdvancedGuardianState advancedGuardianState = new AdvancedGuardianState(map.getId(), scenario.getId(), guardian, guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+            advancedGuardianState.loadSkills();
+            return advancedGuardianState;
+        }
+
         return new GuardianBattleState(guardian, guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
     }
 
@@ -524,5 +547,51 @@ public class MatchplayGuardianGame extends MatchplayGame {
     @Override
     protected MatchplayHandleable createHandler() {
         return new MatchplayGuardianModeHandler(this);
+    }
+
+    public synchronized boolean loadAdvancedBossGuardianMode(String bossCode) {
+        if (phaseManager != null) {
+            log.error("Advanced boss guardian mode already loaded");
+            return false;
+        }
+
+        Optional<ScriptManager> scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
+        List<BossBattlePhaseable> phases = new ArrayList<>();
+        if (scriptManager.isPresent()) {
+            ScriptManager sm = scriptManager.get();
+            List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
+            for (ScriptFile scriptFile : scriptFiles) {
+                String fileName = scriptFile.getFile().getName().split("_")[1].split("\\.")[0];
+
+                if (!fileName.startsWith(bossCode))
+                    continue;
+
+                try {
+                    Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+                    bindings.put("gameManager", GameManager.getInstance());
+                    bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
+                    bindings.put("threadManager", GameManager.getInstance().getThreadManager());
+                    bindings.put("game", this);
+
+                    BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
+                    phases.add(phase);
+                } catch (Exception e) {
+                    log.error("Error on register phase from script: " + fileName + ". ScriptException: " + e.getMessage(), e);
+                }
+            }
+        }
+        final boolean success = !phases.isEmpty();
+        if (success) {
+            this.phaseManager = new PhaseManager(phases);
+            this.isAdvancedBossGuardianMode = true;
+        }
+        return success;
+    }
+
+    public GuardianBattleState getGuardianBattleStateByPosition(int position) {
+        return this.guardianBattleStates.stream()
+                .filter(x -> x.getPosition() == position)
+                .findFirst()
+                .orElse(null);
     }
 }
