@@ -36,6 +36,6 @@ public class MScenarios extends AbstractBaseModel {
     private Set<SMaps> maps;
 
     public enum GameMode {
-        BASIC, BATTLE, GUARDIAN, BOSS_BATTLE
+        BASIC, BATTLE, GUARDIAN, BOSS_BATTLE, BOSS_BATTLE_V2
     }
 }
