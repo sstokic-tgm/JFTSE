@@ -22,7 +22,7 @@ public class ScriptManager {
     private final Object lock = new Object();
 
     private final ConcurrentHashMap<String, List<ScriptFile>> scripts = new ConcurrentHashMap<>();
-    public final static List<String> allowedTypes = Arrays.asList("EVENT", "QUEST", "COMMAND");
+    public final static List<String> allowedTypes = Arrays.asList("EVENT", "QUEST", "COMMAND", "GUARDIAN-PHASE");
 
     private ScriptManager() {
         initialize(new ArrayList<>());
