@@ -61,19 +61,18 @@ public class GuardianServeTask extends AbstractTask {
         if (game.isAdvancedBossGuardianMode()) {
             final PhaseManager phaseManager = game.getPhaseManager();
             phaseManager.start();
-            Future<?> updateTask = ThreadManager.getInstance().submit(() -> {
+            Future<?> updateTask = ThreadManager.getInstance().scheduleAtFixedRate(() -> {
                 phaseManager.getIsRunning().set(true);
 
-                while (phaseManager.getIsRunning().get()) {
-                    try {
-                        phaseManager.update(connection);
+                if (!phaseManager.getIsRunning().get() || phaseManager.getIsChangingPhase().get() || phaseManager.getIsPhaseEnding().get())
+                    return;
 
-                        Thread.sleep(1000);
-                    } catch (Exception e) {
-                        log.error("updateTask exception", e);
-                    }
+                try {
+                    phaseManager.update(connection);
+                } catch (Exception e) {
+                    log.error("updateTask exception", e);
                 }
-            });
+            }, 1, TimeUnit.SECONDS);
             game.getPhaseManager().setUpdateTask(updateTask);
         }
 

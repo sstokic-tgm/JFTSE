@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,34 +24,44 @@ public class PhaseManager {
     private Future<?> updateTask;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    private final Object lock = new Object();
+    private AtomicBoolean isChangingPhase = new AtomicBoolean(false);
+    private AtomicBoolean isPhaseEnding = new AtomicBoolean(false);
+
+    private static final Object lock = new Object();
 
     private PhaseCallback defaultPhaseCallback = new PhaseCallback() {
         @Override
         public void onNextPhase(FTConnection connection) {
             if (hasNextPhase()) {
+                if (!isChangingPhase.compareAndSet(false, true)) {
+                    return;
+                }
 
                 BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
+                final String nextPhaseName = nextPhase.getPhaseName();
 
-                for (int i = 5; i > 0; i--) {
-                    S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhase.getPhaseName() + " starts in " + i + "...");
-                    GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
+                ThreadManager.getInstance().newTask(() -> {
+                    for (int i = 5; i > 0; i--) {
+                        S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
+                        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
 
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        log.error("onPhaseEnd interrupted exception", e);
+                        if (i != 1) {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                log.error("Countdown interrupted exception", e);
+                            }
+                        }
                     }
-                }
-                end();
+                    currentPhase.get().end();
+                    currentPhase.compareAndSet(currentPhase.get(), nextPhase);
+                    setPhaseCallback(defaultPhaseCallback);
 
-                currentPhase.compareAndSet(currentPhase.get(), nextPhase);
-                setPhaseCallback(defaultPhaseCallback);
+                    currentPhase.get().start();
+                    isChangingPhase.set(false);
 
-                start();
-
-                ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
-
+                    ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+                });
             } else {
                 onPhaseEnd(connection);
             }
@@ -58,13 +69,26 @@ public class PhaseManager {
 
         @Override
         public void onPhaseEnd(FTConnection connection) {
+            if (!isPhaseEnding.compareAndSet(false, true)) {
+                return;
+            }
+
             if (!isRunning.compareAndSet(true, false)) {
                 return;
             }
 
-            end();
-            updateTask.cancel(true);
+            currentPhase.get().end();
+            try {
+                updateTask.get();
+            } catch (InterruptedException e) {
+                log.error("updateTask interrupted exception", e);
+            } catch (ExecutionException e) {
+                log.error("updateTask execution exception", e);
+            }
             updateTask = null;
+
+            isPhaseEnding.set(false);
+
             ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
         }
     };
@@ -78,30 +102,18 @@ public class PhaseManager {
 
     public void start() {
         synchronized (lock) {
-            if (currentPhase.get().hasEnded()) {
-                return;
-            }
             currentPhase.get().start();
         }
     }
 
     public void update(FTConnection connection) {
-        if (!isRunning.get())
-            return;
-
         synchronized (lock) {
-            if (currentPhase.get().hasEnded()) {
-                return;
-            }
             currentPhase.get().update(connection);
         }
     }
 
     public void end() {
         synchronized (lock) {
-            if (currentPhase.get().hasEnded()) {
-                return;
-            }
             currentPhase.get().end();
         }
     }
