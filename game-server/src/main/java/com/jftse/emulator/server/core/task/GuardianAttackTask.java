@@ -52,7 +52,7 @@ public class GuardianAttackTask extends AbstractTask {
         if (gameSession == null) return;
         MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getMatchplayGame();
 
-        final boolean hasPhaseEnded = game.isAdvancedBossGuardianMode() && game.getPhaseManager().getIsRunning().get();
+        final boolean hasPhaseEnded = game.isAdvancedBossGuardianMode() && !game.getPhaseManager().getIsRunning().get();
         if (this.guardianBattleState == null) {
             final ArrayList<GuardianBattleState> guardianBattleStates = new ArrayList<>(game.getGuardianBattleStates());
             guardianBattleStates.forEach(guardianBattleState -> pickAttack(gameSession, game, hasPhaseEnded, guardianBattleState));

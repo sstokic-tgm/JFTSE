@@ -10,10 +10,11 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Getter
 @Setter
@@ -27,40 +28,45 @@ public class PhaseManager {
     private AtomicBoolean isChangingPhase = new AtomicBoolean(false);
     private AtomicBoolean isPhaseEnding = new AtomicBoolean(false);
 
-    private static final Object lock = new Object();
+    private final BlockingDeque<Runnable> taskQueue = new LinkedBlockingDeque<>();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    private final Lock lock = new ReentrantLock();
 
     private PhaseCallback defaultPhaseCallback = new PhaseCallback() {
         @Override
         public void onNextPhase(FTConnection connection) {
             if (hasNextPhase()) {
-                if (!isChangingPhase.compareAndSet(false, true)) {
-                    return;
-                }
+                enqueueTask(() -> {
+                    if (!isChangingPhase.compareAndSet(false, true)) {
+                        return;
+                    }
 
-                BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
-                final String nextPhaseName = nextPhase.getPhaseName();
+                    BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
+                    final String nextPhaseName = nextPhase.getPhaseName();
 
-                ThreadManager.getInstance().newTask(() -> {
-                    for (int i = 5; i > 0; i--) {
-                        S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
-                        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
+                    ThreadManager.getInstance().newTask(() -> {
+                        for (int i = 5; i > 0; i--) {
+                            S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
+                            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
 
-                        if (i != 1) {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                log.error("Countdown interrupted exception", e);
+                            if (i != 1) {
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    log.error("Countdown interrupted exception", e);
+                                }
                             }
                         }
-                    }
-                    currentPhase.get().end();
-                    currentPhase.compareAndSet(currentPhase.get(), nextPhase);
-                    setPhaseCallback(defaultPhaseCallback);
+                        currentPhase.get().end();
+                        currentPhase.compareAndSet(currentPhase.get(), nextPhase);
+                        setPhaseCallback(defaultPhaseCallback);
 
-                    currentPhase.get().start();
-                    isChangingPhase.set(false);
+                        currentPhase.get().start();
+                        isChangingPhase.set(false);
 
-                    ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+                        ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+                    });
                 });
             } else {
                 onPhaseEnd(connection);
@@ -69,27 +75,29 @@ public class PhaseManager {
 
         @Override
         public void onPhaseEnd(FTConnection connection) {
-            if (!isPhaseEnding.compareAndSet(false, true)) {
-                return;
-            }
+            enqueueTask(() -> {
+                if (!isPhaseEnding.compareAndSet(false, true)) {
+                    return;
+                }
 
-            if (!isRunning.compareAndSet(true, false)) {
-                return;
-            }
+                if (!isRunning.compareAndSet(true, false)) {
+                    return;
+                }
 
-            currentPhase.get().end();
-            try {
-                updateTask.get();
-            } catch (InterruptedException e) {
-                log.error("updateTask interrupted exception", e);
-            } catch (ExecutionException e) {
-                log.error("updateTask execution exception", e);
-            }
-            updateTask = null;
+                currentPhase.get().end();
+                try {
+                    updateTask.get();
+                } catch (InterruptedException e) {
+                    log.error("updateTask interrupted exception", e);
+                } catch (ExecutionException e) {
+                    log.error("updateTask execution exception", e);
+                }
+                updateTask = null;
 
-            isPhaseEnding.set(false);
+                isPhaseEnding.set(false);
 
-            ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+                ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+            });
         }
     };
 
@@ -101,57 +109,48 @@ public class PhaseManager {
     }
 
     public void start() {
-        synchronized (lock) {
-            currentPhase.get().start();
-        }
+        enqueueTask(() -> currentPhase.get().start());
     }
 
     public void update(FTConnection connection) {
-        synchronized (lock) {
-            currentPhase.get().update(connection);
-        }
+        enqueueTask(() -> currentPhase.get().update(connection));
     }
 
     public void end() {
-        synchronized (lock) {
-            currentPhase.get().end();
-        }
+        enqueueTask(() -> currentPhase.get().end());
     }
 
     public boolean hasNextPhase() {
-        synchronized (lock) {
+        lock.lock();
+        try {
             return phases.indexOf(currentPhase.get()) + 1 < phases.size();
+        } finally {
+            lock.unlock();
         }
     }
 
     public boolean hasEnded() {
-        synchronized (lock) {
-            return currentPhase.get().hasEnded();
-        }
+        var result = executeTask(() -> currentPhase.get().hasEnded());
+        return result != null && result;
     }
 
     public void setPhaseCallback(PhaseCallback phaseCallback) {
-        synchronized (lock) {
-            currentPhase.get().setPhaseCallback(phaseCallback);
-        }
+        enqueueTask(() -> currentPhase.get().setPhaseCallback(phaseCallback));
     }
 
     public long getGuardianAttackLoopTime(AdvancedGuardianState guardian) {
-        synchronized (lock) {
-            return currentPhase.get().getGuardianAttackLoopTime(guardian);
-        }
+        var result = executeTask(() -> currentPhase.get().getGuardianAttackLoopTime(guardian));
+        return result == null ? 0 : result;
     }
 
     public long phaseTime() {
-        synchronized (lock) {
-            return currentPhase.get().phaseTime();
-        }
+        var result = executeTask(() -> currentPhase.get().phaseTime());
+        return result == null ? 0 : result;
     }
 
     public long playTime() {
-        synchronized (lock) {
-            return currentPhase.get().playTime();
-        }
+        var result = executeTask(() -> currentPhase.get().playTime());
+        return result == null ? 0 : result;
     }
 
     public synchronized void removePhase(int index) {
@@ -171,38 +170,64 @@ public class PhaseManager {
     }
 
     public String getName() {
-        synchronized (lock) {
+        lock.lock();
+        try {
             return currentPhase.get().getPhaseName();
+        } finally {
+            lock.unlock();
         }
     }
 
     public int onHeal(int targetGuardian, int healAmount) {
-        synchronized (lock) {
-            return currentPhase.get().onHeal(targetGuardian, healAmount);
-        }
+        var result = executeTask(() -> currentPhase.get().onHeal(targetGuardian, healAmount));
+        return result == null ? 0 : result;
     }
 
     public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) {
-        synchronized (lock) {
-            return currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff);
-        }
+        var result = executeTask(() -> currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff));
+        return result == null ? 0 : result;
     }
 
     public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) {
-        synchronized (lock) {
-            return currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff);
-        }
+        var result = executeTask(() -> currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff));
+        return result == null ? 0 : result;
     }
 
     public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
-        synchronized (lock) {
-            return currentPhase.get().onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff);
-        }
+        var result = executeTask(() -> currentPhase.get().onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff));
+        return result == null ? 0 : result;
     }
 
     public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
-        synchronized (lock) {
-            return currentPhase.get().onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff);
+        var result = executeTask(() -> currentPhase.get().onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff));
+        return result == null ? 0 : result;
+    }
+
+    private void enqueueTask(Runnable task) {
+        taskQueue.offer(task);
+        executorService.submit(this::executeNextTask);
+    }
+
+    private void executeNextTask() {
+        lock.lock();
+        try {
+            Runnable task = taskQueue.poll();
+            if (task != null) {
+                task.run();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private <T> T executeTask(Callable<T> task) {
+        final FutureTask<T> futureTask = new FutureTask<>(task);
+        enqueueTask(futureTask);
+        try {
+            return futureTask.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Task execution exception", e);
+            return null;
         }
     }
 }
