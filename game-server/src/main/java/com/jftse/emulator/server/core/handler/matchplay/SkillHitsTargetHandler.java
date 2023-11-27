@@ -541,7 +541,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 }
             }
 
-            if (!hasBossGuardianStage && isHardMode && !game.isAdvancedBossGuardianMode()) {
+            if (!hasBossGuardianStage && isHardMode) {
                 game.fillRemainingGuardianSlots(true, game, game.getGuardiansInBossStage(), guardians);
             }
 

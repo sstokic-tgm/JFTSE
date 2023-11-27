@@ -252,7 +252,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public GuardianBattleState createGuardianBattleState(boolean isHardMode, GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
-        if (isHardMode) {
+        if (isHardMode && !isAdvancedBossGuardianMode) {
             return new GuardianBattleState(guardian, guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
         }
 
@@ -268,7 +268,15 @@ public class MatchplayGuardianGame extends MatchplayGame {
         int totalWill = guardian.getBaseWill() + extraWill;
 
         if (isAdvancedBossGuardianMode) {
-            AdvancedGuardianState advancedGuardianState = new AdvancedGuardianState(map.getId(), scenario.getId(), guardian, guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+            AdvancedGuardianState advancedGuardianState = !isHardMode ?
+                    new AdvancedGuardianState(map.getId(), scenario.getId(), guardian, guardianPosition, totalHp, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint())
+                    : new AdvancedGuardianState(map.getId(), scenario.getId(), guardian, guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+            if (activePlayingPlayersCount == 4) {
+                final int hp = advancedGuardianState.getCurrentHealth().get();
+                final int newHp = (int) (hp * 1.5);
+                advancedGuardianState.getCurrentHealth().set(newHp);
+                advancedGuardianState.setMaxHealth(newHp);
+            }
             advancedGuardianState.loadSkills();
             return advancedGuardianState;
         }
