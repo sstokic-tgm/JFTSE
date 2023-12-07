@@ -19,6 +19,7 @@ public interface ProductService {
     Map<Product, Byte> findProductsByItemList(Map<Integer, Byte> itemList);
 
     Product findProductByName(String name, String category);
+    List<Product> findProductsByName(String name, String category);
 
     List<Product> findProductsByItemList(List<Integer> itemList);
 

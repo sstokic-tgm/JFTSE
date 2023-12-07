@@ -94,7 +94,7 @@ public class MatchplayBattleGame extends MatchplayGame {
         short totalSta = (short) (baseSta + roomPlayer.getStatusPointsAddedDto().getStamina());
         short totalDex = (short) (baseDex + roomPlayer.getStatusPointsAddedDto().getDexterity());
         short totalWill = (short) (baseWill + roomPlayer.getStatusPointsAddedDto().getWillpower());
-        return new PlayerBattleState(roomPlayer.getPosition(), totalHp, totalStr, totalSta, totalDex, totalWill);
+        return new PlayerBattleState(roomPlayer.getPosition(), roomPlayer.getPlayerId(), totalHp, totalStr, totalSta, totalDex, totalWill);
     }
 
     public List<Integer> getPlayerPositionsOrderedByHighestHealth() {

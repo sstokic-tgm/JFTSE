@@ -88,6 +88,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> findProductsByName(String name, String category) {
+        return productRepository.findProductsByNameAndCategory(name, category);
+    }
+
+    @Override
     public List<Product> findProductsByItemList(List<Integer> itemList) {
         return productRepository.findProductsByProductIndexIn(itemList);
     }

@@ -3,11 +3,14 @@ package com.jftse.emulator.server.core.interaction;
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.item.ItemPart;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.messenger.Gift;
 import com.jftse.entities.database.model.player.Player;
@@ -16,6 +19,7 @@ import com.jftse.server.core.protocol.Packet;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Optional;
 
 @Getter
@@ -25,14 +29,20 @@ public class PlayerScriptableImpl implements PlayerScriptable {
     private FTPlayer ftPlayer;
 
     private final ServiceManager serviceManager;
+    private final GameManager gameManager;
 
     private PlayerScriptableImpl() {
         this.serviceManager = ServiceManager.getInstance();
+        this.gameManager = GameManager.getInstance();
     }
 
     public PlayerScriptableImpl(Long playerId) throws ValidationException {
         this();
         this.ftPlayer = new FTPlayer(playerId);
+
+        FTConnection connection = gameManager.getConnectionByPlayerId(playerId);
+        if (connection != null)
+            this.client = connection.getClient();
     }
 
     public PlayerScriptableImpl(FTClient client) {
