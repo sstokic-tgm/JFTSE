@@ -26,6 +26,7 @@ public class GuardianBase extends AbstractIdBaseModel {
     private Integer rewardExp;
     private Integer rewardGold;
     private Integer btItemID;
+    private Integer guardIndex;
 
     @Column(columnDefinition = "int DEFAULT 0")
     private Integer rewardRankingPoint = 0;
