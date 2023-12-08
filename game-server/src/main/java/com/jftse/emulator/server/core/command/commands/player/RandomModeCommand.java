@@ -8,6 +8,7 @@ import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.constants.GameMode;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class RandomModeCommand extends AbstractCommand {
@@ -27,6 +28,12 @@ public class RandomModeCommand extends AbstractCommand {
         boolean isGuardian = GameManager.getInstance().getRoomMode(room) == GameMode.GUARDIAN;
         if (!isGuardian)
             return;
+
+        if (Arrays.asList(4, 7, 8).contains((int) room.getMap())) {
+            S2CChatRoomAnswerPacket randomGuardianChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Random mode is not allowed on this map");
+            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(randomGuardianChangedPacket));
+            return;
+        }
 
         if (roomPlayer.isMaster()) {
             if (!GameManager.getInstance().isAllowedToChangeMode(room)) {
