@@ -4,6 +4,7 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomMapChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -27,7 +28,7 @@ public class RoomMapChangeRequestPacketHandler extends AbstractPacketHandler {
         Room room = client.getActiveRoom();
         if (room != null) {
             synchronized (room) {
-                if (ConfigService.getInstance().getValue("game.map.allow.snowmoon", false)) {
+                if (ConfigService.getInstance().getValue("game.map.allow.snowmoon", false) && room.getMode() == GameMode.GUARDIAN) {
                     if (room.getPreviousMap() == 3 && roomMapChangeRequestPacket.getMap() == 5) {
                         roomMapChangeRequestPacket.setMap((byte) 4);
                     }
