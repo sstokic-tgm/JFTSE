@@ -91,22 +91,22 @@ public class DbDataLoader implements CommandLineRunner {
 
         boolean dataLoaded = true;
 
-        boolean levelExpInitialized = levelExpRepository.count() == configService.getValue("player.level.max", 60) || levelExpRepository.count() == getCountByFileAndNode("res/LevelExp.xml", "/ExpList/Exp");
-        boolean mapQuestInitialized = challengeRepository.count() == getCountByFileAndNode("res/MapQuest.xml", "/Tables/Challenge") && tutorialRepository.count() == getCountByFileAndNode("res/MapQuest.xml", "/Tables/Tutorial");
-        boolean itemPartInitialized = itemPartRepository.count() == getCountByFileAndNode("res/Item_Parts_Ini3.xml", "/ItemList/Item");
-        boolean itemSpecialInitialized = itemSpecialRepository.count() == getCountByFileAndNode("res/Item_Special.xml", "/ItemList/Item");
-        boolean itemToolInitialized = itemToolRepository.count() == getCountByFileAndNode("res/Item_Tools.xml", "/ItemList/Item");
-        boolean itemHouseDecoInitialized = itemHouseDecoRepository.count() == getCountByFileAndNode("res/Item_HouseDeco.xml", "/ItemList/Item");
-        boolean itemHouseInitialized = itemHouseRepository.count() == getCountByFileAndNode("res/Item_House.xml", "/ItemList/Item");
-        boolean itemEnchantInitialized = itemEnchantRepository.count() == getCountByFileAndNode("res/Item_Enchant.xml","/ItemList/Item" );
-        boolean itemRecipeInitialized = itemRecipeRepository.count() == getCountByFileAndNode("res/Item_Recipe_Ini3.xml", "/RecipeList/Recipe");
-        boolean itemMaterialInitialized = itemMaterialRepository.count() == getCountByFileAndNode("res/Item_Material.xml", "/ItemList/Item");
-        boolean itemCharInitialized = itemCharRepository.count() == getCountByFileAndNode("res/Item_Char.xml", "/ItemList/Item");
-        boolean productInitialized = productRepository.count() == getCountByFileAndNode("res/Shop_Ini3.xml", "/ProductList/Product");
-        boolean skillInitialized = skillRepository.count() == getCountByFileAndNode("res/FieldItem_Skills_Ini3.xml", "/Skills/Skill");
-        boolean skillDropRateInitialized = skillDropRateRepository.count() == getCountByFileAndNode("res/FieldItem_DropRates_Ini3.xml", "/SkillDropRates/SkillDropRate");
-        boolean guardianInitialized = guardianRepository.count() == getCountByFileAndNode("res/GuardianInfo.xml", "/GuardianList/Guardian");
-        boolean bossGuardianInitialized = bossGuardianRepository.count() == getCountByFileAndNode("res/BossGuardianInfo_Ini3.xml", "/GuardianList/Guardian");
+        boolean levelExpInitialized = levelExpRepository.count() >= configService.getValue("player.level.max", 60) || levelExpRepository.count() >= getCountByFileAndNode("res/LevelExp.xml", "/ExpList/Exp");
+        boolean mapQuestInitialized = challengeRepository.count() >= getCountByFileAndNode("res/MapQuest.xml", "/Tables/Challenge") && tutorialRepository.count() >= getCountByFileAndNode("res/MapQuest.xml", "/Tables/Tutorial");
+        boolean itemPartInitialized = itemPartRepository.count() >= getCountByFileAndNode("res/Item_Parts_Ini3.xml", "/ItemList/Item");
+        boolean itemSpecialInitialized = itemSpecialRepository.count() >= getCountByFileAndNode("res/Item_Special.xml", "/ItemList/Item");
+        boolean itemToolInitialized = itemToolRepository.count() >= getCountByFileAndNode("res/Item_Tools.xml", "/ItemList/Item");
+        boolean itemHouseDecoInitialized = itemHouseDecoRepository.count() >= getCountByFileAndNode("res/Item_HouseDeco.xml", "/ItemList/Item");
+        boolean itemHouseInitialized = itemHouseRepository.count() >= getCountByFileAndNode("res/Item_House.xml", "/ItemList/Item");
+        boolean itemEnchantInitialized = itemEnchantRepository.count() >= getCountByFileAndNode("res/Item_Enchant.xml","/ItemList/Item" );
+        boolean itemRecipeInitialized = itemRecipeRepository.count() >= getCountByFileAndNode("res/Item_Recipe_Ini3.xml", "/RecipeList/Recipe");
+        boolean itemMaterialInitialized = itemMaterialRepository.count() >= getCountByFileAndNode("res/Item_Material.xml", "/ItemList/Item");
+        boolean itemCharInitialized = itemCharRepository.count() >= getCountByFileAndNode("res/Item_Char.xml", "/ItemList/Item");
+        boolean productInitialized = productRepository.count() >= getCountByFileAndNode("res/Shop_Ini3.xml", "/ProductList/Product");
+        boolean skillInitialized = skillRepository.count() >= getCountByFileAndNode("res/FieldItem_Skills_Ini3.xml", "/Skills/Skill");
+        boolean skillDropRateInitialized = skillDropRateRepository.count() >= getCountByFileAndNode("res/FieldItem_DropRates_Ini3.xml", "/SkillDropRates/SkillDropRate");
+        boolean guardianInitialized = guardianRepository.count() >= getCountByFileAndNode("res/GuardianInfo.xml", "/GuardianList/Guardian");
+        boolean bossGuardianInitialized = bossGuardianRepository.count() >= getCountByFileAndNode("res/BossGuardianInfo_Ini3.xml", "/GuardianList/Guardian");
 
         List<Future<?>> futures = new ArrayList<>();
         if (!levelExpInitialized) {

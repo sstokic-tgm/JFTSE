@@ -391,32 +391,28 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
             if (!stageRewards.isEmpty()) {
                 if (wonGame) {
-                    final List<Product> winningStageRewards = isBoss ?
-                            stageRewards.stream()
-                                    .filter(p -> p.getCategory().equals(EItemCategory.LOTTERY.getName()) || p.getCategory().equals(EItemCategory.PARTS.getName()))
-                                    .toList() :
-                            stageRewards.stream()
-                                    .filter(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()) && !p.getCategory().equals(EItemCategory.PARTS.getName()))
-                                    .toList();
-
-                    if (!winningStageRewards.isEmpty()) {
-                        final int itemRewardToGive = random.nextInt(winningStageRewards.size());
-                        playerReward.setProductIndex(winningStageRewards.get(itemRewardToGive).getProductIndex());
+                    if (!stageRewards.isEmpty()) {
+                        final int itemRewardToGive = random.nextInt(stageRewards.size());
+                        playerReward.setProductIndex(stageRewards.get(itemRewardToGive).getProductIndex());
 
                         int amount = this.getIsHardMode().get() ? 3 : 1;
                         if (this.getIsRandomGuardiansMode().get())
                             amount = 1;
 
-                        if (winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
+                        if (map.getMap().equals(4)) {
+                            amount = isBoss ? 3 : 1;
+                        }
+
+                        if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
                             amount = 1;
 
-                        if (winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.MATERIAL.getName())) {
+                        if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.MATERIAL.getName())) {
                             final int min = 1;
                             final int max = 3;
                             amount = random.nextInt(max - min + 1) + min;
                         }
 
-                        if (winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.QUICK.getName())) {
+                        if (stageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.QUICK.getName())) {
                             final int min = 5;
                             final int max = 100;
                             amount = random.nextInt(max - min + 1) + min;
