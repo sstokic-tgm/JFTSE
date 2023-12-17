@@ -307,15 +307,13 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .toList();
 
         final List<Guardian2Maps> guardian2Maps = this.guardiansInStage.stream()
-                .filter(x -> x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue()))
-                .filter(x -> x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue()))
+                .filter(x -> (x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue())) || (x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue())))
                 .toList();
 
         final List<Guardian2Maps> guardian2MapsBoss = new ArrayList<>();
         if (isBoss) {
             final List<Guardian2Maps> tmp = this.guardiansInBossStage.stream()
-                    .filter(x -> x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue()))
-                    .filter(x -> x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue()))
+                    .filter(x -> (x.getGuardian() != null && lootedGuardians.contains(x.getGuardian().getId().intValue())) || (x.getBossGuardian() != null && lootedGuardians.contains(x.getBossGuardian().getId().intValue())))
                     .toList();
             guardian2MapsBoss.addAll(tmp);
         }
@@ -392,6 +390,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
             if (!stageRewards.isEmpty()) {
                 if (wonGame) {
                     final List<Product> winningStageRewards = new ArrayList<>(stageRewards);
+                    winningStageRewards.forEach(p -> System.out.println(p.getName()));
                     if (isBoss) {
                         winningStageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.PARTS.getName()) && !p.getCategory().equals(EItemCategory.LOTTERY.getName()));
                     }
