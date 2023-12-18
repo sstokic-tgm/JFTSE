@@ -441,7 +441,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
                         if (loosingStageRewards.get(itemRewardToGiveLoosing).getCategory().equals(EItemCategory.QUICK.getName())) {
                             final int minQuick = 5;
-                            final int maxQuick = 50;
+                            final int maxQuick = 30;
                             amount = random.nextInt(maxQuick - minQuick + 1) + minQuick;
                         }
 
