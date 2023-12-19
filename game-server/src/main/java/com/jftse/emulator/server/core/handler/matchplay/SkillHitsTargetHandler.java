@@ -558,7 +558,6 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
 
                 if (game.getIsRandomGuardiansMode().get()) {
                     guardianBase.setId(random.nextLong(72) + 1);
-                    guardians.set(i, guardianBase);
                 }
 
                 short guardianPosition = (short) (i + guardianStartPosition);
@@ -567,6 +566,10 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 } else {
                     guardianBase = bossGuardianService.findBossGuardianById(guardianBase.getId());
                 }
+                if (game.getIsRandomGuardiansMode().get()) {
+                    guardians.set(i, guardianBase);
+                }
+
                 GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardianBase, guardianPosition, activePlayingPlayersCount);
                 game.getGuardianBattleStates().add(guardianBattleState);
             }

@@ -448,7 +448,6 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
             if (game.getIsRandomGuardiansMode().get()) {
                 guardianBase.setId((long) (Math.random() * 72 + 1));
-                guardians.set(i, guardianBase);
             }
 
             short guardianPosition = (short) (i + guardianStartPosition);
@@ -457,6 +456,10 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             } else {
                 guardianBase = bossGuardianService.findBossGuardianById(guardianBase.getId());
             }
+            if (game.getIsRandomGuardiansMode().get()) {
+                guardians.set(i, guardianBase);
+            }
+
             GuardianBattleState guardianBattleState = game.createGuardianBattleState(game.getIsHardMode().get(), guardianBase, guardianPosition, activePlayingPlayersCount);
             game.getGuardianBattleStates().add(guardianBattleState);
         }
