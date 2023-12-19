@@ -38,6 +38,18 @@ public class RoomMapChangeRequestPacketHandler extends AbstractPacketHandler {
                 }
                 room.setPreviousMap(roomMapChangeRequestPacket.getMap());
                 room.setMap(roomMapChangeRequestPacket.getMap());
+
+                if (room.isRandomGuardians() || room.isHardMode() || room.isArcade()) {
+                    if (room.isRandomGuardians()) {
+                        room.setRandomGuardians(false);
+                    }
+                    if (room.isHardMode()) {
+                        room.setHardMode(false);
+                    }
+                    if (room.isArcade()) {
+                        room.setArcade(false);
+                    }
+                }
             }
 
             S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(roomMapChangeRequestPacket.getMap());

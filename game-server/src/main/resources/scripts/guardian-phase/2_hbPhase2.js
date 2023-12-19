@@ -7,7 +7,6 @@ let Skill = Java.type("com.jftse.entities.database.model.battle.Skill");
 let BattleUtils = Java.type("com.jftse.emulator.server.core.utils.BattleUtils");
 let Thread = Java.type("java.lang.Thread");
 let GuardianAttackTask = Java.type("com.jftse.emulator.server.core.task.GuardianAttackTask");
-let BossBattleReward = Java.type("com.jftse.emulator.server.core.matchplay.BossBattleReward");
 let PlayerScriptableImpl = Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl");
 
 class Phase2 {
