@@ -410,6 +410,11 @@ public class MatchplayGuardianGame extends MatchplayGame {
                             amount = isBoss ? 3 : 1;
                         }
 
+                        // mons only
+                        if (Arrays.asList(8L, 9L).contains(map.getId()) && winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.LOTTERY.getName())) {
+                            amount = 3;
+                        }
+
                         if (winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
                             amount = 1;
 
