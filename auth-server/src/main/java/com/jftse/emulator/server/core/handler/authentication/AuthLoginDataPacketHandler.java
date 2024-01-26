@@ -51,16 +51,16 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
     @Override
     public void handle() {
         Account account = authenticationService.findAccountByUsername(authLoginPacket.getUsername());
-        if (account != null && account.getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+        FTClient client = (FTClient) connection.getClient();
+        if (client != null && account != null && account.getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && client.isLoginIn().compareAndSet(false, true)) {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) 0);
             connection.sendTCP(authLoginAnswerPacket);
 
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             account.setLoggedInServer(ServerType.AUTH_SERVER);
             account = authenticationService.updateAccount(account);
-            FTClient client = (FTClient) connection.getClient();
-            client.setAccount(account.getId());
 
+            client.setAccount(account.getId());
             log.info(account.getUsername() + " connected");
 
             String token = StringUtils.randomString(16);
@@ -80,12 +80,14 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             List<Player> playerList = playerService.findAllByAccount(account);
             boolean hasNewChar = playerList.stream().anyMatch(p -> DateUtils.isSameDay(p.getCreated(), new Date()) && !p.getAlreadyCreated());
 
-            //if (hasNewChar) {
-            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
-            connection.sendTCP(playerListPacket);
-            //}
+            if (hasNewChar) {
+                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+                connection.sendTCP(playerListPacket);
+            }
             S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
             connection.sendTCP(gameServerListPacket);
+
+            client.isLoginIn().set(false);
         } else {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) -1);
             connection.sendTCP(authLoginAnswerPacket);

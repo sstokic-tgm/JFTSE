@@ -12,6 +12,7 @@ public class FTClient extends Client<FTConnection> {
     private Long activePlayerId;
 
     private final AtomicBoolean isClientAlive = new AtomicBoolean(false);
+    private final AtomicBoolean isLoginIn = new AtomicBoolean(false);
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;
@@ -47,6 +48,10 @@ public class FTClient extends Client<FTConnection> {
 
     public AtomicBoolean isClientAlive() {
         return isClientAlive;
+    }
+
+    public AtomicBoolean isLoginIn() {
+        return isLoginIn;
     }
 
     public Long getAccountId() {
