@@ -8,7 +8,7 @@ import com.jftse.entities.database.repository.item.ItemEnchantRepository;
 import com.jftse.entities.database.repository.item.ItemMaterialRepository;
 import com.jftse.entities.database.repository.item.ProductRepository;
 import com.jftse.entities.database.repository.pocket.PlayerPocketRepository;
-import com.jftse.jdbc.JdbcUtil;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
 import com.jftse.server.core.service.PlayerPocketService;

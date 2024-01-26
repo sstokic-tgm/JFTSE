@@ -4,7 +4,7 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
-import com.jftse.jdbc.JdbcUtil;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;

@@ -5,7 +5,7 @@ import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
-import com.jftse.jdbc.JdbcUtil;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;

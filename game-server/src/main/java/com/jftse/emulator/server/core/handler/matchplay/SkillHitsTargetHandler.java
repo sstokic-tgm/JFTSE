@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
-import com.jftse.jdbc.JdbcUtil;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetBossGuardiansStats;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplaySkillHitsTarget;
