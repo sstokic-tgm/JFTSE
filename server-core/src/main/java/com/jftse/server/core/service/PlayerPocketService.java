@@ -10,9 +10,6 @@ public interface PlayerPocketService {
 
     PlayerPocket getItemAsPocketByItemIndexAndCategoryAndPocket(Integer itemIndex, String category, Pocket pocket);
 
-    @Deprecated(forRemoval = true)
-    PlayerPocket getItemAsPocketByItemIndexAndPocket(Integer itemIndex, Pocket pocket);
-
     PlayerPocket findById(Long id);
 
     List<PlayerPocket> getPlayerPocketItems(Pocket pocket);

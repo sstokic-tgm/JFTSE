@@ -1,6 +1,5 @@
-package com.jftse.emulator.server.core.jdbc;
+package com.jftse.jdbc;
 
-import com.jftse.entities.database.model.gameserver.GameServer;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

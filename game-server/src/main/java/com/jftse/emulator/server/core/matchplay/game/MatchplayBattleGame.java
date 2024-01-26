@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
-import com.jftse.emulator.server.core.jdbc.JdbcUtil;
+import com.jftse.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.SimpleExpGoldBonus;
