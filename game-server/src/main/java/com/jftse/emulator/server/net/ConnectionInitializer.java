@@ -24,7 +24,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
     private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
     private final TCPChannelHandler tcpChannelHandler;
-    private final EventExecutorGroup group = new UnorderedThreadPoolEventExecutor(8);
+    private final EventExecutorGroup group = new UnorderedThreadPoolEventExecutor(14);
 
     public ConnectionInitializer(final PacketHandlerFactory packetHandlerFactory) {
         FT_CONNECTION_ATTRIBUTE_KEY = AttributeKey.newInstance("connection");

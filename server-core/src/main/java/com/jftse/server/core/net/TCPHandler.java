@@ -3,25 +3,33 @@ package com.jftse.server.core.net;
 import com.jftse.entities.database.model.log.BlockedIP;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
+import com.jftse.server.core.handler.PacketHandlerTask;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
 public abstract class TCPHandler<T extends Connection<? extends Client<T>>> extends SimpleChannelInboundHandler<Packet> {
+    private final Logger log = LogManager.getLogger(getClass());
+
     protected final AttributeKey<T> CONNECTION_ATTRIBUTE_KEY;
     private final PacketHandlerFactory packetHandlerFactory;
 
     private final Map<String, Pair<Long, Byte>> tracker = new ConcurrentHashMap<>();
+    private final Map<ChannelId, Queue<PacketHandlerTask<T>>> pendingTasks = new ConcurrentHashMap<>();
 
     protected TCPHandler(final AttributeKey<T> connectionAttributeKey, final PacketHandlerFactory packetHandlerFactory) {
         this.CONNECTION_ATTRIBUTE_KEY = connectionAttributeKey;
@@ -33,7 +41,8 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
         connection.setChannelHandlerContext(ctx);
 
-        connected(connection);
+        enqueueTask(connection, c -> connected(connection));
+        processPendingTasks(connection);
     }
 
     @Override
@@ -44,18 +53,44 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         if (connection != null && !connection.getIsClosingConnection().get()) {
             if (abstractPacketHandler != null) {
                 abstractPacketHandler.setConnection(connection);
-                try {
-                    if (abstractPacketHandler.process(packet)) {
-                        abstractPacketHandler.handle();
-                        packetProcessed(connection, abstractPacketHandler);
-                    } else {
-                        packetNotProcessed(connection, abstractPacketHandler);
+
+                enqueueTask(connection, c -> {
+                    try {
+                        if (abstractPacketHandler.process(packet)) {
+                            abstractPacketHandler.handle();
+                            packetProcessed(connection, abstractPacketHandler);
+                        } else {
+                            packetNotProcessed(connection, abstractPacketHandler);
+                        }
+                    } catch (Exception e) {
+                        exceptionCaught(ctx, e);
                     }
-                } catch (Exception e) {
-                    exceptionCaught(ctx, e);
-                }
+                });
             } else {
-                handlerNotFound(connection, packet);
+                enqueueTask(connection, c -> handlerNotFound(connection, packet));
+            }
+            processPendingTasks(connection);
+        }
+    }
+
+    private void enqueueTask(T connection, PacketHandlerTask<T> task) {
+        log.debug("Enqueueing task for connection {}", connection.getId());
+        pendingTasks.computeIfAbsent(connection.getId(), k -> new ConcurrentLinkedQueue<>())
+                .offer(task);
+    }
+
+    private void processPendingTasks(T connection) throws Exception {
+        Queue<PacketHandlerTask<T>> tasks = pendingTasks.get(connection.getId());
+        if (tasks != null) {
+            log.debug("Processing {} pending tasks for connection {}", tasks.size(), connection.getId());
+            PacketHandlerTask<T> task;
+            while ((task = tasks.poll()) != null) {
+                try {
+                    task.accept(connection);
+                } catch (Exception e) {
+                    log.error("Error while processing pending task", e);
+                    exceptionCaught(connection, e);
+                }
             }
         }
     }
@@ -65,10 +100,13 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
 
         if (connection != null && connection.getIsClosingConnection().compareAndSet(false, true)) {
-            disconnected(connection);
+            enqueueTask(connection, c -> {
+                disconnected(connection);
 
-            connection.setClient(null);
-            ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).set(null);
+                connection.setClient(null);
+                ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).set(null);
+            });
+            processPendingTasks(connection);
         }
     }
 
@@ -77,10 +115,12 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
 
         if (connection != null) {
-            exceptionCaught(connection, cause);
+            enqueueTask(connection, c -> {
+                exceptionCaught(connection, cause);
 
-            channelInactive(ctx);
-            connection.close();
+                connection.close();
+            });
+            processPendingTasks(connection);
         }
     }
 

@@ -68,6 +68,9 @@ public class ServiceManager {
     @Autowired
     private ConfigService configService;
 
+    @Autowired
+    private CommandLogService commandLogService;
+
     @PostConstruct
     public void init() {
         instance = this;

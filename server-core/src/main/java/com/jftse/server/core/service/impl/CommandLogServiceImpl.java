@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -17,5 +19,10 @@ public class CommandLogServiceImpl implements CommandLogService {
     @Override
     public CommandLog save(CommandLog commandLog) {
         return commandLogRepository.save(commandLog);
+    }
+
+    @Override
+    public List<CommandLog> findAllByPlayerId(Long playerId) {
+        return commandLogRepository.findAllByPlayerId(playerId);
     }
 }
