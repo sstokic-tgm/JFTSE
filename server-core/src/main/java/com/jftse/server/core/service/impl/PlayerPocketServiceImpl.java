@@ -105,13 +105,14 @@ public class PlayerPocketServiceImpl implements PlayerPocketService {
         else { // everything else buy price / 2
             List<Product> products = productRepository.findProductsByItem0AndCategory(playerPocket.getItemIndex(), playerPocket.getCategory());
             if (!products.isEmpty()) {
+                System.out.println("products: " + products);
                 List<SRelationships> relationships = new ArrayList<>();
                 jdbcUtil.execute(em -> {
                     try {
                         TypedQuery<SRelationships> query = em.createQuery("SELECT sr FROM SRelationships sr " +
                                 "WHERE sr.id_f = :id_f AND sr.status.id = 1 AND " +
                                 "sr.relationship.id = 8 AND sr.role.id = 4", SRelationships.class);
-                        query.setParameter("id_f", products.getFirst().getProductIndex());
+                        query.setParameter("id_f", products.getFirst().getProductIndex().longValue());
                         relationships.addAll(query.getResultList());
                     } catch (Exception e) {
                         log.error("Error while getting sell price: {}", e.getMessage());
