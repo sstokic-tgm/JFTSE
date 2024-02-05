@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -22,4 +19,18 @@ public class PlayerPocket extends AbstractBaseModel {
     private Integer itemIndex;
     private String useType;
     private Integer itemCount;
+
+    @Column(columnDefinition = "int default 0")
+    private Integer enchantStr = 0;
+    @Column(columnDefinition = "int default 0")
+    private Integer enchantSta = 0;
+    @Column(columnDefinition = "int default 0")
+    private Integer enchantDex = 0;
+    @Column(columnDefinition = "int default 0")
+    private Integer enchantWil = 0;
+
+    @Column(columnDefinition = "int default 0")
+    private Integer enchantElement = 0;
+    @Column(columnDefinition = "int default 0")
+    private Integer enchantLevel = 0;
 }
