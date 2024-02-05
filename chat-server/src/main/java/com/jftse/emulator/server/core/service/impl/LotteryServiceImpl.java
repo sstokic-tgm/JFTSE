@@ -185,6 +185,7 @@ public class LotteryServiceImpl implements LotteryService {
                 cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
 
                 playerPocket.setCreated(cal.getTime());
+                playerPocket.setItemCount(1);
             }
 
             playerPocket.setPocket(pocket);

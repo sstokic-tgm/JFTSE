@@ -22,10 +22,10 @@ public class S2CInventoryDataPacket extends Packet {
             this.write(playerPocket.getItemCount());
             this.write(playerPocket.getCreated());
 
-            this.write((byte) 0); // enchant str
-            this.write((byte) 0); // enchant sta
-            this.write((byte) 0); // enchant dex
-            this.write((byte) 0); // enchant wil
+            this.write(playerPocket.getEnchantStr().byteValue()); // enchant str
+            this.write(playerPocket.getEnchantSta().byteValue()); // enchant sta
+            this.write(playerPocket.getEnchantDex().byteValue()); // enchant dex
+            this.write(playerPocket.getEnchantWil().byteValue()); // enchant wil
             // ??
             this.write((byte) 0);
             this.write((byte) 0);
