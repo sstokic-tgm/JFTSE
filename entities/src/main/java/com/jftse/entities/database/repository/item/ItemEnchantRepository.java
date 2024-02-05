@@ -13,4 +13,6 @@ public interface ItemEnchantRepository extends JpaRepository<ItemEnchant, Long> 
 
     @Query(value = "SELECT ie.itemIndex FROM ItemEnchant ie WHERE ie.kind = :kind")
     List<Integer> getItemIndexListByKind(@Param("kind") String kind);
+
+    List<ItemEnchant> findByItemIndex(Integer itemIndex);
 }

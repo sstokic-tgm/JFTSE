@@ -97,6 +97,8 @@ public class ServiceManager {
     private ScenarioService scenarioService;
     @Autowired
     private MapService mapService;
+    @Autowired
+    private EnchantService enchantService;
 
     @Autowired
     private ProfaneWordsService profaneWordsService;

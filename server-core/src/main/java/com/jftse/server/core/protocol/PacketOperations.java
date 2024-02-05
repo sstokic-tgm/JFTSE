@@ -347,6 +347,9 @@ public enum PacketOperations {
     S2CRoomPlayerInformationWithPosition(0x1396),
     S2CLeaveRoomWithPosition(0x1398),
 
+    C2SEnchantRequest(0x2455),
+    S2CEnchantAnswer(0x2456),
+
     S2CDCMsg(0x2329),
 
     C2SUnknown0x1071(0x1071),

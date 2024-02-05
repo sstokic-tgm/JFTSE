@@ -3,6 +3,7 @@ package com.jftse.emulator.server.module;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.ResourceUtil;
+import com.jftse.entities.database.model.ImportLog;
 import com.jftse.entities.database.model.battle.BossGuardian;
 import com.jftse.entities.database.model.battle.Guardian;
 import com.jftse.entities.database.model.battle.Skill;
@@ -11,6 +12,7 @@ import com.jftse.entities.database.model.challenge.Challenge;
 import com.jftse.entities.database.model.item.*;
 import com.jftse.entities.database.model.level.LevelExp;
 import com.jftse.entities.database.model.tutorial.Tutorial;
+import com.jftse.entities.database.repository.ImportLogRepository;
 import com.jftse.entities.database.repository.battle.BossGuardianRepository;
 import com.jftse.entities.database.repository.battle.GuardianRepository;
 import com.jftse.entities.database.repository.battle.SkillDropRateRepository;
@@ -33,10 +35,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -63,6 +70,8 @@ public class DbDataLoader implements CommandLineRunner {
     @Autowired
     private ItemEnchantRepository itemEnchantRepository;
     @Autowired
+    private ItemEnchantLevelRepository itemEnchantLevelRepository;
+    @Autowired
     private ItemRecipeRepository itemRecipeRepository;
     @Autowired
     private ItemMaterialRepository itemMaterialRepository;
@@ -78,6 +87,8 @@ public class DbDataLoader implements CommandLineRunner {
     private BossGuardianRepository bossGuardianRepository;
     @Autowired
     private ItemCharRepository itemCharRepository;
+    @Autowired
+    private ImportLogRepository importLogRepository;
 
     @Autowired
     private ConfigService configService;
@@ -91,22 +102,23 @@ public class DbDataLoader implements CommandLineRunner {
 
         boolean dataLoaded = true;
 
-        boolean levelExpInitialized = levelExpRepository.count() >= configService.getValue("player.level.max", 60) || levelExpRepository.count() >= getCountByFileAndNode("res/LevelExp.xml", "/ExpList/Exp");
-        boolean mapQuestInitialized = challengeRepository.count() >= getCountByFileAndNode("res/MapQuest.xml", "/Tables/Challenge") && tutorialRepository.count() >= getCountByFileAndNode("res/MapQuest.xml", "/Tables/Tutorial");
-        boolean itemPartInitialized = itemPartRepository.count() >= getCountByFileAndNode("res/Item_Parts_Ini3.xml", "/ItemList/Item");
-        boolean itemSpecialInitialized = itemSpecialRepository.count() >= getCountByFileAndNode("res/Item_Special.xml", "/ItemList/Item");
-        boolean itemToolInitialized = itemToolRepository.count() >= getCountByFileAndNode("res/Item_Tools.xml", "/ItemList/Item");
-        boolean itemHouseDecoInitialized = itemHouseDecoRepository.count() >= getCountByFileAndNode("res/Item_HouseDeco.xml", "/ItemList/Item");
-        boolean itemHouseInitialized = itemHouseRepository.count() >= getCountByFileAndNode("res/Item_House.xml", "/ItemList/Item");
-        boolean itemEnchantInitialized = itemEnchantRepository.count() >= getCountByFileAndNode("res/Item_Enchant.xml","/ItemList/Item" );
-        boolean itemRecipeInitialized = itemRecipeRepository.count() >= getCountByFileAndNode("res/Item_Recipe_Ini3.xml", "/RecipeList/Recipe");
-        boolean itemMaterialInitialized = itemMaterialRepository.count() >= getCountByFileAndNode("res/Item_Material.xml", "/ItemList/Item");
-        boolean itemCharInitialized = itemCharRepository.count() >= getCountByFileAndNode("res/Item_Char.xml", "/ItemList/Item");
-        boolean productInitialized = productRepository.count() >= getCountByFileAndNode("res/Shop_Ini3.xml", "/ProductList/Product");
-        boolean skillInitialized = skillRepository.count() >= getCountByFileAndNode("res/FieldItem_Skills_Ini3.xml", "/Skills/Skill");
-        boolean skillDropRateInitialized = skillDropRateRepository.count() >= getCountByFileAndNode("res/FieldItem_DropRates_Ini3.xml", "/SkillDropRates/SkillDropRate");
-        boolean guardianInitialized = guardianRepository.count() >= getCountByFileAndNode("res/GuardianInfo.xml", "/GuardianList/Guardian");
-        boolean bossGuardianInitialized = bossGuardianRepository.count() >= getCountByFileAndNode("res/BossGuardianInfo_Ini3.xml", "/GuardianList/Guardian");
+        boolean levelExpInitialized = levelExpRepository.count() >= configService.getValue("player.level.max", 60) || isFileUpToDate("res/LevelExp.xml");
+        boolean mapQuestInitialized = isFileUpToDate("res/MapQuest.xml") && isFileUpToDate("res/MapQuest.xml");
+        boolean itemPartInitialized = isFileUpToDate("res/Item_Parts_Ini3.xml");
+        boolean itemSpecialInitialized = isFileUpToDate("res/Item_Special.xml");
+        boolean itemToolInitialized = isFileUpToDate("res/Item_Tools.xml");
+        boolean itemHouseDecoInitialized = isFileUpToDate("res/Item_HouseDeco.xml");
+        boolean itemHouseInitialized = isFileUpToDate("res/Item_House.xml");
+        boolean itemEnchantInitialized = isFileUpToDate("res/Item_Enchant.xml");
+        boolean itemEnchantLevelInitialized = isFileUpToDate("res/Item_EnchantLevel_Ini3.xml");
+        boolean itemRecipeInitialized = isFileUpToDate("res/Item_Recipe_Ini3.xml");
+        boolean itemMaterialInitialized = isFileUpToDate("res/Item_Material.xml");
+        boolean itemCharInitialized = isFileUpToDate("res/Item_Char.xml");
+        boolean productInitialized = isFileUpToDate("res/Shop_Ini3.xml");
+        boolean skillInitialized = isFileUpToDate("res/FieldItem_Skills_Ini3.xml");
+        boolean skillDropRateInitialized = isFileUpToDate("res/FieldItem_DropRates_Ini3.xml");
+        boolean guardianInitialized = isFileUpToDate("res/GuardianInfo.xml");
+        boolean bossGuardianInitialized = isFileUpToDate("res/BossGuardianInfo_Ini3.xml");
 
         List<Future<?>> futures = new ArrayList<>();
         if (!levelExpInitialized) {
@@ -189,6 +201,17 @@ public class DbDataLoader implements CommandLineRunner {
             Future<?> future = threadManager.submit(() -> {
                 if (loadItemEnchant())
                     log.info("ItemEnchant successfully initialized!");
+            });
+            futures.add(future);
+        }
+        else
+            dataLoaded = false;
+
+        if (!itemEnchantLevelInitialized) {
+            log.info("Initializing ItemEnchantLevel...");
+            Future<?> future = threadManager.submit(() -> {
+                if (loadItemEnchantLevel())
+                    log.info("ItemEnchantLevel successfully initialized!");
             });
             futures.add(future);
         }
@@ -297,22 +320,39 @@ public class DbDataLoader implements CommandLineRunner {
         log.info("--------------------------------------");
     }
 
-    private int getCountByFileAndNode(String file, String xpathExpression) throws DocumentException, IOException {
-        InputStream itemPartFile = ResourceUtil.getResource(file);
-        SAXReader reader = new SAXReader();
-        reader.setEncoding("UTF-8");
-        Document document = reader.read(itemPartFile);
+    private boolean isFileUpToDate(String file) throws IOException {
+        File xmlFile = new File(file);
 
-        int count = document.selectNodes(xpathExpression).size();
-        itemPartFile.close();
+        if (!xmlFile.exists()) {
+            log.error("File not found: " + file);
+            return false;
+        }
 
-        return count;
+        Path path = Paths.get(file);
+        long lastModified = Files.getLastModifiedTime(path).toMillis();
+        long lastImportTimestamp = getLastImportTimestamp(file);
+
+        return lastModified <= lastImportTimestamp;
+    }
+
+    private long getFileLastModified(String file) throws IOException {
+        File xmlFile = new File(file);
+
+        if (!xmlFile.exists()) {
+            log.error("File not found: " + file);
+            return 0;
+        }
+
+        Path path = Paths.get(file);
+        return Files.getLastModifiedTime(path).toMillis();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean loadBossGuardian() {
         try {
-            InputStream itemPartFile = ResourceUtil.getResource("res/BossGuardianInfo_Ini3.xml");
+            String filePath = "res/BossGuardianInfo_Ini3.xml";
+
+            InputStream itemPartFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemPartFile);
@@ -341,8 +381,9 @@ public class DbDataLoader implements CommandLineRunner {
                 guardian.setBtItemID(Integer.valueOf(skillNode.valueOf("@BtItemID")));
                 bossGuardianRepository.save(guardian);
             }
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -355,7 +396,9 @@ public class DbDataLoader implements CommandLineRunner {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean loadGuardian() {
         try {
-            InputStream itemPartFile = ResourceUtil.getResource("res/GuardianInfo.xml");
+            String filePath = "res/GuardianInfo.xml";
+
+            InputStream itemPartFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemPartFile);
@@ -384,8 +427,10 @@ public class DbDataLoader implements CommandLineRunner {
                 guardian.setBtItemID(Integer.valueOf(skillNode.valueOf("@BtItemID")));
                 guardianRepository.save(guardian);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -398,7 +443,9 @@ public class DbDataLoader implements CommandLineRunner {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean loadSkillDropRate() {
         try {
-            InputStream itemPartFile = ResourceUtil.getResource("res/FieldItem_DropRates_Ini3.xml");
+            String filePath = "res/FieldItem_DropRates_Ini3.xml";
+
+            InputStream itemPartFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemPartFile);
@@ -421,8 +468,10 @@ public class DbDataLoader implements CommandLineRunner {
                 skillDropRate.setDropRates(dropRates.toString());
                 skillDropRateRepository.save(skillDropRate);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -435,7 +484,9 @@ public class DbDataLoader implements CommandLineRunner {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean loadSkill() {
         try {
-            InputStream itemPartFile = ResourceUtil.getResource("res/FieldItem_Skills_Ini3.xml");
+            String filePath = "res/FieldItem_Skills_Ini3.xml";
+
+            InputStream itemPartFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemPartFile);
@@ -477,8 +528,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 skillRepository.save(skill);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -492,8 +545,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadLevelExp() {
 
         try {
+            String filePath = "res/LevelExp.xml";
 
-            InputStream levelExpFile = ResourceUtil.getResource("res/LevelExp.xml");
+            InputStream levelExpFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(levelExpFile);
@@ -513,8 +567,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 levelExpRepository.save(levelExp);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
             return false;
@@ -527,8 +583,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadMapQuest() {
 
         try {
+            String filePath = "res/MapQuest.xml";
 
-            InputStream mapQuestFile = ResourceUtil.getResource("res/MapQuest.xml");
+            InputStream mapQuestFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(mapQuestFile);
@@ -600,8 +657,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 challengeRepository.save(challenge);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
             return false;
@@ -614,8 +673,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemPart() {
 
         try {
+            String filePath = "res/Item_Parts_Ini3.xml";
 
-            InputStream itemPartFile = ResourceUtil.getResource("res/Item_Parts_Ini3.xml");
+            InputStream itemPartFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemPartFile);
@@ -660,8 +720,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemPartRepository.save(itemPart);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -675,8 +737,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemSpecial() {
 
         try {
+            String filePath = "res/Item_Special.xml";
 
-            InputStream itemSpecialFile = ResourceUtil.getResource("res/Item_Special.xml");
+            InputStream itemSpecialFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemSpecialFile);
@@ -696,8 +759,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemSpecialRepository.save(itemSpecial);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -711,8 +776,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemTool() {
 
         try {
+            String filePath = "res/Item_Tools.xml";
 
-            InputStream itemToolFile = ResourceUtil.getResource("res/Item_Tools.xml");
+            InputStream itemToolFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemToolFile);
@@ -734,8 +800,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemToolRepository.save(itemTool);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -749,8 +817,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemHouseDeco() {
 
         try {
+            String filePath = "res/Item_HouseDeco.xml";
 
-            InputStream itemHouseDecoFile = ResourceUtil.getResource("res/Item_HouseDeco.xml");
+            InputStream itemHouseDecoFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemHouseDecoFile);
@@ -776,8 +845,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemHouseDecoRepository.save(itemHouseDeco);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -791,8 +862,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemHouse() {
 
         try {
+            String filePath = "res/Item_House.xml";
 
-            InputStream itemHouseFile = ResourceUtil.getResource("res/Item_House.xml");
+            InputStream itemHouseFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemHouseFile);
@@ -813,8 +885,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemHouseRepository.save(itemHouse);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -828,8 +902,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemEnchant() {
 
         try {
+            String filePath = "res/Item_Enchant.xml";
 
-            InputStream itemEnchantFile = ResourceUtil.getResource("res/Item_Enchant.xml");
+            InputStream itemEnchantFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemEnchantFile);
@@ -848,11 +923,68 @@ public class DbDataLoader implements CommandLineRunner {
                 itemEnchant.setElementalKind(itemNode.valueOf("@ElementalKind"));
                 itemEnchant.setSellPrice(Integer.valueOf(itemNode.valueOf("@SellPrice")));
                 itemEnchant.setName(itemNode.valueOf("@Name_en"));
+                itemEnchant.setAddPercentage(Integer.valueOf(itemNode.valueOf("@AddPer")));
+                itemEnchant.setItemGrade(Integer.valueOf(itemNode.valueOf("@ItemGrade")));
+                itemEnchant.setHair(itemNode.valueOf("@HAIR").equals("1"));
+                itemEnchant.setBody(itemNode.valueOf("@BODY").equals("1"));
+                itemEnchant.setPants(itemNode.valueOf("@PANTS").equals("1"));
+                itemEnchant.setFoot(itemNode.valueOf("@FOOT").equals("1"));
+                itemEnchant.setCap(itemNode.valueOf("@CAP").equals("1"));
+                itemEnchant.setHand(itemNode.valueOf("@HAND").equals("1"));
+                itemEnchant.setGlasses(itemNode.valueOf("@GLASSES").equals("1"));
+                itemEnchant.setBag(itemNode.valueOf("@BAG").equals("1"));
+                itemEnchant.setSocks(itemNode.valueOf("@SOCKS").equals("1"));
+                itemEnchant.setRacket(itemNode.valueOf("@RACKET").equals("1"));
 
                 itemEnchantRepository.save(itemEnchant);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
+
+            de.printStackTrace();
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean loadItemEnchantLevel() {
+
+        try {
+            String filePath = "res/Item_EnchantLevel_Ini3.xml";
+
+            InputStream itemEnchantLevelFile = ResourceUtil.getResource(filePath);
+            SAXReader reader = new SAXReader();
+            reader.setEncoding("UTF-8");
+            Document document = reader.read(itemEnchantLevelFile);
+
+            List<Node> itemList = document.selectNodes("/ItemList/Item");
+
+            long i = 0;
+            for (Node itemNode : itemList) {
+                i++;
+                ItemEnchantLevel itemEnchantLevel = itemEnchantLevelRepository.findById(i).orElse(new ItemEnchantLevel());
+                itemEnchantLevel.setItemIndex(Integer.valueOf(itemNode.valueOf("@Index")));
+                itemEnchantLevel.setName(itemNode.valueOf("@_Name_"));
+                itemEnchantLevel.setElementalKind(itemNode.valueOf("@ElementalKind"));
+                itemEnchantLevel.setBasicPercentage(Double.valueOf(itemNode.valueOf("@BasicPer")));
+                itemEnchantLevel.setFailedPercentage(Integer.valueOf(itemNode.valueOf("@FailedPercent")));
+                itemEnchantLevel.setGrade(Integer.valueOf(itemNode.valueOf("@Grade")));
+                itemEnchantLevel.setDowngrade(Integer.valueOf(itemNode.valueOf("@DownGrade")));
+                itemEnchantLevel.setMinEfficiency(Integer.valueOf(itemNode.valueOf("@MinEfficiency")));
+                itemEnchantLevel.setMaxEfficiency(Integer.valueOf(itemNode.valueOf("@MaxEfficiency")));
+                itemEnchantLevel.setRequireGold(Integer.valueOf(itemNode.valueOf("@RequireGold")));
+
+                itemEnchantLevelRepository.save(itemEnchantLevel);
+            }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
+        }
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -866,8 +998,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemRecipe() {
 
         try {
+            String filePath = "res/Item_Recipe_Ini3.xml";
 
-            InputStream itemRecipeFile = ResourceUtil.getResource("res/Item_Recipe_Ini3.xml");
+            InputStream itemRecipeFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemRecipeFile);
@@ -915,8 +1048,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemRecipeRepository.save(itemRecipe);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -930,8 +1065,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemMaterial() {
 
         try {
+            String filePath = "res/Item_Material.xml";
 
-            InputStream itemMaterialFile = ResourceUtil.getResource("res/Item_Material.xml");
+            InputStream itemMaterialFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemMaterialFile);
@@ -953,8 +1089,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemMaterialRepository.save(itemMaterial);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -968,8 +1106,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadItemChar() {
 
         try {
+            String filePath = "res/Item_Char.xml";
 
-            InputStream itemCharFile = ResourceUtil.getResource("res/Item_Char.xml");
+            InputStream itemCharFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(itemCharFile);
@@ -989,8 +1128,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 itemCharRepository.save(itemChar);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -1004,8 +1145,9 @@ public class DbDataLoader implements CommandLineRunner {
     public boolean loadProduct() {
 
         try {
+            String filePath = "res/Shop_Ini3.xml";
 
-            InputStream shopFile = ResourceUtil.getResource("res/Shop_Ini3.xml");
+            InputStream shopFile = ResourceUtil.getResource(filePath);
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(shopFile);
@@ -1051,8 +1193,10 @@ public class DbDataLoader implements CommandLineRunner {
 
                 productRepository.save(product);
             }
+
+            saveLastImportTimestamp(filePath, getFileLastModified(filePath));
         }
-        catch (DocumentException de) {
+        catch (IOException | DocumentException de) {
 
             de.printStackTrace();
 
@@ -1069,5 +1213,26 @@ public class DbDataLoader implements CommandLineRunner {
         }
 
         return value;
+    }
+
+    private void saveLastImportTimestamp(String fileName, long timestamp) {
+        fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+
+        Optional<ImportLog> importLog = importLogRepository.findByFileName(fileName);
+        if (importLog.isPresent()) {
+            importLog.get().setImportDate(timestamp);
+            importLogRepository.save(importLog.get());
+        } else {
+            ImportLog newImportLog = new ImportLog();
+            newImportLog.setFileName(fileName);
+            newImportLog.setImportDate(timestamp);
+            importLogRepository.save(newImportLog);
+        }
+    }
+
+    private long getLastImportTimestamp(String fileName) {
+        fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+
+        return importLogRepository.findByFileName(fileName).map(ImportLog::getImportDate).orElse(0L);
     }
 }
