@@ -138,14 +138,15 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
             } else {
                 long diff = skillUseTimestamp - lastSkillUse.getTimestamp();
                 long coolingTime = game instanceof MatchplayGuardianGame ? skill.getGdCoolingTime().longValue() : skill.getCoolingTime().longValue();
-                if (diff < coolingTime) {
+                long cooldownBuffer = 150; // 150ms buffer
+                if (diff < (coolingTime + cooldownBuffer)) {
                     playerBattleState.getQuickSlotSkillUseNoCDDetects().getAndIncrement();
                 } else {
                     playerBattleState.getQuickSlotSkillUseNoCDDetects().set(0);
                 }
                 playerBattleState.getQuickSlotSkillUseMap().put(quickSlotIndex, skillUse);
 
-                if (playerBattleState.getQuickSlotSkillUseNoCDDetects().get() >= 3) {
+                if (playerBattleState.getQuickSlotSkillUseNoCDDetects().get() >= 4) {
                     S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
                     connection.sendTCP(msgPacket);
 

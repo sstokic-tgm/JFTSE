@@ -170,9 +170,6 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
                 itemPocket.setEnchantElement((int) EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()).getValue());
                 itemPocket.setEnchantLevel(newEnchantLevel);
             } else {
-                itemPocket.setEnchantElement(0);
-                itemPocket.setEnchantLevel(0);
-
                 int elementalKind = EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()).getValue();
                 switch (elementalKind) {
                     case 1 -> itemPocket.setEnchantStr(itemPocket.getEnchantStr() + 1);
