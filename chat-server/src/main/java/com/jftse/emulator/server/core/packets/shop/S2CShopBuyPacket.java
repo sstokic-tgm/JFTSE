@@ -45,6 +45,8 @@ public class S2CShopBuyPacket extends Packet {
                 this.write((byte) 0);
                 this.write((byte) 0);
             }
+        } else if (result == SUCCESS && playerPocketList != null && playerPocketList.isEmpty()) {
+            this.write((char) 0);
         }
     }
 }

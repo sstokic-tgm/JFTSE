@@ -26,9 +26,9 @@ public class S2CInventoryDataPacket extends Packet {
             this.write(playerPocket.getEnchantSta().byteValue()); // enchant sta
             this.write(playerPocket.getEnchantDex().byteValue()); // enchant dex
             this.write(playerPocket.getEnchantWil().byteValue()); // enchant wil
-            // ??
-            this.write((byte) 0);
-            this.write((byte) 0);
+
+            this.write(playerPocket.getEnchantElement().byteValue()); // enchant element type 5=earth, 6=wind, 7=water, 8=fire
+            this.write(playerPocket.getEnchantLevel().byteValue()); // enchant element level
         }
     }
 }

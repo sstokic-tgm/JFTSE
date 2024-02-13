@@ -92,6 +92,8 @@ public class ServiceManager {
     private SkillService skillService;
     @Autowired
     private WillDamageService willDamageService;
+    @Autowired
+    private EnchantService enchantService;
 
     @Autowired
     private ProfaneWordsService profaneWordsService;

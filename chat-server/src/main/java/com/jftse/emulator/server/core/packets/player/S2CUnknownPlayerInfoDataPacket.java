@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.packets.player;
 
+import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.server.core.protocol.Packet;
@@ -9,17 +10,22 @@ import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.Pocket;
 
 public class S2CUnknownPlayerInfoDataPacket extends Packet {
-    public S2CUnknownPlayerInfoDataPacket(Player player, Pocket pocket, StatusPointsAddedDto statusPointsAddedDto, PlayerStatistic playerStatistic) {
+    public S2CUnknownPlayerInfoDataPacket(Player player, Pocket pocket, StatusPointsAddedDto statusPointsAddedDto, PlayerStatistic playerStatistic, Guild guild) {
         super(PacketOperations.S2CUnknownPlayerInfoData);
 
         this.write(player.getName());
 
-        this.write(0); // ??
-        this.write(0); // ??
-        this.write(0); // ??
-        this.write(0); // ??
-        this.write(0); // ??
-        this.write(0); // ??
+        if (guild != null) {
+            this.write(guild.getLogoBackgroundId());
+            this.write(guild.getLogoBackgroundColor());
+            this.write(guild.getLogoPatternId());
+            this.write(guild.getLogoPatternColor());
+            this.write(guild.getLogoMarkId());
+            this.write(guild.getLogoMarkColor());
+        } else {
+            for (int i = 0; i < 6; i++)
+                this.write(0);
+        }
 
         this.write(playerStatistic.getBasicRecordWin());
         this.write(playerStatistic.getBasicRecordLoss());
@@ -45,31 +51,31 @@ public class S2CUnknownPlayerInfoDataPacket extends Packet {
         this.write(player.getStamina());
         this.write(player.getDexterity());
         this.write(player.getWillpower());
-        // cloth added status points
-        this.write(statusPointsAddedDto.getStrength());
-        this.write(statusPointsAddedDto.getStamina());
-        this.write(statusPointsAddedDto.getDexterity());
-        this.write(statusPointsAddedDto.getWillpower());
+        // enchant added status points
+        this.write(statusPointsAddedDto.getAddStr());
+        this.write(statusPointsAddedDto.getAddSta());
+        this.write(statusPointsAddedDto.getAddDex());
+        this.write(statusPointsAddedDto.getAddWil());
         // ??
         for (int i = 5; i < 13; i++) {
             this.write((byte) 0);
         }
-        // ??
+        // element??
         this.write((byte) 0);
         this.write((byte) 0);
-        // add hp
+
+        // earrings added status points
         this.write(0);
-        // cloth added status points for shop
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);
-        //??
+        // cloth added status points
         this.write(statusPointsAddedDto.getAddHp());
-        this.write((byte) 0);
-        this.write((byte) 0);
-        this.write((byte) 0);
-        this.write((byte) 0);
+        this.write(statusPointsAddedDto.getStrength());
+        this.write(statusPointsAddedDto.getStamina());
+        this.write(statusPointsAddedDto.getDexterity());
+        this.write(statusPointsAddedDto.getWillpower());
         // ??
         for (int i = 5; i < 13; ++i) {
             this.write((byte) 0);

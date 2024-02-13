@@ -51,12 +51,12 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         specialSlotEquipment.forEach(this::write);
         cardSlotEquipment.forEach(this::write);
 
-        this.write(BattleUtils.calculatePlayerHp(playerLevel));
-        // status points
-        this.write(player.getStrength());
-        this.write(player.getStamina());
-        this.write(player.getDexterity());
-        this.write(player.getWillpower());
+        // earrings added status points
+        this.write(0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
         // cloth added status points
         this.write(statusPointsAddedDto.getAddHp());
         this.write(statusPointsAddedDto.getStrength());

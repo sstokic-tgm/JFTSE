@@ -65,31 +65,31 @@ public class S2CRoomFittingPlayerInfoPacket extends Packet {
         this.write(player.getStamina());
         this.write(player.getDexterity());
         this.write(player.getWillpower());
-        // cloth added status points
-        this.write(statusPointsAddedDto.getStrength());
-        this.write(statusPointsAddedDto.getStamina());
-        this.write(statusPointsAddedDto.getDexterity());
-        this.write(statusPointsAddedDto.getWillpower());
+        // enchant added status points
+        this.write(statusPointsAddedDto.getAddStr());
+        this.write(statusPointsAddedDto.getAddSta());
+        this.write(statusPointsAddedDto.getAddDex());
+        this.write(statusPointsAddedDto.getAddWil());
         // ??
         for (int i = 5; i < 13; i++) {
             this.write((byte) 0);
         }
-        // ??
+        // element??
         this.write((byte) 0);
         this.write((byte) 0);
-        // add hp
+
+        // earrings added status points
         this.write(0);
-        // cloth added status points for shop
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);
-        //??
+        // cloth added status points
         this.write(statusPointsAddedDto.getAddHp());
-        this.write((byte) 0);
-        this.write((byte) 0);
-        this.write((byte) 0);
-        this.write((byte) 0);
+        this.write(statusPointsAddedDto.getStrength());
+        this.write(statusPointsAddedDto.getStamina());
+        this.write(statusPointsAddedDto.getDexterity());
+        this.write(statusPointsAddedDto.getWillpower());
         // ??
         for (int i = 5; i < 13; ++i) {
             this.write((byte) 0);

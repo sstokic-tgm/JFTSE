@@ -146,12 +146,18 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
         itemIndexList.add(clothEquipment.getDye());
 
         List<ItemPart> itemPartList = itemPartRepository.findByItemIndexIn(itemIndexList);
+        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
+        playerPocketList.removeIf(p -> !p.getCategory().equals(EItemCategory.PARTS.getName()) && !itemIndexList.contains(p.getItemIndex()));
 
         byte strength = 0;
         byte stamina = 0;
         byte dexterity = 0;
         byte willpower = 0;
         int addHp = 0;
+        int addStr = 0;
+        int addSta = 0;
+        int addDex = 0;
+        int addWil = 0;
 
         for (ItemPart itemPart : itemPartList) {
             strength += itemPart.getStrength();
@@ -161,12 +167,23 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
             addHp += itemPart.getAddHp();
         }
 
+        for (PlayerPocket playerPocket : playerPocketList) {
+            addStr += playerPocket.getEnchantStr();
+            addSta += playerPocket.getEnchantSta();
+            addDex += playerPocket.getEnchantDex();
+            addWil += playerPocket.getEnchantWil();
+        }
+
         StatusPointsAddedDto statusPointsAddedDto = new StatusPointsAddedDto();
         statusPointsAddedDto.setStrength(strength);
         statusPointsAddedDto.setStamina(stamina);
         statusPointsAddedDto.setDexterity(dexterity);
         statusPointsAddedDto.setWillpower(willpower);
         statusPointsAddedDto.setAddHp(addHp);
+        statusPointsAddedDto.setAddStr(addStr);
+        statusPointsAddedDto.setAddSta(addSta);
+        statusPointsAddedDto.setAddDex(addDex);
+        statusPointsAddedDto.setAddWil(addWil);
 
         return statusPointsAddedDto;
     }

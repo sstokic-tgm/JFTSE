@@ -18,6 +18,7 @@ import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
@@ -119,7 +120,12 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
             Pocket pocket = pocketService.findById(player.getPocket().getId());
             PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
 
-            S2CUnknownPlayerInfoDataPacket unknownPlayerInfoDataPacket = new S2CUnknownPlayerInfoDataPacket(player, pocket, statusPointsAddedDto, playerStatistic);
+            GuildMember guildMember = guildMemberService.getByPlayer(player);
+            Guild guild = null;
+            if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
+                guild = guildMember.getGuild();
+
+            S2CUnknownPlayerInfoDataPacket unknownPlayerInfoDataPacket = new S2CUnknownPlayerInfoDataPacket(player, pocket, statusPointsAddedDto, playerStatistic, guild);
             S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
             S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
             connection.sendTCP(unknownPlayerInfoDataPacket);

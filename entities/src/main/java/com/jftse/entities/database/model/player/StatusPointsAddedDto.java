@@ -12,4 +12,9 @@ public class StatusPointsAddedDto {
     private Byte willpower = 0;
 
     private Integer addHp = 0;
+
+    private Integer addStr = 0;
+    private Integer addSta = 0;
+    private Integer addDex = 0;
+    private Integer addWil = 0;
 }

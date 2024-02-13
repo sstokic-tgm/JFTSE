@@ -390,7 +390,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
             if (!stageRewards.isEmpty()) {
                 if (wonGame) {
                     final List<Product> winningStageRewards = new ArrayList<>(stageRewards);
-                    winningStageRewards.forEach(p -> System.out.println(p.getName()));
                     if (isBoss) {
                         winningStageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.PARTS.getName()) && !p.getCategory().equals(EItemCategory.LOTTERY.getName()));
                     }

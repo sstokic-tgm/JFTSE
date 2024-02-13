@@ -1,8 +1,11 @@
 package com.jftse.server.core.matchplay.battle;
 
+import com.jftse.server.core.matchplay.Elementable;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +29,9 @@ public class BattleState {
     protected ConcurrentHashMap<Integer, SkillUse> quickSlotSkillUseMap;
     protected AtomicInteger quickSlotSkillUseNoCDDetects;
 
+    protected Elementable offensiveElement;
+    protected List<Elementable> defensiveElements;
+
     protected BattleState(short position, int hp, int str, int sta, int dex, int will) {
         this();
 
@@ -46,5 +52,8 @@ public class BattleState {
 
         quickSlotSkillUseMap = new ConcurrentHashMap<>();
         quickSlotSkillUseNoCDDetects = new AtomicInteger(0);
+
+        offensiveElement = null;
+        defensiveElements = new ArrayList<>();
     }
 }

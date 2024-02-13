@@ -35,6 +35,7 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
     private final PlayerService playerService;
+    private final PetService petService;
 
     public ShopBuyRequestPacketHandler() {
         productService = ServiceManager.getInstance().getProductService();
@@ -42,6 +43,7 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         pocketService = ServiceManager.getInstance().getPocketService();
         playerService = ServiceManager.getInstance().getPlayerService();
+        petService = ServiceManager.getInstance().getPetService();
     }
 
     @Override
@@ -110,9 +112,8 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
             Product product = data.getKey();
             byte option = data.getValue();
 
-            // prevent user from buying pet till it'simplemented
             if (product.getCategory().equals(EItemCategory.PET_CHAR.getName())) {
-                resultGold += product.getPrice0();
+                petService.createPet(product.getItem0(), player);
                 continue;
             }
 
