@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.life.room;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
+import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.player.ClothEquipment;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
@@ -32,6 +33,7 @@ public class RoomPlayer {
     private AtomicBoolean fitting = new AtomicBoolean(false);
     private AtomicBoolean gameAnimationSkipReady = new AtomicBoolean(false);
     private AtomicBoolean connectedToRelay = new AtomicBoolean(false);
+    private Long petId;
 
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);
@@ -145,5 +147,12 @@ public class RoomPlayer {
 
     public void setPosition(short position) {
         this.position.set(position);
+    }
+
+    public Pet getPet() {
+        if (petId == null)
+            return null;
+
+        return ServiceManager.getInstance().getPetService().findById(petId);
     }
 }

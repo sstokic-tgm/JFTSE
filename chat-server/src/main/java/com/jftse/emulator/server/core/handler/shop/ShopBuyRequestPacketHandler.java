@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.shop;
 
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
+import com.jftse.emulator.server.core.packets.pet.S2CPetAddPacket;
 import com.jftse.emulator.server.core.packets.shop.C2SShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
@@ -8,6 +9,7 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.converters.PriceTypeConverter;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auctionhouse.PriceType;
+import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
@@ -113,7 +115,11 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
             byte option = data.getValue();
 
             if (product.getCategory().equals(EItemCategory.PET_CHAR.getName())) {
-                petService.createPet(product.getItem0(), player);
+                Pet pet = petService.createPet(product.getItem0(), player);
+                if (pet != null) {
+                    S2CPetAddPacket petAddPacket = new S2CPetAddPacket(pet);
+                    connection.sendTCP(petAddPacket);
+                }
                 continue;
             }
 

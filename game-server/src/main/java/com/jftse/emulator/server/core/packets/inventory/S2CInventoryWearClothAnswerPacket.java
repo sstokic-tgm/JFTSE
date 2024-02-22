@@ -36,10 +36,10 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write(player.getDexterity());
             this.write(player.getWillpower());
             // enchant added status points
-            this.write(statusPointsAddedDto.getAddStr());
-            this.write(statusPointsAddedDto.getAddSta());
-            this.write(statusPointsAddedDto.getAddDex());
-            this.write(statusPointsAddedDto.getAddWil());
+            this.write((byte) (statusPointsAddedDto.getAddStr() + statusPointsAddedDto.getStrength()));
+            this.write((byte) (statusPointsAddedDto.getAddSta() + statusPointsAddedDto.getStamina()));
+            this.write((byte) (statusPointsAddedDto.getAddDex() + statusPointsAddedDto.getDexterity()));
+            this.write((byte) (statusPointsAddedDto.getAddWil() + statusPointsAddedDto.getWillpower()));
             // ??
             for (int i = 5; i < 13; i++) {
                 this.write((byte) 0);
@@ -98,10 +98,10 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write(player.getDexterity());
             this.write(player.getWillpower());
             // enchant added status points
-            this.write(statusPointsAddedDto.getAddStr());
-            this.write(statusPointsAddedDto.getAddSta());
-            this.write(statusPointsAddedDto.getAddDex());
-            this.write(statusPointsAddedDto.getAddWil());
+            this.write((byte) (statusPointsAddedDto.getAddStr() + statusPointsAddedDto.getStrength()));
+            this.write((byte) (statusPointsAddedDto.getAddSta() + statusPointsAddedDto.getStamina()));
+            this.write((byte) (statusPointsAddedDto.getAddDex() + statusPointsAddedDto.getDexterity()));
+            this.write((byte) (statusPointsAddedDto.getAddWil() + statusPointsAddedDto.getWillpower()));
             // ??
             for (int i = 5; i < 13; i++) {
                 this.write((byte) 0);

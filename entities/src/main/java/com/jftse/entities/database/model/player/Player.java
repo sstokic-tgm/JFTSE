@@ -3,16 +3,15 @@ package com.jftse.entities.database.model.player;
 import com.jftse.entities.database.model.AbstractBaseModel;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.challenge.ChallengeProgress;
-import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.entities.database.model.tutorial.TutorialProgress;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -71,6 +70,7 @@ public class Player extends AbstractBaseModel {
     private Byte level = 1;
     private Integer expPoints = 0;
     private Boolean nameChangeAllowed = false;
+    private Date lastNameChangeDate;
     private Integer gold = 0;
     private Integer couplePoints = 0;
     private Byte playerType;

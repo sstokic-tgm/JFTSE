@@ -26,9 +26,8 @@ public class RoomAllowBattlemonChangePacketHandler extends AbstractPacketHandler
         Room room = client.getActiveRoom();
         if (room != null) {
             byte allowBattlemon = changeRoomAllowBattlemonRequestPacket.getAllowBattlemon();
-            // disable battlemon
             synchronized (room) {
-                room.setAllowBattlemon((byte) 0);
+                room.setAllowBattlemon(allowBattlemon);
             }
 
             S2CRoomAllowBattlemonChangeAnswerPacket roomAllowBattlemonChangeAnswerPacket = new S2CRoomAllowBattlemonChangeAnswerPacket(room.getAllowBattlemon());

@@ -35,7 +35,7 @@ public class S2CPlayerListPacket extends Packet {
                 this.write(player.getDexterity());
                 this.write(player.getWillpower());
                 this.write(player.getStatusPoints());
-                this.write(player.getNameChangeAllowed()); // old, "Change Nickname"
+                this.write(false); // old, "Change Nickname"
                 this.write(player.getNameChangeAllowed()); // new, change nickname item/icon
 
                 ClothEquipment clothEquipment = player.getClothEquipment();

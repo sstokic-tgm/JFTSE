@@ -17,7 +17,6 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.AuthTokenService;
 import com.jftse.server.core.service.AuthenticationService;
 import com.jftse.server.core.service.ClientWhitelistService;
-import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.S2CDisconnectAnswerPacket;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
@@ -36,7 +35,7 @@ public class LoginPacketHandler extends AbstractPacketHandler {
     private final AuthenticationService authenticationService;
     private final ClientWhitelistService clientWhitelistService;
     private final AuthTokenService authTokenService;
-    private final PlayerService playerService;
+
 
     private final ConfigService configService;
 
@@ -44,7 +43,6 @@ public class LoginPacketHandler extends AbstractPacketHandler {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         clientWhitelistService = ServiceManager.getInstance().getClientWhitelistService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
-        playerService = ServiceManager.getInstance().getPlayerService();
 
         configService = ServiceManager.getInstance().getConfigService();
     }

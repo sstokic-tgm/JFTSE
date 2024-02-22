@@ -12,6 +12,8 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 
+import java.util.Random;
+
 @PacketOperationIdentifier(PacketOperations.C2SRoomCreateQuick)
 public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
     private C2SRoomCreateQuickRequestPacket roomQuickCreateRequestPacket;
@@ -51,6 +53,11 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         room.setRoomType(roomQuickCreateRequestPacket.getRoomType());
         room.setAllowBattlemon(room.getRoomType() == 2 ? (byte) 1 : (byte) 0);
 
+        if (roomQuickCreateRequestPacket.getMode() == -1) {
+            final Random random = new Random();
+            roomQuickCreateRequestPacket.setMode((byte) random.nextInt(2));
+        }
+
         room.setMode(roomQuickCreateRequestPacket.getMode());
         room.setRule((byte) 0);
 
@@ -58,6 +65,9 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
             room.setPlayers((byte) 4);
         else
             room.setPlayers(playerSize == 0 ? 2 : playerSize);
+
+        if (room.getRoomType() == RoomType.BATTLEMON)
+            room.setPlayers((byte) 4);
 
         room.setPrivate(false);
         room.setSkillFree(false);

@@ -8,6 +8,7 @@ import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeGame;
 import com.jftse.emulator.server.core.singleplay.tutorial.TutorialGame;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.net.Client;
@@ -51,6 +52,8 @@ public class FTClient extends Client<FTConnection> {
     private AtomicBoolean isChangingSlot = new AtomicBoolean(false);
 
     private AtomicInteger currentRequestType = new AtomicInteger(0);
+
+    private Pet activePet;
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;

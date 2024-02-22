@@ -20,8 +20,13 @@ public enum PacketOperations {
     C2SLoginFirstPlayerRequest(0x101E),
     S2CLoginFirstPlayerAnswer(0x101F),
     C2SLoginAliveClient(0x100F),
+    C2SRequestPlayerList(0x1009),
     S2CPlayerList(0x1005),
     S2CGameServerList(0x1010),
+    C2SPlayerNameChangeOld(0x1020),
+    S2CPlayerNameChangeAnswer(0x1021),
+    C2SPlayerNameChange(0x1022),
+    S2CPlayerNameChangeMessage(0x1023),
 
     C2SGameReceiveData(0x105E),
     S2CGameAnswerData(0x105F),
@@ -180,6 +185,11 @@ public enum PacketOperations {
 
     C2SPetDataRequest(0x151A),
     S2CPetDataAnswer(0x151B),
+    C2SPetPickupRequest(0x151E),
+    S2CPetPickupAnswer(0x151F),
+    S2CPetAdd(0x1520),
+    C2SPetRequestRoom(0x1D56),
+    S2CPetRequestRoomAnswer(0x1D57),
 
     C2SShopMoneyReq(0x1B60),
     S2CShopMoneyAnswer(0x1B61),

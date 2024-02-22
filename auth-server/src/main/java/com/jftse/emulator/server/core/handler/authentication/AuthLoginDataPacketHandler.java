@@ -12,12 +12,16 @@ import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.AuthTokenService;
 import com.jftse.server.core.service.AuthenticationService;
+import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import lombok.extern.log4j.Log4j2;
@@ -35,11 +39,13 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
     private final AuthenticationService authenticationService;
     private final AuthTokenService authTokenService;
     private final PlayerService playerService;
+    private final PlayerPocketService playerPocketService;
 
     public AuthLoginDataPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
         playerService = ServiceManager.getInstance().getPlayerService();
+        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
     }
 
     @Override
@@ -80,7 +86,19 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             List<Player> playerList = playerService.findAllByAccount(account);
             boolean hasNewChar = playerList.stream().anyMatch(p -> DateUtils.isSameDay(p.getCreated(), new Date()) && !p.getAlreadyCreated());
 
-            if (hasNewChar) {
+            boolean hasNameChangeItem = false;
+            for (Player p : playerList) {
+                List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItems(p.getPocket());
+                final boolean nameChangeItemPresent = ppList.stream()
+                        .anyMatch(pp -> pp.getCategory().equals(EItemCategory.SPECIAL.getName()) && pp.getItemIndex() == 4);
+                if (nameChangeItemPresent && !p.getNameChangeAllowed()) {
+                    p.setNameChangeAllowed(true);
+                    p = playerService.save(p);
+                    hasNameChangeItem = true;
+                }
+            }
+
+            if (hasNewChar || hasNameChangeItem) {
                 S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
                 connection.sendTCP(playerListPacket);
             }

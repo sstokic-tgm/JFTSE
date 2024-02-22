@@ -181,6 +181,7 @@ public class SendGiftRequestHandler extends AbstractHandler {
                             cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
 
                             playerPocket.setCreated(cal.getTime());
+                            playerPocket.setItemCount(1);
                         }
                         playerPocket.setPocket(receiverPocket);
 

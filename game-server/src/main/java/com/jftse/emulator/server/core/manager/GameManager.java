@@ -433,7 +433,6 @@ public class GameManager {
 
     public synchronized void internalHandleRoomCreate(final FTConnection connection, Room room) {
         room.getPositions().set(0, RoomPositionState.InUse);
-        room.setAllowBattlemon((byte) 0);
 
         byte players = room.getPlayers();
         if (players == 2) {

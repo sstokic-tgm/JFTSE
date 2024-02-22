@@ -12,6 +12,7 @@ import com.jftse.emulator.server.core.packets.messenger.S2CFriendRequestNotifica
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
 import com.jftse.emulator.server.core.packets.pet.S2CPetDataAnswerPacket;
+import com.jftse.emulator.server.core.packets.pet.S2CPetPickupAnswerPacket;
 import com.jftse.emulator.server.core.packets.player.*;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
@@ -142,6 +143,9 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
 
             S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
             connection.sendTCP(petDataAnswerPacket);
+
+            S2CPetPickupAnswerPacket petPickupAnswerPacket = new S2CPetPickupAnswerPacket((short) 0, -1);
+            connection.sendTCP(petPickupAnswerPacket);
 
             S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
             connection.sendTCP(gameServerAnswerPacket);

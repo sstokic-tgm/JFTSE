@@ -90,15 +90,11 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
 
         if (checksum % 2 == 0) {
             checksum += (short) 1587;
-
-            data[2] = BitKit.getBytes(checksum)[0];
-            data[3] = BitKit.getBytes(checksum)[1];
         } else {
             checksum += (short) 1568;
-
-            data[2] = BitKit.getBytes(checksum)[0];
-            data[3] = BitKit.getBytes(checksum)[1];
         }
+        data[2] = BitKit.getBytes(checksum)[0];
+        data[3] = BitKit.getBytes(checksum)[1];
     }
 
     private byte[] encryptBytes(byte[] decryptedBuffer, int size) {
