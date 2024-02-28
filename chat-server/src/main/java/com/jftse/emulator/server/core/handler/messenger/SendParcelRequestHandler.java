@@ -120,6 +120,12 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
                     parcel.setCategory(item.getCategory());
                     parcel.setItemIndex(item.getItemIndex());
                     parcel.setUseType(item.getUseType());
+                    parcel.setEnchantStr(item.getEnchantStr());
+                    parcel.setEnchantSta(item.getEnchantSta());
+                    parcel.setEnchantDex(item.getEnchantDex());
+                    parcel.setEnchantWil(item.getEnchantWil());
+                    parcel.setEnchantElement(item.getEnchantElement());
+                    parcel.setEnchantLevel(item.getEnchantLevel());
 
                     // TODO: Is this right?
                     if (receiver.getId().equals(sender.getId())) {

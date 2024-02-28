@@ -147,7 +147,7 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
 
         List<ItemPart> itemPartList = itemPartRepository.findByItemIndexIn(itemIndexList);
         List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
-        playerPocketList.removeIf(p -> !p.getCategory().equals(EItemCategory.PARTS.getName()) && !itemIndexList.contains(p.getItemIndex()));
+        playerPocketList.removeIf(playerPocket -> !itemIndexList.contains(playerPocket.getItemIndex()));
 
         byte strength = 0;
         byte stamina = 0;

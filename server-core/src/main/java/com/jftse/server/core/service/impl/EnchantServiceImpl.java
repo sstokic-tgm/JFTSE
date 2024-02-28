@@ -86,7 +86,7 @@ public class EnchantServiceImpl implements EnchantService {
             return false;
         }
 
-        final boolean isMaxElemental = ip.getEnchantElement() && pp.getEnchantLevel() == 9;
+        final boolean isMaxElemental = ip.getEnchantElement() && pp.getEnchantLevel() == 9 && pp.getEnchantElement().equals(elementalKind.getValue());
         final boolean isMaxStat = isMaxStat(elementalKind, ip, pp);
 
         if (forElemental) {

@@ -5,7 +5,7 @@ public enum PacketOperations {
     C2SLoginRequest(0x0FA1),
     S2CLoginAnswerPacket(0x0FA2),
     C2SHeartbeat(0x0FA3),
-    C2SServerNotice(0x0FA5),
+    C2SSessionTime(0x0FA5),
     S2CServerNotice(0x0FA6),
     C2SDisconnectRequest(0x0FA7),
     S2CDisconnectAnswer(0xFA8),
