@@ -53,6 +53,12 @@ public class DenyParcelRequestHandler extends AbstractPacketHandler {
             item.setItemIndex(parcel.getItemIndex());
             item.setUseType(parcel.getUseType());
             item.setPocket(parcel.getSender().getPocket());
+            item.setEnchantStr(parcel.getEnchantStr());
+            item.setEnchantSta(parcel.getEnchantSta());
+            item.setEnchantDex(parcel.getEnchantDex());
+            item.setEnchantWil(parcel.getEnchantWil());
+            item.setEnchantElement(parcel.getEnchantElement());
+            item.setEnchantLevel(parcel.getEnchantLevel());
         } else {
             item.setItemCount(item.getItemCount() + parcel.getItemCount());
         }
