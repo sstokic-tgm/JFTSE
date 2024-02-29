@@ -5,6 +5,10 @@ import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.entities.database.model.item.ItemEnchantLevel;
+import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.pocket.Pocket;
+import com.jftse.server.core.item.EElementalKind;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
@@ -31,6 +35,7 @@ import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.scenario.MScenarios;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.emulator.server.core.matchplay.guardian.BossBattlePhaseable;
+import com.jftse.server.core.matchplay.*;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.matchplay.battle.SkillCrystal;
@@ -248,7 +253,57 @@ public class MatchplayGuardianGame extends MatchplayGame {
         short totalSta = (short) (baseSta + roomPlayer.getStatusPointsAddedDto().getStamina() + roomPlayer.getStatusPointsAddedDto().getAddSta());
         short totalDex = (short) (baseDex + roomPlayer.getStatusPointsAddedDto().getDexterity() + roomPlayer.getStatusPointsAddedDto().getAddDex());
         short totalWill = (short) (baseWill + roomPlayer.getStatusPointsAddedDto().getWillpower() + roomPlayer.getStatusPointsAddedDto().getAddWil());
-        return new PlayerBattleState(roomPlayer.getPosition(), roomPlayer.getPlayerId(), totalHp, totalStr, totalSta, totalDex, totalWill);
+
+        PlayerBattleState pbs = new PlayerBattleState(roomPlayer.getPosition(), roomPlayer.getPlayerId(), totalHp, totalStr, totalSta, totalDex, totalWill);
+
+        Map<String, Integer> equipment = ServiceManager.getInstance().getClothEquipmentService().getEquippedCloths(roomPlayer.getPlayer());
+        Pocket pocket = roomPlayer.getPlayer().getPocket();
+        pocket = ServiceManager.getInstance().getPocketService().findById(pocket.getId());
+        if (!equipment.isEmpty()) {
+            Integer racketPlayerPocketId = equipment.get("racket");
+            PlayerPocket offensivePP = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocket(racketPlayerPocketId.longValue(), pocket);
+            if (offensivePP != null) {
+                Elementable element = getElementalProperties(offensivePP);
+                pbs.setOffensiveElement(element);
+            }
+            final Pocket finalPocket = pocket;
+            equipment.entrySet().stream()
+                    .filter(e -> !e.getKey().equals("racket")) // we dont need offensive element here
+                    .forEach(e -> {
+                        Integer playerPocketId = e.getValue();
+                        PlayerPocket pp = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocket(playerPocketId.longValue(), finalPocket);
+                        if (pp != null) {
+                            Elementable element = getElementalProperties(pp);
+                            if (element != null) {
+                                pbs.getDefensiveElements().add(element);
+                            }
+                        }
+                    });
+        }
+
+        return pbs;
+    }
+
+    private Elementable getElementalProperties(PlayerPocket pp) {
+        return switch (pp.getEnchantElement()) {
+            case 5 -> {
+                ItemEnchantLevel itemEnchantLevel = ServiceManager.getInstance().getEnchantService().getItemEnchantLevel(EElementalKind.EARTH.getNameNormalized(), pp.getEnchantLevel());
+                yield new EarthElement(itemEnchantLevel.getMinEfficiency(), itemEnchantLevel.getMaxEfficiency());
+            }
+            case 6 -> {
+                ItemEnchantLevel itemEnchantLevel = ServiceManager.getInstance().getEnchantService().getItemEnchantLevel(EElementalKind.WIND.getNameNormalized(), pp.getEnchantLevel());
+                yield new WindElement(itemEnchantLevel.getMinEfficiency(), itemEnchantLevel.getMaxEfficiency());
+            }
+            case 7 -> {
+                ItemEnchantLevel itemEnchantLevel = ServiceManager.getInstance().getEnchantService().getItemEnchantLevel(EElementalKind.WATER.getNameNormalized(), pp.getEnchantLevel());
+                yield new WaterElement(itemEnchantLevel.getMinEfficiency(), itemEnchantLevel.getMaxEfficiency());
+            }
+            case 8 -> {
+                ItemEnchantLevel itemEnchantLevel = ServiceManager.getInstance().getEnchantService().getItemEnchantLevel(EElementalKind.FIRE.getNameNormalized(), pp.getEnchantLevel());
+                yield new FireElement(itemEnchantLevel.getMinEfficiency(), itemEnchantLevel.getMaxEfficiency());
+            }
+            default -> null;
+        };
     }
 
     public GuardianBattleState createGuardianBattleState(boolean isHardMode, GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
