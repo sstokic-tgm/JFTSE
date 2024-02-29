@@ -90,10 +90,10 @@ public class MatchplayBattleGame extends MatchplayGame {
         short baseDex = roomPlayer.getPlayer().getDexterity();
         short baseWill = roomPlayer.getPlayer().getWillpower();
         short totalHp = (short) (baseHp + roomPlayer.getStatusPointsAddedDto().getAddHp());
-        short totalStr = (short) (baseStr + roomPlayer.getStatusPointsAddedDto().getStrength());
-        short totalSta = (short) (baseSta + roomPlayer.getStatusPointsAddedDto().getStamina());
-        short totalDex = (short) (baseDex + roomPlayer.getStatusPointsAddedDto().getDexterity());
-        short totalWill = (short) (baseWill + roomPlayer.getStatusPointsAddedDto().getWillpower());
+        short totalStr = (short) (baseStr + roomPlayer.getStatusPointsAddedDto().getStrength() + roomPlayer.getStatusPointsAddedDto().getAddStr());
+        short totalSta = (short) (baseSta + roomPlayer.getStatusPointsAddedDto().getStamina() + roomPlayer.getStatusPointsAddedDto().getAddSta());
+        short totalDex = (short) (baseDex + roomPlayer.getStatusPointsAddedDto().getDexterity() + roomPlayer.getStatusPointsAddedDto().getAddDex());
+        short totalWill = (short) (baseWill + roomPlayer.getStatusPointsAddedDto().getWillpower() + roomPlayer.getStatusPointsAddedDto().getAddWil());
         return new PlayerBattleState(roomPlayer.getPosition(), roomPlayer.getPlayerId(), totalHp, totalStr, totalSta, totalDex, totalWill);
     }
 
