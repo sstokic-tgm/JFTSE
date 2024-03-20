@@ -62,11 +62,17 @@ public class EnchantServiceImpl implements EnchantService {
 
     @Override
     public boolean isEnchantable(int playerPocketId) {
+        PlayerPocket pp = playerPocketRepository.findById((long) playerPocketId).orElse(null);
         ItemPart ip = getItemPart(playerPocketId);
-        if (ip == null) {
+        if (pp == null || ip == null) {
             return false;
         }
-        return ip.getMaxStrength() > 0 || ip.getMaxStamina() > 0 || ip.getMaxDexterity() > 0 || ip.getMaxWillpower() > 0;
+        byte str = (byte) (ip.getStrength() + pp.getEnchantStr());
+        byte sta = (byte) (ip.getStamina() + pp.getEnchantSta());
+        byte dex = (byte) (ip.getDexterity() + pp.getEnchantDex());
+        byte wil = (byte) (ip.getWillpower() + pp.getEnchantWil());
+
+        return ip.getMaxStrength() > str || ip.getMaxStamina() > sta || ip.getMaxDexterity() > dex || ip.getMaxWillpower() > wil;
     }
 
     @Override
@@ -98,10 +104,10 @@ public class EnchantServiceImpl implements EnchantService {
     private boolean isMaxStat(EElementalKind elementalKind, ItemPart ip, PlayerPocket pp) {
         int ek = elementalKind.getValue();
         return switch (ek) {
-            case 1 -> ip.getMaxStrength() > 0 && pp.getEnchantStr().byteValue() == ip.getMaxStrength();
-            case 2 -> ip.getMaxStamina() > 0 && pp.getEnchantSta().byteValue() == ip.getMaxStamina();
-            case 3 -> ip.getMaxDexterity() > 0 && pp.getEnchantDex().byteValue() == ip.getMaxDexterity();
-            case 4 -> ip.getMaxWillpower() > 0 && pp.getEnchantWil().byteValue() == ip.getMaxWillpower();
+            case 1 -> ip.getMaxStrength() > 0 && (pp.getEnchantStr().byteValue() + ip.getStrength()) == ip.getMaxStrength();
+            case 2 -> ip.getMaxStamina() > 0 && (pp.getEnchantSta().byteValue() + ip.getStamina()) == ip.getMaxStamina();
+            case 3 -> ip.getMaxDexterity() > 0 && (pp.getEnchantDex().byteValue() + ip.getDexterity()) == ip.getMaxDexterity();
+            case 4 -> ip.getMaxWillpower() > 0 && (pp.getEnchantWil().byteValue() + ip.getWillpower()) == ip.getMaxWillpower();
             default -> false;
         };
     }
