@@ -50,7 +50,7 @@ import java.util.concurrent.Future;
 @Log4j2
 @Component
 @Order(1)
-public class DbDataLoader implements CommandLineRunner {
+public class DBDataLoader implements CommandLineRunner {
     @Autowired
     private LevelExpRepository levelExpRepository;
     @Autowired
@@ -98,6 +98,10 @@ public class DbDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        if (args.length > 0 && args[0].equals("-export")) {
+            return;
+        }
+
         log.info("Loading data into the database...");
 
         boolean dataLoaded = true;
