@@ -173,11 +173,13 @@ public class DBExporter {
                 guardianElement.attribute("RewardEXP").setValue(String.valueOf(guardian.getRewardExp()));
                 guardianElement.attribute("RewardGOLD").setValue(String.valueOf(guardian.getRewardGold()));
                 guardianElement.attribute("BtItemID").setValue(String.valueOf(guardian.getBtItemID()));
-                guardianElement.attribute("Earth").setValue(guardian.getEarth() ? "1" : "0");
-                guardianElement.attribute("Wind").setValue(guardian.getWind() ? "1" : "0");
-                guardianElement.attribute("Fire").setValue(guardian.getFire() ? "1" : "0");
-                guardianElement.attribute("Water").setValue(guardian.getWater() ? "1" : "0");
-                guardianElement.attribute("ElementGrade").setValue(String.valueOf(guardian.getElementGrade()));
+                if (guardian.getEarth() != null && guardian.getWind() != null && guardian.getFire() != null && guardian.getWater() != null) {
+                    guardianElement.attribute("Earth").setValue(guardian.getEarth() ? "1" : "0");
+                    guardianElement.attribute("Wind").setValue(guardian.getWind() ? "1" : "0");
+                    guardianElement.attribute("Fire").setValue(guardian.getFire() ? "1" : "0");
+                    guardianElement.attribute("Water").setValue(guardian.getWater() ? "1" : "0");
+                    guardianElement.attribute("ElementGrade").setValue(String.valueOf(guardian.getElementGrade()));
+                }
 
                 log.debug("Guardian updated: " + guardian.getId() + " - " + guardian.getName());
             }
