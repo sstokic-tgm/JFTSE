@@ -9,6 +9,7 @@ import com.jftse.entities.database.model.item.ItemEnchantLevel;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.item.EElementalKind;
+import com.jftse.server.core.item.EElementalProperty;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
@@ -308,7 +309,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     public GuardianBattleState createGuardianBattleState(boolean isHardMode, GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
         if (isHardMode && !isAdvancedBossGuardianMode) {
-            return new GuardianBattleState(guardian, guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+            GuardianBattleState gbs = new GuardianBattleState(guardian, guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+            addElementsToGuardian(guardian, gbs.getElements());
+
+            return gbs;
         }
 
         int extraHp = guardian.getHpPer() * activePlayingPlayersCount;
@@ -332,11 +336,44 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 advancedGuardianState.getCurrentHealth().set(newHp);
                 advancedGuardianState.setMaxHealth(newHp);
             }
+
+            addElementsToGuardian(guardian, advancedGuardianState.getElements());
+
             advancedGuardianState.loadSkills();
             return advancedGuardianState;
         }
 
-        return new GuardianBattleState(guardian, guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+        GuardianBattleState gbs = new GuardianBattleState(guardian, guardianPosition, totalHp, totalStr, totalSta, totalDex, totalWill, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
+        addElementsToGuardian(guardian, gbs.getElements());
+
+        return gbs;
+    }
+
+    private void addElementsToGuardian(GuardianBase guardian, List<Elementable> elements) {
+        if (guardian.getElementGrade() == null || guardian.getElementGrade() == 0) {
+            return;
+        }
+
+        if (guardian.getEarth() != null && guardian.getEarth()) {
+            ItemEnchantLevel itemEnchantLevel = getItemEnchantLevel(EElementalKind.EARTH, guardian.getElementGrade());
+            elements.add(new EarthElement(itemEnchantLevel.getMinEfficiency() + 20.0, itemEnchantLevel.getMaxEfficiency() + 20.0));
+        }
+        if (guardian.getWind() != null && guardian.getWind()) {
+            ItemEnchantLevel itemEnchantLevel = getItemEnchantLevel(EElementalKind.WIND, guardian.getElementGrade());
+            elements.add(new WindElement(itemEnchantLevel.getMinEfficiency() + 20.0, itemEnchantLevel.getMaxEfficiency() + 20.0));
+        }
+        if (guardian.getWater() != null && guardian.getWater()) {
+            ItemEnchantLevel itemEnchantLevel = getItemEnchantLevel(EElementalKind.WATER, guardian.getElementGrade());
+            elements.add(new WaterElement(itemEnchantLevel.getMinEfficiency() + 20.0, itemEnchantLevel.getMaxEfficiency() + 20.0));
+        }
+        if (guardian.getFire() != null && guardian.getFire()) {
+            ItemEnchantLevel itemEnchantLevel = getItemEnchantLevel(EElementalKind.FIRE, guardian.getElementGrade());
+            elements.add(new FireElement(itemEnchantLevel.getMinEfficiency() + 20.0, itemEnchantLevel.getMaxEfficiency() + 20.0));
+        }
+    }
+
+    private ItemEnchantLevel getItemEnchantLevel(EElementalKind kind, int level) {
+        return ServiceManager.getInstance().getEnchantService().getItemEnchantLevel(kind.getNameNormalized(), level);
     }
 
     public long getStageTimePlayingInSeconds() {
