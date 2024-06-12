@@ -18,6 +18,7 @@ public abstract class BaseElement implements Elementable {
         this.random = new Random();
     }
 
+    @Override
     public EElementalProperty getProperty() {
         return property;
     }

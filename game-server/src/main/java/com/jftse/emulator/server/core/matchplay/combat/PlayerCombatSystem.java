@@ -6,9 +6,14 @@ import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.utils.BattleUtils;
+import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.entities.database.model.battle.WillDamage;
+import com.jftse.server.core.item.EElementalProperty;
+import com.jftse.server.core.matchplay.Elementable;
 import com.jftse.server.core.matchplay.battle.BattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
+
+import java.util.List;
 
 public class PlayerCombatSystem implements PlayerCombatable {
     private MatchplayGame game;
@@ -22,7 +27,7 @@ public class PlayerCombatSystem implements PlayerCombatable {
     }
 
     @Override
-    public short dealDamage(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) throws ValidationException {
+    public short dealDamage(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
         int totalDamageToDeal = damage;
         PlayerBattleState attackingPlayer = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
@@ -38,6 +43,8 @@ public class PlayerCombatSystem implements PlayerCombatable {
         if (isNormalDamageSkill) {
             totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
         }
+
+        Elementable offensiveElement = attackingPlayer.getOffensiveElement();
 
         PlayerBattleState targetPlayer = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
@@ -58,6 +65,24 @@ public class PlayerCombatSystem implements PlayerCombatable {
                 totalDamageToDeal = -1;
             } else {
                 totalDamageToDeal += damageToDeny;
+            }
+
+            if (totalDamageToDeal != -1 && offensiveElement != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
+                double efficiency = offensiveElement.getEfficiency();
+
+                List<Elementable> defensiveElements = targetPlayer.getDefensiveElements();
+                for (Elementable defensiveElement : defensiveElements) {
+                    if (offensiveElement.isStrongAgainst(defensiveElement)) {
+                        efficiency += 15;
+                    } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
+                        efficiency -= 10;
+                    } else if (offensiveElement.isResistantTo(defensiveElement)) {
+                        efficiency -= 5;
+                    }
+                }
+
+                final double efficiencyMultiplier = 1 + (efficiency / 100.0);
+                totalDamageToDeal *= (int) efficiencyMultiplier;
             }
         }
 

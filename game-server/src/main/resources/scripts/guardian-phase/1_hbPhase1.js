@@ -81,17 +81,17 @@ var phase = {
     onHeal: function (targetGuardian, healAmount) {
         return game.getGuardianCombatSystem().heal(targetGuardian, healAmount);
     },
-    onDealDamage: function (attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff) {
+    onDealDamage: function (attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill) {
         let targetGuardianState = game.getGuardianBattleStateByPosition(targetGuardian);
         if (targetGuardianState) {
             if (phase1.isBossImmune && targetGuardianState.isBoss()) {
                 return targetGuardianState.getCurrentHealth().get();
             }
         }
-        return game.getGuardianCombatSystem().dealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff);
+        return game.getGuardianCombatSystem().dealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill);
     },
-    onDealDamageToPlayer: function (attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff) {
-        return game.getGuardianCombatSystem().dealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff);
+    onDealDamageToPlayer: function (attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill) {
+        return game.getGuardianCombatSystem().dealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill);
     },
     onDealDamageOnBallLoss: function (attackerPos, targetPos, hasAttackerWillBuff) {
         let targetGuardianState = game.getGuardianBattleStateByPosition(targetPos);

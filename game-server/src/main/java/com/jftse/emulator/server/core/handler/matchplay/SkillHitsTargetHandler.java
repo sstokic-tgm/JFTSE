@@ -228,13 +228,13 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 if (skillDamage > 1) {
                     newHealth = battleGame.getPlayerCombatSystem().heal(targetPosition, skillDamage);
                 } else if (denyDamage) {
-                    newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false);
+                    newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                 } else if (skillDamage == 0) {
                     newHealth = battleGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                 } else if (!skillHitsTarget.isApplySkillEffect()) {
                     return false;
                 } else {
-                    newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+                    newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                 }
             } catch (ValidationException ve) {
                 log.warn(ve.getMessage());
@@ -257,9 +257,9 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                         newHealth = guardianGame.getPlayerCombatSystem().heal(targetPosition, skillDamage);
                     } else if (denyDamage) {
                         if (isAdvancedBossGuardianModeActive) {
-                            newHealth = (short) guardianGame.getPhaseManager().onDealDamageToPlayer(attackerPosition, targetPosition, (short) -1, false, false);
+                            newHealth = (short) guardianGame.getPhaseManager().onDealDamageToPlayer(attackerPosition, targetPosition, (short) -1, false, false, skill);
                         } else {
-                            newHealth = guardianGame.getGuardianCombatSystem().dealDamageToPlayer(attackerPosition, targetPosition, (short) -1, false, false);
+                            newHealth = guardianGame.getGuardianCombatSystem().dealDamageToPlayer(attackerPosition, targetPosition, (short) -1, false, false, skill);
                         }
                     } else if (skillDamage == 0) {
                         newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
@@ -267,9 +267,9 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                         return false;
                     } else {
                         if (isAdvancedBossGuardianModeActive) {
-                            newHealth = (short) guardianGame.getPhaseManager().onDealDamageToPlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+                            newHealth = (short) guardianGame.getPhaseManager().onDealDamageToPlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                         } else {
-                            newHealth = guardianGame.getGuardianCombatSystem().dealDamageToPlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+                            newHealth = guardianGame.getGuardianCombatSystem().dealDamageToPlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                         }
                     }
                 } catch (ValidationException ve) {
@@ -289,17 +289,17 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                         if (skillDamage > 1) {
                             newHealth = (short) guardianGame.getPhaseManager().onHeal(targetPosition, skillDamage);
                         } else if (denyDamage) {
-                            newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, (short) -1, false, false);
+                            newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                         } else {
-                            newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+                            newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                         }
                     } else {
                         if (skillDamage > 1) {
                             newHealth = guardianGame.getGuardianCombatSystem().heal(targetPosition, skillDamage);
                         } else if (denyDamage) {
-                            newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false);
+                            newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                         } else {
-                            newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff);
+                            newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                         }
                     }
                 } catch (ValidationException ve) {

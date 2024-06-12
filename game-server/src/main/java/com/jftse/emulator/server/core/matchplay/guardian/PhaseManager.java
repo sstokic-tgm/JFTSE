@@ -4,6 +4,7 @@ import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.task.GuardianAttackTask;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -183,13 +184,13 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) {
-        var result = executeTask(() -> currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff));
+    public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+        var result = executeTask(() -> currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill));
         return result == null ? 0 : result;
     }
 
-    public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) {
-        var result = executeTask(() -> currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff));
+    public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+        var result = executeTask(() -> currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill));
         return result == null ? 0 : result;
     }
 

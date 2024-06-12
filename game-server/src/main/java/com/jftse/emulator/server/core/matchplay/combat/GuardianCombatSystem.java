@@ -3,10 +3,16 @@ package com.jftse.emulator.server.core.matchplay.combat;
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.utils.BattleUtils;
+import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.entities.database.model.battle.WillDamage;
+import com.jftse.server.core.item.EElementalProperty;
+import com.jftse.server.core.matchplay.Elementable;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Log4j2
 public class GuardianCombatSystem implements GuardianCombatable {
@@ -17,7 +23,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
     }
 
     @Override
-    public short dealDamage(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) throws ValidationException {
+    public short dealDamage(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
         int totalDamageToDeal = damage;
         PlayerBattleState attackingPlayer = game.getPlayerBattleStates().stream()
                 .filter(x -> x.getPosition() == attackerPos)
@@ -28,6 +34,8 @@ public class GuardianCombatSystem implements GuardianCombatable {
         if (attackingPlayer != null && isNormalDamageSkill) {
             totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
         }
+
+        Elementable offensiveElement = attackingPlayer.getOffensiveElement();
 
         GuardianBattleState targetGuardian = game.getGuardianBattleStates().stream()
                 .filter(x -> x.getPosition() == targetPos)
@@ -43,6 +51,24 @@ public class GuardianCombatSystem implements GuardianCombatable {
                 totalDamageToDeal = -1;
             } else {
                 totalDamageToDeal += damageToDeny;
+            }
+
+            if (totalDamageToDeal != -1 && offensiveElement != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
+                double efficiency = offensiveElement.getEfficiency();
+
+                List<Elementable> defensiveElements = targetGuardian.getElements();
+                for (Elementable defensiveElement : defensiveElements) {
+                    if (offensiveElement.isStrongAgainst(defensiveElement)) {
+                        efficiency += 15;
+                    } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
+                        efficiency -= 10;
+                    } else if (offensiveElement.isResistantTo(defensiveElement)) {
+                        efficiency -= 5;
+                    }
+                }
+
+                final double efficiencyMultiplier = 1 + (efficiency / 100.0);
+                totalDamageToDeal *= (int) efficiencyMultiplier;
             }
         }
 
@@ -111,7 +137,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
     }
 
     @Override
-    public short dealDamageToPlayer(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff) throws ValidationException {
+    public short dealDamageToPlayer(int attackerPos, int targetPos, short damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
         int totalDamageToDeal = damage;
         GuardianBattleState attackingGuardian = game.getGuardianBattleStates().stream()
                 .filter(x -> x.getPosition() == attackerPos)
@@ -121,6 +147,15 @@ public class GuardianCombatSystem implements GuardianCombatable {
         boolean isNormalDamageSkill = Math.abs(damage) != 1;
         if (attackingGuardian != null && isNormalDamageSkill) {
             totalDamageToDeal = BattleUtils.calculateDmg(attackingGuardian.getStr(), damage, hasAttackerDmgBuff);
+        }
+
+        Elementable offensiveElement = null;
+        if (attackingGuardian != null) {
+            final List<Elementable> elementList = attackingGuardian.getElements();
+            offensiveElement = elementList.stream()
+                    .filter(x -> x.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue()))
+                    .findFirst()
+                    .orElse(null);
         }
 
         PlayerBattleState targetPlayer = game.getPlayerBattleStates().stream()
@@ -137,6 +172,24 @@ public class GuardianCombatSystem implements GuardianCombatable {
                 totalDamageToDeal = -1;
             } else {
                 totalDamageToDeal += damageToDeny;
+            }
+
+            if (totalDamageToDeal != -1 && offensiveElement != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
+                double efficiency = offensiveElement.getEfficiency();
+
+                List<Elementable> defensiveElements = targetPlayer.getDefensiveElements();
+                for (Elementable defensiveElement : defensiveElements) {
+                    if (offensiveElement.isStrongAgainst(defensiveElement)) {
+                        efficiency += 15;
+                    } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
+                        efficiency -= 10;
+                    } else if (offensiveElement.isResistantTo(defensiveElement)) {
+                        efficiency -= 5;
+                    }
+                }
+
+                final double efficiencyMultiplier = 1 + (efficiency / 100.0);
+                totalDamageToDeal *= (int) efficiencyMultiplier;
             }
         }
 
