@@ -30,4 +30,10 @@ public class GuardianBase extends AbstractIdBaseModel {
 
     @Column(columnDefinition = "int DEFAULT 0")
     private Integer rewardRankingPoint = 0;
+
+    private Boolean earth;
+    private Boolean wind;
+    private Boolean fire;
+    private Boolean water;
+    private Integer elementGrade;
 }

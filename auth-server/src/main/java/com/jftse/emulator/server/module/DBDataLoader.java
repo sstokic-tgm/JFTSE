@@ -96,10 +96,46 @@ public class DBDataLoader implements CommandLineRunner {
     @Autowired
     private ThreadManager threadManager;
 
+    @Autowired
+    private DBExporter dbExporter;
+
+    private enum ECLIOption {
+        EXPORT("-export"),
+        IMPORT("-import"),
+        NONE("");
+
+        private final String option;
+
+        ECLIOption(String option) {
+            this.option = option;
+        }
+
+        public String getOption() {
+            return option;
+        }
+
+        public static ECLIOption fromString(String text) {
+            for (ECLIOption b : ECLIOption.values()) {
+                if (b.option.equalsIgnoreCase(text)) {
+                    return b;
+                }
+            }
+            return NONE;
+        }
+    }
+
     @Override
     public void run(String... args) throws Exception {
-        if (args.length > 0 && args[0].equals("-export")) {
-            return;
+        String arg = args.length > 0 ? args[0] : "";
+        ECLIOption option = ECLIOption.fromString(arg);
+        switch (option) {
+            case EXPORT:
+                dbExporter.init();
+                return;
+            case IMPORT:
+                break;
+            case NONE:
+                return;
         }
 
         log.info("Loading data into the database...");
@@ -383,6 +419,11 @@ public class DBDataLoader implements CommandLineRunner {
                 guardian.setRewardExp(Integer.valueOf(skillNode.valueOf("@RewardEXP")));
                 guardian.setRewardGold(Integer.valueOf(skillNode.valueOf("@RewardGOLD")));
                 guardian.setBtItemID(Integer.valueOf(skillNode.valueOf("@BtItemID")));
+                guardian.setEarth(!skillNode.valueOf("@Earth").equals("0"));
+                guardian.setWind(!skillNode.valueOf("@Wind").equals("0"));
+                guardian.setFire(!skillNode.valueOf("@Fire").equals("0"));
+                guardian.setWater(!skillNode.valueOf("@Water").equals("0"));
+                guardian.setElementGrade(Integer.valueOf(skillNode.valueOf("@ElementGrade")));
                 bossGuardianRepository.save(guardian);
             }
             saveLastImportTimestamp(filePath, getFileLastModified(filePath));
@@ -429,6 +470,11 @@ public class DBDataLoader implements CommandLineRunner {
                 guardian.setRewardExp(Integer.valueOf(skillNode.valueOf("@RewardEXP")));
                 guardian.setRewardGold(Integer.valueOf(skillNode.valueOf("@RewardGOLD")));
                 guardian.setBtItemID(Integer.valueOf(skillNode.valueOf("@BtItemID")));
+                guardian.setEarth(!skillNode.valueOf("@Earth").equals("0"));
+                guardian.setWind(!skillNode.valueOf("@Wind").equals("0"));
+                guardian.setFire(!skillNode.valueOf("@Fire").equals("0"));
+                guardian.setWater(!skillNode.valueOf("@Water").equals("0"));
+                guardian.setElementGrade(Integer.valueOf(skillNode.valueOf("@ElementGrade")));
                 guardianRepository.save(guardian);
             }
 
