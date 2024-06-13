@@ -75,18 +75,16 @@ public class PlayerCombatSystem implements PlayerCombatable {
                 List<Elementable> defensiveElements = targetPlayer.getDefensiveElements();
                 for (Elementable defensiveElement : defensiveElements) {
                     if (offensiveElement.isStrongAgainst(defensiveElement)) {
-                        efficiency += 15;
+                        efficiency += 18;
                     } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
-                        efficiency -= 10;
-                    } else if (offensiveElement.isResistantTo(defensiveElement)) {
                         efficiency -= 5;
+                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
+                        efficiency -= 10;
                     }
                 }
-                //log.debug("Efficiency: {}, pre totalDamageToDeal: {}", efficiency, totalDamageToDeal);
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);
                 totalDamageToDeal =  (int) (totalDamageToDeal * efficiencyMultiplier);
-                //log.debug("efficiencyMultiplier: {}, post totalDamageToDeal: {}", efficiencyMultiplier, totalDamageToDeal);
             }
         }
 

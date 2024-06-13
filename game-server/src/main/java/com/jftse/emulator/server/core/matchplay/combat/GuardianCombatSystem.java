@@ -59,11 +59,11 @@ public class GuardianCombatSystem implements GuardianCombatable {
                 List<Elementable> defensiveElements = targetGuardian.getElements();
                 for (Elementable defensiveElement : defensiveElements) {
                     if (offensiveElement.isStrongAgainst(defensiveElement)) {
-                        efficiency += 15;
+                        efficiency += 18;
                     } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
-                        efficiency -= 10;
-                    } else if (offensiveElement.isResistantTo(defensiveElement)) {
                         efficiency -= 5;
+                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
+                        efficiency -= 10;
                     }
                 }
 
@@ -180,11 +180,11 @@ public class GuardianCombatSystem implements GuardianCombatable {
                 List<Elementable> defensiveElements = targetPlayer.getDefensiveElements();
                 for (Elementable defensiveElement : defensiveElements) {
                     if (offensiveElement.isStrongAgainst(defensiveElement)) {
-                        efficiency += 15;
+                        efficiency += 18;
                     } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
-                        efficiency -= 10;
-                    } else if (offensiveElement.isResistantTo(defensiveElement)) {
                         efficiency -= 5;
+                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
+                        efficiency -= 10;
                     }
                 }
 
