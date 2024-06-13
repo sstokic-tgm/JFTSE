@@ -12,9 +12,11 @@ import com.jftse.server.core.item.EElementalProperty;
 import com.jftse.server.core.matchplay.Elementable;
 import com.jftse.server.core.matchplay.battle.BattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
+@Log4j2
 public class PlayerCombatSystem implements PlayerCombatable {
     private MatchplayGame game;
 
@@ -44,8 +46,6 @@ public class PlayerCombatSystem implements PlayerCombatable {
             totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
         }
 
-        Elementable offensiveElement = attackingPlayer.getOffensiveElement();
-
         PlayerBattleState targetPlayer = isBattleGame ?
                 ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
                         .filter(x -> x.getPosition() == targetPos)
@@ -67,6 +67,8 @@ public class PlayerCombatSystem implements PlayerCombatable {
                 totalDamageToDeal += damageToDeny;
             }
 
+            Elementable offensiveElement = attackingPlayer.getOffensiveElement();
+
             if (totalDamageToDeal != -1 && offensiveElement != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
                 double efficiency = offensiveElement.getEfficiency();
 
@@ -80,9 +82,11 @@ public class PlayerCombatSystem implements PlayerCombatable {
                         efficiency -= 5;
                     }
                 }
+                log.debug("Efficiency: {}, pre totalDamageToDeal: {}", efficiency, totalDamageToDeal);
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);
                 totalDamageToDeal *= (int) efficiencyMultiplier;
+                log.debug("efficiencyMultiplier: {}, post totalDamageToDeal: {}", efficiencyMultiplier, totalDamageToDeal);
             }
         }
 
