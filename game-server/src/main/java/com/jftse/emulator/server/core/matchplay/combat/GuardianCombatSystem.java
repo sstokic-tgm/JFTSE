@@ -53,7 +53,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
             Elementable offensiveElement = attackingPlayer.getOffensiveElement();
 
-            if (totalDamageToDeal != -1 && offensiveElement != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
+            if (totalDamageToDeal != -1 && offensiveElement != null && skill != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
                 double efficiency = offensiveElement.getEfficiency();
 
                 List<Elementable> defensiveElements = targetGuardian.getElements();
@@ -153,7 +153,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
         if (attackingGuardian != null) {
             final List<Elementable> elementList = attackingGuardian.getElements();
             offensiveElement = elementList.stream()
-                    .filter(x -> x.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue()))
+                    .filter(x -> skill != null && x.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue()))
                     .findFirst()
                     .orElse(null);
         }
