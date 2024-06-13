@@ -35,8 +35,6 @@ public class GuardianCombatSystem implements GuardianCombatable {
             totalDamageToDeal = BattleUtils.calculateDmg(attackingPlayer.getStr(), damage, hasAttackerDmgBuff);
         }
 
-        Elementable offensiveElement = attackingPlayer.getOffensiveElement();
-
         GuardianBattleState targetGuardian = game.getGuardianBattleStates().stream()
                 .filter(x -> x.getPosition() == targetPos)
                 .findFirst()
@@ -53,6 +51,8 @@ public class GuardianCombatSystem implements GuardianCombatable {
                 totalDamageToDeal += damageToDeny;
             }
 
+            Elementable offensiveElement = attackingPlayer.getOffensiveElement();
+
             if (totalDamageToDeal != -1 && offensiveElement != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
                 double efficiency = offensiveElement.getEfficiency();
 
@@ -68,7 +68,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
                 }
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);
-                totalDamageToDeal *= (int) efficiencyMultiplier;
+                totalDamageToDeal =  (int) (totalDamageToDeal * efficiencyMultiplier);
             }
         }
 
@@ -189,7 +189,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
                 }
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);
-                totalDamageToDeal *= (int) efficiencyMultiplier;
+                totalDamageToDeal =  (int) (totalDamageToDeal * efficiencyMultiplier);
             }
         }
 

@@ -85,7 +85,7 @@ public class PlayerCombatSystem implements PlayerCombatable {
                 log.debug("Efficiency: {}, pre totalDamageToDeal: {}", efficiency, totalDamageToDeal);
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);
-                totalDamageToDeal *= (int) efficiencyMultiplier;
+                totalDamageToDeal =  (int) (totalDamageToDeal * efficiencyMultiplier);
                 log.debug("efficiencyMultiplier: {}, post totalDamageToDeal: {}", efficiencyMultiplier, totalDamageToDeal);
             }
         }
