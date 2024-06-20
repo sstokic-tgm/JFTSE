@@ -38,4 +38,9 @@ public class Account extends AbstractBaseModel {
     @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
+
+    @Column(nullable = false, columnDefinition = "int(11) DEFAULT 0")
+    private Integer verifyLevel = 0;
+
+    private String discordId;
 }
