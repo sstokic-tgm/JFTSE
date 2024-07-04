@@ -207,9 +207,27 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         final int finalGuardianLevelLimit = guardianLevelLimit;
-        return guardians.stream()
+
+        List<GuardianBase> guardiansToReturn = guardians.stream()
                 .filter(x -> x.getLevel() <= finalGuardianLevelLimit)
                 .collect(Collectors.toList());
+
+        if (guardiansToReturn.size() == 1) {
+            guardians.stream()
+                    .filter(g -> g.getId() > guardiansToReturn.getFirst().getId())
+                    .findFirst()
+                    .ifPresent(guardiansToReturn::add);
+
+            // fallback
+            if (guardiansToReturn.size() == 1) {
+                guardians.stream()
+                        .filter(g -> g.getId() < guardiansToReturn.getFirst().getId())
+                        .findFirst()
+                        .ifPresent(guardiansToReturn::add);
+            }
+        }
+
+        return guardiansToReturn;
     }
 
     public void fillRemainingGuardianSlots(boolean forceFill, MatchplayGuardianGame game, List<Guardian2Maps> guardian2Maps, List<GuardianBase> guardians) {
