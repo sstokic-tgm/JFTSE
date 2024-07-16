@@ -231,7 +231,7 @@ _TODO_
 License: GPL 3.0    
 Read file [LICENSE](LICENSE).
 
-### Footnotes
+## Footnotes
 
 [^1]: If you want to develop yourself.
 [^2]: You do it inside MySQL. Via CLI or some GUI application, it doesn't matter.
