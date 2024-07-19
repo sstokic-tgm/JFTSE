@@ -77,9 +77,9 @@ public class PlayerCombatSystem implements PlayerCombatable {
                     if (offensiveElement.isStrongAgainst(defensiveElement)) {
                         efficiency += 18;
                     } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
-                        efficiency -= 5;
-                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
                         efficiency -= 10;
+                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
+                        efficiency -= 20;
                     }
                 }
 
