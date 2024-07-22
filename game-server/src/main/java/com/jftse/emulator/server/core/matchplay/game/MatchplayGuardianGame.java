@@ -478,9 +478,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
             stageRewards.addAll(guardianProducts);
         });
 
-        SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
-        SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
-
         List<PlayerReward> playerRewards = new ArrayList<>();
 
         final boolean stageChangingToBoss = this.stageChangingToBoss.get();
@@ -491,8 +488,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
             PlayerReward playerReward = new PlayerReward(x.getPosition());
             playerReward.setPlayerPosition(x.getPosition());
 
-            double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
-            double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+            double expMultiplier = expMultipliers.isEmpty() ? 1 : expMultipliers.stream().mapToDouble(SGuardianMultiplier::getMultiplier).sum();
+            double goldMultiplier = goldMultipliers.isEmpty() ? 1 : goldMultipliers.stream().mapToDouble(SGuardianMultiplier::getMultiplier).sum();
             playerReward.setExp((int) (this.getExpPot().get() * expMultiplier));
             playerReward.setGold((int) (this.getGoldPot().get() * goldMultiplier));
             playerReward.setProductIndex(-1);

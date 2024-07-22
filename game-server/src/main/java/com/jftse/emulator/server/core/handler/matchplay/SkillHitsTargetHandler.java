@@ -365,11 +365,9 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 queryMultiplier.setParameter("roleId", 3L);
                 final List<SGuardianMultiplier> goldMultipliers = queryMultiplier.getResultList();
 
-                SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
-                SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
+                double expMultiplier = expMultipliers == null || expMultipliers.isEmpty() ? 1 : expMultipliers.stream().mapToDouble(SGuardianMultiplier::getMultiplier).sum();
+                double goldMultiplier = goldMultipliers == null || goldMultipliers.isEmpty() ? 1 : goldMultipliers.stream().mapToDouble(SGuardianMultiplier::getMultiplier).sum();
 
-                double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
-                double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
                 game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
                 game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
             } else {
@@ -404,11 +402,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     queryMultiplier.setParameter("roleId", 3L);
                     final List<SGuardianMultiplier> goldMultipliers = queryMultiplier.getResultList();
 
-                    SGuardianMultiplier sExpMultiplier = expMultipliers.isEmpty() ? null : expMultipliers.get(0);
-                    SGuardianMultiplier sGoldMultiplier = goldMultipliers.isEmpty() ? null : goldMultipliers.get(0);
-
-                    double expMultiplier = sExpMultiplier == null ? 1 : sExpMultiplier.getMultiplier();
-                    double goldMultiplier = sGoldMultiplier == null ? 1 : sGoldMultiplier.getMultiplier();
+                    double expMultiplier = expMultipliers == null || expMultipliers.isEmpty() ? 1 : expMultipliers.stream().mapToDouble(SGuardianMultiplier::getMultiplier).sum();
+                    double goldMultiplier = goldMultipliers == null || goldMultipliers.isEmpty() ? 1 : goldMultipliers.stream().mapToDouble(SGuardianMultiplier::getMultiplier).sum();
                     game.getExpPot().getAndAdd((int) (guardianBattleState.getExp() * expMultiplier));
                     game.getGoldPot().getAndAdd((int) (guardianBattleState.getGold() * goldMultiplier));
                 }
