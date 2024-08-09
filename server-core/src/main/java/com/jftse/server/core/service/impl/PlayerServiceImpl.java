@@ -82,7 +82,7 @@ public class PlayerServiceImpl implements PlayerService {
     public Player findByName(String name) {
         List<Player> playerList = playerRepository.findAllByName(name);
         for (Player player : playerList) {
-            if (player.getName().equals(name)) {
+            if (player.getName().equalsIgnoreCase(name)) {
                 return player;
             }
         }
@@ -94,7 +94,7 @@ public class PlayerServiceImpl implements PlayerService {
     public Player findByNameFetched(String name) {
         List<Player> playerList = playerRepository.findAllByNameFetched(name);
         for (Player player : playerList) {
-            if (player.getName().equals(name)) {
+            if (player.getName().equalsIgnoreCase(name)) {
                 return player;
             }
         }
