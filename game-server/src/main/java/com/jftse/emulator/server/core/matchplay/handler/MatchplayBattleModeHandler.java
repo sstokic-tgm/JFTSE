@@ -265,8 +265,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
                     eventHandler.push(eventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0));
                 }
 
-                S2CMatchplayDisplayItemRewards s2CMatchplayDisplayItemRewards = new S2CMatchplayDisplayItemRewards(playerRewards);
-                client.getConnection().sendTCP(s2CMatchplayDisplayItemRewards);
+                S2CBettingDisplayItemRewards s2CBettingDisplayItemRewards = new S2CBettingDisplayItemRewards(playerRewards);
+                client.getConnection().sendTCP(s2CBettingDisplayItemRewards);
 
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
                 eventHandler.push(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
