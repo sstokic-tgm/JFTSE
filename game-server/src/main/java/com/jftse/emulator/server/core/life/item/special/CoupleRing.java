@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.life.item.special;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveCoupleRingPacket;
@@ -127,6 +128,9 @@ public class CoupleRing extends BaseItem {
         } else {
             playerPocket.setItemCount(itemCount);
             playerPocketService.save(playerPocket);
+
+            S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
+            this.packetsToSend.add(forPlayerId, inventoryItemCountPacket);
         }
     }
 }

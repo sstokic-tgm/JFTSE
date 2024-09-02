@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.handler.enchant;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.enchant.C2SEnchantRequestPacket;
 import com.jftse.emulator.server.core.packets.enchant.S2CEnchantAnswerPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
@@ -203,11 +204,8 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
             pp.setItemCount(itemCountJewel);
             playerPocketService.save(pp);
 
-            List<PlayerPocket> playerPocketList = new ArrayList<>();
-            playerPocketList.add(pp);
-
-            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
-            connection.sendTCP(inventoryDataPacket);
+            S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(pp);
+            connection.sendTCP(inventoryItemCountPacket);
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.task;
 
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
@@ -105,11 +104,8 @@ public class GachaMachineTask extends AbstractTask {
                     connection.sendTCP(chatLobbyResultItemPacket);
                 });
 
-                List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
-                StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
-                    S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(pocketList);
-                    connection.sendTCP(inventoryDataPacket);
-                });
+                S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(result);
+                connection.sendTCP(inventoryDataPacket);
             } else {
                 S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "You do not have this gacha.");
                 connection.sendTCP(chatLobbyAnswerPacket);

@@ -62,14 +62,13 @@ public class DenyParcelRequestHandler extends AbstractPacketHandler {
             item.setItemCount(item.getItemCount() + parcel.getItemCount());
         }
 
-        playerPocketService.save(item);
+        item = playerPocketService.save(item);
         parcelService.remove(parcel.getId());
 
         S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
         connection.sendTCP(s2CRemoveParcelFromListPacket);
 
-        List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
-        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
+        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(List.of(item));
 
         FTConnection senderConnection = GameManager.getInstance().getConnectionByPlayerId(parcel.getSender().getId());
         if (senderConnection != null) {

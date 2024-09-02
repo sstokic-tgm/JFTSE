@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.home;
 
 import com.jftse.emulator.server.core.packets.home.C2SHomeItemsPlaceReqPacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -66,6 +67,9 @@ public class HomeItemsPlaceRequestPacketHandler extends AbstractPacketHandler {
                     } else {
                         playerPocket.setItemCount(itemCount);
                         playerPocketService.save(playerPocket);
+
+                        S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
+                        connection.sendTCP(inventoryItemCountPacket);
                     }
 
                     HomeInventory homeInventory = new HomeInventory();

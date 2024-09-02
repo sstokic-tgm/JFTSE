@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendProposalRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalDeliveredAnswerPacket;
@@ -130,9 +131,8 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
             } else {
                 item.setItemCount(newItemCount);
                 playerPocketService.save(item);
-                List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(sender.getPocket());
-                S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
-                connection.sendTCP(s2CInventoryItemsPlacePacket);
+                S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(item);
+                connection.sendTCP(inventoryItemCountPacket);
             }
 
             S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket = new S2CReceivedProposalNotificationPacket(proposal);

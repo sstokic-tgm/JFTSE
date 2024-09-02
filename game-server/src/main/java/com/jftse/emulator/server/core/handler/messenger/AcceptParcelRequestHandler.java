@@ -128,7 +128,7 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
             item.setItemCount(item.getItemCount() + parcel.getItemCount());
         }
 
-        playerPocketService.save(item);
+        item = playerPocketService.save(item);
         parcelService.remove(parcel.getId());
         playerService.save(receiver);
         playerService.save(sender);
@@ -149,8 +149,7 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
         S2CShopMoneyAnswerPacket receiverMoneyPacket = new S2CShopMoneyAnswerPacket(receiver);
         connection.sendTCP(receiverMoneyPacket);
 
-        List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(receiver.getPocket());
-        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
-        connection.sendTCP(s2CInventoryItemsPlacePacket);
+        S2CInventoryItemsPlacePacket inventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(List.of(item));
+        connection.sendTCP(inventoryItemsPlacePacket);
     }
 }

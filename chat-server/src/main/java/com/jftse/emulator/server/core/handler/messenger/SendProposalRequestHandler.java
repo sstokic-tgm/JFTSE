@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
+import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendProposalRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalDeliveredAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalListPacket;
@@ -10,16 +12,14 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.messenger.Proposal;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
@@ -130,9 +130,8 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
             } else {
                 item.setItemCount(newItemCount);
                 playerPocketService.save(item);
-                List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(sender.getPocket());
-                S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
-                connection.sendTCP(s2CInventoryItemsPlacePacket);
+                S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(item);
+                connection.sendTCP(inventoryItemCountPacket);
             }
 
             S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket = new S2CReceivedProposalNotificationPacket(proposal);

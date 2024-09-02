@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.life.item.quick;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.QuickSlotEquipment;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
@@ -66,6 +67,9 @@ public class QuickItem extends BaseItem {
         } else {
             playerPocket.setItemCount(itemCount);
             playerPocketService.save(playerPocket);
+
+            S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
+            this.packetsToSend.add(this.localPlayerId, inventoryItemCountPacket);
         }
 
         return true;

@@ -63,11 +63,10 @@ public class CancelSendingParcelRequestHandler extends AbstractPacketHandler {
             item.setItemCount(item.getItemCount() + parcel.getItemCount());
         }
 
-        playerPocketService.save(item);
+        item = playerPocketService.save(item);
         parcelService.remove(parcel.getId());
 
-        List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
-        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
+        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(List.of(item));
         connection.sendTCP(s2CInventoryItemsPlacePacket);
 
         S2CCancelParcelSendingAnswer s2CCancelParcelSendingAnswer = new S2CCancelParcelSendingAnswer((short) 0);

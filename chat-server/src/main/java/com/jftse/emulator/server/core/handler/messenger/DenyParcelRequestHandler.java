@@ -1,17 +1,17 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SDenyParcelRequest;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.messenger.Parcel;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.ParcelService;
 import com.jftse.server.core.service.PlayerPocketService;
@@ -62,14 +62,13 @@ public class DenyParcelRequestHandler extends AbstractPacketHandler {
             item.setItemCount(item.getItemCount() + parcel.getItemCount());
         }
 
-        playerPocketService.save(item);
+        item = playerPocketService.save(item);
         parcelService.remove(parcel.getId());
 
         S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
         connection.sendTCP(s2CRemoveParcelFromListPacket);
 
-        List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
-        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
+        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(List.of(item));
 
         FTConnection senderConnection = GameManager.getInstance().getConnectionByPlayerId(parcel.getSender().getId());
         if (senderConnection != null) {

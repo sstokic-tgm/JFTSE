@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.life.item.special;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryExpandAnswerPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
@@ -63,19 +64,22 @@ public class TrunkSmall extends BaseItem {
         pocket.setMaxBelongings(newMaxBelongings);
         pocket = pocketService.save(pocket);
 
+        S2CInventoryExpandAnswerPacket inventoryExpandAnswerPacket = new S2CInventoryExpandAnswerPacket((byte) 0, pocket.getMaxBelongings().shortValue());
+        this.packetsToSend.add(this.localPlayerId, inventoryExpandAnswerPacket);
+
         int itemCount = playerPocketTrunkSmall.getItemCount() - 1;
         if (itemCount <= 0) {
             playerPocketService.remove(playerPocketTrunkSmall.getId());
             pocketService.decrementPocketBelongings(pocket);
 
             S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(Math.toIntExact(playerPocketTrunkSmall.getId()));
-            S2CInventoryExpandAnswerPacket inventoryExpandAnswerPacket = new S2CInventoryExpandAnswerPacket((byte) 0, pocket.getMaxBelongings().shortValue());
             this.packetsToSend.add(this.localPlayerId, inventoryItemRemoveAnswerPacket);
-            this.packetsToSend.add(this.localPlayerId, inventoryExpandAnswerPacket);
-
         } else {
             playerPocketTrunkSmall.setItemCount(itemCount);
             playerPocketService.save(playerPocketTrunkSmall);
+
+            S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocketTrunkSmall);
+            this.packetsToSend.add(this.localPlayerId, inventoryItemCountPacket);
         }
 
         return true;

@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayUsesSkill;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayUseSkill;
@@ -201,6 +202,9 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
                 } else {
                     playerPocket.setItemCount(itemCount);
                     playerPocketService.save(playerPocket);
+
+                    S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
+                    connection.sendTCP(inventoryItemCountPacket);
                 }
             }
         }

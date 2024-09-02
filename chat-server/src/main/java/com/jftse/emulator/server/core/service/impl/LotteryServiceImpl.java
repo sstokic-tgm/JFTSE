@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.service.impl;
 
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.item.Product;
@@ -96,9 +97,8 @@ public class LotteryServiceImpl implements LotteryService {
                 playerPocket.setItemCount(itemCount);
                 playerPocket = playerPocketService.save(playerPocket);
 
-                // to have current coin count
-                S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(Arrays.asList(playerPocket));
-                connection.sendTCP(inventoryDataPacket);
+                S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
+                connection.sendTCP(inventoryItemCountPacket);
             }
         }
     }

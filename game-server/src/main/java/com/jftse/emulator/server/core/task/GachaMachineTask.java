@@ -105,11 +105,8 @@ public class GachaMachineTask extends AbstractTask {
                     connection.sendTCP(chatLobbyResultItemPacket);
                 });
 
-                List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
-                StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
-                    S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(pocketList);
-                    connection.sendTCP(inventoryDataPacket);
-                });
+                S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(result);
+                connection.sendTCP(inventoryDataPacket);
             } else {
                 S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "You do not have this gacha.");
                 connection.sendTCP(chatLobbyAnswerPacket);

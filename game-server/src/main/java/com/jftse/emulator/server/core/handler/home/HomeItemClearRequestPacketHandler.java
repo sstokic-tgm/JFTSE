@@ -49,9 +49,11 @@ public class HomeItemClearRequestPacketHandler extends AbstractPacketHandler {
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
         Player player = client.getPlayer();
 
+        List<PlayerPocket> playerPocketsToPlace = new ArrayList<>();
+
         homeInventoryList.forEach(hil -> {
             PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hil.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), player.getPocket());
-            ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
+            //ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
 
             // create a new one if null, null indicates that all items are placed
             if (playerPocket == null) {
@@ -67,7 +69,9 @@ public class HomeItemClearRequestPacketHandler extends AbstractPacketHandler {
                 playerPocket.setItemCount(playerPocket.getItemCount() + 1);
             }
 
-            playerPocketService.save(playerPocket);
+            playerPocket = playerPocketService.save(playerPocket);
+
+            playerPocketsToPlace.add(playerPocket);
 
             homeService.updateAccountHomeStatsByHomeInventory(accountHome, hil, false);
             homeService.removeItemFromHomeInventory(hil.getId());
@@ -79,11 +83,7 @@ public class HomeItemClearRequestPacketHandler extends AbstractPacketHandler {
         S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
         connection.sendTCP(homeDataPacket);
 
-        List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
-        StreamUtils.batches(playerPocketList, 10)
-                .forEach(pocketList -> {
-                    S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(pocketList);
-                    connection.sendTCP(inventoryDataPacket);
-                });
+        S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketsToPlace);
+        connection.sendTCP(inventoryDataPacket);
     }
 }

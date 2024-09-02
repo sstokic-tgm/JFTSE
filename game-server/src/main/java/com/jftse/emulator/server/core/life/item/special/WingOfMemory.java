@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.life.item.special;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
@@ -76,7 +77,6 @@ public class WingOfMemory extends BaseItem {
         if (playerPocketWOM == null)
             return false;
 
-        Player player = playerService.findById(localPlayerId);
         log.info("Wing of Memory itemCount before: " + playerPocketWOM.getItemCount());
         int itemCount = playerPocketWOM.getItemCount() - 1;
         if (itemCount <= 0) {
@@ -90,16 +90,8 @@ public class WingOfMemory extends BaseItem {
             playerPocketWOM.setItemCount(itemCount);
             playerPocketService.save(playerPocketWOM);
 
-            playerPocketWOM.setItemCount(itemCount);
-            playerPocketWOM.setPocket(pocket);
-            playerPocketService.save(playerPocketWOM);
-            player.setPocket(pocket);
-
-            List<PlayerPocket> playerPocketList = new ArrayList<>();
-            playerPocketList.add(playerPocketWOM);
-
-            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
-            packetsToSend.add(localPlayerId, inventoryDataPacket);
+            S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocketWOM);
+            packetsToSend.add(localPlayerId, inventoryItemCountPacket);
         }
 
         log.info("Wing of Memory, itemCount now: " + itemCount);

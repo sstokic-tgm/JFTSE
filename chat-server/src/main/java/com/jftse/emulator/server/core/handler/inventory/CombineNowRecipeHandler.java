@@ -1,24 +1,22 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
-import com.jftse.emulator.common.utilities.StreamUtils;
-import com.jftse.emulator.server.core.packets.inventory.C2SCombineNowRecipeReqPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CCombineNowRecipeAnswerPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
-import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.recipe.Recipe;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.emulator.server.core.packets.inventory.C2SCombineNowRecipeReqPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CCombineNowRecipeAnswerPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
+import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
@@ -67,17 +65,14 @@ public class CombineNowRecipeHandler extends AbstractPacketHandler {
         S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
         connection.sendTCP(shopMoneyAnswerPacket);
 
-        List<Packet> inventoryItemRemoveAnswerPacketList = new ArrayList<>();
         List<Long> itemsToRemoveFromClient = recipe.getItemsToRemoveFromClient();
         if (!itemsToRemoveFromClient.isEmpty()) {
-            itemsToRemoveFromClient.forEach(i -> inventoryItemRemoveAnswerPacketList.add(new S2CInventoryItemRemoveAnswerPacket(Math.toIntExact(i))));
-            connection.sendTCP(inventoryItemRemoveAnswerPacketList.toArray(Packet[]::new));
+            connection.sendTCP(itemsToRemoveFromClient.stream().map(item -> new S2CInventoryItemRemoveAnswerPacket(Math.toIntExact(item))).toArray(Packet[]::new));
         }
 
         List<PlayerPocket> playerPocketList = recipe.getItemsToUpdateFromClient();
-        StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
-            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(pocketList);
-            connection.sendTCP(inventoryDataPacket);
-        });
+        if (!playerPocketList.isEmpty()) {
+            connection.sendTCP(playerPocketList.stream().map(S2CInventoryItemCountPacket::new).toArray(Packet[]::new));
+        }
     }
 }
