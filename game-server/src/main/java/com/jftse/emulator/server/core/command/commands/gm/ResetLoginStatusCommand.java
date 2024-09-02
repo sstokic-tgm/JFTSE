@@ -51,8 +51,6 @@ public class ResetLoginStatusCommand extends AbstractCommand {
                         }
                     }
 
-                    S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-                    client.getConnection().sendTCP(disconnectAnswerPacket);
                     client.getConnection().close();
 
                     successfullyReseted = true;

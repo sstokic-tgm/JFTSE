@@ -1,10 +1,9 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SDenyParcelRequest;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
-import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -70,15 +69,15 @@ public class DenyParcelRequestHandler extends AbstractPacketHandler {
         connection.sendTCP(s2CRemoveParcelFromListPacket);
 
         List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
-        S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
+        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
 
         FTConnection senderConnection = GameManager.getInstance().getConnectionByPlayerId(parcel.getSender().getId());
         if (senderConnection != null) {
-            senderConnection.sendTCP(s2CInventoryDataPacket);
+            senderConnection.sendTCP(s2CInventoryItemsPlacePacket);
 
             // TODO: Remove parcel from sent list of sender, S2CSentParcelListPacket doesn't work
         } else {
-            rProducerService.send("playerId", parcel.getSender().getId(), s2CInventoryDataPacket);
+            rProducerService.send("playerId", parcel.getSender().getId(), s2CInventoryItemsPlacePacket);
         }
     }
 }

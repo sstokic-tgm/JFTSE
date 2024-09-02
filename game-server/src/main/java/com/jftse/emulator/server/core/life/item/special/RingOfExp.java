@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.life.item.special;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearSpecialAnswerPacket;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
@@ -103,7 +103,7 @@ public class RingOfExp extends BaseItem {
             List<PlayerPocket> playerPocketList = new ArrayList<>();
             playerPocketList.add(playerPocketROExp);
 
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
             packetsToSend.add(localPlayerId, inventoryDataPacket);
 
             specialSlotEquipmentService.updateSpecialSlots(player, playersSpecialSlots);

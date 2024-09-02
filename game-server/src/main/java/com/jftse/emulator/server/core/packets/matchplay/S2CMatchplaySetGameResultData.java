@@ -12,7 +12,8 @@ public class S2CMatchplaySetGameResultData extends Packet {
 
         this.write((byte) playerRewards.size());
         for (PlayerReward playerReward : playerRewards) {
-            this.write(playerReward.getPlayerPosition());
+            this.write((short) playerReward.getPlayerPosition());
+            this.write((short) 0);
             this.write(playerReward.getExp()); // EXP
             this.write(playerReward.getGold()); // GOLD
 

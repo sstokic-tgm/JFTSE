@@ -2,9 +2,6 @@ package com.jftse.emulator.server.core.packets.matchplay;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
-import com.jftse.emulator.server.core.utils.BattleUtils;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
 
@@ -43,8 +40,6 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write(0);
         this.write(0);
 
-        Player player = roomPlayer.getPlayer();
-        StatusPointsAddedDto statusPointsAddedDto = roomPlayer.getStatusPointsAddedDto();
         List<Integer> specialSlotEquipment = roomPlayer.getSpecialSlotEquipment();
         List<Integer> cardSlotEquipment = roomPlayer.getCardSlotEquipment();
 
@@ -57,11 +52,11 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);
-        // cloth added status points
-        this.write(statusPointsAddedDto.getAddHp());
-        this.write(statusPointsAddedDto.getStrength());
-        this.write(statusPointsAddedDto.getStamina());
-        this.write(statusPointsAddedDto.getDexterity());
-        this.write(statusPointsAddedDto.getWillpower());
+        // cards added status points
+        this.write(0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
     }
 }

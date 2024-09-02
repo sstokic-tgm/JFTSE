@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.handler.enchant;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.enchant.C2SEnchantRequestPacket;
 import com.jftse.emulator.server.core.packets.enchant.S2CEnchantAnswerPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.item.ItemEnchant;
@@ -163,7 +163,7 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
             S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01);
             connection.sendTCP(result);
 
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
             connection.sendTCP(inventoryDataPacket);
         } else {
             if (elementals.contains(EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
@@ -186,7 +186,7 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
             S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_SUCCESS);
             connection.sendTCP(result);
 
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
             connection.sendTCP(inventoryDataPacket);
         }
     }
@@ -206,7 +206,7 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
             List<PlayerPocket> playerPocketList = new ArrayList<>();
             playerPocketList.add(pp);
 
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
             connection.sendTCP(inventoryDataPacket);
         }
     }

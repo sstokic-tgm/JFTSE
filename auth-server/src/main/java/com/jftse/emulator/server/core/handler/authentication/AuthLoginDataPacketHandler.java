@@ -13,7 +13,6 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.item.EItemCategory;
@@ -59,9 +58,6 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
         Account account = authenticationService.findAccountByUsername(authLoginPacket.getUsername());
         FTClient client = (FTClient) connection.getClient();
         if (client != null && account != null && account.getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && client.isLoginIn().compareAndSet(false, true)) {
-            S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) 0);
-            connection.sendTCP(authLoginAnswerPacket);
-
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             account.setLoggedInServer(ServerType.AUTH_SERVER);
             account = authenticationService.updateAccount(account);
@@ -106,6 +102,9 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             connection.sendTCP(gameServerListPacket);
 
             client.isLoginIn().set(false);
+
+            S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) 0);
+            connection.sendTCP(authLoginAnswerPacket);
         } else {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) -1);
             connection.sendTCP(authLoginAnswerPacket);

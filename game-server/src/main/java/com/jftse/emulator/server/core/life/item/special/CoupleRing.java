@@ -4,6 +4,7 @@ import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
+import com.jftse.emulator.server.core.packets.messenger.S2CRemoveCoupleRingPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CYouBrokeUpWithYourCoupleAnswer;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
@@ -13,7 +14,6 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.service.*;
-import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 
 import java.util.List;
 
@@ -122,8 +122,8 @@ public class CoupleRing extends BaseItem {
             playerPocketService.remove(playerPocket.getId());
             pocketService.decrementPocketBelongings(pocket);
 
-            S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(Math.toIntExact(playerPocket.getId()));
-            this.packetsToSend.add(forPlayerId, inventoryItemRemoveAnswerPacket);
+            S2CRemoveCoupleRingPacket removeCoupleRing = new S2CRemoveCoupleRingPacket();
+            this.packetsToSend.add(forPlayerId, removeCoupleRing);
         } else {
             playerPocket.setItemCount(itemCount);
             playerPocketService.save(playerPocket);

@@ -59,9 +59,6 @@ public class LoginPacketHandler extends AbstractPacketHandler {
         if (configService.getValue("anticheat.enabled", false) && !isClientValid(inetSocketAddress, loginPacket.getHwid())) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
-
-            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-            connection.sendTCP(disconnectAnswerPacket);
             return;
         }
 
@@ -69,9 +66,6 @@ public class LoginPacketHandler extends AbstractPacketHandler {
         if (loginPacket.getVersion() != 21108180) {
             S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.INVAILD_VERSION);
             connection.sendTCP(loginAnswerPacket);
-
-            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-            connection.sendTCP(disconnectAnswerPacket);
             return;
         }
 

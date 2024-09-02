@@ -18,6 +18,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.FriendService;
 import com.jftse.server.core.service.PlayerService;
 
+import java.util.Collections;
 import java.util.List;
 
 @PacketOperationIdentifier(PacketOperations.C2SAddFriendRequest)
@@ -71,7 +72,7 @@ public class AddFriendRequestPacketHandler extends AbstractPacketHandler {
             S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) 0);
             connection.sendTCP(s2CAddFriendResponsePacket);
 
-            S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(player.getName());
+            S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(Collections.singletonList(friend));
 
             FTConnection targetConnection = GameManager.getInstance().getConnectionByPlayerId(targetPlayer.getId());
             if (targetConnection != null) {

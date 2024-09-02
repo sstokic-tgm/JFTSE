@@ -28,7 +28,7 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write(inventoryWearClothReqPacket.getHat());
             this.write(inventoryWearClothReqPacket.getDye());
 
-            this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
+            this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
 
             // status points
             this.write(player.getStrength());
@@ -54,12 +54,12 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write((byte) 0);
             this.write((byte) 0);
             this.write((byte) 0);
-            // cloth added status points
-            this.write(statusPointsAddedDto.getAddHp());
-            this.write(statusPointsAddedDto.getStrength());
-            this.write(statusPointsAddedDto.getStamina());
-            this.write(statusPointsAddedDto.getDexterity());
-            this.write(statusPointsAddedDto.getWillpower());
+            // cards added status points
+            this.write(0);
+            this.write((byte) 0);
+            this.write((byte) 0);
+            this.write((byte) 0);
+            this.write((byte) 0);
             // ??
             for (int i = 5; i < 13; i++) {
                 this.write((byte) 0);
@@ -90,7 +90,7 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write(inventoryEquippedCloths.get("hat"));
             this.write(inventoryEquippedCloths.get("dye"));
 
-            this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
+            this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
 
             // status points
             this.write(player.getStrength());
@@ -116,12 +116,12 @@ public class S2CInventoryWearClothAnswerPacket extends Packet {
             this.write((byte) 0);
             this.write((byte) 0);
             this.write((byte) 0);
-            // cloth added status points
-            this.write(statusPointsAddedDto.getAddHp());
-            this.write(statusPointsAddedDto.getStrength());
-            this.write(statusPointsAddedDto.getStamina());
-            this.write(statusPointsAddedDto.getDexterity());
-            this.write(statusPointsAddedDto.getWillpower());
+            // cards added status points
+            this.write(0);
+            this.write((byte) 0);
+            this.write((byte) 0);
+            this.write((byte) 0);
+            this.write((byte) 0);
             // ??
             for (int i = 5; i < 13; ++i) {
                 this.write((byte) 0);

@@ -1,11 +1,10 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SCancelParcelSendingRequest;
 import com.jftse.emulator.server.core.packets.messenger.S2CCancelParcelSendingAnswer;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
-import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -68,8 +67,8 @@ public class CancelSendingParcelRequestHandler extends AbstractPacketHandler {
         parcelService.remove(parcel.getId());
 
         List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(parcel.getSender().getPocket());
-        S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
-        connection.sendTCP(s2CInventoryDataPacket);
+        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
+        connection.sendTCP(s2CInventoryItemsPlacePacket);
 
         S2CCancelParcelSendingAnswer s2CCancelParcelSendingAnswer = new S2CCancelParcelSendingAnswer((short) 0);
         connection.sendTCP(s2CCancelParcelSendingAnswer);

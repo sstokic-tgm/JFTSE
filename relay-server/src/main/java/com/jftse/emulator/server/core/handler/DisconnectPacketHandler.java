@@ -16,10 +16,9 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
-        if (ftClient != null) {
-            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-            connection.sendTCP(disconnectAnswerPacket);
-        }
+        S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+        connection.sendTCP(disconnectAnswerPacket);
+
+        connection.close();
     }
 }

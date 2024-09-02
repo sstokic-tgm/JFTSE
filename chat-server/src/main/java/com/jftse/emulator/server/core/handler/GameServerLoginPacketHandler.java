@@ -66,6 +66,9 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             log.info(player.getName() + " connected");
 
+            player.setOnline(true);
+            client.savePlayer(player);
+
             client.setAccount(account.getId());
             ((FTConnection) connection).setClient(client);
             ((FTConnection) connection).setHwid(gameServerLoginPacket.getHwid());

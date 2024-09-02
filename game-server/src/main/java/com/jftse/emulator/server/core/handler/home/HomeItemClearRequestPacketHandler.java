@@ -4,7 +4,7 @@ import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeItemsLoadAnswerPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -82,7 +82,7 @@ public class HomeItemClearRequestPacketHandler extends AbstractPacketHandler {
         List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
         StreamUtils.batches(playerPocketList, 10)
                 .forEach(pocketList -> {
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+                    S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(pocketList);
                     connection.sendTCP(inventoryDataPacket);
                 });
     }

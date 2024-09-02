@@ -18,6 +18,9 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
+        S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
+        connection.sendTCP(disconnectAnswerPacket);
+
         FTClient client = (FTClient) connection.getClient();
         if (client != null) {
             Account account = client.getAccount();
@@ -25,9 +28,8 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
                 account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
                 client.saveAccount(account);
             }
-
-            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-            connection.sendTCP(disconnectAnswerPacket);
         }
+
+        connection.close();
     }
 }

@@ -32,6 +32,9 @@ public enum PacketOperations {
     S2CGameAnswerData(0x105F),
     C2SGameLoginData(0x1069),
     S2CGameLoginData(0x106A),
+    S2CUnknownPlayerInfoData(0x106D),
+    S2CClearInventoryData(0x106F),
+    S2CInventoryData(0x106E),
 
     C2SRoomCreate(0x1389),
     C2SRoomCreateQuick(0x138f),
@@ -153,7 +156,6 @@ public enum PacketOperations {
 
     S2CPlayerLevelExpData(0x22B8),
     S2CPlayerInfoPlayStatsData(0x1B6F),
-    S2CUnknownPlayerInfoData(0x106D),
     C2SUnknownInventoryOpenRequest(0x237C),
     C2SInventoryWearClothRequest(0x1B63),
     S2CInventoryWearClothAnswer(0x1B64),
@@ -167,9 +169,10 @@ public enum PacketOperations {
     S2CInventoryWearSpecialAnswer(0x1B71),
     C2SInventoryWearCardRequest(0x1C21),
     S2CInventoryWearCardAnswer(0x1C22),
-    S2CInventoryData(0x1B69),
+    S2CInventoryItemsPlace(0x1B69),
     S2CInventoryExpandAnswer(0x22C9),
     C2SInventoryItemTimeExpiredRequest(0x1BBC),
+    S2CInventoryItemCount(0x1B73),
     S2CInventoryItemRemoveAnswer(0x1B74),
     C2SQuickSlotUseRequest(0x1BDA),
     C2SCombineNowRecipe(0x23BE),
@@ -181,6 +184,7 @@ public enum PacketOperations {
     S2CHomeItemsRemoveAnswer(0x2552),
     C2SHomeItemsLoadReq(0x254E),
     S2CHomeItemsLoadAnswer(0x254F),
+    C2SHomeData(0x1518),
     S2CHomeData(0x1519),
 
     C2SPetDataRequest(0x151A),
@@ -219,6 +223,7 @@ public enum PacketOperations {
     S2CAddFriendAnswer(0x1F42),
     S2CFriendRequestNotification(0x1F44),
     C2SAddFriendApprovalRequest(0x1F45),
+    C2SFriendListRequest(0x1F49),
     S2CFriendsListAnswer(0x1F4A),
     C2SDeleteFriendRequest(0x1F55),
     S2CDeleteFriendAnswer(0x1F57),
@@ -253,6 +258,7 @@ public enum PacketOperations {
     C2SProposalListRequest(0x2526),
     S2CProposalListAnswer(0x2527),
     S2CYouBrokeUpWithYourCoupleAnswer(0x252A),
+    S2CRemoveCoupleRing(0x252B),
 
     C2SPlayerDelete(0x1B6B),
     S2CPlayerDelete(0x1B6C),

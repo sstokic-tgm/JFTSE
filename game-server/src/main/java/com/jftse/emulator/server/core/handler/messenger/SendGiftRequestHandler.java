@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendGiftRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedGiftNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CSendGiftAnswerPacket;
@@ -246,7 +246,7 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
             ftClient.saveAccount(senderAcc);
 
             S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket = new S2CReceivedGiftNotificationPacket(gift);
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
 
             FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
             if (receiverConnection != null) {

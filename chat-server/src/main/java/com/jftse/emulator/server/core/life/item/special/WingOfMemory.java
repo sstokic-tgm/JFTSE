@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.life.item.special;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
@@ -98,7 +98,7 @@ public class WingOfMemory extends BaseItem {
             List<PlayerPocket> playerPocketList = new ArrayList<>();
             playerPocketList.add(playerPocketWOM);
 
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
             packetsToSend.add(localPlayerId, inventoryDataPacket);
         }
 

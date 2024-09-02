@@ -1,16 +1,18 @@
 package com.jftse.emulator.server.core.packets.player;
 
-import com.jftse.entities.database.model.guild.Guild;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.Pocket;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
+
+import java.util.Map;
 
 public class S2CUnknownPlayerInfoDataPacket extends Packet {
-    public S2CUnknownPlayerInfoDataPacket(Player player, Pocket pocket, StatusPointsAddedDto statusPointsAddedDto, PlayerStatistic playerStatistic, Guild guild) {
+    public S2CUnknownPlayerInfoDataPacket(Player player, Pocket pocket, Map<String, Integer> equippedCloths, StatusPointsAddedDto statusPointsAddedDto, PlayerStatistic playerStatistic, Guild guild) {
         super(PacketOperations.S2CUnknownPlayerInfoData);
 
         this.write(player.getName());
@@ -44,7 +46,7 @@ public class S2CUnknownPlayerInfoDataPacket extends Packet {
         this.write(0); // perfect(s)
         this.write(0); // guard break(s)
 
-        this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
+        this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
 
         // status points
         this.write(player.getStrength());
@@ -70,12 +72,12 @@ public class S2CUnknownPlayerInfoDataPacket extends Packet {
         this.write((byte) 0);
         this.write((byte) 0);
         this.write((byte) 0);
-        // cloth added status points
-        this.write(statusPointsAddedDto.getAddHp());
-        this.write(statusPointsAddedDto.getStrength());
-        this.write(statusPointsAddedDto.getStamina());
-        this.write(statusPointsAddedDto.getDexterity());
-        this.write(statusPointsAddedDto.getWillpower());
+        // cards added status points
+        this.write(0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
+        this.write((byte) 0);
         // ??
         for (int i = 5; i < 13; ++i) {
             this.write((byte) 0);
@@ -86,13 +88,22 @@ public class S2CUnknownPlayerInfoDataPacket extends Packet {
         }
         this.write(player.getStatusPoints());
 
-        this.write(0); // ??
+        this.write(-1); // active pet type
         this.write(pocket.getMaxBelongings().shortValue());
-        this.write((byte) 0); // ??
+        this.write((byte) 0); // card slots
 
-        // ??
-        for (int i = 0; i < 12; i++)
-            this.write(0);
+        this.write(equippedCloths.get("hair"));
+        this.write(equippedCloths.get("face"));
+        this.write(equippedCloths.get("dress"));
+        this.write(equippedCloths.get("pants"));
+        this.write(equippedCloths.get("socks"));
+        this.write(equippedCloths.get("shoes"));
+        this.write(equippedCloths.get("gloves"));
+        this.write(equippedCloths.get("racket"));
+        this.write(equippedCloths.get("glasses"));
+        this.write(equippedCloths.get("bag"));
+        this.write(equippedCloths.get("hat"));
+        this.write(equippedCloths.get("dye"));
 
         this.write(player.getCouplePoints());
         this.write(0); // ??

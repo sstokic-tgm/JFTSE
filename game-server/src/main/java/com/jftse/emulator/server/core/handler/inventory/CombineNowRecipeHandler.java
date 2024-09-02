@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.handler.inventory;
 import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.core.packets.inventory.C2SCombineNowRecipeReqPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CCombineNowRecipeAnswerPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -76,7 +76,7 @@ public class CombineNowRecipeHandler extends AbstractPacketHandler {
 
         List<PlayerPocket> playerPocketList = recipe.getItemsToUpdateFromClient();
         StreamUtils.batches(playerPocketList, 10).forEach(pocketList -> {
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(pocketList);
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(pocketList);
             connection.sendTCP(inventoryDataPacket);
         });
     }

@@ -2,7 +2,7 @@ package com.jftse.emulator.server.core.matchplay;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.battle.WillDamage;
 import com.jftse.entities.database.model.item.Product;
@@ -100,7 +100,7 @@ public abstract class MatchplayGame {
         List<PlayerPocket> playerPocketList = new ArrayList<>();
         playerPocketList.add(playerPocket);
 
-        S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+        S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
         client.getConnection().sendTCP(inventoryDataPacket);
     }
 

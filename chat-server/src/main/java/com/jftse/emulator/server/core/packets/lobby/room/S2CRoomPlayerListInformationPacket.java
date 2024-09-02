@@ -1,14 +1,14 @@
 package com.jftse.emulator.server.core.packets.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
-import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.guild.Guild;
+import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.ClothEquipment;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.List;
 
@@ -27,6 +27,7 @@ public class S2CRoomPlayerListInformationPacket extends Packet {
             ClothEquipment clothEquipment = roomPlayer.getClothEquipment();
             StatusPointsAddedDto statusPointsAddedDto = roomPlayer.getStatusPointsAddedDto();
 
+            boolean isSpectator = roomPlayer.getPosition() > 3;
             this.write(roomPlayer.getPosition());
             this.write(player.getName());
             this.write(player.getLevel());
@@ -35,7 +36,7 @@ public class S2CRoomPlayerListInformationPacket extends Packet {
             this.write(roomPlayer.isReady());
             this.write(roomPlayer.isFitting());
             this.write(player.getPlayerType());
-            this.write(false);
+            this.write(isSpectator);
             this.write((byte) 0); // unk3
             this.write(guild != null ? guild.getName() : "");
 
@@ -60,7 +61,7 @@ public class S2CRoomPlayerListInformationPacket extends Packet {
             this.write((short) 0); // emblem slot 3
             this.write((short) 0); // emblem slot 4
 
-            this.write(BattleUtils.calculatePlayerHp(player.getLevel()));
+            this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
 
             // status points
             this.write(player.getStrength());
@@ -86,12 +87,12 @@ public class S2CRoomPlayerListInformationPacket extends Packet {
             this.write((byte) 0);
             this.write((byte) 0);
             this.write((byte) 0);
-            // cloth added status points
-            this.write(statusPointsAddedDto.getAddHp());
-            this.write(statusPointsAddedDto.getStrength());
-            this.write(statusPointsAddedDto.getStamina());
-            this.write(statusPointsAddedDto.getDexterity());
-            this.write(statusPointsAddedDto.getWillpower());
+            // cards added status points
+            this.write(0);
+            this.write((byte) 0);
+            this.write((byte) 0);
+            this.write((byte) 0);
+            this.write((byte) 0);
             // ??
             for (int i = 5; i < 13; ++i) {
                 this.write((byte) 0);

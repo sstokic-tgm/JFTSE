@@ -1,9 +1,7 @@
 package com.jftse.emulator.server.core.packets.inventory;
 
-import com.jftse.server.core.item.EItemCategory;
-import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.List;
@@ -16,9 +14,9 @@ public class S2CInventoryDataPacket extends Packet {
 
         for (PlayerPocket playerPocket : playerPocketList) {
             this.write((int) playerPocket.getId().longValue());
-            this.write(EItemCategory.valueOf(playerPocket.getCategory()).getValue());
+            this.write(playerPocket.getCategory());
             this.write(playerPocket.getItemIndex());
-            this.write(playerPocket.getUseType().equals("N/A") ? (byte) 0 : EItemUseType.valueOf(playerPocket.getUseType().toUpperCase()).getValue());
+            this.write(playerPocket.getUseType());
             this.write(playerPocket.getItemCount());
             this.write(playerPocket.getCreated());
 

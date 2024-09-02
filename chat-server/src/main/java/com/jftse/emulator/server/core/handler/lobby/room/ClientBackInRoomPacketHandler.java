@@ -45,8 +45,6 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
     public void handle() {
         FTClient client = (FTClient) connection.getClient();
         if (client == null || client.getPlayer() == null) {
-            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-            connection.sendTCP(disconnectAnswerPacket);
             connection.close();
             return;
         }
@@ -56,8 +54,6 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
         Room currentClientRoom = client.getActiveRoom();
         RoomPlayer roomPlayer = client.getRoomPlayer();
         if (currentClientRoom == null || roomPlayer == null) { // shouldn't happen
-            S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-            connection.sendTCP(disconnectAnswerPacket);
             connection.close();
             return;
         }

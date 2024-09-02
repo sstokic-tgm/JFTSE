@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SProposalAnswerRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
@@ -149,7 +149,7 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
             playerPocketService.save(receiverPocket);
 
             List<PlayerPocket> receiverItems = playerPocketService.getPlayerPocketItems(proposal.getReceiver().getPocket());
-            S2CInventoryDataPacket receiverInventoryPacket = new S2CInventoryDataPacket(receiverItems);
+            S2CInventoryItemsPlacePacket receiverInventoryPacket = new S2CInventoryItemsPlacePacket(receiverItems);
             connection.sendTCP(receiverInventoryPacket);
 
         } else {
@@ -162,7 +162,7 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
         S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
 
         List<PlayerPocket> senderItems = playerPocketService.getPlayerPocketItems(proposal.getSender().getPocket());
-        S2CInventoryDataPacket senderInventoryPacket = new S2CInventoryDataPacket(senderItems);
+        S2CInventoryItemsPlacePacket senderInventoryPacket = new S2CInventoryItemsPlacePacket(senderItems);
 
         FTConnection senderConnection = GameManager.getInstance().getConnectionByPlayerId(proposal.getSender().getId());
         if (senderConnection != null) {

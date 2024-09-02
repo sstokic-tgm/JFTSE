@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryDataPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SAcceptParcelRequest;
 import com.jftse.emulator.server.core.packets.messenger.S2CAcceptParcelAnswer;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
@@ -150,7 +150,7 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
         connection.sendTCP(receiverMoneyPacket);
 
         List<PlayerPocket> items = playerPocketService.getPlayerPocketItems(receiver.getPocket());
-        S2CInventoryDataPacket s2CInventoryDataPacket = new S2CInventoryDataPacket(items);
-        connection.sendTCP(s2CInventoryDataPacket);
+        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(items);
+        connection.sendTCP(s2CInventoryItemsPlacePacket);
     }
 }
