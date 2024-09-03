@@ -372,7 +372,8 @@ public class DBDataLoader implements CommandLineRunner {
         long lastModified = Files.getLastModifiedTime(path).toMillis();
         long lastImportTimestamp = getLastImportTimestamp(file);
 
-        return lastModified <= lastImportTimestamp;
+        //return lastModified <= lastImportTimestamp;
+        return false;
     }
 
     private long getFileLastModified(String file) throws IOException {
