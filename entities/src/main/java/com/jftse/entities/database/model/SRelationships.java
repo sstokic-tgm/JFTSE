@@ -24,4 +24,12 @@ public class SRelationships extends AbstractBaseModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id", referencedColumnName = "id", nullable = false)
     private KStatus status;
+
+    private Integer qtyMin;
+    private Integer qtyMax;
+    private Integer qty;
+    private Double weight;
+    private Integer levelReq;
+    private Boolean forHardMode;
+    private Boolean forRandomMode;
 }

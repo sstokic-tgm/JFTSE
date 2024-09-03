@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
 import com.jftse.emulator.server.core.packets.player.S2CCouplePointsDataPacket;
@@ -58,7 +59,7 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
             return;
         }
 
-
+        int roomId = currentClientRoom.getRoomId();
         short position = roomPlayer.getPosition();
 
         Packet backInRoomAckPacket = new Packet(PacketOperations.S2CMatchplayClientBackInRoomAck);
@@ -75,6 +76,10 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
 
         synchronized (currentClientRoom) {
             currentClientRoom.setStatus(RoomStatus.NotRunning);
+        }
+
+        if (GameSessionManager.getInstance().hasMatchplayReward(roomId)) {
+            GameSessionManager.getInstance().removeMatchplayReward(roomId);
         }
 
         PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());

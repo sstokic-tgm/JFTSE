@@ -5,6 +5,8 @@ import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.matchplay.MatchplayReward;
+import com.jftse.entities.database.model.SRelationships;
 import com.jftse.entities.database.model.item.ItemEnchantLevel;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
@@ -406,7 +408,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.startTime.set(cal.getTime());
     }
 
-    public List<PlayerReward> getPlayerRewards() {
+    public MatchplayReward getMatchRewards() {
         final boolean isBoss = map.getIsBossStage() && bossBattleActive.get();
 
         JdbcUtil jdbcUtil = ServiceManager.getInstance().getJdbcUtil();
@@ -429,6 +431,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         final List<Product> stageRewards = new ArrayList<>();
+        final List<SRelationships> stageRewardsRelationships = new ArrayList<>();
         final List<SGuardianMultiplier> expMultipliers = new ArrayList<>();
         final List<SGuardianMultiplier> goldMultipliers = new ArrayList<>();
 
@@ -445,44 +448,171 @@ public class MatchplayGuardianGame extends MatchplayGame {
             queryGold.setParameter("mapId", this.map.getId());
             goldMultipliers.addAll(queryGold.getResultList());
 
+            TypedQuery<SRelationships> queryRelationships = em.createQuery("SELECT sr FROM SRelationships sr " +
+                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 7 AND sr.role.id = 1", SRelationships.class);
+            queryRelationships.setParameter("mapId", this.map.getId());
+            List<SRelationships> relationships = queryRelationships.getResultList();
+            stageRewardsRelationships.addAll(relationships);
+
             TypedQuery<Product> queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
                     "ON p.productIndex = sr.id_f " +
-                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 7 AND sr.role.id = 1", Product.class);
-            queryProduct.setParameter("mapId", this.map.getId());
+                    "WHERE sr.id IN :relationshipIds", Product.class);
+            final List<Long> relationshipIds = relationships.stream().map(SRelationships::getId).toList();
+            queryProduct.setParameter("relationshipIds", relationshipIds);
             List<Product> products = queryProduct.getResultList();
-
             stageRewards.addAll(products);
+
+            queryRelationships = em.createQuery("SELECT sr FROM SRelationships sr " +
+                    "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id IN (1,2) AND sr.role.id = 1", SRelationships.class);
+            final List<Long> guardian2MapIds = guardian2Maps.stream()
+                    .map(Guardian2Maps::getId)
+                    .toList();
+            queryRelationships.setParameter("guardianList", guardian2MapIds);
+            relationships = queryRelationships.getResultList();
 
             String qlGetGuardiansForProducts =
                     "SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
                     "ON p.productIndex = sr.id_f " +
-                    "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id IN (1,2) AND sr.role.id = 1";
-
+                    "WHERE sr.id IN :relationshipIds";
             queryProduct = em.createQuery(qlGetGuardiansForProducts, Product.class);
-            final List<Long> guardian2MapIds = guardian2Maps.stream()
-                    .map(Guardian2Maps::getId)
-                    .toList();
-            queryProduct.setParameter("guardianList", guardian2MapIds);
+            final List<Long> relationshipIdsGuardians = relationships.stream().map(SRelationships::getId).toList();
+            queryProduct.setParameter("relationshipIds", relationshipIdsGuardians);
             List<Product> guardianProducts = queryProduct.getResultList();
 
             if (isBoss) {
+                queryRelationships = em.createQuery("SELECT sr FROM SRelationships sr " +
+                        "WHERE sr.id_t IN :guardianList AND sr.status.id = 1 AND sr.relationship.id IN (1,2) AND sr.role.id = 1", SRelationships.class);
+                final List<Long> guardian2MapIdsBoss = guardian2MapsBoss.stream().map(Guardian2Maps::getId).toList();
+                queryRelationships.setParameter("guardianList", guardian2MapIdsBoss);
+                List<SRelationships> relationshipsBoss = queryRelationships.getResultList();
+
                 queryProduct = em.createQuery(qlGetGuardiansForProducts, Product.class);
-                final List<Long> guardian2MapIdsBoss = guardian2MapsBoss.stream()
-                        .map(Guardian2Maps::getId)
-                        .toList();
-                queryProduct.setParameter("guardianList", guardian2MapIdsBoss);
+                final List<Long> relationshipIdsGuardiansBoss = relationshipsBoss.stream().map(SRelationships::getId).toList();
+                queryProduct.setParameter("relationshipIds", relationshipIdsGuardiansBoss);
                 final List<Product> tmp = queryProduct.getResultList();
 
                 guardianProducts.addAll(tmp);
+                relationships.addAll(relationshipsBoss);
             }
             stageRewards.addAll(guardianProducts);
+            stageRewardsRelationships.addAll(relationships);
         });
 
-        List<PlayerReward> playerRewards = new ArrayList<>();
+        MatchplayReward reward = new MatchplayReward();
+        final List<MatchplayReward.ItemReward> itemRewards = new ArrayList<>();
 
         final boolean stageChangingToBoss = this.stageChangingToBoss.get();
         final boolean allGuardiansDead = this.guardianBattleStates.stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         final boolean wonGame = allGuardiansDead && finished.get() && !stageChangingToBoss;
+
+        // handle matchplay reward
+        if (!stageRewards.isEmpty() && !stageRewardsRelationships.isEmpty()) {
+            for (Product product : stageRewards) {
+                Double weight = stageRewardsRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getWeight)
+                        .orElse(null);
+                Integer qty = stageRewardsRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getQty)
+                        .orElse(null);
+                Integer qtyMin = stageRewardsRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getQtyMin)
+                        .orElse(null);
+                Integer qtyMax = stageRewardsRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getQtyMax)
+                        .orElse(null);
+                Integer levelReq = stageRewardsRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getLevelReq)
+                        .orElse(null);
+                Boolean forHardMode = stageRewardsRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getForHardMode)
+                        .orElse(null);
+                Boolean forRandomMode = stageRewardsRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getForRandomMode)
+                        .orElse(null);
+
+                if (forHardMode != null && forHardMode && !isHardMode.get()) {
+                    continue;
+                }
+
+                if (forRandomMode != null && forRandomMode && !isRandomGuardiansMode.get()) {
+                    continue;
+                }
+
+                if (qty == null) {
+                    if (qtyMin == null) {
+                        if (product.getCategory().equals(EItemCategory.MATERIAL.getName()))
+                            qtyMin = 1;
+                        else if (product.getCategory().equals(EItemCategory.QUICK.getName()))
+                            qtyMin = 5;
+                        else if (product.getCategory().equals(EItemCategory.PARTS.getName()))
+                            qtyMin = 1;
+                        else
+                            qtyMin = 1;
+                    }
+                    if (qtyMax == null) {
+                        if (product.getCategory().equals(EItemCategory.MATERIAL.getName()))
+                            qtyMax = wonGame ? 3 : 2;
+                        else if (product.getCategory().equals(EItemCategory.QUICK.getName()))
+                            qtyMax = wonGame ? 100 : 30;
+                        else if (product.getCategory().equals(EItemCategory.PARTS.getName()))
+                            qtyMax = 1;
+                        else
+                            qtyMax = 1;
+                    }
+                    qty = random.nextInt(qtyMax - qtyMin + 1) + qtyMin;
+                } else {
+                   if (qtyMin != null && qtyMax != null) {
+                       qty = random.nextInt(qtyMax - qtyMin + 1) + qtyMin;
+                   }
+                }
+
+                // allow only parts and lottery items for boss stages
+                if (wonGame && isBoss) {
+                    if (!product.getCategory().equals(EItemCategory.PARTS.getName()) && !product.getCategory().equals(EItemCategory.LOTTERY.getName())) {
+                        continue;
+                    }
+                }
+
+                if (!wonGame) {
+                    // only material and quick items for lost games
+                    if (!product.getCategory().equals(EItemCategory.MATERIAL.getName()) && !product.getCategory().equals(EItemCategory.QUICK.getName())) {
+                        continue;
+                    }
+                }
+
+                itemRewards.add(new MatchplayReward.ItemReward(product.getProductIndex(), qty, weight));
+            }
+        }
+
+        // also allow room for no item reward
+        itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
+
+        // if there is less than 4 items, add more items to reach 4
+        if (itemRewards.size() < 4) {
+            final int diff = 4 - itemRewards.size();
+            for (int i = 0; i < diff; i++) {
+                itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
+            }
+        }
+
+        double averageWeight = MatchplayReward.calculateAverageWeight(itemRewards);
+        List<MatchplayReward.ItemReward> finalItemRewards = MatchplayReward.selectItemRewardsByWeight(itemRewards, 4, averageWeight);
+        reward.addItemRewards(finalItemRewards);
+        reward.assignItemRewardsToSlots(finalItemRewards);
 
         this.playerBattleStates.forEach(x -> {
             PlayerReward playerReward = new PlayerReward(x.getPosition());
@@ -492,84 +622,16 @@ public class MatchplayGuardianGame extends MatchplayGame {
             double goldMultiplier = goldMultipliers.isEmpty() ? 1 : goldMultipliers.stream().mapToDouble(SGuardianMultiplier::getMultiplier).sum();
             playerReward.setExp((int) (this.getExpPot().get() * expMultiplier));
             playerReward.setGold((int) (this.getGoldPot().get() * goldMultiplier));
-            playerReward.setProductIndex(-1);
-
-            if (!stageRewards.isEmpty()) {
-                if (wonGame) {
-                    final List<Product> winningStageRewards = new ArrayList<>(stageRewards);
-                    if (isBoss) {
-                        winningStageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.PARTS.getName()) && !p.getCategory().equals(EItemCategory.LOTTERY.getName()));
-                    }
-                    if (map.getMap().equals(4)) {
-                        winningStageRewards.removeIf(p -> !p.getCategory().equals(EItemCategory.LOTTERY.getName()));
-                    }
-
-                    if (!winningStageRewards.isEmpty()) {
-                        final int itemRewardToGive = random.nextInt(winningStageRewards.size());
-                        playerReward.setProductIndex(winningStageRewards.get(itemRewardToGive).getProductIndex());
-
-                        int amount = this.getIsHardMode().get() ? 3 : 1;
-                        if (this.getIsRandomGuardiansMode().get())
-                            amount = 1;
-
-                        if (map.getMap().equals(4)) {
-                            amount = isBoss ? 3 : 1;
-                        }
-
-                        // mons only
-                        if (Arrays.asList(8L, 9L).contains(map.getId()) && winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.LOTTERY.getName())) {
-                            amount = 3;
-                        }
-
-                        if (winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
-                            amount = 1;
-
-                        if (winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.MATERIAL.getName())) {
-                            final int min = 1;
-                            final int max = 3;
-                            amount = random.nextInt(max - min + 1) + min;
-                        }
-
-                        if (winningStageRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.QUICK.getName())) {
-                            final int min = 5;
-                            final int max = 100;
-                            amount = random.nextInt(max - min + 1) + min;
-                        }
-                        playerReward.setProductAmount(amount);
-                    }
-                } else {
-                    final List<Product> loosingStageRewards = stageRewards.stream()
-                            .filter(p -> p.getCategory().equals(EItemCategory.MATERIAL.getName()) || p.getCategory().equals(EItemCategory.QUICK.getName()))
-                            .toList();
-
-                    if (!loosingStageRewards.isEmpty()) {
-                        final int itemRewardToGiveLoosing = random.nextInt(loosingStageRewards.size());
-                        playerReward.setProductIndex(loosingStageRewards.get(itemRewardToGiveLoosing).getProductIndex());
-
-                        final int min = 1;
-                        final int max = 2;
-                        int amount = random.nextInt(max - min + 1) + min;
-
-                        if (loosingStageRewards.get(itemRewardToGiveLoosing).getCategory().equals(EItemCategory.QUICK.getName())) {
-                            final int minQuick = 5;
-                            final int maxQuick = 30;
-                            amount = random.nextInt(maxQuick - minQuick + 1) + minQuick;
-                        }
-
-                        playerReward.setProductAmount(amount);
-                    }
-                }
-            }
 
             if (!wonGame) {
                 playerReward.setExp(playerReward.getExp() / 2);
                 playerReward.setGold(playerReward.getGold() / 2);
             }
 
-            playerRewards.add(playerReward);
+            reward.addPlayerReward(playerReward);
         });
 
-        return playerRewards;
+        return reward;
     }
 
     @Override

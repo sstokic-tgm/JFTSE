@@ -16,11 +16,13 @@ public class GameSessionManager {
     private static GameSessionManager instance;
 
     private ConcurrentHashMap<Integer, GameSession> gameSessionList;
+    private ConcurrentHashMap<Integer, MatchplayReward> matchplayRewardList;
 
     @PostConstruct
     public void init() {
         instance = this;
         gameSessionList = new ConcurrentHashMap<>();
+        matchplayRewardList = new ConcurrentHashMap<>();
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }
@@ -42,5 +44,21 @@ public class GameSessionManager {
 
     public GameSession getGameSessionBySessionId(int sessionId) {
         return gameSessionList.get(sessionId);
+    }
+
+    public void addMatchplayReward(int roomId, MatchplayReward matchplayReward) {
+        matchplayRewardList.put(roomId, matchplayReward);
+    }
+
+    public MatchplayReward getMatchplayReward(int roomId) {
+        return matchplayRewardList.get(roomId);
+    }
+
+    public void removeMatchplayReward(int roomId) {
+        matchplayRewardList.remove(roomId);
+    }
+
+    public boolean hasMatchplayReward(int roomId) {
+        return matchplayRewardList.containsKey(roomId);
     }
 }

@@ -125,6 +125,10 @@ public enum PacketOperations {
     S2CMatchplayGiveRandomSkill(0x332E),
     S2CMatchplayGiveSpecificSkill(0x18E8),
 
+    S2CMatchplayItemRewards(0x1D51),
+    C2SMatchplayItemRewardPickupRequest(0x1D52),
+    S2CMatchplayItemRewardPickupAnswer(0x1D53),
+
     C2CBallAnimationPacket(0x10E3),
     C2CPlayerAnimationPacket(0x32C9),
     C2CSpiderMinePlacedPacket(0x3390),

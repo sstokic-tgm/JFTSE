@@ -4,6 +4,7 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.matchplay.MatchplayReward;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
@@ -214,8 +215,10 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             }
         }
 
-        List<PlayerReward> playerRewards = game.getPlayerRewards();
-        game.addBonusesToRewards(activeRoom.getRoomPlayerList(), playerRewards);
+        MatchplayReward matchplayReward = game.getMatchRewards();
+        game.addBonusesToRewards(activeRoom.getRoomPlayerList(), matchplayReward.getPlayerRewards());
+
+        GameSessionManager.getInstance().addMatchplayReward(activeRoom.getRoomId(), matchplayReward);
 
         gameLogContent = new StringBuilder();
 
@@ -232,10 +235,10 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             if (isActivePlayer) {
                 gameLogContent.append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
 
-                PlayerReward playerReward = playerRewards.stream()
-                        .filter(pr -> pr.getPlayerPosition() == rp.getPosition())
-                        .findFirst()
-                        .orElse(new PlayerReward(rp.getPosition()));
+                PlayerReward playerReward = matchplayReward.getPlayerReward(rp.getPosition());
+                if (playerReward == null) {
+                    playerReward = new PlayerReward(rp.getPosition());
+                }
 
                 Player player = rp.getPlayer();
 
@@ -283,8 +286,6 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 player.setCouplePoints(player.getCouplePoints() + playerReward.getCouplePoints());
                 client.savePlayer(player);
 
-                game.addRewardItemToPocket(client, playerReward);
-
                 PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
                 if (wonGame) {
                     playerStatistic.setGuardianRecordWin(playerStatistic.getGuardianRecordWin() + 1);
@@ -328,8 +329,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                     eventHandler.push(eventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0));
                 }
 
-                S2CBettingDisplayItemRewards s2CBettingDisplayItemRewards = new S2CBettingDisplayItemRewards(playerRewards);
-                client.getConnection().sendTCP(s2CBettingDisplayItemRewards);
+                S2CMatchplayItemRewardsPacket itemRewardsPacket = new S2CMatchplayItemRewardsPacket(matchplayReward);
+                client.getConnection().sendTCP(itemRewardsPacket);
 
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
                 eventHandler.push(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
@@ -337,7 +338,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
-            S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(playerRewards);
+            S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(matchplayReward.getPlayerRewards());
             eventHandler.push(eventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0));
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();

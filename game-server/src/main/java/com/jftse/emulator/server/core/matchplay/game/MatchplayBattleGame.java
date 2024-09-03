@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.matchplay.MatchplayReward;
+import com.jftse.entities.database.model.SRelationships;
 import com.jftse.entities.database.model.item.ItemEnchantLevel;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
@@ -162,20 +164,100 @@ public class MatchplayBattleGame extends MatchplayGame {
         return playerPositions;
     }
 
-    public List<PlayerReward> getPlayerRewards() {
+    public MatchplayReward getMatchRewards() {
         int secondsPlayed = (int) Math.ceil((double) this.getTimeNeeded() / 1000);
-        List<PlayerReward> playerRewards = new ArrayList<>();
-
+        final List<SRelationships> rewardRelationships = new ArrayList<>();
         final List<Product> mapRewards = new ArrayList<>();
+
         jdbcUtil.execute(em -> {
+            TypedQuery<SRelationships> queryRelationships = em.createQuery("SELECT sr FROM SRelationships sr " +
+                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 3 AND sr.role.id = 1", SRelationships.class);
+            queryRelationships.setParameter("mapId", this.map.getId());
+            rewardRelationships.addAll(queryRelationships.getResultList());
+
             TypedQuery<Product> queryProduct = em.createQuery("SELECT p FROM SRelationships sr LEFT JOIN FETCH Product p " +
                     "ON p.productIndex = sr.id_f " +
-                    "WHERE sr.id_t = :mapId AND sr.status.id = 1 AND sr.relationship.id = 3 AND sr.role.id = 1", Product.class);
-            queryProduct.setParameter("mapId", this.map.getId());
+                    "WHERE sr.id IN :relationshipIds", Product.class);
+            final List<Long> relationshipIds = rewardRelationships.stream().map(SRelationships::getId).toList();
+            queryProduct.setParameter("relationshipIds", relationshipIds);
             List<Product> products = queryProduct.getResultList();
 
             mapRewards.addAll(products);
         });
+
+        MatchplayReward reward = new MatchplayReward();
+        final List<MatchplayReward.ItemReward> itemRewards = new ArrayList<>();
+
+        if (!mapRewards.isEmpty() && !rewardRelationships.isEmpty()) {
+            for (Product product : mapRewards) {
+                Double weight = rewardRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getWeight)
+                        .orElse(null);
+                Integer qty = rewardRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getQty)
+                        .orElse(null);
+                Integer qtyMin = rewardRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getQtyMin)
+                        .orElse(null);
+                Integer qtyMax = rewardRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getQtyMax)
+                        .orElse(null);
+                Integer levelReq = rewardRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getLevelReq)
+                        .orElse(null);
+
+                if (qty == null) {
+                    if (qtyMin == null) {
+                        if (product.getCategory().equals(EItemCategory.MATERIAL.getName()))
+                            qtyMin = 1;
+                        else if (product.getCategory().equals(EItemCategory.QUICK.getName()))
+                            qtyMin = 5;
+                        else if (product.getCategory().equals(EItemCategory.PARTS.getName()))
+                            qtyMin = 1;
+                        else
+                            qtyMin = 1;
+                    }
+                    if (qtyMax == null) {
+                        if (product.getCategory().equals(EItemCategory.MATERIAL.getName()))
+                            qtyMax = 3;
+                        else if (product.getCategory().equals(EItemCategory.QUICK.getName()))
+                            qtyMax = 100;
+                        else if (product.getCategory().equals(EItemCategory.PARTS.getName()))
+                            qtyMax = 1;
+                        else
+                            qtyMax = 1;
+                    }
+                    qty = random.nextInt(qtyMax - qtyMin + 1) + qtyMin;
+                } else {
+                    if (qtyMin != null && qtyMax != null) {
+                        qty = random.nextInt(qtyMax - qtyMin + 1) + qtyMin;
+                    }
+                }
+
+                itemRewards.add(new MatchplayReward.ItemReward(product.getProductIndex(), qty, weight));
+            }
+        }
+
+        // also allow room for no item reward
+        itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
+
+        // if there is less than 4 items, add more items to reach 4
+        if (itemRewards.size() < 4) {
+            final int diff = 4 - itemRewards.size();
+            for (int i = 0; i < diff; i++) {
+                itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
+            }
+        }
 
         int iteration = 0;
         for (int playerPosition : this.getPlayerPositionsOrderedByHighestHealth()) {
@@ -216,30 +298,12 @@ public class MatchplayBattleGame extends MatchplayGame {
             playerReward.setExp(rewardExp);
             playerReward.setGold(rewardGold);
 
-            final int itemRewardToGive = random.nextInt(mapRewards.size());
-            playerReward.setProductIndex(mapRewards.get(itemRewardToGive).getProductIndex());
-
-            int min = 1;
-            int max = !wonGame ? 2 : 3;
-            int amount = random.nextInt(max - min + 1) + min;
-
-            if (mapRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.PARTS.getName()))
-                amount = 1;
-
-            if (mapRewards.get(itemRewardToGive).getCategory().equals(EItemCategory.QUICK.getName())) {
-                min = 5;
-                max = !wonGame ? 30 : 50;
-                amount = random.nextInt(max - min + 1) + min;
-            }
-
-            playerReward.setProductAmount(amount);
-
-            playerRewards.add(playerReward);
+            reward.addPlayerReward(playerReward);
 
             iteration++;
         }
 
-        return playerRewards;
+        return reward;
     }
 
     @Override

@@ -11,7 +11,9 @@ public class PlayerReward {
     private int gold;
     private int couplePoints;
     private int rankingPoints;
+    @Deprecated
     private int productIndex;
+    @Deprecated
     private int productAmount;
     private int activeBonuses;
 
