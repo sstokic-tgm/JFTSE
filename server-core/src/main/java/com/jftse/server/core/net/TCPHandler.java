@@ -41,6 +41,8 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        markedForClose.compareAndSet(true, false);
+
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
         connection.setChannelHandlerContext(ctx);
 
