@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public abstract class TCPHandler<T extends Connection<? extends Client<T>>> extends SimpleChannelInboundHandler<Packet> {
@@ -30,6 +31,8 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
 
     private final Map<String, Pair<Long, Byte>> tracker = new ConcurrentHashMap<>();
     private final Map<ChannelId, Queue<PacketHandlerTask<T>>> pendingTasks = new ConcurrentHashMap<>();
+
+    private AtomicBoolean markedForClose = new AtomicBoolean(false);
 
     protected TCPHandler(final AttributeKey<T> connectionAttributeKey, final PacketHandlerFactory packetHandlerFactory) {
         this.CONNECTION_ATTRIBUTE_KEY = connectionAttributeKey;
@@ -50,7 +53,7 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         AbstractPacketHandler abstractPacketHandler = packetHandlerFactory.getHandler(PacketOperations.getPacketOperationByValue(packet.getPacketId()));
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
 
-        if (connection != null && !connection.getIsClosingConnection().get()) {
+        if (connection != null && !connection.getIsClosingConnection().get() && !markedForClose.get()) {
             if (abstractPacketHandler != null) {
                 abstractPacketHandler.setConnection(connection);
 
@@ -59,6 +62,10 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
                         if (abstractPacketHandler.process(packet)) {
                             abstractPacketHandler.handle();
                             packetProcessed(connection, abstractPacketHandler);
+
+                            if (packet.getPacketId() == PacketOperations.C2SDisconnectRequest.getValue()) {
+                                markedForClose.set(true);
+                            }
                         } else {
                             packetNotProcessed(connection, abstractPacketHandler);
                         }
