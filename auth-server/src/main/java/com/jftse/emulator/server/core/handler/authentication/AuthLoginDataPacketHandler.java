@@ -24,10 +24,8 @@ import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 @PacketOperationIdentifier(PacketOperations.C2SAuthLoginData)
@@ -80,9 +78,6 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
 
             List<Player> playerList = playerService.findAllByAccount(account);
-            boolean hasNewChar = playerList.stream().anyMatch(p -> DateUtils.isSameDay(p.getCreated(), new Date()) && !p.getAlreadyCreated());
-
-            boolean hasNameChangeItem = false;
             for (Player p : playerList) {
                 List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItems(p.getPocket());
                 final boolean nameChangeItemPresent = ppList.stream()
@@ -90,14 +85,12 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
                 if (nameChangeItemPresent && !p.getNameChangeAllowed()) {
                     p.setNameChangeAllowed(true);
                     p = playerService.save(p);
-                    hasNameChangeItem = true;
                 }
             }
 
-            if (hasNewChar || hasNameChangeItem) {
-                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
-                connection.sendTCP(playerListPacket);
-            }
+            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+            connection.sendTCP(playerListPacket);
+
             S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
             connection.sendTCP(gameServerListPacket);
 

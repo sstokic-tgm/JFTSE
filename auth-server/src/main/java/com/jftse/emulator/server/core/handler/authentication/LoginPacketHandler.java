@@ -5,19 +5,19 @@ import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.authserver.C2SLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
+import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
 import com.jftse.entities.database.model.auth.AuthToken;
+import com.jftse.entities.database.model.player.Player;
+import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.service.AuthTokenService;
-import com.jftse.server.core.service.AuthenticationService;
-import com.jftse.server.core.service.ClientWhitelistService;
-import com.jftse.server.core.shared.packets.S2CDisconnectAnswerPacket;
+import com.jftse.server.core.service.*;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import lombok.extern.log4j.Log4j2;
@@ -35,7 +35,8 @@ public class LoginPacketHandler extends AbstractPacketHandler {
     private final AuthenticationService authenticationService;
     private final ClientWhitelistService clientWhitelistService;
     private final AuthTokenService authTokenService;
-
+    private final PlayerService playerService;
+    private final PlayerPocketService playerPocketService;
 
     private final ConfigService configService;
 
@@ -43,6 +44,8 @@ public class LoginPacketHandler extends AbstractPacketHandler {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         clientWhitelistService = ServiceManager.getInstance().getClientWhitelistService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
+        playerService = ServiceManager.getInstance().getPlayerService();
+        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
 
         configService = ServiceManager.getInstance().getConfigService();
     }
@@ -115,6 +118,18 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 client.saveAccount(account);
                 client.setAccount(account.getId());
 
+                int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
+                List<Player> playerList = playerService.findAllByAccount(account);
+                for (Player p : playerList) {
+                    List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItems(p.getPocket());
+                    final boolean nameChangeItemPresent = ppList.stream()
+                            .anyMatch(pp -> pp.getCategory().equals(EItemCategory.SPECIAL.getName()) && pp.getItemIndex() == 4);
+                    if (nameChangeItemPresent && !p.getNameChangeAllowed()) {
+                        p.setNameChangeAllowed(true);
+                        p = playerService.save(p);
+                    }
+                }
+
                 //((FTConnection) connection).setHwid(loginPacket.getHwid());
 
                 List<AuthToken> existingAuthTokens = authTokenService.findAuthTokensByAccountName(account.getUsername());
@@ -133,6 +148,9 @@ public class LoginPacketHandler extends AbstractPacketHandler {
 
                 S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.SUCCESS, token, timestamp);
                 connection.sendTCP(loginAnswerPacket);
+
+                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+                connection.sendTCP(playerListPacket);
 
                 String hostAddress;
                 if (inetSocketAddress != null)

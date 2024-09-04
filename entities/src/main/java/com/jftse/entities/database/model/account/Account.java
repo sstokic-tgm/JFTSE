@@ -29,6 +29,8 @@ public class Account extends AbstractBaseModel {
     private String banReason;
     private Date bannedUntil;
     private ServerType loggedInServer;
+    private ServerType logoutServer;
+    private Long lastSelectedPlayerId;
 
     @Column(nullable = false, columnDefinition = "bit(1) DEFAULT 1")
     private Boolean active = true;

@@ -209,6 +209,8 @@ public enum PacketOperations {
     S2CShopAnswerData(0x2388),
     C2SShopUnderS2CShopUnderMaintenancePacket(0x2382),
     S2CShopUnderS2CShopUnderMaintenancePacket(0x2383),
+    C2SRedeemCoupon(0x2137),
+    S2CRedeemCouponAnswer(0x2138),
 
     S2CCouplePoints(0x252D),
 

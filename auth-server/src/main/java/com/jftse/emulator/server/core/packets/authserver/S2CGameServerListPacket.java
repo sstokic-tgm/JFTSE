@@ -19,7 +19,7 @@ public class S2CGameServerListPacket extends Packet {
             this.write(gameServer.getGameServerType().getType());
             this.write(gameServer.getHost());
             this.write((short) gameServer.getPort().intValue());
-            this.write((short) 0);  // players online
+            this.write((short) 0);  // players online < 75 Good, < 100 Crowded, >= 100 Full
             this.write(gameServer.getIsCustomChannel());
             this.write(gameServer.getName());
         }

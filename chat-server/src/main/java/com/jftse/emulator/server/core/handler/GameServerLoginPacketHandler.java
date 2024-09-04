@@ -62,6 +62,7 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
             // mark as logged in
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             account.setLoggedInServer(ServerType.CHAT_SERVER);
+            account.setLastSelectedPlayerId(player.getId());
             client.saveAccount(account);
 
             log.info(player.getName() + " connected");

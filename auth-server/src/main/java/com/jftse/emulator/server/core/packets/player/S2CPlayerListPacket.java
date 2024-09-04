@@ -12,10 +12,10 @@ public class S2CPlayerListPacket extends Packet {
     public S2CPlayerListPacket(Account account, List<Player> playerList, int tutorialCount) {
         super(PacketOperations.S2CPlayerList);
 
-        this.write(0);
-        this.write(0);
-        this.write((byte) tutorialCount);
         this.write(Math.toIntExact(account.getId()));
+        this.write(Math.toIntExact(account.getId()));
+        this.write((byte) tutorialCount);
+        this.write(Math.toIntExact(account.getLastSelectedPlayerId() == null ? 0 : account.getLastSelectedPlayerId()));
         this.write(account.getGameMaster()); // GM
 
         if (playerList != null) {

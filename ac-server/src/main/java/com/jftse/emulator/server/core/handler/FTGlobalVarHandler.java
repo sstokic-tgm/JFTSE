@@ -51,6 +51,7 @@ public class FTGlobalVarHandler extends AbstractPacketHandler {
                 propValues.add(Integer.valueOf(properties.getProperty("uiSnowEffect", "0")));
                 propValues.add(Integer.valueOf(properties.getProperty("cherryblossomsEvent", "0")));
                 propValues.add(Integer.valueOf(properties.getProperty("hitProductShow", "0")));
+                propValues.add(Integer.valueOf(properties.getProperty("enableCoupon", "0")));
 
             } catch (IOException e) {
                 log.error("Error reading the properties file: " + e.getMessage(), e);
