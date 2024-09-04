@@ -27,7 +27,7 @@ public class C2SGameServerLoginPacket extends Packet {
         this.timestamp = this.readLong();
         this.accountName = this.readUnicodeString();
         this.unk0 = this.readByte();
-        this.hwid = this.readString();
+        //this.hwid = this.readString();
 
         this.accountName = getAccountName().trim().replaceAll("[^a-zA-Z0-9\\s+]", "");
     }

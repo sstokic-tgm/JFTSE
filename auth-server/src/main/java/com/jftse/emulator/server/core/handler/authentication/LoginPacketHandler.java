@@ -115,7 +115,7 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 client.saveAccount(account);
                 client.setAccount(account.getId());
 
-                ((FTConnection) connection).setHwid(loginPacket.getHwid());
+                //((FTConnection) connection).setHwid(loginPacket.getHwid());
 
                 List<AuthToken> existingAuthTokens = authTokenService.findAuthTokensByAccountName(account.getUsername());
                 if (!existingAuthTokens.isEmpty()) {
