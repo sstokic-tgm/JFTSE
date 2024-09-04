@@ -122,9 +122,7 @@ public class PlayerPocketServiceImpl implements PlayerPocketService {
                     SRelationships relationship = relationships.getFirst();
                     sellPrice = relationship.getId_t().intValue() * itemCount;
                 } else { // default to buy price / 2
-                    int buyPrice = products.getFirst().getPrice0();
-                    if (buyPrice <= 0)
-                        buyPrice = 1;
+                    int buyPrice = products.stream().filter(p -> p.getPrice0() > 0).findFirst().map(Product::getPrice0).orElse(1);
 
                     sellPrice = (int) Math.ceil((double) (buyPrice / 2) * (1 + (itemCount / (double) (buyPrice / 2))));
                 }
