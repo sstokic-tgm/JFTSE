@@ -16,7 +16,6 @@ public class Unknown0x1071PacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        Packet answer = new Packet(packet.getRawPacket());
-        connection.sendTCP(answer);
+        // empty
     }
 }
