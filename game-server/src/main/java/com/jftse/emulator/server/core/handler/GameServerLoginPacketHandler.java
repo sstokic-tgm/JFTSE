@@ -72,7 +72,7 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             client.setAccount(account.getId());
             ((FTConnection) connection).setClient(client);
-            //((FTConnection) connection).setHwid(gameServerLoginPacket.getHwid());
+            ((FTConnection) connection).setHwid(gameServerLoginPacket.getHwid());
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
             connection.sendTCP(gameServerLoginAnswerPacket);

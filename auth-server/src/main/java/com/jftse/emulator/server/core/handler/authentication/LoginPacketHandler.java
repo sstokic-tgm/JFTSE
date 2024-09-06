@@ -7,6 +7,7 @@ import com.jftse.emulator.server.core.packets.authserver.C2SLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
@@ -130,7 +131,7 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                     }
                 }
 
-                //((FTConnection) connection).setHwid(loginPacket.getHwid());
+                ((FTConnection) connection).setHwid(loginPacket.getHwid());
 
                 List<AuthToken> existingAuthTokens = authTokenService.findAuthTokensByAccountName(account.getUsername());
                 if (!existingAuthTokens.isEmpty()) {
