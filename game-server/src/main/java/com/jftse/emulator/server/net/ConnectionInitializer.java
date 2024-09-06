@@ -5,6 +5,7 @@ import com.jftse.entities.database.model.ServerType;
 import com.jftse.server.core.codec.PacketDecoder;
 import com.jftse.server.core.codec.PacketEncoder;
 import com.jftse.server.core.handler.PacketHandlerFactory;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.flush.FlushConsolidationHandler;
@@ -41,7 +42,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
-        ch.pipeline().addLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS));
+        ch.pipeline().addLast(new LoggingReadTimeoutHandler(30, TimeUnit.SECONDS));
         ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, packetLogger));
         ch.pipeline().addLast("encoder", new PacketEncoder(encryptionKey, packetLogger));
@@ -56,5 +57,19 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
             result = new BigInteger(upperLimit.bitLength(), rnd);
         } while (result.compareTo(upperLimit) > 0);
         return result;
+    }
+
+    private static class LoggingReadTimeoutHandler extends ReadTimeoutHandler {
+        private static final Logger logger = LogManager.getLogger(LoggingReadTimeoutHandler.class);
+
+        public LoggingReadTimeoutHandler(long timeout, TimeUnit unit) {
+            super(timeout, unit);
+        }
+
+        @Override
+        protected void readTimedOut(ChannelHandlerContext ctx) throws Exception {
+            logger.warn("Connection timed out: {}", ctx.channel().remoteAddress());
+            super.readTimedOut(ctx);
+        }
     }
 }
