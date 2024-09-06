@@ -7,6 +7,7 @@ import com.jftse.server.core.handler.PacketHandlerTask;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
+import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -14,6 +15,7 @@ import io.netty.util.AttributeKey;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -117,6 +119,11 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
         if (connection != null) {
             enqueueTask(connection, c -> {
                 exceptionCaught(connection, cause);
+
+                if (cause instanceof DataAccessException) {
+                    S2CDCMsgPacket dcPacket = new S2CDCMsgPacket(0);
+                    connection.sendTCP(dcPacket);
+                }
 
                 connection.close();
             });
