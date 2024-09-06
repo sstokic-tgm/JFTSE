@@ -259,6 +259,11 @@ public class MatchplayBattleGame extends MatchplayGame {
             }
         }
 
+        double averageWeight = MatchplayReward.calculateAverageWeight(itemRewards);
+        List<MatchplayReward.ItemReward> finalItemRewards = MatchplayReward.selectItemRewardsByWeight(itemRewards, 4, averageWeight);
+        reward.addItemRewards(finalItemRewards);
+        reward.assignItemRewardsToSlots(finalItemRewards);
+
         int iteration = 0;
         for (int playerPosition : this.getPlayerPositionsOrderedByHighestHealth()) {
             boolean wonGame = false;
