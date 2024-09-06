@@ -29,7 +29,5 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
                 client.saveAccount(account);
             }
         }
-
-        connection.close();
     }
 }

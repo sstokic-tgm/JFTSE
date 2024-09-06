@@ -49,7 +49,5 @@ public class DisconnectPacketHandler extends AbstractPacketHandler {
             S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
             connection.sendTCP(clearInventoryPacket);
         }
-
-        connection.close();
     }
 }
