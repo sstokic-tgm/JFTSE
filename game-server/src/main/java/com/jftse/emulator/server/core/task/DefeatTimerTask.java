@@ -43,7 +43,7 @@ public class DefeatTimerTask extends AbstractTask {
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new FinishGameTask(connection), TimeUnit.MINUTES.toMillis(playTime));
 
             gameSession.getFireables().push(runnableEvent);
-            eventHandler.push(runnableEvent);
+            eventHandler.offer(runnableEvent);
             gameSession.setCountDownRunnable(runnableEvent);
         }
     }

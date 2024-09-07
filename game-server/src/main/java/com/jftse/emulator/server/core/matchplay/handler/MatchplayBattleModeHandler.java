@@ -23,6 +23,7 @@ import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.packets.matchplay.*;
+import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
 import com.jftse.emulator.server.core.utils.RankingUtils;
 import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
@@ -116,8 +117,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
 
             gameSession.getFireables().push(placeCrystalEventRedTeam);
             gameSession.getFireables().push(placeCrystalEventBlueTeam);
-            eventHandler.push(placeCrystalEventRedTeam);
-            eventHandler.push(placeCrystalEventBlueTeam);
+            eventHandler.offer(placeCrystalEventRedTeam);
+            eventHandler.offer(placeCrystalEventBlueTeam);
         }
     }
 
@@ -263,23 +264,25 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
                     rp.setStatusPointsAddedDto(statusPointsAddedDto);
 
                     S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
-                    eventHandler.push(eventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0));
+                    eventHandler.offer(eventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0));
                 }
 
                 S2CMatchplayItemRewardsPacket itemRewardsPacket = new S2CMatchplayItemRewardsPacket(matchplayReward);
                 client.getConnection().sendTCP(itemRewardsPacket);
 
+                eventHandler.offer(eventHandler.createRunnableEvent(new AutoItemRewardPickerTask(client, activeRoom.getRoomId()), TimeUnit.SECONDS.toMillis(11)));
+
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
-                eventHandler.push(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
+                eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
             }
 
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(matchplayReward.getPlayerRewards());
-            eventHandler.push(eventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0));
+            eventHandler.offer(eventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0));
 
             S2CMatchplayBackToRoom backToRoomPacket = new S2CMatchplayBackToRoom();
-            eventHandler.push(eventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)));
+            eventHandler.offer(eventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)));
             client.setActiveGameSession(null);
         }
 

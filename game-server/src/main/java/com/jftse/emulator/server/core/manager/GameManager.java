@@ -12,6 +12,7 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
+import com.jftse.emulator.server.core.matchplay.event.Fireable;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
@@ -176,7 +177,6 @@ public class GameManager {
             while (running.get()) {
                 try {
                     eventHandler.handleQueuedEvents();
-                    TimeUnit.MILLISECONDS.sleep(50);
                 } catch (Exception ex) {
                     log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
                 }

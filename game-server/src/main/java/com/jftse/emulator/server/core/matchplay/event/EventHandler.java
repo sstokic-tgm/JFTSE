@@ -10,21 +10,19 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.time.Instant;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @Service
 @Getter
 @Setter
 @Log4j2
 public class EventHandler {
-    private ConcurrentLinkedDeque<Fireable> fireableDeque;
-
-    private final Object dequeLock = new Object();
+    private BlockingQueue<Fireable> fireableDeque;
 
     @PostConstruct
     public void init() {
-        fireableDeque = new ConcurrentLinkedDeque<>();
+        fireableDeque = new LinkedBlockingQueue<>();
     }
 
     /**
@@ -32,26 +30,18 @@ public class EventHandler {
      *
      * @param fireable
      */
-    public void push(Fireable fireable) {
-        fireableDeque.push(fireable);
+    public void offer(Fireable fireable) {
+        fireableDeque.offer(fireable);
     }
 
     /**
-     * Removes and returns the first fireable from the list.
-     * Shifts any subsequent elements to the left.
+     * Retrieves and removes the head of this queue,
+     * waiting if necessary until an element becomes available.
      *
      * @return removed first fireable
      */
-    public Fireable pop() {
-        return fireableDeque.pop();
-    }
-
-    public Fireable peek() {
-        return fireableDeque.peek();
-    }
-
-    public Fireable poll() {
-        return fireableDeque.poll();
+    public Fireable take() throws InterruptedException {
+        return fireableDeque.take();
     }
 
     /**
@@ -67,21 +57,19 @@ public class EventHandler {
     public void handleQueuedEvents() {
         long currentTime = Instant.now().toEpochMilli();
 
-        // handle fireables
-        synchronized (dequeLock) {
-            Iterator<Fireable> it = fireableDeque.iterator();
-            while (it.hasNext()) {
-                Fireable fireable = it.next();
+        try {
+            Fireable fireable = take();
+            if (fireable != null) {
                 if (!fireable.isFired() && fireable.shouldFire(currentTime) && !fireable.isCancelled()) {
                     fireable.fire();
-                    it.remove();
-                    log.info("Fired fireable: " + fireable.getSelf().getClass().getSimpleName());
-                }
-                if (fireable.isCancelled()) {
-                    it.remove();
-                    log.info("Removed cancelled fireable: " + fireable.getSelf().getClass().getSimpleName());
+                    log.info("Fired fireable: {}", fireable.getSelf().getClass().getSimpleName());
+                } else if (!fireable.isCancelled()) {
+                    offer(fireable);
                 }
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Event handler interrupted: {}", e.getMessage());
         }
     }
 

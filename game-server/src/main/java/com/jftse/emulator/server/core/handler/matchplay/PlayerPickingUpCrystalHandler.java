@@ -128,7 +128,7 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
 
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);
             gameSession.getFireables().push(runnableEvent);
-            eventHandler.push(runnableEvent);
+            eventHandler.offer(runnableEvent);
         }
     }
 

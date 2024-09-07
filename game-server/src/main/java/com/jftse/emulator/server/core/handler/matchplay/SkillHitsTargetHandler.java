@@ -576,23 +576,23 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
 
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianServeTask(connection), TimeUnit.SECONDS.toMillis(18));
             gameSession.getFireables().push(runnableEvent);
-            eventHandler.push(runnableEvent);
+            eventHandler.offer(runnableEvent);
 
             final int activePlayerCount = game.getPlayerBattleStates().size();
             switch (activePlayerCount) {
                 case 1, 2 -> {
                     runnableEvent = eventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection), TimeUnit.SECONDS.toMillis(18));
                     gameSession.getFireables().push(runnableEvent);
-                    eventHandler.push(runnableEvent);
+                    eventHandler.offer(runnableEvent);
                 }
                 case 3, 4 -> {
                     runnableEvent = eventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection), TimeUnit.SECONDS.toMillis(18));
                     gameSession.getFireables().push(runnableEvent);
-                    eventHandler.push(runnableEvent);
+                    eventHandler.offer(runnableEvent);
 
                     runnableEvent = eventHandler.createRunnableEvent(new PlaceCrystalRandomlyTask(connection), TimeUnit.SECONDS.toMillis(36));
                     gameSession.getFireables().push(runnableEvent);
-                    eventHandler.push(runnableEvent);
+                    eventHandler.offer(runnableEvent);
                 }
             }
         } else {

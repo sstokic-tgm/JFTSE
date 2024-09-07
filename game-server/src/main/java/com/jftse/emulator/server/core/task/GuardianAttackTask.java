@@ -80,7 +80,7 @@ public class GuardianAttackTask extends AbstractTask {
 
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(new GuardianAttackTask(connection, guardianBattleState), loopTime);
             gameSession.getFireables().push(runnableEvent);
-            eventHandler.push(runnableEvent);
+            eventHandler.offer(runnableEvent);
         }
     }
 }

@@ -38,7 +38,7 @@ public class ShopRequestDataPacketHandler extends AbstractPacketHandler {
         byte player = shopRequestDataPacket.getPlayer();
         int page = BitKit.fromUnsignedInt(shopRequestDataPacket.getPage());
 
-        List<Product> productList = productService.getProductList(category, part, player, page);
+        int productListSize = productService.getProductListSize(category, part, player);
 
         FTClient client = (FTClient) connection.getClient();
         if (client != null) {
@@ -46,14 +46,16 @@ public class ShopRequestDataPacketHandler extends AbstractPacketHandler {
             if (requestedShopDataPrepare) {
                 client.setRequestedShopDataPrepare(false); // reset flag
             } else {
-                int productListSize = productService.getProductListSize(category, part, player);
-
                 S2CShopAnswerDataPreparePacket shopAnswerDataPreparePacket = new S2CShopAnswerDataPreparePacket(category, part, player, productListSize);
                 connection.sendTCP(shopAnswerDataPreparePacket);
             }
         }
 
-        S2CShopAnswerDataPacket shopAnswerDataPacket = new S2CShopAnswerDataPacket(productList.size(), productList);
-        connection.sendTCP(shopAnswerDataPacket);
+        int pageCount = (productListSize - 1) / 6 + 1;
+        for (int i = page; i <= pageCount; i++) {
+            List<Product> productList = productService.getProductList(category, part, player, i);
+            S2CShopAnswerDataPacket shopAnswerDataPacket = new S2CShopAnswerDataPacket(productList.size(), productList);
+            connection.sendTCP(shopAnswerDataPacket);
+        }
     }
 }
