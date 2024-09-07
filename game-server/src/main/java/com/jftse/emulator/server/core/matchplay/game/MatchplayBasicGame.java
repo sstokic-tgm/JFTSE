@@ -296,16 +296,13 @@ public class MatchplayBasicGame extends MatchplayGame {
                 wonGame = true;
             }
 
-            int basicExpReward;
-            if (secondsPlayed < TimeUnit.MINUTES.toSeconds(2)) {
-                basicExpReward = 1;
-            } else if (secondsPlayed > TimeUnit.MINUTES.toSeconds(15)) {
-                basicExpReward = 130;
-            } else {
-                basicExpReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
-            }
+            int basicExpReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
+            int basicGoldReward = (int) Math.round(30 + (secondsPlayed - 90) * 0.12);
 
-            ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(basicExpReward, basicExpReward);
+            basicExpReward = basicExpReward + (random.nextInt(401) + 800);
+            basicGoldReward = basicGoldReward + (random.nextInt(401) + 700);
+
+            ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(basicExpReward, basicGoldReward);
 
             int playerPositionIndex = this.getPlayerPositionsOrderedByPerformance().indexOf(playerPosition);
             switch (playerPositionIndex) {
