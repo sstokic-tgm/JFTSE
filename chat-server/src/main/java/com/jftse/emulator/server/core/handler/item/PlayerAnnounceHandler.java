@@ -61,7 +61,7 @@ public class PlayerAnnounceHandler extends AbstractPacketHandler {
         S2CPlayerAnnouncePacket playerAnnounceAnswerPacket = new S2CPlayerAnnouncePacket(player.getName(), textSize, textColor, playerAnnouncePacket.getMessage());
         final ConcurrentLinkedDeque<FTClient> clients = GameManager.getInstance().getClients();
         clients.stream()
-                .filter(c -> c.getConnection() != null && c.getActiveGameSession() == null)
+                .filter(c -> c.getConnection() != null)
                 .map(FTClient::getConnection)
                 .forEach(c -> c.sendTCP(playerAnnounceAnswerPacket));
 

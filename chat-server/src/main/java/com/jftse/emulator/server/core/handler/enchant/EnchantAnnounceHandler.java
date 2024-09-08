@@ -46,7 +46,7 @@ public class EnchantAnnounceHandler extends AbstractPacketHandler {
         S2CPlayerAnnouncePacket announcePacket = new S2CPlayerAnnouncePacket(msgPlayerName, packet.getTextSize(), packet.getTextColor(), msg);
         final ConcurrentLinkedDeque<FTClient> clients = GameManager.getInstance().getClients();
         clients.stream()
-                .filter(c -> c.getConnection() != null && c.getActiveGameSession() == null)
+                .filter(c -> c.getConnection() != null)
                 .map(FTClient::getConnection)
                 .forEach(c -> c.sendTCP(announcePacket));
     }
