@@ -58,6 +58,10 @@ public class AutoItemRewardPickerTask extends AbstractTask {
             MatchplayReward matchplayReward = GameSessionManager.getInstance().getMatchplayReward(roomId);
             Map<Byte, MatchplayReward.ItemReward> slotRewards = matchplayReward.getSlotRewards();
 
+            if (slotRewards.values().stream().anyMatch(r -> r.getClaimedPlayerPosition() == roomPlayer.getPosition())) {
+                return;
+            }
+
             boolean rewardClaimed = false;
             while (!rewardClaimed) {
                 List<Map.Entry<Byte, MatchplayReward.ItemReward>> unclaimedRewards = slotRewards.entrySet().stream()
@@ -78,6 +82,8 @@ public class AutoItemRewardPickerTask extends AbstractTask {
 
                 if (itemReward.getClaimed().compareAndSet(false, true)) {
                     rewardClaimed = true;
+
+                    itemReward.setClaimedPlayerPosition(roomPlayer.getPosition());
 
                     S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) roomPlayer.getPosition(), requestingSlot, itemReward);
                     GameManager.getInstance().sendPacketToAllClientsInSameRoom(itemRewardPickup, connection);

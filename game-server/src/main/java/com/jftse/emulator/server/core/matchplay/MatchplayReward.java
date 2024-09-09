@@ -104,12 +104,14 @@ public class MatchplayReward {
         private int productAmount;
         private Double weight;
         private AtomicBoolean claimed;
+        private short claimedPlayerPosition;
 
         public ItemReward(int productIndex, int productAmount, Double weight) {
             this.productIndex = productIndex;
             this.productAmount = productAmount;
             this.weight = weight;
             this.claimed = new AtomicBoolean(false);
+            this.claimedPlayerPosition = -1;
         }
     }
 }

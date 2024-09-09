@@ -59,6 +59,8 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
             MatchplayReward matchplayReward = GameSessionManager.getInstance().getMatchplayReward(roomId);
             final MatchplayReward.ItemReward itemReward = matchplayReward.getSlotReward(requestingSlot);
             if (itemReward.getClaimed().compareAndSet(false, true)) {
+                itemReward.setClaimedPlayerPosition(roomPlayer.getPosition());
+
                 S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) roomPlayer.getPosition(), requestingSlot, itemReward);
                 GameManager.getInstance().sendPacketToAllClientsInSameRoom(itemRewardPickup, (FTConnection) connection);
 
@@ -119,6 +121,9 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
                         connection.sendTCP(inventoryDataPacket);
                     }
                 }
+            } else {
+                S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) itemReward.getClaimedPlayerPosition(), requestingSlot, itemReward);
+                connection.sendTCP(itemRewardPickup);
             }
         }
     }
