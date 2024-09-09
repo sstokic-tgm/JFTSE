@@ -385,6 +385,9 @@ public class MatchplayBasicGame extends MatchplayGame {
                     playerReward.setActiveBonuses(playerReward.getActiveBonuses() | (BonusIconHighlightValues.WisemanBonus << 16));
                 }
 
+                rewardExp = (int) Math.round(rewardExp / 3.5);
+                rewardGold = (int) Math.round(rewardGold / 3.5);
+
                 playerReward.setExp(rewardExp);
                 playerReward.setGold(rewardGold);
 

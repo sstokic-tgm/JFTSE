@@ -14,6 +14,7 @@ public class C2CBallAnimationPacket extends Packet {
     private short absoluteTouchYPositionOnMap;
     private short absoluteTouchZPositionOnMap;
     private byte ballSpeed;
+    private byte ballAnimation;
     private byte ballAbility;
     private byte playerPosition;
 
@@ -29,7 +30,7 @@ public class C2CBallAnimationPacket extends Packet {
         this.absoluteTouchZPositionOnMap = this.readShort();
         this.readByte(); // Unknown
         this.ballSpeed = this.readByte();
-        this.readByte(); // 07 = serve, 00 = s hit, 02 = lob, 01 = slice, 0x0A = skillshot (not sure if racket independent)
+        this.ballAnimation = this.readByte(); // 07 = serve, 00 = s hit, 02 = lob, 01 = slice, 0x0A = skillshot (not sure if racket independent)
         this.readByte(); // Unknown
         this.ballAbility = this.readByte();
         this.readByte();

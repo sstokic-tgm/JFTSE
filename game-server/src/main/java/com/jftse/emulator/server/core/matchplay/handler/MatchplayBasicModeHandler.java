@@ -246,7 +246,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 S2CMatchplayItemRewardsPacket itemRewardsPacket = new S2CMatchplayItemRewardsPacket(matchplayReward);
                 client.getConnection().sendTCP(itemRewardsPacket);
 
-                eventHandler.offer(eventHandler.createRunnableEvent(new AutoItemRewardPickerTask(client, activeRoom.getRoomId()), TimeUnit.SECONDS.toMillis(11)));
+                eventHandler.offer(eventHandler.createRunnableEvent(new AutoItemRewardPickerTask(client, activeRoom.getRoomId()), TimeUnit.SECONDS.toMillis(9)));
 
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler;
 
+import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.gameserver.C2SGameServerLoginPacket;
 import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerLoginPacket;
@@ -38,6 +39,11 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+
         AuthToken authToken = authTokenService.findAuthToken(gameServerLoginPacket.getToken(), gameServerLoginPacket.getTimestamp(), gameServerLoginPacket.getAccountName());
         if (authToken == null) {
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) -1, (byte) 0);
@@ -54,7 +60,7 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
         client.setPlayer(gameServerLoginPacket.getPlayerId());
 
         Player player = client.getPlayer();
-        if (player != null && player.getAccount() != null && player.getAccount().getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && player.getAccount().getUsername().equals(gameServerLoginPacket.getAccountName())) {
+        if (player != null && player.getAccount() != null && player.getAccount().getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && player.getAccount().getUsername().equals(gameServerLoginPacket.getAccountName()) && !StringUtils.isEmpty(player.getName())) {
             Account account = player.getAccount();
 
             // set last login date
