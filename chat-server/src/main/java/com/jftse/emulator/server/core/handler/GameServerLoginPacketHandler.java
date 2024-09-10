@@ -58,6 +58,13 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
         if (player != null && player.getAccount() != null && player.getAccount().getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && player.getAccount().getUsername().equals(gameServerLoginPacket.getAccountName()) && !StringUtils.isEmpty(player.getName())) {
             Account account = player.getAccount();
 
+            boolean wasInGameServer = account.getLogoutServer() == ServerType.GAME_SERVER && account.getLoggedInServer() == ServerType.NONE;
+            boolean shouldUpdateStatus = wasInGameServer && account.getStatus().shortValue() == AuthenticationServiceImpl.SUCCESS;
+
+            if (shouldUpdateStatus) {
+                account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
+            }
+
             // set last login date
             account.setLastLogin(new Date());
             account.setLoggedInServer(ServerType.CHAT_SERVER);
@@ -73,7 +80,9 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
             ((FTConnection) connection).setClient(client);
             ((FTConnection) connection).setHwid(gameServerLoginPacket.getHwid());
 
-            ServiceManager.getInstance().getTransitionServerService().markAccountAsLoggedIn(account.getId());
+            if (!shouldUpdateStatus) {
+                ServiceManager.getInstance().getTransitionServerService().markAccountAsLoggedIn(account.getId());
+            }
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 0);
             connection.sendTCP(gameServerLoginAnswerPacket);
