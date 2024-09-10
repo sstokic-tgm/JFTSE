@@ -46,20 +46,21 @@ public class AutoItemRewardPickerTask extends AbstractTask {
     @Override
     public void run() {
         if (GameSessionManager.getInstance().hasMatchplayReward(roomId)) {
-            MatchplayReward matchplayReward = GameSessionManager.getInstance().getMatchplayReward(roomId);
-            Map<Byte, MatchplayReward.ItemReward> slotRewards = matchplayReward.getSlotRewards();
+            final Room room = clients.getFirst().getActiveRoom();
+
+            final MatchplayReward matchplayReward = GameSessionManager.getInstance().getMatchplayReward(roomId);
+            final Map<Byte, MatchplayReward.ItemReward> slotRewards = matchplayReward.getSlotRewards();
 
             for (final FTClient client : clients) {
-                Room room = client.getActiveRoom();
                 RoomPlayer rp = client.getRoomPlayer();
                 Player player = client.getPlayer();
-                if (room == null || rp == null || player == null)
+                if (rp == null || player == null)
                     continue;
 
                 final boolean isActivePlayer = rp.getPosition() < 4;
                 if (isActivePlayer) {
                     if (slotRewards.values().stream().anyMatch(r -> r.getClaimedPlayerPosition() == rp.getPosition())) {
-                        return;
+                        continue;
                     }
 
                     boolean rewardClaimed = false;
@@ -88,21 +89,13 @@ public class AutoItemRewardPickerTask extends AbstractTask {
                             S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) rp.getPosition(), requestingSlot, itemReward);
                             GameManager.getInstance().sendPacketToAllClientsInSameRoom(itemRewardPickup, client.getConnection());
 
-                            long claimedRewardCount = matchplayReward.getSlotRewards().values().stream().filter(ir -> ir.getClaimed().get()).count();
-                            long activePlayerCount = room.getRoomPlayerList().stream().filter(rpi -> rpi.getPosition() < 4).count();
-
-                            // check if all rewards are claimed
-                            if (matchplayReward.getSlotRewards().values().stream().allMatch(ir -> ir.getClaimed().get()) || claimedRewardCount == activePlayerCount) {
-                                GameSessionManager.getInstance().removeMatchplayReward(roomId);
-                            }
-
                             // add reward to player pocket
                             int productIndex = itemReward.getProductIndex();
                             int productAmount = itemReward.getProductAmount();
                             if (itemReward.getProductIndex() > 0) {
                                 Product product = productService.findProductByProductItemIndex(productIndex);
                                 if (product == null)
-                                    return;
+                                    break;
 
                                 Pocket pocket = player.getPocket();
                                 PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
@@ -148,6 +141,14 @@ public class AutoItemRewardPickerTask extends AbstractTask {
                         }
                     }
                 }
+            }
+
+            long claimedRewardCount = slotRewards.values().stream().filter(ir -> ir.getClaimed().get()).count();
+            long activePlayerCount = room.getRoomPlayerList().stream().filter(rpi -> rpi.getPosition() < 4).count();
+
+            // check if all rewards are claimed
+            if (slotRewards.values().stream().allMatch(ir -> ir.getClaimed().get()) || claimedRewardCount == activePlayerCount) {
+                GameSessionManager.getInstance().removeMatchplayReward(roomId);
             }
         }
     }

@@ -98,9 +98,11 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                 client.savePlayer(player);
 
                 Account account = client.getAccount();
-                if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && account.getLoggedInServer() == ServerType.GAME_SERVER) {
-                    account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                    account.setLoggedInServer(ServerType.NONE);
+                if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+                    if (account.getLoggedInServer() == ServerType.GAME_SERVER) {
+                        account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+                        account.setLoggedInServer(ServerType.NONE);
+                    }
                     account.setLogoutServer(ServerType.GAME_SERVER);
                     client.saveAccount(account);
                 }

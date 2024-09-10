@@ -57,7 +57,7 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
 
         byte requestingSlot = this.packet.getSlot();
         if (GameSessionManager.getInstance().hasMatchplayReward(roomId)) {
-            MatchplayReward matchplayReward = GameSessionManager.getInstance().getMatchplayReward(roomId);
+            final MatchplayReward matchplayReward = GameSessionManager.getInstance().getMatchplayReward(roomId);
             final MatchplayReward.ItemReward itemReward = matchplayReward.getSlotReward(requestingSlot);
             if (itemReward.getClaimed().compareAndSet(false, true)) {
                 itemReward.setClaimedPlayerPosition(roomPlayer.getPosition());
@@ -65,14 +65,6 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
                 connection.sendTCP(new S2CMatchplayItemRewardPickupAnswer((byte) roomPlayer.getPosition(), requestingSlot, itemReward));
 
                 notifyOtherClaimedRewards(roomPlayer, (short) roomId, matchplayReward);
-
-                long claimedRewardCount = matchplayReward.getSlotRewards().values().stream().filter(ir -> ir.getClaimed().get()).count();
-                long activePlayerCount = room.getRoomPlayerList().stream().filter(rp -> rp.getPosition() < 4).count();
-
-                // check if all rewards are claimed
-                if (matchplayReward.getSlotRewards().values().stream().allMatch(ir -> ir.getClaimed().get()) || claimedRewardCount == activePlayerCount) {
-                    GameSessionManager.getInstance().removeMatchplayReward(roomId);
-                }
 
                 // add reward to player pocket
                 int productIndex = itemReward.getProductIndex();
@@ -128,6 +120,14 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
                 connection.sendTCP(itemRewardPickup);
 
                 notifyOtherClaimedRewards(roomPlayer, (short) roomId, matchplayReward);
+            }
+
+            long claimedRewardCount = matchplayReward.getSlotRewards().values().stream().filter(ir -> ir.getClaimed().get()).count();
+            long activePlayerCount = room.getRoomPlayerList().stream().filter(rp -> rp.getPosition() < 4).count();
+
+            // check if all rewards are claimed
+            if (matchplayReward.getSlotRewards().values().stream().allMatch(ir -> ir.getClaimed().get()) || claimedRewardCount == activePlayerCount) {
+                GameSessionManager.getInstance().removeMatchplayReward(roomId);
             }
         }
     }

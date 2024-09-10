@@ -78,10 +78,6 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
             currentClientRoom.setStatus(RoomStatus.NotRunning);
         }
 
-        if (GameSessionManager.getInstance().hasMatchplayReward(roomId)) {
-            GameSessionManager.getInstance().removeMatchplayReward(roomId);
-        }
-
         PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
         player.setPlayerStatistic(playerStatistic);
         client.savePlayer(player);

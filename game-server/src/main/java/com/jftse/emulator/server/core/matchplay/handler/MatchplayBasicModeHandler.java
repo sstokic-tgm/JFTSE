@@ -141,7 +141,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
 
         GameSessionManager.getInstance().addMatchplayReward(activeRoom.getRoomId(), matchplayReward);
 
-        for (FTClient client : clients) {
+        for (final FTClient client : clients) {
             RoomPlayer rp = client.getRoomPlayer();
             if (rp == null)
                 continue;
@@ -259,7 +259,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
             client.setActiveGameSession(null);
         }
 
-        eventHandler.offer(eventHandler.createRunnableEvent(new AutoItemRewardPickerTask(clients, activeRoom.getRoomId()), TimeUnit.SECONDS.toMillis(9)));
+        eventHandler.offer(eventHandler.createRunnableEvent(new AutoItemRewardPickerTask(new ConcurrentLinkedDeque<>(clients), activeRoom.getRoomId()), TimeUnit.SECONDS.toMillis(9)));
 
         gameLogContent.append("playtime: ").append(TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded())).append("s");
 
