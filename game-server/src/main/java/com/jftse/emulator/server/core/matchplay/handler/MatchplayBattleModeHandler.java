@@ -270,8 +270,6 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
                 S2CMatchplayItemRewardsPacket itemRewardsPacket = new S2CMatchplayItemRewardsPacket(matchplayReward);
                 client.getConnection().sendTCP(itemRewardsPacket);
 
-                eventHandler.offer(eventHandler.createRunnableEvent(new AutoItemRewardPickerTask(client, activeRoom.getRoomId()), TimeUnit.SECONDS.toMillis(9)));
-
                 S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
@@ -285,6 +283,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
             eventHandler.offer(eventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)));
             client.setActiveGameSession(null);
         }
+
+        eventHandler.offer(eventHandler.createRunnableEvent(new AutoItemRewardPickerTask(clients, activeRoom.getRoomId()), TimeUnit.SECONDS.toMillis(9)));
 
         gameLogContent.append("playtime: ").append(TimeUnit.MILLISECONDS.toSeconds(game.getTimeNeeded())).append("s");
 

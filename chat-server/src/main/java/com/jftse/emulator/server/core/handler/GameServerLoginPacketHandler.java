@@ -39,11 +39,6 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
-
         AuthToken authToken = authTokenService.findAuthToken(gameServerLoginPacket.getToken(), gameServerLoginPacket.getTimestamp(), gameServerLoginPacket.getAccountName());
         if (authToken == null) {
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) -1, (byte) 0);
@@ -65,8 +60,6 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             // set last login date
             account.setLastLogin(new Date());
-            // mark as logged in
-            account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             account.setLoggedInServer(ServerType.CHAT_SERVER);
             account.setLastSelectedPlayerId(player.getId());
             client.saveAccount(account);
@@ -79,6 +72,8 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
             client.setAccount(account.getId());
             ((FTConnection) connection).setClient(client);
             ((FTConnection) connection).setHwid(gameServerLoginPacket.getHwid());
+
+            ServiceManager.getInstance().getTransitionServerService().markAccountAsLoggedIn(account.getId());
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 0);
             connection.sendTCP(gameServerLoginAnswerPacket);

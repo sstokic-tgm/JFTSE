@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.rpc.client.TransitionServiceImpl;
 import com.jftse.server.core.service.*;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -70,6 +71,9 @@ public class ServiceManager {
 
     @Autowired
     private CommandLogService commandLogService;
+
+    @Autowired
+    private TransitionServiceImpl transitionService;
 
     @PostConstruct
     public void init() {

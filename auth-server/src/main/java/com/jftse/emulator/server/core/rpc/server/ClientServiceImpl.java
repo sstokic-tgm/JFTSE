@@ -1,4 +1,4 @@
-package com.jftse.emulator.server.core.rpc;
+package com.jftse.emulator.server.core.rpc.server;
 
 import com.google.protobuf.Empty;
 import com.jftse.emulator.server.core.manager.AuthenticationManager;

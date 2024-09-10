@@ -2,8 +2,10 @@ package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.rpc.client.TransitionServiceImpl;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.server.core.proto.interfaces.TransitionCallback;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.net.TCPHandler;
@@ -12,12 +14,14 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
+import com.jftse.server.core.thread.ThreadManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -68,16 +72,57 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
         String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
         log.info("(" + remoteAddress + ") Channel Inactive");
 
-        FTClient client = connection.getClient();
-        if (client != null) {
-            Account account = client.getAccount();
-            if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
-                account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                account.setLoggedInServer(ServerType.NONE);
-                client.saveAccount(account);
+        final FTClient client = connection.getClient();
+        ThreadManager.getInstance().schedule(() -> {
+            if (client != null) {
+                Account account = client.getAccount();
+                if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+                    final TransitionServiceImpl transitionService = ServiceManager.getInstance().getTransitionService();
+
+                    transitionService.notifyTransition(ServerType.GAME_SERVER, account.getId(), new TransitionCallback() {
+                        @Override
+                        public void onSuccess(boolean success) {
+                            if (!success) {
+                                transitionService.notifyTransition(ServerType.CHAT_SERVER, account.getId(), new TransitionCallback() {
+                                    @Override
+                                    public void onSuccess(boolean success) {
+                                        if (!success) {
+                                            logoutAccount(client, account);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        logoutAccount(client, account);
+                                    }
+
+                                    @Override
+                                    public void onCompleted() {
+                                        AuthenticationManager.getInstance().removeClient(client);
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            logoutAccount(client, account);
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                            AuthenticationManager.getInstance().removeClient(client);
+                        }
+                    });
+                }
             }
-            AuthenticationManager.getInstance().removeClient(client);
-        }
+        }, 2, TimeUnit.SECONDS);
+    }
+
+    private void logoutAccount(FTClient client, Account account) {
+        account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+        account.setLoggedInServer(ServerType.NONE);
+        client.saveAccount(account);
     }
 
     @Override

@@ -11,7 +11,6 @@ import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePa
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayItemRewardPickupRequest;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayItemRewardPickupAnswer;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
@@ -24,7 +23,9 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 @PacketOperationIdentifier(PacketOperations.C2SMatchplayItemRewardPickupRequest)
 public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
@@ -61,8 +62,9 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
             if (itemReward.getClaimed().compareAndSet(false, true)) {
                 itemReward.setClaimedPlayerPosition(roomPlayer.getPosition());
 
-                S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) roomPlayer.getPosition(), requestingSlot, itemReward);
-                GameManager.getInstance().sendPacketToAllClientsInSameRoom(itemRewardPickup, (FTConnection) connection);
+                connection.sendTCP(new S2CMatchplayItemRewardPickupAnswer((byte) roomPlayer.getPosition(), requestingSlot, itemReward));
+
+                notifyOtherClaimedRewards(roomPlayer, (short) roomId, matchplayReward);
 
                 long claimedRewardCount = matchplayReward.getSlotRewards().values().stream().filter(ir -> ir.getClaimed().get()).count();
                 long activePlayerCount = room.getRoomPlayerList().stream().filter(rp -> rp.getPosition() < 4).count();
@@ -124,7 +126,25 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
             } else {
                 S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) itemReward.getClaimedPlayerPosition(), requestingSlot, itemReward);
                 connection.sendTCP(itemRewardPickup);
+
+                notifyOtherClaimedRewards(roomPlayer, (short) roomId, matchplayReward);
             }
+        }
+    }
+
+    private void notifyOtherClaimedRewards(RoomPlayer roomPlayer, short roomId, MatchplayReward matchplayReward) {
+        final Map<Byte, MatchplayReward.ItemReward> pickedRewards = matchplayReward.getSlotRewards().entrySet().stream()
+                .filter(entry -> entry.getValue().getClaimed().get() && entry.getValue().getClaimedPlayerPosition() != roomPlayer.getPosition())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (!pickedRewards.isEmpty()) {
+            final List<FTClient> clientsInRoom = GameManager.getInstance().getClientsInRoom(roomId);
+            pickedRewards.forEach((slot, reward) -> {
+                S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) reward.getClaimedPlayerPosition(), slot, reward);
+                clientsInRoom.stream()
+                        .filter(c -> c.getConnection() != null)
+                        .map(FTClient::getConnection)
+                        .forEach(c -> c.sendTCP(itemRewardPickup));
+            });
         }
     }
 }

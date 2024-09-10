@@ -67,6 +67,8 @@ public class EventHandler {
                     offer(fireable);
                 }
             }
+            // save cpu cycles
+            Thread.sleep(5);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("Event handler interrupted: {}", e.getMessage());
