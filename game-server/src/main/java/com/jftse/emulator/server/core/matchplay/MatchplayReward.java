@@ -67,7 +67,7 @@ public class MatchplayReward {
 
         for (int i = 0; i < n; i++) {
             ItemReward selectedReward = getItemRewardByWeight(rewards, weights);
-            selectedRewards.add(selectedReward);
+            selectedRewards.add(new ItemReward(selectedReward));
         }
         return selectedRewards;
     }
@@ -112,6 +112,14 @@ public class MatchplayReward {
             this.weight = weight;
             this.claimed = new AtomicBoolean(false);
             this.claimedPlayerPosition = -1;
+        }
+
+        public ItemReward(ItemReward itemReward) {
+            this.productIndex = itemReward.getProductIndex();
+            this.productAmount = itemReward.getProductAmount();
+            this.weight = itemReward.getWeight();
+            this.claimed = new AtomicBoolean(itemReward.getClaimed().get());
+            this.claimedPlayerPosition = itemReward.getClaimedPlayerPosition();
         }
     }
 }
