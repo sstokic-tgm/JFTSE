@@ -305,9 +305,9 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         if (matchplayPointPacket.getPlayerPosition() < 4)
             game.increasePerformancePointForPlayer(matchplayPointPacket.getPlayerPosition());
 
-        if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
+        if (game.isRedTeam(matchplayPointPacket.getPointsTeam()) && game.isRedTeam(matchplayPointPacket.getPlayerPosition()))
             game.setPoints((byte) (pointsTeamRed + 1), (byte) pointsTeamBlue);
-        else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
+        else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()) && game.isBlueTeam(matchplayPointPacket.getPlayerPosition()))
             game.setPoints((byte) pointsTeamRed, (byte) (pointsTeamBlue + 1));
 
         final boolean isFinished = game.getFinished().get();
@@ -340,9 +340,9 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 }
 
                 short pointingTeamPosition = -1;
-                if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
+                if (game.isRedTeam(matchplayPointPacket.getPointsTeam()) && game.isRedTeam(matchplayPointPacket.getPlayerPosition()))
                     pointingTeamPosition = 0;
-                else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
+                else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()) && game.isBlueTeam(matchplayPointPacket.getPlayerPosition()))
                     pointingTeamPosition = 1;
 
                 S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint(pointingTeamPosition, matchplayPointPacket.getBallState(), (byte) game.getPointsRedTeam().get(), (byte) game.getPointsBlueTeam().get());

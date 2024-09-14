@@ -53,6 +53,8 @@ public enum PacketOperations {
     S2CRoomJoinAnswer(0x138C),
     C2SRoomLeave(0x1771),
     S2CRoomLeaveAnswer(0x1772),
+    S2CRequestItemSettings(0x18B6),
+    C2SResponseItemSettings(0x18B7),
 
     S2CRoomListAnswer(0x138E),
     S2CRoomPlayerInformation(0x1394),

@@ -5,6 +5,7 @@ import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.matchplay.MatchplayReward;
+import com.jftse.emulator.server.core.packets.item.S2CRequestItemSettingsPacket;
 import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.life.item.BaseItem;
@@ -122,6 +123,9 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 ThreadManager.getInstance().newTask(new PlaceCrystalRandomlyTask(ftClient.getConnection()));
             }
         }
+
+        S2CRequestItemSettingsPacket requestItemSettingsPacket = new S2CRequestItemSettingsPacket();
+        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(requestItemSettingsPacket, ftClient.getConnection());
 
         ThreadManager.getInstance().newTask(new GuardianAttackTask(ftClient.getConnection()));
         ThreadManager.getInstance().newTask(new DefeatTimerTask(ftClient.getConnection(), gameSession));

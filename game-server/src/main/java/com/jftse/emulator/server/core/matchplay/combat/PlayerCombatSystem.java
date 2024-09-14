@@ -71,16 +71,29 @@ public class PlayerCombatSystem implements PlayerCombatable {
 
             if (totalDamageToDeal != -1 && offensiveElement != null && skill != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
                 double efficiency = offensiveElement.getEfficiency();
-
                 List<Elementable> defensiveElements = targetPlayer.getDefensiveElements();
-                for (Elementable defensiveElement : defensiveElements) {
-                    if (offensiveElement.isStrongAgainst(defensiveElement)) {
-                        efficiency += 26;
-                    } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
-                        efficiency -= 22;
-                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
-                        efficiency -= 24;
-                    }
+
+                Elementable strongElement = defensiveElements.stream()
+                        .filter(offensiveElement::isStrongAgainst)
+                        .findAny()
+                        .orElse(null);
+                Elementable weakElement = defensiveElements.stream()
+                        .filter(offensiveElement::isWeakAgainst)
+                        .findAny()
+                        .orElse(null);
+                Elementable resistantElement = defensiveElements.stream()
+                        .filter(defensiveElement -> defensiveElement.isResistantTo(offensiveElement))
+                        .findAny()
+                        .orElse(null);
+
+                if (strongElement != null) {
+                    efficiency += 26;
+                }
+                if (weakElement != null) {
+                    efficiency -= 15;
+                }
+                if (resistantElement != null) {
+                    efficiency -= 20;
                 }
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);

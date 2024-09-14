@@ -11,7 +11,6 @@ import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
@@ -55,16 +54,29 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
             if (totalDamageToDeal != -1 && offensiveElement != null && skill != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
                 double efficiency = offensiveElement.getEfficiency();
+                List<Elementable> defensiveElements = targetGuardian.getDefensiveElements();
 
-                List<Elementable> defensiveElements = targetGuardian.getElements();
-                for (Elementable defensiveElement : defensiveElements) {
-                    if (offensiveElement.isStrongAgainst(defensiveElement)) {
-                        efficiency += 18;
-                    } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
-                        efficiency -= 5;
-                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
-                        efficiency -= 10;
-                    }
+                Elementable strongElement = defensiveElements.stream()
+                        .filter(offensiveElement::isStrongAgainst)
+                        .findAny()
+                        .orElse(null);
+                Elementable weakElement = defensiveElements.stream()
+                        .filter(offensiveElement::isWeakAgainst)
+                        .findAny()
+                        .orElse(null);
+                Elementable resistantElement = defensiveElements.stream()
+                        .filter(defensiveElement -> defensiveElement.isResistantTo(offensiveElement))
+                        .findAny()
+                        .orElse(null);
+
+                if (strongElement != null) {
+                    efficiency += 16;
+                }
+                if (weakElement != null) {
+                    efficiency -= 5;
+                }
+                if (resistantElement != null) {
+                    efficiency -= 10;
                 }
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);
@@ -149,13 +161,15 @@ public class GuardianCombatSystem implements GuardianCombatable {
             totalDamageToDeal = BattleUtils.calculateDmg(attackingGuardian.getStr(), damage, hasAttackerDmgBuff);
         }
 
-        Elementable offensiveElement = null;
+        Elementable offensiveElement;
         if (attackingGuardian != null) {
             final List<Elementable> elementList = attackingGuardian.getElements();
             offensiveElement = elementList.stream()
                     .filter(x -> skill != null && x.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue()))
                     .findFirst()
                     .orElse(null);
+        } else {
+            offensiveElement = null;
         }
 
         PlayerBattleState targetPlayer = game.getPlayerBattleStates().stream()
@@ -176,16 +190,29 @@ public class GuardianCombatSystem implements GuardianCombatable {
 
             if (totalDamageToDeal != -1 && offensiveElement != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
                 double efficiency = offensiveElement.getEfficiency();
-
                 List<Elementable> defensiveElements = targetPlayer.getDefensiveElements();
-                for (Elementable defensiveElement : defensiveElements) {
-                    if (offensiveElement.isStrongAgainst(defensiveElement)) {
-                        efficiency += 18;
-                    } else if (offensiveElement.isWeakAgainst(defensiveElement)) {
-                        efficiency -= 5;
-                    } else if (defensiveElement.isResistantTo(offensiveElement)) {
-                        efficiency -= 10;
-                    }
+
+                Elementable strongElement = defensiveElements.stream()
+                        .filter(offensiveElement::isStrongAgainst)
+                        .findAny()
+                        .orElse(null);
+                Elementable weakElement = defensiveElements.stream()
+                        .filter(offensiveElement::isWeakAgainst)
+                        .findAny()
+                        .orElse(null);
+                Elementable resistantElement = defensiveElements.stream()
+                        .filter(defensiveElement -> defensiveElement.isResistantTo(offensiveElement))
+                        .findAny()
+                        .orElse(null);
+
+                if (strongElement != null) {
+                    efficiency += 16;
+                }
+                if (weakElement != null) {
+                    efficiency -= 5;
+                }
+                if (resistantElement != null) {
+                    efficiency -= 10;
                 }
 
                 final double efficiencyMultiplier = 1 + (efficiency / 100.0);
