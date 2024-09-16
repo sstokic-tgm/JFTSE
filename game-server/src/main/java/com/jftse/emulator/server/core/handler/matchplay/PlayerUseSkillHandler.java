@@ -48,7 +48,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
     private final GameLogService gameLogService;
 
-    private static final int TIMESTAMP_DELTA = 100;
+    private static final int TIMESTAMP_DELTA = 300;
 
     public PlayerUseSkillHandler() {
         this.skillService = ServiceManager.getInstance().getSkillService();
@@ -139,8 +139,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
             } else {
                 long diff = skillUseTimestamp - lastSkillUse.getTimestamp();
                 long coolingTime = game instanceof MatchplayGuardianGame ? skill.getGdCoolingTime().longValue() : skill.getCoolingTime().longValue();
-                long cooldownBuffer = 150; // 150ms buffer
-                if (diff < (coolingTime + cooldownBuffer)) {
+                if (diff < coolingTime) {
                     playerBattleState.getQuickSlotSkillUseNoCDDetects().getAndIncrement();
                 } else {
                     playerBattleState.getQuickSlotSkillUseNoCDDetects().set(0);
