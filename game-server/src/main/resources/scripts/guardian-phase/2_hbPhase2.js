@@ -107,7 +107,7 @@ var phase = {
                     }
                 }
 
-                threadManager.schedule(function () {
+                let event = eventHandler.createRunnableEvent(function () {
                     let guardianBattleState = phase2.revivedGuardians.shift();
                     let healDamage = new S2CMatchplayDealDamage(guardianBattleState.getPosition(), guardianBattleState.getCurrentHealth().get(), 3, 29, 0, 0);
                     let healUseSkill = new S2CMatchplayUseSkill(bossGuardian.getPosition(), guardianBattleState.getPosition(), 28, Math.floor(Math.random() * 127), 0, 0, 0);
@@ -115,8 +115,8 @@ var phase = {
                     gameManager.sendPacketToAllClientsInSameGameSession(healUseSkill, connection);
 
                     let guardAttackTask = new GuardianAttackTask(connection, guardianBattleState);
-                    let runnableEvent = gameManager.getEventHandler().createRunnableEvent(guardAttackTask, 100);
-                    gameManager.getEventHandler().push(runnableEvent);
+                    let runnableEvent = eventHandler.createRunnableEvent(guardAttackTask, 100);
+                    eventHandler.offer(runnableEvent);
 
                     let reviveMessage = phase2.revivingGuardiansMessages[Math.floor(Math.random() * phase2.revivingGuardiansMessages.length)];
                     packet = new S2CChatRoomAnswerPacket(2, "Server", reviveMessage);
@@ -124,7 +124,7 @@ var phase = {
 
                     phase2.partIsTransitioning = false;
                 }, 2 * 1000); // 5 seconds
-
+                eventHandler.offer(event);
             } else if (currentHealthPercentage <= 45 && !phase2.part2Finished && !phase2.partIsTransitioning) {
                 phase2.part1Finished = true;
                 phase2.part2Finished = true;
@@ -144,7 +144,7 @@ var phase = {
                     }
                 }
 
-                threadManager.schedule(function () {
+                let event = eventHandler.createRunnableEvent(function () {
                     let guardianBattleState = phase2.revivedGuardians.shift();
                     let healDamage = new S2CMatchplayDealDamage(guardianBattleState.getPosition(), guardianBattleState.getCurrentHealth().get(), 3, 29, 0, 0);
                     let healUseSkill = new S2CMatchplayUseSkill(bossGuardian.getPosition(), guardianBattleState.getPosition(), 28, Math.floor(Math.random() * 127), 0, 0, 0);
@@ -152,8 +152,8 @@ var phase = {
                     gameManager.sendPacketToAllClientsInSameGameSession(healUseSkill, connection);
 
                     let guardAttackTask = new GuardianAttackTask(connection, guardianBattleState);
-                    let runnableEvent = gameManager.getEventHandler().createRunnableEvent(guardAttackTask, 100);
-                    gameManager.getEventHandler().push(runnableEvent);
+                    let runnableEvent = eventHandler.createRunnableEvent(guardAttackTask, 100);
+                    eventHandler.offer(runnableEvent);
 
                     let reviveMessage = phase2.revivingGuardiansMessages[Math.floor(Math.random() * phase2.revivingGuardiansMessages.length)];
                     packet = new S2CChatRoomAnswerPacket(2, "Server", reviveMessage);
@@ -161,6 +161,7 @@ var phase = {
 
                     phase2.partIsTransitioning = false;
                 }, 2 * 1000); // 5 seconds
+                eventHandler.offer(event);
             }
         }
 

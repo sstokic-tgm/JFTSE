@@ -25,6 +25,7 @@ public class PhaseManager {
     private List<BossBattlePhaseable> phases;
     private Future<?> updateTask;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
+    private AtomicBoolean isUpdating = new AtomicBoolean(false);
 
     private AtomicBoolean isChangingPhase = new AtomicBoolean(false);
     private AtomicBoolean isPhaseEnding = new AtomicBoolean(false);
@@ -37,21 +38,17 @@ public class PhaseManager {
     private PhaseCallback defaultPhaseCallback = new PhaseCallback() {
         @Override
         public void onNextPhase(FTConnection connection) {
-            log.info("Next phase triggered");
             if (hasNextPhase()) {
                 enqueueTask(() -> {
-                    log.info("Transitioning to next phase");
                     if (!isChangingPhase.compareAndSet(false, true)) {
                         return;
                     }
 
                     BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
                     final String nextPhaseName = nextPhase.getPhaseName();
-                    log.info("Next phase name: {}", nextPhaseName);
 
                     ThreadManager.getInstance().newTask(() -> {
                         for (int i = 5; i > 0; i--) {
-                            log.info("Countdown: {}", i);
                             S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
                             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
 
@@ -63,11 +60,10 @@ public class PhaseManager {
                                 }
                             }
                         }
-                        log.info("Phase ended: {}", currentPhase.get().getPhaseName());
                         currentPhase.get().end();
                         currentPhase.compareAndSet(currentPhase.get(), nextPhase);
                         setPhaseCallback(defaultPhaseCallback);
-                        log.info("Starting new phase: {}", nextPhase.getPhaseName());
+
                         currentPhase.get().start();
                         isChangingPhase.set(false);
 
@@ -75,7 +71,6 @@ public class PhaseManager {
                     });
                 });
             } else {
-                log.info("No next phase available, ending phase");
                 onPhaseEnd(connection);
             }
         }
@@ -116,17 +111,19 @@ public class PhaseManager {
     }
 
     public void start() {
-        log.info("Starting phase: {}", currentPhase.get().getPhaseName());
         enqueueTask(() -> currentPhase.get().start());
     }
 
     public void update(FTConnection connection) {
-        log.info("Updating phase: {}", currentPhase.get().getPhaseName());
-        enqueueTask(() -> currentPhase.get().update(connection));
+        enqueueTask(() -> {
+            if (isUpdating.compareAndSet(false, true)) {
+                currentPhase.get().update(connection);
+                isUpdating.set(false);
+            }
+        });
     }
 
     public void end() {
-        log.info("Ending phase: {}", currentPhase.get().getPhaseName());
         enqueueTask(() -> currentPhase.get().end());
     }
 
@@ -189,65 +186,94 @@ public class PhaseManager {
     }
 
     public int onHeal(int targetGuardian, int healAmount) {
-        var result = executeTask(() -> currentPhase.get().onHeal(targetGuardian, healAmount));
+        var result = executeTask(() -> {
+            while (isUpdating.get()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
+            }
+            return currentPhase.get().onHeal(targetGuardian, healAmount);
+        });
         return result == null ? 0 : result;
     }
 
     public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
-        var result = executeTask(() -> currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill));
+        var result = executeTask(() -> {
+            while (isUpdating.get()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
+            }
+            return currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill);
+        });
         return result == null ? 0 : result;
     }
 
     public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
-        var result = executeTask(() -> currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill));
+        var result = executeTask(() -> {
+            while (isUpdating.get()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
+            }
+            return currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill);
+        });
         return result == null ? 0 : result;
     }
 
     public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
-        var result = executeTask(() -> currentPhase.get().onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff));
+        var result = executeTask(() -> {
+            while (isUpdating.get()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
+            }
+            return currentPhase.get().onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff);
+        });
         return result == null ? 0 : result;
     }
 
     public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
-        var result = executeTask(() -> currentPhase.get().onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff));
+        var result = executeTask(() -> {
+            while (isUpdating.get()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
+            }
+            return currentPhase.get().onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff);
+        });
         return result == null ? 0 : result;
     }
 
     private void enqueueTask(Runnable task) {
-        log.info("Task enqueued: {}", task);
         taskQueue.offer(task);
         executorService.submit(this::executeNextTask);
     }
 
     private void executeNextTask() {
-        log.info("Attempting to acquire lock for task execution");
         lock.lock();
         try {
             Runnable task = taskQueue.poll();
             if (task != null) {
-                log.info("Executing task: {}", task);
                 task.run();
-                log.info("Task completed: {}", task);
-            } else {
-                log.info("No task to execute");
             }
         } finally {
-            log.info("Releasing lock after task execution");
             lock.unlock();
         }
     }
 
     private <T> T executeTask(Callable<T> task) {
         final FutureTask<T> futureTask = new FutureTask<>(task);
-        log.info("Task execution enqueued: {}", futureTask);
         enqueueTask(futureTask);
         try {
-            log.info("Waiting for task to complete: {}", futureTask);
-            T result = futureTask.get();
-            log.info("Task completed with result: {}", result);
-            return result;
+            return futureTask.get();
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Task execution exception: {}", task, e);
+            log.error("Task execution exception", e);
             return null;
         }
     }
