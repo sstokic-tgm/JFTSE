@@ -61,9 +61,8 @@ public class GuardianServeTask extends AbstractTask {
         if (game.isAdvancedBossGuardianMode()) {
             final PhaseManager phaseManager = game.getPhaseManager();
             phaseManager.start();
+            phaseManager.getIsRunning().set(true);
             Future<?> updateTask = ThreadManager.getInstance().scheduleAtFixedRate(() -> {
-                phaseManager.getIsRunning().set(true);
-
                 if (!phaseManager.getIsRunning().get() || phaseManager.getIsChangingPhase().get() || phaseManager.getIsPhaseEnding().get())
                     return;
 

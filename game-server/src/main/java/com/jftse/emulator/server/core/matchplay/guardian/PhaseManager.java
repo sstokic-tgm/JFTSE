@@ -37,17 +37,21 @@ public class PhaseManager {
     private PhaseCallback defaultPhaseCallback = new PhaseCallback() {
         @Override
         public void onNextPhase(FTConnection connection) {
+            log.info("Next phase triggered");
             if (hasNextPhase()) {
                 enqueueTask(() -> {
+                    log.info("Transitioning to next phase");
                     if (!isChangingPhase.compareAndSet(false, true)) {
                         return;
                     }
 
                     BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
                     final String nextPhaseName = nextPhase.getPhaseName();
+                    log.info("Next phase name: {}", nextPhaseName);
 
                     ThreadManager.getInstance().newTask(() -> {
                         for (int i = 5; i > 0; i--) {
+                            log.info("Countdown: {}", i);
                             S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
                             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
 
@@ -59,10 +63,11 @@ public class PhaseManager {
                                 }
                             }
                         }
+                        log.info("Phase ended: {}", currentPhase.get().getPhaseName());
                         currentPhase.get().end();
                         currentPhase.compareAndSet(currentPhase.get(), nextPhase);
                         setPhaseCallback(defaultPhaseCallback);
-
+                        log.info("Starting new phase: {}", nextPhase.getPhaseName());
                         currentPhase.get().start();
                         isChangingPhase.set(false);
 
@@ -70,6 +75,7 @@ public class PhaseManager {
                     });
                 });
             } else {
+                log.info("No next phase available, ending phase");
                 onPhaseEnd(connection);
             }
         }
@@ -110,14 +116,17 @@ public class PhaseManager {
     }
 
     public void start() {
+        log.info("Starting phase: {}", currentPhase.get().getPhaseName());
         enqueueTask(() -> currentPhase.get().start());
     }
 
     public void update(FTConnection connection) {
+        log.info("Updating phase: {}", currentPhase.get().getPhaseName());
         enqueueTask(() -> currentPhase.get().update(connection));
     }
 
     public void end() {
+        log.info("Ending phase: {}", currentPhase.get().getPhaseName());
         enqueueTask(() -> currentPhase.get().end());
     }
 
@@ -205,29 +214,40 @@ public class PhaseManager {
     }
 
     private void enqueueTask(Runnable task) {
+        log.info("Task enqueued: {}", task);
         taskQueue.offer(task);
         executorService.submit(this::executeNextTask);
     }
 
     private void executeNextTask() {
+        log.info("Attempting to acquire lock for task execution");
         lock.lock();
         try {
             Runnable task = taskQueue.poll();
             if (task != null) {
+                log.info("Executing task: {}", task);
                 task.run();
+                log.info("Task completed: {}", task);
+            } else {
+                log.info("No task to execute");
             }
         } finally {
+            log.info("Releasing lock after task execution");
             lock.unlock();
         }
     }
 
     private <T> T executeTask(Callable<T> task) {
         final FutureTask<T> futureTask = new FutureTask<>(task);
+        log.info("Task execution enqueued: {}", futureTask);
         enqueueTask(futureTask);
         try {
-            return futureTask.get();
+            log.info("Waiting for task to complete: {}", futureTask);
+            T result = futureTask.get();
+            log.info("Task completed with result: {}", result);
+            return result;
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Task execution exception", e);
+            log.error("Task execution exception: {}", task, e);
             return null;
         }
     }
