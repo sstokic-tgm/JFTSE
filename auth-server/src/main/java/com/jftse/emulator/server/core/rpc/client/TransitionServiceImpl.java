@@ -1,48 +1,35 @@
 package com.jftse.emulator.server.core.rpc.client;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.jftse.emulator.server.core.utils.FutureUtils;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.proto.auth.TransitionRequest;
 import com.jftse.proto.auth.TransitionResponse;
 import com.jftse.proto.auth.TransitionServiceGrpc;
-import com.jftse.server.core.proto.interfaces.TransitionCallback;
-import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class TransitionServiceImpl {
 
     @GrpcClient("game-server")
-    private TransitionServiceGrpc.TransitionServiceStub gameServerStub;
+    private TransitionServiceGrpc.TransitionServiceFutureStub gameServerStub;
 
     @GrpcClient("chat-server")
-    private TransitionServiceGrpc.TransitionServiceStub chatServerStub;
+    private TransitionServiceGrpc.TransitionServiceFutureStub chatServerStub;
 
 
-    public void notifyTransition(ServerType serverType, Long accountId, TransitionCallback callback) {
-        TransitionServiceGrpc.TransitionServiceStub selectedStub = (serverType == ServerType.GAME_SERVER)
+    public CompletableFuture<TransitionResponse> notifyTransition(ServerType serverType, Long accountId) {
+        TransitionServiceGrpc.TransitionServiceFutureStub selectedStub = (serverType == ServerType.GAME_SERVER)
                 ? gameServerStub : chatServerStub;
 
         TransitionRequest request = TransitionRequest.newBuilder()
                 .setAccountId(accountId)
                 .build();
 
-        selectedStub
-                .notifyTransition(request, new StreamObserver<>() {
-                    @Override
-                    public void onNext(TransitionResponse response) {
-                        callback.onSuccess(response.getSuccess());
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        callback.onFailure(t);
-                    }
-
-                    @Override
-                    public void onCompleted() {
-                        callback.onCompleted();
-                    }
-                });
+        ListenableFuture<TransitionResponse> response = selectedStub.notifyTransition(request);
+        return FutureUtils.toCompletableFuture(response);
     }
 }

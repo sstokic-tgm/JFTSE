@@ -19,18 +19,12 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
 
     protected final int decryptionKey;
     protected final int encryptionKey;
+    protected final ServerType serverType;
 
-    protected ServerType serverType;
-
-    protected Connection(final int decryptionKey, final int encryptionKey) {
+    protected Connection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         this.decryptionKey = decryptionKey;
         this.encryptionKey = encryptionKey;
-    }
-
-    protected Connection(ChannelHandlerContext ctx, final int decryptionKey, final int encryptionKey) {
-        this.ctx = ctx;
-        this.decryptionKey = decryptionKey;
-        this.encryptionKey = encryptionKey;
+        this.serverType = serverType;
     }
 
     public InetSocketAddress getRemoteAddressTCP() {
@@ -55,18 +49,10 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
         return encryptionKey;
     }
 
-    public void setChannelHandlerContext(ChannelHandlerContext chx) {
-        this.ctx = chx;
-        setId(this.ctx.channel().id());
-        remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-    }
-
-    public ChannelHandlerContext getChannelHandlerContext() {
-        return ctx;
-    }
-
-    public void setId(ChannelId id) {
-        this.id = id;
+    public void setChannelHandlerContext(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
+        this.id = ctx.channel().id();
+        this.remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
     }
 
     public ChannelId getId() {
@@ -83,10 +69,6 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
 
     public AtomicBoolean getIsClosingConnection() {
         return isClosingConnection;
-    }
-
-    public void setServerType(ServerType serverType) {
-        this.serverType = serverType;
     }
 
     public ServerType getServerType() {

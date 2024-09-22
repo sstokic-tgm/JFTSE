@@ -5,7 +5,6 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.rpc.client.TransitionServiceImpl;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
-import com.jftse.server.core.proto.interfaces.TransitionCallback;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.net.TCPHandler;
@@ -21,6 +20,7 @@ import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -39,9 +39,6 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
         InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
         String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
         log.info("(" + remoteAddress + ") Channel Active");
-
-        if (!checkIp(connection, remoteAddress, () -> blockedIPService, () -> log))
-            return;
 
         FTClient client = new FTClient();
 
@@ -79,41 +76,23 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                 if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
                     final TransitionServiceImpl transitionService = ServiceManager.getInstance().getTransitionService();
 
-                    transitionService.notifyTransition(ServerType.GAME_SERVER, account.getId(), new TransitionCallback() {
-                        @Override
-                        public void onSuccess(boolean success) {
-                            if (!success) {
-                                transitionService.notifyTransition(ServerType.CHAT_SERVER, account.getId(), new TransitionCallback() {
-                                    @Override
-                                    public void onSuccess(boolean success) {
-                                        if (!success) {
-                                            logoutAccount(client, account);
-                                        }
-                                    }
+                    transitionService.notifyTransition(ServerType.GAME_SERVER, account.getId())
+                            .thenCompose(response -> {
+                                if (!response.getSuccess())
+                                    return transitionService.notifyTransition(ServerType.CHAT_SERVER, account.getId());
+                                else
+                                    return CompletableFuture.completedFuture(response);
+                            })
+                            .thenAccept(response -> {
+                                if (!response.getSuccess())
+                                    logoutAccount(client, account);
+                            })
+                            .whenComplete((response, throwable) -> {
+                                if (throwable != null)
+                                    logoutAccount(client, account);
 
-                                    @Override
-                                    public void onFailure(Throwable t) {
-                                        logoutAccount(client, account);
-                                    }
-
-                                    @Override
-                                    public void onCompleted() {
-                                        AuthenticationManager.getInstance().removeClient(client);
-                                    }
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable t) {
-                            logoutAccount(client, account);
-                        }
-
-                        @Override
-                        public void onCompleted() {
-                            AuthenticationManager.getInstance().removeClient(client);
-                        }
-                    });
+                                AuthenticationManager.getInstance().removeClient(client);
+                            });
                 }
             }
         }, 2, TimeUnit.SECONDS);

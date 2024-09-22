@@ -43,7 +43,7 @@ public class ACServerStart {
         PacketHandlerFactory packetHandlerFactory = PacketHandlerFactory.initFactory(log);
         packetHandlerFactory.autoRegister();
 
-        bossGroup = new NioEventLoopGroup(4);
+        bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup(4);
         try {
             ServerBootstrap b = new ServerBootstrap();

@@ -54,9 +54,6 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
         String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
         log.info("(" + remoteAddress + ") Channel Active");
 
-        if (!checkIp(connection, remoteAddress, () -> blockedIPService, () -> log))
-            return;
-
         FTClient client = new FTClient();
 
         client.setIp(remoteAddress.substring(1, remoteAddress.lastIndexOf(":")));

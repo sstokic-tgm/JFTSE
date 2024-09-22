@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.net;
 
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.JoinedPacket;
 import com.jftse.server.core.protocol.Packet;
@@ -16,8 +17,8 @@ public class FTConnection extends Connection<FTClient> {
 
     private long lastReadTime = 0L;
 
-    public FTConnection(final int decryptionKey, final int encryptionKey) {
-        super(decryptionKey, encryptionKey);
+    public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
+        super(decryptionKey, encryptionKey, serverType);
     }
 
     @Override

@@ -42,15 +42,15 @@ public class GameServerStart {
         packetHandlerFactory.autoRegister();
 
         bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup(14);
+        workerGroup = new NioEventLoopGroup(8);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 300)
                     .childHandler(new ConnectionInitializer(packetHandlerFactory))
-                    .childOption(ChannelOption.TCP_NODELAY, true)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.TCP_NODELAY, false)
+                    .childOption(ChannelOption.SO_KEEPALIVE, false)
                     .childOption(ChannelOption.SO_REUSEADDR, true)
                     .childOption(ChannelOption.SO_RCVBUF, 16384)
                     .childOption(ChannelOption.SO_SNDBUF, 16384);

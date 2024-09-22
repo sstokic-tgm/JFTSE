@@ -9,8 +9,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
-import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,21 +22,22 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
     private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
     private final TCPChannelHandler tcpChannelHandler;
-    private final EventExecutorGroup group = new UnorderedThreadPoolEventExecutor(14);
+    private final EventExecutorGroup group = new DefaultEventExecutorGroup(6);
+
+    private final boolean encryptionEnabled;
 
     public ConnectionInitializer(final PacketHandlerFactory packetHandlerFactory) {
         FT_CONNECTION_ATTRIBUTE_KEY = AttributeKey.newInstance("connection");
         this.tcpChannelHandler = new TCPChannelHandler(FT_CONNECTION_ATTRIBUTE_KEY, packetHandlerFactory);
+        this.encryptionEnabled = ConfigService.getInstance().getValue("network.encryption.enabled", false);
     }
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
-        final int decryptionKey = ConfigService.getInstance().getValue("network.encryption.enabled", false) ? getRandomBigInteger().intValueExact() : 0;
-        final int encryptionKey = ConfigService.getInstance().getValue("network.encryption.enabled", false) ? getRandomBigInteger().intValueExact() : 0;
+        final int decryptionKey = encryptionEnabled ? getRandomBigInteger().intValueExact() : 0;
+        final int encryptionKey = encryptionEnabled ? getRandomBigInteger().intValueExact() : 0;
 
-        FTConnection connection = new FTConnection(decryptionKey, encryptionKey);
-        connection.setServerType(ServerType.RELAY_SERVER);
-
+        FTConnection connection = new FTConnection(decryptionKey, encryptionKey, ServerType.RELAY_SERVER);
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         //ch.pipeline().addLast(new FlushConsolidationHandler());
