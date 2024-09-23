@@ -12,131 +12,100 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
-import java.util.function.BiPredicate;
 
 public class PacketDecoder extends ByteToMessageDecoder {
+    private static final int HEADER_SIZE = 8;
+
     private final byte[] decryptKey;
     private int receiveIndicator = 0;
     private int header1Key = 0;
 
+    private final boolean logAllPackets;
+    private final boolean translatePacketIds;
     private final Logger log;
 
     public PacketDecoder(int decryptKey, Logger log) {
         this.decryptKey = BitKit.getBytes(decryptKey);
+
+        this.logAllPackets = ConfigService.getInstance().getValue("logging.packets.all.enabled", true);
+        final boolean logPacketsToConsole = ConfigService.getInstance().getValue("logging.packets.console-output.enabled", true);
+        this.translatePacketIds = ConfigService.getInstance().getValue("packets.id.translate.enabled", true);
+        LogConfigurator.setConsoleOutput("PacketLogger", logPacketsToConsole);
+
         this.log = log;
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        int length = in.readableBytes();
-
-        in.markReaderIndex();
-        if (length < 7) {
-            in.resetReaderIndex();
-            return;
+        Packet decoded = this.decode(in);
+        if (decoded != null) {
+            out.add(decoded);
         }
-        int actualReaderIndex = in.readerIndex();
-
-        boolean logAllPackets = ConfigService.getInstance().getValue("logging.packets.all.enabled", true);
-
-        boolean logPacketsToConsole = ConfigService.getInstance().getValue("logging.packets.console-output.enabled", true);
-        LogConfigurator.setConsoleOutput("PacketLogger", logPacketsToConsole);
-
-        Packet packet;
-        byte[] encryptedData = new byte[length];
-        in.readBytes(encryptedData);
-        byte[] data = decryptBytes(encryptedData, encryptedData.length);
-
-        if (logAllPackets)
-            log.debug("RECV payload " + BitKit.toString(data, 0, data.length) + ", readableBytes: " + length);
-
-        if (!this.isValidChecksum(data)) {
-            log.error("Invalid packet checksum");
-            in.resetReaderIndex();
-            return;
-        }
-
-        int currentObjectLength = BitKit.bytesToShort(data, 6);
-        if (currentObjectLength < 0) {
-            log.error("Invalid object length: " + currentObjectLength);
-            in.resetReaderIndex();
-            return;
-        }
-        if (currentObjectLength > in.capacity()) {
-            log.error("Unable to read object larger than read buffer: " + currentObjectLength);
-            in.resetReaderIndex();
-            return;
-        }
-
-        BiPredicate<Integer, Integer> packetSizePosRangeCheck = (l, r) -> l >= r;
-        while (true) {
-            if (packetSizePosRangeCheck.test(6, data.length)) {
-                log.error("Invalid packet size position");
-                in.readerIndex(actualReaderIndex);
-                return;
-            }
-
-            if (!this.isValidChecksum(data)) {
-                log.error("Invalid packet checksum");
-                in.readerIndex(actualReaderIndex);
-                return;
-            }
-
-            final int packetSize = BitKit.bytesToShort(data, 6);
-            currentObjectLength = packetSize;
-            if (packetSize + 8 < encryptedData.length) {
-                final int receiveIndicator = this.receiveIndicator;
-                data = decryptBytes(encryptedData, packetSize + 8);
-                packet = new Packet(data);
-
-                actualReaderIndex += packet.getPacketSize();
-
-                if (logAllPackets)
-                    log.debug("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
-
-                out.add(packet);
-
-                // prepare data for loop
-                byte[] tmp = new byte[encryptedData.length - 8 - packetSize];
-                BitKit.blockCopy(encryptedData, packetSize + 8, tmp, 0, tmp.length);
-                encryptedData = new byte[tmp.length];
-                BitKit.blockCopy(tmp, 0, encryptedData, 0, encryptedData.length);
-                data = decryptBytes(encryptedData, encryptedData.length);
-
-                int newReceiveIndicator = receiveIndicator + 1;
-                this.receiveIndicator = newReceiveIndicator % 60;
-            } else {
-                break;
-            }
-        }
-        if (currentObjectLength + 8 <= encryptedData.length) {
-            final int receiveIndicator = this.receiveIndicator;
-
-            data = decryptBytes(encryptedData, currentObjectLength + 8);
-            packet = new Packet(data);
-
-            actualReaderIndex += packet.getPacketSize();
-
-            if (logAllPackets)
-                log.debug("RECV [" + (ConfigService.getInstance().getValue("packets.id.translate.enabled", true) ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId())) + "] " + BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + 8));
-
-            out.add(packet);
-
-            int newReceiveIndicator = receiveIndicator + 1;
-            this.receiveIndicator = newReceiveIndicator % 60;
-        }
-        in.readerIndex(actualReaderIndex);
     }
 
-    private boolean isValidChecksum(byte[] data) {
+    protected Packet decode(ByteBuf in) throws Exception {
+        final int length = in.readableBytes();
+        if (length < HEADER_SIZE) {
+            return null;
+        }
+
+        in.markReaderIndex();
+
+        ByteBuf decryptedData = decryptBytes(in);
+
+        if (logAllPackets)
+            log.debug("RECV payload {}, readableBytes: {}", BitKit.toString(decryptedData, 0, decryptedData.readableBytes()), length);
+
+        final int packetLength = decryptedData.getUnsignedShortLE(6);
+        if (packetLength < 0 || packetLength + HEADER_SIZE > length) {
+            in.resetReaderIndex();
+            decryptedData.release();
+            return null;
+        }
+
+        if (!this.isValidChecksum(decryptedData)) {
+            log.error("Invalid packet checksum");
+            in.resetReaderIndex();
+            decryptedData.release();
+            return null;
+        }
+
+        final int totalPacketSize = packetLength + HEADER_SIZE;
+        if (length < totalPacketSize) {
+            in.resetReaderIndex();
+            decryptedData.release();
+            return null;
+        }
+
+        byte[] data = new byte[totalPacketSize];
+        decryptedData.getBytes(0, data);
+        Packet packet = new Packet(data);
+
+        decryptedData.release();
+        in.readerIndex(in.readerIndex() + totalPacketSize);
+
+        if (logAllPackets)
+            log.debug("RECV [{}] {}", translatePacketIds ? PacketOperations.getNameByValue(packet.getPacketId()) : String.format("0x%X", (int) packet.getPacketId()), BitKit.toString(packet.getRawPacket(), 0, packet.getDataLength() + HEADER_SIZE));
+
+        this.receiveIndicator = (this.receiveIndicator + 1) % 60;
+
+        return packet;
+    }
+
+    private boolean isValidChecksum(ByteBuf in) {
         final int receiveIndicator = this.receiveIndicator;
         final int pos = (((this.header1Key << 4) - this.header1Key * 4 + receiveIndicator) * 2);
         final short serverSerial = BitKit.bytesToShort(SerialTable.serialTable, pos);
 
         byte[] serverSerialData = new byte[]{BitKit.getBytes(serverSerial)[0], BitKit.getBytes(serverSerial)[1]};
         try {
-            final short clientChecksum = (short) ((data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
-            final short serverChecksum = (short) ((serverSerialData[0] & 0xFF) + (serverSerialData[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
+            final short clientChecksum = in.getShortLE(2);
+            short serverChecksum = (short) ((serverSerialData[0] & 0xFF) + (serverSerialData[1] & 0xFF) + (in.getByte(4) & 0xFF) + (in.getByte(5) & 0xFF) + (in.getByte(6) & 0xFF) + (in.getByte(7) & 0xFF));
+            if (serverChecksum % 2 == 0) {
+                serverChecksum += (short) 1587;
+            } else {
+                serverChecksum += (short) 1568;
+            }
 
             return clientChecksum == serverChecksum;
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -144,13 +113,11 @@ public class PacketDecoder extends ByteToMessageDecoder {
         }
     }
 
-    private byte[] decryptBytes(byte[] encryptedBuffer, int size) {
-        byte[] decrypted = new byte[size];
-        BitKit.blockCopy(encryptedBuffer, 0, decrypted, 0, size);
-
-        for (int i = 0; i < size; i++)
-            decrypted[i] ^= this.decryptKey[(i & 3)];
-
-        return decrypted;
+    private ByteBuf decryptBytes(ByteBuf in) {
+        ByteBuf decryptedData = in.copy();
+        for (int i = 0; i < decryptedData.readableBytes(); i++) {
+            decryptedData.setByte(i, decryptedData.getByte(i) ^ this.decryptKey[(i & 3)]);
+        }
+        return decryptedData;
     }
 }

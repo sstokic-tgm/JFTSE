@@ -1,5 +1,7 @@
 package com.jftse.emulator.common.utilities;
 
+import io.netty.buffer.ByteBuf;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -77,5 +79,16 @@ public class BitKit {
         }
 
         return new String(chArray, 0, chArray.length - 1);
+    }
+
+    public static String toString(ByteBuf buf, int startIndex, int length) {
+        StringBuilder sb = new StringBuilder();
+        buf.forEachByte(startIndex, length, (byte b) -> {
+            sb.append(DIGITS_UPPER[(0xF0 & b) >>> 4]);
+            sb.append(DIGITS_UPPER[0x0F & b]);
+            sb.append(' ');
+            return true;
+        });
+        return sb.toString();
     }
 }

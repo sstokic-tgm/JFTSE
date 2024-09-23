@@ -66,6 +66,12 @@
             <artifactId>dom4j</artifactId>
             <version>2.1.4</version>
         </dependency>
+        <!-- netty buffer -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+            <version>4.1.85.Final</version>
+        </dependency>
     </dependencies>
 
 </project>
