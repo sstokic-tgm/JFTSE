@@ -31,7 +31,7 @@ public class PhaseManager {
     private AtomicBoolean isPhaseEnding = new AtomicBoolean(false);
 
     private final BlockingDeque<Runnable> taskQueue = new LinkedBlockingDeque<>();
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = ThreadManager.getInstance().createSequentialExecutor();
 
     private final Lock lock = new ReentrantLock();
 
@@ -125,6 +125,13 @@ public class PhaseManager {
 
     public void end() {
         enqueueTask(() -> currentPhase.get().end());
+
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException ie) {
+            log.error(ie.getMessage(), ie);
+        }
     }
 
     public boolean hasNextPhase() {

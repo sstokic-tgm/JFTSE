@@ -22,7 +22,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
     private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
     private final TCPChannelHandler tcpChannelHandler;
-    private final EventExecutorGroup group = new DefaultEventExecutorGroup(6);
+    private final EventExecutorGroup group = new DefaultEventExecutorGroup(10);
 
     private final boolean encryptionEnabled;
 

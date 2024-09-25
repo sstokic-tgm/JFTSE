@@ -16,31 +16,20 @@ import java.util.concurrent.*;
 public class ThreadManager {
     private static ThreadManager instance;
 
-    private ThreadPoolExecutor tpe;
-    private ScheduledThreadPoolExecutor stpe;
+    private ExecutorService virtualThreadExecutor;
+    private ScheduledExecutorService virtualScheduledExecutor;
 
     @PostConstruct
     public void init() {
         instance = this;
 
-        tpe = new ThreadPoolExecutor(6,
-                6 * Runtime.getRuntime().availableProcessors(),
-                80, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100),
-                Executors.defaultThreadFactory(),
-                (r, executor) -> {
-                    Thread t = new Thread(r);
-                    t.start();
-                });
+        // Use virtual threads for all tasks
+        virtualThreadExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("ThreadManager-VT-", 0L).factory());
 
-        stpe = new ScheduledThreadPoolExecutor(6, r -> {
-            Thread t = new Thread(r);
-            t.setName("ThreadManager-Worker");
-            return t;
-        });
-        stpe.setKeepAliveTime(5, TimeUnit.MINUTES);
-        stpe.allowCoreThreadTimeOut(true);
+        // Use virtual threads for scheduled tasks
+        virtualScheduledExecutor = Executors.newScheduledThreadPool(0, Thread.ofVirtual().name("ThreadManager-VT-Scheduled-", 0L).factory());
 
-        log.info(this.getClass().getSimpleName() + " initialized");
+        log.info("{} initialized", this.getClass().getSimpleName());
     }
 
     public static ThreadManager getInstance() {
@@ -48,49 +37,53 @@ public class ThreadManager {
     }
 
     public void newTask(Runnable runnable) {
-        tpe.execute(runnable);
+        virtualThreadExecutor.execute(runnable);
     }
 
     public Future<?> submit(Runnable runnable) {
-        return tpe.submit(runnable);
+        return virtualThreadExecutor.submit(runnable);
     }
 
     public Future<?> submit(Callable<?> callable) {
-        return tpe.submit(callable);
+        return virtualThreadExecutor.submit(callable);
     }
 
     public <T> Future<?> submit(Runnable runnable, T result) {
-        return tpe.submit(runnable, result);
+        return virtualThreadExecutor.submit(runnable, result);
     }
 
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long period, TimeUnit timeUnit) {
-        return stpe.scheduleAtFixedRate(runnable, 0, period, timeUnit);
+        return virtualScheduledExecutor.scheduleAtFixedRate(runnable, 0, period, timeUnit);
     }
 
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit timeUnit) {
-        return stpe.scheduleAtFixedRate(runnable, initialDelay, period, timeUnit);
+        return virtualScheduledExecutor.scheduleAtFixedRate(runnable, initialDelay, period, timeUnit);
     }
 
     public ScheduledFuture<?> schedule(Runnable runnable, long delay, TimeUnit timeUnit) {
-        return stpe.schedule(runnable, delay, timeUnit);
+        return virtualScheduledExecutor.schedule(runnable, delay, timeUnit);
     }
 
     public ScheduledFuture<?> schedule(Runnable runnable, long delay) {
-        return stpe.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+        return virtualScheduledExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS);
     }
 
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit timeUnit) {
-        return stpe.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
+        return virtualScheduledExecutor.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
+    }
+
+    public ExecutorService createSequentialExecutor() {
+        return Executors.newSingleThreadExecutor(Thread.ofVirtual().factory());
     }
 
     @PreDestroy
     public void onExit() {
-        tpe.shutdown();
-        stpe.shutdown();
+        virtualThreadExecutor.shutdown();
+        virtualScheduledExecutor.shutdown();
 
         try {
-            tpe.awaitTermination(1, TimeUnit.MINUTES);
-            stpe.awaitTermination(1, TimeUnit.MINUTES);
+            virtualThreadExecutor.awaitTermination(1, TimeUnit.MINUTES);
+            virtualScheduledExecutor.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException ie) {
             log.error(ie.getMessage(), ie);
         }
