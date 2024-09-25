@@ -131,6 +131,8 @@ public class PhaseManager {
             executorService.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException ie) {
             log.error(ie.getMessage(), ie);
+        } finally {
+            executorService.shutdownNow();
         }
     }
 
@@ -258,6 +260,10 @@ public class PhaseManager {
     }
 
     private void enqueueTask(Runnable task) {
+        if (!isRunning.get() || executorService.isShutdown() || executorService.isTerminated()) {
+            return;
+        }
+
         taskQueue.offer(task);
         executorService.submit(this::executeNextTask);
     }
