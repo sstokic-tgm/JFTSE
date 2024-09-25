@@ -5,7 +5,6 @@ import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
-import com.jftse.server.core.thread.ThreadManager;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
@@ -39,26 +38,6 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
 
         if (connection != null && !connection.getIsClosingConnection().get()) {
             if (abstractPacketHandler != null) {
-                if (packet.getPacketId() == PacketOperations.C2SMatchplayPlayerUseSkill.getValue()) {
-                    ThreadManager.getInstance().newTask(() -> {
-                        try {
-                            abstractPacketHandler.setConnection(connection);
-                            if (abstractPacketHandler.process(packet)) {
-                                abstractPacketHandler.handle();
-                                packetProcessed(connection, abstractPacketHandler);
-                            } else {
-                                packetNotProcessed(connection, abstractPacketHandler);
-                            }
-                        } catch (Exception e) {
-                            try {
-                                exceptionCaught(ctx, e);
-                            } catch (Exception ex) {
-                                ctx.close();
-                            }
-                        }
-                    });
-                    return;
-                }
                 abstractPacketHandler.setConnection(connection);
 
                 try {
