@@ -260,7 +260,7 @@ public class PhaseManager {
     }
 
     private void enqueueTask(Runnable task) {
-        if (!isRunning.get() || executorService.isShutdown() || executorService.isTerminated()) {
+        if (executorService.isShutdown() || executorService.isTerminated()) {
             return;
         }
 
