@@ -33,7 +33,6 @@ import com.jftse.server.core.service.*;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
-import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -68,11 +67,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        ThreadManager.getInstance().newTask(() -> handle((FTConnection) connection));
-    }
-
-    private void handle(FTConnection connection) {
-        FTClient ftClient = connection.getClient();
+        FTClient ftClient = (FTClient) connection.getClient();
         if (ftClient == null || ftClient.getActiveGameSession() == null
                 || ftClient.getPlayer() == null || ftClient.getRoomPlayer() == null)
             return;
@@ -117,7 +112,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
         S2CMatchplayUseSkill packet =
                 new S2CMatchplayUseSkill(attackerPosition, targetPosition, anyoneUsesSkill.getSkillIndex(), anyoneUsesSkill.getSeed(), anyoneUsesSkill.getXTarget(), anyoneUsesSkill.getZTarget(), anyoneUsesSkill.getYTarget());
         gameSession.getClients().forEach(c -> {
-            if (c.getConnection().getId() != connection.getId()) {
+            if (c.getConnection().getId() != ftClient.getConnection().getId()) {
                 c.getConnection().sendTCP(packet);
             }
         });
