@@ -4,20 +4,20 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.life.room.Room;
+import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.entities.database.model.player.*;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.life.room.Room;
-import com.jftse.emulator.server.core.life.room.RoomPlayer;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
+import com.jftse.entities.database.model.player.*;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.CardSlotEquipmentService;
 import com.jftse.server.core.service.GuildMemberService;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @PacketOperationIdentifier(PacketOperations.C2SRoomJoin)
 public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {

@@ -3,13 +3,10 @@ package com.jftse.entities.database.model.guild;
 import com.jftse.entities.database.model.AbstractBaseModel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.envers.Audited;
 
-import java.util.List;
-
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter

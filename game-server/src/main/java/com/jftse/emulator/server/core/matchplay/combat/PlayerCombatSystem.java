@@ -18,7 +18,7 @@ import java.util.List;
 
 @Log4j2
 public class PlayerCombatSystem implements PlayerCombatable {
-    private MatchplayGame game;
+    private final MatchplayGame game;
 
     private final boolean isBattleGame;
 

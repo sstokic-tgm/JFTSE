@@ -8,8 +8,8 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.life.room.ServeInfo;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.matchplay.event.PacketEvent;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
+import com.jftse.emulator.server.core.matchplay.event.PacketEvent;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayTeamWinsPoint;
@@ -44,8 +44,7 @@ public class PointbackCommand extends AbstractCommand {
         RoomPlayer roomPlayer = connection.getClient().getRoomPlayer();
 
         GameSession gameSession = connection.getClient().getActiveGameSession();
-        if (gameSession.getMatchplayGame() instanceof MatchplayBasicGame) {
-            MatchplayBasicGame game = (MatchplayBasicGame) gameSession.getMatchplayGame();
+        if (gameSession.getMatchplayGame() instanceof MatchplayBasicGame game) {
             final boolean isFinished = game.getFinished().get();
 
             if (isFinished || (game.getSetsBlueTeam().get() == 0 && game.getSetsRedTeam().get() == 0 && game.getPointsBlueTeam().get() == 0 & game.getPointsRedTeam().get() == 0))

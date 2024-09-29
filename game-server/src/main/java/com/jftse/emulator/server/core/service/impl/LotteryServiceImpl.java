@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.service.impl;
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.lottery.LotteryItemDto;

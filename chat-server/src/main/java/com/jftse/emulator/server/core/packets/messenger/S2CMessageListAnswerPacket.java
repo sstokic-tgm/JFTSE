@@ -16,8 +16,7 @@ public class S2CMessageListAnswerPacket extends Packet {
 
         this.write((byte) messageList.size());
         for (AbstractMessage am : messageList) {
-            if (am instanceof Message) {
-                Message m = (Message) am;
+            if (am instanceof Message m) {
                 this.write(Math.toIntExact(m.getId()));
                 this.write((listType % 2) == 0 ? m.getSender().getName() : m.getReceiver().getName());
                 this.write((listType % 2) == 0 ? m.getSeen() : true);
@@ -26,8 +25,7 @@ public class S2CMessageListAnswerPacket extends Packet {
                 this.write(0); // product index
                 this.write(m.getUseTypeOption());
 
-            } else if (am instanceof Gift) {
-                Gift g = (Gift) am;
+            } else if (am instanceof Gift g) {
                 this.write(Math.toIntExact(g.getId()));
                 this.write((listType % 2) == 0 ? g.getSender().getName() : g.getReceiver().getName());
                 this.write((listType % 2) == 0 ? g.getSeen() : true);

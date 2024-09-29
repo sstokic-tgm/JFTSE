@@ -1,9 +1,9 @@
 package com.jftse.emulator.server.core.handler.guild;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.guild.C2SGuildNameCheckRequestPacket;
 import com.jftse.emulator.server.core.packets.guild.S2CGuildNameCheckAnswerPacket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;

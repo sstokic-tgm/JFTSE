@@ -2,14 +2,12 @@ package com.jftse.entities.database.model.guild;
 
 import com.jftse.entities.database.model.AbstractBaseModel;
 import com.jftse.entities.database.model.player.Player;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
-import java.util.Date;
-
 import javax.persistence.*;
+import java.util.Date;
 
 @Getter
 @Setter

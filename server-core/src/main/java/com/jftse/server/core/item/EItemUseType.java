@@ -6,7 +6,7 @@ public enum EItemUseType {
 
     TIME(1), COUNT(2), DURABLE(3), INSTANT(4);
 
-    private byte value;
+    private final byte value;
 
     EItemUseType(int value) {
         this.value = (byte) value;

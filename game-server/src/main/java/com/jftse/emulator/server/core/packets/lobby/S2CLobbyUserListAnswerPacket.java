@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.packets.lobby;
 
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.entities.database.model.player.Player;
 
 import java.util.List;
 

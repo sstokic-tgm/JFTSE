@@ -1,16 +1,15 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.C2SMessageListRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CMessageListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.entities.database.model.messenger.AbstractMessage;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.messenger.Gift;
 import com.jftse.entities.database.model.messenger.Message;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.GiftService;
 import com.jftse.server.core.service.MessageService;

@@ -10,7 +10,6 @@ import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
-import com.jftse.entities.database.model.item.ItemPart;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.messenger.Gift;
 import com.jftse.entities.database.model.player.Player;
@@ -19,7 +18,6 @@ import com.jftse.server.core.protocol.Packet;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.Optional;
 
 @Getter

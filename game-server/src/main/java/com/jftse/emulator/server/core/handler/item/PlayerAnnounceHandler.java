@@ -2,7 +2,6 @@ package com.jftse.emulator.server.core.handler.item;
 
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
-import com.jftse.emulator.server.core.life.item.special.MegaphoneSpeaker;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.item.C2SPlayerAnnouncePacket;
 import com.jftse.emulator.server.core.packets.item.S2CPlayerAnnouncePacket;

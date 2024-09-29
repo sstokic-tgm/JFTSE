@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.core.handler.lobby;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.lobby.C2SLobbyUserInfoClothRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserInfoClothAnswerPacket;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerService;
 

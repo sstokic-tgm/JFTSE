@@ -1,7 +1,7 @@
 import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestServingPositionGenerator {
     @Test

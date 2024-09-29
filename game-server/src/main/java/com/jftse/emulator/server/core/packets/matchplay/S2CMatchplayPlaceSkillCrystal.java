@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.packets.matchplay;
 
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 import java.awt.geom.Point2D;
 

@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.packets.home;
 
+import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.entities.database.model.home.AccountHome;
 
 public class S2CHomeDataPacket extends Packet {
     public S2CHomeDataPacket(AccountHome accountHome) {

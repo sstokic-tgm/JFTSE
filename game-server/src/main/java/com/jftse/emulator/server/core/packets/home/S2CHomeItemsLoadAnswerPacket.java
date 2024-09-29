@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.packets.home;
 
+import com.jftse.entities.database.model.home.HomeInventory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.entities.database.model.home.HomeInventory;
 
 import java.util.List;
 

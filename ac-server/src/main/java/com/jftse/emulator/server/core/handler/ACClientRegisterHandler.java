@@ -43,7 +43,7 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
         if (inetSocketAddress != null) {
             String hostAddress = inetSocketAddress.getAddress().getHostAddress();
 
-            FTClient client = (FTClient) connection.getClient();
+            FTClient client = connection.getClient();
             if (client != null) {
                 ConcurrentHashMap<String, Boolean> files = client.getFileList();
 

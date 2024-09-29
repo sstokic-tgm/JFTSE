@@ -1,16 +1,16 @@
 package com.jftse.emulator.server.core.handler.challenge;
 
-import com.jftse.emulator.server.core.packets.challenge.C2SChallengeBeginRequestPacket;
-import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.core.packets.challenge.C2SChallengeBeginRequestPacket;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeBattleGame;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.challenge.Challenge;
+import com.jftse.server.core.constants.GameMode;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.ChallengeService;
 
 @PacketOperationIdentifier(PacketOperations.C2SChallengeBeginReq)

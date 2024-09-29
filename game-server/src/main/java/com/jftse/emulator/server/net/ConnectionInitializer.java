@@ -7,7 +7,6 @@ import com.jftse.server.core.codec.PacketEncoder;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;

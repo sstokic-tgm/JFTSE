@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.command.commands.gm;
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.command.AbstractCommand;
-import com.jftse.emulator.server.core.interaction.PlayerScriptable;
 import com.jftse.emulator.server.core.interaction.PlayerScriptableImpl;
 import com.jftse.emulator.server.core.life.event.GameEventRegistry;
 import com.jftse.emulator.server.core.manager.ServiceManager;

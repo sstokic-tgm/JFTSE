@@ -1,6 +1,5 @@
 package com.jftse.server.core.service.impl;
 
-import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.entities.database.model.item.ItemEnchant;
 import com.jftse.entities.database.model.item.ItemEnchantLevel;
 import com.jftse.entities.database.model.item.ItemPart;

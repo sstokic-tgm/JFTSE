@@ -6,7 +6,10 @@ import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerAnswerPack
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.inventory.*;
 import com.jftse.emulator.server.core.packets.pet.S2CPetDataAnswerPacket;
-import com.jftse.emulator.server.core.packets.player.*;
+import com.jftse.emulator.server.core.packets.player.S2CCouplePointsDataPacket;
+import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacket;
+import com.jftse.emulator.server.core.packets.player.S2CPlayerLevelExpPacket;
+import com.jftse.emulator.server.core.packets.player.S2CUnknownPlayerInfoDataPacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.account.Account;

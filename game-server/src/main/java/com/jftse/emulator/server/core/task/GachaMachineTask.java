@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.task;
 
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;

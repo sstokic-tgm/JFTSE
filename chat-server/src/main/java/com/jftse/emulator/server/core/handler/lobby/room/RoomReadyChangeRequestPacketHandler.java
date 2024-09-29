@@ -1,11 +1,11 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
+import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomReadyChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomReadyChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;

@@ -2,8 +2,8 @@ package com.jftse.emulator.server.core.packets.messenger;
 
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 import lombok.Getter;
 import lombok.Setter;
 

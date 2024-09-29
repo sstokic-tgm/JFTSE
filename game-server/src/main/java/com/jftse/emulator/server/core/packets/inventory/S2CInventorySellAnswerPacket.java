@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.packets.inventory;
 
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CInventorySellAnswerPacket extends Packet {
     public final static byte SUCCESS = 0;

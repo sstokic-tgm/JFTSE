@@ -1,7 +1,7 @@
 package com.jftse.server.core.service.impl;
 
-import com.jftse.entities.database.model.log.BlockedIP;
 import com.jftse.entities.database.model.ServerType;
+import com.jftse.entities.database.model.log.BlockedIP;
 import com.jftse.entities.database.repository.log.BlockedIPRepository;
 import com.jftse.server.core.service.BlockedIPService;
 import lombok.RequiredArgsConstructor;

@@ -1,13 +1,13 @@
 package com.jftse.emulator.server.core.handler.ranking;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.ranking.C2SRankingDataRequestPacket;
 import com.jftse.emulator.server.core.packets.ranking.S2CRankingDataAnswerPacket;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerService;
 import org.springframework.data.domain.PageRequest;

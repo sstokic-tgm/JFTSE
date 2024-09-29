@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.packets.pet;
 
+import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.entities.database.model.pet.Pet;
 
 import java.util.List;
 

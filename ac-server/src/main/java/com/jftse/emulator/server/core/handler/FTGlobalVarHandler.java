@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler;
 
-import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.server.core.packets.S2CFTGlobalVarStructPacket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -11,7 +10,9 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

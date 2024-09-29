@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @Getter
 public class C2CSpiderMinePlacedPacket extends Packet {
-    private int position;
-    private boolean shouldPlace;
-    private short spiderMineId;
-    private double xPos;
-    private double yPos;
+    private final int position;
+    private final boolean shouldPlace;
+    private final short spiderMineId;
+    private final double xPos;
+    private final double yPos;
 
     public C2CSpiderMinePlacedPacket(Packet packet) {
         super(packet);

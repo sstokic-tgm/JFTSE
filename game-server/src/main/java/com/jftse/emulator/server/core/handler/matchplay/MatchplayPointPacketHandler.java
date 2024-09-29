@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
+import com.jftse.emulator.server.core.life.room.GameSession;
+import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayPointPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.matchplay.MatchplayGame;
-import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;

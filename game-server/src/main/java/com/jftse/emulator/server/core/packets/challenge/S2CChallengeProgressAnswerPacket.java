@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.packets.challenge;
 
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.challenge.ChallengeProgress;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.List;

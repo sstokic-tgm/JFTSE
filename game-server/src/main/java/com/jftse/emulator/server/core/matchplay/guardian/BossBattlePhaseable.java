@@ -2,7 +2,6 @@ package com.jftse.emulator.server.core.matchplay.guardian;
 
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.battle.Skill;
-import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 
 public interface BossBattlePhaseable {
     String getPhaseName();

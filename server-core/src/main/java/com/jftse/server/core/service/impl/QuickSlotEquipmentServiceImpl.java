@@ -7,7 +7,6 @@ import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.entities.database.repository.player.QuickSlotEquipmentRepository;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.QuickSlotEquipmentService;
-import com.jftse.server.core.service.impl.PlayerPocketServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;

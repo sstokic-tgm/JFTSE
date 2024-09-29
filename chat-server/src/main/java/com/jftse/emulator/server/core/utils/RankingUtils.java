@@ -8,7 +8,7 @@ import java.util.List;
 
 public class RankingUtils {
     private static double transformedRating(int rating) {
-        return Math.pow(10, (double) (rating / 400));
+        return Math.pow(10, rating / 400);
     }
 
     private static double expectedScore(Player player1, Player player2, byte gameMode) {

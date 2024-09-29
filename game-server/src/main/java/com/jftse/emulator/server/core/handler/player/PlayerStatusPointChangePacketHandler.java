@@ -1,14 +1,14 @@
 package com.jftse.emulator.server.core.handler.player;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.player.C2SPlayerStatusPointChangePacket;

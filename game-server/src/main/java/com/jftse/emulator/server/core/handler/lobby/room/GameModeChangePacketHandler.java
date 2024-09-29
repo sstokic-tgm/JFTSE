@@ -1,15 +1,15 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
+import com.jftse.emulator.server.core.life.room.Room;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomGameModeChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 
 @PacketOperationIdentifier(PacketOperations.C2SRoomGameModeChange)

@@ -11,7 +11,6 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
-import com.jftse.server.core.shared.packets.S2CDisconnectAnswerPacket;
 
 import java.util.Iterator;
 import java.util.List;

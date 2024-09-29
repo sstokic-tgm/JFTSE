@@ -1,9 +1,9 @@
 package com.jftse.emulator.server.core.packets.messenger;
 
-import com.jftse.server.core.item.EItemCategory;
-import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.messenger.Parcel;
+import com.jftse.server.core.item.EItemCategory;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 import lombok.Getter;
 import lombok.Setter;
 

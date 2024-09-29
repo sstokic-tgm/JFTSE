@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.core.handler.chat;
 
 import com.jftse.emulator.server.core.command.CommandManager;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.C2SChatLobbyReqPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;

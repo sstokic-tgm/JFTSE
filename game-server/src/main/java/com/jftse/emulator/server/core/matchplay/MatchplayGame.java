@@ -5,7 +5,8 @@ import com.jftse.entities.database.model.battle.WillDamage;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;

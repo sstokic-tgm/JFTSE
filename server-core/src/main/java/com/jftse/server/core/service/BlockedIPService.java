@@ -1,7 +1,7 @@
 package com.jftse.server.core.service;
 
-import com.jftse.entities.database.model.log.BlockedIP;
 import com.jftse.entities.database.model.ServerType;
+import com.jftse.entities.database.model.log.BlockedIP;
 
 import java.util.List;
 import java.util.Optional;

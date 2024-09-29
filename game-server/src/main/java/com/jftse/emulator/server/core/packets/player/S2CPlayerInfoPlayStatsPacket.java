@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.packets.player;
 
-import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.player.PlayerStatistic;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CPlayerInfoPlayStatsPacket extends Packet {
     public S2CPlayerInfoPlayStatsPacket(PlayerStatistic playerStatistic) {

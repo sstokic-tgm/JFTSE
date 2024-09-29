@@ -650,7 +650,7 @@ public class DBDataLoader implements CommandLineRunner {
                 Tutorial tutorial = tutorialRepository.findById(i).orElse(new Tutorial());
 
                 tutorial.setTutorialIndex(Integer.valueOf(tutorialNode.valueOf("@Index")));
-                tutorial.setItemRewardRepeat(!tutorialNode.valueOf("@ItemRewardRepeat").toLowerCase().equals("no"));
+                tutorial.setItemRewardRepeat(!tutorialNode.valueOf("@ItemRewardRepeat").equalsIgnoreCase("no"));
                 tutorial.setQuantityMin1(Integer.valueOf(tutorialNode.valueOf("@QuantityMin1")));
                 tutorial.setQuantityMin2(Integer.valueOf(tutorialNode.valueOf("@QuantityMin2")));
                 tutorial.setQuantityMin3(Integer.valueOf(tutorialNode.valueOf("@QuantityMin3")));
@@ -687,7 +687,7 @@ public class DBDataLoader implements CommandLineRunner {
 
                 challenge.setGameMode(gameMode);
 
-                challenge.setItemRewardRepeat(!challengeNode.valueOf("@ItemRewardRepeat").toLowerCase().equals("no"));
+                challenge.setItemRewardRepeat(!challengeNode.valueOf("@ItemRewardRepeat").equalsIgnoreCase("no"));
                 challenge.setQuantityMin1(Integer.valueOf(challengeNode.valueOf("@QuantityMin1")));
                 challenge.setQuantityMin2(Integer.valueOf(challengeNode.valueOf("@QuantityMin2")));
                 challenge.setQuantityMin3(Integer.valueOf(challengeNode.valueOf("@QuantityMin3")));

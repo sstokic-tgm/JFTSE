@@ -2,6 +2,9 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.life.room.Room;
+import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
 import com.jftse.emulator.server.core.packets.player.S2CCouplePointsDataPacket;
@@ -9,18 +12,14 @@ import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacke
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.life.room.Room;
-import com.jftse.emulator.server.core.life.room.RoomPlayer;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerStatisticService;
-import com.jftse.server.core.shared.packets.S2CDisconnectAnswerPacket;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,15 +1,15 @@
 package com.jftse.emulator.server.core.handler.shop;
 
 import com.jftse.emulator.common.utilities.BitKit;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.shop.C2SShopRequestDataPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopAnswerDataPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopAnswerDataPreparePacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.item.Product;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.item.Product;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.ProductService;
 

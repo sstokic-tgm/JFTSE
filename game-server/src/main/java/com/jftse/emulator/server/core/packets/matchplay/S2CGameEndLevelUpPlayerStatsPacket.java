@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.packets.matchplay;
 
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.emulator.server.core.utils.BattleUtils;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
     public S2CGameEndLevelUpPlayerStatsPacket(short playerPosition, Player player, StatusPointsAddedDto statusPointsAddedDto) {

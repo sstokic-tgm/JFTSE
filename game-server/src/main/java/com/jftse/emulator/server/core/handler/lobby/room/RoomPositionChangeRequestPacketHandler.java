@@ -1,18 +1,19 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.constants.RoomPositionState;
-import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.*;
-import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomPositionChangeRequestPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPositionChangeAnswerPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPositionSwapPacket;
+import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomReadyChangeAnswerPacket;
+import com.jftse.emulator.server.net.FTClient;
+import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 @PacketOperationIdentifier(PacketOperations.C2SRoomPositionChange)
 public class RoomPositionChangeRequestPacketHandler extends AbstractPacketHandler {

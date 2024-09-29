@@ -1,16 +1,12 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.entities.database.model.account.Account;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Service

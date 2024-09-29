@@ -3,12 +3,9 @@ package com.jftse.server.core.protocol;
 import com.jftse.emulator.common.utilities.BitKit;
 import lombok.Getter;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 @Getter
 public class JoinedPacket extends Packet {
-    private final ByteBuffer joinedData;
+    private final byte[] joinedData;
 
     public JoinedPacket(Packet... packets) {
         int length = 0;
@@ -16,25 +13,25 @@ public class JoinedPacket extends Packet {
             length += packet.getDataLength() + 8;
         }
 
-        joinedData = ByteBuffer.allocate(length);
-        joinedData.order(ByteOrder.nativeOrder());
+        joinedData = new byte[length];
 
+        int offset = 0;
         for (Packet packet : packets) {
-            joinedData.put(packet.getRawPacket());
+            final int packetLength = packet.getDataLength() + 8;
+            BitKit.blockCopy(packet.getRawPacket(), 0, joinedData, offset, packetLength);
+            offset += packetLength;
         }
     }
 
     @Override
     public byte[] getRawPacket() {
-        joinedData.flip();
-        return joinedData.array();
+        return joinedData;
     }
 
     @Override
     public String toString() {
-        joinedData.flip();
         return "Packet{" +
-                "data=" + BitKit.toString(joinedData.array(), 0, joinedData.capacity()) +
+                "data=" + BitKit.toString(joinedData, 0, joinedData.length) +
                 '}';
     }
 }

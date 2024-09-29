@@ -1,9 +1,9 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.C2SInventoryWearBattlemonReqPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearBattlemonAnswerPacket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;

@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendProposalRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalDeliveredAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalListPacket;

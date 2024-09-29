@@ -4,15 +4,15 @@ import com.jftse.emulator.server.core.command.CommandManager;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.C2SChatRoomReqPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 
 @PacketOperationIdentifier(PacketOperations.C2SChatRoomReq)

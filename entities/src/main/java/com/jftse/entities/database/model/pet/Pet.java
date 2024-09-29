@@ -1,11 +1,9 @@
 package com.jftse.entities.database.model.pet;
 
 import com.jftse.entities.database.model.AbstractBaseModel;
-import com.jftse.entities.database.model.pet.PetStatistic;
 import com.jftse.entities.database.model.player.Player;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;

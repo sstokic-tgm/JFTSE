@@ -17,9 +17,9 @@ import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.item.EItemCategory;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
-import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import lombok.extern.log4j.Log4j2;
 

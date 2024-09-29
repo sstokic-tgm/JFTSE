@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class DespawnCrystalTask extends AbstractTask {
     private final FTConnection connection;
-    private SkillCrystal skillCrystal;
+    private final SkillCrystal skillCrystal;
     private final short gameFieldSide;
 
     private final EventHandler eventHandler;
@@ -45,9 +45,7 @@ public class DespawnCrystalTask extends AbstractTask {
         if (gameSession == null) return;
 
         MatchplayGame game = gameSession.getMatchplayGame();
-        boolean isBattleGame = false;
-        if (gameSession.getMatchplayGame() instanceof MatchplayBattleGame)
-            isBattleGame = true;
+        boolean isBattleGame = gameSession.getMatchplayGame() instanceof MatchplayBattleGame;
 
         boolean isCrystalStillAvailable =
                 isBattleGame && (((MatchplayBattleGame) game).getSkillCrystals().stream().anyMatch(x -> x.getId() == skillCrystal.getId())) ||

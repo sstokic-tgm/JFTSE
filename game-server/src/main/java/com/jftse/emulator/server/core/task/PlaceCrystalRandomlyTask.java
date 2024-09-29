@@ -43,9 +43,7 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
         if (gameSession == null) return;
 
         MatchplayGame game = gameSession.getMatchplayGame();
-        boolean isBattleGame = false;
-        if (gameSession.getMatchplayGame() instanceof MatchplayBattleGame)
-            isBattleGame = true;
+        boolean isBattleGame = gameSession.getMatchplayGame() instanceof MatchplayBattleGame;
 
         Point2D point = isBattleGame ? this.getRandomPoint(gameFieldSide) : this.getRandomPoint();
 

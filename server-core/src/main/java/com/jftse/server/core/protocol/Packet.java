@@ -251,8 +251,7 @@ public class Packet {
     @Override
     public String toString() {
         return "Packet{" +
-                "readPosition=" + readPosition +
-                ", checkSerial=" + (int) checkSerial +
+                "checkSerial=" + (int) checkSerial +
                 ", checkSum=" + (int) checkSum +
                 ", packetId=" + String.format("0x%X", (int) packetId) +
                 ", dataLength=" + dataLength +

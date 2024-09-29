@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.chat;
 
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.C2SWhisperReqPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
@@ -8,7 +9,6 @@ import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;

@@ -15,7 +15,7 @@ import java.util.List;
 
 @Log4j2
 public class GuardianCombatSystem implements GuardianCombatable {
-    private MatchplayGuardianGame game;
+    private final MatchplayGuardianGame game;
 
     public GuardianCombatSystem(MatchplayGuardianGame game) {
         this.game = game;

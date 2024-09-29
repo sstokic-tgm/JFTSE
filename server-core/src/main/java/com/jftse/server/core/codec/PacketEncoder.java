@@ -13,9 +13,10 @@ import org.apache.logging.log4j.Logger;
 
 public class PacketEncoder extends MessageToByteEncoder<Packet> {
     private static final int HEADER_SIZE = 8;
+
     private final byte[] encryptKey;
     private int sendIndicator = 0;
-    private int header1Key = 0;
+    private final int header1Key = 0;
 
     private final boolean logAllPackets;
     private final boolean translatePacketIds;

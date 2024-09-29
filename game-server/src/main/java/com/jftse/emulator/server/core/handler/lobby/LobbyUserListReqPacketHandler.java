@@ -1,13 +1,13 @@
 package com.jftse.emulator.server.core.handler.lobby;
 
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.lobby.C2SLobbyUserListRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.List;

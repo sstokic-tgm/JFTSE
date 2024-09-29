@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.life.item.special;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearSpecialAnswerPacket;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;

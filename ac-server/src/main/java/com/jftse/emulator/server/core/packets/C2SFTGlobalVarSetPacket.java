@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class C2SFTGlobalVarSetPacket extends Packet {
-    private String confName;
-    private int confValue;
+    private final String confName;
+    private final int confValue;
 
     public C2SFTGlobalVarSetPacket(Packet packet) {
         super(packet);

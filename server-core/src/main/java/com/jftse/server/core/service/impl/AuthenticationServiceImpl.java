@@ -8,7 +8,6 @@ import com.jftse.entities.database.repository.account.AccountRepository;
 import com.jftse.entities.database.repository.gameserver.GameServerRepository;
 import com.jftse.server.core.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

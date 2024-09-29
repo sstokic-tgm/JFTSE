@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.packets.ranking;
 
+import com.jftse.entities.database.model.player.Player;
+import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.PlayerStatistic;
 
 import java.util.List;
 

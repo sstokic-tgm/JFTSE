@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.command;
 import com.jftse.emulator.common.scripting.ScriptFile;
 import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.server.core.command.commands.gm.*;
-import com.jftse.emulator.server.core.command.commands.player.*;
+import com.jftse.emulator.server.core.command.commands.player.OpenGachaCommand;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;

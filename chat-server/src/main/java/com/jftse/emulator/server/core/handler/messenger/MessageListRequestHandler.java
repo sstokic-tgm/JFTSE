@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.handler.messenger;
 import com.jftse.emulator.server.core.packets.messenger.C2SMessageListRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CMessageListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.entities.database.model.messenger.AbstractMessage;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;

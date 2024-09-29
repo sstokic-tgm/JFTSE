@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
     private static final Logger packetLogger = LogManager.getLogger("PacketLogger");

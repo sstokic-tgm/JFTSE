@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.packets.matchplay;
 
 import com.jftse.entities.database.model.battle.GuardianBase;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CMatchplaySpawnBossBattle extends Packet {
     public S2CMatchplaySpawnBossBattle(GuardianBase boss, GuardianBase leftMonster, GuardianBase rightMonster) {

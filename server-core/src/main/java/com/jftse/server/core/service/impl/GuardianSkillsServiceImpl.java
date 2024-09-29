@@ -7,7 +7,6 @@ import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.scenario.MScenarios;
 import com.jftse.entities.database.repository.battle.Guardian2MapsRepository;
 import com.jftse.entities.database.repository.battle.Skill2GuardiansRepository;
-import com.jftse.entities.database.repository.map.MapsRepository;
 import com.jftse.server.core.matchplay.battle.SkillDrop;
 import com.jftse.server.core.service.GuardianSkillsService;
 import lombok.RequiredArgsConstructor;

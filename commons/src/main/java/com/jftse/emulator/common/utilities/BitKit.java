@@ -2,9 +2,6 @@ package com.jftse.emulator.common.utilities;
 
 import io.netty.buffer.ByteBuf;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 public class BitKit {
     private static final char[] DIGITS_UPPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
@@ -21,43 +18,43 @@ public class BitKit {
     }
 
     public static char bytesToChar(byte[] bytes, int index) {
-        return ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).getChar(index);
+        return (char)((bytes[index] & 0xFF) | ((bytes[index + 1] & 0xFF) << 8));
     }
 
     public static short bytesToShort(byte[] bytes, int index) {
-        return ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).getShort(index);
+        return (short)((bytes[index] & 0xFF) | ((bytes[index + 1] & 0xFF) << 8));
     }
 
     public static int bytesToInt(byte[] bytes, int index) {
-        return ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).getInt(index);
+        return (bytes[index] & 0xFF) | ((bytes[index + 1] & 0xFF) << 8) | ((bytes[index + 2] & 0xFF) << 16) | ((bytes[index + 3] & 0xFF) << 24);
     }
 
     public static float bytesToFloat(byte[] bytes, int index) {
-        return ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).getFloat(index);
+        return Float.intBitsToFloat(bytesToInt(bytes, index));
     }
 
     public static long bytesToLong(byte[] bytes, int index) {
-        return ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).getLong(index);
+        return (bytes[index] & 0xFFL) | ((bytes[index + 1] & 0xFFL) << 8) | ((bytes[index + 2] & 0xFFL) << 16) | ((bytes[index + 3] & 0xFFL) << 24) | ((bytes[index + 4] & 0xFFL) << 32) | ((bytes[index + 5] & 0xFFL) << 40) | ((bytes[index + 6] & 0xFFL) << 48) | ((bytes[index + 7] & 0xFFL) << 56);
     }
 
     public static byte[] getBytes(byte value) {
-        return ByteBuffer.allocate(1).order(ByteOrder.nativeOrder()).put(value).array();
+        return new byte[] { value };
     }
 
     public static byte[] getBytes(char value) {
-        return ByteBuffer.allocate(2).order(ByteOrder.nativeOrder()).putChar(value).array();
+        return new byte[] { (byte)value, (byte)(value >> 8) };
     }
 
     public static byte[] getBytes(int value) {
-        return ByteBuffer.allocate(4).order(ByteOrder.nativeOrder()).putInt(value).array();
+        return new byte[] { (byte)value, (byte)(value >> 8), (byte)(value >> 16), (byte)(value >> 24) };
     }
 
     public static byte[] getBytes(float value) {
-        return ByteBuffer.allocate(4).order(ByteOrder.nativeOrder()).putFloat(value).array();
+        return getBytes(Float.floatToRawIntBits(value));
     }
 
     public static byte[] getBytes(long value) {
-        return ByteBuffer.allocate(8).order(ByteOrder.nativeOrder()).putLong(value).array();
+        return new byte[] { (byte)value, (byte)(value >> 8), (byte)(value >> 16), (byte)(value >> 24), (byte)(value >> 32), (byte)(value >> 40), (byte)(value >> 48), (byte)(value >> 56) };
     }
 
     public static void blockCopy(Object src, int srcPos, Object dest, int destPos, int length) {

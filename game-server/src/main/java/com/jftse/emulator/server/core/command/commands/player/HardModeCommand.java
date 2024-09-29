@@ -8,7 +8,6 @@ import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.constants.GameMode;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class HardModeCommand extends AbstractCommand {

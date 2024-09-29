@@ -18,7 +18,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
     private final byte[] decryptKey;
     private int receiveIndicator = 0;
-    private int header1Key = 0;
+    private final int header1Key = 0;
 
     private final boolean logAllPackets;
     private final boolean translatePacketIds;

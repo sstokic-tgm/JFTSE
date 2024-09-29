@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.life.item.special;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacket;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
@@ -12,12 +11,12 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.service.*;
+import com.jftse.server.core.service.ItemCharService;
+import com.jftse.server.core.service.PlayerPocketService;
+import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Log4j2
 public class WingOfMemory extends BaseItem {

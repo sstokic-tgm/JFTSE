@@ -2,8 +2,8 @@ package com.jftse.emulator.server.core.packets.matchplay;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.List;
 

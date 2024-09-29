@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.packets.ranking;
 
+import com.jftse.entities.database.model.player.Player;
+import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.PlayerStatistic;
 
 public class S2CRankingPersonalDataAnswerPacket extends Packet {
     public S2CRankingPersonalDataAnswerPacket(char result, byte gameMode, Player player, int ranking) {

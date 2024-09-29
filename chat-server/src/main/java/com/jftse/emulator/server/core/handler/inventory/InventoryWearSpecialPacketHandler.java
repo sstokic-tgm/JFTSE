@@ -1,14 +1,14 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.C2SInventoryWearSpecialRequestPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearSpecialAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.SpecialSlotEquipmentService;
 import lombok.extern.log4j.Log4j2;

@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.packets.matchplay;
 
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CMatchplayDealDamage extends Packet {
     public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, short targeting, byte skillAnimation, int xKnockbackPosition, int yKnockbackPosition) {

@@ -2,8 +2,8 @@ package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.rpc.server.TransitionServerServiceImpl;
-import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.service.*;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
