@@ -222,14 +222,11 @@ public class MatchplayBattleGame extends MatchplayGame {
                         .findFirst()
                         .map(SRelationships::getForDoubles)
                         .orElse(null);
-                // Default `null` to `false` for doubles match, meaning it's treated as a normal reward in doubles
-                if (forDoubles == null && !this.isSingles) {
-                    forDoubles = false;  // Treat as normal reward in doubles
-                }
-
-                // Skip reward if it's not for the current match type
-                if ((this.isSingles && forDoubles == true) || (!this.isSingles && forDoubles == false)) {
-                    continue;
+                // Skip reward if it's exclusively for doubles or singles
+                if (forDoubles != null) {
+                    if ((this.isSingles && forDoubles) || (!this.isSingles && !forDoubles)) {
+                        continue;  // Skip the reward if it's exclusive to the other match type
+                    }
                 }
 
                 if (qty == null) {
