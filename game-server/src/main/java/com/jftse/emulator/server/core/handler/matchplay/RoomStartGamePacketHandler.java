@@ -84,7 +84,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
         MatchplayGame game;
         switch (room.getMode()) {
             case GameMode.BASIC -> game = new MatchplayBasicGame(room.getPlayers());
-            case GameMode.BATTLE -> game = new MatchplayBattleGame();
+            case GameMode.BATTLE -> game = new MatchplayBattleGame(room.getPlayers());
             case GameMode.GUARDIAN -> game = new MatchplayGuardianGame();
             default -> throw new IllegalStateException("room mode not supported: " + room.getMode());
         }

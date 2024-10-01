@@ -52,6 +52,7 @@ public class MatchplayBattleGame extends MatchplayGame {
     private AtomicInteger lastCrystalId;
     private AtomicInteger lastGuardianServeSide;
     private AtomicInteger spiderMineIdentifier;
+    private final boolean isSingles;
 
     private final PlayerCombatSystem playerCombatSystem;
 
@@ -61,7 +62,7 @@ public class MatchplayBattleGame extends MatchplayGame {
 
     private final Random random = new Random();
 
-    public MatchplayBattleGame() {
+    public MatchplayBattleGame(byte players) {
         super();
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -83,6 +84,8 @@ public class MatchplayBattleGame extends MatchplayGame {
         this.spiderMineIdentifier = new AtomicInteger(0);
         this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.finished = new AtomicBoolean(false);
+
+        this.isSingles = players == 2;
 
         playerCombatSystem = new PlayerCombatSystem(this);
 
@@ -214,6 +217,20 @@ public class MatchplayBattleGame extends MatchplayGame {
                         .findFirst()
                         .map(SRelationships::getLevelReq)
                         .orElse(null);
+                Boolean forDoubles = rewardRelationships.stream()
+                        .filter(x -> x.getId_f().intValue() == product.getProductIndex())
+                        .findFirst()
+                        .map(SRelationships::getForDoubles)
+                        .orElse(null);
+                // Default `null` to `false` for doubles match, meaning it's treated as a normal reward in doubles
+                if (forDoubles == null && !this.isSingles) {
+                    forDoubles = false;  // Treat as normal reward in doubles
+                }
+
+                // Skip reward if it's not for the current match type
+                if ((this.isSingles && forDoubles == true) || (!this.isSingles && forDoubles == false)) {
+                    continue;
+                }
 
                 if (qty == null) {
                     if (qtyMin == null) {
@@ -251,12 +268,12 @@ public class MatchplayBattleGame extends MatchplayGame {
         itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
 
         // if there is less than 4 items, add more items to reach 4
-        if (itemRewards.size() < 4) {
+        /*if (itemRewards.size() < 4) {
             final int diff = 4 - itemRewards.size();
             for (int i = 0; i < diff; i++) {
                 itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
             }
-        }
+        }*/
 
         double averageWeight = MatchplayReward.calculateAverageWeight(itemRewards);
         List<MatchplayReward.ItemReward> finalItemRewards = MatchplayReward.selectItemRewardsByWeight(itemRewards, 4, averageWeight);

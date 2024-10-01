@@ -32,4 +32,5 @@ public class SRelationships extends AbstractBaseModel {
     private Integer levelReq;
     private Boolean forHardMode;
     private Boolean forRandomMode;
+    private Boolean forDoubles;
 }
