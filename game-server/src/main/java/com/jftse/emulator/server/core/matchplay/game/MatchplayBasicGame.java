@@ -288,14 +288,6 @@ public class MatchplayBasicGame extends MatchplayGame {
         // also allow room for no item reward
         itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
 
-        // if there is less than 4 items, add more items to reach 4
-        /*if (itemRewards.size() < 4) {
-            final int diff = 4 - itemRewards.size();
-            for (int i = 0; i < diff; i++) {
-                itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
-            }
-        }*/
-
         double averageWeight = MatchplayReward.calculateAverageWeight(itemRewards);
         List<MatchplayReward.ItemReward> finalItemRewards = MatchplayReward.selectItemRewardsByWeight(itemRewards, 4, averageWeight);
         reward.addItemRewards(finalItemRewards);
