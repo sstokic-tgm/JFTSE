@@ -29,7 +29,7 @@ public class RandomModeCommand extends AbstractCommand {
         if (!isGuardian)
             return;
 
-        if (Arrays.asList(1, 4, 7, 8).contains((int) room.getMap())) {
+        if (Arrays.asList(1, 2, 4, 7, 8).contains((int) room.getMap())) {
             S2CChatRoomAnswerPacket randomGuardianChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Random mode is not allowed on this map");
             GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(randomGuardianChangedPacket));
             return;

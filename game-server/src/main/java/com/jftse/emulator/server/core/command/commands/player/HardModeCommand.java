@@ -28,7 +28,7 @@ public class HardModeCommand extends AbstractCommand {
         if (!isGuardian)
             return;
 
-        if (room.getMap() == 4 || room.getMap() == 1) {
+        if (room.getMap() == 4 || room.getMap() == 1 || room.getMap() == 2) {
             S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Hard mode is not allowed on this map");
             GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
             return;
