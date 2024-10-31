@@ -15,7 +15,7 @@
 	<LotteryItem_Niki Index="12" _Name_="Skeleton Body" ShopIndex="52188" QuantityMin="1" QuantityMax="1" ChansPer="2.00" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Niki Index="13" _Name_="Skeleton Shoes" ShopIndex="52190" QuantityMin="1" QuantityMax="1" ChansPer="2.00" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Niki Index="14" _Name_="Skeleton Glove" ShopIndex="52189" QuantityMin="1" QuantityMax="1" ChansPer="2.00" Effect="3" ProductOpt="0"/>
-	<LotteryItem_Niki Index="15" _Name_="Halloween Racket" ShopIndex="50330" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Halloween Racket" ShopIndex="52233" QuantityMin="1" QuantityMax="1" ChansPer="1.00" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lunlun Index="1" _Name_="Halloween Bed" ShopIndex="1073" QuantityMin="1" QuantityMax="1" ChansPer="8.00" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lunlun Index="2" _Name_="Halloween Candy Box" ShopIndex="1087" QuantityMin="1" QuantityMax="1" ChansPer="9.00" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lunlun Index="3" _Name_="Halloween Chair" ShopIndex="1077" QuantityMin="1" QuantityMax="1" ChansPer="9.00" Effect="3" ProductOpt="0"/>
@@ -31,7 +31,7 @@
 	<LotteryItem_Lunlun Index="13" _Name_="Witch Shoes" ShopIndex="52195" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lunlun Index="14" _Name_="Witch Glove" ShopIndex="52193" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lunlun Index="15" _Name_="Witch Stripe Stocking" ShopIndex="52194" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
-	<LotteryItem_Lunlun Index="16" _Name_="Halloween Racket" ShopIndex="50331" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Halloween Racket" ShopIndex="52234" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Dhanpir Index="1" _Name_="Halloween Bed" ShopIndex="1073" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Dhanpir Index="2" _Name_="Halloween Candy Box" ShopIndex="1087" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Dhanpir Index="3" _Name_="Halloween Chair" ShopIndex="1077" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
@@ -46,7 +46,7 @@
 	<LotteryItem_Dhanpir Index="12" _Name_="Skeleton Body" ShopIndex="52197" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Dhanpir Index="13" _Name_="Skeleton Shoes" ShopIndex="52199" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Dhanpir Index="14" _Name_="Skeleton Glove" ShopIndex="52198" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
-	<LotteryItem_Dhanpir Index="15" _Name_="Halloween Racket" ShopIndex="50332" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Halloween Racket" ShopIndex="52235" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lucy Index="1" _Name_="Halloween Bed" ShopIndex="1073" QuantityMin="1" QuantityMax="1" ChansPer="8" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lucy Index="2" _Name_="Halloween Candy Box" ShopIndex="1087" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lucy Index="3" _Name_="Halloween Chair" ShopIndex="1077" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
@@ -62,7 +62,7 @@
 	<LotteryItem_Lucy Index="13" _Name_="Witch Shoes" ShopIndex="52204" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lucy Index="14" _Name_="Witch Glove" ShopIndex="52202" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Lucy Index="15" _Name_="Witch Stripe Stocking" ShopIndex="52203" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
-	<LotteryItem_Lucy Index="16" _Name_="Halloween Racket" ShopIndex="50333" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Halloween Racket" ShopIndex="52236" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Shua Index="1" _Name_="Halloween Bed" ShopIndex="1073" QuantityMin="1" QuantityMax="1" ChansPer="8" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Shua Index="2" _Name_="Halloween Candy Box" ShopIndex="1087" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Shua Index="3" _Name_="Halloween Chair" ShopIndex="1077" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
@@ -78,7 +78,7 @@
 	<LotteryItem_Shua Index="13" _Name_="Witch Shoes" ShopIndex="52209" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Shua Index="14" _Name_="Witch Glove" ShopIndex="52207" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Shua Index="15" _Name_="Witch Stripe Stocking" ShopIndex="52208" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
-	<LotteryItem_Shua Index="16" _Name_="Halloween Racket" ShopIndex="50334" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Halloween Racket" ShopIndex="52237" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Pochi Index="1" _Name_="Halloween Bed" ShopIndex="1073" QuantityMin="1" QuantityMax="1" ChansPer="8" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Pochi Index="2" _Name_="Halloween Candy Box" ShopIndex="1087" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Pochi Index="3" _Name_="Halloween Chair" ShopIndex="1077" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
@@ -94,7 +94,7 @@
 	<LotteryItem_Pochi Index="13" _Name_="Witch Shoes" ShopIndex="52214" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Pochi Index="14" _Name_="Witch Glove" ShopIndex="52212" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Pochi Index="15" _Name_="Witch Stripe Stocking" ShopIndex="52213" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
-	<LotteryItem_Pochi Index="16" _Name_="Halloween Racket" ShopIndex="50335" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Halloween Racket" ShopIndex="52238" QuantityMin="1" QuantityMax="1" ChansPer="1" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Al Index="1" _Name_="Halloween Bed" ShopIndex="1073" QuantityMin="1" QuantityMax="1" ChansPer="8" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Al Index="2" _Name_="Halloween Candy Box" ShopIndex="1087" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
 	<LotteryItem_Al Index="3" _Name_="Halloween Chair" ShopIndex="1077" QuantityMin="1" QuantityMax="1" ChansPer="9" Effect="3" ProductOpt="0"/>
