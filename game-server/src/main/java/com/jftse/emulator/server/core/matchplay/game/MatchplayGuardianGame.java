@@ -591,6 +591,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     if (!product.getCategory().equals(EItemCategory.MATERIAL.getName()) && !product.getCategory().equals(EItemCategory.QUICK.getName())) {
                         continue;
                     }
+
+                    // qty is halved for lost games
+                    qty = qty / 2;
                 }
 
                 itemRewards.add(new MatchplayReward.ItemReward(product.getProductIndex(), qty, weight));
