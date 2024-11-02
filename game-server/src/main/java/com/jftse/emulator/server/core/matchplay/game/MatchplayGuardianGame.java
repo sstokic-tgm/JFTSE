@@ -409,6 +409,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
     public MatchplayReward getMatchRewards() {
         final boolean isBoss = map.getIsBossStage() && bossBattleActive.get();
+        final int secondsPlayed = (int) Math.ceil((double) this.getTimeNeeded() / 1000);
 
         JdbcUtil jdbcUtil = ServiceManager.getInstance().getJdbcUtil();
 
@@ -603,6 +604,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
         // also allow room for no item reward if it is not a boss stage
         if (!isBoss) {
             itemRewards.add(new MatchplayReward.ItemReward(0, 0, 15.0));
+        }
+
+        if (map.getIsBossStage() && secondsPlayed < 90 && !bossBattleActive.get()) {
+            itemRewards.clear();
         }
 
         // avoid unnecessary empty item rewards

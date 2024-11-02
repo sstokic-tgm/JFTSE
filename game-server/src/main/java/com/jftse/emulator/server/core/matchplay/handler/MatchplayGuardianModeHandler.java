@@ -170,6 +170,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         final boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         final boolean allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
         final boolean wonGame = allGuardiansDead && !allPlayersDead;
+        final int secondsPlayed = (int) Math.ceil((double) game.getTimeNeeded() / 1000);
 
         ConcurrentLinkedDeque<FTClient> clients = gameSession.getClients();
 
@@ -299,7 +300,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 }
 
                 final ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = game.getGuardianBattleStates();
-                final List<Integer> guardianRewardRankingPointList = guardianBattleStates.stream()
+                List<Integer> guardianRewardRankingPointList = guardianBattleStates.stream()
                         .filter(g -> g.getLooted().get())
                         .map(GuardianBattleState::getRewardRankingPoint)
                         .toList();
@@ -315,6 +316,23 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                             .sum();
 
                     playerReward.setRankingPoints(guardianRewardRankingPointSum);
+                } else {
+                    if (game.getMap().getIsBossStage() && secondsPlayed < 90 && !game.getBossBattleActive().get()) {
+                        guardianRewardRankingPointList = guardianBattleStates.stream()
+                                .map(GuardianBattleState::getRewardRankingPoint)
+                                .toList();
+
+                        final int guardianRewardRankingPointSum = guardianRewardRankingPointList.stream()
+                                .mapToInt(v -> {
+                                    if (game.getIsHardMode().get() && !game.getIsRandomGuardiansMode().get()) {
+                                        return (int) (v + (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.lost.ranking-point.multiplier", 1.0)));
+                                    }
+                                    return v;
+                                })
+                                .sum();
+
+                        playerReward.setRankingPoints(-guardianRewardRankingPointSum);
+                    }
                 }
                 playerStatistic.setGuardianRP(playerStatistic.getGuardianRP() + playerReward.getRankingPoints());
 
@@ -337,7 +355,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 S2CMatchplayItemRewardsPacket itemRewardsPacket = new S2CMatchplayItemRewardsPacket(matchplayReward);
                 client.getConnection().sendTCP(itemRewardsPacket);
 
-                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, secondsPlayed, playerReward, playerLevel, rp);
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
