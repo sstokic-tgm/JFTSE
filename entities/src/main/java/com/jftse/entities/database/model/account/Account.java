@@ -45,4 +45,6 @@ public class Account extends AbstractBaseModel {
     private Integer verifyLevel = 0;
 
     private String discordId;
+
+    private String agreements;
 }
