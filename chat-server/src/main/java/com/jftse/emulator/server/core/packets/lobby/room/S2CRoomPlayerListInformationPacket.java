@@ -27,7 +27,8 @@ public class S2CRoomPlayerListInformationPacket extends Packet {
             ClothEquipment clothEquipment = roomPlayer.getClothEquipment();
             StatusPointsAddedDto statusPointsAddedDto = roomPlayer.getStatusPointsAddedDto();
 
-            boolean isSpectator = roomPlayer.getPosition() > 3;
+            boolean isSpectator = false;
+
             this.write(roomPlayer.getPosition());
             this.write(player.getName());
             this.write(player.getLevel());

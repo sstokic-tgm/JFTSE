@@ -20,6 +20,7 @@ import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,14 +29,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @Getter
@@ -60,22 +60,30 @@ public class GameManager {
     private AtomicBoolean running;
     private ConcurrentLinkedDeque<FTClient> clients;
     private ConcurrentLinkedDeque<Room> rooms;
+    private Room townSquare;
+
+    private ConcurrentHashMap<Integer, String> personalBoardMessages;
 
     private Future<?> eventHandlerTask;
 
     private Optional<ScriptManager> scriptManager;
 
+    private Random rnd;
+
     @PostConstruct
     public void init() {
         instance = this;
 
+        rnd = new Random();
         clients = new ConcurrentLinkedDeque<>();
         rooms = new ConcurrentLinkedDeque<>();
+        personalBoardMessages = new ConcurrentHashMap<>();
 
         scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
 
         running = new AtomicBoolean(true);
 
+        setupChatLobby();
         setupGlobalTasks();
 
         log.info(this.getClass().getSimpleName() + " initialized");
@@ -160,6 +168,127 @@ public class GameManager {
         log.info("EventHandlerTask started");
     }
 
+    private void setupChatLobby() {
+        Room square = new Room();
+        square.setRoomId(getRoomId());
+        square.setRoomName("Town Square");
+        square.setRoomType((byte) 1);
+        square.setMode((byte) 2);
+        square.setMap((byte) 0);
+        square.setRule((byte) 0);
+        square.setPlayers((byte) 100);
+        square.setPrivate(false);
+        square.setSkillFree(false);
+        square.setQuickSlot(true);
+        square.setLevel((byte) 0);
+        square.setLevelRange((byte) 0);
+        square.setBall((byte) 0);
+
+        townSquare = square;
+        addRoom(townSquare);
+    }
+
+    public synchronized void handleChatLobbyJoin(FTClient client) {
+        FTConnection connection = client.getConnection();
+        if (connection == null) {
+            return;
+        }
+
+        if (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
+            return;
+        }
+
+        Player player = client.getPlayer();
+
+        S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) 0, townSquare.getRoomType(), townSquare.getMode(), townSquare.getMap());
+        connection.sendTCP(roomJoinAnswerPacket);
+
+        if (player == null) {
+            client.getIsJoiningOrLeavingLobby().set(false);
+            return;
+        }
+
+        final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = townSquare.getRoomPlayerList();
+        boolean anyPositionAvailable = roomPlayerList.size() < townSquare.getPlayers();
+        if (!anyPositionAvailable) {
+            roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+
+            client.getIsJoiningOrLeavingLobby().set(false);
+
+            updateRoomForAllClientsInMultiplayer(connection, townSquare);
+            return;
+        }
+
+        if (client.getActiveRoom() != null) {
+            client.getIsJoiningOrLeavingLobby().set(false);
+            return;
+        }
+
+        List<Short> positions = roomPlayerList.stream().map(RoomPlayer::getPosition).toList();
+        final short position = (short) IntStream.range(0, townSquare.getPlayers())
+                .filter(p -> !positions.contains((short) p))
+                .findFirst()
+                .orElse(-1);
+
+        if (position == -1) {
+            roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            connection.sendTCP(roomJoinAnswerPacket);
+
+            client.getIsJoiningOrLeavingLobby().set(false);
+
+            updateRoomForAllClientsInMultiplayer(connection, townSquare);
+            return;
+        }
+
+        RoomPlayer roomPlayer = new RoomPlayer();
+        roomPlayer.setPlayerId(player.getId());
+
+        GuildMember guildMember = ServiceManager.getInstance().getGuildMemberService().getByPlayer(player);
+        Friend couple = ServiceManager.getInstance().getSocialService().getRelationship(player);
+        ClothEquipment clothEquipment = ServiceManager.getInstance().getClothEquipmentService().findClothEquipmentById(player.getClothEquipment().getId());
+        SpecialSlotEquipment specialSlotEquipment = ServiceManager.getInstance().getSpecialSlotEquipmentService().findById(player.getSpecialSlotEquipment().getId());
+        CardSlotEquipment cardSlotEquipment = ServiceManager.getInstance().getCardSlotEquipmentService().findById(player.getCardSlotEquipment().getId());
+        StatusPointsAddedDto statusPointsAddedDto = ServiceManager.getInstance().getClothEquipmentService().getStatusPointsFromCloths(player);
+
+        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
+        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
+        roomPlayer.setClothEquipmentId(clothEquipment.getId());
+        roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
+        roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
+        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
+        roomPlayer.setPosition(position);
+        roomPlayer.setMaster(false);
+        roomPlayer.setFitting(false);
+
+        townSquare.getRoomPlayerList().add(roomPlayer);
+
+        client.setActiveRoom(townSquare);
+        client.setInLobby(true);
+
+        S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(townSquare);
+        connection.sendTCP(roomInformationPacket);
+
+        float spawnX = rnd.nextFloat(45.0f, 56.0f);
+        float spawnY = rnd.nextFloat(45.0f, 56.0f);
+        roomPlayer.setLastX(spawnX);
+        roomPlayer.setLastY(spawnY);
+        roomPlayer.setLastMapLayer(0);
+
+        for (final RoomPlayer rp : townSquare.getRoomPlayerList()) {
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(rp, rp.getLastX(), rp.getLastY(), 0.0f, 0.0f, rp.getLastMapLayer());
+            sendPacketToAllClientsInSameRoom(roomPlayerInformationPacket, connection);
+        }
+
+        Packet enableMovement = new Packet(PacketOperations.S2CEnableTownSquareMovement);
+        connection.sendTCP(enableMovement);
+
+        updateLobbyRoomListForAllClients(connection);
+        refreshLobbyPlayerListForAllClients();
+
+        client.getIsJoiningOrLeavingRoom().set(false);
+    }
+
     public void refreshLobbyPlayerListForAllClients() {
         final List<FTClient> clientsInLobby = getClientsInLobby();
         clientsInLobby.forEach(c -> {
@@ -180,7 +309,7 @@ public class GameManager {
         if (client == null)
             return;
 
-        Player activePlayer = connection.getClient().getPlayer();
+        Player activePlayer = client.getPlayer();
         if (activePlayer == null)
             return;
 
@@ -188,6 +317,7 @@ public class GameManager {
         if (room == null)
             return;
 
+        final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
         ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
         final Optional<RoomPlayer> roomPlayer = Optional.ofNullable(client.getRoomPlayer());
 
@@ -220,27 +350,31 @@ public class GameManager {
             roomPlayer.get().setReady(false);
         }
 
-        if (playerPosition == 9) {
-            room.getPositions().set(playerPosition, RoomPositionState.Locked);
-        } else if (playerPosition != -1) {
-            room.getPositions().set(playerPosition, RoomPositionState.Free);
+        if (!isTownSquare) {
+            if (playerPosition == 9) {
+                room.getPositions().set(playerPosition, RoomPositionState.Locked);
+            } else if (playerPosition != -1) {
+                room.getPositions().set(playerPosition, RoomPositionState.Free);
+            }
         }
 
         roomPlayerList.removeIf(rp -> rp.getPlayerId().equals(activePlayer.getId()));
-        if (room.getRoomPlayerList().isEmpty()) {
+        if (room.getRoomPlayerList().isEmpty() && !isTownSquare) {
             removeRoom(room);
         }
 
-        final GameSession activeGameSession = client.getActiveGameSession();
-        if (activeGameSession == null) {
-            S2CLeaveRoomWithPositionPacket leaveRoomWithPositionPacket = new S2CLeaveRoomWithPositionPacket(playerPosition);
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(leaveRoomWithPositionPacket, connection);
-        } else {
-            GameSession gameSession = gameSessionManager.getGameSessionBySessionId(client.getGameSessionId());
-            if (gameSession != null) {
-                gameSession.getClients().removeIf(c -> c.getPlayer() != null && c.getPlayer().getId().equals(activePlayer.getId()));
+        if (!isTownSquare) {
+            final GameSession activeGameSession = client.getActiveGameSession();
+            if (activeGameSession == null) {
+                S2CLeaveRoomWithPositionPacket leaveRoomWithPositionPacket = new S2CLeaveRoomWithPositionPacket(playerPosition);
+                GameManager.getInstance().sendPacketToAllClientsInSameRoom(leaveRoomWithPositionPacket, connection);
+            } else {
+                GameSession gameSession = gameSessionManager.getGameSessionBySessionId(client.getGameSessionId());
+                if (gameSession != null) {
+                    gameSession.getClients().removeIf(c -> c.getPlayer() != null && c.getPlayer().getId().equals(activePlayer.getId()));
+                }
+                client.setActiveGameSession(null);
             }
-            client.setActiveGameSession(null);
         }
 
         if (playerPosition != -1) {
@@ -258,7 +392,7 @@ public class GameManager {
         if (isMaster) {
             RoomPlayer newMaster = roomPlayerList.stream().filter(RoomPlayer::isMaster).findFirst().orElse(null);
             if (newMaster != null) {
-                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(newMaster);
+                S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(newMaster, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                 S2CRoomFittingPlayerInfoPacket roomFittingPlayerInfoPacket = new S2CRoomFittingPlayerInfoPacket(newMaster.getPosition(), newMaster);
                 S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, newMaster.getPosition(), newMaster.getPosition());
                 getClientsInRoom(room.getRoomId()).forEach(c -> {
@@ -276,13 +410,14 @@ public class GameManager {
 
     public void updateRoomForAllClientsInMultiplayer(final FTConnection connection, final Room room) {
         FTClient client = connection.getClient();
+        final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
 
         short roomPlayerPosition = -1;
         final RoomPlayer roomPlayer = client.getRoomPlayer();
         if (roomPlayer != null) {
             roomPlayerPosition = roomPlayer.getPosition();
         }
-        boolean shouldUpdateNonGM = roomPlayerPosition != MiscConstants.InvisibleGmSlot || !client.isGameMaster();
+        boolean shouldUpdateNonGM = !isTownSquare && (roomPlayerPosition != MiscConstants.InvisibleGmSlot || !client.isGameMaster());
 
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
         getClientsInRoom(room.getRoomId()).forEach(c -> {
@@ -306,7 +441,7 @@ public class GameManager {
         final int clientRoomModeFilter = client.getLobbyGameModeTabFilter();
         final int currentRoomListPage = Math.max(client.getLobbyCurrentRoomListPage(), 0);
         return getRooms().stream()
-                .filter(r -> clientRoomModeFilter == GameMode.ALL || getRoomMode(r) == clientRoomModeFilter)
+                .filter(r -> (clientRoomModeFilter == GameMode.ALL || getRoomMode(r) == clientRoomModeFilter) && !(r.getRoomType() == 1 && r.getMode() == 2))
                 .skip(currentRoomListPage * 5L)
                 .limit(5)
                 .collect(Collectors.toList());

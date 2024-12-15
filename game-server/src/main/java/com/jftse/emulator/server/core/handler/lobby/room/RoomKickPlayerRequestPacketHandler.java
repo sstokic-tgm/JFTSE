@@ -51,7 +51,7 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractPacketHandler {
 
                 if (client != null) {
                     Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
-                    answerPacket.write(0);
+                    answerPacket.write((short) 0);
                     client.getConnection().sendTCP(answerPacket);
 
                     GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);

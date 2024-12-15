@@ -6,12 +6,6 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.chat.house.C2SChatHouseMovePacket;
-import com.jftse.emulator.server.core.packets.chat.house.C2SChatHousePositionPacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CChatHouseMovePacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CChatHousePositionPacket;
-import com.jftse.emulator.server.core.packets.chat.square.C2SChatSquareMovePacket;
-import com.jftse.emulator.server.core.packets.chat.square.S2CChatSquareMovePacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeItemsLoadAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
@@ -30,7 +24,9 @@ import com.jftse.server.core.service.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.IntStream;
 
 @PacketOperationIdentifier(PacketOperations.C2SRoomJoin)
 public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
@@ -86,6 +82,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
+        final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+
         if (room.getStatus() != RoomStatus.NotRunning) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -1, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
@@ -107,7 +105,7 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
-        boolean anyPositionAvailable = room.getRoomPlayerList().size() < room.getPlayers();
+        boolean anyPositionAvailable = roomPlayerList.size() < room.getPlayers();
         if (!anyPositionAvailable) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
@@ -121,11 +119,9 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         // prevent abusive room joins
         if (ftClient.getActiveRoom() != null) {
             Room clientRoom = ftClient.getActiveRoom();
-
-            handleRoomUponJoin(clientRoom);
+            handleRoomUponJoin(clientRoom, true);
 
             resetIsJoiningOrLeavingRoom(ftClient);
-
             return;
         }
 
@@ -149,34 +145,13 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
-        List<Short> positions = room.getRoomPlayerList().stream().map(RoomPlayer::getPosition).collect(Collectors.toList());
-        final int currentNextPosition = room.getNextPlayerPosition().get();
-        int nextPosition = room.getNextPlayerPosition().getAndUpdate(currentPosition -> {
-            if (currentPosition >= 0 && currentPosition < room.getPlayers() && !positions.contains((short) currentPosition)) {
-                return currentPosition;
-            } else {
-                return -1;
-            }
-        });
+        List<Short> positions = roomPlayerList.stream().map(RoomPlayer::getPosition).toList();
+        final short position = (short) IntStream.range(0, room.getPlayers())
+                .filter(p -> !positions.contains((short) p))
+                .findFirst()
+                .orElse(-1);
 
-        if (nextPosition == -1) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
-            connection.sendTCP(roomJoinAnswerPacket);
-
-            resetIsJoiningOrLeavingRoom(ftClient);
-
-            GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
-            return;
-        }
-
-        positions.add((short) nextPosition);
-        final int newPosition = nextPosition;
-
-        while (positions.contains((short) nextPosition)) {
-            nextPosition = (nextPosition + 1) % room.getPlayers();
-        }
-
-        if (!room.getNextPlayerPosition().compareAndSet(currentNextPosition, nextPosition)) {
+        if (position == -1) {
             S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
             connection.sendTCP(roomJoinAnswerPacket);
 
@@ -202,21 +177,23 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
         roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
         roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
-        roomPlayer.setPosition((short) newPosition);
+        roomPlayer.setPosition(position);
         roomPlayer.setMaster(false);
         roomPlayer.setFitting(false);
+
         room.getRoomPlayerList().add(roomPlayer);
 
         ftClient.setActiveRoom(room);
-        ftClient.setInLobby(false);
+        ftClient.setInLobby(room.getMode() == 2);
 
-        handleRoomUponJoin(room);
+        handleRoomUponJoin(room, false);
 
         ftClient.getIsJoiningOrLeavingRoom().set(false);
     }
 
-    private void handleRoomUponJoin(Room room) {
+    private void handleRoomUponJoin(Room room, boolean existingRoom) {
         FTClient client = (FTClient) connection.getClient();
+        RoomPlayer roomPlayer = client.getRoomPlayer();
 
         Optional<RoomPlayer> roomPlayerMaster = room.getRoomPlayerList().stream().filter(RoomPlayer::isMaster).findFirst();
 
@@ -226,53 +203,61 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         connection.sendTCP(roomJoinAnswerPacket);
         connection.sendTCP(roomInformationPacket);
 
-        if (roomPlayerMaster.isPresent()) {
+        AccountHome accountHome = null;
+        if (roomPlayerMaster.isPresent() && room.getMode() == 1) {
             RoomPlayer master = roomPlayerMaster.get();
             Long accountId = master.getPlayer().getAccount().getId();
-            AccountHome accountHome = homeService.findAccountHomeByAccountId(accountId);
+            accountHome = homeService.findAccountHomeByAccountId(accountId);
             List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 
             S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(homeInventoryList);
             connection.sendTCP(homeItemsLoadAnswerPacket);
         }
 
-        for (final RoomPlayer roomPlayer : room.getRoomPlayerList()) {
-            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(roomPlayer);
+        Random rnd = new Random();
+        float spawnX, spawnY;
+        if (room.getMode() == 0) {
+            spawnX = rnd.nextFloat(10.0f, 21.0f);
+            spawnY = rnd.nextFloat(15.0f, 50.0f);
+        } else if (room.getMode() == 1) {
+            spawnX = switch (accountHome.getLevel()) {
+                case 3, 4 -> 10.0f;
+                default -> 9.0f;
+            };
+            spawnY = switch (accountHome.getLevel()) {
+                case 2 -> 15.0f;
+                case 3 -> 17.0f;
+                case 4 -> 20.0f;
+                default -> 12.0f;
+            };
+        } else {
+            spawnX = rnd.nextFloat(45.0f, 56.0f);
+            spawnY = rnd.nextFloat(45.0f, 56.0f);
+        }
+
+        if (!existingRoom) {
+            roomPlayer.setLastX(spawnX);
+            roomPlayer.setLastY(spawnY);
+        } else {
+            roomPlayer.setLastX(roomPlayer.getLastX());
+            roomPlayer.setLastY(roomPlayer.getLastY());
+            client.setInLobby(true);
+        }
+
+        roomPlayer.setLastMapLayer(0);
+
+        for (final RoomPlayer rp : room.getRoomPlayerList()) {
+            S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(rp, rp.getLastX(), rp.getLastY(), room.getMode() == 2 ? 0.0f : rp.getLastX(), room.getMode() == 2 ? 0.0f : rp.getLastY(), rp.getLastMapLayer());
             GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomPlayerInformationPacket, client.getConnection());
+        }
+
+        if (room.getMode() == 2) {
+            Packet enableMovement = new Packet(PacketOperations.S2CEnableTownSquareMovement);
+            connection.sendTCP(enableMovement);
         }
 
         GameManager.getInstance().updateLobbyRoomListForAllClients(client.getConnection());
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();
-
-        for (final RoomPlayer roomPlayer : room.getRoomPlayerList()) {
-            if (roomPlayer.getPlayerId().equals(client.getActivePlayerId())) {
-                continue;
-            }
-
-            if (room.getMode() == 0) {
-                C2SChatSquareMovePacket chatSquareMovePacket = roomPlayer.getLastSquareMovePacket().get();
-                if (chatSquareMovePacket != null) {
-                    S2CChatSquareMovePacket chatSquareMovePacketAnswer = new S2CChatSquareMovePacket(roomPlayer.getPosition(), (byte) 1, chatSquareMovePacket.getX2(), chatSquareMovePacket.getY2());
-                    connection.sendTCP(chatSquareMovePacketAnswer);
-                }
-            }
-
-            if (room.getMode() == 1) {
-                C2SChatHousePositionPacket chatHousePositionPacket = roomPlayer.getLastHousePositionPacket().get();
-                C2SChatHouseMovePacket chatHouseMovePacket = roomPlayer.getLastHouseMovePacket().get();
-                if (chatHousePositionPacket != null) {
-                    S2CChatHousePositionPacket chatHousePositionPacketAnswer = new S2CChatHousePositionPacket(roomPlayer.getPosition(), chatHousePositionPacket.getLevel(), chatHousePositionPacket.getX(), chatHousePositionPacket.getY());
-                    connection.sendTCP(chatHousePositionPacketAnswer);
-                }
-                if (chatHouseMovePacket != null) {
-                    byte level = chatHousePositionPacket == null ? (byte) 0 : chatHousePositionPacket.getLevel();
-                    S2CChatHousePositionPacket chatHousePositionPacketAnswer = new S2CChatHousePositionPacket(roomPlayer.getPosition(), level, chatHouseMovePacket.getX(), chatHouseMovePacket.getY());
-                    S2CChatHouseMovePacket chatHouseMovePacketAnswer = new S2CChatHouseMovePacket(roomPlayer.getPosition(), chatHouseMovePacket.getUnk1(), chatHouseMovePacket.getUnk2(), chatHouseMovePacket.getX(), chatHouseMovePacket.getY(), chatHouseMovePacket.getAnimationType(), chatHouseMovePacket.getUnk3());
-                    connection.sendTCP(chatHousePositionPacketAnswer);
-                    connection.sendTCP(chatHouseMovePacketAnswer);
-                }
-            }
-        }
     }
 
     private void resetIsJoiningOrLeavingRoom(FTClient ftClient) {

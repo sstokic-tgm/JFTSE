@@ -2,7 +2,6 @@ package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.gameserver.C2SGameServerRequestPacket;
-import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerAnswerPacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.inventory.*;
 import com.jftse.emulator.server.core.packets.pet.S2CPetDataAnswerPacket;
@@ -46,7 +45,7 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
     private final BattlemonSlotEquipmentService battlemonSlotEquipmentService;
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
-
+    private final PlayerService playerService;
 
     public GameServerDataRequestPacketHandler() {
         homeService = ServiceManager.getInstance().getHomeService();
@@ -61,6 +60,7 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
         battlemonSlotEquipmentService = ServiceManager.getInstance().getBattlemonSlotEquipmentService();
         pocketService = ServiceManager.getInstance().getPocketService();
         playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
+        playerService = ServiceManager.getInstance().getPlayerService();
     }
 
     @Override
@@ -77,46 +77,46 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
 
         byte requestType = gameServerRequestPacket.getRequestType();
 
-        while (client.getCurrentRequestType().get() != requestType) {
+        /*while (client.getCurrentRequestType().get() != requestType) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
             }
+        }*/
+
+        if (!client.updateDataRequestStep(requestType)) {
+            return;
         }
 
         if (requestType == 0) {
+            Player lastLoggedInPlayer = playerService.findById(account.getLastSelectedPlayerId());
+            Pocket pocket = pocketService.findById(lastLoggedInPlayer.getPocket().getId());
+            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
+
+            S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
+            connection.sendTCP(clearInventoryPacket);
+
+            AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
+
+            S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
+            connection.sendTCP(homeDataPacket);
+        } else if (requestType == 1) {
             Pocket pocket = pocketService.findById(player.getPocket().getId());
             List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
 
             S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
             connection.sendTCP(inventoryDataPacket);
 
-            AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
-
-            S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-            connection.sendTCP(homeDataPacket);
-
-            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
-
-            client.getCurrentRequestType().incrementAndGet();
-        } else if (requestType == 1) {
             List<Pet> petList = petService.findAllByPlayerId(player.getId());
-
             S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
             connection.sendTCP(petDataAnswerPacket);
-
-            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
-
-            client.getCurrentRequestType().incrementAndGet();
         } else if (requestType == 2) {
             S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
             S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
 
             connection.sendTCP(playerLevelExpPacket);
             connection.sendTCP(couplePointsDataPacket);
-
+        } else if (requestType == 3) {
             Pocket pocket = pocketService.findById(player.getPocket().getId());
             PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
 
@@ -150,16 +150,6 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
             connection.sendTCP(inventoryWearClothAnswerPacket);
             connection.sendTCP(unknownPlayerInfoDataPacket);
             connection.sendTCP(playerInfoPlayStatsPacket);
-
-            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
-
-            client.getCurrentRequestType().incrementAndGet();
-        } else {
-            S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket(requestType, (byte) 0);
-            connection.sendTCP(gameServerAnswerPacket);
-
-            client.getCurrentRequestType().incrementAndGet();
         }
     }
 }

@@ -34,8 +34,10 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         if (client == null)
             return;
 
-        if (roomQuickCreateRequestPacket.getRoomType() == RoomType.BATTLEMON)
+        if (roomQuickCreateRequestPacket.getRoomType() == RoomType.BATTLEMON) {
+            GameManager.getInstance().handleChatLobbyJoin(client);
             return;
+        }
 
         Player player = client.getPlayer();
         if (player == null)

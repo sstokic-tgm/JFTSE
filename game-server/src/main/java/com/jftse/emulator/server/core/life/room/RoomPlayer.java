@@ -35,6 +35,10 @@ public class RoomPlayer {
     private AtomicBoolean connectedToRelay = new AtomicBoolean(false);
     private Long petId;
 
+    private volatile float lastX;
+    private volatile float lastY;
+    private volatile int lastMapLayer;
+
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);
     }

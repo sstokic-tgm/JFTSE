@@ -11,7 +11,7 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CRoomPlayerInformationPacket extends Packet {
-    public S2CRoomPlayerInformationPacket(RoomPlayer roomPlayer) {
+    public S2CRoomPlayerInformationPacket(RoomPlayer roomPlayer, float spawnX, float spawnY, float spawnX2, float spawnY2, int lastMapLayer) {
         super(PacketOperations.S2CRoomPlayerInformationWithPosition);
 
         Guild guild = null;
@@ -113,13 +113,15 @@ public class S2CRoomPlayerInformationPacket extends Packet {
         this.write(clothEquipment.getHat());
         this.write(clothEquipment.getDye());
 
-        this.write(9.0f);
-        this.write(15.0f);
+        // house / town square
+        this.write(spawnX);
+        this.write(spawnY);
 
-        this.write(0.0f);
-        this.write(0.0f);
+        // square
+        this.write(spawnX2);
+        this.write(spawnY2);
 
         this.write((byte) 0);
-        this.write((byte) 0);
+        this.write(lastMapLayer);
     }
 }

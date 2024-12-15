@@ -152,7 +152,10 @@ public enum PacketOperations {
     S2CRoomFittingAnswer(0x1D61),
     S2CRoomFittingPlayerInfo(0x1D62),
 
-    S2CUnknownRoomJoin(0x189D),
+    C2SRequestRoomLobbyJoin(0x189C),
+    S2CRequestRoomLobbyJoin(0x189D),
+    C2SRequestLobbyOption(0x189E),
+    S2CLobbyOption(0x189F),
 
     C2SInventorySellReq(0x1D06),
     S2CInventorySellAnswer(0x1D07),
@@ -358,6 +361,7 @@ public enum PacketOperations {
     S2CChatSquareMove(0x18A3),
     C2SChatHouseMove(0x18A5),
     S2CChatHouseMove(0x18A6),
+    S2CEnableTownSquareMovement(0x2617),
 
     C2SShakeTreeRequest(0x2C29),
     S2CShakeTreeAnswer(0x2C2A),
@@ -368,11 +372,17 @@ public enum PacketOperations {
 
     S2CHousingRewardItem(0x25E4),
 
+    C2SFireCrackerRequest(0xC9E),
+    S2CFireCrackerAnswer(0xC9F),
+
     S2CRoomPlayerInformationWithPosition(0x1396),
     S2CLeaveRoomWithPosition(0x1398),
 
     C2SPlayerAnnounce(0x22C5),
     S2CPlayerAnnounce(0x22C7),
+    C2SPersonalBoardRequest(0x22CD),
+    S2CPersonalBoardAnswer(0x22CE),
+    S2CPersonalBoardMessageList(0x22CF),
 
     C2SEnchantRequest(0x2455),
     S2CEnchantAnswer(0x2456),

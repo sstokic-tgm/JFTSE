@@ -1622,7 +1622,7 @@
         <Vibration>0.0, 0.0, 0.0</Vibration>
         <SoundShotID>257</SoundShotID>
         <SoundHitID>-1</SoundHitID>
-        <Damage>-100</Damage>
+        <Damage>-200</Damage>
         <DamageRate>100</DamageRate>
         <DamageInfo>0.7, 0.3, 15.0</DamageInfo>
         <Property>0</Property>

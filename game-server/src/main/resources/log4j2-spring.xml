@@ -48,6 +48,7 @@
         </Root>
 
         <Logger name="com.jftse.emulator" level="trace"/>
+        <!-- <Logger name="io.netty" level="trace"/> -->
 
         <Logger name="PacketLogger" level="trace" additivity="false">
             <AppenderRef ref="RollingFilePacketsLog"/>

@@ -4,7 +4,9 @@ import com.jftse.emulator.server.core.constants.ChatMode;
 import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerAnswerPacket;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeGame;
 import com.jftse.emulator.server.core.singleplay.tutorial.TutorialGame;
 import com.jftse.entities.database.model.account.Account;
@@ -49,7 +51,20 @@ public class FTClient extends Client<FTConnection> {
     private AtomicBoolean isGoingReady = new AtomicBoolean(false);
     private AtomicBoolean isClosingSlot = new AtomicBoolean(false);
 
-    private AtomicInteger currentRequestType = new AtomicInteger(0);
+    private AtomicInteger dataRequestStep = new AtomicInteger(-1);
+
+    public boolean updateDataRequestStep(int step) {
+        boolean valid = dataRequestStep.compareAndSet(step - 1, step);
+
+        S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) step, valid ? (byte) 0 : (byte) 1);
+        connection.sendTCP(gameServerAnswerPacket);
+
+        if (valid && dataRequestStep.get() == 4) {
+            GameManager.getInstance().handleChatLobbyJoin(this);
+        }
+
+        return valid;
+    }
 
     public void setPlayer(Long id) {
         this.activePlayerId = id;

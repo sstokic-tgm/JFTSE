@@ -37,9 +37,9 @@ public class RoomPlayer {
     private AtomicBoolean gameAnimationSkipReady = new AtomicBoolean(false);
     private AtomicBoolean connectedToRelay = new AtomicBoolean(false);
 
-    private AtomicReference<C2SChatHousePositionPacket> lastHousePositionPacket = new AtomicReference<>();
-    private AtomicReference<C2SChatHouseMovePacket> lastHouseMovePacket = new AtomicReference<>();
-    private AtomicReference<C2SChatSquareMovePacket> lastSquareMovePacket = new AtomicReference<>();
+    private volatile float lastX;
+    private volatile float lastY;
+    private volatile int lastMapLayer;
 
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);

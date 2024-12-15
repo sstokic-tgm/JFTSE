@@ -24,7 +24,10 @@ public class LobbyJoinPacketHandler extends AbstractPacketHandler {
 
         if (!client.isInLobby()) {
             client.setInLobby(true);
+        } else {
+            return;
         }
+
         client.setLobbyCurrentRoomListPage(-1);
 
         GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);

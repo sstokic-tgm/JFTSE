@@ -34,7 +34,9 @@ public class ChatHousePositionPacketHandler extends AbstractPacketHandler {
             return;
 
         S2CChatHousePositionPacket answerHousePositionPacket = new S2CChatHousePositionPacket(roomPlayer.getPosition(), chatHousePositionPacket.getLevel(), chatHousePositionPacket.getX(), chatHousePositionPacket.getY());
-        roomPlayer.getLastHousePositionPacket().set(chatHousePositionPacket);
+        roomPlayer.setLastX(chatHousePositionPacket.getX());
+        roomPlayer.setLastY(chatHousePositionPacket.getY());
+        roomPlayer.setLastMapLayer(chatHousePositionPacket.getLevel());
 
         GameManager.getInstance().sendPacketToAllClientsInSameRoom(answerHousePositionPacket, client.getConnection());
     }

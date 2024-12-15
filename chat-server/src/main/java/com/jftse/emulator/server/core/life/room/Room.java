@@ -13,7 +13,6 @@ public class Room {
     public Room() {
         bannedPlayers = new ConcurrentLinkedDeque<>();
         roomPlayerList = new ConcurrentLinkedDeque<>();
-        nextPlayerPosition = new AtomicInteger(0);
         status = RoomStatus.NotRunning;
     }
 
@@ -36,7 +35,6 @@ public class Room {
     private String password;
     private ConcurrentLinkedDeque<Long> bannedPlayers;
     private ConcurrentLinkedDeque<RoomPlayer> roomPlayerList;
-    private AtomicInteger nextPlayerPosition;
     private int status;
 
     // Guardian
