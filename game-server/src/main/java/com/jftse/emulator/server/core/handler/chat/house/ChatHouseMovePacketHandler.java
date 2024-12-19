@@ -33,6 +33,10 @@ public class ChatHouseMovePacketHandler extends AbstractPacketHandler {
     private final PocketService pocketService;
     private final ProductService productService;
 
+    private final short christmasTreeX = 44;
+    private final short christmasTreeY = 23;
+    private final int radius = 6;
+
     public ChatHouseMovePacketHandler() {
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
@@ -59,6 +63,19 @@ public class ChatHouseMovePacketHandler extends AbstractPacketHandler {
 
         if (roomPlayer.isFitting())
             return;
+
+        int deltaX = chatHouseMovePacket.getX() - christmasTreeX;
+        int deltaY = chatHouseMovePacket.getY() - christmasTreeY;
+        double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (distance < radius) {
+            double angle = Math.atan2(deltaY, deltaX);
+            int adjustedX = (int) (christmasTreeX + Math.cos(angle) * radius);
+            int adjustedY = (int) (christmasTreeY + Math.sin(angle) * radius);
+
+            chatHouseMovePacket.setX((short) adjustedX);
+            chatHouseMovePacket.setY((short) adjustedY);
+        }
 
         pickARandomReward(room, roomPlayer);
 
