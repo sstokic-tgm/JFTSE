@@ -269,8 +269,8 @@ public class GameManager {
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(townSquare);
         connection.sendTCP(roomInformationPacket);
 
-        float spawnX = rnd.nextFloat(45.0f, 56.0f);
-        float spawnY = rnd.nextFloat(45.0f, 56.0f);
+        float spawnX = rnd.nextFloat(40.0f, 46.0f);
+        float spawnY = rnd.nextFloat(60.0f, 64.0f);
         roomPlayer.setLastX(spawnX);
         roomPlayer.setLastY(spawnY);
         roomPlayer.setLastMapLayer(0);

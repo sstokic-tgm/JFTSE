@@ -269,8 +269,8 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             S2CRoomPlayerListInformationPacket roomPlayerListInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
             connection.sendTCP(roomPlayerListInformationPacket);
         } else {
-            spawnX = rnd.nextFloat(45.0f, 56.0f);
-            spawnY = rnd.nextFloat(45.0f, 56.0f);
+            spawnX = rnd.nextFloat(40.0f, 46.0f);
+            spawnY = rnd.nextFloat(60.0f, 64.0f);
 
             if (!existingRoom) {
                 roomPlayer.setLastX(spawnX);

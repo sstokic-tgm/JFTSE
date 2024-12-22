@@ -250,8 +250,8 @@ public class GameManager {
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(townSquare);
         connection.sendTCP(roomInformationPacket);
 
-        float spawnX = rnd.nextFloat(45.0f, 56.0f);
-        float spawnY = rnd.nextFloat(45.0f, 56.0f);
+        float spawnX = rnd.nextFloat(40.0f, 46.0f);
+        float spawnY = rnd.nextFloat(60.0f, 64.0f);
         roomPlayer.setLastX(spawnX);
         roomPlayer.setLastY(spawnY);
         roomPlayer.setLastMapLayer(0);
@@ -429,8 +429,8 @@ public class GameManager {
                 default -> 12.0f;
             };
         } else {
-            spawnX = rnd.nextFloat(45.0f, 56.0f);
-            spawnY = rnd.nextFloat(45.0f, 56.0f);
+            spawnX = rnd.nextFloat(40.0f, 46.0f);
+            spawnY = rnd.nextFloat(60.0f, 64.0f);
         }
 
         roomPlayer.setLastX(spawnX);
