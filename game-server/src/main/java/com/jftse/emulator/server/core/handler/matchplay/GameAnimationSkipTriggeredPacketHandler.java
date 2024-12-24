@@ -42,6 +42,16 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
             return;
         }
 
+        final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
+        if (isTownSquare) {
+            synchronized (room) {
+                if (room.getStatus() != RoomStatus.NotRunning) {
+                    room.setStatus(RoomStatus.NotRunning);
+                }
+            }
+            return;
+        }
+
         Player player = ftClient.getPlayer();
 
         Optional<RoomPlayer> roomPlayer = room.getRoomPlayerList().stream()
