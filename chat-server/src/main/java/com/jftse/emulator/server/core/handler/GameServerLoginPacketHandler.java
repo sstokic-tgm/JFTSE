@@ -80,10 +80,6 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
             ((FTConnection) connection).setClient(client);
             ((FTConnection) connection).setHwid(gameServerLoginPacket.getHwid());
 
-            if (!shouldUpdateStatus) {
-                ServiceManager.getInstance().getTransitionServerService().markAccountAsLoggedIn(account.getId());
-            }
-
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 0);
             connection.sendTCP(gameServerLoginAnswerPacket);
         } else {

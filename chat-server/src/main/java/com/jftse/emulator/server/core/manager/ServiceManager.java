@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
-import com.jftse.emulator.server.core.rpc.server.TransitionServerServiceImpl;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.server.core.service.*;
 import lombok.Getter;
@@ -114,9 +113,6 @@ public class ServiceManager {
 
     @Autowired
     private GameEventService gameEventService;
-
-    @Autowired
-    private TransitionServerServiceImpl transitionServerService;
 
     @PostConstruct
     public void init() {

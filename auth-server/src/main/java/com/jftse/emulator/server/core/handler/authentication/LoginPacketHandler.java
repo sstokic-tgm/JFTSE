@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.authentication;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.authserver.C2SLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
@@ -27,6 +28,7 @@ import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @PacketOperationIdentifier(PacketOperations.C2SLoginRequest)
 @Log4j2
@@ -81,8 +83,12 @@ public class LoginPacketHandler extends AbstractPacketHandler {
             connection.sendTCP(loginAnswerPacket);
         } else {
             Integer accountStatus = account.getStatus();
-            if (accountStatus.equals((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN)) {
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
+
+            final ConcurrentLinkedDeque<FTClient> clients = AuthenticationManager.getInstance().getClients();
+            final boolean isLoggedIn = clients.stream()
+                    .anyMatch(client -> client.getAccount() != null && client.getAccount().getId().equals(account.getId()));
+            if (isLoggedIn || accountStatus.equals((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN)) {
+                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
                 connection.sendTCP(loginAnswerPacket);
                 return;
             }
@@ -112,8 +118,6 @@ public class LoginPacketHandler extends AbstractPacketHandler {
 
                 // set last login date
                 account.setLastLogin(new Date());
-                // mark as logged in
-                account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
                 account.setLoggedInServer(ServerType.AUTH_SERVER);
                 FTClient client = (FTClient) connection.getClient();
                 client.saveAccount(account);

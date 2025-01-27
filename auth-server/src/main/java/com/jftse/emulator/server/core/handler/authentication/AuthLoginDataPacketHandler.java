@@ -59,7 +59,6 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) 0);
             connection.sendTCP(authLoginAnswerPacket);
 
-            account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             account.setLoggedInServer(ServerType.AUTH_SERVER);
             account = authenticationService.updateAccount(account);
 
