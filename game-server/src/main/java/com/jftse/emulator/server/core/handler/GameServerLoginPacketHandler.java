@@ -58,13 +58,7 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
         if (player != null && player.getAccount() != null && player.getAccount().getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && player.getAccount().getUsername().equals(gameServerLoginPacket.getAccountName()) && !StringUtils.isEmpty(player.getName())) {
             Account account = player.getAccount();
 
-            boolean wasInChatServer = account.getLogoutServer() == ServerType.CHAT_SERVER && account.getLoggedInServer() == ServerType.NONE;
-            boolean shouldUpdateStatus = wasInChatServer && account.getStatus().shortValue() == AuthenticationServiceImpl.SUCCESS;
-
-            if (shouldUpdateStatus) {
-                account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
-            }
-
+            account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
             // set last login date
             account.setLastLogin(new Date());
             account.setLoggedInServer(ServerType.GAME_SERVER);
