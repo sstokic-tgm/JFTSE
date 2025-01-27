@@ -62,11 +62,11 @@ public class FTClient extends Client<FTConnection> {
 
         S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) step, valid ? (byte) 0 : (byte) 1);
         connection.sendTCP(gameServerAnswerPacket);
-
+        /*
         if (valid && dataRequestStep.get() == 4) {
             GameManager.getInstance().handleChatLobbyJoin(this);
         }
-
+        */
         return valid;
     }
 

@@ -32,6 +32,6 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
 
         client.getIsJoiningOrLeavingRoom().set(false);
 
-        GameManager.getInstance().handleChatLobbyJoin(client);
+        //GameManager.getInstance().handleChatLobbyJoin(client);
     }
 }

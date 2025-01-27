@@ -83,7 +83,7 @@ public class GameManager {
 
         running = new AtomicBoolean(true);
 
-        setupChatLobby();
+        //setupChatLobby();
         setupGlobalTasks();
 
         log.info(this.getClass().getSimpleName() + " initialized");

@@ -28,7 +28,7 @@ public class RoomCreateRequestPacketHandler extends AbstractPacketHandler {
             return;
 
         if (roomCreateRequestPacket.getRoomType() == RoomType.BATTLEMON) {
-            GameManager.getInstance().handleChatLobbyJoin(client);
+            //GameManager.getInstance().handleChatLobbyJoin(client);
             return;
         }
 
