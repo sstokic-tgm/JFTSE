@@ -45,7 +45,6 @@ Since it's cross-platform I will not provide download links otherwise I will blo
 The project is divided into 12 modules:
 
 ----------------
-* **emulator** - Old emulator, will be removed in the future
 * **entities** - Database model, repository and converters
 * **commons** - Utility classes
 * **commons-proto** - Protocol buffer classes
@@ -57,6 +56,7 @@ The project is divided into 12 modules:
 * **relay-server** - Relay server implementation (match interaction between players has to be broadcast to all players in the match)
 * **ac-server** - Anti-cheat server implementation (JFTSE only)
 * **docker** - Docker files for the server (needed and not needed ones for running the server)
+* **scripts** - Various scripts for the server (e.g. SQL import script)
 
 ## Installation
 
@@ -172,25 +172,30 @@ mvn clean install
 
 ### Running it the first time
 
-Before you run it the first time, please execute[^2] the SQL file **_create_fantasytennis.sql_** located inside **emulator/sql/create/**.
-
 Build the emulator and run it via:
 ```
 cd auth-server/target
-java -jar auth-server-1.0.0-SNAPSHOT.jar
+java -jar auth-server-1.0.0-SNAPSHOT.jar -import
 ```
-Or you run it from inside your Java IDE if using one.
+Or you run it from inside your Java IDE if using one. Make sure to add the **-import** argument.
 
 The auth-server will do his first time initialization and the process will take some time. It loades static data like products of the shop etc.    
 When it says 
 > **auth-server successfully started!**
 
-Then the initialization was successful and the auth-server is running.
+Then the initialization was successful and the auth-server is running. You can now close it and start it again without the **-import** argument.
+```
+java -jar auth-server-1.0.0-SNAPSHOT.jar
+```
 
-Before you start to play, you have to do 3 more things:
-1. Execute[^2] the SQL file **__gameservertype.sql__** located inside **emulator/sql/insert/** (execute this first!)
-2. Execute[^2] the SQL file **__gameserver.sql__** located inside **emulator/sql/insert/**
-3. Create a new account inside the Account table
+Before you start playing, you need to import additional data into the database.  
+**Run the `import_sql.sh` script** located inside the `scripts/` folder to insert required game data:
+   ```sh
+   cd <path to the cloned project>/scripts
+    ./import_sql.sh
+   ```
+
+This will import default required data into the database. Depending on the environment you are running the server on, you may need to adjust the script to fit your needs.
 
 Then you can start other server implementations you need or want to play on:
 ```
@@ -234,4 +239,3 @@ Read file [LICENSE](LICENSE).
 ## Footnotes
 
 [^1]: If you want to develop yourself.
-[^2]: You do it inside MySQL. Via CLI or some GUI application, it doesn't matter.

@@ -1,0 +1,11 @@
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(1, 'default exp multiplier', 1.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(2, 'default gold multiplier', 1.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(3, 'exp x3', 3.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(4, 'exp x4', 4.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(5, 'exp x5', 5.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(6, 'exp x6', 6.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(7, 'exp x7', 7.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(8, 'gold x7', 7.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(9, 'gold x5', 5.0);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(10, 'gold x3.5', 3.5);
+INSERT INTO fantasytennis.S_Guardian_Multiplier (id, description, multiplier) VALUES(11, 'exp x3.5', 3.5);

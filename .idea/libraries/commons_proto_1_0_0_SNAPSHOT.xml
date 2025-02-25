@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="commons-proto-1.0.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/commons-proto/target/commons-proto-1.0.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

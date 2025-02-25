@@ -1,0 +1,16 @@
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(1, 'Enables or disables the built-in anticheat (JFTSE exclusive)', 'anticheat.enabled', 'boolean', 'false');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(2, 'Port used for the anticheat system (JFTSE exclusive)', 'anticheat.port', 'int', '1337');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(3, 'Handles developer/debug packets (Packet ID 0x555)', 'dev.packets.handle', 'boolean', 'false');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(4, 'Enables translation of packet IDs', 'packets.id.translate.enabled', 'boolean', 'true');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(5, 'Enables logging of all network packets', 'logging.packets.all.enabled', 'boolean', 'true');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(6, 'Enables network encryption for secure communication', 'network.encryption.enabled', 'boolean', 'false');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(7, 'Encrypts player passwords upon login', 'password.encryption.enabled', 'boolean', 'false');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(8, 'Maximum player level (JFTSE exclusive, levels above 65 require client modifications)', 'player.level.max', 'int', '65');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(9, 'Minimum required level to change room mode via command', 'command.room.mode.change.player.level', 'int', '60');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(10, 'Global gold bonus multiplier (Single Player)', 'game.bonus.global.gold', 'int', '5');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(11, 'Global experience bonus multiplier (Single Player)', 'game.bonus.global.exp', 'int', '5');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(12, 'Experience bonus for winning a game (Basic & Battle)', 'game.bonus.wongame.exp', 'double', '0.2');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(13, 'Gold bonus for winning a game (Basic & Battle)', 'game.bonus.wongame.gold', 'double', '0.2');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(14, 'Enables logging of packets in console output', 'logging.packets.console-output.enabled', 'boolean', 'true');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(15, 'Multiplier applied to ranking points in Guardian Hard mode', 'matchplay.guardian.hard.won.ranking-point.multiplier', 'double', '1.0');
+INSERT INTO fantasytennis.Config (id, description, name, `type`, value) VALUES(16, 'Allows Snow Moon map in Guardian mode', 'game.map.allow.snowmoon', 'boolean', 'false');

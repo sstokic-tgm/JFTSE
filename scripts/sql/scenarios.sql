@@ -1,0 +1,3 @@
+INSERT INTO fantasytennis.M_Scenarios (id, created, modified, description, gameMode, isDefault, component_of_id, status_id) VALUES(1, '2023-11-11 16:32:57.492000', NULL, 'Guardian Normal', 'GUARDIAN', 1, NULL, 1);
+INSERT INTO fantasytennis.M_Scenarios (id, created, modified, description, gameMode, isDefault, component_of_id, status_id) VALUES(2, '2023-11-11 16:32:57.492000', NULL, 'Boss Guardian', 'BOSS_BATTLE', 1, NULL, 1);
+INSERT INTO fantasytennis.M_Scenarios (id, created, modified, description, gameMode, isDefault, component_of_id, status_id) VALUES(3, '2023-11-20 01:38:19.186000', NULL, 'Boss Guardian v2', 'BOSS_BATTLE_V2', 1, NULL, 1);
