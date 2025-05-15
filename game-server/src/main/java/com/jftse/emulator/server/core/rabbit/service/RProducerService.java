@@ -1,16 +1,13 @@
 package com.jftse.emulator.server.core.rabbit.service;
 
+import com.jftse.emulator.common.utilities.RandomUtils;
 import com.jftse.emulator.server.rabbit.RabbitMQConfig;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.rabbit.AbstractBaseMessage;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @Log4j2
@@ -32,39 +29,32 @@ public class RProducerService {
         return instance;
     }
 
-    public synchronized <T> void send(List<String> headerKeys, List<T> headerValues, Packet packet) {
-        MessageProperties messageProperties = new MessageProperties();
-        for (int i = 0; i < headerKeys.size(); i++) {
-            messageProperties.setHeader(headerKeys.get(i), headerValues.get(i));
-        }
-        Message message = new Message(packet.getRawPacket(), messageProperties);
+    public void send(AbstractBaseMessage message, String routingKey, String sender) {
+        String[] routingKeys = routingKey.split("\\s+");
+        for (String key : routingKeys) {
+            message.setCorrelationId(RandomUtils.getUUID());
+            message.setSender(sender);
+            try {
+                final long start = System.currentTimeMillis();
 
-        try {
-            rabbitTemplate.convertAndSend(rabbitMQConfig.getExchangeName(), "game-to-chat", message);
-        } catch (AmqpException ae) {
-            log.error("Error while sending message to RabbitMQ: {}", ae.getMessage());
-        }
-    }
+                log.debug("[{}] Sending message to {}: type={}, sender={}",
+                        message.getCorrelationId(),
+                        key,
+                        message.getMessageType(),
+                        message.getSender());
 
-    public synchronized <T> void send(String headerKey, T headerValue, Packet packet) {
-        MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setHeader(headerKey, headerValue);
-        Message message = new Message(packet.getRawPacket(), messageProperties);
+                rabbitTemplate.convertAndSend(rabbitMQConfig.getExchangeName(), key, message);
 
-        try {
-            rabbitTemplate.convertAndSend(rabbitMQConfig.getExchangeName(), "game-to-chat", message);
-        } catch (AmqpException ae) {
-            log.error("Error while sending message to RabbitMQ: {}", ae.getMessage());
-        }
-    }
+                final long duration = System.currentTimeMillis() - start;
+                log.debug("[{}] Message sent in {} ms",
+                        message.getCorrelationId(),
+                        duration);
 
-    public synchronized void send(Packet packet) {
-        Message message = new Message(packet.getRawPacket());
-
-        try {
-            rabbitTemplate.convertAndSend(rabbitMQConfig.getExchangeName(), "game-to-chat", message);
-        } catch (AmqpException ae) {
-            log.error("Error while sending message to RabbitMQ: {}", ae.getMessage());
+            } catch (AmqpException ae) {
+                log.error("[{}] Failed to send message: {}",
+                        message.getCorrelationId(),
+                        ae.getMessage());
+            }
         }
     }
 }

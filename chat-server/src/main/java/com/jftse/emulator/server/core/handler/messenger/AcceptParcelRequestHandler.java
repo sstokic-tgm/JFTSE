@@ -1,15 +1,14 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SAcceptParcelRequest;
 import com.jftse.emulator.server.core.packets.messenger.S2CAcceptParcelAnswer;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.messages.UpdateMoneyMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.messenger.EParcelType;
@@ -133,15 +132,10 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
         playerService.save(receiver);
         playerService.save(sender);
 
-        FTConnection senderConnection = GameManager.getInstance().getConnectionByPlayerId(sender.getId());
-        S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
-        if (senderConnection != null) {
-            senderConnection.sendTCP(senderMoneyPacket);
-
-            // TODO: Remove parcel from sent list of sender, S2CSentParcelListPacket doesn't work
-        } else {
-            rProducerService.send("playerId", sender.getId(), senderMoneyPacket);
-        }
+        UpdateMoneyMessage updateMoneyMessage = UpdateMoneyMessage.builder()
+                .playerId(sender.getId())
+                .build();
+        rProducerService.send(updateMoneyMessage, "game.messenger.parcel chat.messenger.parcel", player.getName() + "(ChatServer)");
 
         S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
         connection.sendTCP(s2CRemoveParcelFromListPacket);

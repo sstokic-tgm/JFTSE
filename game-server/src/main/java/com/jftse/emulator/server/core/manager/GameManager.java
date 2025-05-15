@@ -15,6 +15,7 @@ import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
@@ -70,6 +71,8 @@ public class GameManager {
 
     private Random rnd;
 
+    private String motd;
+
     @PostConstruct
     public void init() {
         instance = this;
@@ -109,6 +112,10 @@ public class GameManager {
 
     public static GameManager getInstance() {
         return instance;
+    }
+
+    public String getServer() {
+        return ServerType.GAME_SERVER.getName();
     }
 
     public void addClient(FTClient client) {

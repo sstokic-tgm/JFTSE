@@ -4,7 +4,6 @@ import com.jftse.emulator.server.core.packets.messenger.C2SAddFriendApprovalRequ
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -17,6 +16,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.FriendService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.SocialService;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
@@ -85,12 +85,12 @@ public class AddFriendApprovalRequestHandler extends AbstractPacketHandler {
             friends.clear();
             friends = socialService.getFriendList(targetPlayer, EFriendshipState.Friends);
             S2CFriendsListAnswerPacket targetFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
-            FTConnection friendConnection = GameManager.getInstance().getConnectionByPlayerId(targetPlayer.getId());
-            if (friendConnection != null) {
-                friendConnection.sendTCP(targetFriendsListAnswerPacket);
-            } else {
-                rProducerService.send("playerId", targetPlayer.getId(), targetFriendsListAnswerPacket);
-            }
+
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(targetPlayer.getId())
+                    .packet(targetFriendsListAnswerPacket)
+                    .build();
+            rProducerService.send(packetMessage, "game.messenger.friendList chat.messenger.friendList", activePlayer.getName() + "(GameServer)");
             // TODO: ANSWER???
         } else {
             friendService.remove(friend.getId());

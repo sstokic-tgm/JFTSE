@@ -1,10 +1,14 @@
 package com.jftse.emulator.server.net;
 
+import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CClubMembersListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.messages.NotifyGuildMemberListOnDisconnectMessage;
+import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendListMessage;
+import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendRelationMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
@@ -19,7 +23,9 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.shared.packets.S2CServerNoticePacket;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
+import com.jftse.server.core.thread.ThreadManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
@@ -27,6 +33,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -56,6 +63,14 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecryptionKey(), connection.getEncryptionKey(), 0, 0);
         connection.sendTCP(welcomePacket);
+
+        final String motd = GameManager.getInstance().getMotd();
+        if (!StringUtils.isEmpty(motd)) {
+            ThreadManager.getInstance().schedule(() -> {
+                S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(motd);
+                connection.sendTCP(serverNoticePacket);
+            }, 1, TimeUnit.SECONDS);
+        }
     }
 
     @Override
@@ -95,48 +110,13 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
                     client.saveAccount(account);
                 }
 
-                List<Friend> friends = ServiceManager.getInstance().getFriendService().findByPlayer(player);
-                friends.forEach(x -> {
-                    List<Friend> friendList = ServiceManager.getInstance().getSocialService().getFriendList(x.getFriend(), EFriendshipState.Friends);
-                    S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
-                    FTConnection friendConnection = GameManager.getInstance().getConnectionByPlayerId(x.getFriend().getId());
-                    if (friendConnection != null) {
-                        friendConnection.sendTCP(friendListAnswerPacket);
-                    } else {
-                        RProducerService.getInstance().send("playerId", x.getFriend().getId(), friendListAnswerPacket);
-                    }
-                });
+                RefreshFriendListMessage refreshFriendListMessage = RefreshFriendListMessage.builder().playerId(player.getId()).build();
+                NotifyGuildMemberListOnDisconnectMessage notifyGuildMemberListOnDisconnectMessage = NotifyGuildMemberListOnDisconnectMessage.builder().playerId(player.getId()).build();
+                RefreshFriendRelationMessage refreshFriendRelationMessage = RefreshFriendRelationMessage.builder().playerId(player.getId()).build();
 
-                GuildMember guildMember = ServiceManager.getInstance().getGuildMemberService().getByPlayer(player);
-                if (guildMember != null && guildMember.getGuild() != null) {
-                    guildMember.getGuild().getMemberList().stream()
-                            .filter(x -> x != guildMember)
-                            .forEach(x -> {
-                                List<GuildMember> guildMembers = ServiceManager.getInstance().getSocialService().getGuildMemberList(x.getPlayer());
-
-                                S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
-                                FTConnection guildMemberConnection = GameManager.getInstance().getConnectionByPlayerId(x.getPlayer().getId());
-                                if (guildMemberConnection != null) {
-                                    guildMemberConnection.sendTCP(s2CClubMembersListAnswerPacket);
-                                } else {
-                                    RProducerService.getInstance().send("playerId", x.getPlayer().getId(), s2CClubMembersListAnswerPacket);
-                                }
-                            });
-                }
-
-                Friend myRelation = ServiceManager.getInstance().getSocialService().getRelationship(player);
-                if (myRelation != null) {
-                    FTConnection friendRelationClient = GameManager.getInstance().getConnectionByPlayerId(myRelation.getFriend().getId());
-                    Friend friendRelation = ServiceManager.getInstance().getSocialService().getRelationship(myRelation.getFriend());
-
-                    if (friendRelationClient != null && friendRelation != null) {
-                        S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                        friendRelationClient.sendTCP(s2CRelationshipAnswerPacket);
-                    } else if (friendRelation != null) {
-                        S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                        RProducerService.getInstance().send("playerId", friendRelation.getPlayer().getId(), s2CRelationshipAnswerPacket);
-                    }
-                }
+                RProducerService.getInstance().send(refreshFriendListMessage, "game.messenger.friendList chat.messenger.friendList", "ChatServer");
+                RProducerService.getInstance().send(notifyGuildMemberListOnDisconnectMessage, "game.messenger.guildList chat.messenger.guildList", "ChatServer");
+                RProducerService.getInstance().send(refreshFriendRelationMessage, "game.messenger.friendRelation chat.messenger.friendRelation", "ChatServer");
             }
 
             GameManager.getInstance().handleRoomPlayerChanges(connection, notifyClients);

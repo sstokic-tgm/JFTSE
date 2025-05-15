@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendGiftRequestPacket;
@@ -10,7 +9,6 @@ import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auctionhouse.PriceType;
 import com.jftse.entities.database.model.item.Product;
@@ -25,6 +23,7 @@ import com.jftse.server.core.item.EItemUseType;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 import org.springframework.util.ReflectionUtils;
 
 import java.util.ArrayList;
@@ -248,14 +247,16 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
             S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket = new S2CReceivedGiftNotificationPacket(gift);
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
 
-            FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
-            if (receiverConnection != null) {
-                receiverConnection.sendTCP(s2CReceivedGiftNotificationPacket);
-                receiverConnection.sendTCP(inventoryDataPacket);
-            } else {
-                rProducerService.send("playerId", receiver.getId(), s2CReceivedGiftNotificationPacket);
-                rProducerService.send("playerId", receiver.getId(), inventoryDataPacket);
-            }
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(receiver.getId())
+                    .packet(s2CReceivedGiftNotificationPacket)
+                    .build();
+            PacketMessage packetMessage2 = PacketMessage.builder()
+                    .receivingPlayerId(receiver.getId())
+                    .packet(inventoryDataPacket)
+                    .build();
+            rProducerService.send(packetMessage, "game.messenger.gift chat.messenger.gift", sender.getName() + "(GameServer)");
+            rProducerService.send(packetMessage2, "game.messenger.gift chat.messenger.gift", sender.getName() + "(GameServer)");
 
             // 0 = Item purchase successful, -1 = Not enough gold, -2 = Not enough AP,
             // -3 = Receiver reached maximum number of character, -6 = That user already has the maximum number of this item

@@ -4,9 +4,7 @@ import com.jftse.emulator.server.core.packets.messenger.C2SSendMessageRequestPac
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
@@ -15,6 +13,7 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.MessageService;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 @PacketOperationIdentifier(PacketOperations.C2SSendMessageRequest)
 public class SendMessageRequestHandler extends AbstractPacketHandler {
@@ -54,12 +53,11 @@ public class SendMessageRequestHandler extends AbstractPacketHandler {
 
             S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
 
-            FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
-            if (receiverConnection != null) {
-                receiverConnection.sendTCP(s2CReceivedMessageNotificationPacket);
-            } else {
-                rProducerService.send("playerId", receiver.getId(), s2CReceivedMessageNotificationPacket);
-            }
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(receiver.getId())
+                    .packet(s2CReceivedMessageNotificationPacket)
+                    .build();
+            rProducerService.send(packetMessage, "game.messenger.message chat.messenger.message", ftClient.getPlayer().getName() + "(GameServer)");
         }
     }
 }

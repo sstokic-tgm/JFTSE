@@ -1,14 +1,13 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SProposalAnswerRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
+import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendRelationMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.messenger.Message;
@@ -21,6 +20,7 @@ import com.jftse.server.core.item.EItemUseType;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
@@ -59,8 +59,6 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
 
         Proposal proposal = proposalService.findById(c2SProposalAnswerRequestPacket.getProposalId().longValue());
         if (proposal == null) return;
-
-        FTConnection senderConnection = GameManager.getInstance().getConnectionByPlayerId(proposal.getSender().getId());
 
         List<Friend> senderFriend = friendService.findByPlayer(proposal.getSender());
         if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
@@ -123,15 +121,10 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
                 S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(myRelation);
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
-                FTConnection friendRelationConnection = GameManager.getInstance().getConnectionByPlayerId(myRelation.getFriend().getId());
-                Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
-                if (friendRelationConnection != null && friendRelation != null) {
-                    s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                    friendRelationConnection.sendTCP(s2CRelationshipAnswerPacket);
-                } else if (friendRelation != null) {
-                    s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
-                    rProducerService.send("playerId", friendRelation.getPlayer().getId(), s2CRelationshipAnswerPacket);
-                }
+                RefreshFriendRelationMessage refreshFriendRelationMessage = RefreshFriendRelationMessage.builder()
+                        .playerId(ftClient.getPlayer().getId())
+                        .build();
+                rProducerService.send(refreshFriendRelationMessage, "game.messenger.relationship chat.messenger.relationship", "ChatServer");
             }
 
             PlayerPocket senderPocket = new PlayerPocket();
@@ -154,11 +147,11 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
             S2CInventoryItemsPlacePacket receiverInventoryPacket = new S2CInventoryItemsPlacePacket(List.of(receiverPocket));
             connection.sendTCP(receiverInventoryPacket);
 
-            if (senderConnection != null) {
-                senderConnection.sendTCP(senderInventoryPacket);
-            } else {
-                rProducerService.send("playerId", proposal.getSender().getId(), senderInventoryPacket);
-            }
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .packet(senderInventoryPacket)
+                    .receivingPlayerId(proposal.getSender().getId())
+                    .build();
+            rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", "ChatServer");
         } else {
             message.setMessage("[Automatic response] I denied your proposal ＞﹏＜");
         }
@@ -167,10 +160,10 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
         proposalService.remove(proposal.getId());
 
         S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
-        if (senderConnection != null) {
-            senderConnection.sendTCP(s2CReceivedMessageNotificationPacket);
-        } else {
-            rProducerService.send("playerId", proposal.getSender().getId(), s2CReceivedMessageNotificationPacket);
-        }
+        PacketMessage packetMessage = PacketMessage.builder()
+                .packet(s2CReceivedMessageNotificationPacket)
+                .receivingPlayerId(proposal.getSender().getId())
+                .build();
+        rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", "ChatServer");
     }
 }

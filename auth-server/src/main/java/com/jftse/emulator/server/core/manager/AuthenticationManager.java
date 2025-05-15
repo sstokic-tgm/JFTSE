@@ -18,6 +18,8 @@ public class AuthenticationManager {
 
     private ConcurrentLinkedDeque<FTClient> clients;
 
+    private String motd;
+
     @PostConstruct
     public void init() {
         instance = this;

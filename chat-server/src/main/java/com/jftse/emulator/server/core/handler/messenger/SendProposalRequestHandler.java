@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendProposalRequestPacket;
@@ -9,7 +8,6 @@ import com.jftse.emulator.server.core.packets.messenger.S2CProposalListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedProposalNotificationPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
@@ -23,6 +21,7 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
@@ -136,12 +135,11 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
 
             S2CReceivedProposalNotificationPacket s2CReceivedProposalNotificationPacket = new S2CReceivedProposalNotificationPacket(proposal);
 
-            FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
-            if (receiverConnection != null) {
-                receiverConnection.sendTCP(s2CReceivedProposalNotificationPacket);
-            } else {
-                rProducerService.send("playerId", receiver.getId(), s2CReceivedProposalNotificationPacket);
-            }
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(receiver.getId())
+                    .packet(s2CReceivedProposalNotificationPacket)
+                    .build();
+            rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", sender.getName() + "(ChatServer)");
 
             List<Proposal> sentProposals = proposalService.findBySender(sender);
             S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);

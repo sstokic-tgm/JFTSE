@@ -1,13 +1,11 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.C2SCancelParcelSendingRequest;
 import com.jftse.emulator.server.core.packets.messenger.S2CCancelParcelSendingAnswer;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.messenger.Parcel;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.AbstractPacketHandler;
@@ -16,6 +14,7 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.ParcelService;
 import com.jftse.server.core.service.PlayerPocketService;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
@@ -74,11 +73,10 @@ public class CancelSendingParcelRequestHandler extends AbstractPacketHandler {
 
         S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
 
-        FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(parcel.getReceiver().getId());
-        if (receiverConnection != null) {
-            receiverConnection.sendTCP(s2CRemoveParcelFromListPacket);
-        } else {
-            rProducerService.send("playerId", parcel.getReceiver().getId(), s2CRemoveParcelFromListPacket);
-        }
+        PacketMessage packetMessage = PacketMessage.builder()
+                .receivingPlayerId(parcel.getReceiver().getId())
+                .packet(s2CRemoveParcelFromListPacket)
+                .build();
+        rProducerService.send(packetMessage, "game.messenger.parcel chat.messenger.parcel", parcel.getSender().getName() + "(ChatServer)");
     }
 }

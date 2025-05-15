@@ -13,6 +13,7 @@ import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 import org.springframework.util.MultiValueMap;
 
 @PacketOperationIdentifier(PacketOperations.C2SQuickSlotUseRequest)
@@ -54,11 +55,12 @@ public class QuickSlotUseRequestHandler extends AbstractPacketHandler {
 
     private void sendPackets(MultiValueMap<Long, Packet> packetsToSend) {
         packetsToSend.forEach((playerId, packets) -> {
-            final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
-            if (connectionByPlayerId != null) {
-                packets.forEach(connectionByPlayerId::sendTCP);
-            } else {
-                packets.forEach(packet -> rProducerService.send("playerId", playerId, packet));
+            for (Packet p : packets) {
+                PacketMessage packetMessage = PacketMessage.builder()
+                        .packet(p)
+                        .receivingPlayerId(playerId)
+                        .build();
+                rProducerService.send(packetMessage, "game.player.quickSlot chat.player.quickSlot", "GameServer");
             }
         });
     }

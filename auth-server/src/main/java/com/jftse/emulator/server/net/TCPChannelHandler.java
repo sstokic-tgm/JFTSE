@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.net;
 
+import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.ServerType;
@@ -10,13 +11,16 @@ import com.jftse.server.core.net.TCPHandler;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.BlockedIPService;
+import com.jftse.server.core.shared.packets.S2CServerNoticePacket;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
+import com.jftse.server.core.thread.ThreadManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -44,6 +48,14 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
         S2CWelcomePacket welcomePacket = new S2CWelcomePacket(connection.getDecryptionKey(), connection.getEncryptionKey(), 0, 0);
         connection.sendTCP(welcomePacket);
+
+        final String motd = AuthenticationManager.getInstance().getMotd();
+        if (!StringUtils.isEmpty(motd)) {
+            ThreadManager.getInstance().schedule(() -> {
+                S2CServerNoticePacket serverNoticePacket = new S2CServerNoticePacket(motd);
+                connection.sendTCP(serverNoticePacket);
+            }, 1, TimeUnit.SECONDS);
+        }
     }
 
     @Override

@@ -1,27 +1,26 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.C2SSendParcelRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CParcelListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedParcelNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CSendParcelAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.messenger.EParcelType;
 import com.jftse.entities.database.model.messenger.Parcel;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
@@ -157,12 +156,11 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
 
                     S2CReceivedParcelNotificationPacket s2CReceivedParcelNotificationPacket = new S2CReceivedParcelNotificationPacket(parcel);
 
-                    FTConnection receiverConnection = GameManager.getInstance().getConnectionByPlayerId(receiver.getId());
-                    if (receiverConnection != null) {
-                        receiverConnection.sendTCP(s2CReceivedParcelNotificationPacket);
-                    } else {
-                        rProducerService.send("playerId", receiver.getId(), s2CReceivedParcelNotificationPacket);
-                    }
+                    PacketMessage packetMessage = PacketMessage.builder()
+                            .receivingPlayerId(receiver.getId())
+                            .packet(s2CReceivedParcelNotificationPacket)
+                            .build();
+                    rProducerService.send(packetMessage, "game.messenger.parcel chat.messenger.parcel", sender.getName() + "(ChatServer)");
 
                     // TODO: Handle fee
                     // TODO: Handle all these cases
