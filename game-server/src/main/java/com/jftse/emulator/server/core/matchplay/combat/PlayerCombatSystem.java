@@ -67,7 +67,7 @@ public class PlayerCombatSystem implements PlayerCombatable {
                 totalDamageToDeal += damageToDeny;
             }
 
-            Elementable offensiveElement = attackingPlayer.getOffensiveElement();
+            Elementable offensiveElement = attackingPlayer != null ? attackingPlayer.getOffensiveElement() : null;
 
             if (totalDamageToDeal != -1 && offensiveElement != null && skill != null && offensiveElement.getProperty() == EElementalProperty.fromValue(skill.getElemental().byteValue())) {
                 double efficiency = offensiveElement.getEfficiency();
