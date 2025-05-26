@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.authentication;
 
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.authserver.C2SAuthLoginPacket;
 import com.jftse.emulator.server.core.packets.authserver.S2CAuthLoginPacket;
@@ -13,6 +14,8 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.proto.auth.UpdateAccountRequest;
+import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.item.EItemCategory;
@@ -59,12 +62,13 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) 0);
             connection.sendTCP(authLoginAnswerPacket);
 
-            if (account.getStatus() == AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN) {
-                account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-            }
-
-            account.setLoggedInServer(ServerType.AUTH_SERVER);
-            account = authenticationService.updateAccount(account);
+            UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
+                    .setAccountId(account.getId())
+                    .setTimestamp(System.currentTimeMillis())
+                    .setServer(ServerType.AUTH_SERVER.getValue())
+                    .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.RELOG.getValue()).build())
+                    .build();
+            AuthenticationManager.getInstance().addUpdateAccountRequest(request);
 
             client.setAccount(account.getId());
             log.info(account.getUsername() + " connected");

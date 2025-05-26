@@ -5,6 +5,8 @@ import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.proto.auth.UpdateAccountRequest;
+import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.net.TCPHandler;
@@ -80,15 +82,16 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
         if (client != null) {
             final Account account = client.getAccount();
             if (account != null) {
-                logoutAccount(client, account);
+                UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
+                        .setAccountId(account.getId())
+                        .setTimestamp(System.currentTimeMillis())
+                        .setServer(ServerType.AUTH_SERVER.getValue())
+                        .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.DISCONNECT.getValue()).build())
+                        .build();
+                AuthenticationManager.getInstance().addUpdateAccountRequest(request);
             }
         }
         AuthenticationManager.getInstance().removeClient(client);
-    }
-
-    private void logoutAccount(FTClient client, Account account) {
-        account.setLoggedInServer(ServerType.NONE);
-        client.saveAccount(account);
     }
 
     @Override

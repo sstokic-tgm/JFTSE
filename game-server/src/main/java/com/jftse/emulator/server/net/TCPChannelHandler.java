@@ -18,6 +18,8 @@ import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
+import com.jftse.proto.auth.UpdateAccountRequest;
+import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketHandlerFactory;
 import com.jftse.server.core.net.TCPHandler;
@@ -103,12 +105,13 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
 
                 Account account = client.getAccount();
                 if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
-                    if (account.getLoggedInServer() == ServerType.GAME_SERVER) {
-                        account.setLoggedInServer(ServerType.NONE);
-                    }
-                    account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                    account.setLogoutServer(ServerType.GAME_SERVER);
-                    client.saveAccount(account);
+                    UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
+                            .setAccountId(account.getId())
+                            .setTimestamp(System.currentTimeMillis())
+                            .setServer(ServerType.GAME_SERVER.getValue())
+                            .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.DISCONNECT.getValue()).build())
+                            .build();
+                    ServiceManager.getInstance().getGrpcAuthService().updateAccount(request);
                 }
 
                 RefreshFriendListMessage refreshFriendListMessage = RefreshFriendListMessage.builder().playerId(player.getId()).build();

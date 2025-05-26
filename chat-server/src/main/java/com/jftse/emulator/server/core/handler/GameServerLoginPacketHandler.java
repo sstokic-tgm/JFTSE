@@ -10,6 +10,8 @@ import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.proto.auth.UpdateAccountRequest;
+import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.protocol.Packet;
@@ -57,13 +59,16 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
         Player player = client.getPlayer();
         if (player != null && player.getAccount() != null && player.getAccount().getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && player.getAccount().getUsername().equals(gameServerLoginPacket.getAccountName()) && !StringUtils.isEmpty(player.getName())) {
             Account account = player.getAccount();
-
-            account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
-            // set last login date
-            account.setLastLogin(new Date());
-            account.setLoggedInServer(ServerType.CHAT_SERVER);
             account.setLastSelectedPlayerId(player.getId());
             client.saveAccount(account);
+
+            UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
+                    .setAccountId(account.getId())
+                    .setTimestamp(System.currentTimeMillis())
+                    .setServer(ServerType.CHAT_SERVER.getValue())
+                    .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.LOGIN.getValue()).build())
+                    .build();
+            ServiceManager.getInstance().getGrpcAuthService().updateAccount(request);
 
             log.info(player.getName() + " connected");
 

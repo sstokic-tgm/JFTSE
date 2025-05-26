@@ -15,6 +15,8 @@ import com.jftse.entities.database.model.anticheat.ClientWhitelist;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.proto.auth.UpdateAccountRequest;
+import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.AbstractPacketHandler;
 import com.jftse.server.core.handler.PacketOperationIdentifier;
 import com.jftse.server.core.item.EItemCategory;
@@ -116,12 +118,17 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                     return;
                 }
 
-                // set last login date
-                account.setLastLogin(new Date());
-                account.setLoggedInServer(ServerType.AUTH_SERVER);
                 FTClient client = (FTClient) connection.getClient();
                 client.saveAccount(account);
                 client.setAccount(account.getId());
+
+                UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
+                        .setAccountId(account.getId())
+                        .setTimestamp(System.currentTimeMillis())
+                        .setServer(ServerType.AUTH_SERVER.getValue())
+                        .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.LOGIN.getValue()).build())
+                        .build();
+                AuthenticationManager.getInstance().addUpdateAccountRequest(request);
 
                 int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
                 List<Player> playerList = playerService.findAllByAccount(account);
