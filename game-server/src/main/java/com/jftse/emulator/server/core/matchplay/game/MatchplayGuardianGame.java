@@ -171,7 +171,12 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 .toList();
 
         if (filteredGuardianIds.isEmpty()) {
-            return null;
+            // pick a random guardian from the original list if all are ignored in case of the map atlantis
+            if (map.getId().equals(11L)) {
+                filteredGuardianIds = guardians;
+            } else {
+                return null;
+            }
         }
 
         int randomIndex = random.nextInt(filteredGuardianIds.size());
