@@ -64,7 +64,7 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
 
             UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
                     .setAccountId(account.getId())
-                    .setTimestamp(System.currentTimeMillis())
+                    .setTimestamp(System.currentTimeMillis() + 150)
                     .setServer(ServerType.AUTH_SERVER.getValue())
                     .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.RELOG.getValue()).build())
                     .build();
