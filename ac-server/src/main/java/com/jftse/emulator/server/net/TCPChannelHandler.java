@@ -88,15 +88,6 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
             if (clientWhitelist != null) {
                 clientWhitelist.setIsActive(false);
                 clientWhitelist = clientWhitelistService.save(clientWhitelist);
-
-                Account account = clientWhitelist.getAccount();
-                if (account != null) {
-                    account = authenticationService.findAccountById(account.getId());
-                    if (account.getStatus() == AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN && clientWhitelist.getIsAuthenticated()) {
-                        account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
-                        authenticationService.updateAccount(account);
-                    }
-                }
             }
             ACManager.getInstance().removeClient(client);
         }
