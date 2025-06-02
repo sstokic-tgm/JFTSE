@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.command;
 
 import com.jftse.emulator.common.scripting.ScriptFile;
 import com.jftse.emulator.common.scripting.ScriptManager;
+import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.command.commands.gm.*;
 import com.jftse.emulator.server.core.command.commands.player.*;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -53,6 +54,9 @@ public class CommandManager {
     }
 
     public boolean isCommand(String content) {
+        if (StringUtils.isEmpty(content) || content.isEmpty())
+            return false;
+
         char heading = content.charAt(0);
         return heading == COMMAND_HEADING && registeredCommands.get(getCommandArgumentList(content).get(0).substring(1)) != null;
     }
