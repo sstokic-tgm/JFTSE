@@ -57,13 +57,13 @@ public class AuthenticationManager {
 
     public void onExit() {
         if (running.compareAndSet(true, false)) {
-            if (authenticationTask != null && authenticationTask.cancel(false)) {
-                log.info("AuthenticationTask stopped");
-            }
-
             log.info("Closing all connections");
             for (FTClient client : clients) {
                 client.getConnection().close();
+            }
+
+            if (authenticationTask != null && authenticationTask.cancel(false)) {
+                log.info("AuthenticationTask stopped");
             }
 
             log.info("Clearing queue for update account requests");
