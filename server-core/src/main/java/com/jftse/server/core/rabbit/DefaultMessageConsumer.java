@@ -1,5 +1,7 @@
 package com.jftse.server.core.rabbit;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -13,6 +15,7 @@ import java.util.List;
 public class DefaultMessageConsumer {
     private static final Logger log = LogManager.getLogger(DefaultMessageConsumer.class);
     private final DefaultMessageHandlerRegistry registry;
+    private Gson gsonDefault;
 
     public DefaultMessageConsumer(DefaultMessageHandlerRegistry registry,
                                   List<AbstractMessageHandler<? extends AbstractBaseMessage>> handlers) {
@@ -26,6 +29,33 @@ public class DefaultMessageConsumer {
         log.info("DefaultMessageConsumer initialized");
     }
 
+    /**
+     * Set a custom Gson instance for serialization/deserialization.
+     * If not set, a default Gson instance will be created with pretty printing and null serialization.
+     *
+     * @param gson the custom Gson instance
+     */
+    public void setGson(Gson gson) {
+        this.gsonDefault = gson;
+    }
+
+    /**
+     * Get the Gson instance for serialization/deserialization.
+     * If a custom Gson instance is not set, a default Gson instance will be created with pretty printing and null serialization.
+     * This method can be overridden to provide a custom Gson instance if needed.
+     *
+     * @return the Gson instance
+     */
+    public Gson getGson() {
+        if (gsonDefault == null) {
+            gsonDefault = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .serializeNulls()
+                    .create();
+        }
+        return gsonDefault;
+    }
+
     @RabbitListener(queues = "${jftse.rabbitmq.queue}")
     public void receiveMessage(AbstractBaseMessage message) {
         final long start = System.currentTimeMillis();
@@ -34,6 +64,12 @@ public class DefaultMessageConsumer {
                 message.getCorrelationId(),
                 message.getSender(),
                 message.getMessageType());
+
+        Gson gson = getGson();
+        log.debug("[{}]\n{} {}",
+                message.getCorrelationId(),
+                message.getClass().getSimpleName(),
+                gson.toJson(message));
 
         AbstractMessageHandler<AbstractBaseMessage> handler = registry.getHandler(message.getMessageType());
         if (handler != null) {
