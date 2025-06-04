@@ -26,10 +26,12 @@ import com.jftse.server.core.service.AuthenticationService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @PacketOperationIdentifier(PacketOperations.C2SAuthLoginData)
 @Log4j2
@@ -64,11 +66,12 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
 
             UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
                     .setAccountId(account.getId())
-                    .setTimestamp(System.currentTimeMillis() + 150)
+                    .setTimestamp(System.currentTimeMillis())
                     .setServer(ServerType.AUTH_SERVER.getValue())
                     .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.RELOG.getValue()).build())
                     .build();
-            AuthenticationManager.getInstance().addUpdateAccountRequest(request);
+
+            ThreadManager.getInstance().schedule(() -> AuthenticationManager.getInstance().addUpdateAccountRequest(request), 50, TimeUnit.MILLISECONDS);
 
             client.setAccount(account.getId());
             log.info(account.getUsername() + " connected");

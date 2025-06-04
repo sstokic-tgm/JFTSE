@@ -99,16 +99,15 @@ public class AuthenticationManager {
     }
 
     private void setupGlobalTasks() {
-        authenticationTask = threadManager.submit(() -> {
-            while (running.get()) {
+        authenticationTask = threadManager.scheduleAtFixedRate(() -> {
+            if (running.get()) {
                 try {
                     processUpdateAccountRequestQueue();
                 } catch (Exception ex) {
                     log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
                 }
             }
-            log.info("AuthenticationTask stopped");
-        });
+        }, 0, 100, TimeUnit.MILLISECONDS);
         log.info("AuthenticationTask started");
     }
 
@@ -160,27 +159,12 @@ public class AuthenticationManager {
 
     private void processUpdateAccountRequestQueue() {
         try {
-            UpdateAccountRequest request = updateAccountQueue.take();
-            if (request != null) {
+            for (UpdateAccountRequest request = updateAccountQueue.poll(); request != null; request = updateAccountQueue.poll()) {
                 final UpdateAccountRequest validRequest = getValidUpdateAccountRequest(request);
                 processUpdateAccountRequest(validRequest);
             }
-            // save cpu cycles
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("Error processing update account request queue: {}", e.getMessage(), e);
-
-            while (!updateAccountQueue.isEmpty()) {
-                try {
-                    UpdateAccountRequest request = updateAccountQueue.poll();
-                    if (request != null) {
-                        processUpdateAccountRequest(request);
-                    }
-                } catch (Exception ex) {
-                    log.error("Error processing remaining request: {}", ex.getMessage(), ex);
-                }
-            }
+        } catch (Exception ex) {
+            log.error("Error processing update account request: {}", ex.getMessage(), ex);
         }
     }
 
