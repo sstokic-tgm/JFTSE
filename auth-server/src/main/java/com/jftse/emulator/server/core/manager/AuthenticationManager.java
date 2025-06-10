@@ -3,7 +3,9 @@ package com.jftse.emulator.server.core.manager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.proto.auth.UpdateAccountRequest;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.thread.ThreadManager;
 import com.jftse.server.core.util.AccountAction;
@@ -38,6 +40,8 @@ public class AuthenticationManager {
     private ServiceManager serviceManager;
     @Autowired
     private ThreadManager threadManager;
+    @Autowired
+    private JdbcUtil jdbcUtil;
 
     private String motd;
 
@@ -82,7 +86,43 @@ public class AuthenticationManager {
 
             clients.clear();
 
+            log.info("Clearing leftover accounts still marked as logged in");
+            resetLogins();
+            log.info("Leftover accounts cleared");
+
             log.info("AuthenticationManager stopped");
+        }
+    }
+
+    private void resetLogins() {
+        List<Account> loggedInAccounts = serviceManager.getAuthenticationService().findByStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
+        for (Account account : loggedInAccounts) {
+            account.setStatus((int) AuthenticationServiceImpl.SUCCESS);
+            account.setLoggedInServer(ServerType.NONE);
+            try {
+                serviceManager.getAuthenticationService().updateAccount(account);
+                log.info("Account ID {} cleared from logged in status", account.getId());
+            } catch (Exception e) {
+                log.error("Failed to clear account ID {}: {}", account.getId(), e.getMessage(), e);
+            }
+        }
+
+        List<Player> playerList = new ArrayList<>();
+        jdbcUtil.execute(em -> {
+            List<Player> tmpList = em.createQuery("SELECT p FROM Player p WHERE p.online = :online", Player.class)
+                    .setParameter("online", true)
+                    .getResultList();
+            playerList.addAll(tmpList);
+        });
+
+        for (Player player : playerList) {
+            player.setOnline(false);
+            try {
+                serviceManager.getPlayerService().save(player);
+                log.info("Player ID {} cleared from online status", player.getId());
+            } catch (Exception e) {
+                log.error("Failed to clear player ID {}: {}", player.getId(), e.getMessage(), e);
+            }
         }
     }
 

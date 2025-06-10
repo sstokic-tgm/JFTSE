@@ -14,12 +14,14 @@ import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.ClientWhitelistService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CWelcomePacket;
+import com.jftse.server.core.thread.ThreadManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -81,15 +83,18 @@ public class TCPChannelHandler extends TCPHandler<FTConnection> {
         String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
         log.info("(" + remoteAddress + ") Channel Inactive");
 
-        FTClient client = connection.getClient();
+        final FTClient client = connection.getClient();
         if (client != null) {
-            String hostAddress = client.getIp();
-            ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, connection.getHwid());
-            if (clientWhitelist != null) {
-                clientWhitelist.setIsActive(false);
-                clientWhitelist = clientWhitelistService.save(clientWhitelist);
-            }
-            ACManager.getInstance().removeClient(client);
+            final String hostAddress = client.getIp();
+            final String hwid = connection.getHwid();
+            ThreadManager.getInstance().schedule(() -> {
+                ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, hwid);
+                if (clientWhitelist != null) {
+                    clientWhitelist.setIsActive(false);
+                    clientWhitelist = clientWhitelistService.save(clientWhitelist);
+                }
+                ACManager.getInstance().removeClient(client);
+            }, 100, TimeUnit.MILLISECONDS);
         }
     }
 

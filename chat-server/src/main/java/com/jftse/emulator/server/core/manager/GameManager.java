@@ -328,7 +328,7 @@ public class GameManager {
                         }
                     }
                     c.setActiveRoom(null);
-                    handleChatLobbyJoin(c);
+                    //handleChatLobbyJoin(c);
                 });
                 removeRoom(room);
                 updateLobbyRoomListForAllClients(connection);
