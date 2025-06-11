@@ -201,6 +201,7 @@ public enum PacketOperations {
     C2SPetPickupRequest(0x151E),
     S2CPetPickupAnswer(0x151F),
     S2CPetAdd(0x1520),
+    C2SPetCheck(0x1521),
     C2SPetRequestRoom(0x1D56),
     S2CPetRequestRoomAnswer(0x1D57),
 
