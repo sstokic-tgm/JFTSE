@@ -22,6 +22,8 @@ import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.packets.matchplay.*;
+import com.jftse.emulator.server.core.rabbit.messages.MatchFinishedMessage;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
 import com.jftse.emulator.server.core.utils.RankingUtils;
 import com.jftse.emulator.server.net.FTClient;
@@ -61,6 +63,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
     private final ClothEquipmentService clothEquipmentService;
     private final ProductService productService;
     private final MapService mapService;
+    private final RProducerService rProducerService;
 
     public MatchplayBasicModeHandler(MatchplayBasicGame game) {
         this.game = game;
@@ -73,6 +76,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
         this.productService = ServiceManager.getInstance().getProductService();
         this.mapService = ServiceManager.getInstance().getMapService();
+        this.rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -143,6 +147,8 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
 
         GameSessionManager.getInstance().addMatchplayReward(activeRoom.getRoomId(), matchplayReward);
 
+        List<MatchFinishedMessage.PlayerDto> playerDtoList = new ArrayList<>();
+
         for (final FTClient client : clients) {
             RoomPlayer rp = client.getRoomPlayer();
             if (rp == null)
@@ -161,6 +167,8 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 }
 
                 Player player = rp.getPlayer();
+
+                playerDtoList.add(new MatchFinishedMessage.PlayerDto(player.getName(), isCurrentPlayerInRedTeam ? "red" : "blue"));
 
                 List<BaseItem> ringItemList = new ArrayList<>();
                 if (!rp.isRingOfWisemanEquipped()) {
@@ -252,6 +260,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
+                playerDtoList.add(new MatchFinishedMessage.PlayerDto(rp.getPlayer().getName(), "spectator"));
             }
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(matchplayReward.getPlayerRewards());
             eventHandler.offer(eventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0));
@@ -273,6 +282,19 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (gameSession.getClients().isEmpty()) {
             GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
+
+            MatchFinishedMessage message = MatchFinishedMessage.builder()
+                    .gameSessionId(gameSessionId)
+                    .time(game.getTimeNeeded())
+                    .mode("BASIC")
+                    .winner(redTeamWon ? "red" : "blue")
+                    .map(game.getMap().getName())
+                    .players(playerDtoList)
+                    .isBoss(false)
+                    .isRandom(false)
+                    .isHard(false)
+                    .build();
+            RProducerService.getInstance().send(message, "game.stats.match", "MatchplaySystem");
         }
     }
 

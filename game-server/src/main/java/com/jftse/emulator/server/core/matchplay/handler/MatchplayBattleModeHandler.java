@@ -23,6 +23,8 @@ import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.packets.matchplay.*;
+import com.jftse.emulator.server.core.rabbit.messages.MatchFinishedMessage;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
 import com.jftse.emulator.server.core.utils.RankingUtils;
@@ -164,6 +166,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
 
         GameSessionManager.getInstance().addMatchplayReward(activeRoom.getRoomId(), matchplayReward);
 
+        List<MatchFinishedMessage.PlayerDto> playerDtoList = new ArrayList<>();
+
         for (final FTClient client : clients) {
             RoomPlayer rp = client.getRoomPlayer();
             if (rp == null)
@@ -183,6 +187,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
                 }
 
                 Player player = rp.getPlayer();
+
+                playerDtoList.add(new MatchFinishedMessage.PlayerDto(player.getName(), isCurrentPlayerInRedTeam ? "red" : "blue"));
 
                 List<BaseItem> ringItemList = new ArrayList<>();
                 if (!rp.isRingOfWisemanEquipped()) {
@@ -274,6 +280,7 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
+                playerDtoList.add(new MatchFinishedMessage.PlayerDto(rp.getPlayer().getName(), "spectator"));
             }
 
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(matchplayReward.getPlayerRewards());
@@ -296,6 +303,19 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (gameSession.getClients().isEmpty()) {
             GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
+
+            MatchFinishedMessage message = MatchFinishedMessage.builder()
+                    .gameSessionId(gameSessionId)
+                    .time(game.getTimeNeeded())
+                    .mode("BATTLE")
+                    .winner(allPlayersTeamRedDead ? "blue" : "red")
+                    .map(game.getMap().getName())
+                    .players(playerDtoList)
+                    .isBoss(false)
+                    .isRandom(false)
+                    .isHard(false)
+                    .build();
+            RProducerService.getInstance().send(message, "game.stats.match", "MatchplaySystem");
         }
     }
 

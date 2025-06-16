@@ -26,6 +26,8 @@ import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomMapChangeAnswerP
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardians;
 import com.jftse.emulator.server.core.packets.matchplay.*;
+import com.jftse.emulator.server.core.rabbit.messages.MatchFinishedMessage;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
 import com.jftse.emulator.server.core.task.DefeatTimerTask;
 import com.jftse.emulator.server.core.task.GuardianAttackTask;
@@ -232,6 +234,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         gameLogContent.append(game.getBossBattleActive().get() ? "Boss " : "Guardian ").append("battle finished. ");
         gameLogContent.append(wonGame ? "Players " : "Guardians ").append("won. ");
 
+        List<MatchFinishedMessage.PlayerDto> playerDtoList = new ArrayList<>();
+
         for (final FTClient client : clients) {
             RoomPlayer rp = client.getRoomPlayer();
             if (rp == null)
@@ -247,6 +251,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 }
 
                 Player player = rp.getPlayer();
+
+                playerDtoList.add(new MatchFinishedMessage.PlayerDto(player.getName(), "red"));
 
                 List<BaseItem> ringItemList = new ArrayList<>();
                 if (!rp.isRingOfWisemanEquipped()) {
@@ -359,6 +365,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
                 gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
+                playerDtoList.add(new MatchFinishedMessage.PlayerDto(rp.getPlayer().getName(), "spectator"));
             }
 
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(matchplayReward.getPlayerRewards());
@@ -386,6 +393,19 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
         if (game.getFinished().get() && gameSession.getClients().isEmpty()) {
             GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
+
+            MatchFinishedMessage message = MatchFinishedMessage.builder()
+                    .gameSessionId(gameSessionId)
+                    .time(game.getTimeNeeded())
+                    .mode("GUARDIAN")
+                    .winner(wonGame ? "red" : "blue")
+                    .map(game.getMap().getName())
+                    .players(playerDtoList)
+                    .isBoss(game.getBossBattleActive().get())
+                    .isRandom(game.getIsRandomGuardiansMode().get())
+                    .isHard(game.getIsHardMode().get())
+                    .build();
+            RProducerService.getInstance().send(message, "game.stats.match", "MatchplaySystem");
         }
     }
 
