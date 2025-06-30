@@ -55,16 +55,19 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public int getPlayerRankingByName(String name, byte gameMode) {
         return playerRepository.getRankingByNameAndGameMode(name, gameMode);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int getTutorialProgressSucceededCountByAccount(Long accountId) {
         return playerRepository.getTutorialProgressSucceededCount(accountId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Player findById(Long playerId) {
         Optional<Player> player = playerRepository.findById(playerId);
         return player.orElse(null);
@@ -72,6 +75,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public Player findByIdFetched(Long playerId) {
         Optional<Player> player = playerRepository.findByIdFetched(playerId);
         return player.orElse(null);
@@ -79,6 +83,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public Player findByName(String name) {
         List<Player> playerList = playerRepository.findAllByName(name);
         for (Player player : playerList) {
@@ -91,6 +96,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public Player findByNameFetched(String name) {
         List<Player> playerList = playerRepository.findAllByNameFetched(name);
         for (Player player : playerList) {
@@ -100,7 +106,6 @@ public class PlayerServiceImpl implements PlayerService {
         }
         return null;
     }
-
 
     @Override
     public Player updateMoney(Player player, int gold) {

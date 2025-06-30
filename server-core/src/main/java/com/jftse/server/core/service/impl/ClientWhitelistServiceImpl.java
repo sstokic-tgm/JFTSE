@@ -25,6 +25,7 @@ public class ClientWhitelistServiceImpl implements ClientWhitelistService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClientWhitelist findByIpAndHwid(String ip, String hwid) {
         try {
             Optional<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findByIpAndHwid(ip, hwid, Sort.by("created").descending());
@@ -36,6 +37,7 @@ public class ClientWhitelistServiceImpl implements ClientWhitelistService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClientWhitelist findByHwidAndFlaggedTrue(String hwid) {
         try {
             Optional<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findByHwidAndFlaggedTrue(hwid, Sort.by("created").descending());
@@ -47,6 +49,7 @@ public class ClientWhitelistServiceImpl implements ClientWhitelistService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClientWhitelist findByIpAndHwidAndAccount(String ip, String hwid, Account account) {
         try {
             Optional<ClientWhitelist> clientWhitelist = clientWhitelistRepository.findByIpAndHwidAndAccount(ip, hwid, account, Sort.by("created").descending());
