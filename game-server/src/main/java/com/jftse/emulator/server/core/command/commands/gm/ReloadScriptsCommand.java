@@ -7,6 +7,7 @@ import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.command.CommandManager;
 import com.jftse.emulator.server.core.interaction.PlayerScriptable;
 import com.jftse.emulator.server.core.interaction.PlayerScriptableImpl;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTConnection;
 import lombok.extern.log4j.Log4j2;
@@ -18,6 +19,7 @@ import java.util.Optional;
 public class ReloadScriptsCommand extends AbstractCommand {
     private final GameManager gameManager;
     private final CommandManager commandManager;
+    private final GameEventBus gameEventBus;
 
     private final String MESSAGE_SUCCESS = "Scripts reloaded";
     private final String MESSAGE_FAIL = "Scripts not reloaded";
@@ -28,6 +30,7 @@ public class ReloadScriptsCommand extends AbstractCommand {
 
         this.gameManager = GameManager.getInstance();
         this.commandManager = CommandManager.getInstance();
+        this.gameEventBus = GameEventBus.getInstance();
     }
 
     @Override
@@ -44,7 +47,9 @@ public class ReloadScriptsCommand extends AbstractCommand {
                 playerScriptable.sendChat(MESSAGE_SENDER, MESSAGE_FAIL);
                 return;
             }
-            valid = registerScriptFileEvents(playerScriptable);
+
+            playerScriptable.sendChat("Server", "Reloading events...");
+            valid = registerScriptFileEvents();
             if (!valid) {
                 playerScriptable.sendChat(MESSAGE_SENDER, MESSAGE_FAIL);
                 return;
@@ -79,7 +84,7 @@ public class ReloadScriptsCommand extends AbstractCommand {
         return hasRegisteredACommand;
     }
 
-    private boolean registerScriptFileEvents(PlayerScriptable playerScriptable) {
-        return true;
+    private boolean registerScriptFileEvents() {
+        return gameEventBus.reloadEvents();
     }
 }

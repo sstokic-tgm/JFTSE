@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.gameserver.C2SGameServerLoginPacket;
 import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerLoginPacket;
@@ -19,8 +21,6 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.AuthTokenService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.Date;
 
 @PacketOperationIdentifier(PacketOperations.C2SGameLoginData)
 @Log4j2
@@ -81,6 +81,8 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 1);
             connection.sendTCP(gameServerLoginAnswerPacket);
+
+            GameEventBus.call(GameEventType.ON_LOGIN, client);
         } else {
             AuthToken authTokenToRemove = authTokenService.findAuthToken(gameServerLoginPacket.getToken());
             if (authTokenToRemove != null) {

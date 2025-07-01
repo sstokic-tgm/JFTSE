@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.gameserver.C2SGameServerLoginPacket;
 import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerLoginPacket;
@@ -81,6 +83,8 @@ public class GameServerLoginPacketHandler extends AbstractPacketHandler {
 
             S2CGameServerLoginPacket gameServerLoginAnswerPacket = new S2CGameServerLoginPacket((char) 0, (byte) 0);
             connection.sendTCP(gameServerLoginAnswerPacket);
+
+            GameEventBus.call(GameEventType.ON_LOGIN, client);
         } else {
             AuthToken authTokenToRemove = authTokenService.findAuthToken(gameServerLoginPacket.getToken());
             if (authTokenToRemove != null) {
