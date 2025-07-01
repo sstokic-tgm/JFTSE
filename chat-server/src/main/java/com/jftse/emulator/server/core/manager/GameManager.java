@@ -4,6 +4,8 @@ import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.ChatMode;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
@@ -29,7 +31,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,6 +61,7 @@ public class GameManager {
     private ConcurrentHashMap<Integer, String> personalBoardMessages;
 
     private Future<?> eventHandlerTask;
+    private Future<?> updateLoopTask;
 
     private Optional<ScriptManager> scriptManager;
 
@@ -87,6 +92,9 @@ public class GameManager {
         if (running.compareAndSet(true, false)) {
             if (eventHandlerTask != null && eventHandlerTask.cancel(false))
                 log.info("EventHandlerTask stopped");
+
+            if (updateLoopTask != null && updateLoopTask.cancel(false))
+                log.info("UpdateLoopTask stopped");
 
             log.info("Closing all connections");
             for (FTClient client : clients) {
@@ -153,7 +161,19 @@ public class GameManager {
     }
 
     private void setupGlobalTasks() {
-        // empty
+        AtomicLong lastTickTime = new AtomicLong(System.currentTimeMillis());
+        updateLoopTask = threadManager.scheduleAtFixedRate(() -> {
+            if (running.get()) {
+                long now = System.currentTimeMillis();
+                long diff = now - lastTickTime.getAndSet(now);
+                try {
+                    GameEventBus.call(GameEventType.ON_TICK, diff);
+                } catch (Exception e) {
+                    log.error("Error during update loop: " + e.getMessage(), e);
+                }
+            }
+        }, 1, 1, TimeUnit.SECONDS);
+        log.info("UpdateLoopTask started");
     }
 
     private void setupChatLobby() {

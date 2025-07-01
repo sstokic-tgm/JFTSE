@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -95,6 +97,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
         Skill skill = skillService.findSkillById((long) skillId);
 
         if (skill != null && this.isUniqueSkill(skill)) {
+            GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, ftClient, game, skill);
+
             this.handleUniqueSkill(ftClient.getConnection(), game, skill);
             return;
         }
@@ -197,6 +201,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     }
                 }
             }
+
+            GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, skillHitsTarget);
         } catch (ValidationException ve) {
             log.warn(ve.getMessage());
             return false;
@@ -312,6 +318,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                 }
             }
         }
+
+        GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, skill, skillHitsTarget);
 
         Skill skillToApply = this.getSkillToApply(skill);
         S2CMatchplayDealDamage damageToPlayerPacket =

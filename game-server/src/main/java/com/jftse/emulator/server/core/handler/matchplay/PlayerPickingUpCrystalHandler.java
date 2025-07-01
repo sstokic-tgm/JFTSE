@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.utilities.StringTokenizer;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -116,6 +118,8 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
             int randomSkillIndex = this.getRandomPlayerSkill(player, playerBattleState, levelRequired);
             S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill(playerPicksUpCrystalPacket.getCrystalId(), playerPosition, randomSkillIndex);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, ftClient.getConnection());
+
+            GameEventBus.call(GameEventType.MP_PLAYER_PICKING_UP_CRYSTAL, ftClient, skillCrystal, randomSkillIndex);
 
             if (isBattleGame) {
                 ((MatchplayBattleGame) game).getSkillCrystals().removeIf(sc -> sc.getId() == skillCrystal.getId());

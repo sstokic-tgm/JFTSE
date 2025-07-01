@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -98,6 +100,8 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
         SkillUse skillUse = null;
         if (skill != null)
             skillUse = new SkillUse(skill, attackerPosition, targetPosition, isQuickSlot, skillUseTimestamp, false);
+
+        GameEventBus.call(GameEventType.MP_PLAYER_USE_SKILL, ftClient, game, roomPlayer, skill, skillUse, anyoneUsesSkill);
 
         if (attackerIsGuardian) {
             if (skill != null) {

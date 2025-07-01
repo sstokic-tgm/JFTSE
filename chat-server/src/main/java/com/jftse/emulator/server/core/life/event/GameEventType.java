@@ -1,7 +1,9 @@
 package com.jftse.emulator.server.core.life.event;
 
 public enum GameEventType {
-    GAME, MATCH_START, MATCH_END, ON_LOGIN;
+    ON_TICK,
+    ON_LOGIN,
+    ON_LOGOUT;
 
     public String getName() {
         return toString();

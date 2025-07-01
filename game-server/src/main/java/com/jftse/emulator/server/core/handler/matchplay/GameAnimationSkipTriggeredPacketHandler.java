@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -69,6 +71,8 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
             gameAnimationSkipPacket.write((char) 0);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationSkipPacket, ftClient.getConnection());
 
+            GameEventBus.call(GameEventType.MP_GAME_ANIM_SKIP_TRIGGERED, ftClient, room, roomPlayer.get());
+
             S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(room);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(playerStatsPacket, ftClient.getConnection());
 
@@ -88,6 +92,8 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
                 MatchplayGame game = gameSession.getMatchplayGame();
                 if (game == null)
                     return;
+
+                GameEventBus.call(GameEventType.MP_GAME_ANIM_SKIP_END, game, room);
 
                 game.getHandleable().onStart(client);
             }, 8, TimeUnit.SECONDS);
