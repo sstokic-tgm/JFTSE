@@ -471,19 +471,15 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
             gameSession.getFireables().forEach(f -> f.setCancelled(true));
             gameSession.getFireables().clear();
 
-            boolean isAdvancedBossGuardianMode = false;
-            MScenarios.GameMode gameMode;
+            List<MScenarios> scenarios = ServiceManager.getInstance().getScenarioService().getByMapAndIsDefault(game.getMap().getId(), true);
+            MScenarios bossScenario = scenarios.stream()
+                    .filter(s -> s.getGameMode() == MScenarios.GameMode.BOSS_BATTLE || (s.getGameMode() == MScenarios.GameMode.BOSS_BATTLE_V2 && !isHardMode))
+                    .findFirst()
+                    .orElse(null);
 
-            // mons only
-            if (Arrays.asList(8L, 9L).contains(game.getMap().getId()) && !isHardMode) {
-                gameMode = MScenarios.GameMode.BOSS_BATTLE_V2;
-                isAdvancedBossGuardianMode = true;
-            } else {
-                gameMode = MScenarios.GameMode.BOSS_BATTLE;
-            }
+            boolean isAdvancedBossGuardianMode = bossScenario != null && bossScenario.getGameMode() == MScenarios.GameMode.BOSS_BATTLE_V2;
 
-            MScenarios bossBattleScenario = ServiceManager.getInstance().getScenarioService().getDefaultScenarioByMapAndGameMode(game.getMap().getId(), gameMode);
-            game.setScenario(bossBattleScenario);
+            game.setScenario(bossScenario);
 
             final Guardian2Maps[] bossGuardianArr = { null };
 
@@ -504,7 +500,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     bossGuardianArr[0] = bossGuardians.get(random.nextInt(bossGuardians.size()));
 
                     TypedQuery<Guardian2Maps> q = em.createQuery("SELECT g FROM Guardian2Maps g WHERE g.scenario.id = :scenarioId AND g.status.id = 1", Guardian2Maps.class);
-                    q.setParameter("scenarioId", bossBattleScenario.getId());
+                    q.setParameter("scenarioId", bossScenario.getId());
                     List<Guardian2Maps> guardian2Maps = q.getResultList();
 
                     final List<Guardian2Maps> filteredList = new ArrayList<>();
@@ -537,7 +533,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
             bossGuardian = bossGuardianService.findBossGuardianById(bossGuardian.getId());
 
             if (isAdvancedBossGuardianMode) {
-                if (game.loadAdvancedBossGuardianMode("hb")) {
+                if (game.loadAdvancedBossGuardianMode()) {
                     log.info("Advanced boss guardian mode loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
                 } else {
                     log.info("Advanced boss guardian mode could not be loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());

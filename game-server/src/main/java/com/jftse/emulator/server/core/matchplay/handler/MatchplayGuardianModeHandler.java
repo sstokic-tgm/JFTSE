@@ -451,18 +451,19 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
         if (game.getMap().getIsBossStage()) {
 
-            MScenarios.GameMode gameMode;
-
-            // mons only
-            if (Arrays.asList(8L, 9L).contains(game.getMap().getId())) {
-                gameMode = MScenarios.GameMode.BOSS_BATTLE_V2;
-            } else {
-                gameMode = MScenarios.GameMode.BOSS_BATTLE;
+            List<MScenarios> scenarios = scenarioService.getByMapAndIsDefault(game.getMap().getId(), true);
+            if (scenarios.isEmpty()) {
+                log.error("No default scenarios found for map: " + game.getMap().getName());
+                return;
             }
 
-            MScenarios bossScenario = scenarioService.getDefaultScenarioByMapAndGameMode(game.getMap().getId(), gameMode);
+            MScenarios bossScenario = scenarios.stream()
+                    .filter(s -> s.getGameMode() == MScenarios.GameMode.BOSS_BATTLE || s.getGameMode() == MScenarios.GameMode.BOSS_BATTLE_V2)
+                    .findFirst()
+                    .orElse(null);
+
             if (bossScenario == null) {
-                log.error("No default scenario found for game mode: " + MScenarios.GameMode.BOSS_BATTLE);
+                log.error("No boss scenario found for map: " + game.getMap().getName());
                 return;
             }
 

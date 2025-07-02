@@ -7,9 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 public abstract class ScriptManagerFactory {
@@ -31,20 +29,33 @@ public abstract class ScriptManagerFactory {
             logger.get().info("Loading scripts...");
 
             Files.walkFileTree(p, new FileVisitor<>() {
-                private Path preVisitDir;
+                private final Deque<Path> dirStack = new ArrayDeque<>();
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    preVisitDir = dir;
+                    dirStack.push(dir);
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Path currentDir = dirStack.peek();
+
                     String fileName = file.getFileName().toString();
-                    String type = file.getParent().toString().equals(preVisitDir.getFileName().toString())
-                            ? preVisitDir.getFileName().toString().toUpperCase()
-                            : file.getParent().getFileName().toString().toUpperCase();
+                    String type = currentDir.getFileName().toString().toUpperCase();
+                    String subType = "";
+
+                    if (!ScriptManager.allowedTypes.contains(type)) {
+                        Path parentDir = currentDir.getParent();
+                        if (parentDir != null && ScriptManager.allowedTypes.contains(parentDir.getFileName().toString().toUpperCase())) {
+                            type = parentDir.getFileName().toString().toUpperCase();
+                            if (type.equals("GUARDIAN-PHASE")) {
+                                subType = currentDir.getFileName().toString();
+                            }
+                        } else {
+                            return FileVisitResult.CONTINUE;
+                        }
+                    }
 
                     Long id = null;
                     try {
@@ -52,7 +63,7 @@ public abstract class ScriptManagerFactory {
                     } catch (NumberFormatException ignored) {
                     }
 
-                    ScriptFile scriptFile = new ScriptFile(id, file.toFile(), type);
+                    ScriptFile scriptFile = new ScriptFile(id, file.toFile(), type, subType);
                     scriptFileList.add(scriptFile);
 
                     logger.get().info("Loaded " + scriptFile);
@@ -67,6 +78,7 @@ public abstract class ScriptManagerFactory {
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    dirStack.pop();
                     return FileVisitResult.CONTINUE;
                 }
             });

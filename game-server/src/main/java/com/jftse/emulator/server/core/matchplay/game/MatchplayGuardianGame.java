@@ -744,7 +744,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return new MatchplayGuardianModeHandler(this);
     }
 
-    public synchronized boolean loadAdvancedBossGuardianMode(String bossCode) {
+    public synchronized boolean loadAdvancedBossGuardianMode() {
         if (phaseManager != null) {
             log.error("Advanced boss guardian mode already loaded");
             return false;
@@ -757,9 +757,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
             List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
             for (ScriptFile scriptFile : scriptFiles) {
                 String fileName = scriptFile.getFile().getName().split("_")[1].split("\\.")[0];
-
-                if (!fileName.startsWith(bossCode))
+                if (!scriptFile.getSubType().equals(map.getMap().toString())) {
                     continue;
+                }
 
                 try {
                     Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);

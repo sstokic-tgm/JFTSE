@@ -16,4 +16,7 @@ public interface ScenariosRepository extends JpaRepository<MScenarios, Long> {
 
     @Query("SELECT ms FROM MScenarios ms LEFT JOIN ms.maps m WHERE m.id IN :maps AND ms.gameMode = :gameMode AND ms.status.id = 1 AND ms.isDefault = :isDefault")
     List<MScenarios> findAllByMapsAndGameModeAndIsDefault(Set<Long> maps, MScenarios.GameMode gameMode, Boolean isDefault);
+
+    @Query("SELECT ms FROM MScenarios ms LEFT JOIN ms.maps m WHERE m.id = :mapId AND ms.isDefault = :isDefault AND ms.status.id = 1")
+    List<MScenarios> findAllByMapAndIsDefault(Long mapId, Boolean isDefault);
 }
