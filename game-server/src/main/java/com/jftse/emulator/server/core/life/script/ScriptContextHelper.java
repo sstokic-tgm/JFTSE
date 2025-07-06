@@ -25,32 +25,32 @@ public class ScriptContextHelper {
         return stateService.get(scriptId, name).orElse(null);
     }
 
-    public String get(Long accountId, String name) {
-        return stateService.get(scriptId, accountId, name).orElse(null);
+    public String get(String name, Long accountId) {
+        return stateService.get(scriptId, name, accountId).orElse(null);
     }
 
     public void set(String name, String value) {
         stateService.set(scriptId, name, value);
     }
 
-    public void set(Long accountId, String name, String value) {
-        stateService.set(scriptId, accountId, name, value);
+    public void set(String name, Long accountId, String value) {
+        stateService.set(scriptId, name, accountId, value);
     }
 
     public void delete(String name) {
         stateService.delete(scriptId, name);
     }
 
-    public void delete(Long accountId, String name) {
-        stateService.delete(scriptId, accountId, name);
+    public void delete(String name, Long accountId) {
+        stateService.delete(scriptId, name, accountId);
     }
 
     public <T> T getJson(String name, Class<T> clazz) {
         return stateService.getJson(scriptId, name, clazz);
     }
 
-    public <T> T getJson(Long accountId, String name, Class<T> clazz) {
-        return stateService.getJson(scriptId, accountId, name, clazz);
+    public <T> T getJson(String name, Long accountId, Class<T> clazz) {
+        return stateService.getJson(scriptId, name, accountId, clazz);
     }
 
     public <T> void setJson(String name, T value) {
@@ -61,9 +61,9 @@ public class ScriptContextHelper {
         }
     }
 
-    public <T> void setJson(Long accountId, String name, T value) {
+    public <T> void setJson(String name, Long accountId, T value) {
         try {
-            stateService.setJson(scriptId, accountId, name, value);
+            stateService.setJson(scriptId, name, accountId, value);
         } catch (ValidationException e) {
             log.error("Failed to set JSON value for script {}: {}", scriptId, e.getMessage(), e);
         }

@@ -20,7 +20,7 @@ public class ScriptStateServiceImpl implements ScriptStateService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public Optional<String> get(String scriptId, Long accountId, String name) {
+    public Optional<String> get(String scriptId, String name, Long accountId) {
         return repo.findByScriptIdAndAccountIdAndName(scriptId, accountId, name)
                 .map(SavedVariables::getData);
     }
@@ -50,7 +50,7 @@ public class ScriptStateServiceImpl implements ScriptStateService {
 
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void set(String scriptId, Long accountId, String name, String data) {
+    public void set(String scriptId, String name, Long accountId, String data) {
         SavedVariables savedVar = repo.findByScriptIdAndAccountIdAndName(scriptId, accountId, name)
                 .orElseGet(SavedVariables::new);
 
@@ -75,7 +75,7 @@ public class ScriptStateServiceImpl implements ScriptStateService {
     }
 
     @Override
-    public void delete(String scriptId, Long accountId, String name) {
+    public void delete(String scriptId, String name, Long accountId) {
         repo.findByScriptIdAndAccountIdAndName(scriptId, accountId, name)
                 .ifPresent(repo::delete);
     }
@@ -87,7 +87,7 @@ public class ScriptStateServiceImpl implements ScriptStateService {
     }
 
     @Override
-    public <T> T getJson(String scriptId, Long accountId, String name, Class<T> clazz) {
+    public <T> T getJson(String scriptId, String name, Long accountId, Class<T> clazz) {
         Optional<SavedVariables> savedVarOpt = repo.findByScriptIdAndAccountIdAndName(scriptId, accountId, name);
         return savedVarOpt.map(savedVar -> {
             try {
@@ -112,14 +112,14 @@ public class ScriptStateServiceImpl implements ScriptStateService {
 
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public <T> void setJson(String scriptId, Long accountId, String name, T data) throws ValidationException {
+    public <T> void setJson(String scriptId, String name, Long accountId, T data) throws ValidationException {
         if (data == null) {
             throw new ValidationException("Data cannot be null");
         }
 
         try {
             String jsonData = objectMapper.writeValueAsString(data);
-            set(scriptId, accountId, name, jsonData);
+            set(scriptId, name, accountId, jsonData);
         } catch (Exception e) {
             throw new ValidationException("Failed to serialize data to JSON", e);
         }
