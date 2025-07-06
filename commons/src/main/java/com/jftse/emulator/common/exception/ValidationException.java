@@ -10,6 +10,10 @@ public class ValidationException extends Exception implements ExtraInformationEx
         super(message);
     }
 
+    public ValidationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public boolean getHandleable() {
         return this.handleable;
     }

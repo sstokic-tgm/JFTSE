@@ -50,7 +50,7 @@ public abstract class ScriptManagerFactory {
                         if (parentDir != null && ScriptManager.allowedTypes.contains(parentDir.getFileName().toString().toUpperCase())) {
                             type = parentDir.getFileName().toString().toUpperCase();
                             if (type.equals("GUARDIAN-PHASE")) {
-                                subType = currentDir.getFileName().toString();
+                                subType = currentDir.getFileName().toString().toUpperCase();
                             }
                         } else {
                             return FileVisitResult.CONTINUE;
@@ -63,7 +63,9 @@ public abstract class ScriptManagerFactory {
                     } catch (NumberFormatException ignored) {
                     }
 
-                    ScriptFile scriptFile = new ScriptFile(id, file.toFile(), type, subType);
+                    String name = file.toFile().getName().split("_")[1].split("\\.")[0];
+
+                    ScriptFile scriptFile = new ScriptFile(id, name, file.toFile(), type, subType);
                     scriptFileList.add(scriptFile);
 
                     logger.get().info("Loaded " + scriptFile);

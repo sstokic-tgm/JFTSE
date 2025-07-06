@@ -10,14 +10,16 @@ import java.io.File;
 @Setter
 public class ScriptFile {
     private Long id;
+    private String name;
     private File file;
     private String type;
     private String subType;
 
     private CompiledScript compiledScript;
 
-    public ScriptFile(Long id, File file, String type, String subType) {
+    public ScriptFile(Long id, String name, File file, String type, String subType) {
         this.id = id;
+        this.name = name;
         this.file = file;
         this.type = type;
         this.subType = subType;
@@ -26,7 +28,8 @@ public class ScriptFile {
     @Override
     public String toString() {
         return "ScriptFile { " +
-                "type='" + type + '\'' +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
                 ", subType='" + subType + '\'' +
                 ", id=" + id +
                 ", file=" + file.getName() +

@@ -756,7 +756,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
             ScriptManager sm = scriptManager.get();
             List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
             for (ScriptFile scriptFile : scriptFiles) {
-                String fileName = scriptFile.getFile().getName().split("_")[1].split("\\.")[0];
                 if (!scriptFile.getSubType().equals(map.getMap().toString())) {
                     continue;
                 }
@@ -772,7 +771,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
                     phases.add(phase);
                 } catch (Exception e) {
-                    log.error("Error on register phase from script: " + fileName + ". ScriptException: " + e.getMessage(), e);
+                    log.error("Error on register phase from script: " + scriptFile.getName() + ". ScriptException: " + e.getMessage(), e);
                 }
             }
         }
