@@ -7,6 +7,8 @@ public interface PlayerScriptable {
     void giveItem(int productIndex, int quantity);
     void giveItem(int itemIndex, String category, int quantity);
     void sendGift(int productIndex, int quantity, String message);
+    void sendMessage(String message);
+    void sendMessage(String sender, String message);
     void sendChat(String name, String message);
     void sendChat(String name, String message, Integer chatMode);
 }

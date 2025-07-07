@@ -7,14 +7,18 @@ import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.messenger.Gift;
+import com.jftse.entities.database.model.messenger.Message;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -157,6 +161,76 @@ public class PlayerScriptableImpl implements PlayerScriptable {
 
         player.getInventory().addItem(productIndex, quantity);
     }
+
+    @Override
+    public void sendMessage(String message) {
+        Optional<FTPlayer> optionalPlayer = getPlayer();
+        if (optionalPlayer.isEmpty() || message == null || message.isEmpty())
+            return;
+
+        FTPlayer player = optionalPlayer.get();
+
+        Player sender = serviceManager.getPlayerService().findByName("JFTSE");
+        if (sender == null) {
+            sender = new Player();
+            sender.setId(player.getPlayer().getId());
+        }
+
+        Message msg = new Message();
+        msg.setSeen(false);
+        msg.setSender(sender);
+        msg.setReceiver(player.getPlayer());
+        msg.setMessage(message);
+        serviceManager.getMessageService().save(msg);
+
+        FTConnection connection = gameManager.getConnectionByPlayerId(player.getPlayer().getId());
+        if (connection != null) {
+            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg);
+
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(player.getPlayer().getId())
+                    .packet(notifyPacket)
+                    .build();
+            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getPlayer().getName() + "(GameServer)");
+        }
+    }
+
+    @Override
+    public void sendMessage(String sender, String message) {
+        Optional<FTPlayer> optionalPlayer = getPlayer();
+        if (optionalPlayer.isEmpty() || sender == null || sender.isEmpty() || message == null || message.isEmpty())
+            return;
+
+        FTPlayer player = optionalPlayer.get();
+
+        Player senderPlayer = serviceManager.getPlayerService().findByName(sender);
+        if (senderPlayer == null) {
+            senderPlayer = serviceManager.getPlayerService().findByName("JFTSE");
+            if (senderPlayer == null) {
+                senderPlayer = new Player();
+                senderPlayer.setId(player.getPlayer().getId());
+            }
+        }
+
+        Message msg = new Message();
+        msg.setSeen(false);
+        msg.setSender(senderPlayer);
+        msg.setReceiver(player.getPlayer());
+        msg.setMessage(message);
+        serviceManager.getMessageService().save(msg);
+
+        FTConnection connection = gameManager.getConnectionByPlayerId(player.getPlayer().getId());
+        if (connection != null) {
+            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg);
+
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(player.getPlayer().getId())
+                    .packet(notifyPacket)
+                    .build();
+            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getPlayer().getName() + "(GameServer)");
+        }
+    }
+
 
     @Override
     public void sendChat(String name, String message) {
