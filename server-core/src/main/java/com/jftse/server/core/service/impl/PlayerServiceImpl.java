@@ -55,7 +55,6 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
-    @Transactional(readOnly = true)
     public int getPlayerRankingByName(String name, byte gameMode) {
         return playerRepository.getRankingByNameAndGameMode(name, gameMode);
     }
