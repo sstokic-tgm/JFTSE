@@ -19,15 +19,13 @@ import java.util.*;
 public class GameEventBus {
     private static GameEventBus instance;
 
-    private static Map<GameEventType, List<GameEventCallback>> eventListeners;
+    private static final Map<GameEventType, List<GameEventCallback>> eventListeners = new HashMap<>();
 
     @Autowired
     private ScriptStateService scriptStateService;
 
     @PostConstruct
     public void init() {
-        eventListeners = new HashMap<>();
-
         log.info("Loading events...");
         registerEvents();
         log.info("Game events has been loaded.");
