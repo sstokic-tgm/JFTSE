@@ -63,7 +63,8 @@ public abstract class ScriptManagerFactory {
                     } catch (NumberFormatException ignored) {
                     }
 
-                    String name = file.toFile().getName().split("_")[1].split("\\.")[0];
+                    String[] parts = file.toFile().getName().split("\\.")[0].split("_");
+                    String name = String.join("_", Arrays.copyOfRange(parts, 1, parts.length));
 
                     ScriptFile scriptFile = new ScriptFile(id, name, file.toFile(), type, subType);
                     scriptFileList.add(scriptFile);
