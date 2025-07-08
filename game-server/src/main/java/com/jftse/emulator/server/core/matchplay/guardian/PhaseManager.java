@@ -97,8 +97,6 @@ public class PhaseManager {
                 updateTask = null;
 
                 isPhaseEnding.set(false);
-
-                ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
             });
         }
     };

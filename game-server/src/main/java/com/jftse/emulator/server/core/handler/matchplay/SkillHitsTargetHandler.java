@@ -12,6 +12,7 @@ import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
+import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetBossGuardiansStats;
 import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplaySkillHitsTarget;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage;
@@ -602,6 +603,11 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
         } else {
             stageChangingToBoss = game.getStageChangingToBoss().get();
             allGuardiansDead = game.getGuardianBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
+            final PhaseManager phaseManager = game.getPhaseManager();
+            if (phaseManager != null && phaseManager.getIsRunning().get()) {
+                return;
+            }
+
             if (allGuardiansDead && !game.getFinished().get() && !stageChangingToBoss) {
                 ThreadManager.getInstance().newTask(new FinishGameTask(connection));
             }
