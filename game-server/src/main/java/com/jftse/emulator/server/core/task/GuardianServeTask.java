@@ -67,7 +67,7 @@ public class GuardianServeTask extends AbstractTask {
                 } catch (Exception e) {
                     log.error("updateTask exception", e);
                 }
-            }, 1, TimeUnit.SECONDS);
+            }, 250, TimeUnit.MILLISECONDS);
             game.getPhaseManager().setUpdateTask(updateTask);
         }
 
