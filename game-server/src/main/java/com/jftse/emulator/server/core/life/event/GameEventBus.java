@@ -40,6 +40,10 @@ public class GameEventBus {
         return instance;
     }
 
+    public ScriptStateService getScriptStateService() {
+        return scriptStateService;
+    }
+
     public void on(String eventType, GameEventCallback listener) {
         GameEventType type = GameEventType.valueOf(eventType.toUpperCase());
         eventListeners.computeIfAbsent(type, k -> new ArrayList<>()).add(listener);

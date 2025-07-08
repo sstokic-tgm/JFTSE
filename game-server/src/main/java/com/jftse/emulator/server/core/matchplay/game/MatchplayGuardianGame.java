@@ -5,6 +5,7 @@ import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.bonuses.BattleHouseBonus;
@@ -12,6 +13,7 @@ import com.jftse.emulator.server.core.life.progression.bonuses.RingOfExpBonus;
 import com.jftse.emulator.server.core.life.progression.bonuses.RingOfGoldBonus;
 import com.jftse.emulator.server.core.life.progression.bonuses.RingOfWisemanBonus;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.life.script.ScriptContextHelper;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
@@ -766,6 +768,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
                     bindings.put("threadManager", GameManager.getInstance().getThreadManager());
                     bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
+                    bindings.put("scriptContextHelper", new ScriptContextHelper(GameEventBus.getInstance().getScriptStateService(), scriptFile));
+                    bindings.put("geb", GameEventBus.getInstance());
                     bindings.put("game", this);
 
                     BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);

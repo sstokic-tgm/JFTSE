@@ -114,6 +114,8 @@ public class ServiceManager {
 
     @Autowired
     private GameEventService gameEventService;
+    @Autowired
+    private ScriptStateService scriptStateService;
 
     @Autowired
     private GrpcAuthService grpcAuthService;
