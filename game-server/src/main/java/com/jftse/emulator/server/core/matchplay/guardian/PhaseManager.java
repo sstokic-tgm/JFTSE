@@ -38,12 +38,12 @@ public class PhaseManager {
     private PhaseCallback defaultPhaseCallback = new PhaseCallback() {
         @Override
         public void onNextPhase(FTConnection connection) {
+            if (!isChangingPhase.compareAndSet(false, true)) {
+                return;
+            }
+
             if (hasNextPhase()) {
                 enqueueTask(() -> {
-                    if (!isChangingPhase.compareAndSet(false, true)) {
-                        return;
-                    }
-
                     BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
                     final String nextPhaseName = nextPhase.getPhaseName();
 
@@ -71,6 +71,7 @@ public class PhaseManager {
                     });
                 });
             } else {
+                isChangingPhase.set(false);
                 onPhaseEnd(connection);
             }
         }
@@ -183,7 +184,7 @@ public class PhaseManager {
         }
     }
 
-    public synchronized int onHeal(int target, int healAmount, boolean isGuardian) {
+    public int onHeal(int target, int healAmount, boolean isGuardian) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -196,7 +197,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public synchronized int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+    public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -209,7 +210,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public synchronized int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+    public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -222,7 +223,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public synchronized int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
+    public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -235,7 +236,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public synchronized int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
+    public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
