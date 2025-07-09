@@ -183,7 +183,7 @@ public class PhaseManager {
         }
     }
 
-    public int onHeal(int target, int healAmount, boolean isGuardian) {
+    public synchronized int onHeal(int target, int healAmount, boolean isGuardian) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -196,7 +196,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+    public synchronized int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -209,7 +209,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+    public synchronized int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -222,7 +222,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
+    public synchronized int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -235,7 +235,7 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
+    public synchronized int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
