@@ -1,13 +1,13 @@
-let S2CMatchplayDealDamage = Java.type("com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage");
-let S2CChatRoomAnswerPacket = Java.type("com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket");
-let S2CMatchplayUseSkill = Java.type("com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayUseSkill");
-let S2CMatchplayGiveSpecificSkill = Java.type("com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayGiveSpecificSkill");
-let Skill2Guardians = Java.type("com.jftse.entities.database.model.battle.Skill2Guardians");
-let Skill = Java.type("com.jftse.entities.database.model.battle.Skill");
-let BattleUtils = Java.type("com.jftse.emulator.server.core.utils.BattleUtils");
-let Thread = Java.type("java.lang.Thread");
-let GuardianAttackTask = Java.type("com.jftse.emulator.server.core.task.GuardianAttackTask");
-let PlayerScriptableImpl = Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl");
+var S2CMatchplayDealDamage = Java.type("com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage");
+var S2CChatRoomAnswerPacket = Java.type("com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket");
+var S2CMatchplayUseSkill = Java.type("com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayUseSkill");
+var S2CMatchplayGiveSpecificSkill = Java.type("com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayGiveSpecificSkill");
+var Skill2Guardians = Java.type("com.jftse.entities.database.model.battle.Skill2Guardians");
+var Skill = Java.type("com.jftse.entities.database.model.battle.Skill");
+var BattleUtils = Java.type("com.jftse.emulator.server.core.utils.BattleUtils");
+var Thread = Java.type("java.lang.Thread");
+var GuardianAttackTask = Java.type("com.jftse.emulator.server.core.task.GuardianAttackTask");
+var PlayerScriptableImpl = Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl");
 
 class Phase2 {
     constructor() {
