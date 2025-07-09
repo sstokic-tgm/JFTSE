@@ -246,8 +246,12 @@ var phase = {
         }
         return attackLoopTime;
     },
-    onHeal: function (targetGuardian, healAmount) {
-        return game.getGuardianCombatSystem().heal(targetGuardian, healAmount);
+    onHeal: function (targetGuardian, healAmount, isGuardian) {
+        if (isGuardian) {
+            return game.getGuardianCombatSystem().heal(target, healAmount);
+        } else {
+            return game.getPlayerCombatSystem().heal(target, healAmount);
+        }
     },
     onDealDamage: function (attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill) {
         let targetGuardianState = game.getGuardianBattleStateByPosition(targetGuardian);

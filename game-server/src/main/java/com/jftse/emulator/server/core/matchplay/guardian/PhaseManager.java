@@ -183,7 +183,7 @@ public class PhaseManager {
         }
     }
 
-    public int onHeal(int targetGuardian, int healAmount) {
+    public int onHeal(int target, int healAmount, boolean isGuardian) {
         var result = executeTask(() -> {
             while (isUpdating.get()) {
                 try {
@@ -191,7 +191,7 @@ public class PhaseManager {
                 } catch (InterruptedException e) {
                 }
             }
-            return currentPhase.get().onHeal(targetGuardian, healAmount);
+            return currentPhase.get().onHeal(target, healAmount, isGuardian);
         });
         return result == null ? 0 : result;
     }

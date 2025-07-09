@@ -15,7 +15,7 @@ public interface BossBattlePhaseable {
     boolean hasEnded();
     void setPhaseCallback(PhaseCallback phaseCallback);
     long getGuardianAttackLoopTime(AdvancedGuardianState guardian);
-    int onHeal(int targetGuardian, int healAmount);
+    int onHeal(int target, int healAmount, boolean isGuardian);
     int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill);
     int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill);
     int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff);

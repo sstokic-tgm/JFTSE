@@ -261,7 +261,11 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                         return false;
 
                     if (skillDamage > 1) {
-                        newHealth = guardianGame.getPlayerCombatSystem().heal(targetPosition, skillDamage);
+                        if (isAdvancedBossGuardianModeActive) {
+                            newHealth = (short) guardianGame.getPhaseManager().onHeal(targetPosition, skillDamage, false);
+                        } else {
+                            newHealth = guardianGame.getPlayerCombatSystem().heal(targetPosition, skillDamage);
+                        }
                     } else if (denyDamage) {
                         if (isAdvancedBossGuardianModeActive) {
                             newHealth = (short) guardianGame.getPhaseManager().onDealDamageToPlayer(attackerPosition, targetPosition, (short) -1, false, false, skill);
@@ -294,7 +298,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
 
                     if (isAdvancedBossGuardianModeActive) {
                         if (skillDamage > 1) {
-                            newHealth = (short) guardianGame.getPhaseManager().onHeal(targetPosition, skillDamage);
+                            newHealth = (short) guardianGame.getPhaseManager().onHeal(targetPosition, skillDamage, true);
                         } else if (denyDamage) {
                             newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                         } else {
