@@ -51,24 +51,14 @@ public class GuardianServeTask extends AbstractTask {
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setNameColorAndRemoveBlackBarPacket, connection);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, connection);
         game.resetStageStartTime();
-        ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession));
-        ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
 
         if (game.isAdvancedBossGuardianMode()) {
             final PhaseManager phaseManager = game.getPhaseManager();
-            phaseManager.start();
-            Future<?> updateTask = ThreadManager.getInstance().scheduleAtFixedRate(() -> {
-                if (!phaseManager.getIsRunning().get() || phaseManager.getIsChangingPhase().get() || phaseManager.getIsPhaseEnding().get())
-                    return;
-
-                try {
-                    phaseManager.update(connection);
-                } catch (Exception e) {
-                    log.error("updateTask exception", e);
-                }
-            }, 250, TimeUnit.MILLISECONDS);
-            game.getPhaseManager().setUpdateTask(updateTask);
+            phaseManager.start(connection);
         }
+
+        ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession));
+        ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
 
         game.getStageChangingToBoss().compareAndSet(true, false);
     }

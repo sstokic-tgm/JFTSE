@@ -31,7 +31,18 @@ public class PhaseManager {
     private AtomicBoolean isPhaseEnding = new AtomicBoolean(false);
 
     private final BlockingDeque<Runnable> taskQueue = new LinkedBlockingDeque<>();
-    private final ExecutorService executorService = ThreadManager.getInstance().createSequentialExecutor();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r);
+        thread.setName("PhaseManager-Executor-" + thread.threadId());
+        thread.setDaemon(true);
+        return thread;
+    });
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread thread = new Thread(r);
+        thread.setName("PhaseManager-Scheduled-Executor-" + thread.threadId());
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private final Lock lock = new ReentrantLock();
 
@@ -43,42 +54,40 @@ public class PhaseManager {
             }
 
             if (hasNextPhase()) {
-                enqueueTask(() -> {
-                    BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
-                    final String nextPhaseName = nextPhase.getPhaseName();
+                BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
+                final String nextPhaseName = nextPhase.getPhaseName();
 
-                    Future<?> countdownTask = executorService.submit(() -> {
-                        for (int i = 5; i > 0; i--) {
-                            S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
-                            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
+                Future<?> countdownTask = executorService.submit(() -> {
+                    for (int i = 5; i > 0; i--) {
+                        S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
+                        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
 
-                            if (i != 1) {
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException e) {
-                                    log.error("Countdown interrupted exception", e);
-                                }
+                        if (i != 1) {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                log.error("Countdown interrupted exception", e);
                             }
                         }
-                    });
+                    }
+                });
 
-                    enqueueTask(() -> {
-                        try {
-                            countdownTask.get();
-                        } catch (InterruptedException e) {
-                            log.error("Countdown task interrupted exception", e);
-                        } catch (ExecutionException e) {
-                            log.error("Countdown task execution exception", e);
-                        }
+                enqueueTask(() -> {
+                    try {
+                        countdownTask.get();
+                    } catch (InterruptedException e) {
+                        log.error("Countdown task interrupted exception", e);
+                    } catch (ExecutionException e) {
+                        log.error("Countdown task execution exception", e);
+                    }
 
-                        currentPhase.get().end();
-                        currentPhase.compareAndSet(currentPhase.get(), nextPhase);
+                    currentPhase.get().end();
+                    currentPhase.compareAndSet(currentPhase.get(), nextPhase);
 
-                        currentPhase.get().start();
-                        isChangingPhase.set(false);
+                    currentPhase.get().start();
+                    isChangingPhase.set(false);
 
-                        ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
-                    });
+                    ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
                 });
             } else {
                 isChangingPhase.set(false);
@@ -96,32 +105,44 @@ public class PhaseManager {
                 return;
             }
 
-            enqueueTask(() -> {
-                currentPhase.get().end();
-                try {
-                    updateTask.get();
-                } catch (InterruptedException e) {
-                    log.error("updateTask interrupted exception", e);
-                } catch (ExecutionException e) {
-                    log.error("updateTask execution exception", e);
-                }
-                updateTask = null;
+            currentPhase.get().end();
+            try {
+                updateTask.get();
+            } catch (InterruptedException e) {
+                log.error("updateTask interrupted exception", e);
+            } catch (ExecutionException e) {
+                log.error("updateTask execution exception", e);
+            }
+            updateTask = null;
 
-                isPhaseEnding.set(false);
-            });
+            isPhaseEnding.set(false);
         }
     };
 
     public PhaseManager(List<BossBattlePhaseable> phases) {
         this.phases = phases;
         currentPhase = new AtomicReference<>(phases.getFirst());
+
+        final CompletableFuture<Thread> threadCapture = new CompletableFuture<>();
+        executorService.submit(() -> {
+            Thread currentThread = Thread.currentThread();
+            threadCapture.complete(currentThread);
+            log.debug("PhaseManager thread started: {}", currentThread.getName());
+        });
     }
 
-    public void start() {
+    public void start(FTConnection connection) {
         final BossBattlePhaseable current = currentPhase.get();
         if (current != null) {
             current.start();
             isRunning.set(true);
+
+            updateTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
+                if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())
+                    return;
+
+                update(connection);
+            }, 0, 250, TimeUnit.MILLISECONDS);
         } else {
             log.error("Current phase is null, cannot start PhaseManager.");
         }
@@ -129,8 +150,8 @@ public class PhaseManager {
 
     public void update(FTConnection connection) {
         enqueueTask(() -> {
-            if (isUpdating.compareAndSet(false, true)) {
-                try {
+            try {
+                if (isUpdating.compareAndSet(false, true)) {
                     PhaseUpdateResult result = currentPhase.get().update(connection);
                     log.debug("Phase update result: {}", result);
 
@@ -141,11 +162,11 @@ public class PhaseManager {
                         default -> {
                         }
                     }
-                } catch (Exception e) {
-                    log.error("Exception during phase update", e);
-                } finally {
-                    isUpdating.set(false);
                 }
+            } catch (Exception e) {
+                log.error("Exception during phase update", e);
+            } finally {
+                isUpdating.set(false);
             }
         });
     }
@@ -210,7 +231,7 @@ public class PhaseManager {
 
     public int onHeal(int target, int healAmount, boolean isGuardian) {
         var result = executeTask(() -> {
-            while (isUpdating.get()) {
+            while (!canExecuteTask()) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -223,7 +244,7 @@ public class PhaseManager {
 
     public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         var result = executeTask(() -> {
-            while (isUpdating.get()) {
+            while (!canExecuteTask()) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -236,7 +257,7 @@ public class PhaseManager {
 
     public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         var result = executeTask(() -> {
-            while (isUpdating.get()) {
+            while (!canExecuteTask()) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -249,7 +270,7 @@ public class PhaseManager {
 
     public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         var result = executeTask(() -> {
-            while (isUpdating.get()) {
+            while (!canExecuteTask()) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -262,7 +283,7 @@ public class PhaseManager {
 
     public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         var result = executeTask(() -> {
-            while (isUpdating.get()) {
+            while (!canExecuteTask()) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -274,8 +295,6 @@ public class PhaseManager {
     }
 
     private void enqueueTask(Runnable task) {
-        if (!isRunning.get() || isChangingPhase.get() || isPhaseEnding.get()) return;
-
         if (taskQueue.size() > 40) {
             log.warn("Task queue size is high: {}", taskQueue.size());
         }
@@ -297,13 +316,31 @@ public class PhaseManager {
     }
 
     private <T> T executeTask(Callable<T> task) {
-        final FutureTask<T> futureTask = new FutureTask<>(task);
-        enqueueTask(futureTask);
+        final CompletableFuture<T> future = new CompletableFuture<>();
+
+        enqueueTask(() -> {
+            try {
+                future.complete(task.call());
+            } catch (Exception e) {
+                log.error("Task execution exception", e);
+                future.completeExceptionally(e);
+            }
+        });
+
         try {
-            return futureTask.get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Task execution exception", e);
-            return null;
+            return future.get(500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            log.error("Interrupted while waiting", e);
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            log.warn("PhaseManager task timed out.");
+        } catch (ExecutionException e) {
+            log.error("PhaseManager task failed", e.getCause());
         }
+        return null;
+    }
+
+    private boolean canExecuteTask() {
+        return isRunning.get() && !isChangingPhase.get() && !isPhaseEnding.get() && !isUpdating.get();
     }
 }

@@ -39,6 +39,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -73,6 +75,7 @@ public class GameManager {
     private Future<?> updateLoopTask;
 
     private Optional<ScriptManager> scriptManager;
+    private final Lock lock = new ReentrantLock();
 
     private Random rnd;
 
@@ -561,14 +564,22 @@ public class GameManager {
     }
 
     public void sendPacketToAllClientsInSameGameSession(Packet packet, FTConnection connection) {
-        final GameSession gameSession = connection.getClient().getActiveGameSession();
-        if (gameSession != null) {
-            final ArrayList<FTClient> clientsInGameSession = new ArrayList<>(gameSession.getClients());
-            clientsInGameSession.forEach(c -> {
-                if (c.getConnection() != null) {
-                    c.getConnection().sendTCP(packet);
-                }
-            });
+        lock.lock();
+        try {
+            if (connection == null || connection.getClient() == null) {
+                return;
+            }
+            final GameSession gameSession = connection.getClient().getActiveGameSession();
+            if (gameSession != null) {
+                final ArrayList<FTClient> clientsInGameSession = new ArrayList<>(gameSession.getClients());
+                clientsInGameSession.forEach(c -> {
+                    if (c.getConnection() != null) {
+                        c.getConnection().sendTCP(packet);
+                    }
+                });
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
