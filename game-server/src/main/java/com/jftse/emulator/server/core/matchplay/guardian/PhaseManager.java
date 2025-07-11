@@ -47,7 +47,7 @@ public class PhaseManager {
                     BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
                     final String nextPhaseName = nextPhase.getPhaseName();
 
-                    ThreadManager.getInstance().newTask(() -> {
+                    Future<?> countdownTask = executorService.submit(() -> {
                         for (int i = 5; i > 0; i--) {
                             S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
                             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
@@ -60,9 +60,19 @@ public class PhaseManager {
                                 }
                             }
                         }
+                    });
+
+                    enqueueTask(() -> {
+                        try {
+                            countdownTask.get();
+                        } catch (InterruptedException e) {
+                            log.error("Countdown task interrupted exception", e);
+                        } catch (ExecutionException e) {
+                            log.error("Countdown task execution exception", e);
+                        }
+
                         currentPhase.get().end();
                         currentPhase.compareAndSet(currentPhase.get(), nextPhase);
-                        setPhaseCallback(defaultPhaseCallback);
 
                         currentPhase.get().start();
                         isChangingPhase.set(false);
@@ -78,15 +88,15 @@ public class PhaseManager {
 
         @Override
         public void onPhaseEnd(FTConnection connection) {
+            if (!isPhaseEnding.compareAndSet(false, true)) {
+                return;
+            }
+
+            if (!isRunning.compareAndSet(true, false)) {
+                return;
+            }
+
             enqueueTask(() -> {
-                if (!isPhaseEnding.compareAndSet(false, true)) {
-                    return;
-                }
-
-                if (!isRunning.compareAndSet(true, false)) {
-                    return;
-                }
-
                 currentPhase.get().end();
                 try {
                     updateTask.get();
@@ -104,20 +114,38 @@ public class PhaseManager {
 
     public PhaseManager(List<BossBattlePhaseable> phases) {
         this.phases = phases;
-        currentPhase = new AtomicReference<>(phases.get(0));
-
-        setPhaseCallback(defaultPhaseCallback);
+        currentPhase = new AtomicReference<>(phases.getFirst());
     }
 
     public void start() {
-        enqueueTask(() -> currentPhase.get().start());
+        final BossBattlePhaseable current = currentPhase.get();
+        if (current != null) {
+            current.start();
+            isRunning.set(true);
+        } else {
+            log.error("Current phase is null, cannot start PhaseManager.");
+        }
     }
 
     public void update(FTConnection connection) {
         enqueueTask(() -> {
             if (isUpdating.compareAndSet(false, true)) {
-                currentPhase.get().update(connection);
-                isUpdating.set(false);
+                try {
+                    PhaseUpdateResult result = currentPhase.get().update(connection);
+                    log.debug("Phase update result: {}", result);
+
+                    switch (result) {
+                        case NEXT_PHASE -> defaultPhaseCallback.onNextPhase(connection);
+                        case END_PHASE -> defaultPhaseCallback.onPhaseEnd(connection);
+                        case ERROR -> log.error("Error during phase update for {}", currentPhase.get().getPhaseName());
+                        default -> {
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Exception during phase update", e);
+                } finally {
+                    isUpdating.set(false);
+                }
             }
         });
     }
@@ -138,10 +166,6 @@ public class PhaseManager {
     public boolean hasEnded() {
         var result = executeTask(() -> currentPhase.get().hasEnded());
         return result != null && result;
-    }
-
-    public void setPhaseCallback(PhaseCallback phaseCallback) {
-        enqueueTask(() -> currentPhase.get().setPhaseCallback(phaseCallback));
     }
 
     public long getGuardianAttackLoopTime(AdvancedGuardianState guardian) {
@@ -250,6 +274,12 @@ public class PhaseManager {
     }
 
     private void enqueueTask(Runnable task) {
+        if (!isRunning.get() || isChangingPhase.get() || isPhaseEnding.get()) return;
+
+        if (taskQueue.size() > 40) {
+            log.warn("Task queue size is high: {}", taskQueue.size());
+        }
+
         taskQueue.offer(task);
         executorService.submit(this::executeNextTask);
     }

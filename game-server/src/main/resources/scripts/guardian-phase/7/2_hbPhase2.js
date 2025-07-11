@@ -8,13 +8,13 @@ var BattleUtils = Java.type("com.jftse.emulator.server.core.utils.BattleUtils");
 var Thread = Java.type("java.lang.Thread");
 var GuardianAttackTask = Java.type("com.jftse.emulator.server.core.task.GuardianAttackTask");
 var PlayerScriptableImpl = Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl");
+var PhaseUpdateResult = Java.type("com.jftse.emulator.server.core.matchplay.guardian.PhaseUpdateResult");
 
 class Phase2 {
     constructor() {
         this.timeStarted = 0;
         this.finished = false;
         this.phaseStarted = false;
-        this.phaseCallback = null;
         this.isBossImmune = false;
 
         this.part1Finished = false;
@@ -65,16 +65,10 @@ var phase = {
         phase2.phaseStarted = true;
     },
     update: function (connection) {
-        if (!phase2.phaseStarted) {
-            return;
-        }
-
-        if (this.hasEnded()) {
-            return;
-        }
+        if (!phase1.phaseStarted || this.hasEnded()) return PhaseUpdateResult.CONTINUE;
 
         if (phase2.partIsTransitioning) {
-            return;
+            return PhaseUpdateResult.CONTINUE;
         }
 
         let guardianBattleStates = game.getGuardianBattleStates();
@@ -166,7 +160,7 @@ var phase = {
         }
 
         if (phase2.partIsTransitioning) {
-            return;
+            return PhaseUpdateResult.CONTINUE;
         }
 
         let allGuardiansDead = guardianBattleStates.stream().allMatch(function (guardianBattleState) {
@@ -216,10 +210,10 @@ var phase = {
         }
 
         if (allGuardiansDead) {
-            if (phase2.phaseCallback) {
-                phase2.phaseCallback.onPhaseEnd(connection);
-            }
+            return PhaseUpdateResult.END_PHASE;
         }
+
+        return PhaseUpdateResult.CONTINUE;
     },
     end: function () {
         phase2.finished = true;
@@ -233,9 +227,6 @@ var phase = {
     hasEnded: function () {
         return (phase2.finished) || (this.playTime() !== 0 && this.phaseTime() > this.playTime());
     },
-    setPhaseCallback: function (pc) {
-        phase2.phaseCallback = pc;
-    },
     getGuardianAttackLoopTime: function (guardian) {
         let attackLoopTime = -1;
         if (guardian.isBoss()) {
@@ -246,7 +237,7 @@ var phase = {
         }
         return attackLoopTime;
     },
-    onHeal: function (targetGuardian, healAmount, isGuardian) {
+    onHeal: function (target, healAmount, isGuardian) {
         if (isGuardian) {
             return game.getGuardianCombatSystem().heal(target, healAmount);
         } else {

@@ -771,6 +771,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
                     bindings.put("scriptContextHelper", new ScriptContextHelper(GameEventBus.getInstance().getScriptStateService(), scriptFile));
                     bindings.put("geb", GameEventBus.getInstance());
+                    bindings.put("log", log);
                     bindings.put("game", this);
 
                     BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);

@@ -6,14 +6,13 @@ import com.jftse.entities.database.model.battle.Skill;
 public interface BossBattlePhaseable {
     String getPhaseName();
     void start();
-    void update(FTConnection connection);
+    PhaseUpdateResult update(FTConnection connection);
     void end();
     // time in milliseconds
     long phaseTime();
     // time in milliseconds
     long playTime();
     boolean hasEnded();
-    void setPhaseCallback(PhaseCallback phaseCallback);
     long getGuardianAttackLoopTime(AdvancedGuardianState guardian);
     int onHeal(int target, int healAmount, boolean isGuardian);
     int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill);

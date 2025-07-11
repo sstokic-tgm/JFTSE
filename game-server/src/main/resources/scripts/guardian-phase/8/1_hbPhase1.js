@@ -1,9 +1,10 @@
+var PhaseUpdateResult = Java.type("com.jftse.emulator.server.core.matchplay.guardian.PhaseUpdateResult");
+
 class Phase1 {
     constructor() {
         this.timeStarted = 0;
         this.finished = false;
         this.phaseStarted = false;
-        this.phaseCallback = null;
         this.isBossImmune = true;
     }
 }
@@ -19,12 +20,7 @@ var phase = {
         phase1.phaseStarted = true;
     },
     update: function (connection) {
-        if (!phase1.phaseStarted) {
-            return;
-        }
-        if (this.hasEnded()) {
-            return;
-        }
+        if (!phase1.phaseStarted || this.hasEnded()) return PhaseUpdateResult.CONTINUE;
 
         let guardianBattleStates = game.getGuardianBattleStates();
         let nonBossGuardiansAllDead = false;
@@ -45,10 +41,10 @@ var phase = {
         }
 
         if (nonBossGuardiansAllDead) {
-            if (phase1.phaseCallback) {
-                phase1.phaseCallback.onNextPhase(connection);
-            }
+            return PhaseUpdateResult.NEXT_PHASE;
         }
+
+        return PhaseUpdateResult.CONTINUE;
     },
     end: function () {
         phase1.finished = true;
@@ -61,9 +57,6 @@ var phase = {
     },
     hasEnded: function () {
         return (phase1.finished) || (this.playTime() !== 0 && this.phaseTime() > this.playTime());
-    },
-    setPhaseCallback: function (pc) {
-        phase1.phaseCallback = pc;
     },
     getGuardianAttackLoopTime: function (guardian) {
         let attackLoopTime = -1;
@@ -78,8 +71,12 @@ var phase = {
         }
         return attackLoopTime;
     },
-    onHeal: function (targetGuardian, healAmount) {
-        return game.getGuardianCombatSystem().heal(targetGuardian, healAmount);
+    onHeal: function (target, healAmount, isGuardian) {
+        if (isGuardian) {
+            return game.getGuardianCombatSystem().heal(target, healAmount);
+        } else {
+            return game.getPlayerCombatSystem().heal(target, healAmount);
+        }
     },
     onDealDamage: function (attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill) {
         let targetGuardianState = game.getGuardianBattleStateByPosition(targetGuardian);
