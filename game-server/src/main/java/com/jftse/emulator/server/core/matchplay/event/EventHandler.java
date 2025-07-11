@@ -12,6 +12,8 @@ import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @Getter
@@ -19,6 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Log4j2
 public class EventHandler {
     private BlockingQueue<Fireable> fireableDeque;
+    private final Lock lock = new ReentrantLock();
 
     @PostConstruct
     public void init() {
@@ -32,6 +35,21 @@ public class EventHandler {
      */
     public void offer(Fireable fireable) {
         fireableDeque.offer(fireable);
+    }
+
+    /**
+     * Appends packetEvent to the end of this list.
+     * This method is thread-safe and should be used only for calls from JavaScript code.
+     *
+     * @param fireable to be added to the queue
+     */
+    public void offerJS(Fireable fireable) {
+        try {
+            lock.lock();
+            fireableDeque.offer(fireable);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -90,13 +108,17 @@ public class EventHandler {
     }
 
     public RunnableEvent createRunnableEvent(Runnable runnable, long eventFireTime) {
-        long packetTimestamp = Instant.now().toEpochMilli();
+        try {
+            lock.lock();
 
-        RunnableEvent runnableEvent = new RunnableEvent();
-        runnableEvent.setRunnable(runnable);
-        runnableEvent.setRunnableTimeStamp(packetTimestamp);
-        runnableEvent.setEventFireTime(eventFireTime);
-
-        return runnableEvent;
+            long packetTimestamp = Instant.now().toEpochMilli();
+            RunnableEvent runnableEvent = new RunnableEvent();
+            runnableEvent.setRunnable(runnable);
+            runnableEvent.setRunnableTimeStamp(packetTimestamp);
+            runnableEvent.setEventFireTime(eventFireTime);
+            return runnableEvent;
+        } finally {
+            lock.unlock();
+        }
     }
 }

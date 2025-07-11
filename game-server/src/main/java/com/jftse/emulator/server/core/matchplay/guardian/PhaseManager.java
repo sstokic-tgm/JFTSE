@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.matchplay.guardian;
 
+import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.task.GuardianAttackTask;
@@ -229,7 +230,9 @@ public class PhaseManager {
         }
     }
 
-    public int onHeal(int target, int healAmount, boolean isGuardian) {
+    public int onHeal(int target, int healAmount, boolean isGuardian) throws ValidationException {
+        validate();
+
         var result = executeTask(() -> {
             while (!canExecuteTask()) {
                 try {
@@ -242,7 +245,9 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+    public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
+        validate();
+
         var result = executeTask(() -> {
             while (!canExecuteTask()) {
                 try {
@@ -255,7 +260,9 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
+    public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
+        validate();
+
         var result = executeTask(() -> {
             while (!canExecuteTask()) {
                 try {
@@ -268,7 +275,9 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
+    public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
+        validate();
+
         var result = executeTask(() -> {
             while (!canExecuteTask()) {
                 try {
@@ -281,7 +290,9 @@ public class PhaseManager {
         return result == null ? 0 : result;
     }
 
-    public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
+    public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
+        validate();
+
         var result = executeTask(() -> {
             while (!canExecuteTask()) {
                 try {
@@ -328,7 +339,7 @@ public class PhaseManager {
         });
 
         try {
-            return future.get(500, TimeUnit.MILLISECONDS);
+            return future.get(6, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             log.error("Interrupted while waiting", e);
             Thread.currentThread().interrupt();
@@ -342,5 +353,11 @@ public class PhaseManager {
 
     private boolean canExecuteTask() {
         return isRunning.get() && !isChangingPhase.get() && !isPhaseEnding.get() && !isUpdating.get();
+    }
+
+    private void validate() throws ValidationException {
+        if (isChangingPhase.get() || isPhaseEnding.get()) {
+            throw new ValidationException("Cannot execute action while changing phase.");
+        }
     }
 }
