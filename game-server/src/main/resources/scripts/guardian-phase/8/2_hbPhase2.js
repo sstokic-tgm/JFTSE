@@ -9,7 +9,6 @@ var Thread = Java.type("java.lang.Thread");
 var GuardianAttackTask = Java.type("com.jftse.emulator.server.core.task.GuardianAttackTask");
 var PlayerScriptableImpl = Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl");
 var PhaseUpdateResult = Java.type("com.jftse.emulator.server.core.matchplay.guardian.PhaseUpdateResult");
-var Runnable = Java.type("java.lang.Runnable");
 
 class Phase2 {
     constructor() {
@@ -102,7 +101,7 @@ var phase = {
                     }
                 }
 
-                const task = new Runnable({
+                const task = new java.lang.Runnable({
                     run: function () {
                         let guardianBattleState = phase2.revivedGuardians.shift();
                         let healDamage = new S2CMatchplayDealDamage(guardianBattleState.getPosition(), guardianBattleState.getCurrentHealth().get(), 3, 29, 0, 0);
@@ -142,7 +141,7 @@ var phase = {
                     }
                 }
 
-                const task = new Runnable({
+                const task = new java.lang.Runnable({
                     run: function () {
                         let guardianBattleState = phase2.revivedGuardians.shift();
                         let healDamage = new S2CMatchplayDealDamage(guardianBattleState.getPosition(), guardianBattleState.getCurrentHealth().get(), 3, 29, 0, 0);

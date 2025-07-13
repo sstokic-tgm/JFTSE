@@ -108,17 +108,11 @@ public class EventHandler {
     }
 
     public RunnableEvent createRunnableEvent(Runnable runnable, long eventFireTime) {
-        try {
-            lock.lock();
-
-            long packetTimestamp = Instant.now().toEpochMilli();
-            RunnableEvent runnableEvent = new RunnableEvent();
-            runnableEvent.setRunnable(runnable);
-            runnableEvent.setRunnableTimeStamp(packetTimestamp);
-            runnableEvent.setEventFireTime(eventFireTime);
-            return runnableEvent;
-        } finally {
-            lock.unlock();
-        }
+        long packetTimestamp = Instant.now().toEpochMilli();
+        RunnableEvent runnableEvent = new RunnableEvent();
+        runnableEvent.setRunnable(runnable);
+        runnableEvent.setRunnableTimeStamp(packetTimestamp);
+        runnableEvent.setEventFireTime(eventFireTime);
+        return runnableEvent;
     }
 }
