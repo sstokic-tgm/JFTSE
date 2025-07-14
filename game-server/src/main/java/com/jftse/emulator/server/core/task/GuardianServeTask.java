@@ -10,6 +10,7 @@ import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayTriggerGuard
 import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.scenario.MScenarios;
 import com.jftse.server.core.thread.AbstractTask;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
@@ -52,7 +53,7 @@ public class GuardianServeTask extends AbstractTask {
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, connection);
         game.resetStageStartTime();
 
-        if (game.isAdvancedBossGuardianMode()) {
+        if (game.getScenario() != null && game.getScenario().getGameMode() == MScenarios.GameMode.BOSS_BATTLE_V2) {
             final PhaseManager phaseManager = game.getPhaseManager();
             phaseManager.start(connection, game);
         }
