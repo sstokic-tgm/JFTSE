@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.matchplay.guardian;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.task.GuardianAttackTask;
 import com.jftse.emulator.server.net.FTConnection;
@@ -132,11 +133,20 @@ public class PhaseManager {
         });
     }
 
-    public void start(FTConnection connection) {
+    public void start(FTConnection connection, MatchplayGuardianGame game) {
         final BossBattlePhaseable current = currentPhase.get();
         if (current != null) {
-            current.start();
-            isRunning.set(true);
+            enqueueTask(() -> {
+                if (game.loadAdvancedBossGuardianMode()) {
+                    log.info("Advanced boss guardian mode loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
+
+                    isRunning.set(true);
+                    current.start();
+                } else {
+                    log.info("Advanced boss guardian mode could not be loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
+                    isRunning.set(false);
+                }
+            });
 
             updateTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
                 if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())

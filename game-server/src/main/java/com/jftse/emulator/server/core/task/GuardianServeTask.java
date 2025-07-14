@@ -54,7 +54,7 @@ public class GuardianServeTask extends AbstractTask {
 
         if (game.isAdvancedBossGuardianMode()) {
             final PhaseManager phaseManager = game.getPhaseManager();
-            phaseManager.start(connection);
+            phaseManager.start(connection, game);
         }
 
         ThreadManager.getInstance().newTask(new DefeatTimerTask(connection, gameSession));
