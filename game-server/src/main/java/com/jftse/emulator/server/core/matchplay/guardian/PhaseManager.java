@@ -154,6 +154,7 @@ public class PhaseManager {
                 phases.addAll(loadedPhases);
 
                 final BossBattlePhaseable current = phases.getFirst();
+                this.currentPhase = new AtomicReference<>(current);
 
                 isRunning.set(true);
                 current.start();
