@@ -2,7 +2,6 @@ package com.jftse.emulator.server.core.matchplay.guardian;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.task.GuardianAttackTask;
 import com.jftse.emulator.server.net.FTConnection;
@@ -19,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 @Getter
 @Setter
@@ -145,31 +145,42 @@ public class PhaseManager {
         });
     }
 
-    public void start(FTConnection connection, MatchplayGuardianGame game) {
-        enqueueTask(() -> {
-            final List<BossBattlePhaseable> loadedPhases = game.loadAdvancedBossGuardianMode();
-            if (!loadedPhases.isEmpty()) {
-                log.info("Advanced boss guardian mode loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
-                game.setPhaseManager(this);
-                phases.addAll(loadedPhases);
+    public boolean setup(Supplier<Boolean> action) {
+        if (action == null) {
+            log.error("Action supplier is null, cannot setup PhaseManager.");
+            return false;
+        }
 
-                final BossBattlePhaseable current = phases.getFirst();
-                this.currentPhase = new AtomicReference<>(current);
-
-                isRunning.set(true);
-                current.start();
-            } else {
-                log.info("Advanced boss guardian mode could not be loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
-                isRunning.set(false);
+        Boolean result = executeTask(() -> {
+            try {
+                return action.get();
+            } catch (Exception e) {
+                log.error("Exception during PhaseManager setup", e);
+                return false;
             }
         });
 
-        updateTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
-            if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())
-                return;
+        if (result == null) {
+            log.error("PhaseManager setup action returned null.");
+            return false;
+        }
 
-            update(connection);
-        }, 0, 250, TimeUnit.MILLISECONDS);
+        return result;
+    }
+
+    public void start(FTConnection connection) {
+        final BossBattlePhaseable current = currentPhase.get();
+        if (current != null) {
+            current.start();
+            isRunning.set(true);
+
+            updateTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
+                if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())
+                    return;
+
+                update(connection);
+            }, 0, 250, TimeUnit.MILLISECONDS);
+        }
     }
 
     public void update(FTConnection connection) {

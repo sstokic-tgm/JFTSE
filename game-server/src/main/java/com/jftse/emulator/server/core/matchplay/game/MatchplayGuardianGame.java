@@ -746,46 +746,51 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return new MatchplayGuardianModeHandler(this);
     }
 
-    public synchronized List<BossBattlePhaseable> loadAdvancedBossGuardianMode() {
+    public synchronized boolean loadAdvancedBossGuardianMode() {
         if (phaseManager != null) {
             log.error("Advanced boss guardian mode already loaded");
-            return new ArrayList<>();
+            return false;
         }
 
-        Optional<ScriptManager> scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
-        List<BossBattlePhaseable> phases = new ArrayList<>();
-        if (scriptManager.isPresent()) {
-            ScriptManager sm = scriptManager.get();
-            List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
-            scriptFiles.sort(Comparator.comparing(ScriptFile::getId));
-            for (ScriptFile scriptFile : scriptFiles) {
-                if (!scriptFile.getSubType().equals(map.getMap().toString())) {
-                    continue;
-                }
+        this.phaseManager = new PhaseManager();
+        final boolean success = this.phaseManager.setup(() -> {
+            Optional<ScriptManager> scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
+            List<BossBattlePhaseable> phases = new ArrayList<>();
+            if (scriptManager.isPresent()) {
+                ScriptManager sm = scriptManager.get();
+                List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
+                scriptFiles.sort(Comparator.comparing(ScriptFile::getId));
+                for (ScriptFile scriptFile : scriptFiles) {
+                    if (!scriptFile.getSubType().equals(map.getMap().toString())) {
+                        continue;
+                    }
 
-                try {
-                    Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
-                    bindings.put("gameManager", GameManager.getInstance());
-                    bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
-                    bindings.put("threadManager", GameManager.getInstance().getThreadManager());
-                    bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
-                    bindings.put("scriptContextHelper", new ScriptContextHelper(GameEventBus.getInstance().getScriptStateService(), scriptFile));
-                    bindings.put("geb", GameEventBus.getInstance());
-                    bindings.put("log", log);
-                    bindings.put("game", this);
+                    try {
+                        Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+                        bindings.put("gameManager", GameManager.getInstance());
+                        bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
+                        bindings.put("threadManager", GameManager.getInstance().getThreadManager());
+                        bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
+                        bindings.put("scriptContextHelper", new ScriptContextHelper(GameEventBus.getInstance().getScriptStateService(), scriptFile));
+                        bindings.put("geb", GameEventBus.getInstance());
+                        bindings.put("log", log);
+                        bindings.put("game", this);
 
-                    BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
-                    phases.add(phase);
-                } catch (Exception e) {
-                    log.error("Error on register phase from script: " + scriptFile.getName() + ". ScriptException: " + e.getMessage(), e);
+                        BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
+                        phases.add(phase);
+                    } catch (Exception e) {
+                        log.error("Error on register phase from script: " + scriptFile.getName() + ". ScriptException: " + e.getMessage(), e);
+                    }
                 }
             }
-        }
-        final boolean success = !phases.isEmpty();
+            return  !phases.isEmpty();
+        });
+
+
         if (success) {
             this.isAdvancedBossGuardianMode = true;
         }
-        return phases;
+        return success;
     }
 
     public GuardianBattleState getGuardianBattleStateByPosition(int position) {
