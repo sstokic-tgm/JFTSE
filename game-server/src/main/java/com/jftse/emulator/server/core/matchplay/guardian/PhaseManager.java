@@ -165,6 +165,10 @@ public class PhaseManager {
             return false;
         }
 
+        if (result) {
+            this.currentPhase = new AtomicReference<>(phases.getFirst());
+        }
+
         return result;
     }
 

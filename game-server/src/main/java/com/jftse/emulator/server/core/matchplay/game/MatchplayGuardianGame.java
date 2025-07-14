@@ -778,14 +778,14 @@ public class MatchplayGuardianGame extends MatchplayGame {
 
                         BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
                         phases.add(phase);
+                        this.phaseManager.addPhase(phase);
                     } catch (Exception e) {
                         log.error("Error on register phase from script: " + scriptFile.getName() + ". ScriptException: " + e.getMessage(), e);
                     }
                 }
             }
-            return  !phases.isEmpty();
+            return !phases.isEmpty();
         });
-
 
         if (success) {
             this.isAdvancedBossGuardianMode = true;

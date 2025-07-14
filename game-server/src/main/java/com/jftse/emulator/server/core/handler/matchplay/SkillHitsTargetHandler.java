@@ -537,6 +537,14 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     .orElse(bossGuardianService.findBossGuardianById(1L));
             bossGuardian = bossGuardianService.findBossGuardianById(bossGuardian.getId());
 
+            if (isAdvancedBossGuardianMode) {
+                if (game.loadAdvancedBossGuardianMode()) {
+                    log.info("Advanced boss guardian mode loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
+                } else {
+                    log.info("Advanced boss guardian mode could not be loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
+                }
+            }
+
             if (!hasBossGuardianStage && isHardMode) {
                 game.fillRemainingGuardianSlots(true, game, game.getGuardiansInBossStage(), guardians);
             }
