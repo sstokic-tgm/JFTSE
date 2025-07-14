@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -133,30 +134,41 @@ public class PhaseManager {
         });
     }
 
+    public PhaseManager() {
+        this.phases = new ArrayList<>();
+
+        final CompletableFuture<Thread> threadCapture = new CompletableFuture<>();
+        executorService.submit(() -> {
+            Thread currentThread = Thread.currentThread();
+            threadCapture.complete(currentThread);
+            log.debug("PhaseManager thread started: {}", currentThread.getName());
+        });
+    }
+
     public void start(FTConnection connection, MatchplayGuardianGame game) {
-        final BossBattlePhaseable current = currentPhase.get();
-        if (current != null) {
-            enqueueTask(() -> {
-                if (game.loadAdvancedBossGuardianMode()) {
-                    log.info("Advanced boss guardian mode loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
+        enqueueTask(() -> {
+            final List<BossBattlePhaseable> loadedPhases = game.loadAdvancedBossGuardianMode();
+            if (!loadedPhases.isEmpty()) {
+                log.info("Advanced boss guardian mode loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
+                game.setPhaseManager(this);
+                phases.addAll(loadedPhases);
 
-                    isRunning.set(true);
-                    current.start();
-                } else {
-                    log.info("Advanced boss guardian mode could not be loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
-                    isRunning.set(false);
-                }
-            });
+                final BossBattlePhaseable current = phases.getFirst();
 
-            updateTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
-                if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())
-                    return;
+                isRunning.set(true);
+                current.start();
+            } else {
+                log.info("Advanced boss guardian mode could not be loaded for map: " + game.getMap().getName() + ", scenarioId: " + game.getScenario().getId());
+                isRunning.set(false);
+            }
+        });
 
-                update(connection);
-            }, 0, 250, TimeUnit.MILLISECONDS);
-        } else {
-            log.error("Current phase is null, cannot start PhaseManager.");
-        }
+        updateTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
+            if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())
+                return;
+
+            update(connection);
+        }, 0, 250, TimeUnit.MILLISECONDS);
     }
 
     public void update(FTConnection connection) {

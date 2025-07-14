@@ -54,7 +54,7 @@ public class GuardianServeTask extends AbstractTask {
         game.resetStageStartTime();
 
         if (game.getScenario() != null && game.getScenario().getGameMode() == MScenarios.GameMode.BOSS_BATTLE_V2) {
-            final PhaseManager phaseManager = game.getPhaseManager();
+            final PhaseManager phaseManager = new PhaseManager();
             phaseManager.start(connection, game);
         }
 

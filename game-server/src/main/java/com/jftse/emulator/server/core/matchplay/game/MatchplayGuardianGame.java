@@ -746,10 +746,10 @@ public class MatchplayGuardianGame extends MatchplayGame {
         return new MatchplayGuardianModeHandler(this);
     }
 
-    public synchronized boolean loadAdvancedBossGuardianMode() {
+    public synchronized List<BossBattlePhaseable> loadAdvancedBossGuardianMode() {
         if (phaseManager != null) {
             log.error("Advanced boss guardian mode already loaded");
-            return false;
+            return new ArrayList<>();
         }
 
         Optional<ScriptManager> scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
@@ -783,10 +783,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
         final boolean success = !phases.isEmpty();
         if (success) {
-            this.phaseManager = new PhaseManager(phases);
             this.isAdvancedBossGuardianMode = true;
         }
-        return success;
+        return phases;
     }
 
     public GuardianBattleState getGuardianBattleStateByPosition(int position) {
