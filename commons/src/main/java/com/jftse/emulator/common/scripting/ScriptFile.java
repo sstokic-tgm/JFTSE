@@ -2,6 +2,8 @@ package com.jftse.emulator.common.scripting;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Source;
 
 import javax.script.CompiledScript;
 import java.io.File;
@@ -16,6 +18,8 @@ public class ScriptFile {
     private String subType;
 
     private CompiledScript compiledScript;
+    private Context context;
+    private Source source;
 
     public ScriptFile(Long id, String name, File file, String type, String subType) {
         this.id = id;

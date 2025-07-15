@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.matchplay.game;
 import com.jftse.emulator.common.scripting.ScriptFile;
 import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
+import com.jftse.emulator.common.scripting.ScriptManagerV2;
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.life.event.GameEventBus;
@@ -752,42 +753,39 @@ public class MatchplayGuardianGame extends MatchplayGame {
             return false;
         }
 
-        this.phaseManager = new PhaseManager();
-        final boolean success = this.phaseManager.setup(() -> {
-            Optional<ScriptManager> scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
-            List<BossBattlePhaseable> phases = new ArrayList<>();
-            if (scriptManager.isPresent()) {
-                ScriptManager sm = scriptManager.get();
-                List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
-                scriptFiles.sort(Comparator.comparing(ScriptFile::getId));
-                for (ScriptFile scriptFile : scriptFiles) {
-                    if (!scriptFile.getSubType().equals(map.getMap().toString())) {
-                        continue;
-                    }
+        Optional<ScriptManagerV2> scriptManager = ScriptManagerFactory.loadScriptsV2("scripts", () -> log);
+        List<BossBattlePhaseable> phases = new ArrayList<>();
+        if (scriptManager.isPresent()) {
+            ScriptManagerV2 sm = scriptManager.get();
+            List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
+            scriptFiles.sort(Comparator.comparing(ScriptFile::getId));
+            for (ScriptFile scriptFile : scriptFiles) {
+                if (!scriptFile.getSubType().equals(map.getMap().toString())) {
+                    continue;
+                }
 
-                    try {
-                        Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
-                        bindings.put("gameManager", GameManager.getInstance());
-                        bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
-                        bindings.put("threadManager", GameManager.getInstance().getThreadManager());
-                        bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
-                        bindings.put("scriptContextHelper", new ScriptContextHelper(GameEventBus.getInstance().getScriptStateService(), scriptFile));
-                        bindings.put("geb", GameEventBus.getInstance());
-                        bindings.put("log", log);
-                        bindings.put("game", this);
+                try {
+                    Map<String, Object> bindings = new HashMap<>();
+                    bindings.put("gameManager", GameManager.getInstance());
+                    bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
+                    bindings.put("threadManager", GameManager.getInstance().getThreadManager());
+                    bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
+                    bindings.put("scriptContextHelper", new ScriptContextHelper(GameEventBus.getInstance().getScriptStateService(), scriptFile));
+                    bindings.put("geb", GameEventBus.getInstance());
+                    bindings.put("log", log);
+                    bindings.put("game", this);
 
-                        BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
-                        phases.add(phase);
-                        this.phaseManager.addPhase(phase);
-                    } catch (Exception e) {
-                        log.error("Error on register phase from script: " + scriptFile.getName() + ". ScriptException: " + e.getMessage(), e);
-                    }
+                    BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
+                    phases.add(phase);
+                    log.info("Phase registered from script: " + scriptFile.getName() + " for map: " + map.getMap());
+                } catch (Exception e) {
+                    log.error("Error on register phase from script: " + scriptFile.getName() + ". ScriptException: " + e.getMessage(), e);
                 }
             }
-            return !phases.isEmpty();
-        });
-
+        }
+        final boolean success = !phases.isEmpty();
         if (success) {
+            this.phaseManager = new PhaseManager(phases);
             this.isAdvancedBossGuardianMode = true;
         }
         return success;

@@ -75,23 +75,21 @@ public class PhaseManager {
                     }
                 });
 
-                enqueueTask(() -> {
-                    try {
-                        countdownTask.get();
-                    } catch (InterruptedException e) {
-                        log.error("Countdown task interrupted exception", e);
-                    } catch (ExecutionException e) {
-                        log.error("Countdown task execution exception", e);
-                    }
+                try {
+                    countdownTask.get();
+                } catch (InterruptedException e) {
+                    log.error("Countdown task interrupted exception", e);
+                } catch (ExecutionException e) {
+                    log.error("Countdown task execution exception", e);
+                }
 
-                    currentPhase.get().end();
-                    currentPhase.compareAndSet(currentPhase.get(), nextPhase);
+                currentPhase.get().end();
+                currentPhase.compareAndSet(currentPhase.get(), nextPhase);
 
-                    currentPhase.get().start();
-                    isChangingPhase.set(false);
+                currentPhase.get().start();
+                isChangingPhase.set(false);
 
-                    ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
-                });
+                ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
             } else {
                 isChangingPhase.set(false);
                 onPhaseEnd(connection);
@@ -188,30 +186,33 @@ public class PhaseManager {
     }
 
     public void update(FTConnection connection) {
-        enqueueTask(() -> {
-            try {
-                if (isUpdating.compareAndSet(false, true)) {
-                    PhaseUpdateResult result = currentPhase.get().update(connection);
-                    log.debug("Phase update result: {}", result);
+        try {
+            if (isUpdating.compareAndSet(false, true)) {
+                PhaseUpdateResult result = currentPhase.get().update(connection);
+                log.debug("Phase update result: {}", result);
 
-                    switch (result) {
-                        case NEXT_PHASE -> defaultPhaseCallback.onNextPhase(connection);
-                        case END_PHASE -> defaultPhaseCallback.onPhaseEnd(connection);
-                        case ERROR -> log.error("Error during phase update for {}", currentPhase.get().getPhaseName());
-                        default -> {
-                        }
+                switch (result) {
+                    case NEXT_PHASE -> defaultPhaseCallback.onNextPhase(connection);
+                    case END_PHASE -> defaultPhaseCallback.onPhaseEnd(connection);
+                    case ERROR -> log.error("Error during phase update for {}", currentPhase.get().getPhaseName());
+                    default -> {
                     }
                 }
-            } catch (Exception e) {
-                log.error("Exception during phase update", e);
-            } finally {
-                isUpdating.set(false);
             }
-        });
+        } catch (Exception e) {
+            log.error("Exception during phase update", e);
+        } finally {
+            isUpdating.set(false);
+        }
     }
 
     public void end() {
-        enqueueTask(() -> currentPhase.get().end());
+        lock.lock();
+        try {
+            currentPhase.get().end();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public boolean hasNextPhase() {
@@ -229,8 +230,12 @@ public class PhaseManager {
     }
 
     public long getGuardianAttackLoopTime(AdvancedGuardianState guardian) {
-        var result = executeTask(() -> currentPhase.get().getGuardianAttackLoopTime(guardian));
-        return result == null ? 0 : result;
+        lock.lock();
+        try {
+            return currentPhase.get().getGuardianAttackLoopTime(guardian);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public long phaseTime() {
@@ -271,76 +276,56 @@ public class PhaseManager {
     public int onHeal(int target, int healAmount, boolean isGuardian) throws ValidationException {
         validate();
 
-        var result = executeTask(() -> {
-            while (!canExecuteTask()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
-            }
+        lock.lock();
+        try {
             return currentPhase.get().onHeal(target, healAmount, isGuardian);
-        });
-        return result == null ? 0 : result;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
         validate();
 
-        var result = executeTask(() -> {
-            while (!canExecuteTask()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
-            }
+        lock.lock();
+        try {
             return currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill);
-        });
-        return result == null ? 0 : result;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
         validate();
 
-        var result = executeTask(() -> {
-            while (!canExecuteTask()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
-            }
+        lock.lock();
+        try {
             return currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill);
-        });
-        return result == null ? 0 : result;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
         validate();
 
-        var result = executeTask(() -> {
-            while (!canExecuteTask()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
-            }
+        lock.lock();
+        try {
             return currentPhase.get().onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff);
-        });
-        return result == null ? 0 : result;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
         validate();
 
-        var result = executeTask(() -> {
-            while (!canExecuteTask()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
-            }
+        lock.lock();
+        try {
             return currentPhase.get().onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff);
-        });
-        return result == null ? 0 : result;
+        } finally {
+            lock.unlock();
+        }
     }
 
     private void enqueueTask(Runnable task) {
@@ -396,6 +381,10 @@ public class PhaseManager {
     private void validate() throws ValidationException {
         if (isChangingPhase.get() || isPhaseEnding.get()) {
             throw new ValidationException("Cannot execute action while changing phase.");
+        }
+
+        if (!isRunning.get()) {
+            throw new ValidationException("PhaseManager is not running.");
         }
     }
 }
