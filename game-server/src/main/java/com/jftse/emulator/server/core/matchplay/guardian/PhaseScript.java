@@ -5,6 +5,7 @@ import com.jftse.entities.database.model.battle.Skill;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.graalvm.polyglot.Context;
 
 import java.util.concurrent.locks.Lock;
@@ -13,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Getter
 @Setter
 @AllArgsConstructor
+@Log4j2
 public class PhaseScript {
     private final BossBattlePhaseable phase;
     private final Context context;
@@ -25,7 +27,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.getPhaseName();
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -39,7 +46,12 @@ public class PhaseScript {
                 context.enter();
                 phase.start();
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -53,7 +65,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.update(connection);
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -67,7 +84,12 @@ public class PhaseScript {
                 context.enter();
                 phase.end();
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -81,7 +103,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.phaseTime();
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -95,7 +122,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.playTime();
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -109,7 +141,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.hasEnded();
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -123,7 +160,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.getGuardianAttackLoopTime(guardian);
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -137,7 +179,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.onHeal(target, healAmount, isGuardian);
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -151,7 +198,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill);
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -165,7 +217,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill);
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -179,7 +236,12 @@ public class PhaseScript {
                 context.enter();
                 return phase.onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff);
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
@@ -193,10 +255,19 @@ public class PhaseScript {
                 context.enter();
                 return phase.onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff);
             } finally {
-                context.leave();
+                try {
+                    context.leave();
+                } catch (IllegalStateException e) {
+                    // we can safely ignore this exception due to the context being already exited
+                    logException(e);
+                }
             }
         } finally {
             lock.unlock();
         }
+    }
+
+    private void logException(IllegalStateException e) {
+        log.warn("Failed to leave context: {}", e.getMessage());
     }
 }
