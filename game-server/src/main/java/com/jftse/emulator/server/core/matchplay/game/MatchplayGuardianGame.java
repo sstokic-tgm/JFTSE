@@ -26,6 +26,7 @@ import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
 import com.jftse.emulator.server.core.matchplay.guardian.AdvancedGuardianState;
 import com.jftse.emulator.server.core.matchplay.guardian.BossBattlePhaseable;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
+import com.jftse.emulator.server.core.matchplay.guardian.PhaseScript;
 import com.jftse.emulator.server.core.matchplay.handler.MatchplayGuardianModeHandler;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.entities.database.model.SRelationships;
@@ -754,7 +755,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         }
 
         Optional<ScriptManagerV2> scriptManager = ScriptManagerFactory.loadScriptsV2("scripts", () -> log);
-        List<BossBattlePhaseable> phases = new ArrayList<>();
+        List<PhaseScript> phases = new ArrayList<>();
         if (scriptManager.isPresent()) {
             ScriptManagerV2 sm = scriptManager.get();
             List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
@@ -776,7 +777,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     bindings.put("game", this);
 
                     BossBattlePhaseable phase = sm.getInterfaceByImplementingObject(scriptFile, "phase", BossBattlePhaseable.class, bindings);
-                    phases.add(phase);
+                    PhaseScript phaseScript = new PhaseScript(phase, scriptFile.getContext());
+                    phases.add(phaseScript);
                     log.info("Phase registered from script: " + scriptFile.getName() + " for map: " + map.getMap());
                 } catch (Exception e) {
                     log.error("Error on register phase from script: " + scriptFile.getName() + ". ScriptException: " + e.getMessage(), e);

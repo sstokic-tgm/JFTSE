@@ -11,21 +11,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 @Getter
 @Setter
 @Log4j2
 public class PhaseManager {
-    private AtomicReference<BossBattlePhaseable> currentPhase;
-    private List<BossBattlePhaseable> phases;
+    private AtomicReference<PhaseScript> currentPhase;
+    private List<PhaseScript> phases;
     private Future<?> updateTask;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
     private AtomicBoolean isUpdating = new AtomicBoolean(false);
@@ -47,8 +43,6 @@ public class PhaseManager {
         return thread;
     });
 
-    private final Lock lock = new ReentrantLock();
-
     private PhaseCallback defaultPhaseCallback = new PhaseCallback() {
         @Override
         public void onNextPhase(FTConnection connection) {
@@ -57,7 +51,7 @@ public class PhaseManager {
             }
 
             if (hasNextPhase()) {
-                BossBattlePhaseable nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
+                PhaseScript nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
                 final String nextPhaseName = nextPhase.getPhaseName();
 
                 Future<?> countdownTask = executorService.submit(() -> {
@@ -120,7 +114,7 @@ public class PhaseManager {
         }
     };
 
-    public PhaseManager(List<BossBattlePhaseable> phases) {
+    public PhaseManager(List<PhaseScript> phases) {
         this.phases = phases;
         currentPhase = new AtomicReference<>(phases.getFirst());
 
@@ -132,46 +126,8 @@ public class PhaseManager {
         });
     }
 
-    public PhaseManager() {
-        this.phases = new ArrayList<>();
-
-        final CompletableFuture<Thread> threadCapture = new CompletableFuture<>();
-        executorService.submit(() -> {
-            Thread currentThread = Thread.currentThread();
-            threadCapture.complete(currentThread);
-            log.debug("PhaseManager thread started: {}", currentThread.getName());
-        });
-    }
-
-    public boolean setup(Supplier<Boolean> action) {
-        if (action == null) {
-            log.error("Action supplier is null, cannot setup PhaseManager.");
-            return false;
-        }
-
-        Boolean result = executeTask(() -> {
-            try {
-                return action.get();
-            } catch (Exception e) {
-                log.error("Exception during PhaseManager setup", e);
-                return false;
-            }
-        });
-
-        if (result == null) {
-            log.error("PhaseManager setup action returned null.");
-            return false;
-        }
-
-        if (result) {
-            this.currentPhase = new AtomicReference<>(phases.getFirst());
-        }
-
-        return result;
-    }
-
     public void start(FTConnection connection) {
-        final BossBattlePhaseable current = currentPhase.get();
+        final PhaseScript current = currentPhase.get();
         if (current != null) {
             current.start();
             isRunning.set(true);
@@ -198,6 +154,7 @@ public class PhaseManager {
                     default -> {
                     }
                 }
+
             }
         } catch (Exception e) {
             log.error("Exception during phase update", e);
@@ -207,171 +164,56 @@ public class PhaseManager {
     }
 
     public void end() {
-        lock.lock();
-        try {
-            currentPhase.get().end();
-        } finally {
-            lock.unlock();
-        }
+        currentPhase.get().end();
     }
 
     public boolean hasNextPhase() {
-        lock.lock();
-        try {
-            return phases.indexOf(currentPhase.get()) + 1 < phases.size();
-        } finally {
-            lock.unlock();
-        }
+        return phases.indexOf(currentPhase.get()) + 1 < phases.size();
     }
 
     public boolean hasEnded() {
-        var result = executeTask(() -> currentPhase.get().hasEnded());
-        return result != null && result;
+        return currentPhase.get().hasEnded();
     }
 
     public long getGuardianAttackLoopTime(AdvancedGuardianState guardian) {
-        lock.lock();
-        try {
-            return currentPhase.get().getGuardianAttackLoopTime(guardian);
-        } finally {
-            lock.unlock();
-        }
+        return currentPhase.get().getGuardianAttackLoopTime(guardian);
     }
 
     public long phaseTime() {
-        var result = executeTask(() -> currentPhase.get().phaseTime());
-        return result == null ? 0 : result;
+        return currentPhase.get().phaseTime();
     }
 
     public long playTime() {
-        var result = executeTask(() -> currentPhase.get().playTime());
-        return result == null ? 0 : result;
-    }
-
-    public synchronized void removePhase(int index) {
-        phases.remove(index);
-    }
-
-    public synchronized void removePhase(BossBattlePhaseable phase) {
-        phases.remove(phase);
-    }
-
-    public synchronized void addPhase(int index, BossBattlePhaseable phase) {
-        phases.add(index, phase);
-    }
-
-    public synchronized void addPhase(BossBattlePhaseable phase) {
-        phases.add(phase);
+        return currentPhase.get().playTime();
     }
 
     public String getName() {
-        lock.lock();
-        try {
-            return currentPhase.get().getPhaseName();
-        } finally {
-            lock.unlock();
-        }
+        return currentPhase.get().getPhaseName();
     }
 
     public int onHeal(int target, int healAmount, boolean isGuardian) throws ValidationException {
         validate();
-
-        lock.lock();
-        try {
-            return currentPhase.get().onHeal(target, healAmount, isGuardian);
-        } finally {
-            lock.unlock();
-        }
+        return currentPhase.get().onHeal(target, healAmount, isGuardian);
     }
 
     public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
         validate();
-
-        lock.lock();
-        try {
-            return currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill);
-        } finally {
-            lock.unlock();
-        }
+        return currentPhase.get().onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill);
     }
 
     public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) throws ValidationException {
         validate();
-
-        lock.lock();
-        try {
-            return currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill);
-        } finally {
-            lock.unlock();
-        }
+        return currentPhase.get().onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill);
     }
 
     public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
         validate();
-
-        lock.lock();
-        try {
-            return currentPhase.get().onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff);
-        } finally {
-            lock.unlock();
-        }
+        return currentPhase.get().onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff);
     }
 
     public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) throws ValidationException {
         validate();
-
-        lock.lock();
-        try {
-            return currentPhase.get().onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private void enqueueTask(Runnable task) {
-        if (taskQueue.size() > 40) {
-            log.warn("Task queue size is high: {}", taskQueue.size());
-        }
-
-        taskQueue.offer(task);
-        executorService.submit(this::executeNextTask);
-    }
-
-    private void executeNextTask() {
-        lock.lock();
-        try {
-            Runnable task = taskQueue.poll();
-            if (task != null) {
-                task.run();
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private <T> T executeTask(Callable<T> task) {
-        final CompletableFuture<T> future = new CompletableFuture<>();
-
-        enqueueTask(() -> {
-            try {
-                future.complete(task.call());
-            } catch (Exception e) {
-                log.error("Task execution exception", e);
-                future.completeExceptionally(e);
-            }
-        });
-
-        try {
-            return future.get(6, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            log.error("Interrupted while waiting", e);
-            Thread.currentThread().interrupt();
-        } catch (TimeoutException e) {
-            log.warn("PhaseManager task timed out.");
-        } catch (ExecutionException e) {
-            log.error("PhaseManager task failed", e.getCause());
-        }
-        return null;
+        return currentPhase.get().onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff);
     }
 
     private boolean canExecuteTask() {
