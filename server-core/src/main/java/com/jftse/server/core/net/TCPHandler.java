@@ -78,9 +78,9 @@ public abstract class TCPHandler<T extends Connection<? extends Client<T>>> exte
             if (cause instanceof DataAccessException) {
                 S2CDCMsgPacket dcPacket = new S2CDCMsgPacket(0);
                 connection.sendTCP(dcPacket);
-            }
 
-            connection.close();
+                connection.close();
+            }
         }
     }
 
