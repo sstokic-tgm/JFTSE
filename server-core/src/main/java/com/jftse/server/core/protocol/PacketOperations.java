@@ -373,6 +373,20 @@ public enum PacketOperations {
 
     S2CHousingRewardItem(0x25E4),
 
+    S2CInitFish(0x2AFD),
+    S2CInitFishWithDetails(0x2B0C),
+    S2CFishMove(0x2CEF),
+    S2CFishSetSpeed(0x2CF1),
+    S2CFishStop(0x2CF3),
+    S2CDestroyFish(0x2B7F),
+    C2SThrowRodRequest(0x2BC5),
+    S2CThrowRodAnswer(0x2BC6),
+    S2CFishingBar(0x2B74),
+    S2CReturnRod(0x2B75),
+    C2SRodAtLocation(0x2BC8),
+    S2CRodAtLocation(0x2BC9),
+    C2SFishingSuccess(0x2BDA),
+
     C2SFireCrackerRequest(0xC9E),
     S2CFireCrackerAnswer(0xC9F),
 
