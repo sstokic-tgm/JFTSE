@@ -40,7 +40,6 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -169,7 +168,7 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
     private boolean handleBallLossDamage(FTConnection connection, MatchplayGame game) {
         short receiverPosition = skillHitsTarget.getTargetPosition();
         short attackerPosition = skillHitsTarget.getAttackerPosition();
-        boolean attackerHasWillBuff = skillHitsTarget.getAttackerBuffId() == 3;
+        boolean attackerHasWillBuff = skillHitsTarget.getAttackerBuffId1() == 3 || skillHitsTarget.getAttackerBuffId2() == 3;
 
         boolean guardianMadePoint = skillHitsTarget.getTargetPosition() < 4;
 
@@ -202,12 +201,12 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
                     }
                 }
             }
-
-            GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, skillHitsTarget);
         } catch (ValidationException ve) {
             log.warn(ve.getMessage());
             return false;
         }
+
+        GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, skillHitsTarget);
 
         S2CMatchplayDealDamage damagePacket = new S2CMatchplayDealDamage(skillHitsTarget.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damagePacket, connection);
@@ -217,8 +216,8 @@ public class SkillHitsTargetHandler extends AbstractPacketHandler {
     private boolean handleSkillDamage(FTConnection connection, short targetPosition, MatchplayGame game, Skill skill) {
         boolean denyDamage = skillHitsTarget.getDamageType() == 1;
         short attackerPosition = skillHitsTarget.getAttackerPosition();
-        boolean attackerHasStrBuff = skillHitsTarget.getAttackerBuffId() == 0;
-        boolean receiverHasDefBuff = skillHitsTarget.getReceiverBuffId() == 1;
+        boolean attackerHasStrBuff = skillHitsTarget.getAttackerBuffId1() == 0 || skillHitsTarget.getAttackerBuffId2() == 0;
+        boolean receiverHasDefBuff = skillHitsTarget.getReceiverBuffId1() == 1 || skillHitsTarget.getReceiverBuffId2() == 1;
 
         short skillDamage = skill != null ? skill.getDamage().shortValue() : -1;
 
