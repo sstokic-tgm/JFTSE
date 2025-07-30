@@ -375,6 +375,7 @@ public enum PacketOperations {
 
     S2CInitFish(0x2AFD),
     S2CInitFishWithDetails(0x2B0C),
+    C2SSyncFish(0x2B02),
     S2CFishMove(0x2CEF),
     S2CFishSetSpeed(0x2CF1),
     S2CFishStop(0x2CF3),

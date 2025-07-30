@@ -6,6 +6,7 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.constants.ChatMode;
 import com.jftse.emulator.server.core.life.event.GameEventBus;
 import com.jftse.emulator.server.core.life.event.GameEventType;
+import com.jftse.emulator.server.core.life.housing.FishManager;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
@@ -82,7 +83,7 @@ public class GameManager {
 
         running = new AtomicBoolean(true);
 
-        // setupChatLobby();
+        setupChatLobby();
         setupGlobalTasks();
 
         log.info(this.getClass().getSimpleName() + " initialized");
@@ -351,6 +352,7 @@ public class GameManager {
                     //handleChatLobbyJoin(c);
                 });
                 removeRoom(room);
+                FishManager.getInstance().clearFishes(room.getRoomId());
                 updateLobbyRoomListForAllClients(connection);
                 return;
             }
@@ -478,6 +480,10 @@ public class GameManager {
         connection.sendTCP(roomCreateAnswerPacket);
         connection.sendTCP(roomInformationPacket);
         connection.sendTCP(roomPlayerInformationPacket);
+
+        if (room.getMode() == 1) {
+            FishManager.getInstance().registerRoom(room.getRoomId());
+        }
 
         updateLobbyRoomListForAllClients(connection);
         refreshLobbyPlayerListForAllClients();
