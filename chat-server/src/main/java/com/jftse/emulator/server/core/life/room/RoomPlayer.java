@@ -41,6 +41,10 @@ public class RoomPlayer {
     private volatile float lastY;
     private volatile int lastMapLayer;
 
+    private AtomicBoolean usedRod = new AtomicBoolean(false);
+    private float baitX;
+    private float baitY;
+
     public Player getPlayer() {
         return ServiceManager.getInstance().getPlayerService().findById(playerId);
     }

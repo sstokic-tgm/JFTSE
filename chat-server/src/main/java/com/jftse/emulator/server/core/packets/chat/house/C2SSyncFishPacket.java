@@ -12,6 +12,6 @@ public class C2SSyncFishPacket extends Packet {
     public C2SSyncFishPacket(Packet packet) {
         super(packet);
 
-        this.fishId = packet.readShort();
+        this.fishId = this.readShort();
     }
 }

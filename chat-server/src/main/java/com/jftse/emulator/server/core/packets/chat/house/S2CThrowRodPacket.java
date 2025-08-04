@@ -5,7 +5,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CThrowRodPacket extends Packet {
     public S2CThrowRodPacket(short playerPosition, byte displayMessage) {
-        super(PacketOperations.S2CThrowRodAnswer);
+        super(PacketOperations.SMSG_ThrowBait);
 
         this.write(playerPosition);
         this.write(displayMessage);
