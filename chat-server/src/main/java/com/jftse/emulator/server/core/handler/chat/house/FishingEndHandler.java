@@ -61,6 +61,8 @@ public class FishingEndHandler extends AbstractPacketHandler {
         Pocket pocket = player.getPocket();
 
         roomPlayer.getUsedRod().set(false);
+        roomPlayer.setBaitX(0.0f);
+        roomPlayer.setBaitY(0.0f);
 
         Fish claimedFish = FishManager.getInstance().getClaimedFish(room.getRoomId(), roomPlayer.getPosition());
         if (claimedFish != null) {

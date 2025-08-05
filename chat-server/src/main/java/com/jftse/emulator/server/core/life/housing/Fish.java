@@ -19,6 +19,8 @@ public class Fish {
     private long lastUpdate = 0;
     private long lastBiteTime = 0;
     private long aliveTime = 0;
+    private long lastCorrectionTime = 0;
+    private long lastActivityTime = System.currentTimeMillis();
     private boolean bitBait = false;
     private short claimedPlayerPosition = -1;
 
@@ -58,6 +60,10 @@ public class Fish {
             this.state = state;
             if (state == FishState.BITING) {
                 this.lastBiteTime = System.currentTimeMillis();
+            }
+
+            if (state == FishState.ATTACKING || state == FishState.FRIGHTENED || state == FishState.BITING) {
+                this.lastActivityTime = System.currentTimeMillis();
             }
         }
     }
@@ -105,6 +111,7 @@ public class Fish {
         this.turningSpeed = 0;
         this.lastUpdate = System.currentTimeMillis();
         this.lastBiteTime = System.currentTimeMillis();
+        this.lastCorrectionTime = System.currentTimeMillis();
         this.aliveTime = 0;
         this.bitBait = false;
         this.claimedPlayerPosition = -1;

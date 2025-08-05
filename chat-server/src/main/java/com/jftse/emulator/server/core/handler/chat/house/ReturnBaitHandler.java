@@ -7,7 +7,6 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.house.S2CFishMovePacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CFishStopPacket;
 import com.jftse.emulator.server.core.packets.chat.house.SMSGReturnBait;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
@@ -37,6 +36,7 @@ public class ReturnBaitHandler extends AbstractPacketHandler {
             Fish claimedFish = FishManager.getInstance().getClaimedFish(room.getRoomId(), roomPlayer.getPosition());
             if (claimedFish != null) {
                 claimedFish.setState(FishState.IDLE);
+                claimedFish.setBitBait(false);
 
                 S2CFishMovePacket movePacket = new S2CFishMovePacket(claimedFish.getId(), (byte) claimedFish.getState().getValue(), claimedFish.getX(), claimedFish.getY(), 0.0f);
                 GameManager.getInstance().sendPacketToAllClientsInSameRoom(movePacket, (FTConnection) connection);
@@ -48,6 +48,8 @@ public class ReturnBaitHandler extends AbstractPacketHandler {
             }
 
             FishManager.getInstance().removeBaitPosition(roomPlayer.getBaitX(), roomPlayer.getBaitY());
+            roomPlayer.setBaitX(0.0f);
+            roomPlayer.setBaitY(0.0f);
 
             SMSGReturnBait returnBaitPacket = new SMSGReturnBait(roomPlayer.getPosition());
             GameManager.getInstance().sendPacketToAllClientsInSameRoom(returnBaitPacket, (FTConnection) connection);
