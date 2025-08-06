@@ -41,6 +41,7 @@ public class ConfigService {
             case "string" -> (T) config.getValue();
             case "int" -> (T) Integer.valueOf(config.getValue());
             case "double" -> (T) Double.valueOf(config.getValue());
+            case "float" -> (T) Float.valueOf(config.getValue());
             case "boolean" -> config.getValue().equals("true") || config.getValue().equals("1");
             default -> 0;
         };
