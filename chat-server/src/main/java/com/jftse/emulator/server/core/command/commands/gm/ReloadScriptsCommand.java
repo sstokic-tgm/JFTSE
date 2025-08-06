@@ -16,10 +16,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Log4j2
-public class ReloadScriptsCommand extends AbstractCommand {
+public class  ReloadScriptsCommand extends AbstractCommand {
     private final GameManager gameManager;
     private final CommandManager commandManager;
-    private final GameEventBus gameEventBus;
 
     private final String MESSAGE_SUCCESS = "Scripts reloaded";
     private final String MESSAGE_FAIL = "Scripts not reloaded";
@@ -30,7 +29,6 @@ public class ReloadScriptsCommand extends AbstractCommand {
 
         this.gameManager = GameManager.getInstance();
         this.commandManager = CommandManager.getInstance();
-        this.gameEventBus = GameEventBus.getInstance();
     }
 
     @Override
@@ -85,6 +83,6 @@ public class ReloadScriptsCommand extends AbstractCommand {
     }
 
     private boolean registerScriptFileEvents() {
-        return gameEventBus.reloadEvents();
+        return GameEventBus.getInstance().reloadEvents();
     }
 }
