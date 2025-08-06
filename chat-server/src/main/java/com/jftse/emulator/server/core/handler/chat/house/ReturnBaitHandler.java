@@ -41,8 +41,8 @@ public class ReturnBaitHandler extends AbstractPacketHandler {
                 S2CFishMovePacket movePacket = new S2CFishMovePacket(claimedFish.getId(), (byte) claimedFish.getState().getValue(), claimedFish.getX(), claimedFish.getY(), 0.0f);
                 GameManager.getInstance().sendPacketToAllClientsInSameRoom(movePacket, (FTConnection) connection);
 
-                claimedFish.setSpeed(FishManager.NORMAL_SPEED_1);
-                claimedFish.setTurningSpeed(FishManager.NORMAL_TURNING_SPEED);
+                claimedFish.setSpeed(FishManager.getInstance().NORMAL_SPEED_1);
+                claimedFish.setTurningSpeed(FishManager.getInstance().NORMAL_TURNING_SPEED);
 
                 FishManager.getInstance().frightenFishes(room.getRoomId(), roomPlayer.getBaitX(), roomPlayer.getBaitY());
             }

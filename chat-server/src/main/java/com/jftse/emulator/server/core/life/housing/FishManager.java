@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.life.housing;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.house.*;
@@ -9,6 +10,7 @@ import com.jftse.server.core.protocol.Packet;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -29,6 +31,9 @@ public class FishManager {
     @Getter
     private static FishManager instance;
 
+    @Autowired
+    private ConfigService configService;
+
     private ScheduledExecutorService executor;
     private SecureRandom random;
 
@@ -36,31 +41,32 @@ public class FishManager {
     private final ConcurrentHashMap<Short, Boolean> scheduledRooms = new ConcurrentHashMap<>();
     private final ConcurrentLinkedDeque<Float[]> baitPositions = new ConcurrentLinkedDeque<>();
 
-    public static final int MAX_FISH_SPAWN_COUNT_PER_ROOM = 10;
-    public static final int FISH_SPAWN_COUNT = 4;
+    public int MAX_FISH_SPAWN_COUNT_PER_ROOM;
+    public int FISH_SPAWN_COUNT;
 
-    public static final int INACTIVITY_TIMEOUT = 10; // minutes
-    public static final float MIN_SPAWN_TIME = 6.0f; // seconds
-    public static final float MAX_SPAWN_TIME = 8.0f; // seconds
-    public static final float NORMAL_SPEED_1 = 2.0f;
-    public static final float NORMAL_SPEED_2 = 3.0f;
-    public static final float ATTACK_SPEED = 4.0f;
-    public static final float SCARED_SPEED = 10.0f;
-    public static final float DISENGAGE_SPEED = 10.0f;
-    public static final float NORMAL_TURNING_SPEED = 3.0f; // degrees
-    public static final float DISENGAGE_TURNING_SPEED = 6.0f; // degrees
+    public int INACTIVITY_TIMEOUT; // minutes
+    public int SPAWN_CHANCE; // percent
+    public float MIN_SPAWN_TIME; // seconds
+    public float MAX_SPAWN_TIME; // seconds
+    public float NORMAL_SPEED_1;
+    public float NORMAL_SPEED_2;
+    public float ATTACK_SPEED;
+    public float SCARED_SPEED;
+    public float DISENGAGE_SPEED;
+    public float NORMAL_TURNING_SPEED; // degrees
+    public float DISENGAGE_TURNING_SPEED; // degrees
 
-    public static final int BITE_SUCCESS_CHANCE = 40; // percent
-    public static final float BITE_ATTEMPT_INTERVAL = 2.0f; // seconds
-    public static final float FISH_LENGTH = 6.43f;
-    public static final float ATTACK_RADIUS = 4.0f; // related to fish length
-    public static final float BAIT_TOO_CLOSE_RADIUS = 6.0f; // related to fish length
-    public static final float FRIGHTENED_RADIUS = 10.0f; // related to fish length
-    public static final float BAIT_DETECTION_RADIUS = 10.0f; // related to fish length
+    public int BITE_SUCCESS_CHANCE; // percent
+    public float BITE_ATTEMPT_INTERVAL; // seconds
+    public static float FISH_LENGTH = 6.43f;
+    public float ATTACK_RADIUS; // related to fish length
+    public float BAIT_TOO_CLOSE_RADIUS; // related to fish length
+    public float FRIGHTENED_RADIUS; // related to fish length
+    public float BAIT_DETECTION_RADIUS; // related to fish length
 
-    public static final float RANDOM_POSITION_RADIUS = 10.0f; // 5.0 is 1 square
-    public static final int MOVEMENT_CHANCE_1 = 40; // percent
-    public static final int MOVEMENT_CHANCE_2 = 25; // percent
+    public float RANDOM_POSITION_RADIUS; // 5.0 is 1 square
+    public int MOVEMENT_CHANCE_1; // percent
+    public int MOVEMENT_CHANCE_2; // percent
 
     public static final int MAX_FISH_ID = 31;
 
@@ -83,7 +89,40 @@ public class FishManager {
         random = new SecureRandom();
         random.setSeed(System.currentTimeMillis());
 
+        initFishSettings();
+
         log.info(this.getClass().getSimpleName() + " initialized");
+    }
+
+    private void initFishSettings() {
+        MAX_FISH_SPAWN_COUNT_PER_ROOM = configService.getValue("fish.spawn.max_per_room", 10);
+        FISH_SPAWN_COUNT = configService.getValue("fish.spawn.count", 4);
+        INACTIVITY_TIMEOUT = configService.getValue("fish.inactivity.timeout", 10);
+        SPAWN_CHANCE = configService.getValue("fish.spawn.chance", 20);
+        MIN_SPAWN_TIME = configService.getValue("fish.spawn.min_time", 6.0f);
+        MAX_SPAWN_TIME = configService.getValue("fish.spawn.max_time", 8.0f);
+        NORMAL_SPEED_1 = configService.getValue("fish.speed.normal1", 2.0f);
+        NORMAL_SPEED_2 = configService.getValue("fish.speed.normal2", 3.0f);
+        ATTACK_SPEED = configService.getValue("fish.speed.attack", 4.0f);
+        SCARED_SPEED = configService.getValue("fish.speed.scared", 10.0f);
+        DISENGAGE_SPEED = configService.getValue("fish.speed.disengage", 10.0f);
+        NORMAL_TURNING_SPEED = configService.getValue("fish.speed.turning.normal", 3.0f);
+        DISENGAGE_TURNING_SPEED = configService.getValue("fish.speed.turning.disengage", 6.0f);
+        BITE_SUCCESS_CHANCE = configService.getValue("fish.bite.success.chance", 40);
+        BITE_ATTEMPT_INTERVAL = configService.getValue("fish.bite.attempt.interval", 2.0f);
+        ATTACK_RADIUS = configService.getValue("fish.radius.attack", 4.0f);
+        BAIT_TOO_CLOSE_RADIUS = configService.getValue("fish.radius.bait.too_close", 6.0f);
+        FRIGHTENED_RADIUS = configService.getValue("fish.radius.frightened", 10.0f);
+        BAIT_DETECTION_RADIUS = configService.getValue("fish.radius.bait.detection", 10.0f);
+        RANDOM_POSITION_RADIUS = configService.getValue("fish.radius.random_position", 10.0f);
+        MOVEMENT_CHANCE_1 = configService.getValue("fish.movement.chance1", 40);
+        MOVEMENT_CHANCE_2 = configService.getValue("fish.movement.chance2", 25);
+    }
+
+    public void reloadFishSettings() {
+        log.info("Reloading fish settings...");
+        initFishSettings();
+        log.info("Fish settings reloaded successfully.");
     }
 
     @PreDestroy
@@ -264,7 +303,7 @@ public class FishManager {
             float deltaSeconds = (currentTime - fish.getLastUpdate()) / 1000.0f;
             fish.setLastUpdate(currentTime);
 
-            if (fish.getLastActivityTime() + INACTIVITY_TIMEOUT * 60 * 1000 < currentTime) {
+            if (fish.getLastActivityTime() + (long) INACTIVITY_TIMEOUT * 60 * 1000 < currentTime) {
                 log.info("Fish " + fish.getId() + " in room " + roomId + " has been inactive for too long, removing it.");
                 inactiveFishes.add(fish);
                 continue;
@@ -385,11 +424,7 @@ public class FishManager {
                                 .map(RoomPlayer::getPosition)
                                 .findFirst()
                                 .orElse((short) -1);
-                        FTClient client = clients.stream()
-                                .filter(c -> c.getRoomPlayer() != null && c.getRoomPlayer().getPosition() == playerPos)
-                                .findFirst()
-                                .orElse(null);
-                        if (playerPos != -1 && client != null) {
+                        if (playerPos != -1) {
                             fish.setBitBait(true);
                             fish.setLastBiteTime(currentTime);
                             removeBaitPosition(fish.getDestX(), fish.getDestY());
@@ -419,7 +454,7 @@ public class FishManager {
         }
 
         // handle spawn logic
-        if (fishes.size() < MAX_FISH_SPAWN_COUNT_PER_ROOM && random.nextInt(101) < 20) { // 20% chance to spawn a new fish
+        if (fishes.size() < MAX_FISH_SPAWN_COUNT_PER_ROOM && random.nextInt(101) < SPAWN_CHANCE) {
             final float spawnTime = MIN_SPAWN_TIME + random.nextFloat() * (MAX_SPAWN_TIME - MIN_SPAWN_TIME);
             if (fishes.stream().noneMatch(f -> f.getLastUpdate() + spawnTime * 1000 > currentTime)) {
                 Fish newFish = spawnFish(roomId);

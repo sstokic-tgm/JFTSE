@@ -47,6 +47,8 @@ public class GameManager {
 
     @Autowired
     private ServiceManager serviceManager;
+    @Autowired
+    private FishManager fishManager;
 
     @Autowired
     private ConfigService configService;
@@ -352,7 +354,7 @@ public class GameManager {
                     //handleChatLobbyJoin(c);
                 });
                 removeRoom(room);
-                FishManager.getInstance().clearFishes(room.getRoomId());
+                fishManager.clearFishes(room.getRoomId());
                 updateLobbyRoomListForAllClients(connection);
                 return;
             }
@@ -482,7 +484,7 @@ public class GameManager {
         connection.sendTCP(roomPlayerInformationPacket);
 
         if (room.getMode() == 1) {
-            FishManager.getInstance().registerRoom(room.getRoomId());
+            fishManager.registerRoom(room.getRoomId());
         }
 
         updateLobbyRoomListForAllClients(connection);
