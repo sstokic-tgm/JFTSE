@@ -24,6 +24,9 @@ public class Fish {
     private boolean bitBait = false;
     private short claimedPlayerPosition = -1;
 
+    private Long rewardProductIndex;
+    private int group = 0;
+
     public void updatePosition(float x, float y) {
         this.x = x;
         this.y = y;
@@ -115,6 +118,15 @@ public class Fish {
         this.aliveTime = 0;
         this.bitBait = false;
         this.claimedPlayerPosition = -1;
+    }
+
+    public float getFishingBarSpeed() {
+        return switch (group) {
+            case 1 -> 1.0f;
+            case 2 -> 0.8f;
+            case 3 -> 1.1f;
+            default -> 1.3f;
+        };
     }
 
     public String debugString() {

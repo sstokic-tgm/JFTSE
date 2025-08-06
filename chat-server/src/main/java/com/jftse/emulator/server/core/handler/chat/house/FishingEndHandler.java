@@ -13,6 +13,7 @@ import com.jftse.emulator.server.core.packets.chat.house.S2CHousingRewardItemPac
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.ItemMaterial;
+import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
@@ -25,6 +26,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.ItemMaterialService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
+import com.jftse.server.core.service.ProductService;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -33,12 +35,12 @@ import java.util.TimeZone;
 public class FishingEndHandler extends AbstractPacketHandler {
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
-    private final ItemMaterialService itemMaterialService;
+    private final ProductService productService;
 
     public FishingEndHandler() {
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
-        this.itemMaterialService = ServiceManager.getInstance().getItemMaterialService();
+        this.productService = ServiceManager.getInstance().getProductService();
     }
 
     @Override
@@ -66,6 +68,8 @@ public class FishingEndHandler extends AbstractPacketHandler {
 
         Fish claimedFish = FishManager.getInstance().getClaimedFish(room.getRoomId(), roomPlayer.getPosition());
         if (claimedFish != null) {
+            Long rewardProductIndex = claimedFish.getRewardProductIndex();
+
             claimedFish.setState(FishState.CAUGHT);
             S2CFishStopPacket stopPacket = new S2CFishStopPacket(claimedFish.getId(), (byte) claimedFish.getState().getValue());
             GameManager.getInstance().sendPacketToAllClientsInSameRoom(stopPacket, (FTConnection) connection);
@@ -75,44 +79,43 @@ public class FishingEndHandler extends AbstractPacketHandler {
             S2CFishingBarPacket despawnMiniGame = new S2CFishingBarPacket(roomPlayer.getPosition(), claimedFish.getId(), 1.3f, (byte) 0);
             GameManager.getInstance().sendPacketToAllClientsInSameRoom(despawnMiniGame, (FTConnection) connection);
 
-            ItemMaterial item = itemMaterialService.findByItemIndex(3).orElse(null);
-            if (item == null) {
-                return;
+            if (rewardProductIndex != null) {
+                Product item = productService.findProductByProductItemIndex(rewardProductIndex.intValue());
+
+                PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(item.getItem0(), item.getCategory(), pocket);
+                int existingItemCount = 0;
+                boolean existingItem = false;
+
+                if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
+                    existingItemCount = playerPocket.getItemCount();
+                    existingItem = true;
+                } else {
+                    playerPocket = new PlayerPocket();
+                }
+
+                playerPocket.setCategory(item.getCategory());
+                playerPocket.setItemIndex(item.getItem0());
+                playerPocket.setUseType(item.getUseType());
+
+                int quantity = 1;
+                playerPocket.setItemCount(quantity + existingItemCount);
+
+                if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+                    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
+
+                    playerPocket.setCreated(cal.getTime());
+                    playerPocket.setItemCount(1);
+                }
+                playerPocket.setPocket(pocket);
+
+                playerPocket = playerPocketService.save(playerPocket);
+                if (!existingItem)
+                    pocket = pocketService.incrementPocketBelongings(pocket);
+
+                S2CHousingRewardItemPacket housingRewardItemPacket = new S2CHousingRewardItemPacket(playerPocket, true);
+                connection.sendTCP(housingRewardItemPacket);
             }
-
-            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(item.getItemIndex(), EItemCategory.MATERIAL.getName(), pocket);
-            int existingItemCount = 0;
-            boolean existingItem = false;
-
-            if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
-                existingItemCount = playerPocket.getItemCount();
-                existingItem = true;
-            } else {
-                playerPocket = new PlayerPocket();
-            }
-
-            playerPocket.setCategory(EItemCategory.MATERIAL.getName());
-            playerPocket.setItemIndex(item.getItemIndex());
-            playerPocket.setUseType(item.getUseType());
-
-            int quantity = 1;
-            playerPocket.setItemCount(quantity + existingItemCount);
-
-            if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
-                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
-
-                playerPocket.setCreated(cal.getTime());
-                playerPocket.setItemCount(1);
-            }
-            playerPocket.setPocket(pocket);
-
-            playerPocket = playerPocketService.save(playerPocket);
-            if (!existingItem)
-                pocket = pocketService.incrementPocketBelongings(pocket);
-
-            S2CHousingRewardItemPacket housingRewardItemPacket = new S2CHousingRewardItemPacket(playerPocket);
-            connection.sendTCP(housingRewardItemPacket);
         }
     }
 }

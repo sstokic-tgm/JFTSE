@@ -6,6 +6,13 @@ import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.house.*;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.KStatus;
+import com.jftse.entities.database.model.SRelationshipRoles;
+import com.jftse.entities.database.model.SRelationshipTypes;
+import com.jftse.entities.database.model.SRelationships;
+import com.jftse.entities.database.repository.RelationshipRolesRepository;
+import com.jftse.entities.database.repository.RelationshipTypesRepository;
+import com.jftse.entities.database.repository.RelationshipsRepository;
 import com.jftse.server.core.protocol.Packet;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,6 +40,13 @@ public class FishManager {
 
     @Autowired
     private ConfigService configService;
+
+    @Autowired
+    private RelationshipsRepository rr;
+    @Autowired
+    private RelationshipRolesRepository rrRole;
+    @Autowired
+    private RelationshipTypesRepository rrType;
 
     private ScheduledExecutorService executor;
     private SecureRandom random;
@@ -81,6 +95,9 @@ public class FishManager {
             new Point(320, -350)
     );
 
+    private SRelationshipRoles relationRole;
+    private SRelationshipTypes relationType;
+
     @PostConstruct
     public void init() {
         instance = this;
@@ -88,6 +105,9 @@ public class FishManager {
         executor = Executors.newScheduledThreadPool(5);
         random = new SecureRandom();
         random.setSeed(System.currentTimeMillis());
+
+        relationRole = rrRole.findById(5L).orElseThrow(() -> new RuntimeException("Role: 'Fishing Item Drop' not found(5)"));
+        relationType = rrType.findById(9L).orElseThrow(() -> new RuntimeException("Type: 'Fishing: Product to Group' not found(9)"));
 
         initFishSettings();
 
@@ -163,7 +183,6 @@ public class FishManager {
         baitPositions.removeIf(baitPosition -> baitPosition[0].equals(x) && baitPosition[1].equals(y));
     }
 
-    // Modify spawnFish to avoid using the same spawn position more than once
     private Fish spawnFish(short roomId) {
         List<Fish> fishes = fishesByRoomId.getOrDefault(roomId, new ArrayList<>());
 
@@ -201,6 +220,9 @@ public class FishManager {
         fish.setSpeed(NORMAL_SPEED_1);
         fish.setTurningSpeed(NORMAL_TURNING_SPEED);
         fish.setLastCorrectionTime(System.currentTimeMillis());
+
+        fish.setGroup(random.nextInt(4));
+        fish.setRewardProductIndex(pickRandomReward(fish.getGroup()));
 
         final List<FTClient> clients = GameManager.getInstance().getClientsInRoom(roomId);
 
@@ -316,7 +338,7 @@ public class FishManager {
 
                     // Clamp to spawn radius
                     float distFromOrigin = distance(newX, newY, fish.getSpawnX(), fish.getSpawnY());
-                    if (distFromOrigin > RANDOM_POSITION_RADIUS) {
+                    if (distFromOrigin > RANDOM_POSITION_RADIUS + FISH_LENGTH) {
                         if (currentTime - fish.getLastCorrectionTime() > 3000) {
                             fish.setLastCorrectionTime(currentTime);
                             fish.stop();
@@ -430,7 +452,7 @@ public class FishManager {
                             removeBaitPosition(fish.getDestX(), fish.getDestY());
                             fish.setClaimedPlayerPosition(playerPos);
 
-                            S2CFishingBarPacket initMiniGame = new S2CFishingBarPacket(playerPos, fish.getId(), 1.3f, (byte) 0);
+                            S2CFishingBarPacket initMiniGame = new S2CFishingBarPacket(playerPos, fish.getId(), fish.getFishingBarSpeed(), (byte) fish.getGroup());
                             broadcast(initMiniGame, clients);
                         } else {
                             log.warn("Fish " + fish.getId() + " bit bait but no player found in room " + roomId);
@@ -509,7 +531,7 @@ public class FishManager {
 
     private float[] getRandomDirectionFrom(float originX, float originY) {
         float angle = random.nextFloat() * 2 * (float) Math.PI;
-        float radius = RANDOM_POSITION_RADIUS * (0.5f + random.nextFloat() * 0.5f); // 50–100% of range
+        float radius = (RANDOM_POSITION_RADIUS + FISH_LENGTH) * (0.5f + random.nextFloat() * 0.5f); // 50–100% of range
         float dx = (float) Math.cos(angle) * radius;
         float dy = (float) Math.sin(angle) * radius;
         return new float[] { originX + dx, originY + dy };
@@ -524,7 +546,7 @@ public class FishManager {
         dx /= dist;
         dy /= dist;
 
-        float fleeDistance = RANDOM_POSITION_RADIUS * (0.5f + random.nextFloat() * 0.5f); // 50–100%
+        float fleeDistance = (RANDOM_POSITION_RADIUS + FISH_LENGTH) * (0.5f + random.nextFloat() * 0.5f); // 50–100%
         float offsetAngle = (float) ((random.nextFloat() - 0.5f) * Math.PI / 6.0); // +/- 15 degrees
 
         float angle = (float) Math.atan2(dy, dx) + offsetAngle;
@@ -539,6 +561,53 @@ public class FishManager {
         float dx = x2 - x1;
         float dy = y2 - y1;
         return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+
+    private Long pickRandomReward(int group) {
+        List<SRelationships> rewards = rr.findAllByRoleAndRelationship(relationRole, relationType);
+        if (rewards.isEmpty()) {
+            log.warn("No fishing rewards found for role: " + relationRole.getName() + " and type: " + relationType.getName());
+            return null;
+        }
+
+        rewards.removeIf(r -> !r.getStatus().getId().equals(KStatus.ACTIVE) || r.getId_t().intValue() != group);
+
+        double averageWeight = calculateAverageWeight(rewards);
+        return selectItemRewardByWeight(rewards, averageWeight);
+    }
+
+    private Long selectItemRewardByWeight(List<SRelationships> rewards, double defaultWeight) {
+        List<Double> weights = rewards.stream()
+                .map(reward -> reward.getWeight() != null ? reward.getWeight() : defaultWeight)
+                .toList();
+
+        double totalWeight = weights.stream().mapToDouble(Double::doubleValue).sum();
+        double randomValue = random.nextDouble() * totalWeight;
+        double cumulativeWeight = 0.0;
+
+        for (int i = 0; i < rewards.size(); i++) {
+            cumulativeWeight += weights.get(i);
+            if (randomValue < cumulativeWeight) {
+                return rewards.get(i).getId_f();
+            }
+        }
+
+        return null;
+    }
+
+    private double calculateAverageWeight(List<SRelationships> rewards) {
+        double totalWeight = 0.0;
+        int totalItems = 0;
+
+        for (SRelationships reward : rewards) {
+            Double weight = reward.getWeight();
+            if (weight != null) {
+                totalWeight += weight;
+                totalItems++;
+            }
+        }
+
+        return (totalItems > 0) ? totalWeight / totalItems : 20.0; // default weight
     }
 
     private void broadcast(Packet packet, List<FTClient> clients) {
