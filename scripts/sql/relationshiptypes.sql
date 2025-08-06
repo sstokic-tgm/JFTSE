@@ -6,3 +6,4 @@ INSERT INTO fantasytennis.S_Relationship_Types (id, name) VALUES(5, 'Multiplier 
 INSERT INTO fantasytennis.S_Relationship_Types (id, name) VALUES(6, 'Multiplier to Map');
 INSERT INTO fantasytennis.S_Relationship_Types (id, name) VALUES(7, 'Product to Map(Guardian mode)');
 INSERT INTO fantasytennis.S_Relationship_Types (id, name) VALUES(8, 'Product to Sell Price');
+INSERT INTO fantasytennis.S_Relationship_Types (id, name) VALUES(9, 'Fishing: Product to Group');
