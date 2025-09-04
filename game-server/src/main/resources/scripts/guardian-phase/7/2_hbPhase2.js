@@ -65,7 +65,7 @@ var phase = {
         phase2.phaseStarted = true;
     },
     update: function (connection) {
-        if (!phase1.phaseStarted || this.hasEnded()) return PhaseUpdateResult.CONTINUE;
+        if (!phase2.phaseStarted || this.hasEnded()) return PhaseUpdateResult.CONTINUE;
 
         if (phase2.partIsTransitioning) {
             return PhaseUpdateResult.CONTINUE;

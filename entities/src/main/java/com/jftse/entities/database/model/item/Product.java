@@ -18,6 +18,7 @@ public class Product extends AbstractIdBaseModel {
     private Boolean hitDisplay;
 
     private Boolean enabled;
+    private Boolean noBuy;
 
     private String useType;
 

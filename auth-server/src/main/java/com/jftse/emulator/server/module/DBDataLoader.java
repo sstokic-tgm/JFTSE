@@ -1214,6 +1214,7 @@ public class DBDataLoader implements CommandLineRunner {
                 product.setDisplay(Integer.valueOf(productNode.valueOf("@DISPLAY")));
                 product.setHitDisplay(!productNode.valueOf("@HIT_DISPLAY").equals("0"));
                 product.setEnabled(!productNode.valueOf("@Enable").equals("0"));
+                product.setNoBuy(!productNode.valueOf("@Nobuy").equals("0"));
                 product.setUseType(productNode.valueOf("@UseType"));
                 product.setUse0(Integer.parseInt(productNode.valueOf("@Use0")));
                 product.setUse1(Integer.parseInt(productNode.valueOf("@Use1")));

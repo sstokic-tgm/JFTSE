@@ -42,7 +42,7 @@ public class GameServerStart {
         packetHandlerFactory.autoRegister();
 
         bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup(10);
+        workerGroup = new NioEventLoopGroup(20);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)

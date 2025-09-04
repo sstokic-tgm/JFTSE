@@ -60,6 +60,24 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
         Map<Integer, Byte> itemList = shopBuyPacket.getItemList();
         Map<Product, Byte> productList = productService.findProductsByItemList(itemList);
 
+        if (productList.size() == 1) {
+            boolean noBuy = productList.keySet()
+                    .stream()
+                    .allMatch(Product::getNoBuy);
+            if (noBuy) {
+                S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NOT_FOR_SALE_LIMIT_PRODUCT, null);
+                connection.sendTCP(shopBuyPacketAnswer);
+                return;
+            }
+        } else {
+            boolean success = productList.keySet().removeIf(Product::getNoBuy);
+            if (success && productList.isEmpty()) {
+                S2CShopBuyPacket shopBuyPacketAnswer = new S2CShopBuyPacket(S2CShopBuyPacket.NOT_FOR_SALE_LIMIT_PRODUCT, null);
+                connection.sendTCP(shopBuyPacketAnswer);
+                return;
+            }
+        }
+
         Account account = ftClient.getAccount();
         Player player = ftClient.getPlayer();
 

@@ -42,7 +42,7 @@ public class ChatServerStart {
         packetHandlerFactory.autoRegister();
 
         bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup(4);
+        workerGroup = new NioEventLoopGroup(10);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
