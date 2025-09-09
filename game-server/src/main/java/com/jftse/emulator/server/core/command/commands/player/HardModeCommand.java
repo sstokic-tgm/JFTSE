@@ -8,6 +8,7 @@ import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.constants.GameMode;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class HardModeCommand extends AbstractCommand {
@@ -28,7 +29,7 @@ public class HardModeCommand extends AbstractCommand {
         if (!isGuardian)
             return;
 
-        if (room.getMap() == 4 || room.getMap() == 1 || room.getMap() == 2) {
+        if (Arrays.asList(1, 2, 4, 7, 8, 10).contains((int) room.getMap())) {
             S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Hard mode is not allowed on this map");
             GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
             return;
