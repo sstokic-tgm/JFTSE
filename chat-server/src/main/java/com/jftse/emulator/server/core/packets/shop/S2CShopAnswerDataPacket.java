@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.packets.shop;
 
+import com.jftse.server.core.constants.ShopItemFlags;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.entities.database.model.item.Product;
@@ -17,7 +18,18 @@ public class S2CShopAnswerDataPacket extends Packet {
 
         for (Product product : productList) {
             this.write(product.getProductIndex());
-            this.write(product.getPriceType().equals("GOLD") ? (byte) 0 : (byte) 1);
+
+            byte shopItemFlags = ShopItemFlags.getPriceTypeFlag(product.getPriceType());
+
+            if (product.getCouplePrice() != 0) {
+                shopItemFlags = ShopItemFlags.add(shopItemFlags, ShopItemFlags.COUPLE);
+            }
+
+            if (product.getNoBuy() != null && product.getNoBuy()) {
+                shopItemFlags = ShopItemFlags.add(shopItemFlags, ShopItemFlags.NO_BUY);
+            }
+
+            this.write(shopItemFlags);
             this.write(product.getGoldBack());
             this.write(product.getUse0());
             this.write(product.getUse1());
