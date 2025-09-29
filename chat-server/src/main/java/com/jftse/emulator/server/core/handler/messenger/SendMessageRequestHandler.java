@@ -15,6 +15,8 @@ import com.jftse.server.core.service.MessageService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
+import java.util.List;
+
 @PacketOperationIdentifier(PacketOperations.C2SSendMessageRequest)
 public class SendMessageRequestHandler extends AbstractPacketHandler {
     private C2SSendMessageRequestPacket c2SSendMessageRequestPacket;
@@ -44,6 +46,12 @@ public class SendMessageRequestHandler extends AbstractPacketHandler {
 
         Player receiver = playerService.findByName(c2SSendMessageRequestPacket.getReceiverName());
         if (receiver != null) {
+            List<Message> messages = messageService.findByReceiver(receiver);
+            List<Message> senderMessages = messageService.findBySender(ftClient.getPlayer());
+            if (messages.size() > 128 || senderMessages.size() > 128) {
+                return;
+            }
+
             Message message = new Message();
             message.setReceiver(receiver);
             message.setSender(ftClient.getPlayer());

@@ -108,6 +108,14 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
                         return;
                     }
 
+                    List<Parcel> receiverParcels = parcelService.findByReceiver(receiver);
+                    List<Parcel> senderParcels = parcelService.findBySender(sender);
+                    if (receiverParcels.size() > 128 || senderParcels.size() > 128) {
+                        S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
+                        connection.sendTCP(s2CSendParcelAnswerPacket);
+                        return;
+                    }
+
                     // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
                     Parcel parcel = new Parcel();
                     parcel.setReceiver(receiver);

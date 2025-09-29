@@ -83,6 +83,14 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
                 return;
             }
 
+            List<Gift> gifts = giftService.findByReceiver(receiver);
+            List<Gift> senderGifts = giftService.findBySender(sender);
+            if (gifts.size() > 128 || senderGifts.size() > 128) {
+                S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) -9, null);
+                connection.sendTCP(s2CSendGiftAnswerPacket);
+                return;
+            }
+
             Gift gift = new Gift();
             gift.setReceiver(receiver);
             gift.setSender(sender);

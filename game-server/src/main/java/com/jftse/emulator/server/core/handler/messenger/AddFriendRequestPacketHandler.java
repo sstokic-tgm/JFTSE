@@ -56,6 +56,15 @@ public class AddFriendRequestPacketHandler extends AbstractPacketHandler {
         }
 
         List<Friend> friends = friendService.findByPlayer(player);
+        final long count = friends.stream()
+                .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends || x.getEFriendshipState() == EFriendshipState.Relationship)
+                .count();
+        if (count > 128) { // Max friends limit reached
+            S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) -2);
+            connection.sendTCP(s2CAddFriendResponsePacket);
+            return;
+        }
+
         Friend targetFriend = friends.stream()
                 .filter(x -> x.getFriend().getId().equals(targetPlayer.getId()))
                 .findFirst()

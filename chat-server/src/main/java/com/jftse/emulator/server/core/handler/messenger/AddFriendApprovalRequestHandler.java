@@ -53,6 +53,13 @@ public class AddFriendApprovalRequestHandler extends AbstractPacketHandler {
         Player targetPlayer = playerService.findByName(c2SAddFriendApprovalRequestPacket.getPlayerName());
 
         List<Friend> friends = friendService.findByPlayer(targetPlayer);
+        final long count = friends.stream()
+                .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends || x.getEFriendshipState() == EFriendshipState.Relationship)
+                .count();
+        if (count > 128) { // Max friends limit reached
+            return;
+        }
+
         Friend friend = friends.stream()
                 .filter(x -> x.getFriend().getId().equals(activePlayer.getId()))
                 .findFirst()
