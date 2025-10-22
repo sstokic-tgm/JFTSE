@@ -1,0 +1,5 @@
+message SMSG_LoginFirstPlayer (0x101F) {
+    char result = 1;
+    int32 playerId = 2;
+    byte playerType = 3;
+}

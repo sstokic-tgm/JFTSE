@@ -1,0 +1,6 @@
+message SMSG_InitHandshake (0xFF9A) {
+    int32 decKey = 1;
+    int32 encKey = 2;
+    int32 decTblIdx = 3;
+    int32 encTblIdx = 4;
+}

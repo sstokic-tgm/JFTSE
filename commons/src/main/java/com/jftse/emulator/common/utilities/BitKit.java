@@ -4,9 +4,12 @@ import io.netty.buffer.ByteBuf;
 
 public class BitKit {
     private static final char[] DIGITS_UPPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    private static final String SPACE = " ";
+    private static final String GAP = "    ";
+    private static final String DOUBLE_SPACE = "  ";
 
     public static byte fromUnsignedInt(int value) {
-        return (byte)value;
+        return (byte) value;
     }
 
     public static int toUnsignedInt(byte value) {
@@ -14,15 +17,15 @@ public class BitKit {
     }
 
     public static char byteToChar(byte value) {
-        return (char)toUnsignedInt(value);
+        return (char) toUnsignedInt(value);
     }
 
     public static char bytesToChar(byte[] bytes, int index) {
-        return (char)((bytes[index] & 0xFF) | ((bytes[index + 1] & 0xFF) << 8));
+        return (char) ((bytes[index] & 0xFF) | ((bytes[index + 1] & 0xFF) << 8));
     }
 
     public static short bytesToShort(byte[] bytes, int index) {
-        return (short)((bytes[index] & 0xFF) | ((bytes[index + 1] & 0xFF) << 8));
+        return (short) ((bytes[index] & 0xFF) | ((bytes[index + 1] & 0xFF) << 8));
     }
 
     public static int bytesToInt(byte[] bytes, int index) {
@@ -33,28 +36,36 @@ public class BitKit {
         return Float.intBitsToFloat(bytesToInt(bytes, index));
     }
 
+    public static double bytesToDouble(byte[] bytes, int index) {
+        return Double.longBitsToDouble(bytesToLong(bytes, index));
+    }
+
     public static long bytesToLong(byte[] bytes, int index) {
         return (bytes[index] & 0xFFL) | ((bytes[index + 1] & 0xFFL) << 8) | ((bytes[index + 2] & 0xFFL) << 16) | ((bytes[index + 3] & 0xFFL) << 24) | ((bytes[index + 4] & 0xFFL) << 32) | ((bytes[index + 5] & 0xFFL) << 40) | ((bytes[index + 6] & 0xFFL) << 48) | ((bytes[index + 7] & 0xFFL) << 56);
     }
 
     public static byte[] getBytes(byte value) {
-        return new byte[] { value };
+        return new byte[]{value};
     }
 
     public static byte[] getBytes(char value) {
-        return new byte[] { (byte)value, (byte)(value >> 8) };
+        return new byte[]{(byte) value, (byte) (value >> 8)};
     }
 
     public static byte[] getBytes(int value) {
-        return new byte[] { (byte)value, (byte)(value >> 8), (byte)(value >> 16), (byte)(value >> 24) };
+        return new byte[]{(byte) value, (byte) (value >> 8), (byte) (value >> 16), (byte) (value >> 24)};
     }
 
     public static byte[] getBytes(float value) {
         return getBytes(Float.floatToRawIntBits(value));
     }
 
+    public static byte[] getBytes(double value) {
+        return getBytes(Double.doubleToRawLongBits(value));
+    }
+
     public static byte[] getBytes(long value) {
-        return new byte[] { (byte)value, (byte)(value >> 8), (byte)(value >> 16), (byte)(value >> 24), (byte)(value >> 32), (byte)(value >> 40), (byte)(value >> 48), (byte)(value >> 56) };
+        return new byte[]{(byte) value, (byte) (value >> 8), (byte) (value >> 16), (byte) (value >> 24), (byte) (value >> 32), (byte) (value >> 40), (byte) (value >> 48), (byte) (value >> 56)};
     }
 
     public static void blockCopy(Object src, int srcPos, Object dest, int destPos, int length) {
@@ -62,12 +73,16 @@ public class BitKit {
     }
 
     public static String toString(byte[] value, int startIndex, int length) {
+        if (length == 0) {
+            return "";
+        }
+
         int chArrayLength = length * 3;
 
         char[] chArray = new char[chArrayLength];
         int index = startIndex;
 
-        for(int i = 0; i < chArrayLength; i += 3) {
+        for (int i = 0; i < chArrayLength; i += 3) {
 
             byte b = value[index++];
             chArray[i] = DIGITS_UPPER[(0xF0 & b) >>> 4];
@@ -86,6 +101,74 @@ public class BitKit {
             sb.append(' ');
             return true;
         });
+        return sb.toString();
+    }
+
+    public static String toString8x2(byte[] value, int startIndex, int length) {
+        final int endIndex = startIndex + length;
+        final char[] DIGITS = DIGITS_UPPER;
+
+        int estimatedSize = (length * 3) + (length / 8) * 4 + (length / 16) * 2;
+        StringBuilder sb = new StringBuilder(estimatedSize);
+        int i = startIndex;
+        int rowCount = 0;
+
+        while (i < endIndex) {
+            final int rowEnd = Math.min(i + 16, endIndex);
+            final int rowBytes = rowEnd - i;
+            for (int j = 0; j < 16; j++) {
+                if (j < rowBytes) {
+                    final byte b = value[i + j];
+                    sb.append(DIGITS[(b >>> 4) & 0x0F]).append(DIGITS[b & 0x0F]);
+                } else {
+                    sb.append(DOUBLE_SPACE);
+                }
+
+                sb.append(j == 7 ? GAP : SPACE);
+            }
+            i += 16;
+            rowCount++;
+            if (i < endIndex) {
+                sb.append('\n');
+                if (rowCount % 4 == 0) {
+                    sb.append('\n');
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String toString8x2(ByteBuf buf, int startIndex, int length) {
+        final int endIndex = startIndex + length;
+        final char[] DIGITS = DIGITS_UPPER;
+
+        int estimatedSize = (length * 3) + (length / 8) * 4 + (length / 16) * 2;
+        StringBuilder sb = new StringBuilder(estimatedSize);
+        int i = startIndex;
+        int rowCount = 0;
+
+        while (i < endIndex) {
+            final int rowEnd = Math.min(i + 16, endIndex);
+            final int rowBytes = rowEnd - i;
+            for (int j = 0; j < 16; j++) {
+                if (j < rowBytes) {
+                    final byte b = buf.getByte(i + j);
+                    sb.append(DIGITS[(b >>> 4) & 0x0F]).append(DIGITS[b & 0x0F]);
+                } else {
+                    sb.append(DOUBLE_SPACE);
+                }
+
+                sb.append(j == 7 ? GAP : SPACE);
+            }
+            i += 16;
+            rowCount++;
+            if (i < endIndex) {
+                sb.append('\n');
+                if (rowCount % 4 == 0) {
+                    sb.append('\n');
+                }
+            }
+        }
         return sb.toString();
     }
 }

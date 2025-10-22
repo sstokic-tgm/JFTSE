@@ -4,6 +4,7 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.repository.player.PlayerRepository;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.auth.CMSGPlayerCreate;
 import com.jftse.server.core.shared.packets.player.C2SPlayerCreatePacket;
 import com.jftse.server.core.shared.packets.player.C2SPlayerStatusPointChangePacket;
 import lombok.RequiredArgsConstructor;
@@ -144,6 +145,21 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public boolean isStatusPointHack(C2SPlayerCreatePacket playerCreatePacket, Player player) {
         // checking them so we are not 'hacked'
+        byte serverStatusPoints = player.getStatusPoints();
+        byte clientStatusPoints = playerCreatePacket.getStatusPoints();
+
+        byte strength = (byte) (playerCreatePacket.getStrength() - player.getStrength());
+        byte stamina = (byte) (playerCreatePacket.getStamina() - player.getStamina());
+        byte dexterity = (byte) (playerCreatePacket.getDexterity() - player.getDexterity());
+        byte willpower = (byte) (playerCreatePacket.getWillpower() - player.getWillpower());
+
+        byte newStatusPoints = (byte) (strength + stamina + dexterity + willpower + clientStatusPoints);
+
+        return (serverStatusPoints - newStatusPoints) != 0;
+    }
+
+    @Override
+    public boolean isStatusPointHack(CMSGPlayerCreate playerCreatePacket, Player player) {
         byte serverStatusPoints = player.getStatusPoints();
         byte clientStatusPoints = playerCreatePacket.getStatusPoints();
 

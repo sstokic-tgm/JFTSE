@@ -1,6 +1,7 @@
 package com.jftse.server.core.net;
 
 import com.jftse.entities.database.model.ServerType;
+import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.Packet;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -41,6 +42,10 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
         return ctx.close();
     }
 
+    public void wantsToCloseConnection() {
+        isClosingConnection.set(true);
+    }
+
     public final int getDecryptionKey() {
         return decryptionKey;
     }
@@ -76,4 +81,7 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
     }
 
     public abstract ChannelFuture sendTCP(Packet... packets);
+    public ChannelFuture sendTCP(IPacket... packets) {
+        return null;
+    }
 }

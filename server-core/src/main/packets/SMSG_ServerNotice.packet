@@ -1,0 +1,3 @@
+message SMSG_ServerNotice (0xFA6) {
+    string message = 1;
+}

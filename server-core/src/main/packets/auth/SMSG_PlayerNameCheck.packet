@@ -1,0 +1,3 @@
+message SMSG_PlayerNameCheck (0x101A) {
+    char result = 1;
+}

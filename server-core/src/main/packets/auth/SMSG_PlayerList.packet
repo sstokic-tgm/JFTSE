@@ -1,0 +1,45 @@
+message Account {
+    int32 id = 1;
+    int32 id2 = 2;
+    byte tutorialCount = 3;
+    int32 lastPlayedPlayerId = 4;
+    boolean gameMaster = 5;
+}
+
+message ClothEquipment {
+    int32 hair = 1;
+    int32 face = 2;
+    int32 dress = 3;
+    int32 pants = 4;
+    int32 socks = 5;
+    int32 shoes = 6;
+    int32 gloves = 7;
+    int32 racket = 8;
+    int32 glasses = 9;
+    int32 bag = 10;
+    int32 hat = 11;
+    int32 dye = 12;
+}
+
+message Player {
+    int32 id = 1;
+    string name = 2;
+    byte level = 3;
+    boolean created = 4;
+    boolean canDelete = 5;
+    int32 gold = 6;
+    byte playerType = 7;
+    byte str = 8;
+    byte sta = 9;
+    byte dex = 10;
+    byte wil = 11;
+    byte statPoints = 12;
+    boolean oldRenameAllowed = 13;
+    boolean renameAllowed = 14;
+    ClothEquipment clothEquipment = 15;
+}
+
+message SMSG_PlayerList (0x1005) {
+    Account account = 1;
+    repeated Player players = 2;
+}

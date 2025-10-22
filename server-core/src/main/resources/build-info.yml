@@ -1,0 +1,6 @@
+build:
+  rev: "@git.commit.id.abbrev@"
+  time: "@git.commit.time@"
+  branch: "@git.branch@"
+  host: "@os.name@"
+  arch: "@os.arch@"

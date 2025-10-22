@@ -1,0 +1,7 @@
+message CMSG_Login (0xFA1) {
+    string username = 1;
+    string password = 2 [encoding = utf8];
+    int32 version = 3;
+    byte unk0 = 4;
+    string hwid = 5 [encoding = utf8];
+}
