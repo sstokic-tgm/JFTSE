@@ -61,6 +61,8 @@ public class ServiceManager {
     private ItemCharService itemCharService;
     @Autowired
     private ProfaneWordsService profaneWordsService;
+    @Autowired
+    private UptimeService uptimeService;
 
     @Autowired
     private BlockedIPService blockedIPService;

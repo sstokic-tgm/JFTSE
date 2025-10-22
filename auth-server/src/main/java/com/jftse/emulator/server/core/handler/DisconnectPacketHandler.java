@@ -1,21 +1,16 @@
 package com.jftse.emulator.server.core.handler;
 
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.shared.packets.S2CDisconnectAnswerPacket;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.CMSGDisconnectRequest;
+import com.jftse.server.core.shared.packets.SMSGDisconnectResponse;
 
-@PacketOperationIdentifier(PacketOperations.C2SDisconnectRequest)
-public class DisconnectPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGDisconnectRequest.PACKET_ID)
+public class DisconnectPacketHandler implements PacketHandler<FTConnection, CMSGDisconnectRequest> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        S2CDisconnectAnswerPacket disconnectAnswerPacket = new S2CDisconnectAnswerPacket();
-        connection.sendTCP(disconnectAnswerPacket);
+    public void handle(FTConnection connection, CMSGDisconnectRequest packet) throws Exception {
+        SMSGDisconnectResponse response = SMSGDisconnectResponse.builder().status((byte) 0).build();
+        connection.sendTCP(response);
     }
 }

@@ -1,14 +1,24 @@
 package com.jftse.emulator.server.core.manager;
 
+import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.EconomySnapshot;
 import com.jftse.entities.database.model.ServerType;
+import com.jftse.entities.database.model.Uptime;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.proto.auth.UpdateAccountRequest;
+import com.jftse.server.core.BuildInfoProperties;
 import com.jftse.server.core.jdbc.JdbcUtil;
+import com.jftse.server.core.ServerLoopHandler;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.shared.packets.SMSGInitHandshake;
+import com.jftse.server.core.shared.packets.SMSGServerNotice;
 import com.jftse.server.core.thread.ThreadManager;
 import com.jftse.server.core.util.AccountAction;
+import com.jftse.server.core.util.GameTime;
+import com.jftse.server.core.util.IntervalTimer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -16,23 +26,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Getter
 @Setter
 @Log4j2
-public class AuthenticationManager {
+public class AuthenticationManager implements ServerLoopHandler {
+    @Getter
     private static AuthenticationManager instance;
 
+    private ConcurrentLinkedQueue<FTConnection> addConnectionQueue;
     private ConcurrentLinkedDeque<FTClient> clients;
-    private AtomicBoolean running;
-    private Future<?> authenticationTask;
+    private AtomicInteger playerCount = new AtomicInteger(0);
+    private int maxPlayerCount = 0;
 
     private BlockingQueue<UpdateAccountRequest> updateAccountQueue;
 
@@ -43,7 +52,12 @@ public class AuthenticationManager {
     @Autowired
     private JdbcUtil jdbcUtil;
 
+    @Autowired
+    private BuildInfoProperties revisionInfo;
+
     private String motd;
+
+    private IntervalTimer[] timers = new IntervalTimer[ServerTimers.COUNT];
 
     @PostConstruct
     public void init() {
@@ -51,46 +65,97 @@ public class AuthenticationManager {
 
         clients = new ConcurrentLinkedDeque<>();
         updateAccountQueue = new LinkedBlockingQueue<>();
+        addConnectionQueue = new ConcurrentLinkedQueue<>();
 
-        running = new AtomicBoolean(true);
+        GameTime.updateGameTimers();
+        initTimers();
 
-        setupGlobalTasks();
+        Uptime uptime = new Uptime();
+        uptime.setServerType(ServerType.AUTH_SERVER);
+        uptime.setStartTime(GameTime.getStartTime().getEpochSecond());
+        uptime.setUptime(0L);
+        uptime.setRevision(revisionInfo.getFullVersion());
+        serviceManager.getUptimeService().save(uptime);
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }
 
     public void onExit() {
-        if (running.compareAndSet(true, false)) {
-            log.info("Closing all connections");
-            for (FTClient client : clients) {
-                client.getConnection().close();
+        log.info("Closing all connections");
+
+        for (FTClient client : clients) {
+            client.getConnection().close();
+        }
+
+        log.info("Clearing leftover accounts still marked as logged in");
+        while (!clients.isEmpty()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
             }
+        }
+        resetLogins();
+        log.info("Leftover accounts cleared");
 
-            if (authenticationTask != null && authenticationTask.cancel(false)) {
-                log.info("AuthenticationTask stopped");
-            }
+        serviceManager.getUptimeService().updateUptimeAndMaxPlayers(GameTime.getUptimeSeconds(), getMaxPlayerCount(), ServerType.AUTH_SERVER, GameTime.getStartTime().getEpochSecond());
 
-            log.info("Clearing queue for update account requests");
-            while (!updateAccountQueue.isEmpty()) {
-                try {
-                    UpdateAccountRequest request = updateAccountQueue.poll();
-                    if (request != null) {
-                        processUpdateAccountRequest(request);
-                    }
-                } catch (Exception ex) {
-                    log.error("Error processing remaining request: {}", ex.getMessage(), ex);
-                }
-            }
+        log.info("AuthenticationManager stopped");
+    }
 
-            log.info("All connections closed");
+    @Override
+    public void update(long diff) {
+        GameTime.updateGameTimers();
 
-            clients.clear();
+        // update different timers
+        for (IntervalTimer timer : timers) {
+            if (timer.getCurrent() >= 0)
+                timer.update(diff);
+            else
+                timer.setCurrent(0);
+        }
 
-            log.info("Clearing leftover accounts still marked as logged in");
-            resetLogins();
-            log.info("Leftover accounts cleared");
+        if (timers[ServerTimers.SUPDATE_ECONOMY.value()].passed()) {
+            timers[ServerTimers.SUPDATE_ECONOMY.value()].reset();
 
-            log.info("AuthenticationManager stopped");
+            jdbcUtil.execute(em -> {
+                Long totalGold = Optional.ofNullable(
+                        em.createQuery("SELECT SUM(p.gold) FROM Player p WHERE p.alreadyCreated = true", Long.class)
+                                .getSingleResult()
+                ).orElse(0L);
+
+                Long totalAp = Optional.ofNullable(
+                        em.createQuery("SELECT SUM(a.ap) FROM Account a", Long.class).getSingleResult()
+                ).orElse(0L);
+
+                Long activePlayers = Optional.ofNullable(
+                        em.createQuery("SELECT COUNT(p) FROM Player p WHERE p.alreadyCreated = true", Long.class).getSingleResult()
+                ).orElse(0L);
+
+                Long activeAccounts = Optional.ofNullable(
+                        em.createQuery("SELECT COUNT(DISTINCT p.account.id) FROM Player p WHERE p.alreadyCreated = true", Long.class).getSingleResult()
+                ).orElse(0L);
+
+                EconomySnapshot snap = new EconomySnapshot();
+                snap.setDateTime(GameTime.getDateAndTime());
+                snap.setTotalGold(totalGold);
+                snap.setTotalAp(totalAp);
+                snap.setActivePlayers(activePlayers.intValue());
+                snap.setAvgGoldPerPlayer(activePlayers > 0 ? totalGold / activePlayers : 0);
+                snap.setAvgApPerAccount(activeAccounts > 0 ? totalAp / activeAccounts : 0);
+
+                em.persist(snap);
+            });
+        }
+
+        updateSessions(diff);
+        processUpdateAccountRequestQueue();
+
+        if (timers[ServerTimers.SUPDATE_UPTIME.value()].passed()) {
+            long uptimeSeconds = GameTime.getUptimeSeconds();
+            int maxOnlinePlayers = getMaxPlayerCount();
+            timers[ServerTimers.SUPDATE_UPTIME.value()].reset();
+
+            serviceManager.getUptimeService().updateUptimeAndMaxPlayers(uptimeSeconds, maxOnlinePlayers, ServerType.AUTH_SERVER, GameTime.getStartTime().getEpochSecond());
         }
     }
 
@@ -126,29 +191,19 @@ public class AuthenticationManager {
         }
     }
 
-    public static AuthenticationManager getInstance() {
-        return instance;
-    }
-
     public void addClient(FTClient client) {
         clients.add(client);
+        playerCount.getAndIncrement();
+        maxPlayerCount = Math.max(maxPlayerCount, playerCount.get());
     }
 
     public void removeClient(FTClient client) {
         clients.remove(client);
+        playerCount.getAndDecrement();
     }
 
-    private void setupGlobalTasks() {
-        authenticationTask = threadManager.scheduleAtFixedRate(() -> {
-            if (running.get()) {
-                try {
-                    processUpdateAccountRequestQueue();
-                } catch (Exception ex) {
-                    log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
-                }
-            }
-        }, 0, 100, TimeUnit.MILLISECONDS);
-        log.info("AuthenticationTask started");
+    public void queueConnection(FTConnection connection) {
+        addConnectionQueue.offer(connection);
     }
 
     public void addUpdateAccountRequest(UpdateAccountRequest request) {
@@ -185,7 +240,8 @@ public class AuthenticationManager {
                 account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
                 account.setLoggedInServer(ServerType.fromValue(request.getServer()));
             }
-            case null, default -> log.warn("Unknown account action {} for account ID: {}", action, request.getAccountId());
+            case null, default ->
+                    log.warn("Unknown account action {} for account ID: {}", action, request.getAccountId());
         }
 
         try {
@@ -221,5 +277,64 @@ public class AuthenticationManager {
         }
 
         return toProcess;
+    }
+
+    private void updateSessions(long diff) {
+        while (!addConnectionQueue.isEmpty()) {
+            FTConnection conn = addConnectionQueue.poll();
+            if (conn != null) {
+                initializeConnection(conn);
+            }
+        }
+
+        final ConcurrentLinkedDeque<FTClient> clientsSnapshot = new ConcurrentLinkedDeque<>(getClients());
+        for (FTClient client : clientsSnapshot) {
+            FTConnection conn = client.getConnection();
+            if (conn != null && !conn.update(diff)) {
+                removeClient(client);
+                conn.close();
+            }
+        }
+    }
+
+    private void initializeConnection(FTConnection conn) {
+        FTClient client = new FTClient();
+        client.setConnection(conn);
+        conn.setClient(client);
+        addClient(client);
+
+        SMSGInitHandshake initHandshakePacket = SMSGInitHandshake.builder()
+                .decKey(conn.getDecryptionKey())
+                .encKey(conn.getEncryptionKey())
+                .decTblIdx(0)
+                .encTblIdx(0)
+                .build();
+        conn.sendTCP(initHandshakePacket);
+
+        final String motd = AuthenticationManager.getInstance().getMotd();
+        SMSGServerNotice serverNotice = SMSGServerNotice.builder().message(motd).build();
+        if (!StringUtils.isEmpty(motd)) {
+            ThreadManager.getInstance().schedule(() -> conn.sendTCP(serverNotice), 100, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void initTimers() {
+        for (int i = 0; i < ServerTimers.COUNT; i++) {
+            timers[i] = new IntervalTimer();
+        }
+        timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(10)); // 10 minutes
+        timers[ServerTimers.SUPDATE_ECONOMY.value()].setInterval(TimeUnit.HOURS.toMillis(8)); // 8 hours
+    }
+
+
+    public enum ServerTimers {
+        SUPDATE_ECONOMY,
+        SUPDATE_UPTIME;
+
+        public static final int COUNT = values().length;
+
+        public int value() {
+            return this.ordinal();
+        }
     }
 }

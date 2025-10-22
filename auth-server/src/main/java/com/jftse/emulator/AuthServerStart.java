@@ -2,7 +2,9 @@ package com.jftse.emulator;
 
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.net.ConnectionInitializer;
-import com.jftse.server.core.handler.PacketHandlerFactory;
+import com.jftse.server.core.ServerLoop;
+import com.jftse.server.core.YamlPropertySourceFactory;
+import com.jftse.server.core.protocol.PacketAutoRegister;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -15,6 +17,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.annotation.PreDestroy;
@@ -25,11 +28,14 @@ import java.util.concurrent.Future;
 @EntityScan(basePackages = "com.jftse.entities")
 @EnableJpaRepositories(basePackages = "com.jftse.entities")
 @ComponentScan(basePackages = "com.jftse")
+@PropertySource(value = "classpath:build-info.yml", factory = YamlPropertySourceFactory.class)
 @Log4j2
 public class AuthServerStart {
     private static EventLoopGroup bossGroup;
     private static EventLoopGroup workerGroup;
 
+    @Autowired
+    private ServerLoop serverLoop;
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -37,8 +43,7 @@ public class AuthServerStart {
         SpringApplication app = new SpringApplication(AuthServerStart.class);
 
         app.run(args);
-        PacketHandlerFactory packetHandlerFactory = PacketHandlerFactory.initFactory(log);
-        packetHandlerFactory.autoRegister();
+        PacketAutoRegister.registerAll();
 
         bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup(4);
@@ -47,7 +52,7 @@ public class AuthServerStart {
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 300)
-                    .childHandler(new ConnectionInitializer(packetHandlerFactory))
+                    .childHandler(new ConnectionInitializer())
                     .childOption(ChannelOption.TCP_NODELAY, false)
                     .childOption(ChannelOption.SO_KEEPALIVE, false)
                     .childOption(ChannelOption.SO_REUSEADDR, true)
@@ -56,6 +61,8 @@ public class AuthServerStart {
 
             ChannelFuture f = b.bind(5894).sync();
             if (f.isSuccess()) {
+                ServerLoop.getInstance().start();
+
                 log.info(
                         "\n\n*************************************\n" +
                                 "* auth-server successfully started! *\n" +
@@ -66,6 +73,7 @@ public class AuthServerStart {
             log.info("Stopping server");
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
+            ServerLoop.getInstance().stop();
         }
 
     }
@@ -74,6 +82,7 @@ public class AuthServerStart {
     public void onExit() {
         log.info("Server exited");
         authenticationManager.onExit();
+        serverLoop.stop();
         Future<?> workerGroupFuture = workerGroup.shutdownGracefully();
         Future<?> bossGroupFuture = bossGroup.shutdownGracefully();
         try {

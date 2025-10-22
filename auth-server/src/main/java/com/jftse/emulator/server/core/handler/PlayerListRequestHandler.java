@@ -1,20 +1,20 @@
 package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.auth.CMSGRequestPlayerList;
+import com.jftse.server.core.shared.packets.auth.SMSGPlayerList;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SRequestPlayerList)
-public class PlayerListRequestHandler extends AbstractPacketHandler {
+@PacketId(CMSGRequestPlayerList.PACKET_ID)
+public class PlayerListRequestHandler implements PacketHandler<FTConnection, CMSGRequestPlayerList> {
     private final PlayerService playerService;
 
     public PlayerListRequestHandler() {
@@ -22,13 +22,8 @@ public class PlayerListRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRequestPlayerList packet) {
+        FTClient client = connection.getClient();
         if (client == null) {
             return;
         }
@@ -41,7 +36,48 @@ public class PlayerListRequestHandler extends AbstractPacketHandler {
         int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
         List<Player> playerList = playerService.findAllByAccount(account);
 
-        S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+        SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
+                .account(
+                        com.jftse.server.core.shared.packets.auth.Account.builder()
+                                .id(Math.toIntExact(account.getId()))
+                                .id2(Math.toIntExact(account.getId()))
+                                .tutorialCount((byte) tutorialCount)
+                                .gameMaster(account.getGameMaster())
+                                .lastPlayedPlayerId(Math.toIntExact(account.getLastSelectedPlayerId() == null ? 0 : account.getLastSelectedPlayerId()))
+                                .build()
+                )
+                .players(playerList.stream().map(p -> com.jftse.server.core.shared.packets.auth.Player.builder()
+                        .id(Math.toIntExact(p.getId()))
+                        .name(p.getName())
+                        .level(p.getLevel())
+                        .created(p.getAlreadyCreated())
+                        .canDelete(!p.getFirstPlayer())
+                        .gold(p.getGold())
+                        .playerType(p.getPlayerType())
+                        .str(p.getStrength())
+                        .sta(p.getStamina())
+                        .dex(p.getDexterity())
+                        .wil(p.getWillpower())
+                        .statPoints(p.getStatusPoints())
+                        .oldRenameAllowed(false)
+                        .renameAllowed(p.getNameChangeAllowed())
+                        .clothEquipment(com.jftse.server.core.shared.packets.auth.ClothEquipment.builder()
+                                .hair(p.getClothEquipment().getHair())
+                                .face(p.getClothEquipment().getFace())
+                                .dress(p.getClothEquipment().getDress())
+                                .pants(p.getClothEquipment().getPants())
+                                .socks(p.getClothEquipment().getSocks())
+                                .shoes(p.getClothEquipment().getShoes())
+                                .gloves(p.getClothEquipment().getGloves())
+                                .racket(p.getClothEquipment().getRacket())
+                                .glasses(p.getClothEquipment().getGlasses())
+                                .bag(p.getClothEquipment().getBag())
+                                .hat(p.getClothEquipment().getHat())
+                                .dye(p.getClothEquipment().getDye())
+                                .build()
+                        )
+                        .build()).toList()
+                ).build();
         connection.sendTCP(playerListPacket);
     }
 }

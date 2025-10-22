@@ -1,20 +1,17 @@
 package com.jftse.emulator.server.core.handler.authentication;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.player.C2SPlayerNameCheckPacket;
-import com.jftse.emulator.server.core.packets.player.S2CPlayerNameCheckAnswerPacket;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.ProfaneWordsService;
+import com.jftse.server.core.shared.packets.auth.CMSGPlayerNameCheck;
+import com.jftse.server.core.shared.packets.auth.SMSGPlayerNameCheck;
 
-@PacketOperationIdentifier(PacketOperations.C2SPlayerNameCheck)
-public class PlayerNameCheckPacketHandler extends AbstractPacketHandler {
-    private C2SPlayerNameCheckPacket playerNameCheckPacket;
-
+@PacketId(CMSGPlayerNameCheck.PACKET_ID)
+public class PlayerNameCheckPacketHandler implements PacketHandler<FTConnection, CMSGPlayerNameCheck> {
     private final ProfaneWordsService profaneWordsService;
     private final PlayerService playerService;
 
@@ -24,23 +21,17 @@ public class PlayerNameCheckPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        playerNameCheckPacket = new C2SPlayerNameCheckPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        String playerName = playerNameCheckPacket.getNickname();
+    public void handle(FTConnection connection, CMSGPlayerNameCheck playerNameCheckPacket) {
+        String playerName = playerNameCheckPacket.getName();
         boolean isPlayerNameValid = !profaneWordsService.textContainsProfaneWord(playerName);
 
         Player player = playerService.findByName(playerName);
         if (player == null && isPlayerNameValid) {
-            S2CPlayerNameCheckAnswerPacket playerNameCheckAnswerPacket = new S2CPlayerNameCheckAnswerPacket((char) 0);
-            connection.sendTCP(playerNameCheckAnswerPacket);
+            SMSGPlayerNameCheck response = SMSGPlayerNameCheck.builder().result((char) 0).build();
+            connection.sendTCP(response);
         } else {
-            S2CPlayerNameCheckAnswerPacket playerNameCheckAnswerPacket = new S2CPlayerNameCheckAnswerPacket((char) -1);
-            connection.sendTCP(playerNameCheckAnswerPacket);
+            SMSGPlayerNameCheck response = SMSGPlayerNameCheck.builder().result((char) -1).build();
+            connection.sendTCP(response);
         }
     }
 }

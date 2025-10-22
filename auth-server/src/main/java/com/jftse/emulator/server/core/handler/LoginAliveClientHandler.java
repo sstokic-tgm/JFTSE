@@ -1,18 +1,21 @@
 package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.authserver.S2CGameServerListPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.entities.database.model.gameserver.GameServer;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.AuthenticationService;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.auth.CMSGRequestChannelList;
+import com.jftse.server.core.shared.packets.auth.SMSGChannelList;
 
-@PacketOperationIdentifier(PacketOperations.C2SLoginAliveClient)
-public class LoginAliveClientHandler extends AbstractPacketHandler {
+import java.util.List;
+
+@PacketId(CMSGRequestChannelList.PACKET_ID)
+public class LoginAliveClientHandler implements PacketHandler<FTConnection, CMSGRequestChannelList> {
     private final AuthenticationService authenticationService;
     private final PlayerService playerService;
 
@@ -22,13 +25,8 @@ public class LoginAliveClientHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRequestChannelList packet) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -37,8 +35,20 @@ public class LoginAliveClientHandler extends AbstractPacketHandler {
             return;
 
         if (client.isClientAlive().compareAndSet(false, true)) {
-            S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
-            connection.sendTCP(gameServerListPacket);
+            List<GameServer> gameServerList = authenticationService.getGameServerList();
+            SMSGChannelList channelList = SMSGChannelList.builder()
+                    .channels(gameServerList.stream().map(gs -> com.jftse.server.core.shared.packets.auth.Channel.builder()
+                            .id((byte) Math.toIntExact(gs.getId()))
+                            .id2((short) Math.toIntExact(gs.getId()))
+                            .type(gs.getGameServerType().getType())
+                            .hostname(gs.getHost())
+                            .port(gs.getPort().shortValue())
+                            .population((short) 0)
+                            .customChannel(gs.getIsCustomChannel())
+                            .name(gs.getName())
+                            .build()).toList()
+                    ).build();
+            connection.sendTCP(channelList);
         }
     }
 }

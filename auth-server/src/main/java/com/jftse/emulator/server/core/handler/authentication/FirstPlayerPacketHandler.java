@@ -1,24 +1,21 @@
 package com.jftse.emulator.server.core.handler.authentication;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.player.C2SFirstPlayerPacket;
-import com.jftse.emulator.server.core.packets.player.S2CFirstPlayerAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.auth.CMSGLoginFirstPlayer;
+import com.jftse.server.core.shared.packets.auth.SMSGLoginFirstPlayer;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SLoginFirstPlayerRequest)
-public class FirstPlayerPacketHandler extends AbstractPacketHandler {
-    private C2SFirstPlayerPacket firstPlayerPacket;
-
+@PacketId(CMSGLoginFirstPlayer.PACKET_ID)
+public class FirstPlayerPacketHandler implements PacketHandler<FTConnection, CMSGLoginFirstPlayer> {
     private final ClothEquipmentService clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
@@ -44,14 +41,8 @@ public class FirstPlayerPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        firstPlayerPacket = new C2SFirstPlayerPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGLoginFirstPlayer firstPlayerPacket) {
+        FTClient client = connection.getClient();
         List<Player> playerList = playerService.findAllByAccount(client.getAccount());
 
         if (playerList.isEmpty()) {
@@ -99,11 +90,19 @@ public class FirstPlayerPacketHandler extends AbstractPacketHandler {
             accountHome.setAccount(client.getAccount());
             accountHome = homeService.save(accountHome);
 
-            S2CFirstPlayerAnswerPacket firstPlayerAnswerPacket = new S2CFirstPlayerAnswerPacket((char) 0, player.getId(), player.getPlayerType());
-            connection.sendTCP(firstPlayerAnswerPacket);
+            SMSGLoginFirstPlayer response = SMSGLoginFirstPlayer.builder()
+                    .result((char) 0)
+                    .playerId(Math.toIntExact(player.getId()))
+                    .playerType(player.getPlayerType())
+                    .build();
+            connection.sendTCP(response);
         } else {
-            S2CFirstPlayerAnswerPacket firstPlayerAnswerPacket = new S2CFirstPlayerAnswerPacket((char) -1, 0L, (byte) 0);
-            connection.sendTCP(firstPlayerAnswerPacket);
+            SMSGLoginFirstPlayer response = SMSGLoginFirstPlayer.builder()
+                    .result((char) -1)
+                    .playerId(0)
+                    .playerType((byte) 0)
+                    .build();
+            connection.sendTCP(response);
         }
     }
 }

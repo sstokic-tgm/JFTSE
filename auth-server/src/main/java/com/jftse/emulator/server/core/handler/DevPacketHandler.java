@@ -3,15 +3,14 @@ package com.jftse.emulator.server.core.handler;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.CMSGDefault;
+import com.jftse.server.core.shared.packets.CMSGDevPacket;
 
-@PacketOperationIdentifier(PacketOperations.D2SDevPacket)
-public class DevPacketHandler extends AbstractPacketHandler {
-    private Packet packet;
-
+@PacketId(CMSGDevPacket.PACKET_ID)
+public class DevPacketHandler implements PacketHandler<FTConnection, CMSGDevPacket> {
     private final ConfigService configService;
 
     public DevPacketHandler() {
@@ -19,16 +18,9 @@ public class DevPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGDevPacket packet) {
         if (configService.getValue("dev.packets.handle", false)) {
-            byte[] data = packet.getData();
-            Packet packetToRelay = new Packet(data);
+            CMSGDefault packetToRelay = CMSGDefault.fromBytes(packet.getPacket());
             AuthenticationManager.getInstance().getClients().forEach(c -> {
                 if (c.getConnection() != null) {
                     c.getConnection().sendTCP(packetToRelay);

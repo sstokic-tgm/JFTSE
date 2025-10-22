@@ -3,29 +3,25 @@ package com.jftse.emulator.server.core.handler.authentication;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.authserver.C2SAuthLoginPacket;
-import com.jftse.emulator.server.core.packets.authserver.S2CAuthLoginPacket;
-import com.jftse.emulator.server.core.packets.authserver.S2CGameServerListPacket;
-import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
-import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
+import com.jftse.entities.database.model.gameserver.GameServer;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.AuthTokenService;
 import com.jftse.server.core.service.AuthenticationService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.shared.packets.auth.*;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
@@ -33,11 +29,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@PacketOperationIdentifier(PacketOperations.C2SAuthLoginData)
+@PacketId(CMSGAuthLogin.PACKET_ID)
 @Log4j2
-public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
-    private C2SAuthLoginPacket authLoginPacket;
-
+public class AuthLoginDataPacketHandler implements PacketHandler<FTConnection, CMSGAuthLogin> {
     private final AuthenticationService authenticationService;
     private final AuthTokenService authTokenService;
     private final PlayerService playerService;
@@ -51,18 +45,14 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        authLoginPacket = new C2SAuthLoginPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGAuthLogin authLoginPacket) {
         Account account = authenticationService.findAccountByUsername(authLoginPacket.getUsername());
-        FTClient client = (FTClient) connection.getClient();
+        FTClient client = connection.getClient();
         if (client != null && account != null && account.getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && client.isLoginIn().compareAndSet(false, true)) {
-            S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) 0);
-            connection.sendTCP(authLoginAnswerPacket);
+            SMSGAuthLogin authLogin = SMSGAuthLogin.builder()
+                    .result((char) 0)
+                    .build();
+            connection.sendTCP(authLogin);
 
             UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
                     .setAccountId(account.getId())
@@ -85,7 +75,11 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
             authToken.setAccountName(authLoginPacket.getUsername());
             authTokenService.save(authToken);
 
-            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.SUCCESS, token, timestamp);
+            SMSGLogin loginAnswerPacket = SMSGLogin.builder()
+                    .result(AuthenticationServiceImpl.SUCCESS)
+                    .token(token)
+                    .timestamp(timestamp)
+                    .build();
             connection.sendTCP(loginAnswerPacket);
 
             int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
@@ -101,16 +95,71 @@ public class AuthLoginDataPacketHandler extends AbstractPacketHandler {
                 }
             }
 
-            S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+            SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
+                    .account(
+                            com.jftse.server.core.shared.packets.auth.Account.builder()
+                                    .id(Math.toIntExact(account.getId()))
+                                    .id2(Math.toIntExact(account.getId()))
+                                    .tutorialCount((byte) tutorialCount)
+                                    .gameMaster(account.getGameMaster())
+                                    .lastPlayedPlayerId(Math.toIntExact(account.getLastSelectedPlayerId() == null ? 0 : account.getLastSelectedPlayerId()))
+                                    .build()
+                    )
+                    .players(playerList.stream().map(p -> com.jftse.server.core.shared.packets.auth.Player.builder()
+                            .id(Math.toIntExact(p.getId()))
+                            .name(p.getName())
+                            .level(p.getLevel())
+                            .created(p.getAlreadyCreated())
+                            .canDelete(!p.getFirstPlayer())
+                            .gold(p.getGold())
+                            .playerType(p.getPlayerType())
+                            .str(p.getStrength())
+                            .sta(p.getStamina())
+                            .dex(p.getDexterity())
+                            .wil(p.getWillpower())
+                            .statPoints(p.getStatusPoints())
+                            .oldRenameAllowed(false)
+                            .renameAllowed(p.getNameChangeAllowed())
+                            .clothEquipment(com.jftse.server.core.shared.packets.auth.ClothEquipment.builder()
+                                    .hair(p.getClothEquipment().getHair())
+                                    .face(p.getClothEquipment().getFace())
+                                    .dress(p.getClothEquipment().getDress())
+                                    .pants(p.getClothEquipment().getPants())
+                                    .socks(p.getClothEquipment().getSocks())
+                                    .shoes(p.getClothEquipment().getShoes())
+                                    .gloves(p.getClothEquipment().getGloves())
+                                    .racket(p.getClothEquipment().getRacket())
+                                    .glasses(p.getClothEquipment().getGlasses())
+                                    .bag(p.getClothEquipment().getBag())
+                                    .hat(p.getClothEquipment().getHat())
+                                    .dye(p.getClothEquipment().getDye())
+                                    .build()
+                            )
+                            .build()).toList()
+                    ).build();
             connection.sendTCP(playerListPacket);
 
-            S2CGameServerListPacket gameServerListPacket = new S2CGameServerListPacket(authenticationService.getGameServerList());
-            connection.sendTCP(gameServerListPacket);
+            List<GameServer> gameServerList = authenticationService.getGameServerList();
+            SMSGChannelList channelList = SMSGChannelList.builder()
+                    .channels(gameServerList.stream().map(gs -> com.jftse.server.core.shared.packets.auth.Channel.builder()
+                            .id((byte) Math.toIntExact(gs.getId()))
+                            .id2((short) Math.toIntExact(gs.getId()))
+                            .type(gs.getGameServerType().getType())
+                            .hostname(gs.getHost())
+                            .port(gs.getPort().shortValue())
+                            .population((short) 0)
+                            .customChannel(gs.getIsCustomChannel())
+                            .name(gs.getName())
+                            .build()).toList()
+                    ).build();
+            connection.sendTCP(channelList);
 
             client.isLoginIn().set(false);
         } else {
-            S2CAuthLoginPacket authLoginAnswerPacket = new S2CAuthLoginPacket((char) -1);
-            connection.sendTCP(authLoginAnswerPacket);
+            SMSGAuthLogin authLogin = SMSGAuthLogin.builder()
+                    .result((char) -1)
+                    .build();
+            connection.sendTCP(authLogin);
             connection.close();
         }
     }

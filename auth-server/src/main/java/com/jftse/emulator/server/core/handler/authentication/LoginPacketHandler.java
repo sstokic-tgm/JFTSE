@@ -4,9 +4,6 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.authserver.C2SLoginPacket;
-import com.jftse.emulator.server.core.packets.authserver.S2CLoginAnswerPacket;
-import com.jftse.emulator.server.core.packets.player.S2CPlayerListPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
@@ -17,13 +14,14 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.shared.packets.auth.CMSGLogin;
+import com.jftse.server.core.shared.packets.auth.SMSGLogin;
+import com.jftse.server.core.shared.packets.auth.SMSGPlayerList;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.InetSocketAddress;
@@ -32,11 +30,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@PacketOperationIdentifier(PacketOperations.C2SLoginRequest)
+@PacketId(CMSGLogin.PACKET_ID)
 @Log4j2
-public class LoginPacketHandler extends AbstractPacketHandler {
-    private C2SLoginPacket loginPacket;
-
+public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin> {
     private final AuthenticationService authenticationService;
     private final ClientWhitelistService clientWhitelistService;
     private final AuthTokenService authTokenService;
@@ -56,24 +52,22 @@ public class LoginPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        loginPacket = new C2SLoginPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGLogin loginPacket) {
         InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
         if (configService.getValue("anticheat.enabled", false) && !isClientValid(inetSocketAddress, loginPacket.getHwid())) {
-            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.INVAILD_VERSION);
-            connection.sendTCP(loginAnswerPacket);
+            SMSGLogin loginAnswer = SMSGLogin.builder()
+                    .result(AuthenticationServiceImpl.INVAILD_VERSION)
+                    .build();
+            connection.sendTCP(loginAnswer);
             return;
         }
 
         // version check
         if (loginPacket.getVersion() != 21108180) {
-            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.INVAILD_VERSION);
-            connection.sendTCP(loginAnswerPacket);
+            SMSGLogin loginAnswer = SMSGLogin.builder()
+                    .result(AuthenticationServiceImpl.INVAILD_VERSION)
+                    .build();
+            connection.sendTCP(loginAnswer);
             return;
         }
 
@@ -81,8 +75,10 @@ public class LoginPacketHandler extends AbstractPacketHandler {
         Account account = authenticationService.findAccountByUsername(loginPacket.getUsername());
 
         if (account == null || loginResult != AuthenticationServiceImpl.SUCCESS) {
-            S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket((short) loginResult);
-            connection.sendTCP(loginAnswerPacket);
+            SMSGLogin loginAnswer = SMSGLogin.builder()
+                    .result((short) loginResult)
+                    .build();
+            connection.sendTCP(loginAnswer);
         } else {
             Integer accountStatus = account.getStatus();
 
@@ -90,8 +86,10 @@ public class LoginPacketHandler extends AbstractPacketHandler {
             final boolean isLoggedIn = clients.stream()
                     .anyMatch(client -> client.getAccount() != null && client.getAccount().getId().equals(account.getId()));
             if (isLoggedIn || accountStatus.equals((int) AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN)) {
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN);
-                connection.sendTCP(loginAnswerPacket);
+                SMSGLogin loginAnswer = SMSGLogin.builder()
+                        .result(AuthenticationServiceImpl.ACCOUNT_ALREADY_LOGGED_IN)
+                        .build();
+                connection.sendTCP(loginAnswer);
                 return;
             }
 
@@ -102,23 +100,29 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                     account.setBanReason(null);
                     accountStatus = 0;
                 } else {
-                    S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(accountStatus.shortValue());
-                    connection.sendTCP(loginAnswerPacket);
+                    SMSGLogin loginAnswer = SMSGLogin.builder()
+                            .result(accountStatus.shortValue())
+                            .build();
+                    connection.sendTCP(loginAnswer);
                     return;
                 }
             }
 
             if (isClientFlagged(loginPacket.getHwid())) {
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID);
-                connection.sendTCP(loginAnswerPacket);
+                SMSGLogin loginAnswer = SMSGLogin.builder()
+                        .result(AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID)
+                        .build();
+                connection.sendTCP(loginAnswer);
             } else {
                 if (configService.getValue("anticheat.enabled", false) && !linkAccountToClientWhitelist(inetSocketAddress, loginPacket.getHwid(), account)) {
-                    S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket((short) -80);
-                    connection.sendTCP(loginAnswerPacket);
+                    SMSGLogin loginAnswer = SMSGLogin.builder()
+                            .result((short) -80)
+                            .build();
+                    connection.sendTCP(loginAnswer);
                     return;
                 }
 
-                FTClient client = (FTClient) connection.getClient();
+                FTClient client = connection.getClient();
                 client.saveAccount(account);
                 client.setAccount(account.getId());
 
@@ -142,7 +146,7 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                     }
                 }
 
-                ((FTConnection) connection).setHwid(loginPacket.getHwid());
+                connection.setHwid(loginPacket.getHwid());
 
                 List<AuthToken> existingAuthTokens = authTokenService.findAuthTokensByAccountName(account.getUsername());
                 if (!existingAuthTokens.isEmpty()) {
@@ -158,10 +162,55 @@ public class LoginPacketHandler extends AbstractPacketHandler {
                 authToken.setAccountName(account.getUsername());
                 authTokenService.save(authToken);
 
-                S2CLoginAnswerPacket loginAnswerPacket = new S2CLoginAnswerPacket(AuthenticationServiceImpl.SUCCESS, token, timestamp);
-                connection.sendTCP(loginAnswerPacket);
+                SMSGLogin loginAnswer = SMSGLogin.builder()
+                        .result(AuthenticationServiceImpl.SUCCESS)
+                        .token(token)
+                        .timestamp(timestamp)
+                        .build();
+                connection.sendTCP(loginAnswer);
 
-                S2CPlayerListPacket playerListPacket = new S2CPlayerListPacket(account, playerList, tutorialCount);
+                SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
+                        .account(
+                                com.jftse.server.core.shared.packets.auth.Account.builder()
+                                        .id(Math.toIntExact(account.getId()))
+                                        .id2(Math.toIntExact(account.getId()))
+                                        .tutorialCount((byte) tutorialCount)
+                                        .gameMaster(account.getGameMaster())
+                                        .lastPlayedPlayerId(Math.toIntExact(account.getLastSelectedPlayerId() == null ? 0 : account.getLastSelectedPlayerId()))
+                                        .build()
+                        )
+                        .players(playerList.stream().map(p -> com.jftse.server.core.shared.packets.auth.Player.builder()
+                                .id(Math.toIntExact(p.getId()))
+                                .name(p.getName())
+                                .level(p.getLevel())
+                                .created(p.getAlreadyCreated())
+                                .canDelete(!p.getFirstPlayer())
+                                .gold(p.getGold())
+                                .playerType(p.getPlayerType())
+                                .str(p.getStrength())
+                                .sta(p.getStamina())
+                                .dex(p.getDexterity())
+                                .wil(p.getWillpower())
+                                .statPoints(p.getStatusPoints())
+                                .oldRenameAllowed(false)
+                                .renameAllowed(p.getNameChangeAllowed())
+                                .clothEquipment(com.jftse.server.core.shared.packets.auth.ClothEquipment.builder()
+                                        .hair(p.getClothEquipment().getHair())
+                                        .face(p.getClothEquipment().getFace())
+                                        .dress(p.getClothEquipment().getDress())
+                                        .pants(p.getClothEquipment().getPants())
+                                        .socks(p.getClothEquipment().getSocks())
+                                        .shoes(p.getClothEquipment().getShoes())
+                                        .gloves(p.getClothEquipment().getGloves())
+                                        .racket(p.getClothEquipment().getRacket())
+                                        .glasses(p.getClothEquipment().getGlasses())
+                                        .bag(p.getClothEquipment().getBag())
+                                        .hat(p.getClothEquipment().getHat())
+                                        .dye(p.getClothEquipment().getDye())
+                                        .build()
+                                )
+                                .build()).toList()
+                        ).build();
                 connection.sendTCP(playerListPacket);
 
                 String hostAddress;
