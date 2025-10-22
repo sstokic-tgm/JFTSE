@@ -65,9 +65,14 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
                 SMSGDisconnectMessage dcPacket = SMSGDisconnectMessage.builder()
                         .result((byte) 0)
                         .build();
-                connection.sendTCP(dcPacket);
-                disconnected(connection);
-                connection.wantsToCloseConnection();
+                connection.sendTCP(dcPacket).addListener((f) -> {
+                    if (f.isSuccess()) {
+                        connection.close();
+                    }else {
+                        log.warn("Failed to send disconnect packet to client before closing connection", f.cause());
+                        connection.close();
+                    }
+                });
             }
         }
     }

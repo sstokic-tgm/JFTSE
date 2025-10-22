@@ -6,9 +6,13 @@ import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
+import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.net.TCPHandlerV2;
 import com.jftse.server.core.protocol.IPacket;
+import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.service.BlockedIPService;
+import com.jftse.server.core.shared.packets.CMSGDisconnectRequest;
+import com.jftse.server.core.shared.packets.CMSGHeartbeat;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
@@ -34,7 +38,24 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
 
     @Override
     protected void packetReceived(FTConnection connection, IPacket packet) {
-        connection.queuePacket(packet);
+        if (packet instanceof CMSGHeartbeat || packet instanceof CMSGDisconnectRequest) {
+            callPacketHandler(connection, packet);
+        } else {
+            connection.queuePacket(packet);
+        }
+    }
+
+    private void callPacketHandler(FTConnection connection, IPacket packet) {
+        try {
+            PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
+            if (handler != null) {
+                handler.handle(connection, packet);
+            } else {
+                log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
+            }
+        } catch (Exception e) {
+            log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
+        }
     }
 
     @Override
