@@ -69,7 +69,10 @@ public class PacketDecoderV2 extends ByteToMessageDecoder {
         }
 
         if (!this.isValidChecksum(decryptedData)) {
-            log.error("Invalid packet checksum for packet: {}", BitKit.toString(decryptedData, 0, decryptedData.readableBytes()));
+            log.error("RECV [{} bytes]\nInvalid packet checksum\n--- Hex Dump ---\n{}\n===",
+                    decryptedData.readableBytes(),
+                    BitKit.toString8x2(decryptedData, 0, decryptedData.readableBytes()));
+
             in.resetReaderIndex();
             decryptedData.release();
             return null;
@@ -107,19 +110,28 @@ public class PacketDecoderV2 extends ByteToMessageDecoder {
     private boolean isValidChecksum(ByteBuf in) {
         final int receiveIndicator = this.receiveIndicator;
         final int pos = receiveIndicator * 2;
-        final short serverSerial = BitKit.bytesToShort(SerialTable.serialTable, pos);
+        final int packetChecksum = in.getUnsignedShortLE(2);
 
-        byte[] serverSerialData = new byte[]{BitKit.getBytes(serverSerial)[0], BitKit.getBytes(serverSerial)[1]};
         try {
-            final short clientChecksum = in.getShortLE(2);
-            short serverChecksum = (short) ((serverSerialData[0] & 0xFF) + (serverSerialData[1] & 0xFF) + (in.getByte(4) & 0xFF) + (in.getByte(5) & 0xFF) + (in.getByte(6) & 0xFF) + (in.getByte(7) & 0xFF));
-            if (serverChecksum % 2 == 0) {
-                serverChecksum += (short) 1587;
-            } else {
-                serverChecksum += (short) 1568;
+            final int c0 = in.getUnsignedByte(0);
+            final int c1 = in.getUnsignedByte(1);
+            final int c4 = in.getUnsignedByte(4);
+            final int c5 = in.getUnsignedByte(5);
+            final int c6 = in.getUnsignedByte(6);
+            final int c7 = in.getUnsignedByte(7);
+
+            final int s0 = SerialTable.serialTable[pos] & 0xFF;
+            final int s1 = SerialTable.serialTable[pos + 1] & 0xFF;
+
+            int recomputed = c0 + c1 + c4 + c5 + c6 + c7;
+            recomputed += (recomputed % 2 == 0) ? 1587 : 1568;
+            recomputed &= 0xFFFF;
+
+            if (packetChecksum != recomputed) {
+                return false;
             }
 
-            return clientChecksum == serverChecksum;
+            return s0 == c0 && s1 == c1;
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }

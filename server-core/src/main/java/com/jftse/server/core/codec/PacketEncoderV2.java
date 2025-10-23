@@ -92,23 +92,18 @@ public class PacketEncoderV2 extends MessageToByteEncoder<IPacket> {
     private void createSerial(byte[] data) {
         final int sendIndicator = this.sendIndicator;
         final int pos = sendIndicator * 2;
-        short header = BitKit.bytesToShort(SerialTable.serialTable, pos);
 
-        data[0] = BitKit.getBytes(header)[0];
-        data[1] = BitKit.getBytes(header)[1];
+        data[0] = SerialTable.serialTable[pos];
+        data[1] = SerialTable.serialTable[pos + 1];
 
         this.sendIndicator = (sendIndicator + 1) % 60;
     }
 
     private void createChecksum(byte[] data) {
-        short checksum = (short) ((data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF));
+        int checksum = (data[0] & 0xFF) + (data[1] & 0xFF) + (data[4] & 0xFF) + (data[5] & 0xFF) + (data[6] & 0xFF) + (data[7] & 0xFF);
+        checksum += (checksum % 2 == 0) ? 1587 : 1568;
 
-        if (checksum % 2 == 0) {
-            checksum += (short) 1587;
-        } else {
-            checksum += (short) 1568;
-        }
-        data[2] = BitKit.getBytes(checksum)[0];
-        data[3] = BitKit.getBytes(checksum)[1];
+        data[2] = (byte) (checksum & 0xFF);
+        data[3] = (byte) ((checksum >>> 8) & 0xFF);
     }
 }
