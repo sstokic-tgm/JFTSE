@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.common.utilities.BitKit;
+import com.jftse.emulator.server.core.manager.RelayManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.PacketHandler;
@@ -9,6 +10,8 @@ import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.packets.CMSGDefault;
 import com.jftse.server.core.shared.packets.relay.CMSGRelay;
+
+import java.util.List;
 
 @PacketId(CMSGRelay.PACKET_ID)
 public class RelayPacketRequestHandler implements PacketHandler<FTConnection, CMSGRelay> {
@@ -22,7 +25,11 @@ public class RelayPacketRequestHandler implements PacketHandler<FTConnection, CM
             if (relayPacket instanceof CMSGDefault defaultPacket) {
                 // not found so its wrapped in CMSGDefault and prob not reversed yet
                 // we must still relay it because the client expects the packet to function properly
-                connection.sendTCP(defaultPacket);
+                final List<FTClient> clients = RelayManager.getInstance().getClientsInSession(client.getGameSessionId().get());
+                clients.forEach(c -> {
+                    if (c.getConnection() != null)
+                        c.getConnection().sendTCP(defaultPacket);
+                });
             } else {
                 // just queue the packet for processing since we know about it
                 connection.queuePacket(relayPacket);
