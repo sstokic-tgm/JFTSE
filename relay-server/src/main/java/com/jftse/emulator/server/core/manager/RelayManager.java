@@ -82,8 +82,6 @@ public class RelayManager implements ServerLoopHandler {
 
     public void addClient(FTClient client) {
         clients.add(client);
-        playerCount.getAndIncrement();
-        maxPlayerCount = Math.max(maxPlayerCount, playerCount.get());
     }
 
     public void removeClient(FTClient client) {
@@ -100,6 +98,9 @@ public class RelayManager implements ServerLoopHandler {
         }
         clientList.add(client);
         sessionMap.put(sessionId, clientList);
+
+        playerCount.getAndIncrement();
+        maxPlayerCount = Math.max(maxPlayerCount, playerCount.get());
     }
 
     public void removeClient(final int sessionId, final FTClient client) {
