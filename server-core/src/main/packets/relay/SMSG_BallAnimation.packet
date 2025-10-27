@@ -1,0 +1,16 @@
+message SMSG_BallAnimation (0x10E3) {
+    bytes unk0 = 1 [len = 5];
+    int16 absoluteStartXPositionOnMap = 2;
+    int16 absoluteStartYPositionOnMap = 3;
+    int16 absoluteStartZPositionOnMap = 4;
+    int16 absoluteTouchXPositionOnMap = 5;
+    int16 absoluteTouchYPositionOnMap = 6;
+    int16 absoluteTouchZPositionOnMap = 7;
+    byte unk1 = 8;
+    byte ballSpeed = 9;
+    byte ballAnimation = 10;
+    byte unk2 = 11;
+    byte ballAbility = 12;
+    byte unk3 = 13;
+    byte playerPosition = 14;
+}

@@ -2,9 +2,8 @@ package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.entities.database.model.ServerType;
-import com.jftse.server.core.codec.PacketDecoder;
-import com.jftse.server.core.codec.PacketEncoder;
-import com.jftse.server.core.handler.PacketHandlerFactory;
+import com.jftse.server.core.codec.PacketDecoderV2;
+import com.jftse.server.core.codec.PacketEncoderV2;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.AttributeKey;
@@ -25,9 +24,9 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
     private final boolean encryptionEnabled;
 
-    public ConnectionInitializer(final PacketHandlerFactory packetHandlerFactory) {
+    public ConnectionInitializer() {
         FT_CONNECTION_ATTRIBUTE_KEY = AttributeKey.newInstance("connection");
-        this.tcpChannelHandler = new TCPChannelHandler(FT_CONNECTION_ATTRIBUTE_KEY, packetHandlerFactory);
+        this.tcpChannelHandler = new TCPChannelHandler(FT_CONNECTION_ATTRIBUTE_KEY);
         this.encryptionEnabled = ConfigService.getInstance().getValue("network.encryption.enabled", false);
     }
 
@@ -40,8 +39,8 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         //ch.pipeline().addLast(new FlushConsolidationHandler());
-        ch.pipeline().addLast("decoder", new PacketDecoder(decryptionKey, packetLogger));
-        ch.pipeline().addLast("encoder", new PacketEncoder(encryptionKey, packetLogger));
+        ch.pipeline().addLast("decoder", new PacketDecoderV2(decryptionKey, packetLogger));
+        ch.pipeline().addLast("encoder", new PacketEncoderV2(encryptionKey, packetLogger));
         ch.pipeline().addLast(group, tcpChannelHandler);
     }
 

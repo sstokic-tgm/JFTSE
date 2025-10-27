@@ -1,0 +1,3 @@
+message CMSG_Relay (0x414) {
+    bytes packet = 1;
+}

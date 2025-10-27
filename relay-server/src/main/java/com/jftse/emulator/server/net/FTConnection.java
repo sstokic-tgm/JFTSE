@@ -1,13 +1,15 @@
 package com.jftse.emulator.server.net;
 
 import com.jftse.entities.database.model.ServerType;
+import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.net.Connection;
-import com.jftse.server.core.protocol.JoinedPacket;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.*;
 import io.netty.channel.ChannelFuture;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
 @Setter
@@ -17,8 +19,49 @@ public class FTConnection extends Connection<FTClient> {
 
     private long lastReadTime = 0L;
 
+    private ConcurrentLinkedQueue<IPacket> recvQueue = new ConcurrentLinkedQueue<>();
+
+    private final static int MAX_PROCESSED_PACKETS_PER_UPDATE = 100;
+
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         super(decryptionKey, encryptionKey, serverType);
+    }
+
+    public void queuePacket(IPacket packet) {
+        recvQueue.add(packet);
+    }
+
+    public boolean update(long diff) {
+        final FTClient client = getClient();
+        int processedPackets = 0;
+
+        while (!getIsClosingConnection().get() && !recvQueue.isEmpty()) {
+            IPacket packet = recvQueue.poll();
+            if (packet == null)
+                continue;
+
+            try {
+                PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
+                if (handler != null) {
+                    handler.handle(this, packet);
+                } else {
+                    log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
+                }
+            } catch (Exception e) {
+                log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
+            }
+
+            processedPackets++;
+
+            if (processedPackets > MAX_PROCESSED_PACKETS_PER_UPDATE) {
+                break;
+            }
+        }
+
+        if (getIsClosingConnection().get())
+            return false;
+
+        return true;
     }
 
     @Override
@@ -28,5 +71,13 @@ public class FTConnection extends Connection<FTClient> {
 
         JoinedPacket joinedPackets = new JoinedPacket(packets);
         return ctx.writeAndFlush(joinedPackets);
+    }
+
+    public ChannelFuture sendTCP(IPacket... packets) {
+        if (packets == null || packets.length == 0)
+            throw new IllegalArgumentException("Packet cannot be null.");
+
+        IPacket toSend = new CompositePacket(packets);
+        return ctx.writeAndFlush(toSend);
     }
 }

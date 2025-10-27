@@ -4,10 +4,15 @@ import com.jftse.emulator.common.utilities.BitKit;
 
 public interface IPacket {
     byte[] toBytes();
+
     char getDataLength();
+
     char getPacketId();
+
     char getCheckSerial();
+
     char getCheckSum();
+
     String toString();
 
     default byte[] addByteToArray(byte[] byteArray, byte newByte) {
@@ -22,5 +27,11 @@ public interface IPacket {
         BitKit.blockCopy(byteArray, 0, newArray, newBytes.length, byteArray.length);
         BitKit.blockCopy(newBytes, 0, newArray, 0, newBytes.length);
         return newArray;
+    }
+
+    default <T extends IPacket, U extends IPacket> T translate(IPacketTranslator<T, U> translator) {
+        @SuppressWarnings("unchecked")
+        U self = (U) this;
+        return translator.translate(self);
     }
 }

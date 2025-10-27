@@ -1,0 +1,8 @@
+message SMSG_PlayerAnimation (0x32C9) {
+    char playerPosition = 1;
+    short absoluteXPositionOnMap = 2;
+    short absoluteYPositionOnMap = 3;
+    short relativeXMovement = 4;
+    short relativeYMovement = 5;
+    byte animationType = 6;
+}

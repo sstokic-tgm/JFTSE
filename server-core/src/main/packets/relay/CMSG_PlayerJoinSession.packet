@@ -1,0 +1,5 @@
+message CMSG_PlayerJoinSession (0x3ED) {
+    int32 sessionId = 1;
+    boolean isSpectator = 2;
+    repeated int32 playerIds = 3 [len = 4];
+}
