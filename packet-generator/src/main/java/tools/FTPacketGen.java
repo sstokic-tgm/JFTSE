@@ -487,9 +487,14 @@ public class FTPacketGen {
 
     private static String readExprRecursive(Field f, int depth) {
         String t = f.type;
+        String mappedType = mapType(t);
         Map<String, String> o = f.options;
 
-        if (f.repeated && !f.type.equals("bytes")) {
+        if (f.repeated && !t.equals("bytes")) {
+            if (mappedType.equals("int") && o.containsKey("len")) {
+                return "msg.readRepeated(() -> " + readExprRecursive(new Field(t, "tmp", false, o), depth + 1) + ", " + o.get("len") + ")";
+            }
+
             return "msg.readRepeated(() -> " + readExprRecursive(new Field(t, "tmp", false, o), depth + 1) + ")";
         }
 
@@ -510,7 +515,13 @@ public class FTPacketGen {
             case "char" -> "msg.readChar()";
             case "short", "uint16", "int16" -> "msg.readShort()";
             case "date" -> "msg.readDate()";
-            case "bytes" -> "msg.readBytes()";
+            case "bytes" -> {
+                if (o.containsKey("len")) {
+                    yield "msg.readBytes(" + o.get("len") + ")";
+                } else {
+                    yield "msg.readBytes()";
+                }
+            }
             default -> {
                 if (parsedMessages.containsKey(t)) {
                     StringBuilder sb = new StringBuilder();
@@ -856,6 +867,14 @@ public class FTPacketGen {
                          return list;
                      }
                 
+                     private <T> List<T> readRepeated(java.util.function.Supplier<T> reader, int len) {
+                         List<T> list = new ArrayList<>(len);
+                         for (int i = 0; i < len; i++) {
+                             list.add(reader.get());
+                         }
+                         return list;
+                     }
+                
                      private byte[] readBytes(int len) {
                          if (this.readPos + len > this.data.length)
                              len = data.length - readPos;
@@ -922,6 +941,11 @@ public class FTPacketGen {
             if (f.repeated && !f.type.equals("bytes")) {
                 return "(" + ref + " != null ? " + ref + ".toString() : \"null\")";
             }
+
+            if (f.type.equals("char")) {
+                return "(int) " + ref;
+            }
+
             return ref;
         }
 
@@ -965,6 +989,9 @@ public class FTPacketGen {
                 } else if (sub.repeated && !sub.type.equals("bytes")) {
                     sb.append("(").append(getter).append(" != null ? ").append(getter).append(".toString() : \"null\")");
                 } else {
+                    if (sub.type.equals("char")) {
+                        sb.append("(int) ");
+                    }
                     sb.append(getter);
                 }
             } else if (parsedMessages.containsKey(sub.type)) {
