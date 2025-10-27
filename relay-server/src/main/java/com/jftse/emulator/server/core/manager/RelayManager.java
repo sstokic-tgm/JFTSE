@@ -108,8 +108,6 @@ public class RelayManager implements ServerLoopHandler {
             clientList.remove(client);
             removeClient(client);
 
-            playerCount.getAndDecrement();
-
             if (clientList.isEmpty())
                 sessionMap.remove(sessionId);
         }
