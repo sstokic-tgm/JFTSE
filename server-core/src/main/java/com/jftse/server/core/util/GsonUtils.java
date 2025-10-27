@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class StringUtils {
+public final class GsonUtils {
     private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Pattern PACKET_LINE = Pattern.compile(
             "^\\s*(\\w+)\\s*\\{\\s*\"id\":\\s*\"?([^\",]+)\"?,\\s*\"len\":\\s*([^,]+),\\s*\"data\":\\s*(\\{.*})\\s*}$",
