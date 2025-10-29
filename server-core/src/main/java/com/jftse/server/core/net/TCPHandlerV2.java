@@ -50,7 +50,7 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
 
         if (!connection.getIsClosingConnection().get()) {
             connection.wantsToCloseConnection();
-            disconnected(connection);
+            disconnected0(connection);
         }
     }
 
@@ -74,6 +74,12 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
                     }
                 });
             }
+        }
+    }
+
+    protected void disconnected0(T connection) {
+        if (connection.getClient() != null) { // only call disconnected if the connection was fully established
+            disconnected(connection);
         }
     }
 
