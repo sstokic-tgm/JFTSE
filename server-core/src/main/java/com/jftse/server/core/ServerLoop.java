@@ -56,7 +56,7 @@ public class ServerLoop {
                     updateThread.join(5000);
                 }
                 if (watchdogThread != null) {
-                    watchdogThread.join(5000);
+                    watchdogThread.join(); // daemon thread, should not block
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
