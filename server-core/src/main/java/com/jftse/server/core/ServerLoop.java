@@ -55,9 +55,6 @@ public class ServerLoop {
                 if (updateThread != null) {
                     updateThread.join(5000);
                 }
-                if (watchdogThread != null) {
-                    watchdogThread.join(); // daemon thread, should not block
-                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.error("Failed to stop server update loop", e);
