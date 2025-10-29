@@ -31,8 +31,8 @@ import java.util.concurrent.Future;
 @PropertySource(value = "classpath:build-info.yml", factory = YamlPropertySourceFactory.class)
 @Log4j2
 public class RelayServerStart implements CommandLineRunner {
-    private static EventLoopGroup bossGroup;
-    private static EventLoopGroup workerGroup;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
 
     @Autowired
     private ServerLoop serverLoop;
