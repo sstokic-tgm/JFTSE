@@ -14,11 +14,8 @@ import com.jftse.server.core.shared.packets.CMSGDisconnectRequest;
 import com.jftse.server.core.shared.packets.CMSGHeartbeat;
 import com.jftse.server.core.shared.packets.SMSGDisconnectResponse;
 import io.netty.channel.ChannelHandler;
-import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
-
-import java.net.InetSocketAddress;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -51,45 +48,37 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
         FTClient client = connection.getClient();
         Account account = client.getAccount();
         if (account != null && account.getStatus() == AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
-            connection.close();
+            connection.wantsToCloseConnection();
         }
     }
 
     private void handleDisconnectRequest(FTConnection connection, CMSGDisconnectRequest packet) {
         SMSGDisconnectResponse response = SMSGDisconnectResponse.builder().status((byte) 0).build();
         connection.sendTCP(response);
+        connection.wantsToCloseConnection();
     }
 
     @Override
     public void disconnected(FTConnection connection) {
         final FTClient client = connection.getClient();
-        if (client != null) {
-            final Account account = client.getAccount();
-            if (account != null) {
-                UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
-                        .setAccountId(account.getId())
-                        .setTimestamp(System.currentTimeMillis())
-                        .setServer(ServerType.AUTH_SERVER.getValue())
-                        .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.DISCONNECT.getValue()).build())
-                        .build();
-                AuthenticationManager.getInstance().addUpdateAccountRequest(request);
-            }
+        final Account account = client.getAccount();
+        if (account != null) {
+            UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
+                    .setAccountId(account.getId())
+                    .setTimestamp(System.currentTimeMillis())
+                    .setServer(ServerType.AUTH_SERVER.getValue())
+                    .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.DISCONNECT.getValue()).build())
+                    .build();
+            AuthenticationManager.getInstance().addUpdateAccountRequest(request);
         }
     }
 
     @Override
     public void exceptionCaught(FTConnection connection, Throwable cause) throws Exception {
-        if (!cause.equals(ReadTimeoutException.INSTANCE)) {
-            var shouldHandleException = switch (cause.getMessage()) {
-                case "Connection reset", "Connection timed out", "No route to host" -> false;
-                default -> true;
-            };
-
-            if (shouldHandleException) {
-                InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
-                String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
-                log.error("({}) exceptionCaught: {}", remoteAddress, cause.getMessage(), cause);
-            }
+        FTClient client = connection.getClient();
+        Account account = client.getAccount();
+        if (account != null) {
+            log.error("({}) exceptionCaught for account ID {}: {}", account.getId(), cause.getMessage(), cause);
         }
     }
 }

@@ -4,6 +4,7 @@ import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.shared.packets.SMSGDisconnectMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,10 +35,7 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IPacket packet) throws Exception {
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
-
-        if (connection != null && !connection.getIsClosingConnection().get()) {
-            packetReceived(connection, packet);
-        }
+        packetReceived(connection, packet);
     }
 
     @Override
@@ -48,32 +46,47 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
         String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
         log.info("({}) Channel Inactive", remoteAddress);
 
-        if (!connection.getIsClosingConnection().get()) {
-            connection.wantsToCloseConnection();
-            disconnected0(connection);
-        }
+        // channelInactive is only called once anyway
+        connection.wantsToCloseConnection();
+        disconnected0(connection);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
 
-        if (connection != null) {
-            exceptionCaught(connection, cause);
+        InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
+        String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "IP_UNKNOWN";
 
-            if (cause instanceof DataAccessException) {
-                SMSGDisconnectMessage dcPacket = SMSGDisconnectMessage.builder()
-                        .result((byte) 0)
-                        .build();
-                connection.sendTCP(dcPacket).addListener((f) -> {
-                    if (f.isSuccess()) {
-                        connection.close();
-                    }else {
-                        log.warn("Failed to send disconnect packet to client before closing connection", f.cause());
-                        connection.close();
-                    }
-                });
+        if (!(cause instanceof ReadTimeoutException)) {
+            var isConnectionResetError = switch (cause.getMessage()) {
+                case "Connection reset", "Connection timed out", "No route to host" -> true;
+                default -> false;
+            };
+
+            if (isConnectionResetError) {
+                log.warn("({}) Client closed connection abruptly: {}", remoteAddress, cause.getMessage());
+            } else {
+                log.error("({}) exceptionCaught: {}", remoteAddress, cause.getMessage(), cause);
             }
+        } else {
+            log.warn("({}) Read timeout, closing connection.", remoteAddress);
+        }
+
+        exceptionCaught(connection, cause);
+
+        if (cause instanceof DataAccessException) {
+            SMSGDisconnectMessage dcPacket = SMSGDisconnectMessage.builder()
+                    .result((byte) 0)
+                    .build();
+            connection.sendTCP(dcPacket).addListener((f) -> {
+                if (f.isSuccess()) {
+                    connection.close();
+                } else {
+                    log.warn("Failed to send disconnect packet to client before closing connection", f.cause());
+                    connection.close();
+                }
+            });
         }
     }
 
