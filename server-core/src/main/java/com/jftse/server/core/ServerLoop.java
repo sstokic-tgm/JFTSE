@@ -1,6 +1,6 @@
 package com.jftse.server.core;
 
-import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.server.core.shared.ServerConfService;
 import com.jftse.server.core.util.Time;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,30 +16,31 @@ import java.util.concurrent.atomic.AtomicLong;
 @Setter
 @Log4j2
 public class ServerLoop {
-    @Getter private static ServerLoop instance;
+    @Getter
+    private static ServerLoop instance;
 
     private final ServerLoopHandler handler;
-    private final ConfigService configService;
+    private final ServerConfService confService;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private Thread updateThread;
     private Thread watchdogThread;
-    private final int minUpdateDiff;
-    private final int maxCoreStuckTime;
+    private int minUpdateDiff;
+    private int maxCoreStuckTime;
     private AtomicLong loopCounter = new AtomicLong(0);
 
-    public ServerLoop(Optional<ServerLoopHandler> handler, ConfigService configService) {
+    public ServerLoop(Optional<ServerLoopHandler> handler, ServerConfService confService) {
         this.handler = handler.orElse(null);
-        this.configService = configService;
-
-        this.minUpdateDiff = configService.getValue("server.minServerUpdateTime", 1);
-        this.maxCoreStuckTime = configService.getValue("server.maxCoreStuckTime", 60) * 1000;
+        this.confService = confService;
 
         instance = this;
     }
 
     public void start() {
         if (running.compareAndSet(false, true)) {
+            this.minUpdateDiff = confService.getOrDefault("MinServerUpdateTime", 1);
+            this.maxCoreStuckTime = confService.getOrDefault("MaxCoreStuckTime", 60) * 1000; // convert to milliseconds
+
             updateThread = new Thread(this::updateLoop, "ServerUpdateLoop");
             watchdogThread = new Thread(new ServerLoopWatchdog(this.maxCoreStuckTime), "ServerWatchdog");
             watchdogThread.setDaemon(true);

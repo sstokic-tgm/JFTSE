@@ -13,6 +13,7 @@ import com.jftse.server.core.BuildInfoProperties;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.ServerLoopHandler;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.shared.ServerConfService;
 import com.jftse.server.core.shared.packets.SMSGInitHandshake;
 import com.jftse.server.core.shared.packets.SMSGServerNotice;
 import com.jftse.server.core.thread.ThreadManager;
@@ -54,6 +55,8 @@ public class AuthenticationManager implements ServerLoopHandler {
 
     @Autowired
     private BuildInfoProperties revisionInfo;
+    @Autowired
+    private ServerConfService serverConfService;
 
     private String motd;
 
@@ -322,8 +325,8 @@ public class AuthenticationManager implements ServerLoopHandler {
         for (int i = 0; i < ServerTimers.COUNT; i++) {
             timers[i] = new IntervalTimer();
         }
-        timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(10)); // 10 minutes
-        timers[ServerTimers.SUPDATE_ECONOMY.value()].setInterval(TimeUnit.HOURS.toMillis(8)); // 8 hours
+        timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(serverConfService.getOrDefault("UpdateUptimeInterval", 10)));
+        timers[ServerTimers.SUPDATE_ECONOMY.value()].setInterval(TimeUnit.HOURS.toMillis(serverConfService.getOrDefault("UpdateEconomyInterval", 8)));
     }
 
 

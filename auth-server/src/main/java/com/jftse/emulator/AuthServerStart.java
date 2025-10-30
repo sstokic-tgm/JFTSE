@@ -5,6 +5,7 @@ import com.jftse.emulator.server.net.ConnectionInitializer;
 import com.jftse.server.core.ServerLoop;
 import com.jftse.server.core.YamlPropertySourceFactory;
 import com.jftse.server.core.protocol.PacketAutoRegister;
+import com.jftse.server.core.shared.ServerConfService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -38,6 +39,8 @@ public class AuthServerStart implements CommandLineRunner {
     private ServerLoop serverLoop;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private ServerConfService serverConfService;
 
     public static void main(String[] args) {
         SpringApplication.run(AuthServerStart.class, args);
@@ -46,6 +49,11 @@ public class AuthServerStart implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         PacketAutoRegister.registerAll();
+
+        if (!serverConfService.loadConf(false)) {
+            log.error("Failed to load server configuration. Exiting...");
+            System.exit(1);
+        }
 
         bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup(4);
@@ -61,7 +69,7 @@ public class AuthServerStart implements CommandLineRunner {
                 .childOption(ChannelOption.SO_RCVBUF, 16384)
                 .childOption(ChannelOption.SO_SNDBUF, 16384);
 
-        b.bind(5894).addListener(cf -> {
+        b.bind(serverConfService.getOrDefault("ServerPort", 5894)).addListener(cf -> {
             if (cf.isSuccess()) {
                 serverLoop.start();
 
@@ -81,13 +89,15 @@ public class AuthServerStart implements CommandLineRunner {
         log.info("Shutting down server...");
         authenticationManager.onExit();
         serverLoop.stop();
-        Future<?> workerGroupFuture = workerGroup.shutdownGracefully();
-        Future<?> bossGroupFuture = bossGroup.shutdownGracefully();
-        try {
-            workerGroupFuture.get();
-            bossGroupFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Error while exiting server: {}", e.getMessage(), e);
+        if (workerGroup != null && bossGroup != null) {
+            Future<?> workerGroupFuture = workerGroup.shutdownGracefully();
+            Future<?> bossGroupFuture = bossGroup.shutdownGracefully();
+            try {
+                workerGroupFuture.get();
+                bossGroupFuture.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Error while exiting server: {}", e.getMessage(), e);
+            }
         }
     }
 }

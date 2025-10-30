@@ -138,6 +138,13 @@
                                         <include>res/**</include>
                                     </includes>
                                 </resource>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>server.conf</include>
+                                    </includes>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>

@@ -8,6 +8,7 @@ import com.jftse.server.core.BuildInfoProperties;
 import com.jftse.server.core.ServerLoopHandler;
 import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.UptimeService;
+import com.jftse.server.core.shared.ServerConfService;
 import com.jftse.server.core.shared.packets.SMSGInitHandshake;
 import com.jftse.server.core.util.GameTime;
 import com.jftse.server.core.util.IntervalTimer;
@@ -39,6 +40,8 @@ public class RelayManager implements ServerLoopHandler {
     private UptimeService uptimeService;
     @Autowired
     private BuildInfoProperties revisionInfo;
+    @Autowired
+    private ServerConfService serverConfService;
 
     private ConcurrentLinkedQueue<FTConnection> addConnectionQueue;
     private ConcurrentLinkedDeque<FTClient> clients;
@@ -48,7 +51,7 @@ public class RelayManager implements ServerLoopHandler {
 
     private final Object lock = new Object();
 
-    private IntervalTimer uptimeTimer = new IntervalTimer(TimeUnit.MINUTES.toMillis(10));
+    private IntervalTimer uptimeTimer = new IntervalTimer();
 
     @PostConstruct
     public void init() {
@@ -59,6 +62,7 @@ public class RelayManager implements ServerLoopHandler {
         sessionMap = new ConcurrentHashMap<>();
 
         GameTime.updateGameTimers();
+        uptimeTimer.setInterval(TimeUnit.MINUTES.toMillis(serverConfService.getOrDefault("UpdateUptimeInterval", 10)));
 
         Uptime uptime = new Uptime();
         uptime.setServerType(ServerType.RELAY_SERVER);
