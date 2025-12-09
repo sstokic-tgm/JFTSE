@@ -2,13 +2,11 @@ package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.messenger.C2SAcceptParcelRequest;
-import com.jftse.emulator.server.core.packets.messenger.S2CAcceptParcelAnswer;
-import com.jftse.emulator.server.core.packets.messenger.S2CRemoveParcelFromListPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.messages.UpdateMoneyMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.messenger.EParcelType;
@@ -16,21 +14,20 @@ import com.jftse.entities.database.model.messenger.Parcel;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GameLogService;
 import com.jftse.server.core.service.ParcelService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.messenger.CMSGAcceptParcel;
+import com.jftse.server.core.shared.packets.messenger.SMSGAcceptParcel;
+import com.jftse.server.core.shared.packets.messenger.SMSGDeleteParcel;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SAcceptParcelRequest)
-public class AcceptParcelRequestHandler extends AbstractPacketHandler {
-    private C2SAcceptParcelRequest c2SAcceptParcelRequest;
-
+@PacketId(CMSGAcceptParcel.PACKET_ID)
+public class AcceptParcelRequestHandler implements PacketHandler<FTConnection, CMSGAcceptParcel> {
     private final ParcelService parcelService;
     private final PlayerService playerService;
     private final PlayerPocketService playerPocketService;
@@ -48,17 +45,11 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SAcceptParcelRequest = new C2SAcceptParcelRequest(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        Parcel parcel = parcelService.findById(c2SAcceptParcelRequest.getParcelId().longValue());
+    public void handle(FTConnection connection, CMSGAcceptParcel packet) {
+        Parcel parcel = parcelService.findById((long) packet.getParcelId());
         if (parcel == null) return;
 
-        FTClient ftClient = (FTClient) connection.getClient();
+        FTClient ftClient = connection.getClient();
         if (ftClient == null)
             return;
 
@@ -70,8 +61,8 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
         Player sender = parcel.getSender();
 
         if (!receiver.getId().equals(player.getId())) {
-            S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -1);
-            connection.sendTCP(s2CAcceptParcelAnswer);
+            SMSGAcceptParcel answer = SMSGAcceptParcel.builder().status((short) -1).build();
+            connection.sendTCP(answer);
 
             GameLog gameLog = new GameLog();
             gameLog.setGameLogType(GameLogType.BANABLE);
@@ -82,16 +73,16 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
         }
 
         if (receiver.getLevel() < 20) {
-            S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -1);
-            connection.sendTCP(s2CAcceptParcelAnswer);
+            SMSGAcceptParcel answer = SMSGAcceptParcel.builder().status((short) -1).build();
+            connection.sendTCP(answer);
             return;
         }
 
         if (parcel.getEParcelType().equals(EParcelType.CashOnDelivery)) {
             final int newGoldReceiver = receiver.getGold() - parcel.getGold();
             if (newGoldReceiver < 0) {
-                S2CAcceptParcelAnswer s2CAcceptParcelAnswer = new S2CAcceptParcelAnswer((short) -2);
-                connection.sendTCP(s2CAcceptParcelAnswer);
+                SMSGAcceptParcel answer = SMSGAcceptParcel.builder().status((short) -2).build();
+                connection.sendTCP(answer);
                 return;
             }
             receiver.setGold(newGoldReceiver);
@@ -137,8 +128,8 @@ public class AcceptParcelRequestHandler extends AbstractPacketHandler {
                 .build();
         rProducerService.send(updateMoneyMessage, "game.messenger.parcel chat.messenger.parcel", player.getName() + "(ChatServer)");
 
-        S2CRemoveParcelFromListPacket s2CRemoveParcelFromListPacket = new S2CRemoveParcelFromListPacket(parcel.getId().intValue());
-        connection.sendTCP(s2CRemoveParcelFromListPacket);
+        SMSGDeleteParcel answer = SMSGDeleteParcel.builder().parcelId(parcel.getId().intValue()).build();
+        connection.sendTCP(answer);
 
         S2CShopMoneyAnswerPacket receiverMoneyPacket = new S2CShopMoneyAnswerPacket(receiver);
         connection.sendTCP(receiverMoneyPacket);

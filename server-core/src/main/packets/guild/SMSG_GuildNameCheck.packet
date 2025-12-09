@@ -1,0 +1,3 @@
+message SMSG_GuildNameCheck (0x200A) {
+    short result = 1;
+}

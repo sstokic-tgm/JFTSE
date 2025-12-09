@@ -7,23 +7,18 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.house.S2CFishMovePacket;
-import com.jftse.emulator.server.core.packets.chat.house.SMSGReturnBait;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.house.CMSGReturnBait;
+import com.jftse.server.core.shared.packets.chat.house.SMSGReturnBait;
 
-@PacketOperationIdentifier(PacketOperations.CMSG_ReturnBait)
-public class ReturnBaitHandler extends AbstractPacketHandler {
+@PacketId(CMSGReturnBait.PACKET_ID)
+public class ReturnBaitHandler implements PacketHandler<FTConnection, CMSGReturnBait> {
     @Override
-    public boolean process(com.jftse.server.core.protocol.Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGReturnBait packet) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -39,7 +34,7 @@ public class ReturnBaitHandler extends AbstractPacketHandler {
                 claimedFish.setBitBait(false);
 
                 S2CFishMovePacket movePacket = new S2CFishMovePacket(claimedFish.getId(), (byte) claimedFish.getState().getValue(), claimedFish.getX(), claimedFish.getY(), 0.0f);
-                GameManager.getInstance().sendPacketToAllClientsInSameRoom(movePacket, (FTConnection) connection);
+                GameManager.getInstance().sendPacketToAllClientsInSameRoom(movePacket, connection);
 
                 claimedFish.setSpeed(FishManager.getInstance().NORMAL_SPEED_1);
                 claimedFish.setTurningSpeed(FishManager.getInstance().NORMAL_TURNING_SPEED);
@@ -51,8 +46,10 @@ public class ReturnBaitHandler extends AbstractPacketHandler {
             roomPlayer.setBaitX(0.0f);
             roomPlayer.setBaitY(0.0f);
 
-            SMSGReturnBait returnBaitPacket = new SMSGReturnBait(roomPlayer.getPosition());
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(returnBaitPacket, (FTConnection) connection);
+            SMSGReturnBait returnBait = SMSGReturnBait.builder()
+                    .playerPosition(roomPlayer.getPosition())
+                    .build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(returnBait, connection);
         }
     }
 }

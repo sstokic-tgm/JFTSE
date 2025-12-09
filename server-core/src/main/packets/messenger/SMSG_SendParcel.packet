@@ -1,0 +1,3 @@
+message SMSG_SendParcel (0x219A) {
+    short status = 1;
+}

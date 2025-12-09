@@ -1,0 +1,7 @@
+message CMSG_SendGift (0x1F73) {
+    byte unk0 = 1;
+    string receiverName = 2;
+    string message = 3;
+    int32 productIndex = 4;
+    byte option = 5;
+}

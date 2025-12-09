@@ -14,8 +14,8 @@ public class C2SProposalAnswerRequestPacket extends Packet {
     public C2SProposalAnswerRequestPacket(Packet packet) {
         super(packet);
 
-        this.proposalId = packet.readInt();
-        this.accepted = packet.readBoolean();
-        this.senderName = packet.readUnicodeString();
+        this.proposalId = this.readInt();
+        this.accepted = this.readBoolean();
+        this.senderName = this.readString();
     }
 }

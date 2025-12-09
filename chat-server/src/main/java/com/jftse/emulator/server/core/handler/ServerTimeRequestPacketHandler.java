@@ -1,27 +1,20 @@
 package com.jftse.emulator.server.core.handler;
 
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.CMSGServerTime;
+import com.jftse.server.core.shared.packets.tutorial.SMSGServerTime;
+import com.jftse.server.core.util.GameTime;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
-@PacketOperationIdentifier(PacketOperations.C2SServerTimeRequest)
-public class ServerTimeRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGServerTime.PACKET_ID)
+public class ServerTimeRequestPacketHandler implements PacketHandler<FTConnection, CMSGServerTime> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        Date currentTime = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
-
-        Packet answer = new Packet(PacketOperations.S2CServerTimeAnswer);
-        answer.write(currentTime);
-        connection.sendTCP(answer);
+    public void handle(FTConnection connection, CMSGServerTime packet) {
+        Date currentTime = new Date(GameTime.getGameTimeMS());
+        SMSGServerTime time = SMSGServerTime.builder().currentTime(currentTime).build();
+        connection.sendTCP(time);
     }
 }

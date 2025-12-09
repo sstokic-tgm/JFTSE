@@ -1,19 +1,16 @@
 package com.jftse.emulator.server.core.handler.challenge;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.challenge.C2SChallengePointPacket;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeBasicGame;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.ChallengeService;
+import com.jftse.server.core.shared.packets.challenge.CMSGChallengePoint;
 
-@PacketOperationIdentifier(PacketOperations.C2SChallengePoint)
-public class ChallengePointPacketHandler extends AbstractPacketHandler {
-    private C2SChallengePointPacket challengePointPacket;
-
+@PacketId(CMSGChallengePoint.PACKET_ID)
+public class ChallengePointPacketHandler implements PacketHandler<FTConnection, CMSGChallengePoint> {
     private final ChallengeService challengeService;
 
     public ChallengePointPacketHandler() {
@@ -21,14 +18,8 @@ public class ChallengePointPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        challengePointPacket = new C2SChallengePointPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGChallengePoint challengePointPacket) {
+        FTClient client = connection.getClient();
         if (client.getActiveChallengeGame() instanceof ChallengeBasicGame) {
             ((ChallengeBasicGame) client.getActiveChallengeGame()).setPoints(challengePointPacket.getPointsPlayer(), challengePointPacket.getPointsNpc());
 

@@ -12,6 +12,6 @@ public class C2SRedeemCouponPacket extends Packet {
     public C2SRedeemCouponPacket(Packet packet) {
         super(packet);
 
-        this.couponCode = this.readUnicodeString();
+        this.couponCode = this.readString();
     }
 }

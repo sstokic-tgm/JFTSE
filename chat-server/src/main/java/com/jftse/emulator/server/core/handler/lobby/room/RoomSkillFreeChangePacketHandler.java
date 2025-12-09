@@ -2,35 +2,26 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomSkillFreeChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSkillFreeChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomChangeSkillFree;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomChangeSkillFree;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomSkillFreeChange)
-public class RoomSkillFreeChangePacketHandler extends AbstractPacketHandler {
-    private C2SRoomSkillFreeChangeRequestPacket changeRoomSkillFreeRequestPacket;
-
+@PacketId(CMSGRoomChangeSkillFree.PACKET_ID)
+public class RoomSkillFreeChangePacketHandler implements PacketHandler<FTConnection, CMSGRoomChangeSkillFree> {
     @Override
-    public boolean process(Packet packet) {
-        changeRoomSkillFreeRequestPacket = new C2SRoomSkillFreeChangeRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomChangeSkillFree packet) {
+        FTClient ftClient = connection.getClient();
         Room room = ftClient.getActiveRoom();
         if (room != null) {
             synchronized (room) {
-                room.setSkillFree(changeRoomSkillFreeRequestPacket.isSkillFree());
+                room.setSkillFree(packet.getEnable());
             }
 
-            S2CRoomSkillFreeChangeAnswerPacket skillFreeChangeAnswerPacket = new S2CRoomSkillFreeChangeAnswerPacket(room.isSkillFree());
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(skillFreeChangeAnswerPacket, ftClient.getConnection());
+            SMSGRoomChangeSkillFree answer = SMSGRoomChangeSkillFree.builder().enable(room.isSkillFree()).build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(answer, connection);
         }
     }
 }

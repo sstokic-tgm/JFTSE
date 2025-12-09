@@ -14,6 +14,6 @@ public class C2SRoomUserInfoRequestPacket extends Packet {
         super(packet);
 
         this.position = this.readShort();
-        this.nickname = this.readUnicodeString();
+        this.nickname = this.readString();
     }
 }

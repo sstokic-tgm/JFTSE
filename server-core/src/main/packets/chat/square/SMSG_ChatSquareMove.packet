@@ -1,0 +1,6 @@
+message SMSG_ChatSquareMove (0x18A3) {
+    short position = 1;
+    byte unk0 = 2;
+    float x = 3;
+    float y = 4;
+}

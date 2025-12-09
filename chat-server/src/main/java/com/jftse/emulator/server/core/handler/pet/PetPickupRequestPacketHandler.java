@@ -1,27 +1,21 @@
 package com.jftse.emulator.server.core.handler.pet;
 
-import com.jftse.emulator.server.core.packets.pet.C2SPetPickupRequestPacket;
-import com.jftse.emulator.server.core.packets.pet.S2CPetPickupAnswerPacket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.pet.CMSGPickupPet;
+import com.jftse.server.core.shared.packets.pet.SMSGPickupPet;
 
-public class PetPickupRequestPacketHandler extends AbstractPacketHandler {
-    private C2SPetPickupRequestPacket petPickupRequestPacket;
-
+//@PacketId(CMSGPickupPet.PACKET_ID)
+public class PetPickupRequestPacketHandler implements PacketHandler<FTConnection, CMSGPickupPet> {
     public PetPickupRequestPacketHandler() {}
 
     @Override
-    public boolean process(Packet packet) {
-        petPickupRequestPacket = new C2SPetPickupRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGPickupPet packet) {
         // To Do
-        Integer newActivePetType = petPickupRequestPacket.getPetType();
+        Integer newActivePetType = packet.getPetType();
 
-        S2CPetPickupAnswerPacket petPickupAnswerPacket = new S2CPetPickupAnswerPacket((short) 0, newActivePetType);
-        connection.sendTCP(petPickupAnswerPacket);
+        SMSGPickupPet response = SMSGPickupPet.builder().result((short) 0).petType(newActivePetType).build();
+        connection.sendTCP(response);
     }
 }

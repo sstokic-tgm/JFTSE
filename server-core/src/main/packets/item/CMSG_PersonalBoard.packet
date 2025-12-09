@@ -1,0 +1,4 @@
+message CMSG_PersonalBoard (0x22CD) {
+    int32 playerPocketId = 1;
+    string message = 2;
+}

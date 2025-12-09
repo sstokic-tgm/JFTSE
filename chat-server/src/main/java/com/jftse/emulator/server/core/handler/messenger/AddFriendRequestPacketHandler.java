@@ -1,29 +1,26 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.messenger.C2SAddFriendRequestPacket;
-import com.jftse.emulator.server.core.packets.messenger.S2CAddFriendResponsePacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendRequestNotificationPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.FriendService;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.messenger.CMSGAddFriend;
+import com.jftse.server.core.shared.packets.messenger.SMSGAddFriend;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.Collections;
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SAddFriendRequest)
-public class AddFriendRequestPacketHandler extends AbstractPacketHandler {
-    private C2SAddFriendRequestPacket c2SAddFriendRequestPacket;
-
+@PacketId(CMSGAddFriend.PACKET_ID)
+public class AddFriendRequestPacketHandler implements PacketHandler<FTConnection, CMSGAddFriend> {
     private final PlayerService playerService;
     private final FriendService friendService;
 
@@ -36,22 +33,16 @@ public class AddFriendRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SAddFriendRequestPacket = new C2SAddFriendRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGAddFriend packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 
         Player player = ftClient.getPlayer();
-        Player targetPlayer = playerService.findByName(c2SAddFriendRequestPacket.getPlayerName());
+        Player targetPlayer = playerService.findByName(packet.getPlayerName());
         if (targetPlayer == null) {
-            S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) -1);
-            connection.sendTCP(s2CAddFriendResponsePacket);
+            SMSGAddFriend response = SMSGAddFriend.builder().result((short) -1).build();
+            connection.sendTCP(response);
             return;
         }
 
@@ -60,8 +51,8 @@ public class AddFriendRequestPacketHandler extends AbstractPacketHandler {
                 .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends || x.getEFriendshipState() == EFriendshipState.Relationship)
                 .count();
         if (count > 128) { // Max friends limit reached
-            S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) -2);
-            connection.sendTCP(s2CAddFriendResponsePacket);
+            SMSGAddFriend response = SMSGAddFriend.builder().result((short) -2).build();
+            connection.sendTCP(response);
             return;
         }
 
@@ -77,8 +68,8 @@ public class AddFriendRequestPacketHandler extends AbstractPacketHandler {
             friend.setEFriendshipState(EFriendshipState.WaitingApproval);
             friendService.save(friend);
 
-            S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) 0);
-            connection.sendTCP(s2CAddFriendResponsePacket);
+            SMSGAddFriend response = SMSGAddFriend.builder().result((short) 0).build();
+            connection.sendTCP(response);
 
             S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(Collections.singletonList(friend));
 
@@ -91,11 +82,11 @@ public class AddFriendRequestPacketHandler extends AbstractPacketHandler {
         }
 
         if (targetFriend.getEFriendshipState() == EFriendshipState.Friends || targetFriend.getEFriendshipState() == EFriendshipState.Relationship) {
-            S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) -5);
-            connection.sendTCP(s2CAddFriendResponsePacket);
+            SMSGAddFriend response = SMSGAddFriend.builder().result((short) -5).build();
+            connection.sendTCP(response);
         } else if (targetFriend.getEFriendshipState() == EFriendshipState.WaitingApproval) {
-            S2CAddFriendResponsePacket s2CAddFriendResponsePacket = new S2CAddFriendResponsePacket((short) -4);
-            connection.sendTCP(s2CAddFriendResponsePacket);
+            SMSGAddFriend response = SMSGAddFriend.builder().result((short) -4).build();
+            connection.sendTCP(response);
         }
     }
 }

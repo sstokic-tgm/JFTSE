@@ -1,0 +1,5 @@
+message CMSG_AcceptProposal (0x2521) {
+    int32 proposalId = 1;
+    bool accept = 2;
+    string senderName = 3;
+}

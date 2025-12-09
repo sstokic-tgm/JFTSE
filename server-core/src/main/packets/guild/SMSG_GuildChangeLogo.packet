@@ -1,0 +1,3 @@
+message SMSG_GuildChangeLogo (0x2035) {
+    short result = 1;
+}

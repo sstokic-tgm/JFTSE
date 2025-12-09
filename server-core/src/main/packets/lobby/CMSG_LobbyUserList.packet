@@ -1,0 +1,4 @@
+message CMSG_LobbyUserList (0x1707) {
+    byte page = 1;
+    short refresh = 2;
+}

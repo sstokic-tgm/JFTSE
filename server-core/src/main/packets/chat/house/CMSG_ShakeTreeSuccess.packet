@@ -1,0 +1,4 @@
+message CMSG_ShakeTreeSuccess (0x2C3E) {
+    byte song = 1;
+    short score = 2;
+}

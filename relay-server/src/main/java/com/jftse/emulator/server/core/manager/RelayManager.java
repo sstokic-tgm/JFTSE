@@ -62,7 +62,7 @@ public class RelayManager implements ServerLoopHandler {
         sessionMap = new ConcurrentHashMap<>();
 
         GameTime.updateGameTimers();
-        uptimeTimer.setInterval(TimeUnit.MINUTES.toMillis(serverConfService.getOrDefault("UpdateUptimeInterval", 10)));
+        uptimeTimer.setInterval(TimeUnit.MINUTES.toMillis(serverConfService.get("UpdateUptimeInterval", Integer.class)));
 
         Uptime uptime = new Uptime();
         uptime.setServerType(ServerType.RELAY_SERVER);

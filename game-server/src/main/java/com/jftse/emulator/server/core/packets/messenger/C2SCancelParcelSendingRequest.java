@@ -12,6 +12,6 @@ public class C2SCancelParcelSendingRequest extends Packet {
     public C2SCancelParcelSendingRequest(Packet packet) {
         super(packet);
 
-        this.parcelId = packet.readInt();
+        this.parcelId = this.readInt();
     }
 }

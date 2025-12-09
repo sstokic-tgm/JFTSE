@@ -1,0 +1,4 @@
+message CMSG_ChallengeDamage (0x2211) {
+    byte player = 1;
+    int32 damage = 2;
+}

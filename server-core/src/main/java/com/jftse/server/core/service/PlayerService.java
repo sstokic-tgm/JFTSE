@@ -3,8 +3,8 @@ package com.jftse.server.core.service;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.shared.packets.auth.CMSGPlayerCreate;
-import com.jftse.server.core.shared.packets.player.C2SPlayerCreatePacket;
 import com.jftse.server.core.shared.packets.player.C2SPlayerStatusPointChangePacket;
+import com.jftse.server.core.shared.packets.player.CMSGChangePlayerStatPoints;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -41,7 +41,7 @@ public interface PlayerService {
 
     boolean isStatusPointHack(C2SPlayerStatusPointChangePacket playerStatusPointChangePacket, Player player);
 
-    boolean isStatusPointHack(C2SPlayerCreatePacket playerCreatePacket, Player player);
-
     boolean isStatusPointHack(CMSGPlayerCreate playerCreatePacket, Player player);
+
+    boolean isStatusPointHack(CMSGChangePlayerStatPoints playerStatPointsPacket, Player player);
 }

@@ -15,10 +15,10 @@ public class C2SSendGiftRequestPacket extends Packet {
     public C2SSendGiftRequestPacket(Packet packet) {
         super(packet);
 
-        packet.readByte(); //Unk
-        this.receiverName = packet.readUnicodeString();
-        this.message = packet.readUnicodeString();
-        this.productIndex = packet.readInt();
-        this.option = packet.readByte();
+        this.readByte(); //Unk
+        this.receiverName = this.readString();
+        this.message = this.readString();
+        this.productIndex = this.readInt();
+        this.option = this.readByte();
     }
 }

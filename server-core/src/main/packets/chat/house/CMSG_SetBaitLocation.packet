@@ -1,0 +1,5 @@
+message CMSG_SetBaitLocation (0x2BC8) {
+    float x = 1;
+    float z = 2;
+    float y = 3;
+}

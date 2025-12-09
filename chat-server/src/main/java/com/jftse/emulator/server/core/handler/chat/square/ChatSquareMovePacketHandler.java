@@ -2,27 +2,18 @@ package com.jftse.emulator.server.core.handler.chat.square;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.square.C2SChatSquareMovePacket;
-import com.jftse.emulator.server.core.packets.chat.square.S2CChatSquareMovePacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.square.CMSGChatSquareMove;
+import com.jftse.server.core.shared.packets.chat.square.SMSGChatSquareMove;
 
-@PacketOperationIdentifier(PacketOperations.C2SChatSquareMove)
-public class ChatSquareMovePacketHandler extends AbstractPacketHandler {
-    private C2SChatSquareMovePacket chatSquareMovePacket;
-
+@PacketId(CMSGChatSquareMove.PACKET_ID)
+public class ChatSquareMovePacketHandler implements PacketHandler<FTConnection, CMSGChatSquareMove> {
     @Override
-    public boolean process(Packet packet) {
-        chatSquareMovePacket = new C2SChatSquareMovePacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGChatSquareMove chatSquareMovePacket) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -33,7 +24,12 @@ public class ChatSquareMovePacketHandler extends AbstractPacketHandler {
         if (roomPlayer.isFitting())
             return;
 
-        S2CChatSquareMovePacket answerSquareMovePacket = new S2CChatSquareMovePacket(roomPlayer.getPosition(), chatSquareMovePacket.getUnk1(), chatSquareMovePacket.getX2(), chatSquareMovePacket.getY2());
+        SMSGChatSquareMove answerSquareMovePacket = SMSGChatSquareMove.builder()
+                .position(roomPlayer.getPosition())
+                .unk0(chatSquareMovePacket.getUnk0())
+                .x(chatSquareMovePacket.getX2())
+                .y(chatSquareMovePacket.getY2())
+                .build();
         roomPlayer.setLastX(chatSquareMovePacket.getX2());
         roomPlayer.setLastY(chatSquareMovePacket.getY2());
 

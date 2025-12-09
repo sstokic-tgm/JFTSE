@@ -1,0 +1,8 @@
+message CMSG_GuildChangeLogo (0x2034) {
+    int32 pocketIdLogoBackground = 1;
+    int32 logoBackgroundColor = 2;
+    int32 pocketIdLogoPattern = 3;
+    int32 logoPatternColor = 4;
+    int32 pocketIdLogoMark = 5;
+    int32 logoMarkColor = 6;
+}

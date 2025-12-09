@@ -1,19 +1,14 @@
 package com.jftse.emulator.server.core.handler.challenge;
 
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.challenge.CMSGChallengeSet;
 
-@PacketOperationIdentifier(PacketOperations.C2SChallengeSet)
-public class ChallengeSetPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGChallengeSet.PACKET_ID)
+public class ChallengeSetPacketHandler implements PacketHandler<FTConnection, CMSGChallengeSet> {
     @Override
-    public boolean process(Packet packet) {
-        return false;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGChallengeSet packet) {
         // empty
     }
 }

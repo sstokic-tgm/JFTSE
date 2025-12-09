@@ -17,10 +17,10 @@ public class C2SDeleteMessagesRequest extends Packet {
     public C2SDeleteMessagesRequest(Packet packet) {
         super(packet);
 
-        this.type = packet.readByte(); // 0 = Message, 3 == Gift
-        this.size = packet.readByte();
+        this.type = this.readByte(); // 0 = Message, 3 == Gift
+        this.size = this.readByte();
         for (int i = 0; i < size; i++) {
-            messageIds.add(packet.readInt());
+            messageIds.add(this.readInt());
         }
     }
 }

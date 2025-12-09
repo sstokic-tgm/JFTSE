@@ -1,0 +1,4 @@
+message SMSG_PickupPet (0x151F) {
+    short result = 1;
+    int32 petType = 2;
+}

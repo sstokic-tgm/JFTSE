@@ -12,6 +12,6 @@ public class C2SRoomNameChangeRequestPacket extends Packet {
     public C2SRoomNameChangeRequestPacket(Packet packet) {
         super(packet);
 
-        this.roomName = this.readUnicodeString();
+        this.roomName = this.readString();
     }
 }

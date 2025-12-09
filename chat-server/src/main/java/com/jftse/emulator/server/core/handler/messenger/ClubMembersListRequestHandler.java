@@ -3,14 +3,14 @@ package com.jftse.emulator.server.core.handler.messenger;
 import com.jftse.emulator.server.core.rabbit.messages.GuildMemberListOnRequestMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.messenger.CMSGGuildMemberList;
 
-@PacketOperationIdentifier(PacketOperations.C2SClubMembersListRequest)
-public class ClubMembersListRequestHandler extends AbstractPacketHandler {
+@PacketId(CMSGGuildMemberList.PACKET_ID)
+public class ClubMembersListRequestHandler implements PacketHandler<FTConnection, CMSGGuildMemberList> {
     private final RProducerService rProducerService;
 
     public ClubMembersListRequestHandler() {
@@ -18,13 +18,8 @@ public class ClubMembersListRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildMemberList packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 

@@ -15,9 +15,9 @@ public class C2SSendProposalRequestPacket extends Packet {
     public C2SSendProposalRequestPacket(Packet packet) {
         super(packet);
 
-        this.receiverName = packet.readUnicodeString();
-        this.playerPocketId = packet.readInt();
-        this.itemIndex = packet.readInt();
-        this.message = packet.readUnicodeString();
+        this.receiverName = this.readString();
+        this.playerPocketId = this.readInt();
+        this.itemIndex = this.readInt();
+        this.message = this.readString();
     }
 }

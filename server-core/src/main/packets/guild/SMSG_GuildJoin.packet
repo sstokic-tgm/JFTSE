@@ -1,0 +1,3 @@
+message SMSG_GuildJoin (0x2012) {
+    short result = 1;
+}

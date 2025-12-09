@@ -14,6 +14,6 @@ public class C2SPersonalBoardPacket extends Packet {
         super(packet);
 
         this.playerPocketId = this.readInt();
-        this.message = this.readUnicodeString();
+        this.message = this.readString();
     }
 }

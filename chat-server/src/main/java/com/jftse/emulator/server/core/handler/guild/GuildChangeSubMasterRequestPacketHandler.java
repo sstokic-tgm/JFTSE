@@ -2,22 +2,19 @@ package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildChangeSubMasterRequestPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildChangeSubMasterAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildChangeSubMaster;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildChangeSubMaster;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildChangeSubMasterRequest)
-public class GuildChangeSubMasterRequestPacketHandler extends AbstractPacketHandler {
-    private C2SGuildChangeSubMasterRequestPacket guildChangeSubMasterRequestPacket;
-
+@PacketId(CMSGGuildChangeSubMaster.PACKET_ID)
+public class GuildChangeSubMasterRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildChangeSubMaster> {
     private final GuildMemberService guildMemberService;
 
     public GuildChangeSubMasterRequestPacketHandler() {
@@ -25,16 +22,10 @@ public class GuildChangeSubMasterRequestPacketHandler extends AbstractPacketHand
     }
 
     @Override
-    public boolean process(Packet packet) {
-        guildChangeSubMasterRequestPacket = new C2SGuildChangeSubMasterRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildChangeSubMaster guildChangeSubMasterRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null) {
-            connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 0, (short) -1));
+            connection.sendTCP(SMSGGuildChangeSubMaster.builder().status((byte) 0).result((short) -1).build());
             return;
         }
 
@@ -54,20 +45,20 @@ public class GuildChangeSubMasterRequestPacketHandler extends AbstractPacketHand
 
                 if (guildChangeSubMasterRequestPacket.getStatus() == 1) {
                     if (subMasterCount == 3) {
-                        connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 0, (short) -5));
+                        connection.sendTCP(SMSGGuildChangeSubMaster.builder().status((byte) 0).result((short) -5).build());
                     } else {
                         subClubMaster.setMemberRank((byte) 2);
                         guildMemberService.save((subClubMaster));
-                        connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 1, (short) 0));
+                        connection.sendTCP(SMSGGuildChangeSubMaster.builder().status((byte) 1).result((short) 0).build());
                     }
                 } else {
                     subClubMaster.setMemberRank((byte) 1);
                     guildMemberService.save((subClubMaster));
-                    connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 0, (short) 0));
+                    connection.sendTCP(SMSGGuildChangeSubMaster.builder().status((byte) 0).result((short) 0).build());
                 }
             }
         } else {
-            connection.sendTCP(new S2CGuildChangeSubMasterAnswerPacket((byte) 0, (short) -1));
+            connection.sendTCP(SMSGGuildChangeSubMaster.builder().status((byte) 0).result((short) -1).build());
         }
     }
 }

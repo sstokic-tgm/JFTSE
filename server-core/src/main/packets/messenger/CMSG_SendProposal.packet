@@ -1,0 +1,6 @@
+message CMSG_SendProposal (0x251D) {
+    string receiverName = 1;
+    int32 playerPocketId = 2;
+    int32 itemIndex = 3;
+    string message = 4;
+}

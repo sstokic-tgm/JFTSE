@@ -1,0 +1,3 @@
+message CMSG_GuildDismissMember (0x2023) {
+    int32 playerPositionInGuild = 1;
+}

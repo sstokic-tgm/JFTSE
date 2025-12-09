@@ -1,18 +1,15 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.messenger.C2SDeleteMessagesRequest;
-import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GiftService;
 import com.jftse.server.core.service.MessageService;
+import com.jftse.server.core.shared.packets.messenger.CMSGDeleteMessage;
 
-@PacketOperationIdentifier(PacketOperations.C2SDeleteMessagesRequest)
-public class DeleteMessageRequestHandler extends AbstractPacketHandler {
-    private C2SDeleteMessagesRequest c2SDeleteMessagesRequest;
-
+@PacketId(CMSGDeleteMessage.PACKET_ID)
+public class DeleteMessageRequestHandler implements PacketHandler<FTConnection, CMSGDeleteMessage> {
     private final MessageService messageService;
     private final GiftService giftService;
 
@@ -22,17 +19,11 @@ public class DeleteMessageRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SDeleteMessagesRequest = new C2SDeleteMessagesRequest(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        if (c2SDeleteMessagesRequest.getType() == 0) {
-            c2SDeleteMessagesRequest.getMessageIds().forEach(m -> messageService.remove(m.longValue()));
-        } else if (c2SDeleteMessagesRequest.getType() == 2) {
-            c2SDeleteMessagesRequest.getMessageIds().forEach(m -> giftService.remove(m.longValue()));
+    public void handle(FTConnection connection, CMSGDeleteMessage packet) {
+        if (packet.getType() == 0) {
+            packet.getMessageIds().forEach(m -> messageService.remove(m.longValue()));
+        } else if (packet.getType() == 2) {
+            packet.getMessageIds().forEach(m -> giftService.remove(m.longValue()));
         }
     }
 }

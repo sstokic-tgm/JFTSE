@@ -3,10 +3,10 @@ package com.jftse.emulator.server.core.handler.shop;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.pet.S2CPetAddPacket;
-import com.jftse.emulator.server.core.packets.shop.C2SShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auctionhouse.PriceType;
 import com.jftse.entities.database.model.home.AccountHome;
@@ -16,21 +16,19 @@ import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.shop.CMSGShopBuy;
+import com.jftse.server.core.shared.packets.shop.ShopBuy;
 import org.springframework.util.ReflectionUtils;
 
 import java.util.*;
 
-@PacketOperationIdentifier(PacketOperations.C2SShopBuyReq)
-public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
-    private C2SShopBuyPacket shopBuyPacket;
-
+@PacketId(CMSGShopBuy.PACKET_ID)
+public class ShopBuyRequestPacketHandler implements PacketHandler<FTConnection, CMSGShopBuy> {
     private final ProductService productService;
     private final HomeService homeService;
     private final PlayerPocketService playerPocketService;
@@ -48,17 +46,11 @@ public class ShopBuyRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        shopBuyPacket = new C2SShopBuyPacket(packet);
-        return true;
-    }
+    public void handle(FTConnection connection, CMSGShopBuy shopBuyPacket) {
+        FTClient ftClient = connection.getClient();
 
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
-
-        Map<Integer, Byte> itemList = shopBuyPacket.getItemList();
-        Map<Product, Byte> productList = productService.findProductsByItemList(itemList);
+        List<ShopBuy> itemList = shopBuyPacket.getItemList();
+        Map<Product, Byte> productList = productService.findProductsByItemList2(itemList);
 
         if (productList.size() == 1) {
             boolean noBuy = productList.keySet()

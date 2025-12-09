@@ -1,0 +1,5 @@
+message SMSG_InventorySell (0x1D07) {
+    byte status = 1;
+    int32 itemPocketId = 2;
+    int32 price = 3;
+}

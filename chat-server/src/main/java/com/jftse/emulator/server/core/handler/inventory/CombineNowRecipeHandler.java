@@ -2,40 +2,32 @@ package com.jftse.emulator.server.core.handler.inventory;
 
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.recipe.Recipe;
-import com.jftse.emulator.server.core.packets.inventory.C2SCombineNowRecipeReqPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CCombineNowRecipeAnswerPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.shared.packets.inventory.CMSGCombineNowRecipe;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SCombineNowRecipe)
-public class CombineNowRecipeHandler extends AbstractPacketHandler {
-    private C2SCombineNowRecipeReqPacket combineNowRecipeReqPacket;
-
+@PacketId(CMSGCombineNowRecipe.PACKET_ID)
+public class CombineNowRecipeHandler implements PacketHandler<FTConnection, CMSGCombineNowRecipe> {
     public CombineNowRecipeHandler() {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        combineNowRecipeReqPacket = new C2SCombineNowRecipeReqPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGCombineNowRecipe packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -45,7 +37,7 @@ public class CombineNowRecipeHandler extends AbstractPacketHandler {
         if (pocket == null)
             return;
 
-        Recipe recipe = (Recipe) ItemFactory.getItem(combineNowRecipeReqPacket.getPlayerPocketId(), pocket);
+        Recipe recipe = (Recipe) ItemFactory.getItem(packet.getPlayerPocketId(), pocket);
         if (recipe == null)
             return;
 

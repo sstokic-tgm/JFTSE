@@ -14,6 +14,6 @@ public class C2SChatLobbyReqPacket extends Packet {
         super(packet);
 
         this.unk = this.readChar();
-        this.message = this.readUnicodeString();
+        this.message = this.readString();
     }
 }

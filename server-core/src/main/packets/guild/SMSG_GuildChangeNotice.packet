@@ -1,0 +1,3 @@
+message SMSG_GuildChangeNotice (0x202F) {
+    char result = 1;
+}

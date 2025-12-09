@@ -1,0 +1,5 @@
+message CMSG_GuildChangeReverseMember (0x203F) {
+    byte unk0 = 1;
+    byte status = 2;
+    int32 playerId = 3;
+}

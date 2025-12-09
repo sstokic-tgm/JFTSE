@@ -3,29 +3,20 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomIsPrivateChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomChangeIsPrivate;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomIsPrivateChange)
-public class RoomIsPrivateChangePacketHandler extends AbstractPacketHandler {
-    private C2SRoomIsPrivateChangeRequestPacket changeRoomIsPrivateRequestPacket;
-
+@PacketId(CMSGRoomChangeIsPrivate.PACKET_ID)
+public class RoomIsPrivateChangePacketHandler implements PacketHandler<FTConnection, CMSGRoomChangeIsPrivate> {
     @Override
-    public boolean process(Packet packet) {
-        changeRoomIsPrivateRequestPacket = new C2SRoomIsPrivateChangeRequestPacket(packet);
-        return true;
-    }
+    public void handle(FTConnection connection, CMSGRoomChangeIsPrivate packet) {
+        FTClient client = connection.getClient();
 
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
-
-        String password = changeRoomIsPrivateRequestPacket.getPassword();
+        String password = packet.getPassword();
         Room room = client.getActiveRoom();
         if (room != null) {
             if (StringUtils.isEmpty(password)) {

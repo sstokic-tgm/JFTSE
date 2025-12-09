@@ -1,23 +1,14 @@
 package com.jftse.emulator.server.core.handler;
 
-import com.jftse.emulator.server.core.packets.C2SSessionTimePacket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.CMSGSessionTime;
 
-@PacketOperationIdentifier(PacketOperations.C2SSessionTime)
-public class SessionTimePacketHandler extends AbstractPacketHandler {
-    private C2SSessionTimePacket sessionTimePacket;
-
+@PacketId(CMSGSessionTime.PACKET_ID)
+public class SessionTimePacketHandler implements PacketHandler<FTConnection, CMSGSessionTime> {
     @Override
-    public boolean process(Packet packet) {
-        sessionTimePacket = new C2SSessionTimePacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-
+    public void handle(FTConnection connection, CMSGSessionTime packet) {
+        // empty
     }
 }

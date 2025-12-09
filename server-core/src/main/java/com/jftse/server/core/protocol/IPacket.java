@@ -15,6 +15,10 @@ public interface IPacket {
 
     String toString();
 
+    static <T extends IPacket> T fromBytes(byte[] packet) {
+        throw new UnsupportedOperationException("fromBytes method not implemented");
+    }
+
     default byte[] addByteToArray(byte[] byteArray, byte newByte) {
         byte[] newArray = new byte[byteArray.length + 1];
         BitKit.blockCopy(byteArray, 0, newArray, 1, newArray.length);

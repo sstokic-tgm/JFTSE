@@ -1,0 +1,5 @@
+message CMSG_ShopDataPrepare (0x2389) {
+    byte category = 1;
+    byte part = 2;
+    byte player = 3;
+}

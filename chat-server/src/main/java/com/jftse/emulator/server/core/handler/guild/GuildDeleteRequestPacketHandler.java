@@ -1,20 +1,20 @@
 package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildDeleteAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.GuildService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildDelete;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildDelete;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildDeleteRequest)
-public class GuildDeleteRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGGuildDelete.PACKET_ID)
+public class GuildDeleteRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildDelete> {
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
 
@@ -24,13 +24,8 @@ public class GuildDeleteRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildDelete packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -40,7 +35,7 @@ public class GuildDeleteRequestPacketHandler extends AbstractPacketHandler {
         if (guildMember != null && guildMember.getMemberRank() == 3) {
             Guild guild = guildMember.getGuild();
             guildService.remove(guild.getId());
-            connection.sendTCP(new S2CGuildDeleteAnswerPacket((short) 0));
+            connection.sendTCP(SMSGGuildDelete.builder().result((short) 0).build());
         }
     }
 }

@@ -1,0 +1,4 @@
+message SMSG_GuildChatMessage (0x2031) {
+    string sender = 1;
+    string message = 2;
+}

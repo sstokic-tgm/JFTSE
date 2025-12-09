@@ -33,7 +33,7 @@ public class FTGlobalVarHandler extends AbstractPacketHandler {
 
     @Override
     public void handle() {
-        byte n = packet.readByte();
+        byte n = packet.read(Byte.class);
         if (n == 1) {
             Optional<Path> p = ResourceUtil.getPath(FTGLOBALVARS_PROPERTIES);
             if (p.isEmpty())

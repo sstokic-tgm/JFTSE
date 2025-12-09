@@ -1,0 +1,2 @@
+message CMSG_LobbyLeave (0x2379) {
+}

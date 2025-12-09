@@ -1,0 +1,2 @@
+message CMSG_RoomLobbyJoin (0x189C) {
+}

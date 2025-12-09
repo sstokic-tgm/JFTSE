@@ -3,24 +3,18 @@ package com.jftse.emulator.server.core.handler.chat.house;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.house.S2CThrowRodPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.house.CMSGThrowBait;
+import com.jftse.server.core.shared.packets.chat.house.SMSGThrowBait;
 
-@PacketOperationIdentifier(PacketOperations.CMSG_ThrowBait)
-public class UseBaitHandler extends AbstractPacketHandler {
+@PacketId(CMSGThrowBait.PACKET_ID)
+public class UseBaitHandler implements PacketHandler<FTConnection, CMSGThrowBait> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGThrowBait packet) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -30,8 +24,11 @@ public class UseBaitHandler extends AbstractPacketHandler {
             return;
 
         if (roomPlayer.getUsedRod().compareAndSet(false, true)) {
-            S2CThrowRodPacket throwRodPacket = new S2CThrowRodPacket(roomPlayer.getPosition(), (byte) 0);
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(throwRodPacket, (FTConnection) connection);
+            SMSGThrowBait throwBaitPacket = SMSGThrowBait.builder()
+                    .playerPosition(roomPlayer.getPosition())
+                    .displayMessage((byte) 0)
+                    .build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(throwBaitPacket, connection);
         }
     }
 }

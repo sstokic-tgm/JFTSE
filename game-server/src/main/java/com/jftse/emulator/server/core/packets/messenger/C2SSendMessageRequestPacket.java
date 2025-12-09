@@ -13,7 +13,7 @@ public class C2SSendMessageRequestPacket extends Packet {
     public C2SSendMessageRequestPacket(Packet packet) {
         super(packet);
 
-        this.receiverName = this.readUnicodeString();
-        this.message = this.readUnicodeString();
+        this.receiverName = this.readString();
+        this.message = this.readString();
     }
 }

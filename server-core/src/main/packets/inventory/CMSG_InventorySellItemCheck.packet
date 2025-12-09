@@ -1,0 +1,3 @@
+message CMSG_InventorySellItemCheck (0x1D08) {
+    int32 itemPocketId = 1;
+}

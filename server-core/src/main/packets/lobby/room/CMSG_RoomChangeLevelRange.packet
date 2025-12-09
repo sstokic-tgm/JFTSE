@@ -1,0 +1,3 @@
+message CMSG_RoomChangeLevelRange (0x178F) {
+    byte levelRange = 1;
+}

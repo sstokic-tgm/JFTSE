@@ -4,21 +4,19 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.inventory.CMSGUnknownInventoryOpen;
 
 import java.util.List;
 import java.util.Map;
 
-@PacketOperationIdentifier(PacketOperations.C2SUnknownInventoryOpenRequest)
-public class UnknownInventoryOpenPacketHandler extends AbstractPacketHandler {
-    private Packet packet;
-
+@PacketId(CMSGUnknownInventoryOpen.PACKET_ID)
+public class UnknownInventoryOpenPacketHandler implements PacketHandler<FTConnection, CMSGUnknownInventoryOpen> {
     private final ClothEquipmentServiceImpl clothEquipmentService;
     private final QuickSlotEquipmentService quickSlotEquipmentService;
     private final ToolSlotEquipmentService toolSlotEquipmentService;
@@ -36,14 +34,8 @@ public class UnknownInventoryOpenPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGUnknownInventoryOpen packet) {
+        FTClient client = connection.getClient();
         if (client != null) {
             Player player = client.getPlayer();
 

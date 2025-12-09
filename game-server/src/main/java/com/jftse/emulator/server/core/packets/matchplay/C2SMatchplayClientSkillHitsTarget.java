@@ -15,14 +15,14 @@ public class C2SMatchplayClientSkillHitsTarget extends Packet {
     public C2SMatchplayClientSkillHitsTarget(Packet packet) {
         super(packet);
 
-        packet.readByte(); // Unk
-        this.targetPosition = packet.readByte();
-        packet.readByte();
-        packet.readInt();
-        packet.readByte();
-        this.skillId = packet.readByte();
-        this.xKnockbackPosition = packet.readInt();
-        this.yKnockbackPosition = packet.readInt();
-        packet.readByte(); // Unk
+        this.readByte(); // Unk
+        this.targetPosition = this.readByte();
+        this.readByte();
+        this.readInt();
+        this.readByte();
+        this.skillId = this.readByte();
+        this.xKnockbackPosition = this.readInt();
+        this.yKnockbackPosition = this.readInt();
+        this.readByte(); // Unk
     }
 }

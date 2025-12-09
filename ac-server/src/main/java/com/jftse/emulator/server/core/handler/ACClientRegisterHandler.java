@@ -31,7 +31,7 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
     @Override
     public boolean process(Packet packet) {
         this.packet = packet;
-        str = packet.readString();
+        str = packet.read(String.class);
         return true;
     }
 

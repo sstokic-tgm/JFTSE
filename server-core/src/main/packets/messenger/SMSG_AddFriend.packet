@@ -1,0 +1,3 @@
+message SMSG_AddFriend (0x1F42) {
+    short result = 1;
+}

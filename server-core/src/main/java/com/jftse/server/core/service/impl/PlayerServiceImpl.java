@@ -5,8 +5,8 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.repository.player.PlayerRepository;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.auth.CMSGPlayerCreate;
-import com.jftse.server.core.shared.packets.player.C2SPlayerCreatePacket;
 import com.jftse.server.core.shared.packets.player.C2SPlayerStatusPointChangePacket;
+import com.jftse.server.core.shared.packets.player.CMSGChangePlayerStatPoints;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -143,8 +143,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public boolean isStatusPointHack(C2SPlayerCreatePacket playerCreatePacket, Player player) {
-        // checking them so we are not 'hacked'
+    public boolean isStatusPointHack(CMSGPlayerCreate playerCreatePacket, Player player) {
         byte serverStatusPoints = player.getStatusPoints();
         byte clientStatusPoints = playerCreatePacket.getStatusPoints();
 
@@ -159,14 +158,14 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public boolean isStatusPointHack(CMSGPlayerCreate playerCreatePacket, Player player) {
+    public boolean isStatusPointHack(CMSGChangePlayerStatPoints playerStatPointsPacket, Player player) {
         byte serverStatusPoints = player.getStatusPoints();
-        byte clientStatusPoints = playerCreatePacket.getStatusPoints();
+        byte clientStatusPoints = playerStatPointsPacket.getStatusPoints();
 
-        byte strength = (byte) (playerCreatePacket.getStrength() - player.getStrength());
-        byte stamina = (byte) (playerCreatePacket.getStamina() - player.getStamina());
-        byte dexterity = (byte) (playerCreatePacket.getDexterity() - player.getDexterity());
-        byte willpower = (byte) (playerCreatePacket.getWillpower() - player.getWillpower());
+        byte strength = (byte) (playerStatPointsPacket.getStrength() - player.getStrength());
+        byte stamina = (byte) (playerStatPointsPacket.getStamina() - player.getStamina());
+        byte dexterity = (byte) (playerStatPointsPacket.getDexterity() - player.getDexterity());
+        byte willpower = (byte) (playerStatPointsPacket.getWillpower() - player.getWillpower());
 
         byte newStatusPoints = (byte) (strength + stamina + dexterity + willpower + clientStatusPoints);
 

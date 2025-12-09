@@ -12,6 +12,6 @@ public class C2SGuildChangeNoticeRequestPacket extends Packet {
     public C2SGuildChangeNoticeRequestPacket(Packet packet) {
         super(packet);
 
-        this.notice = this.readUnicodeString();
+        this.notice = this.readString();
     }
 }

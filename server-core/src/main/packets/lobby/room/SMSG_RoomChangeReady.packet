@@ -1,0 +1,4 @@
+message SMSG_RoomChangeReady (0x1776) {
+    short position = 1;
+    bool ready = 2;
+}

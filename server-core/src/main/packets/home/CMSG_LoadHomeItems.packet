@@ -1,0 +1,2 @@
+message CMSG_LoadHomeItems (0x254E) {
+}

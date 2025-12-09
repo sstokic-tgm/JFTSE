@@ -1,0 +1,4 @@
+message CMSG_ChallengePoint (0x220A) {
+    byte pointsPlayer = 1;
+    byte pointsNpc = 2;
+}

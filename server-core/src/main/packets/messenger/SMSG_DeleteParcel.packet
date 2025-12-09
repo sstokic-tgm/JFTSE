@@ -1,0 +1,3 @@
+message SMSG_DeleteParcel (0x21A6) {
+    int32 parcelId = 1;
+}

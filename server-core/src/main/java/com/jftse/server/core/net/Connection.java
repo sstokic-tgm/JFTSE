@@ -1,8 +1,8 @@
 package com.jftse.server.core.net;
 
 import com.jftse.entities.database.model.ServerType;
+import com.jftse.server.core.protocol.CompositePacket;
 import com.jftse.server.core.protocol.IPacket;
-import com.jftse.server.core.protocol.Packet;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -80,8 +80,11 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
         return serverType;
     }
 
-    public abstract ChannelFuture sendTCP(Packet... packets);
     public ChannelFuture sendTCP(IPacket... packets) {
-        return null;
+        if (packets == null || packets.length == 0)
+            throw new IllegalArgumentException("Packet cannot be null.");
+
+        IPacket toSend = new CompositePacket(packets);
+        return ctx.writeAndFlush(toSend);
     }
 }

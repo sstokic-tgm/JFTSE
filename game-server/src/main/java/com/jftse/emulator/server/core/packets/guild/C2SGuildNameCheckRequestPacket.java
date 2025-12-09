@@ -12,6 +12,6 @@ public class C2SGuildNameCheckRequestPacket extends Packet {
     public C2SGuildNameCheckRequestPacket(Packet packet) {
         super(packet);
 
-        this.name = this.readUnicodeString();
+        this.name = this.readString();
     }
 }

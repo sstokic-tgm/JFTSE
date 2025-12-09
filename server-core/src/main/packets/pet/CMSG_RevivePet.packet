@@ -1,0 +1,4 @@
+message CMSG_RevivePet {
+    int32 itemId = 1;
+    byte petType = 2;
+}

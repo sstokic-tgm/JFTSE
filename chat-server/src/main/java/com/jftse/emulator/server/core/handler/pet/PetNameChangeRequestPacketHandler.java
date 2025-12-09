@@ -1,23 +1,17 @@
 package com.jftse.emulator.server.core.handler.pet;
 
-import com.jftse.emulator.server.core.packets.pet.C2SPetNameChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.pet.S2CPetNameChangeAnswerPacket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.shared.packets.CMSGDefault;
+import com.jftse.server.core.shared.packets.pet.CMSGPetNameCheck;
 
-public class PetNameChangeRequestPacketHandler extends AbstractPacketHandler {
-    private C2SPetNameChangeRequestPacket petNameChangeRequestPacket;
-
+//@PacketId(CMSGPetNameCheck.PACKET_ID)
+public class PetNameChangeRequestPacketHandler implements PacketHandler<FTConnection, /* CMSGPetNameCheck */ CMSGDefault> {
     public PetNameChangeRequestPacketHandler() {}
 
     @Override
-    public boolean process(Packet packet) {
-        petNameChangeRequestPacket = new C2SPetNameChangeRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, /* CMSGPetNameCheck */ CMSGDefault packet) {
         // To Do
 
         S2CPetNameChangeAnswerPacket petNameChangeAnswerPacket = new S2CPetNameChangeAnswerPacket((short) 0);

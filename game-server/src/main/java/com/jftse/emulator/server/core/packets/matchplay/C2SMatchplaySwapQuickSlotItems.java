@@ -13,16 +13,16 @@ public class C2SMatchplaySwapQuickSlotItems extends Packet {
     public C2SMatchplaySwapQuickSlotItems(Packet packet) {
         super(packet);
 
-        packet.readByte(); // Unk
-        packet.readByte(); // Unk
-        packet.readByte(); // Unk
-        packet.readByte(); // Unk
-        this.targetLeftSlotSkill = packet.readByte();
-        packet.readInt(); // Unk
-        packet.readByte(); // Unk
-        packet.readByte(); // Unk
-        packet.readByte(); // Unk
-        this.targetRightSlotSkill = packet.readByte();
+        this.readByte(); // Unk
+        this.readByte(); // Unk
+        this.readByte(); // Unk
+        this.readByte(); // Unk
+        this.targetLeftSlotSkill = this.readByte();
+        this.readInt(); // Unk
+        this.readByte(); // Unk
+        this.readByte(); // Unk
+        this.readByte(); // Unk
+        this.targetRightSlotSkill = this.readByte();
 
          // 7 more unknown bytes follow here
     }

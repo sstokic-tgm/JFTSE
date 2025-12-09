@@ -1,0 +1,13 @@
+message HomeItem {
+    int32 inventoryItemId = 1;
+    int32 homeInventoryId = 2;
+    int32 itemIndex = 3;
+    byte unk0 = 4;
+    byte rotation = 5;
+    byte x = 6;
+    byte y = 7;
+}
+
+message CMSG_PlaceHomeItems (0x2550) {
+    repeated HomeItem items = 1 [type = char];
+}

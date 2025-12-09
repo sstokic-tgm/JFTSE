@@ -1,0 +1,4 @@
+message SMSG_ReceiveData (0x105F) {
+    byte dataType = 1;
+    byte unk0 = 2;
+}

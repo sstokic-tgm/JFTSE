@@ -2,32 +2,29 @@ package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.messenger.C2SProposalAnswerRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRelationshipAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendRelationMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.messenger.Message;
 import com.jftse.entities.database.model.messenger.Proposal;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.messenger.CMSGAcceptProposal;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SProposalAnswerRequest)
-public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
-    private C2SProposalAnswerRequestPacket c2SProposalAnswerRequestPacket;
-
+@PacketId(CMSGAcceptProposal.PACKET_ID)
+public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection, CMSGAcceptProposal> {
     private final ProposalService proposalService;
     private final FriendService friendService;
     private final MessageService messageService;
@@ -46,23 +43,17 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SProposalAnswerRequestPacket = new C2SProposalAnswerRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGAcceptProposal packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 
-        Proposal proposal = proposalService.findById(c2SProposalAnswerRequestPacket.getProposalId().longValue());
+        Proposal proposal = proposalService.findById((long) packet.getProposalId());
         if (proposal == null) return;
 
         List<Friend> senderFriend = friendService.findByPlayer(proposal.getSender());
         if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
-            if (c2SProposalAnswerRequestPacket.getAccepted()) {
+            if (packet.getAccept()) {
                 Message message = new Message();
                 message.setSeen(false);
                 message.setSender(proposal.getSender());
@@ -82,7 +73,7 @@ public class ProposalAnswerRequestHandler extends AbstractPacketHandler {
         message.setSeen(false);
         message.setSender(proposal.getReceiver());
         message.setReceiver(proposal.getSender());
-        if (c2SProposalAnswerRequestPacket.getAccepted()) {
+        if (packet.getAccept()) {
             List<Friend> receiverFriend = friendService.findByPlayer(proposal.getReceiver());
             if (receiverFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
                 proposalService.remove(proposal.getId());

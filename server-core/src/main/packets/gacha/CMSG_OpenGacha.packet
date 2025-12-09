@@ -1,0 +1,4 @@
+message CMSG_OpenGacha (0x1F86) {
+    int32 playerPocketId = 1;
+    int32 productIndex = 2;
+}

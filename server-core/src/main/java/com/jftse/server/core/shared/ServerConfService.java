@@ -21,13 +21,13 @@ public class ServerConfService {
     private boolean loaded = false;
 
     @PostConstruct
-    public  void init() {
-        loaded = loadConf(true);
+    public void init() {
+        loadConf(true);
     }
 
     public boolean loadConf(boolean reload) {
-        if (!reload) {
-            return loaded;
+        if (!reload && loaded) {
+            return true;
         }
 
         Path execDir = getExecDir();
@@ -40,11 +40,14 @@ public class ServerConfService {
         try (var reader = Files.newBufferedReader(confFile)) {
             props.clear();
             props.load(reader);
-            return true;
+            loaded = true;
+            log.info("Configuration loaded from {}", confFile);
         } catch (Exception e) {
             log.error("Failed to read configuration {}", confFile, e);
-            return false;
+            loaded = false;
         }
+
+        return loaded;
     }
 
     private Path getExecDir() {
@@ -56,20 +59,33 @@ public class ServerConfService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getOrDefault(String key, T defaultValue) {
+    private String getString(String key) {
         String value = props.getProperty(key);
         if (value == null) {
-            return defaultValue;
+            throw new IllegalArgumentException("Configuration key not found: " + key);
         }
 
-        Object castedValue = switch (defaultValue) {
-            case Integer i -> Integer.parseInt(value);
-            case Long l -> Long.parseLong(value);
-            case Boolean b -> Boolean.parseBoolean(value);
-            case Float f -> Float.parseFloat(value);
-            default -> value;
-        };
-        return (T) castedValue;
+        return value;
+    }
+
+    public <T> T get(String key, Class<T> type) {
+        String value = getString(key);
+
+        Object castedValue;
+        if (type == Integer.class) {
+            castedValue = Integer.parseInt(value);
+        } else if (type == Long.class) {
+            castedValue = Long.parseLong(value);
+        } else if (type == Boolean.class) {
+            castedValue = Boolean.parseBoolean(value);
+        } else if (type == Float.class) {
+            castedValue = Float.parseFloat(value);
+        } else if (type == Double.class) {
+            castedValue = Double.parseDouble(value);
+        } else {
+            castedValue = value;
+        }
+
+        return type.cast(castedValue);
     }
 }

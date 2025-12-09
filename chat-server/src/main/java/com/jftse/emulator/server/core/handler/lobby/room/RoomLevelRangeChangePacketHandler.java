@@ -2,31 +2,22 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomLevelRangeChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomChangeLevelRange;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomLevelRangeChange)
-public class RoomLevelRangeChangePacketHandler extends AbstractPacketHandler {
-    private C2SRoomLevelRangeChangeRequestPacket changeRoomLevelRangeRequestPacket;
-
+@PacketId(CMSGRoomChangeLevelRange.PACKET_ID)
+public class RoomLevelRangeChangePacketHandler implements PacketHandler<FTConnection, CMSGRoomChangeLevelRange> {
     @Override
-    public boolean process(Packet packet) {
-        changeRoomLevelRangeRequestPacket = new C2SRoomLevelRangeChangeRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomChangeLevelRange packet) {
+        FTClient client = connection.getClient();
         Room room = client.getActiveRoom();
         if (room != null) {
             synchronized (room) {
-                room.setLevelRange(changeRoomLevelRangeRequestPacket.getLevelRange());
+                room.setLevelRange(packet.getLevelRange());
             }
 
             S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);

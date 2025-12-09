@@ -17,8 +17,8 @@ public class C2SGuildCreateRequestPacket extends Packet {
     public C2SGuildCreateRequestPacket(Packet packet) {
         super(packet);
 
-        this.name = this.readUnicodeString();
-        this.introduction = this.readUnicodeString();
+        this.name = this.readString();
+        this.introduction = this.readString();
         this.isPublic = this.readBoolean();
         this.levelRestriction = this.readByte();
         this.allowedCharacterTypeCount = this.readByte();

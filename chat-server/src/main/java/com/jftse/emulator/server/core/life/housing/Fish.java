@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.life.housing;
 
+import com.jftse.server.core.util.GameTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +21,7 @@ public class Fish {
     private long lastBiteTime = 0;
     private long aliveTime = 0;
     private long lastCorrectionTime = 0;
-    private long lastActivityTime = System.currentTimeMillis();
+    private long lastActivityTime = GameTime.getGameTimeMS();
     private boolean bitBait = false;
     private short claimedPlayerPosition = -1;
 
@@ -62,18 +63,18 @@ public class Fish {
         if (this.state != state) {
             this.state = state;
             if (state == FishState.BITING) {
-                this.lastBiteTime = System.currentTimeMillis();
+                this.lastBiteTime = GameTime.getGameTimeMS();
             }
 
             if (state == FishState.ATTACKING || state == FishState.FRIGHTENED || state == FishState.BITING) {
-                this.lastActivityTime = System.currentTimeMillis();
+                this.lastActivityTime = GameTime.getGameTimeMS();
             }
         }
     }
 
     public void updateAliveTime() {
         if (lastUpdate > 0) {
-            this.aliveTime += System.currentTimeMillis() - lastUpdate;
+            this.aliveTime += GameTime.getGameTimeMS() - lastUpdate;
         }
     }
 
@@ -112,9 +113,9 @@ public class Fish {
         this.rotation = 0;
         this.speed = 0;
         this.turningSpeed = 0;
-        this.lastUpdate = System.currentTimeMillis();
-        this.lastBiteTime = System.currentTimeMillis();
-        this.lastCorrectionTime = System.currentTimeMillis();
+        this.lastUpdate = GameTime.getGameTimeMS();
+        this.lastBiteTime = GameTime.getGameTimeMS();
+        this.lastCorrectionTime = GameTime.getGameTimeMS();
         this.aliveTime = 0;
         this.bitBait = false;
         this.claimedPlayerPosition = -1;

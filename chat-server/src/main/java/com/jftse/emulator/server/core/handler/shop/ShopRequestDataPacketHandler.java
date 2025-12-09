@@ -2,23 +2,20 @@ package com.jftse.emulator.server.core.handler.shop;
 
 import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.shop.C2SShopRequestDataPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopAnswerDataPacket;
-import com.jftse.emulator.server.core.packets.shop.S2CShopAnswerDataPreparePacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.ProductService;
+import com.jftse.server.core.shared.packets.shop.CMSGShopData;
+import com.jftse.server.core.shared.packets.shop.SMSGShopDataPrepare;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SShopRequestData)
-public class ShopRequestDataPacketHandler extends AbstractPacketHandler {
-    private C2SShopRequestDataPacket shopRequestDataPacket;
-
+@PacketId(CMSGShopData.PACKET_ID)
+public class ShopRequestDataPacketHandler implements PacketHandler<FTConnection, CMSGShopData> {
     private final ProductService productService;
 
     public ShopRequestDataPacketHandler() {
@@ -26,28 +23,27 @@ public class ShopRequestDataPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        shopRequestDataPacket = new C2SShopRequestDataPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        byte category = shopRequestDataPacket.getCategory();
-        byte part = shopRequestDataPacket.getPart();
-        byte player = shopRequestDataPacket.getPlayer();
-        int page = BitKit.fromUnsignedInt(shopRequestDataPacket.getPage());
+    public void handle(FTConnection connection, CMSGShopData packet) {
+        byte category = packet.getCategory();
+        byte part = packet.getPart();
+        byte player = packet.getPlayer();
+        int page = BitKit.fromUnsignedInt(packet.getPage());
 
         int productListSize = productService.getProductListSize(category, part, player);
 
-        FTClient client = (FTClient) connection.getClient();
+        FTClient client = connection.getClient();
         if (client != null) {
             final boolean requestedShopDataPrepare = client.isRequestedShopDataPrepare();
             if (requestedShopDataPrepare) {
                 client.setRequestedShopDataPrepare(false); // reset flag
             } else {
-                S2CShopAnswerDataPreparePacket shopAnswerDataPreparePacket = new S2CShopAnswerDataPreparePacket(category, part, player, productListSize);
-                connection.sendTCP(shopAnswerDataPreparePacket);
+                SMSGShopDataPrepare preparedData = SMSGShopDataPrepare.builder()
+                        .category(category)
+                        .part(part)
+                        .player(player)
+                        .size(productListSize)
+                        .build();
+                connection.sendTCP(preparedData);
             }
         }
 

@@ -1,0 +1,4 @@
+message CMSG_LobbyUserInfo (0x139C) {
+    int32 playerId = 1;
+    string playerName = 2;
+}

@@ -4,7 +4,6 @@ import com.jftse.entities.database.model.ServerType;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.*;
-import io.netty.channel.ChannelFuture;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -62,22 +61,5 @@ public class FTConnection extends Connection<FTClient> {
             return false;
 
         return true;
-    }
-
-    @Override
-    public ChannelFuture sendTCP(Packet... packets) {
-        if (packets == null || packets.length == 0)
-            throw new IllegalArgumentException("Packet cannot be null.");
-
-        JoinedPacket joinedPackets = new JoinedPacket(packets);
-        return ctx.writeAndFlush(joinedPackets);
-    }
-
-    public ChannelFuture sendTCP(IPacket... packets) {
-        if (packets == null || packets.length == 0)
-            throw new IllegalArgumentException("Packet cannot be null.");
-
-        IPacket toSend = new CompositePacket(packets);
-        return ctx.writeAndFlush(toSend);
     }
 }

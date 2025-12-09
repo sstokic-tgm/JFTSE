@@ -1,0 +1,3 @@
+message SMSG_GuildLeave (0x2015) {
+    char status = 1;
+}

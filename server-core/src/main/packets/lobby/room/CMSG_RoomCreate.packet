@@ -1,0 +1,16 @@
+message CMSG_RoomCreate (0x1389) {
+    string roomName = 1;
+    byte roomType = 2;
+    byte mode = 3;
+    byte rule = 4;
+    byte players = 5;
+    bool isPrivate = 6;
+    byte mapId = 7;
+    bool skillFree = 8;
+    bool quickSlot = 9;
+    byte levelRange = 10;
+    char bettingType = 11;
+    int32 bettingAmount = 12;
+    int32 ball = 13;
+    string password = 14;
+}

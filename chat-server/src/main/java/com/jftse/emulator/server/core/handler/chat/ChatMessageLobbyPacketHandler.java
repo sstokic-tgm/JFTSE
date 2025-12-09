@@ -2,43 +2,36 @@ package com.jftse.emulator.server.core.handler.chat;
 
 import com.jftse.emulator.server.core.command.CommandManager;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.C2SChatLobbyReqPacket;
-import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.CMSGChatMessageLobby;
+import com.jftse.server.core.shared.packets.chat.SMSGChatMessageLobby;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@PacketOperationIdentifier(PacketOperations.C2SChatLobbyReq)
-public class ChatMessageLobbyPacketHandler extends AbstractPacketHandler {
-    private C2SChatLobbyReqPacket chatLobbyReqPacket;
-
+@PacketId(CMSGChatMessageLobby.PACKET_ID)
+public class ChatMessageLobbyPacketHandler implements PacketHandler<FTConnection, CMSGChatMessageLobby> {
     @Override
-    public boolean process(Packet packet) {
-        chatLobbyReqPacket = new C2SChatLobbyReqPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
-        S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket(chatLobbyReqPacket.getUnk(), client.getPlayer().getName(), chatLobbyReqPacket.getMessage());
+    public void handle(FTConnection connection, CMSGChatMessageLobby chatLobbyReqPacket) {
+        FTClient client = connection.getClient();
+        SMSGChatMessageLobby chatLobbyMessage = SMSGChatMessageLobby.builder()
+                .unk(chatLobbyReqPacket.getUnk())
+                .sender(client.getPlayer().getName())
+                .message(chatLobbyReqPacket.getMessage())
+                .build();
 
         if (CommandManager.getInstance().isCommand(chatLobbyReqPacket.getMessage())) {
-            connection.sendTCP(chatLobbyAnswerPacket);
-            CommandManager.getInstance().handle((FTConnection) connection, chatLobbyReqPacket.getMessage());
+            connection.sendTCP(chatLobbyMessage);
+            CommandManager.getInstance().handle(connection, chatLobbyReqPacket.getMessage());
             return;
         }
 
         List<FTClient> clientList = GameManager.getInstance().getClients().stream()
                 .filter(FTClient::isInLobby)
-                .collect(Collectors.toList());
+                .toList();
 
-        clientList.forEach(c -> c.getConnection().sendTCP(chatLobbyAnswerPacket));
+        clientList.forEach(c -> c.getConnection().sendTCP(chatLobbyMessage));
     }
 }

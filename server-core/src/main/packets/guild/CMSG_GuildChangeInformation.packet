@@ -1,0 +1,7 @@
+message CMSG_GuildChangeInformation (0x2017) {
+    string introduction = 1;
+    bool isPublic = 2;
+    byte minLevel = 3;
+    byte allowedCharacterTypeCount = 4;
+    repeated byte allowedCharacterTypes = 5 [len = msg.allowedCharacterTypeCount];
+}

@@ -12,6 +12,6 @@ public class C2SAcceptParcelRequest extends Packet {
     public C2SAcceptParcelRequest(Packet packet) {
         super(packet);
 
-        this.parcelId = packet.readInt();
+        this.parcelId = this.readInt();
     }
 }

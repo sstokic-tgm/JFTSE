@@ -29,27 +29,27 @@ public class C2SMatchplaySkillHitsTarget extends Packet {
     public C2SMatchplaySkillHitsTarget(Packet packet) {
         super(packet);
 
-        this.attackerPosition = packet.readShort();
-        this.unk0 = packet.readByte();
-        this.targetPosition = packet.readShort();
-        this.unk1 = packet.readByte();
-        this.skillId = packet.readByte();
+        this.attackerPosition = this.readShort();
+        this.unk0 = this.readByte();
+        this.targetPosition = this.readShort();
+        this.unk1 = this.readByte();
+        this.skillId = this.readByte();
 
         // 0=Str, 1=DEF, 2=Projectile speed, 3=Ball damage, 4=DMG and Projectile speed
         // 5=Charge shot speed, 6=Movement speed, 7=Ball spin
-        this.attackerBuffId1 = packet.readByte();
-        this.attackerBuffId2 = packet.readByte();
-        this.unk3 = packet.readByte();
-        this.receiverBuffId1 = packet.readByte();
-        this.unk4 = packet.readByte();
-        this.receiverBuffId2 = packet.readByte();
-        this.damageType = packet.readByte();
-        this.unk6 = packet.readByte();
-        this.applySkillEffect = packet.readByte() == 0;
-        this.unk7 = packet.readByte();
-        this.xKnockbackPosition = packet.readInt();
-        this.yKnockbackPosition = packet.readInt();
-        this.unk8 = packet.readByte();
+        this.attackerBuffId1 = this.readByte();
+        this.attackerBuffId2 = this.readByte();
+        this.unk3 = this.readByte();
+        this.receiverBuffId1 = this.readByte();
+        this.unk4 = this.readByte();
+        this.receiverBuffId2 = this.readByte();
+        this.damageType = this.readByte();
+        this.unk6 = this.readByte();
+        this.applySkillEffect = this.readByte() == 0;
+        this.unk7 = this.readByte();
+        this.xKnockbackPosition = this.readInt();
+        this.yKnockbackPosition = this.readInt();
+        this.unk8 = this.readByte();
     }
 
     @Override

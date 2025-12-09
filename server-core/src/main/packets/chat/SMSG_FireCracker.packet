@@ -1,0 +1,4 @@
+message SMSG_FireCracker (0xC9F) {
+    byte fireCrackerType = 1;
+    short position = 2;
+}

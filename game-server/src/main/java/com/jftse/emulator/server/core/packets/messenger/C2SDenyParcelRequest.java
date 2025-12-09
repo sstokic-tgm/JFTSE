@@ -12,6 +12,6 @@ public class C2SDenyParcelRequest extends Packet {
     public C2SDenyParcelRequest(Packet packet) {
         super(packet);
 
-        this.parcelId = packet.readInt();
+        this.parcelId = this.readInt();
     }
 }

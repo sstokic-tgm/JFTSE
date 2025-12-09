@@ -1,26 +1,24 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.messenger.C2SMessageListRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CMessageListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.entities.database.model.messenger.Gift;
 import com.jftse.entities.database.model.messenger.Message;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.GiftService;
 import com.jftse.server.core.service.MessageService;
+import com.jftse.server.core.shared.packets.messenger.CMSGMessageList;
+import com.jftse.server.core.shared.packets.messenger.SMSGReceivedPresent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SMessageListRequest)
-public class MessageListRequestHandler extends AbstractPacketHandler {
-    private C2SMessageListRequestPacket messageListRequestPacket;
-
+@PacketId(CMSGMessageList.PACKET_ID)
+public class MessageListRequestHandler implements PacketHandler<FTConnection, CMSGMessageList> {
     private final MessageService messageService;
     private final GiftService giftService;
 
@@ -30,18 +28,12 @@ public class MessageListRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        messageListRequestPacket = new C2SMessageListRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGMessageList packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 
-        byte listType = messageListRequestPacket.getListType();
+        byte listType = packet.getListType();
 
         Player player = ftClient.getPlayer();
 
@@ -62,9 +54,8 @@ public class MessageListRequestHandler extends AbstractPacketHandler {
 
                 boolean allSeen = gifts.stream().allMatch(Gift::getSeen);
                 if (!allSeen) {
-                    Packet packet = new Packet(PacketOperations.S2CYouGotPresentMessage);
-                    packet.write((byte) 17);
-                    connection.sendTCP(packet);
+                    SMSGReceivedPresent response = SMSGReceivedPresent.builder().result((byte) 17).build();
+                    connection.sendTCP(response);
                 }
 
                 gifts = giftService.findBySender(player);

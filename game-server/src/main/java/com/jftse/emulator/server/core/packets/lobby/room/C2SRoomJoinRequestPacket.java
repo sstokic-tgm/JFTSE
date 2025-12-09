@@ -26,6 +26,6 @@ public class C2SRoomJoinRequestPacket extends Packet {
                 .orElse(null);
 
         if (room != null && room.isPrivate() && !StringUtils.isEmpty(room.getPassword()))
-            this.password = this.readUnicodeString();
+            this.password = this.readString();
     }
 }

@@ -12,21 +12,24 @@ import com.jftse.emulator.server.core.packets.player.S2CPlayerInfoPlayStatsPacke
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerStatisticService;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGClientBackInRoom;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGClientBackInRoom;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@PacketOperationIdentifier(PacketOperations.C2SMatchplayClientBackInRoom)
-public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGClientBackInRoom.PACKET_ID)
+public class ClientBackInRoomPacketHandler implements PacketHandler<FTConnection, CMSGClientBackInRoom> {
     private final PlayerStatisticService playerStatisticService;
     private final ClothEquipmentServiceImpl clothEquipmentService;
 
@@ -36,13 +39,8 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGClientBackInRoom packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null) {
             connection.close();
             return;
@@ -59,10 +57,8 @@ public class ClientBackInRoomPacketHandler extends AbstractPacketHandler {
 
 
         short position = roomPlayer.getPosition();
-
-        Packet backInRoomAckPacket = new Packet(PacketOperations.S2CMatchplayClientBackInRoomAck);
-        backInRoomAckPacket.write(position);
-        connection.sendTCP(backInRoomAckPacket);
+        SMSGClientBackInRoom backInRoomPacket = SMSGClientBackInRoom.builder().position(position).build();
+        connection.sendTCP(backInRoomPacket);
 
         Packet unsetHostPacket = new Packet(PacketOperations.S2CUnsetHost);
         unsetHostPacket.write((byte) 0);

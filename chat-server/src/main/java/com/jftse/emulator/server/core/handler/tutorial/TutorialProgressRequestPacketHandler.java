@@ -3,17 +3,17 @@ package com.jftse.emulator.server.core.handler.tutorial;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.tutorial.S2CTutorialProgressAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.tutorial.TutorialProgress;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.TutorialService;
+import com.jftse.server.core.shared.packets.tutorial.CMSGTutorialProgress;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2STutorialProgressReq)
-public class TutorialProgressRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGTutorialProgress.PACKET_ID)
+public class TutorialProgressRequestPacketHandler implements PacketHandler<FTConnection, CMSGTutorialProgress> {
     private final TutorialService tutorialService;
 
     public TutorialProgressRequestPacketHandler() {
@@ -21,13 +21,8 @@ public class TutorialProgressRequestPacketHandler extends AbstractPacketHandler 
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGTutorialProgress packet) {
+        FTClient client = connection.getClient();
         List<TutorialProgress> tutorialProgressList = tutorialService.findAllByPlayerIdFetched(client.getPlayer().getId());
 
         S2CTutorialProgressAnswerPacket tutorialProgressAnswerPacket = new S2CTutorialProgressAnswerPacket(tutorialProgressList);

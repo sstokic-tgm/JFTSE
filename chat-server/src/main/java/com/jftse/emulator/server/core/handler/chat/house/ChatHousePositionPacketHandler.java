@@ -2,27 +2,18 @@ package com.jftse.emulator.server.core.handler.chat.house;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.house.C2SChatHousePositionPacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CChatHousePositionPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.house.CMSGChatHousePosition;
+import com.jftse.server.core.shared.packets.chat.house.SMSGChatHousePosition;
 
-@PacketOperationIdentifier(PacketOperations.C2SChatHousePosition)
-public class ChatHousePositionPacketHandler extends AbstractPacketHandler {
-    private C2SChatHousePositionPacket chatHousePositionPacket;
-
+@PacketId(CMSGChatHousePosition.PACKET_ID)
+public class ChatHousePositionPacketHandler implements PacketHandler<FTConnection, CMSGChatHousePosition> {
     @Override
-    public boolean process(Packet packet) {
-        chatHousePositionPacket = new C2SChatHousePositionPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGChatHousePosition chatHousePositionPacket) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -33,11 +24,16 @@ public class ChatHousePositionPacketHandler extends AbstractPacketHandler {
         if (roomPlayer.isFitting())
             return;
 
-        S2CChatHousePositionPacket answerHousePositionPacket = new S2CChatHousePositionPacket(roomPlayer.getPosition(), chatHousePositionPacket.getLevel(), chatHousePositionPacket.getX(), chatHousePositionPacket.getY());
+        SMSGChatHousePosition answerHousePosition = SMSGChatHousePosition.builder()
+                .position(roomPlayer.getPosition())
+                .level(chatHousePositionPacket.getLevel())
+                .x(chatHousePositionPacket.getX())
+                .y(chatHousePositionPacket.getY())
+                .build();
         roomPlayer.setLastX(chatHousePositionPacket.getX());
         roomPlayer.setLastY(chatHousePositionPacket.getY());
         roomPlayer.setLastMapLayer(chatHousePositionPacket.getLevel());
 
-        GameManager.getInstance().sendPacketToAllClientsInSameRoom(answerHousePositionPacket, client.getConnection());
+        GameManager.getInstance().sendPacketToAllClientsInSameRoom(answerHousePosition, connection);
     }
 }

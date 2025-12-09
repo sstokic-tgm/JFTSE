@@ -13,7 +13,7 @@ public class C2SPetReviveRequestPacket extends Packet {
     public C2SPetReviveRequestPacket(Packet packet) {
         super(packet);
 
-        this.itemId = packet.readInt();
-        this.petType = packet.readByte();
+        this.itemId = this.readInt();
+        this.petType = this.readByte();
     }
 }

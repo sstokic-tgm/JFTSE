@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.service.impl;
 
-import com.jftse.emulator.server.core.packets.inventory.C2SInventoryWearClothReqPacket;
 import com.jftse.entities.database.model.item.ItemPart;
 import com.jftse.entities.database.model.player.ClothEquipment;
 import com.jftse.entities.database.model.player.Player;
@@ -12,6 +11,7 @@ import com.jftse.entities.database.repository.player.ClothEquipmentRepository;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.service.ClothEquipmentService;
 import com.jftse.server.core.service.PlayerPocketService;
+import com.jftse.server.core.shared.packets.inventory.CMSGInventoryWearCloth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -39,7 +39,7 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
         return clothEquipment.orElse(null);
     }
 
-    public void updateCloths(Player player, C2SInventoryWearClothReqPacket inventoryWearClothReqPacket) {
+    public void updateCloths(Player player, CMSGInventoryWearCloth inventoryWearClothReqPacket) {
         Pocket pocket = player.getPocket();
         ClothEquipment clothEquipment = findClothEquipmentById(player.getClothEquipment().getId());
 

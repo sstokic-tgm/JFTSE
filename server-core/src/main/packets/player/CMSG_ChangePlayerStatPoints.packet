@@ -1,0 +1,7 @@
+message CMSG_ChangePlayerStatPoints (0x1B6D) {
+     byte strength = 1;
+     byte stamina = 2;
+     byte dexterity = 3;
+     byte willpower = 4;
+     byte statusPoints = 5;
+}

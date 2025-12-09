@@ -1,20 +1,17 @@
 package com.jftse.emulator.server.core.handler.ranking;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.ranking.C2SRankingPersonalDataRequestPacket;
 import com.jftse.emulator.server.core.packets.ranking.S2CRankingPersonalDataAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.ranking.CMSGRankingPersonalData;
 
-@PacketOperationIdentifier(PacketOperations.C2SRankingPersonalDataReq)
-public class RankingPersonalDataReqPacketHandler extends AbstractPacketHandler {
-    private C2SRankingPersonalDataRequestPacket rankingPersonalDataRequestPacket;
-
+@PacketId(CMSGRankingPersonalData.PACKET_ID)
+public class RankingPersonalDataReqPacketHandler implements PacketHandler<FTConnection, CMSGRankingPersonalData> {
     private final PlayerService playerService;
 
     public RankingPersonalDataReqPacketHandler() {
@@ -22,25 +19,19 @@ public class RankingPersonalDataReqPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        rankingPersonalDataRequestPacket = new C2SRankingPersonalDataRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRankingPersonalData packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null)
             return;
 
-        final byte gameMode = rankingPersonalDataRequestPacket.getGameMode();
+        final byte gameMode = packet.getGameMode();
 
         Player activePlayer = ftClient.getPlayer();
         if (activePlayer == null) {
             S2CRankingPersonalDataAnswerPacket rankingPersonalDataAnswerPacket = new S2CRankingPersonalDataAnswerPacket((char) 1, gameMode, new Player(), 0);
             connection.sendTCP(rankingPersonalDataAnswerPacket);
         } else {
-            Player player = playerService.findByNameFetched(rankingPersonalDataRequestPacket.getNickname());
+            Player player = playerService.findByNameFetched(packet.getNickname());
             if (player != null) {
                 final int ranking = playerService.getPlayerRankingByName(player.getName(), gameMode);
 

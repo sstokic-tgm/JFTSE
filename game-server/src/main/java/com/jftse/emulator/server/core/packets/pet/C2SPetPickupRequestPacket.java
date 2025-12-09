@@ -12,6 +12,6 @@ public class C2SPetPickupRequestPacket extends Packet {
     public C2SPetPickupRequestPacket(Packet packet) {
         super(packet);
 
-        this.petType = packet.readInt();
+        this.petType = this.readInt();
     }
 }

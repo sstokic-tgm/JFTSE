@@ -2,12 +2,11 @@ package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.core.packets.messenger.C2SSendProposalRequestPacket;
-import com.jftse.emulator.server.core.packets.messenger.S2CProposalDeliveredAnswerPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedProposalNotificationPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
@@ -15,20 +14,18 @@ import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.messenger.Proposal;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
+import com.jftse.server.core.shared.packets.messenger.CMSGSendProposal;
+import com.jftse.server.core.shared.packets.messenger.SMSGSendProposal;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SSendProposalRequest)
-public class SendProposalRequestHandler extends AbstractPacketHandler {
-    private C2SSendProposalRequestPacket c2SSendProposalRequestPacket;
-
+@PacketId(CMSGSendProposal.PACKET_ID)
+public class SendProposalRequestHandler implements PacketHandler<FTConnection, CMSGSendProposal> {
     private final PlayerPocketService playerPocketService;
     private final ProposalService proposalService;
     private final PlayerService playerService;
@@ -48,18 +45,12 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SSendProposalRequestPacket = new C2SSendProposalRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGSendProposal packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null)
             return;
 
-        PlayerPocket item = playerPocketService.findById(c2SSendProposalRequestPacket.getPlayerPocketId().longValue());
+        PlayerPocket item = playerPocketService.findById((long) packet.getPlayerPocketId());
 
         // 0 = MSG_PROPOSE_SUCCESS
         //-1 = MSG_NO_CHARACTER_AT_CHARACTER_LIST
@@ -73,8 +64,8 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
                         item.getItemIndex().equals(24) ||
                         item.getItemIndex().equals(25));
         if (!isValidProposalItem) {
-            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -7);
-            connection.sendTCP(proposalDeliveredAnswerPacket);
+            SMSGSendProposal response = SMSGSendProposal.builder().status((byte) -7).build();
+            connection.sendTCP(response);
             return;
         }
 
@@ -83,8 +74,8 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
             return;
 
         if (!sender.getPocket().getId().equals(item.getPocket().getId())) {
-            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -2);
-            connection.sendTCP(proposalDeliveredAnswerPacket);
+            SMSGSendProposal response = SMSGSendProposal.builder().status((byte) -2).build();
+            connection.sendTCP(response);
 
             GameLog gameLog = new GameLog();
             gameLog.setGameLogType(GameLogType.BANABLE);
@@ -94,27 +85,27 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
             return;
         }
 
-        Player receiver = playerService.findByName(c2SSendProposalRequestPacket.getReceiverName());
+        Player receiver = playerService.findByName(packet.getReceiverName());
 
         List<Friend> senderFriend = friendService.findByPlayer(sender);
         if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
-            S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -3);
-            connection.sendTCP(proposalDeliveredAnswerPacket);
+            SMSGSendProposal response = SMSGSendProposal.builder().status((byte) -3).build();
+            connection.sendTCP(response);
             return;
         }
 
         if (receiver != null) {
             List<Friend> receiverFriends = friendService.findByPlayer(receiver);
             if (receiverFriends.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
-                S2CProposalDeliveredAnswerPacket proposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) -3);
-                connection.sendTCP(proposalDeliveredAnswerPacket);
+                SMSGSendProposal response = SMSGSendProposal.builder().status((byte) -3).build();
+                connection.sendTCP(response);
                 return;
             }
 
             Proposal proposal = new Proposal();
             proposal.setReceiver(receiver);
             proposal.setSender(sender);
-            proposal.setMessage(c2SSendProposalRequestPacket.getMessage());
+            proposal.setMessage(packet.getMessage());
             proposal.setSeen(false);
             proposal.setCategory(item.getCategory());
             proposal.setItemIndex(item.getItemIndex());
@@ -145,8 +136,8 @@ public class SendProposalRequestHandler extends AbstractPacketHandler {
             S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
             connection.sendTCP(s2CSentProposalListPacket);
 
-            S2CProposalDeliveredAnswerPacket s2CProposalDeliveredAnswerPacket = new S2CProposalDeliveredAnswerPacket((byte) 0);
-            connection.sendTCP(s2CProposalDeliveredAnswerPacket);
+            SMSGSendProposal response = SMSGSendProposal.builder().status((byte) 0).build();
+            connection.sendTCP(response);
         }
     }
 }

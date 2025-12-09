@@ -1,0 +1,5 @@
+message CMSG_RoomCreateQuick (0x138F) {
+    byte roomType = 1;
+    byte mode = 2;
+    byte players = 3;
+}

@@ -12,6 +12,6 @@ public class C2SGuildChatRequestPacket extends Packet {
     public C2SGuildChatRequestPacket(Packet packet) {
         super(packet);
 
-        this.message = this.readUnicodeString();
+        this.message = this.readString();
     }
 }

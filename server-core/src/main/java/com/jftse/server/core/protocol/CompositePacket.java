@@ -5,7 +5,7 @@ import com.jftse.emulator.common.utilities.BitKit;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CompositePacket implements IPacket {
+public class CompositePacket extends Packet {
     private final List<IPacket> packets;
 
     public CompositePacket(IPacket... packets) {

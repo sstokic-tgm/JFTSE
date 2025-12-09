@@ -38,8 +38,8 @@ public class ServerLoop {
 
     public void start() {
         if (running.compareAndSet(false, true)) {
-            this.minUpdateDiff = confService.getOrDefault("MinServerUpdateTime", 1);
-            this.maxCoreStuckTime = confService.getOrDefault("MaxCoreStuckTime", 60) * 1000; // convert to milliseconds
+            this.minUpdateDiff = confService.get("MinServerUpdateTime", Integer.class);
+            this.maxCoreStuckTime = confService.get("MaxCoreStuckTime", Integer.class) * 1000; // convert to milliseconds
 
             updateThread = new Thread(this::updateLoop, "ServerUpdateLoop");
             watchdogThread = new Thread(new ServerLoopWatchdog(this.maxCoreStuckTime), "ServerWatchdog");

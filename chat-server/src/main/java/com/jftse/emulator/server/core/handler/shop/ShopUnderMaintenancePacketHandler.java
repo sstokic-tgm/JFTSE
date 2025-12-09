@@ -1,21 +1,16 @@
 package com.jftse.emulator.server.core.handler.shop;
 
-import com.jftse.emulator.server.core.packets.shop.S2CShopUnderMaintenancePacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.shop.CMSGShopMaintenance;
+import com.jftse.server.core.shared.packets.shop.SMSGShopMaintenance;
 
-@PacketOperationIdentifier(PacketOperations.C2SShopUnderS2CShopUnderMaintenancePacket)
-public class ShopUnderMaintenancePacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGShopMaintenance.PACKET_ID)
+public class ShopUnderMaintenancePacketHandler implements PacketHandler<FTConnection, CMSGShopMaintenance> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGShopMaintenance packet) {
         /*
          * result:
          * 0 - OK
@@ -23,10 +18,10 @@ public class ShopUnderMaintenancePacketHandler extends AbstractPacketHandler {
          *
          * unk0: unknown int
          */
-        FTClient client = (FTClient) connection.getClient();
+        FTClient client = connection.getClient();
         int playerId = client.getActivePlayerId() == null ? 0 : Math.toIntExact(client.getActivePlayerId());
 
-        S2CShopUnderMaintenancePacket shopUnderMaintenancePacket = new S2CShopUnderMaintenancePacket((short) 0, playerId);
-        connection.sendTCP(shopUnderMaintenancePacket);
+        SMSGShopMaintenance response = SMSGShopMaintenance.builder().result((short) 0).playerId(playerId).build();
+        connection.sendTCP(response);
     }
 }

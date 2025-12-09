@@ -5,30 +5,27 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.chat.house.C2SChatHouseMovePacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CChatHouseMovePacket;
 import com.jftse.emulator.server.core.packets.chat.house.S2CHousingRewardItemPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.service.ProductService;
+import com.jftse.server.core.shared.packets.chat.house.CMSGChatHouseMove;
+import com.jftse.server.core.shared.packets.chat.house.SMSGChatHouseMove;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 
-@PacketOperationIdentifier(PacketOperations.C2SChatHouseMove)
-public class ChatHouseMovePacketHandler extends AbstractPacketHandler {
-    private C2SChatHouseMovePacket chatHouseMovePacket;
-
+@PacketId(CMSGChatHouseMove.PACKET_ID)
+public class ChatHouseMovePacketHandler implements PacketHandler<FTConnection, CMSGChatHouseMove> {
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
     private final ProductService productService;
@@ -44,14 +41,8 @@ public class ChatHouseMovePacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        chatHouseMovePacket = new C2SChatHouseMovePacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGChatHouseMove chatHouseMovePacket) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -77,16 +68,24 @@ public class ChatHouseMovePacketHandler extends AbstractPacketHandler {
             chatHouseMovePacket.setY((short) adjustedY);
         }
 
-        pickARandomReward(room, roomPlayer);
+        pickARandomReward(connection, room, roomPlayer);
 
-        S2CChatHouseMovePacket answerHouseMovePacket = new S2CChatHouseMovePacket(roomPlayer.getPosition(), chatHouseMovePacket.getUnk1(), chatHouseMovePacket.getUnk2(), chatHouseMovePacket.getX(), chatHouseMovePacket.getY(), chatHouseMovePacket.getAnimationType(), chatHouseMovePacket.getUnk3());
+        SMSGChatHouseMove answerHouseMove = SMSGChatHouseMove.builder()
+                .position(roomPlayer.getPosition())
+                .unk0(chatHouseMovePacket.getUnk0())
+                .unk1(chatHouseMovePacket.getUnk1())
+                .x(chatHouseMovePacket.getX())
+                .y(chatHouseMovePacket.getY())
+                .animationType(chatHouseMovePacket.getAnimationType())
+                .unk2(chatHouseMovePacket.getUnk2())
+                .build();
         roomPlayer.setLastX(chatHouseMovePacket.getX());
         roomPlayer.setLastY(chatHouseMovePacket.getY());
 
-        GameManager.getInstance().sendPacketToAllClientsInSameRoom(answerHouseMovePacket, client.getConnection());
+        GameManager.getInstance().sendPacketToAllClientsInSameRoom(answerHouseMove, connection);
     }
 
-    void pickARandomReward(Room room, RoomPlayer roomPlayer) {
+    void pickARandomReward(final FTConnection connection, Room room, RoomPlayer roomPlayer) {
         if (room == null || room.getRoomId() != 0 || !ConfigService.getInstance().getValue("town-square.reward.enabled", false)) {
             return;
         }

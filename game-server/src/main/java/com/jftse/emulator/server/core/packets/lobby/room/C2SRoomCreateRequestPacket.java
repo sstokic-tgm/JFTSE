@@ -25,7 +25,7 @@ public class C2SRoomCreateRequestPacket extends Packet {
     public C2SRoomCreateRequestPacket(Packet packet) {
         super(packet);
 
-        this.roomName = this.readUnicodeString();
+        this.roomName = this.readString();
         this.roomType = this.readByte();
         this.mode = this.readByte();
         this.rule = this.readByte();
@@ -39,6 +39,6 @@ public class C2SRoomCreateRequestPacket extends Packet {
         this.bettingAmount = this.readInt();
         this.ball = this.readInt();
         if (this.isPrivate)
-            this.password = this.readUnicodeString();
+            this.password = this.readString();
     }
 }

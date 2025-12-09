@@ -6,30 +6,27 @@ import com.jftse.emulator.server.core.life.housing.FruitTree;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.chat.house.C2SShakeTreeSuccessPacket;
 import com.jftse.emulator.server.core.packets.chat.house.S2CHousingRewardItemPacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CShakeTreeFailPacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CShakeTreeSuccessPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.ItemMaterial;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
+import com.jftse.server.core.shared.packets.chat.house.CMSGShakeTreeSuccess;
+import com.jftse.server.core.shared.packets.chat.house.SMSGShakeTreeFail;
+import com.jftse.server.core.shared.packets.chat.house.SMSGShakeTreeSuccess;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 
-@PacketOperationIdentifier(PacketOperations.C2SShakeTreeSuccess)
-public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
-    private C2SShakeTreeSuccessPacket shakeTreeSuccessPacket;
-
+@PacketId(CMSGShakeTreeSuccess.PACKET_ID)
+public class ShakeTreeSuccessHandler implements PacketHandler<FTConnection, CMSGShakeTreeSuccess> {
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
 
@@ -39,14 +36,8 @@ public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        shakeTreeSuccessPacket = new C2SShakeTreeSuccessPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGShakeTreeSuccess shakeTreeSuccessPacket) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -60,19 +51,39 @@ public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
 
         FruitReward fruitReward = fruitTree.getFruitReward();
         if (fruitReward == null) {
-            S2CShakeTreeFailPacket shakeTreeFailPacket = new S2CShakeTreeFailPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-            S2CShakeTreeSuccessPacket shakeTreeSuccessPacket = new S2CShakeTreeSuccessPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeFailPacket, client.getConnection());
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeSuccessPacket, client.getConnection());
+            SMSGShakeTreeFail fail = SMSGShakeTreeFail.builder()
+                    .position(roomPlayer.getPosition())
+                    .x(fruitTree.getX())
+                    .y(fruitTree.getY())
+                    .unk0((short) 1)
+                    .build();
+            SMSGShakeTreeSuccess success = SMSGShakeTreeSuccess.builder()
+                    .position(roomPlayer.getPosition())
+                    .x(fruitTree.getX())
+                    .y(fruitTree.getY())
+                    .unk0((short) 1)
+                    .build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(fail, client.getConnection());
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(success, client.getConnection());
             return;
         }
 
         ItemMaterial item = fruitReward.getItem();
         if (item == null) {
-            S2CShakeTreeFailPacket shakeTreeFailPacket = new S2CShakeTreeFailPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-            S2CShakeTreeSuccessPacket shakeTreeSuccessPacket = new S2CShakeTreeSuccessPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeFailPacket, client.getConnection());
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeSuccessPacket, client.getConnection());
+            SMSGShakeTreeFail fail = SMSGShakeTreeFail.builder()
+                    .position(roomPlayer.getPosition())
+                    .x(fruitTree.getX())
+                    .y(fruitTree.getY())
+                    .unk0((short) 1)
+                    .build();
+            SMSGShakeTreeSuccess success = SMSGShakeTreeSuccess.builder()
+                    .position(roomPlayer.getPosition())
+                    .x(fruitTree.getX())
+                    .y(fruitTree.getY())
+                    .unk0((short) 1)
+                    .build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(fail, client.getConnection());
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(success, client.getConnection());
             return;
         }
 
@@ -116,7 +127,13 @@ public class ShakeTreeSuccessHandler extends AbstractPacketHandler {
             S2CHousingRewardItemPacket housingRewardItemPacket = new S2CHousingRewardItemPacket(playerPocket);
             connection.sendTCP(housingRewardItemPacket);
         }
-        S2CShakeTreeSuccessPacket shakeTreeSuccessPacket = new S2CShakeTreeSuccessPacket(roomPlayer.getPosition(), fruitTree, (short) 1);
-        GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeSuccessPacket, client.getConnection());
+
+        SMSGShakeTreeSuccess success = SMSGShakeTreeSuccess.builder()
+                .position(roomPlayer.getPosition())
+                .x(fruitTree.getX())
+                .y(fruitTree.getY())
+                .unk0((short) 1)
+                .build();
+        GameManager.getInstance().sendPacketToAllClientsInSameRoom(success, connection);
     }
 }

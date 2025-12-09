@@ -6,25 +6,25 @@ import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeItemsLoadAnswerPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.home.HomeInventory;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.HomeService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
+import com.jftse.server.core.shared.packets.home.CMSGClearHomeItems;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SHomeItemsClearReq)
-public class HomeItemClearRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGClearHomeItems.PACKET_ID)
+public class HomeItemClearRequestPacketHandler implements PacketHandler<FTConnection, CMSGClearHomeItems> {
     private final HomeService homeService;
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
@@ -36,13 +36,8 @@ public class HomeItemClearRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGClearHomeItems packet) {
+        FTClient client = connection.getClient();
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
         Player player = client.getPlayer();

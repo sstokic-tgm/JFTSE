@@ -1,0 +1,2 @@
+message CMSG_GuildNotice (0x1FFE) {
+}

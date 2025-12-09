@@ -25,7 +25,7 @@ public class C2SGameServerLoginPacket extends Packet {
         this.token = new String(tokenBytes, StandardCharsets.UTF_8);
 
         this.timestamp = this.readLong();
-        this.accountName = this.readUnicodeString();
+        this.accountName = this.readString();
         this.unk0 = this.readByte();
         this.hwid = this.readString();
 

@@ -4,28 +4,18 @@ import com.jftse.emulator.server.core.life.housing.FishManager;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.house.CMSGSetBaitLocationPacket;
-import com.jftse.emulator.server.core.packets.chat.house.SMSGSetBaitLocationPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.house.CMSGSetBaitLocation;
+import com.jftse.server.core.shared.packets.chat.house.SMSGSetBaitLocation;
 
-@PacketOperationIdentifier(PacketOperations.CMSG_SetBaitLocation)
-public class SetBaitLocationHandler extends AbstractPacketHandler {
-    private CMSGSetBaitLocationPacket packet;
-
+@PacketId(CMSGSetBaitLocation.PACKET_ID)
+public class SetBaitLocationHandler implements PacketHandler<FTConnection, CMSGSetBaitLocation> {
     @Override
-    public boolean process(Packet packet) {
-        this.packet = new CMSGSetBaitLocationPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGSetBaitLocation packet) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -39,7 +29,12 @@ public class SetBaitLocationHandler extends AbstractPacketHandler {
         FishManager.getInstance().registerBaitPosition(roomPlayer.getBaitX(), roomPlayer.getBaitY());
         FishManager.getInstance().frightenFishes(room.getRoomId(), roomPlayer.getBaitX(), roomPlayer.getBaitY());
 
-        SMSGSetBaitLocationPacket setBaitLocationPacket = new SMSGSetBaitLocationPacket(roomPlayer.getPosition(), packet.getX(), packet.getZ(), packet.getY());
-        GameManager.getInstance().sendPacketToAllClientsInSameRoom(setBaitLocationPacket, (FTConnection) connection);
+        SMSGSetBaitLocation smsgSetBaitLocation = SMSGSetBaitLocation.builder()
+                .playerPosition(roomPlayer.getPosition())
+                .x(packet.getX())
+                .z(packet.getZ())
+                .y(packet.getY())
+                .build();
+        GameManager.getInstance().sendPacketToAllClientsInSameRoom(smsgSetBaitLocation, connection);
     }
 }

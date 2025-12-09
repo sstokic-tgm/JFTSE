@@ -1,0 +1,2 @@
+message CMSG_ChallengeProgress (0x2206) {
+}

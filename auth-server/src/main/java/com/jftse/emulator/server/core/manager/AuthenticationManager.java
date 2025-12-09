@@ -150,8 +150,8 @@ public class AuthenticationManager implements ServerLoopHandler {
             });
         }
 
-        updateSessions(diff);
         processUpdateAccountRequestQueue();
+        updateSessions(diff);
 
         if (timers[ServerTimers.SUPDATE_UPTIME.value()].passed()) {
             long uptimeSeconds = GameTime.getUptimeSeconds();
@@ -325,8 +325,8 @@ public class AuthenticationManager implements ServerLoopHandler {
         for (int i = 0; i < ServerTimers.COUNT; i++) {
             timers[i] = new IntervalTimer();
         }
-        timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(serverConfService.getOrDefault("UpdateUptimeInterval", 10)));
-        timers[ServerTimers.SUPDATE_ECONOMY.value()].setInterval(TimeUnit.HOURS.toMillis(serverConfService.getOrDefault("UpdateEconomyInterval", 8)));
+        timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(serverConfService.get("UpdateUptimeInterval", Integer.class)));
+        timers[ServerTimers.SUPDATE_ECONOMY.value()].setInterval(TimeUnit.HOURS.toMillis(serverConfService.get("UpdateEconomyInterval", Integer.class)));
     }
 
 

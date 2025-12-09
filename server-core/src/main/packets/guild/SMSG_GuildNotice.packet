@@ -1,0 +1,3 @@
+message SMSG_GuildNotice (0x1FFF) {
+    string notice = 1;
+}

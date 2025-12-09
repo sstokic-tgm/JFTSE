@@ -8,6 +8,7 @@ import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.entities.database.repository.item.*;
 import com.jftse.server.core.item.*;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.shop.ShopBuy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -76,6 +74,24 @@ public class ProductServiceImpl implements ProductService {
         productList.forEach(p -> {
             if (p.getEnabled())
                 result.put(p, itemList.get(p.getProductIndex()));
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Product, Byte> findProductsByItemList2(List<ShopBuy> itemList) {
+        List<Integer> productIndexList = new ArrayList<>();
+        itemList.forEach(i -> productIndexList.add(i.getItemId()));
+
+        List<Product> productList = productRepository.findProductsByProductIndexIn(productIndexList);
+
+        Map<Product, Byte> result = new HashMap<>();
+        productList.forEach(p -> {
+            if (p.getEnabled()) {
+                Optional<ShopBuy> opt = itemList.stream().filter(i -> i.getItemId() == p.getProductIndex()).findFirst();
+                opt.ifPresent(shopBuy -> result.put(p, shopBuy.getOption()));
+            }
         });
 
         return result;

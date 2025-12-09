@@ -14,8 +14,8 @@ public class C2SPetNameChangeRequestPacket extends Packet {
     public C2SPetNameChangeRequestPacket(Packet packet) {
         super(packet);
 
-        this.itemId = packet.readInt();
-        this.petType = packet.readByte();
-        this.newPetName = packet.readUnicodeString();
+        this.itemId = this.readInt();
+        this.petType = this.readByte();
+        this.newPetName = this.readString();
     }
 }

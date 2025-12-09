@@ -1,0 +1,4 @@
+message CMSG_ShakeTreeRequest (0x2C29) {
+    short xPos = 1;
+    short yPos = 2;
+}

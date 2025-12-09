@@ -23,7 +23,7 @@ public class ACClientModuleHandler extends AbstractPacketHandler {
     @Override
     public boolean process(Packet packet) {
         this.packet = packet;
-        moduleName = packet.readUnicodeString();
+        moduleName = packet.read(String.class);
         return true;
     }
 

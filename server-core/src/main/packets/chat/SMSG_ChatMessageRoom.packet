@@ -1,0 +1,5 @@
+message SMSG_ChatMessageRoom (0x1778) {
+    byte type = 1;
+    string sender = 2;
+    string message = 3;
+}

@@ -1,0 +1,6 @@
+message CMSG_RoomList (0x13EC) {
+    int32 roomTypeTab = 1;
+    short roomOffset = 2;
+    byte unk0 = 3;
+    byte direction = 4;
+}

@@ -1,0 +1,3 @@
+message SMSG_RoomLobbyJoin (0x189D) {
+    short result = 1;
+}

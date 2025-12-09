@@ -1,35 +1,26 @@
 package com.jftse.emulator.server.core.handler.lobby;
 
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.C2SLobbyUserListRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.CMSGLobbyUserList;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@PacketOperationIdentifier(PacketOperations.C2SLobbyUserListRequest)
-public class LobbyUserListReqPacketHandler extends AbstractPacketHandler {
-    private C2SLobbyUserListRequestPacket lobbyUserListRequestPacket;
-
+@PacketId(CMSGLobbyUserList.PACKET_ID)
+public class LobbyUserListReqPacketHandler implements PacketHandler<FTConnection, CMSGLobbyUserList> {
     @Override
-    public boolean process(Packet packet) {
-        lobbyUserListRequestPacket = new C2SLobbyUserListRequestPacket(packet);
-        return true;
-    }
+    public void handle(FTConnection connection, CMSGLobbyUserList packet) {
+        FTClient client = connection.getClient();
 
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
-
-        byte page = lobbyUserListRequestPacket.getPage();
+        byte page = packet.getPage();
         final int clientLobbyCurrentPlayerListPage = client.getLobbyCurrentPlayerListPage();
-        boolean shouldJustRefresh = lobbyUserListRequestPacket.getRefresh() == 0 & page == 1;
+        boolean shouldJustRefresh = packet.getRefresh() == 0 & page == 1;
         boolean wantsToGoBackOnNegativePage = page == -1 && clientLobbyCurrentPlayerListPage == 1;
         if (wantsToGoBackOnNegativePage || shouldJustRefresh) {
             page = 0;

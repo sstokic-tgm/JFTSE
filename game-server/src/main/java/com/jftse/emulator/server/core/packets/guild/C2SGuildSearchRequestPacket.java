@@ -18,6 +18,6 @@ public class C2SGuildSearchRequestPacket extends Packet {
         this.number = this.readInt();
 
         if (this.searchType == 1)
-            this.name = this.readUnicodeString();
+            this.name = this.readString();
     }
 }

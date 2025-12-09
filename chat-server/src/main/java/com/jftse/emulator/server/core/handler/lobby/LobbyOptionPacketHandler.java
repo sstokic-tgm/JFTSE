@@ -1,18 +1,15 @@
 package com.jftse.emulator.server.core.handler.lobby;
 
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.C2SRequestLobbyOptionPacket;
-import com.jftse.emulator.server.core.packets.lobby.S2CLobbyOptionPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.CMSGLobbyOption;
+import com.jftse.server.core.shared.packets.lobby.SMSGLobbyOption;
 
-@PacketOperationIdentifier(PacketOperations.C2SRequestLobbyOption)
-public class LobbyOptionPacketHandler extends AbstractPacketHandler {
-    private C2SRequestLobbyOptionPacket requestLobbyOptionPacket;
-
+@PacketId(CMSGLobbyOption.PACKET_ID)
+public class LobbyOptionPacketHandler implements PacketHandler<FTConnection, CMSGLobbyOption> {
     /**
      * option 10: create room
      * option 12: join room
@@ -21,19 +18,13 @@ public class LobbyOptionPacketHandler extends AbstractPacketHandler {
      */
 
     @Override
-    public boolean process(Packet packet) {
-        requestLobbyOptionPacket = new C2SRequestLobbyOptionPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGLobbyOption packet) {
+        FTClient client = connection.getClient();
         if (client == null) {
             return;
         }
 
-        byte option = requestLobbyOptionPacket.getOption();
+        byte option = packet.getOption();
         if (option == 10 || option == 12 || option == 17 || option == 18) {
             if (client.isInLobby()) {
                 client.setInLobby(false);
@@ -41,7 +32,7 @@ public class LobbyOptionPacketHandler extends AbstractPacketHandler {
             GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);
         }
 
-        S2CLobbyOptionPacket lobbyOptionPacket = new S2CLobbyOptionPacket(option);
+        SMSGLobbyOption lobbyOptionPacket = SMSGLobbyOption.builder().option(option).build();
         connection.sendTCP(lobbyOptionPacket);
     }
 }

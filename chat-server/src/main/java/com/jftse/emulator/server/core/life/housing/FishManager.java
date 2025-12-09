@@ -14,6 +14,7 @@ import com.jftse.entities.database.repository.RelationshipRolesRepository;
 import com.jftse.entities.database.repository.RelationshipTypesRepository;
 import com.jftse.entities.database.repository.RelationshipsRepository;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.util.GameTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -48,7 +49,6 @@ public class FishManager {
     @Autowired
     private RelationshipTypesRepository rrType;
 
-    private ScheduledExecutorService executor;
     private SecureRandom random;
 
     private final ConcurrentHashMap<Short, List<Fish>> fishesByRoomId = new ConcurrentHashMap<>();
@@ -102,9 +102,8 @@ public class FishManager {
     public void init() {
         instance = this;
 
-        executor = Executors.newScheduledThreadPool(5);
         random = new SecureRandom();
-        random.setSeed(System.currentTimeMillis());
+        random.setSeed(GameTime.getGameTimeMS());
 
         relationRole = rrRole.findById(5L).orElseThrow(() -> new RuntimeException("Role: 'Fishing Item Drop' not found(5)"));
         relationType = rrType.findById(9L).orElseThrow(() -> new RuntimeException("Type: 'Fishing: Product to Group' not found(9)"));
@@ -147,9 +146,6 @@ public class FishManager {
 
     @PreDestroy
     public void shutdown() {
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
-        }
         clearAllFishes();
 
         log.info(this.getClass().getSimpleName() + " shutdown");
@@ -171,7 +167,6 @@ public class FishManager {
 
         if (!scheduledRooms.containsKey(roomId)) {
             scheduledRooms.put(roomId, true);
-            executor.scheduleAtFixedRate(() -> tick(roomId), 5, 1, TimeUnit.SECONDS);
         }
     }
 
@@ -219,7 +214,7 @@ public class FishManager {
         fish.setRotation(0.0f);
         fish.setSpeed(NORMAL_SPEED_1);
         fish.setTurningSpeed(NORMAL_TURNING_SPEED);
-        fish.setLastCorrectionTime(System.currentTimeMillis());
+        fish.setLastCorrectionTime(GameTime.getGameTimeMS());
 
         fish.setGroup(random.nextInt(4));
         fish.setRewardProductIndex(pickRandomReward(fish.getGroup()));
@@ -307,7 +302,15 @@ public class FishManager {
         scheduledRooms.clear();
     }
 
-    private void tick(short roomId) {
+    public void update(long diff) {
+        for (var roomEntry : scheduledRooms.entrySet()) {
+            if (roomEntry.getValue()) {
+                tick(roomEntry.getKey(), diff);
+            }
+        }
+    }
+
+    private void tick(short roomId, long diff) {
         List<Fish> fishes = fishesByRoomId.get(roomId);
         if (fishes == null || fishes.isEmpty()) {
             scheduledRooms.remove(roomId);
@@ -315,14 +318,14 @@ public class FishManager {
         }
 
         final List<FTClient> clients = GameManager.getInstance().getClientsInRoom(roomId);
-        long currentTime = System.currentTimeMillis();
+        long currentTime = GameTime.getGameTimeMS();
 
         List<Fish> inactiveFishes = new ArrayList<>();
         for (Fish fish : fishes) {
             if (fish == null) continue;
 
             fish.updateAliveTime();
-            float deltaSeconds = (currentTime - fish.getLastUpdate()) / 1000.0f;
+            float deltaSeconds = diff / 1000.0f;
             fish.setLastUpdate(currentTime);
 
             if (fish.getLastActivityTime() + (long) INACTIVITY_TIMEOUT * 60 * 1000 < currentTime) {
@@ -355,19 +358,20 @@ public class FishManager {
 
                             S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) fish.getState().getValue(), newX, newY, fish.getSpeed());
                             broadcast(movePacket, clients);
+
+                            log.info("Fish {} exceeded spawn radius, correcting position towards ({}, {})", fish.getId(), newX, newY);
                         }
                         break;
                     }
 
                     fish.updatePosition(newX, newY);
 
-                    S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) fish.getState().getValue(), fish.getX(), fish.getY(), fish.getSpeed());
-                    broadcast(movePacket, clients);
-
                     if (fish.hasReachedDestination(0.8f)) {
                         fish.stop();
                         S2CFishStopPacket stopPacket = new S2CFishStopPacket(fish.getId(), (byte) fish.getState().getValue());
                         broadcast(stopPacket, clients);
+
+                        log.info("Fish {} reached destination at ({}, {})", fish.getId(), fish.getX(), fish.getY());
                     }
                 }
                 case IDLE -> {
@@ -375,6 +379,11 @@ public class FishManager {
                         float[] next = getRandomDirectionFrom(fish.getSpawnX(), fish.getSpawnY());
                         fish.setState(FishState.MOVING);
                         fish.moveTo(next[0], next[1], NORMAL_SPEED_1);
+
+                        S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) fish.getState().getValue(), fish.getDestX(), fish.getDestY(), fish.getSpeed());
+                        broadcast(movePacket, clients);
+
+                        log.info("Fish {} changed from IDLE to MOVING towards ({}, {})", fish.getId(), fish.getDestX(), fish.getDestY());
                     }
                 }
                 case FRIGHTENED -> {
@@ -394,9 +403,6 @@ public class FishManager {
                     float newX = fish.getX() + fish.getDirX() * fish.getSpeed() * deltaSeconds;
                     float newY = fish.getY() + fish.getDirY() * fish.getSpeed() * deltaSeconds;
                     fish.updatePosition(newX, newY);
-
-                    S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) fish.getState().getValue(), fish.getX(), fish.getY(), fish.getSpeed());
-                    broadcast(movePacket, clients);
                 }
                 case ATTACKING -> {
                     if (fish.hasReachedDestination(1.0f)) {
@@ -414,9 +420,6 @@ public class FishManager {
                     float newX = fish.getX() + fish.getDirX() * fish.getSpeed() * deltaSeconds;
                     float newY = fish.getY() + fish.getDirY() * fish.getSpeed() * deltaSeconds;
                     fish.updatePosition(newX, newY);
-
-                    S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) FishState.MOVING.getValue(), fish.getX(), fish.getY(), fish.getSpeed());
-                    broadcast(movePacket, clients);
                 }
                 case BITING -> {
                     if (!baitExists(fish.getDestX(), fish.getDestY()) && !fish.isBitBait()) {
@@ -470,6 +473,9 @@ public class FishManager {
                         fish.setSpeed(ATTACK_SPEED);
                         fish.setTurningSpeed(NORMAL_TURNING_SPEED);
                         fish.moveTo(baitPosition[0], baitPosition[1], ATTACK_SPEED);
+
+                        S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) FishState.MOVING.getValue(), fish.getDestX(), fish.getDestY(), fish.getSpeed());
+                        broadcast(movePacket, clients);
                     }
                 }
             }
@@ -492,6 +498,7 @@ public class FishManager {
     }
 
     public void frightenFishes(short roomId, float baitX, float baitY) {
+        final List<FTClient> clients = GameManager.getInstance().getClientsInRoom(roomId);
         List<Fish> fishes = getFishes(roomId);
         if (fishes == null || fishes.isEmpty()) {
             return;
@@ -510,6 +517,9 @@ public class FishManager {
 
                 float[] fleeDirection = getFleeDirectionFrom(fish.getX(), fish.getY(), baitX, baitY);
                 fish.moveTo(fleeDirection[0], fleeDirection[1], SCARED_SPEED);
+
+                S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) fish.getState().getValue(), fish.getDestX(), fish.getDestY(), fish.getSpeed());
+                broadcast(movePacket, clients);
             }
         }
     }

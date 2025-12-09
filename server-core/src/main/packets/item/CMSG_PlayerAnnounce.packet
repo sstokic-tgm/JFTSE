@@ -1,0 +1,6 @@
+message CMSG_PlayerAnnounce (0x22C5) {
+    int32 playerPocketId = 1;
+    byte textSize = 2;
+    byte textColor = 3;
+    string message = 4;
+}

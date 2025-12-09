@@ -1,0 +1,6 @@
+message SMSG_ShakeTreeFail (0x2C3D) {
+    short position = 1;
+    short x = 2;
+    short y = 3;
+    short unk0 = 4;
+}

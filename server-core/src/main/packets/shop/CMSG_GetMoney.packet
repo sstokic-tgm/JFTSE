@@ -1,0 +1,2 @@
+message CMSG_GetMoney (0x1B60) {
+}

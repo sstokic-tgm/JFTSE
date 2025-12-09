@@ -3,20 +3,17 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomCreateQuickRequestPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.HomeService;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomCreateQuick;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomCreateQuick)
-public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
-    private C2SRoomCreateQuickRequestPacket roomQuickCreateRequestPacket;
-
+@PacketId(CMSGRoomCreateQuick.PACKET_ID)
+public class RoomCreateQuickRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomCreateQuick> {
     private final HomeService homeService;
 
     public RoomCreateQuickRequestPacketHandler() {
@@ -24,14 +21,8 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        roomQuickCreateRequestPacket = new C2SRoomCreateQuickRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomCreateQuick packet) {
+        FTClient client = connection.getClient();
         // prevent multiple room creations, this might have to be adjusted into a "room join answer"
         if (client != null && client.getActiveRoom() != null)
             return;
@@ -47,7 +38,7 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
-        byte players = roomQuickCreateRequestPacket.getPlayers();
+        byte players = packet.getPlayers();
         if (players == 0) {
             players = 8;
         }
@@ -55,10 +46,10 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         Room room = new Room();
         room.setRoomId(GameManager.getInstance().getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
-        room.setRoomType(roomQuickCreateRequestPacket.getRoomType());
+        room.setRoomType(packet.getRoomType());
         room.setAllowBattlemon(room.getRoomType() == 2 ? (byte) 1 : (byte) 0);
 
-        room.setMode(roomQuickCreateRequestPacket.getMode());
+        room.setMode(packet.getMode());
         room.setRule((byte) 0);
         room.setPlayers(players);
         room.setPrivate(false);

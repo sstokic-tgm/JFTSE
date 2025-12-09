@@ -1,0 +1,3 @@
+message CMSG_RoomChangeMap (0x1788) {
+    byte map = 1;
+}

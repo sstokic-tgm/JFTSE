@@ -2,22 +2,19 @@ package com.jftse.emulator.server.core.handler.inventory;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.inventory.C2SInventoryWearCardRequestPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearCardAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.CardSlotEquipmentService;
+import com.jftse.server.core.shared.packets.inventory.CMSGInventoryWearCard;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SInventoryWearCardRequest)
-public class InventoryWearCardPacketHandler extends AbstractPacketHandler {
-    private C2SInventoryWearCardRequestPacket inventoryWearCardRequestPacket;
-
+@PacketId(CMSGInventoryWearCard.PACKET_ID)
+public class InventoryWearCardPacketHandler implements PacketHandler<FTConnection, CMSGInventoryWearCard> {
     private final CardSlotEquipmentService cardSlotEquipmentService;
 
     public InventoryWearCardPacketHandler() {
@@ -25,20 +22,14 @@ public class InventoryWearCardPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        inventoryWearCardRequestPacket = new C2SInventoryWearCardRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGInventoryWearCard packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
         Player player = client.getPlayer();
 
-        cardSlotEquipmentService.updateCardSlots(player, inventoryWearCardRequestPacket.getCardSlotList());
+        cardSlotEquipmentService.updateCardSlots(player, packet.getCardSlotList());
 
         RoomPlayer roomPlayer = client.getRoomPlayer();
         if (roomPlayer != null) {

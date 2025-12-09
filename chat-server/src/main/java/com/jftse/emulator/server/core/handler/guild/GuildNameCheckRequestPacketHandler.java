@@ -1,18 +1,15 @@
 package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildNameCheckRequestPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildNameCheckAnswerPacket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildNameCheck;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildNameCheck;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildNameCheckRequest)
-public class GuildNameCheckRequestPacketHandler extends AbstractPacketHandler {
-    private C2SGuildNameCheckRequestPacket guildNameCheckRequestPacket;
-
+@PacketId(CMSGGuildNameCheck.PACKET_ID)
+public class GuildNameCheckRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildNameCheck> {
     private final GuildService guildService;
 
     public GuildNameCheckRequestPacketHandler() {
@@ -20,16 +17,10 @@ public class GuildNameCheckRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        guildNameCheckRequestPacket = new C2SGuildNameCheckRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        if (guildService.findByName(guildNameCheckRequestPacket.getName()) != null)
-            connection.sendTCP(new S2CGuildNameCheckAnswerPacket((short) -1));
+    public void handle(FTConnection connection, CMSGGuildNameCheck packet) {
+        if (guildService.findByName(packet.getName()) != null)
+            connection.sendTCP(SMSGGuildNameCheck.builder().result((short) -1).build());
         else
-            connection.sendTCP(new S2CGuildNameCheckAnswerPacket((short) 0));
+            connection.sendTCP(SMSGGuildNameCheck.builder().result((short) 0).build());
     }
 }

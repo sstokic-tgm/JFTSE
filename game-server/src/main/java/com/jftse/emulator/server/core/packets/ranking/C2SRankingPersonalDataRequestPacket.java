@@ -16,6 +16,6 @@ public class C2SRankingPersonalDataRequestPacket extends Packet {
         this.readInt(); // unk
         this.readByte(); // unk;
         this.gameMode = this.readByte();
-        this.nickname = this.readUnicodeString();
+        this.nickname = this.readString();
     }
 }

@@ -14,6 +14,6 @@ public class C2SLobbyUserInfoRequestPacket extends Packet {
         super(packet);
 
         this.playerId = this.readInt();
-        this.playerName = this.readUnicodeString();
+        this.playerName = this.readString();
     }
 }

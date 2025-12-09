@@ -1,0 +1,2 @@
+message CMSG_FishingEnd (0x2BDA) {
+}

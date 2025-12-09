@@ -1,0 +1,3 @@
+message SMSG_RoomChangeQuickSlot (0x17A3) {
+    bool enable = 1;
+}

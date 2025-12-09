@@ -1,0 +1,5 @@
+message CMSG_ChatHousePosition (0x190A) {
+    byte level = 1;
+    int32 x = 2;
+    int32 y = 3;
+}

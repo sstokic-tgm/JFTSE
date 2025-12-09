@@ -1,0 +1,8 @@
+message CMSG_LoginData (0x1069) {
+    int32 playerId = 1;
+    string token = 2 [len = 16];
+    long timestamp = 3;
+    string accountName = 4;
+    byte unk0 = 5;
+    string hwid = 6;
+}

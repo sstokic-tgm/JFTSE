@@ -1,21 +1,18 @@
 package com.jftse.emulator.server.core.handler.gacha;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.lottery.C2SOpenGachaReqPacket;
 import com.jftse.emulator.server.core.packets.lottery.S2COpenGachaAnswerPacket;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.LotteryService;
+import com.jftse.server.core.shared.packets.gacha.CMSGOpenGacha;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SOpenGachaReq)
-public class OpenGachaRequestPacketHandler extends AbstractPacketHandler {
-    private C2SOpenGachaReqPacket openGachaReqPacket;
-
+@PacketId(CMSGOpenGacha.PACKET_ID)
+public class OpenGachaRequestPacketHandler implements PacketHandler<FTConnection, CMSGOpenGacha> {
     private final LotteryService lotteryService;
 
     public OpenGachaRequestPacketHandler() {
@@ -23,13 +20,7 @@ public class OpenGachaRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        openGachaReqPacket = new C2SOpenGachaReqPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGOpenGacha openGachaReqPacket) {
         long playerPocketId = openGachaReqPacket.getPlayerPocketId();
         int productIndex = openGachaReqPacket.getProductIndex();
 

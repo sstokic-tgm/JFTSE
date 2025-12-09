@@ -3,31 +3,22 @@ package com.jftse.emulator.server.core.handler.chat.house;
 import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.house.C2SShakeTreeRequestPacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CShakeTreeAnswerPacket;
-import com.jftse.emulator.server.core.packets.chat.house.S2CShakeTreeFailPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.house.CMSGShakeTreeRequest;
+import com.jftse.server.core.shared.packets.chat.house.SMSGShakeTreeFail;
+import com.jftse.server.core.shared.packets.chat.house.SMSGShakeTreeResponse;
 import com.jftse.server.core.thread.ThreadManager;
 
 import java.util.concurrent.TimeUnit;
 
-@PacketOperationIdentifier(PacketOperations.C2SShakeTreeRequest)
-public class ShakeTreeRequestHandler extends AbstractPacketHandler {
-    private C2SShakeTreeRequestPacket shakeTreeRequestPacket;
-
+@PacketId(CMSGShakeTreeRequest.PACKET_ID)
+public class ShakeTreeRequestHandler implements PacketHandler<FTConnection, CMSGShakeTreeRequest> {
     @Override
-    public boolean process(Packet packet) {
-        shakeTreeRequestPacket = new C2SShakeTreeRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGShakeTreeRequest shakeTreeRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -38,13 +29,23 @@ public class ShakeTreeRequestHandler extends AbstractPacketHandler {
         FruitManager fruitManager = client.getFruitManager();
         boolean availableFruits = fruitManager.init(shakeTreeRequestPacket.getXPos(), shakeTreeRequestPacket.getYPos());
 
-        S2CShakeTreeAnswerPacket shakeTreeAnswerPacket = new S2CShakeTreeAnswerPacket(roomPlayer.getPosition(), shakeTreeRequestPacket.getXPos(), shakeTreeRequestPacket.getYPos(), availableFruits);
-        GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeAnswerPacket, client.getConnection());
+        SMSGShakeTreeResponse responsePacket = SMSGShakeTreeResponse.builder()
+                .position(roomPlayer.getPosition())
+                .x(shakeTreeRequestPacket.getXPos())
+                .y(shakeTreeRequestPacket.getYPos())
+                .available(availableFruits)
+                .build();
+        GameManager.getInstance().sendPacketToAllClientsInSameRoom(responsePacket, client.getConnection());
 
         if (!availableFruits) {
             ThreadManager.getInstance().schedule(() -> {
-                S2CShakeTreeFailPacket shakeTreeFailPacket = new S2CShakeTreeFailPacket(roomPlayer.getPosition(), shakeTreeRequestPacket.getXPos(), shakeTreeRequestPacket.getYPos(), (short) 1);
-                GameManager.getInstance().sendPacketToAllClientsInSameRoom(shakeTreeFailPacket, client.getConnection());
+                SMSGShakeTreeFail failPacket = SMSGShakeTreeFail.builder()
+                        .position(roomPlayer.getPosition())
+                        .x(shakeTreeRequestPacket.getXPos())
+                        .y(shakeTreeRequestPacket.getYPos())
+                        .unk0((short) 1)
+                        .build();
+                GameManager.getInstance().sendPacketToAllClientsInSameRoom(failPacket, client.getConnection());
             }, 1, TimeUnit.SECONDS);
         }
     }

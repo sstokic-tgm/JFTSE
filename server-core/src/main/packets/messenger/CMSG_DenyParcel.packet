@@ -1,0 +1,3 @@
+message CMSG_DenyParcel (0x21A0) {
+    int32 parcelId = 1;
+}

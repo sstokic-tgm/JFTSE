@@ -4,19 +4,16 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.player.S2CPlayerStatusPointChangePacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.PlayerService;
-import com.jftse.server.core.shared.packets.player.C2SPlayerStatusPointChangePacket;
+import com.jftse.server.core.shared.packets.player.CMSGChangePlayerStatPoints;
 
-@PacketOperationIdentifier(PacketOperations.C2SPlayerStatusPointChange)
-public class PlayerStatusPointChangePacketHandler extends AbstractPacketHandler {
-    private C2SPlayerStatusPointChangePacket playerStatusPointChangePacket;
-
+@PacketId(CMSGChangePlayerStatPoints.PACKET_ID)
+public class PlayerStatusPointChangePacketHandler implements PacketHandler<FTConnection, CMSGChangePlayerStatPoints> {
     private final PlayerService playerService;
     private final ClothEquipmentServiceImpl clothEquipmentService;
 
@@ -26,14 +23,8 @@ public class PlayerStatusPointChangePacketHandler extends AbstractPacketHandler 
     }
 
     @Override
-    public boolean process(Packet packet) {
-        playerStatusPointChangePacket = new C2SPlayerStatusPointChangePacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGChangePlayerStatPoints playerStatusPointChangePacket) {
+        FTClient ftClient = connection.getClient();
         Player player = ftClient.getPlayer();
 
         // we can't change; attributes should be server sided

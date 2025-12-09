@@ -1,20 +1,17 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
-import com.jftse.emulator.server.core.packets.messenger.C2SMessageSeenRequestPacket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.entities.database.model.messenger.Gift;
 import com.jftse.entities.database.model.messenger.Message;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.GiftService;
 import com.jftse.server.core.service.MessageService;
+import com.jftse.server.core.shared.packets.messenger.CMSGSeeMessage;
 
-@PacketOperationIdentifier(PacketOperations.C2SMessageSeenRequest)
-public class MessageSeenRequestHandler extends AbstractPacketHandler {
-    private C2SMessageSeenRequestPacket c2SMessageSeenRequestPacket;
-
+@PacketId(CMSGSeeMessage.PACKET_ID)
+public class MessageSeenRequestHandler implements PacketHandler<FTConnection, CMSGSeeMessage> {
     private final MessageService messageService;
     private final GiftService giftService;
 
@@ -24,19 +21,13 @@ public class MessageSeenRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SMessageSeenRequestPacket = new C2SMessageSeenRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        if (c2SMessageSeenRequestPacket.getType() == 0) {
-            Message message = messageService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
+    public void handle(FTConnection connection, CMSGSeeMessage packet) {
+        if (packet.getType() == 0) {
+            Message message = messageService.findById((long) packet.getMessageId());
             message.setSeen(true);
             messageService.save(message);
-        } else if (c2SMessageSeenRequestPacket.getType() == 2) {
-            Gift gift = giftService.findById(c2SMessageSeenRequestPacket.getMessageId().longValue());
+        } else if (packet.getType() == 2) {
+            Gift gift = giftService.findById((long) packet.getMessageId());
             gift.setSeen(true);
             giftService.save(gift);
         }

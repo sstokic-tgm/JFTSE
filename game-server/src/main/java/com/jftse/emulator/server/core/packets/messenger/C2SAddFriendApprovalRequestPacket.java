@@ -13,7 +13,7 @@ public class C2SAddFriendApprovalRequestPacket extends Packet {
     public C2SAddFriendApprovalRequestPacket(Packet packet) {
         super(packet);
 
-        this.accept = packet.readBoolean();
-        this.playerName = packet.readUnicodeString();
+        this.accept = this.readBoolean();
+        this.playerName = this.readString();
     }
 }

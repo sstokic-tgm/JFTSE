@@ -2,13 +2,13 @@ package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.messenger.C2SSendGiftRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedGiftNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CSendGiftAnswerPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auctionhouse.PriceType;
 import com.jftse.entities.database.model.item.Product;
@@ -16,13 +16,12 @@ import com.jftse.entities.database.model.messenger.Gift;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.messenger.CMSGSendGift;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 import org.springframework.util.ReflectionUtils;
 
@@ -31,10 +30,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
-@PacketOperationIdentifier(PacketOperations.C2SSendGiftRequest)
-public class SendGiftRequestHandler extends AbstractPacketHandler {
-    private C2SSendGiftRequestPacket c2SSendGiftRequestPacket;
-
+@PacketId(CMSGSendGift.PACKET_ID)
+public class SendGiftRequestHandler implements PacketHandler<FTConnection, CMSGSendGift> {
     private final PlayerService playerService;
     private final ProductService productService;
     private final PocketService pocketService;
@@ -53,23 +50,17 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SSendGiftRequestPacket = new C2SSendGiftRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGSendGift packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 
-        byte option = c2SSendGiftRequestPacket.getOption();
+        byte option = packet.getOption();
 
-        Product product = productService.findProductByProductItemIndex(c2SSendGiftRequestPacket.getProductIndex());
+        Product product = productService.findProductByProductItemIndex(packet.getProductIndex());
         Player sender = ftClient.getPlayer();
         Account senderAcc = ftClient.getAccount();
-        Player receiver = playerService.findByName(c2SSendGiftRequestPacket.getReceiverName());
+        Player receiver = playerService.findByName(packet.getReceiverName());
 
         if (receiver != null && product != null) {
             if (!product.getEnabled()) {
@@ -94,7 +85,7 @@ public class SendGiftRequestHandler extends AbstractPacketHandler {
             Gift gift = new Gift();
             gift.setReceiver(receiver);
             gift.setSender(sender);
-            gift.setMessage(c2SSendGiftRequestPacket.getMessage());
+            gift.setMessage(packet.getMessage());
             gift.setSeen(false);
             gift.setProduct(product);
             gift.setUseTypeOption(option);

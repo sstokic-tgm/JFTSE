@@ -2,28 +2,25 @@ package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.messenger.C2SAddFriendApprovalRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.FriendService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.SocialService;
+import com.jftse.server.core.shared.packets.messenger.CMSGAddFriendApproval;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SAddFriendApprovalRequest)
-public class AddFriendApprovalRequestHandler extends AbstractPacketHandler {
-    private C2SAddFriendApprovalRequestPacket c2SAddFriendApprovalRequestPacket;
-
+@PacketId(CMSGAddFriendApproval.PACKET_ID)
+public class AddFriendApprovalRequestHandler implements PacketHandler<FTConnection, CMSGAddFriendApproval> {
     private final PlayerService playerService;
     private final FriendService friendService;
     private final SocialService socialService;
@@ -38,19 +35,13 @@ public class AddFriendApprovalRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SAddFriendApprovalRequestPacket = new C2SAddFriendApprovalRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGAddFriendApproval packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 
         Player activePlayer = ftClient.getPlayer();
-        Player targetPlayer = playerService.findByName(c2SAddFriendApprovalRequestPacket.getPlayerName());
+        Player targetPlayer = playerService.findByName(packet.getPlayerName());
 
         List<Friend> friends = friendService.findByPlayer(targetPlayer);
         final long count = friends.stream()
@@ -67,7 +58,7 @@ public class AddFriendApprovalRequestHandler extends AbstractPacketHandler {
         if (friend == null)
             return;
 
-        if (c2SAddFriendApprovalRequestPacket.isAccept()) {
+        if (packet.getApproved()) {
             friend.setEFriendshipState(EFriendshipState.Friends);
             Friend newFriend = new Friend();
             newFriend.setPlayer(activePlayer);

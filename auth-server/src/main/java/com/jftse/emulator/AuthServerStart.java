@@ -69,7 +69,7 @@ public class AuthServerStart implements CommandLineRunner {
                 .childOption(ChannelOption.SO_RCVBUF, 16384)
                 .childOption(ChannelOption.SO_SNDBUF, 16384);
 
-        b.bind(serverConfService.getOrDefault("ServerPort", 5894)).addListener(cf -> {
+        b.bind(serverConfService.get("ServerPort", Integer.class)).addListener(cf -> {
             if (cf.isSuccess()) {
                 serverLoop.start();
 

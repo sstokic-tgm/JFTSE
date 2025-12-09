@@ -1,21 +1,14 @@
 package com.jftse.emulator.server.core.handler;
 
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.CMSGUnknown0x1071;
 
-@PacketOperationIdentifier(PacketOperations.C2SUnknown0x1071)
-public class Unknown0x1071PacketHandler extends AbstractPacketHandler {
-    private Packet packet;
+@PacketId(CMSGUnknown0x1071.PACKET_ID)
+public class Unknown0x1071PacketHandler implements PacketHandler<FTConnection, CMSGUnknown0x1071> {
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGUnknown0x1071 packet) {
         // empty
     }
 }

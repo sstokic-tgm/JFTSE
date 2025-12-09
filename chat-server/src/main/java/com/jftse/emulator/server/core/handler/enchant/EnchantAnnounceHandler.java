@@ -1,30 +1,21 @@
 package com.jftse.emulator.server.core.handler.enchant;
 
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.enchant.C2SEnchantAnnouncePacket;
-import com.jftse.emulator.server.core.packets.item.S2CPlayerAnnouncePacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.enchant.CMSGEnchantAnnounce;
+import com.jftse.server.core.shared.packets.item.SMSGPlayerAnnounce;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@PacketOperationIdentifier(PacketOperations.C2SEnchantAnnounce)
-public class EnchantAnnounceHandler extends AbstractPacketHandler {
-    private C2SEnchantAnnouncePacket packet;
-
+@PacketId(CMSGEnchantAnnounce.PACKET_ID)
+public class EnchantAnnounceHandler implements PacketHandler<FTConnection, CMSGEnchantAnnounce> {
     @Override
-    public boolean process(Packet packet) {
-        this.packet = new C2SEnchantAnnouncePacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGEnchantAnnounce packet) {
+        FTClient client = connection.getClient();
         if (client == null) {
             return;
         }
@@ -43,7 +34,12 @@ public class EnchantAnnounceHandler extends AbstractPacketHandler {
             return;
         }
 
-        S2CPlayerAnnouncePacket announcePacket = new S2CPlayerAnnouncePacket(msgPlayerName, packet.getTextSize(), packet.getTextColor(), msg);
+        SMSGPlayerAnnounce announcePacket = SMSGPlayerAnnounce.builder()
+                .playerName(msgPlayerName)
+                .textSize(packet.getTextSize())
+                .textColor(packet.getTextColor())
+                .message(msg)
+                .build();
         final ConcurrentLinkedDeque<FTClient> clients = GameManager.getInstance().getClients();
         clients.stream()
                 .filter(c -> c.getConnection() != null)

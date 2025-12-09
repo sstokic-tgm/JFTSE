@@ -1,0 +1,3 @@
+message CMSG_CancelParcel (0x21A4) {
+    int32 parcelId = 1;
+}

@@ -2,17 +2,18 @@ package com.jftse.emulator.server.core.rabbit.handlers;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
-import com.jftse.emulator.server.core.packets.chat.S2CWhisperAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.MessageTypes;
 import com.jftse.emulator.server.core.rabbit.messages.ChatWhisperMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.rabbit.AbstractMessageHandler;
 import com.jftse.server.core.rabbit.MessageHandlerRegistry;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.chat.SMSGChatMessageLobby;
+import com.jftse.server.core.shared.packets.chat.SMSGChatMessageWhisper;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,9 +80,13 @@ public class ChatWhisperHandler extends AbstractMessageHandler<ChatWhisperMessag
         final FTClient receiverClient = receiverConn.getClient();
 
         if (senderClient != null && receiverClient != null) {
-            S2CWhisperAnswerPacket whisperPacket = new S2CWhisperAnswerPacket(senderClient.getPlayer().getName(), receiverClient.getPlayer().getName(), message);
-            senderConn.sendTCP(whisperPacket);
-            receiverConn.sendTCP(whisperPacket);
+            SMSGChatMessageWhisper whisperMessage = SMSGChatMessageWhisper.builder()
+                    .sender(senderClient.getPlayer().getName())
+                    .receiver(receiverClient.getPlayer().getName())
+                    .message(message)
+                    .build();
+            senderConn.sendTCP(whisperMessage);
+            receiverConn.sendTCP(whisperMessage);
         } else {
             throw new ValidationException("Something went wrong.");
         }
@@ -108,11 +113,15 @@ public class ChatWhisperHandler extends AbstractMessageHandler<ChatWhisperMessag
         final FTClient client = conn.getClient();
         if (client != null) {
             Player sendingPlayer = playerService.findById(senderId);
-            S2CWhisperAnswerPacket whisperPacket = new S2CWhisperAnswerPacket(sendingPlayer.getName(), client.getPlayer().getName(), message);
-            conn.sendTCP(whisperPacket);
+            SMSGChatMessageWhisper whisperMessage = SMSGChatMessageWhisper.builder()
+                    .sender(sendingPlayer.getName())
+                    .receiver(client.getPlayer().getName())
+                    .message(message)
+                    .build();
+            conn.sendTCP(whisperMessage);
 
             PacketMessage packetMessage = PacketMessage.builder()
-                    .packet(whisperPacket)
+                    .packet(new Packet(whisperMessage))
                     .receivingPlayerId(senderId)
                     .build();
             rProducerService.send(packetMessage, "game.messenger.whisper chat.messenger.whisper", sendingPlayer.getName() + "(ChatServer)");
@@ -127,10 +136,14 @@ public class ChatWhisperHandler extends AbstractMessageHandler<ChatWhisperMessag
      * @param senderId The player ID of the sender
      */
     private void handleNotOnline(Long senderId) {
-        S2CChatLobbyAnswerPacket chatLobbyPacket = new S2CChatLobbyAnswerPacket((char) 0, "Whisper", "This user not connected.");
+        SMSGChatMessageLobby chatLobbyMessage = SMSGChatMessageLobby.builder()
+                .unk((char) 0)
+                .sender("Whisper")
+                .message("This user not connected.")
+                .build();
         Player sendingPlayer = playerService.findById(senderId);
         PacketMessage packetMessage = PacketMessage.builder()
-                .packet(chatLobbyPacket)
+                .packet(new Packet(chatLobbyMessage))
                 .receivingPlayerId(sendingPlayer.getId())
                 .build();
         rProducerService.send(packetMessage, "game.messenger.whisper chat.messenger.whisper", sendingPlayer.getName() + "(ChatServer)");
@@ -139,9 +152,13 @@ public class ChatWhisperHandler extends AbstractMessageHandler<ChatWhisperMessag
     private void handleOops(Long senderId, Long receiverId) {
         Player sendingPlayer = playerService.findById(senderId);
         Player receivingPlayer = playerService.findById(receiverId);
-        S2CChatLobbyAnswerPacket chatLobbyPacket = new S2CChatLobbyAnswerPacket((char) 0, "Whisper", "Something went wrong.");
+        SMSGChatMessageLobby chatLobbyMessage = SMSGChatMessageLobby.builder()
+                .unk((char) 0)
+                .sender("Whisper")
+                .message("Something went wrong.")
+                .build();
         PacketMessage packetMessage = PacketMessage.builder()
-                .packet(chatLobbyPacket)
+                .packet(new Packet(chatLobbyMessage))
                 .receivingPlayerId(senderId)
                 .build();
         rProducerService.send(packetMessage, "game.messenger.whisper chat.messenger.whisper", sendingPlayer.getName() + "(ChatServer)");

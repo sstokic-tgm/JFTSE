@@ -100,6 +100,9 @@ public class ServiceManager {
     private ProfaneWordsService profaneWordsService;
 
     @Autowired
+    private UptimeService uptimeService;
+
+    @Autowired
     private ModuleService moduleService;
     @Autowired
     private GameLogService gameLogService;

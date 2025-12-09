@@ -1,0 +1,3 @@
+message SMSG_AcceptParcel (0x21A3) {
+    short status = 1;
+}

@@ -18,6 +18,6 @@ public class C2SPlayerAnnouncePacket extends Packet {
         this.playerPocketId = this.readInt();
         this.textSize = this.readByte();
         this.textColor = this.readByte();
-        this.message = this.readUnicodeString();
+        this.message = this.readString();
     }
 }

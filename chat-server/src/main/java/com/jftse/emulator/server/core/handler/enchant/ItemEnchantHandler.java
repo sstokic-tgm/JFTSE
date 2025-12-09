@@ -1,12 +1,11 @@
 package com.jftse.emulator.server.core.handler.enchant;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.enchant.C2SEnchantRequestPacket;
-import com.jftse.emulator.server.core.packets.enchant.S2CEnchantAnswerPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.ItemEnchant;
 import com.jftse.entities.database.model.item.ItemEnchantLevel;
 import com.jftse.entities.database.model.player.Player;
@@ -15,25 +14,23 @@ import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.enchant.EnchantForge;
 import com.jftse.server.core.enchant.EnchantResultMessage;
 import com.jftse.server.core.enchant.EnchantingItem;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EElementalKind;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.EnchantService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.PocketService;
-import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
+import com.jftse.server.core.shared.packets.enchant.CMSGEnchantRequest;
+import com.jftse.server.core.shared.packets.enchant.SMSGEnchantAnswer;
+import com.jftse.server.core.shared.packets.inventory.SMSGInventoryRemoveItem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-@PacketOperationIdentifier(PacketOperations.C2SEnchantRequest)
-public class ItemEnchantHandler extends AbstractPacketHandler {
-    private C2SEnchantRequestPacket enchantRequestPacket;
-
+@PacketId(CMSGEnchantRequest.PACKET_ID)
+public class ItemEnchantHandler implements PacketHandler<FTConnection, CMSGEnchantRequest> {
     private final EnchantService enchantService;
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
@@ -47,14 +44,8 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        enchantRequestPacket = new C2SEnchantRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGEnchantRequest enchantRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -66,7 +57,9 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
         int itemPocketId = enchantRequestPacket.getItemPocketId();
         boolean isValidPlayerPocketId = enchantService.isValidPlayerPocketId(itemPocketId, pocket);
         if (!isValidPlayerPocketId) {
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_02);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_02.getCode())
+                    .build();
             connection.sendTCP(result);
             return;
         }
@@ -75,13 +68,17 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
         int jewelPocketId = enchantRequestPacket.getJewelPocketId();
         boolean hasIngredients = enchantService.hasJewel(jewelPocketId, pocket) && enchantService.hasElemental(elementPocketId, pocket);
         if (!hasIngredients) {
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_03);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_03.getCode())
+                    .build();
             connection.sendTCP(result);
             return;
         }
 
         if (!enchantService.isElemental(itemPocketId) && !enchantService.isEnchantable(itemPocketId)) {
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_07);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_07.getCode())
+                    .build();
             connection.sendTCP(result);
             return;
         }
@@ -94,7 +91,9 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
         ItemEnchant itemJewel = enchantService.getItemEnchant(jewelPocketId);
         ItemEnchant itemEnchant = enchantService.getItemEnchant(elementPocketId);
         if (itemEnchant == null) {
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01.getCode())
+                    .build();
             connection.sendTCP(result);
             return;
         }
@@ -106,14 +105,18 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
 
         ItemEnchantLevel itemEnchantLevel = enchantService.getItemEnchantLevel(itemEnchant.getElementalKind(), grade);
         if (itemJewel == null || itemEnchantLevel == null) {
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01.getCode())
+                    .build();
             connection.sendTCP(result);
             return;
         }
 
         final int costs = itemEnchantLevel.getRequireGold();
         if (player.getGold() < costs) {
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_06);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_06.getCode())
+                    .build();
             connection.sendTCP(result);
             return;
         }
@@ -123,13 +126,17 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
                 .toList();
         if (elementals.contains(EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
             if (enchantService.isMaxEnchantLevel(itemPocketId, true, EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
-                S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_05);
+                SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                        .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_05.getCode())
+                        .build();
                 connection.sendTCP(result);
                 return;
             }
         } else {
             if (enchantService.isMaxEnchantLevel(itemPocketId, false, EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
-                S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_05);
+                SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                        .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_05.getCode())
+                        .build();
                 connection.sendTCP(result);
                 return;
             }
@@ -143,8 +150,8 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
         S2CShopMoneyAnswerPacket moneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
         connection.sendTCP(moneyAnswerPacket);
 
-        consumeIngredients(pocket, elementPocket);
-        consumeIngredients(pocket, jewelPocket);
+        consumeIngredients(connection, pocket, elementPocket);
+        consumeIngredients(connection, pocket, jewelPocket);
 
         int newEnchantLevel = enchantForge.enchantItem(enchantingItem);
         if (newEnchantLevel <= currentEnchantLevel && grade != 1) {
@@ -161,7 +168,9 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
             List<PlayerPocket> playerPocketList = new ArrayList<>();
             playerPocketList.add(itemPocket);
 
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01.getCode())
+                    .build();
             connection.sendTCP(result);
 
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
@@ -184,7 +193,9 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
             List<PlayerPocket> playerPocketList = new ArrayList<>();
             playerPocketList.add(itemPocket);
 
-            S2CEnchantAnswerPacket result = new S2CEnchantAnswerPacket(EnchantResultMessage.MSG_ITEM_ENCHANT_SUCCESS);
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_SUCCESS.getCode())
+                    .build();
             connection.sendTCP(result);
 
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
@@ -192,14 +203,16 @@ public class ItemEnchantHandler extends AbstractPacketHandler {
         }
     }
 
-    private void consumeIngredients(Pocket pocket, PlayerPocket pp) {
+    private void consumeIngredients(final FTConnection connection, Pocket pocket, PlayerPocket pp) {
         int itemCountJewel = pp.getItemCount() - 1;
         if (itemCountJewel <= 0) {
             playerPocketService.remove(pp.getId());
             pocketService.decrementPocketBelongings(pocket);
 
-            S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(Math.toIntExact(pp.getId()));
-            connection.sendTCP(inventoryItemRemoveAnswerPacket);
+            SMSGInventoryRemoveItem inventoryRemoveItemPacket = SMSGInventoryRemoveItem.builder()
+                    .itemPocketId(Math.toIntExact(pp.getId()))
+                    .build();
+            connection.sendTCP(inventoryRemoveItemPacket);
         } else {
             pp.setItemCount(itemCountJewel);
             playerPocketService.save(pp);

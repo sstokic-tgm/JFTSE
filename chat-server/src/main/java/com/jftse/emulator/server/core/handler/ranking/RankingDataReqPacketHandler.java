@@ -1,24 +1,21 @@
 package com.jftse.emulator.server.core.handler.ranking;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.ranking.C2SRankingDataRequestPacket;
 import com.jftse.emulator.server.core.packets.ranking.S2CRankingDataAnswerPacket;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.ranking.CMSGRankingData;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SRankingDataReq)
-public class RankingDataReqPacketHandler extends AbstractPacketHandler {
-    private C2SRankingDataRequestPacket rankingDataRequestPacket;
-
+@PacketId(CMSGRankingData.PACKET_ID)
+public class RankingDataReqPacketHandler implements PacketHandler<FTConnection, CMSGRankingData> {
     private final PlayerService playerService;
 
     public RankingDataReqPacketHandler() {
@@ -26,15 +23,9 @@ public class RankingDataReqPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        rankingDataRequestPacket = new C2SRankingDataRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        int page = rankingDataRequestPacket.getPage();
-        byte gameMode = rankingDataRequestPacket.getGameMode();
+    public void handle(FTConnection connection, CMSGRankingData packet) {
+        int page = packet.getPage();
+        byte gameMode = packet.getGameMode();
 
         String gameModeRP;
         if (gameMode == GameMode.BASIC)

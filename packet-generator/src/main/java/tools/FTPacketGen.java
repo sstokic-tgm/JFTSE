@@ -491,7 +491,7 @@ public class FTPacketGen {
         Map<String, String> o = f.options;
 
         if (f.repeated && !t.equals("bytes")) {
-            if (mappedType.equals("int") && o.containsKey("len")) {
+            if (o.containsKey("len")) {
                 return "msg.readRepeated(() -> " + readExprRecursive(new Field(t, "tmp", false, o), depth + 1) + ", " + o.get("len") + ")";
             }
 

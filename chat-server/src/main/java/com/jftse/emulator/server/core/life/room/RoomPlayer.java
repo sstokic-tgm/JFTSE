@@ -1,9 +1,6 @@
 package com.jftse.emulator.server.core.life.room;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.chat.house.C2SChatHouseMovePacket;
-import com.jftse.emulator.server.core.packets.chat.house.C2SChatHousePositionPacket;
-import com.jftse.emulator.server.core.packets.chat.square.C2SChatSquareMovePacket;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.ClothEquipment;
@@ -18,7 +15,6 @@ import lombok.Setter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Setter

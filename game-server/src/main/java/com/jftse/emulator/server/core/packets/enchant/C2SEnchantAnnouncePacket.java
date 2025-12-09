@@ -16,6 +16,6 @@ public class C2SEnchantAnnouncePacket extends Packet {
 
         this.textSize = this.readByte();
         this.textColor = this.readByte();
-        this.message = this.readUnicodeString();
+        this.message = this.readString();
     }
 }

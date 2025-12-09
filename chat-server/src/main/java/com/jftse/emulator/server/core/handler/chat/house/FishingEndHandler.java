@@ -12,27 +12,23 @@ import com.jftse.emulator.server.core.packets.chat.house.S2CFishingBarPacket;
 import com.jftse.emulator.server.core.packets.chat.house.S2CHousingRewardItemPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.item.ItemMaterial;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.item.EItemCategory;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.service.ItemMaterialService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.service.ProductService;
+import com.jftse.server.core.shared.packets.chat.house.CMSGFishingEnd;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 
-@PacketOperationIdentifier(PacketOperations.CMSG_FishingEnd)
-public class FishingEndHandler extends AbstractPacketHandler {
+@PacketId(CMSGFishingEnd.PACKET_ID)
+public class FishingEndHandler implements PacketHandler<FTConnection, CMSGFishingEnd> {
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
     private final ProductService productService;
@@ -44,13 +40,8 @@ public class FishingEndHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGFishingEnd packet) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -72,12 +63,12 @@ public class FishingEndHandler extends AbstractPacketHandler {
 
             claimedFish.setState(FishState.CAUGHT);
             S2CFishStopPacket stopPacket = new S2CFishStopPacket(claimedFish.getId(), (byte) claimedFish.getState().getValue());
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(stopPacket, (FTConnection) connection);
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(stopPacket, connection);
 
             FishManager.getInstance().removeFish(room.getRoomId(), claimedFish);
 
             S2CFishingBarPacket despawnMiniGame = new S2CFishingBarPacket(roomPlayer.getPosition(), claimedFish.getId(), 1.3f, (byte) 0);
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(despawnMiniGame, (FTConnection) connection);
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(despawnMiniGame, connection);
 
             if (rewardProductIndex != null) {
                 Product item = productService.findProductByProductItemIndex(rewardProductIndex.intValue());

@@ -41,52 +41,53 @@ public class PacketDecoderV2 extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        decode(in, out);
+        IPacket decoded = decode(in);
+        if (decoded != null) {
+            out.add(decoded);
+        }
     }
 
-    protected void decode(ByteBuf in, List<Object> out) throws Exception {
-        for (; ; ) {
-            final int length = in.readableBytes();
-            if (length < HEADER_SIZE) {
-                return;
-            }
-            in.markReaderIndex();
-
-            decryptHeader(in, in.readerIndex(), header);
-            final int packetId = BitKit.bytesToShort(header, 4);
-            final int packetLength = BitKit.bytesToShort(header, 6);
-            final int totalPacketSize = packetLength + HEADER_SIZE;
-
-            if (packetLength < 0 || length < totalPacketSize) {
-                in.resetReaderIndex();
-                return;
-            }
-
-            final byte[] data = new byte[totalPacketSize];
-            decryptBytes(in, in.readerIndex(), data, totalPacketSize);
-
-            if (!this.isValidChecksum(data)) {
-                log.error("RECV [{} bytes]\nInvalid packet checksum\n--- Hex Dump ---\n{}\n===",
-                        totalPacketSize,
-                        BitKit.toString8x2(data, 0, totalPacketSize));
-
-                in.skipBytes(totalPacketSize); // consume invalid to avoid decode loop
-                continue;
-            }
-
-            in.skipBytes(totalPacketSize);
-            IPacket packet = PacketRegistry.decode(packetId, data);
-
-            if (logAllPackets) {
-                log.debug("RECV [{} bytes]\n{}\n--- Hex Dump ---\n{}\n===",
-                        data.length,
-                        prettyPrintEnabled ? GsonUtils.pretty(ValidationUtil.sanitizeLogForDecode(packet.toString())) : ValidationUtil.sanitizeLogForDecode(packet.toString()),
-                        BitKit.toString8x2(data, 0, data.length));
-            }
-
-            this.receiveIndicator = (this.receiveIndicator + 1) % 60;
-            out.add(packet);
+    protected IPacket decode(ByteBuf in) throws Exception {
+        final int length = in.readableBytes();
+        if (length < HEADER_SIZE) {
+            return null;
         }
+        in.markReaderIndex();
+
+        decryptHeader(in, in.readerIndex(), header);
+        final int packetId = BitKit.bytesToShort(header, 4);
+        final int packetLength = BitKit.bytesToShort(header, 6);
+        final int totalPacketSize = packetLength + HEADER_SIZE;
+
+        if (packetLength < 0 || length < totalPacketSize) {
+            in.resetReaderIndex();
+            return null;
+        }
+
+        final byte[] data = new byte[totalPacketSize];
+        decryptBytes(in, in.readerIndex(), data, totalPacketSize);
+
+        if (!this.isValidChecksum(data)) {
+            log.error("RECV [{} bytes]\nInvalid packet checksum\n--- Hex Dump ---\n{}\n===",
+                    totalPacketSize,
+                    BitKit.toString8x2(data, 0, totalPacketSize));
+
+            in.skipBytes(totalPacketSize); // consume invalid to avoid decode loop
+            return null;
+        }
+
+        in.skipBytes(totalPacketSize);
+        IPacket packet = PacketRegistry.decode(packetId, data);
+
+        if (logAllPackets) {
+            log.debug("RECV [{} bytes]\n{}\n--- Hex Dump ---\n{}\n===",
+                    data.length,
+                    prettyPrintEnabled ? GsonUtils.pretty(ValidationUtil.sanitizeLogForDecode(packet.toString())) : ValidationUtil.sanitizeLogForDecode(packet.toString()),
+                    BitKit.toString8x2(data, 0, data.length));
+        }
+
+        this.receiveIndicator = (this.receiveIndicator + 1) % 60;
+        return packet;
     }
 
     private boolean isValidChecksum(byte[] data) {

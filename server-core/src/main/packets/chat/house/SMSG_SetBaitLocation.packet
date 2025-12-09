@@ -1,0 +1,6 @@
+message SMSG_SetBaitLocation (0x2BC9) {
+    short playerPosition = 1;
+    float x = 2;
+    float z = 3;
+    float y = 4;
+}

@@ -1,50 +1,49 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.inventory.C2SInventorySellReqPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventorySellAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.PlayerPocketService;
+import com.jftse.server.core.shared.packets.inventory.CMSGInventorySell;
+import com.jftse.server.core.shared.packets.inventory.SMSGInventorySell;
 
-@PacketOperationIdentifier(PacketOperations.C2SInventorySellReq)
-public class InventorySellRequestHandler extends AbstractPacketHandler {
-    private C2SInventorySellReqPacket inventorySellReqPacket;
-
+@PacketId(CMSGInventorySell.PACKET_ID)
+public class InventorySellRequestHandler implements PacketHandler<FTConnection, CMSGInventorySell> {
     private final PlayerPocketService playerPocketService;
+
+    private final static byte SUCCESS = 0;
+    private final static byte NO_ITEM = -1;
+    private final static byte IMPOSSIBLE_ITEM = -2;
 
     public InventorySellRequestHandler() {
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
     }
 
     @Override
-    public boolean process(Packet packet) {
-        inventorySellReqPacket = new C2SInventorySellReqPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
-        byte status = S2CInventorySellAnswerPacket.SUCCESS;
-        int itemPocketId = inventorySellReqPacket.getItemPocketId();
+    public void handle(FTConnection connection, CMSGInventorySell packet) {
+        FTClient client = connection.getClient();
+        byte status = SUCCESS;
+        int itemPocketId = packet.getItemPocketId();
 
         PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, client.getPlayer().getPocket());
 
         if (playerPocket == null) {
-            status = S2CInventorySellAnswerPacket.NO_ITEM;
+            status = NO_ITEM;
 
-            S2CInventorySellAnswerPacket inventorySellAnswerPacket = new S2CInventorySellAnswerPacket(status, 0, 0);
-            connection.sendTCP(inventorySellAnswerPacket);
+            SMSGInventorySell answer = SMSGInventorySell.builder().status(status).itemPocketId(0).price(0).build();
+            connection.sendTCP(answer);
         } else {
             int sellPrice = playerPocketService.getSellPrice(playerPocket);
 
-            S2CInventorySellAnswerPacket inventorySellAnswerPacket = new S2CInventorySellAnswerPacket(status, itemPocketId, sellPrice);
-            connection.sendTCP(inventorySellAnswerPacket);
+            SMSGInventorySell answer = SMSGInventorySell.builder()
+                    .status(status)
+                    .itemPocketId(itemPocketId)
+                    .price(sellPrice)
+                    .build();
+            connection.sendTCP(answer);
         }
     }
 }

@@ -9,15 +9,19 @@ import lombok.extern.log4j.Log4j2;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j2
 public final class PacketRegistry {
     private static final Map<Integer, PacketFactory> REGISTRY = new HashMap<>();
     private static final Map<Integer, PacketHandler<? extends Connection<?>, ? extends IPacket>> HANDLERS = new HashMap<>();
+
+    private static final Reflections REFLECTIONS =
+            new Reflections(new ConfigurationBuilder().forPackages(
+                    "com.jftse.emulator.server.core.packets",
+                    "com.jftse.emulator.server.core.handler"
+            ));
 
     private PacketRegistry() {
     }
@@ -29,18 +33,41 @@ public final class PacketRegistry {
         REGISTRY.put(packetId, factory);
     }
 
+    public static void autoRegisterOldClientPackets() {
+        log.info("Registering old client packets...");
+
+        final Set<Class<? extends IPacket>> packetClasses = REFLECTIONS.getSubTypesOf(IPacket.class);
+
+        int cnt = 0;
+        for (Class<? extends IPacket> packetClass : packetClasses) {
+            if (packetClass.isAnnotationPresent(RegisterClientPacket.class)) {
+                try {
+                    packetClass.getDeclaredField("PACKET_ID").get(null);
+                    ++cnt;
+                } catch (Exception e) {
+                    log.error("Failed to auto-register packet class: {}", packetClass.getCanonicalName(), e);
+                }
+            }
+        }
+
+        log.info("Registered {} old client packets.", cnt);
+    }
+
     public static void registerHandlers() {
         log.info("Registering handlers...");
 
-        Reflections reflections = new Reflections(new ConfigurationBuilder().forPackages("com.jftse.emulator.server.core.handler"));
-
-        final Set<Class<? extends PacketHandler>> packetHandlers = reflections.getSubTypesOf(PacketHandler.class);
+        final Set<Class<? extends PacketHandler>> packetHandlers = REFLECTIONS.getSubTypesOf(PacketHandler.class);
         final Map<Integer, Class<? extends PacketHandler>> packetHandlersMap = packetHandlers.stream()
                 .filter(handler -> handler.isAnnotationPresent(PacketId.class))
+                .sorted(Comparator.comparingInt(handler -> handler.getAnnotation(PacketId.class).value()))
                 .collect(
                         Collectors.toMap(
                                 handler -> handler.getAnnotation(PacketId.class).value(),
-                                handler -> handler));
+                                handler -> handler,
+                                (a, b) -> a,
+                                TreeMap::new
+                        )
+                );
         packetHandlersMap.forEach((key, value) -> {
             log.info(value.getCanonicalName() + " " + String.format("0x%X(%d)", key, key));
             try {
@@ -49,7 +76,7 @@ public final class PacketRegistry {
             } catch (Exception e) {
                 log.error("Failed to instantiate handler for packet ID: 0x{} ({})", Integer.toHexString(key), key, e);
             }
-        } );
+        });
     }
 
     public static IPacket decode(int packetId, byte[] data) {

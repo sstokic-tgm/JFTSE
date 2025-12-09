@@ -1,0 +1,4 @@
+message CMSG_RoomUserInfo (0x139A) {
+    short position = 1;
+    string nickname = 2;
+}

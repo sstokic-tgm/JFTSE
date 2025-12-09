@@ -16,10 +16,10 @@ public class C2SSendParcelRequestPacket extends Packet {
     public C2SSendParcelRequestPacket(Packet packet) {
         super(packet);
 
-        this.receiverName = packet.readUnicodeString();
-        this.message = packet.readUnicodeString();
-        this.playerPocketId = packet.readInt();
-        this.unk0 = packet.readByte();
-        this.cashOnDelivery = packet.readInt();
+        this.receiverName = this.readString();
+        this.message = this.readString();
+        this.playerPocketId = this.readInt();
+        this.unk0 = this.readByte();
+        this.cashOnDelivery = this.readInt();
     }
 }

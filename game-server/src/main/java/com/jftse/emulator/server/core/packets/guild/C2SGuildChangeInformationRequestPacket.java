@@ -16,7 +16,7 @@ public class C2SGuildChangeInformationRequestPacket extends Packet {
     public C2SGuildChangeInformationRequestPacket(Packet packet) {
         super(packet);
 
-        this.introduction = this.readUnicodeString();
+        this.introduction = this.readString();
         this.isPublic = this.readBoolean();
         this.minLevel = this.readByte();
         this.allowedCharacterTypeCount = this.readByte();

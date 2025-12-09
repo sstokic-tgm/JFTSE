@@ -12,6 +12,6 @@ public class C2SRoomIsPrivateChangeRequestPacket extends Packet {
     public C2SRoomIsPrivateChangeRequestPacket(Packet packet) {
         super(packet);
 
-        this.password = this.readUnicodeString();
+        this.password = this.readString();
     }
 }
