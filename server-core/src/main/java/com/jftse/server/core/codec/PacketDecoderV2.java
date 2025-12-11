@@ -55,8 +55,8 @@ public class PacketDecoderV2 extends ByteToMessageDecoder {
         in.markReaderIndex();
 
         decryptHeader(in, in.readerIndex(), header);
-        final int packetId = BitKit.bytesToShort(header, 4);
-        final int packetLength = BitKit.bytesToShort(header, 6);
+        final int packetId = BitKit.bytesToShort(header, 4) & 0xFFFF;
+        final int packetLength = BitKit.bytesToShort(header, 6) & 0xFFFF;
         final int totalPacketSize = packetLength + HEADER_SIZE;
 
         if (packetLength < 0 || length < totalPacketSize) {
