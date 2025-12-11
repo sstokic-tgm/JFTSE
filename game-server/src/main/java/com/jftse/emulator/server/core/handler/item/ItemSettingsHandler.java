@@ -4,23 +4,23 @@ import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.core.packets.item.C2SResponseItemSettingsPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayBackToRoom;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.AuthenticationService;
 import com.jftse.server.core.service.GameLogService;
 import com.jftse.server.core.service.SkillService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
+import com.jftse.server.core.shared.packets.item.CMSGItemSettings;
+import com.jftse.server.core.shared.packets.item.ItemSetting;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
@@ -29,10 +29,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SResponseItemSettings)
-public class ItemSettingsHandler extends AbstractPacketHandler {
-    private C2SResponseItemSettingsPacket itemSettingsPacket;
-
+@PacketId(CMSGItemSettings.PACKET_ID)
+public class ItemSettingsHandler implements PacketHandler<FTConnection, CMSGItemSettings> {
     private final AuthenticationService authenticationService;
     private final SkillService skillService;
     private final GameLogService gameLogService;
@@ -44,14 +42,8 @@ public class ItemSettingsHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        itemSettingsPacket = new C2SResponseItemSettingsPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGItemSettings packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null)
             return;
 
@@ -63,10 +55,11 @@ public class ItemSettingsHandler extends AbstractPacketHandler {
 
         Player player = ftClient.getPlayer();
 
-        final Map<Skill, C2SResponseItemSettingsPacket.ItemSettings> mapOfNonMatchingSkills = new HashMap<>(itemSettingsPacket.getSize());
-        final List<C2SResponseItemSettingsPacket.ItemSettings> itemSettings = itemSettingsPacket.getItemSettings();
-        for (C2SResponseItemSettingsPacket.ItemSettings itemSetting : itemSettings) {
-            Skill skill = this.skillService.findSkillById(itemSetting.getId());
+        final Map<Skill, ItemSetting> mapOfNonMatchingSkills = new HashMap<>();
+        final List<ItemSetting> itemSettings = packet.getItemSettings();
+        int id = 0;
+        for (ItemSetting itemSetting : itemSettings) {
+            Skill skill = this.skillService.findSkillById((long) ++id);
             if (skill == null)
                 continue;
 
@@ -86,9 +79,9 @@ public class ItemSettingsHandler extends AbstractPacketHandler {
 
         StringBuilder sb = new StringBuilder();
         sb.append("Player: ").append(player.getName()).append(" has modified the following skills: ");
-        for (Map.Entry<Skill, C2SResponseItemSettingsPacket.ItemSettings> entry : mapOfNonMatchingSkills.entrySet()) {
+        for (Map.Entry<Skill, ItemSetting> entry : mapOfNonMatchingSkills.entrySet()) {
             Skill skill = entry.getKey();
-            C2SResponseItemSettingsPacket.ItemSettings itemSetting = entry.getValue();
+            ItemSetting itemSetting = entry.getValue();
             sb.append(skill.getName())
                     .append(" (");
             sb.append("Damage: ").append(skill.getDamage().byteValue()).append(" -> ").append(itemSetting.getDamage()).append(", ");

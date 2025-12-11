@@ -2,35 +2,26 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomQuickSlotChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomQuickSlotChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomChangeQuickSlot;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomChangeQuickSlot;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomQuickSlotChange)
-public class RoomQuickSlotChangePacketHandler extends AbstractPacketHandler {
-    private C2SRoomQuickSlotChangeRequestPacket changeRoomQuickSlotRequestPacket;
-
+@PacketId(CMSGRoomChangeQuickSlot.PACKET_ID)
+public class RoomQuickSlotChangePacketHandler implements PacketHandler<FTConnection, CMSGRoomChangeQuickSlot> {
     @Override
-    public boolean process(Packet packet) {
-        changeRoomQuickSlotRequestPacket = new C2SRoomQuickSlotChangeRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomChangeQuickSlot packet) {
+        FTClient client = connection.getClient();
         Room room = client.getActiveRoom();
         if (room != null) {
             synchronized (room) {
-                room.setQuickSlot(changeRoomQuickSlotRequestPacket.isQuickSlot());
+                room.setQuickSlot(packet.getEnable());
             }
 
-            S2CRoomQuickSlotChangeAnswerPacket roomQuickSlotChangeAnswerPacket = new S2CRoomQuickSlotChangeAnswerPacket(room.isQuickSlot());
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomQuickSlotChangeAnswerPacket, client.getConnection());
+            SMSGRoomChangeQuickSlot answer = SMSGRoomChangeQuickSlot.builder().enable(room.isQuickSlot()).build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(answer, connection);
         }
     }
 }

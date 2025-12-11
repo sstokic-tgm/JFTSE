@@ -1,0 +1,9 @@
+message SMSG_PlayerUseSkill (0x18EA) {
+    byte attacker = 1;
+    byte target = 2;
+    byte skillId = 3;
+    byte seed = 4;
+    float xTarget = 5;
+    float zTarget = 6;
+    float yTarget = 7;
+}

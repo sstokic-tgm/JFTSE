@@ -42,6 +42,7 @@ import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
@@ -315,7 +316,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
     }
 
     @Override
-    public void onPoint(final FTClient ftClient, C2SMatchplayPointPacket matchplayPointPacket) {
+    public void onPoint(final FTClient ftClient, CMSGPoint pointPacket) {
         GameSession gameSession = ftClient.getActiveGameSession();
         if (gameSession == null)
             return;
@@ -330,12 +331,12 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         final int setsTeamRead = game.getSetsRedTeam().get();
         final int setsTeamBlue = game.getSetsBlueTeam().get();
 
-        if (matchplayPointPacket.getPlayerPosition() < 4)
-            game.increasePerformancePointForPlayer(matchplayPointPacket.getPlayerPosition());
+        if (pointPacket.getPlayerPosition() < 4)
+            game.increasePerformancePointForPlayer(pointPacket.getPlayerPosition());
 
-        if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
+        if (game.isRedTeam(pointPacket.getPointsTeam()))
             game.setPoints((byte) (pointsTeamRed + 1), (byte) pointsTeamBlue);
-        else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
+        else if (game.isBlueTeam(pointPacket.getPointsTeam()))
             game.setPoints((byte) pointsTeamRed, (byte) (pointsTeamBlue + 1));
 
         final boolean isFinished = game.getFinished().get();
@@ -368,12 +369,12 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 }
 
                 short pointingTeamPosition = -1;
-                if (game.isRedTeam(matchplayPointPacket.getPointsTeam()))
+                if (game.isRedTeam(pointPacket.getPointsTeam()))
                     pointingTeamPosition = 0;
-                else if (game.isBlueTeam(matchplayPointPacket.getPointsTeam()))
+                else if (game.isBlueTeam(pointPacket.getPointsTeam()))
                     pointingTeamPosition = 1;
 
-                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint(pointingTeamPosition, matchplayPointPacket.getBallState(), (byte) game.getPointsRedTeam().get(), (byte) game.getPointsBlueTeam().get());
+                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint(pointingTeamPosition, pointPacket.getBallState(), (byte) game.getPointsRedTeam().get(), (byte) game.getPointsBlueTeam().get());
                 eventHandler.offer(eventHandler.createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0));
 
                 if (anyTeamWonSet) {

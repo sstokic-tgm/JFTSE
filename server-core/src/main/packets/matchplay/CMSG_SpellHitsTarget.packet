@@ -1,0 +1,22 @@
+message CMSG_SpellHitsTarget (0x22F1) {
+    short attackerPosition = 1;
+    byte unk0 = 2;
+    short targetPosition = 3;
+    byte unk1 = 4;
+    byte skillId = 5;
+    // 0=Str, 1=DEF, 2=Projectile speed, 3=Ball damage, 4=DMG and Projectile speed
+    // 5=Charge shot speed, 6=Movement speed, 7=Ball spin
+    byte attackerBuffId1 = 6;
+    byte attackerBuffId2 = 7;
+    byte unk3 = 8;
+    byte receiverBuffId1 = 9;
+    byte unk4 = 10;
+    byte receiverBuffId2 = 11;
+    byte damageType = 12;
+    byte unk6 = 13;
+    bool applySkillEffect = 14;
+    byte unk7 = 15;
+    int32 xKnockbackPosition = 16;
+    int32 yKnockbackPosition = 17;
+    byte unk8 = 18;
+}

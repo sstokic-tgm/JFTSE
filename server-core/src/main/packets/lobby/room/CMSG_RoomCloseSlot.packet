@@ -1,0 +1,4 @@
+message CMSG_RoomCloseSlot (0x1D4C) {
+    byte slot = 1;
+    bool close = 2;
+}

@@ -63,6 +63,16 @@ public class EventHandler {
     }
 
     /**
+     * Retrieves and removes the head of this queue,
+     * or returns null if this queue is empty.
+     *
+     * @return removed first fireable or null
+     */
+    public Fireable poll() {
+        return fireableDeque.poll();
+    }
+
+    /**
      * Removes the first occurrence of packetEvent from this list, if it is present.
      * Shifts any subsequent elements to the left.
      *
@@ -75,8 +85,9 @@ public class EventHandler {
     public void handleQueuedEvents() {
         long currentTime = Instant.now().toEpochMilli();
 
-        try {
-            Fireable fireable = take();
+        int queueSize = fireableDeque.size();
+        for (int i = 0; i < queueSize; i++) {
+            Fireable fireable = poll();
             if (fireable != null) {
                 if (!fireable.isFired() && fireable.shouldFire(currentTime) && !fireable.isCancelled()) {
                     fireable.fire();
@@ -85,11 +96,6 @@ public class EventHandler {
                     offer(fireable);
                 }
             }
-            // save cpu cycles
-            Thread.sleep(5);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("Event handler interrupted: {}", e.getMessage());
         }
     }
 

@@ -44,6 +44,7 @@ import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
@@ -342,7 +343,7 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
     }
 
     @Override
-    public void onPoint(FTClient ftClient, C2SMatchplayPointPacket matchplayPointPacket) {
+    public void onPoint(FTClient ftClient, CMSGPoint pointPacket) {
         boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide().get() == GameFieldSide.BlueTeam;
 
         byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();

@@ -3,18 +3,18 @@ package com.jftse.emulator.server.core.handler.home;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.home.S2CHomeItemsLoadAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.home.HomeInventory;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.HomeService;
+import com.jftse.server.core.shared.packets.home.CMSGLoadHomeItems;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SHomeItemsLoadReq)
-public class HomeItemsLoadRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGLoadHomeItems.PACKET_ID)
+public class HomeItemsLoadRequestPacketHandler implements PacketHandler<FTConnection, CMSGLoadHomeItems> {
     private final HomeService homeService;
 
     public HomeItemsLoadRequestPacketHandler() {
@@ -22,13 +22,8 @@ public class HomeItemsLoadRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGLoadHomeItems packet) {
+        FTClient client = connection.getClient();
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 

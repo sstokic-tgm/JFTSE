@@ -3,32 +3,21 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomKickPlayerRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomJoinAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomKickPlayer;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomJoin;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomLeave;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomKickPlayer)
-public class RoomKickPlayerRequestPacketHandler extends AbstractPacketHandler {
-    private C2SRoomKickPlayerRequestPacket roomKickPlayerRequestPacket;
-
+@PacketId(CMSGRoomKickPlayer.PACKET_ID)
+public class RoomKickPlayerRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomKickPlayer> {
     @Override
-    public boolean process(Packet packet) {
-        roomKickPlayerRequestPacket = new C2SRoomKickPlayerRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        if (connection.getClient() == null)
-            return;
-
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomKickPlayer packet) {
+        FTClient ftClient = connection.getClient();
 
         final RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer == null || !roomPlayer.isMaster())
@@ -38,7 +27,7 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractPacketHandler {
 
         if (room != null) {
             RoomPlayer playerToKick = room.getRoomPlayerList().stream()
-                    .filter(rp -> rp.getPosition() == roomKickPlayerRequestPacket.getPosition())
+                    .filter(rp -> rp.getPosition() == packet.getPosition())
                     .findAny()
                     .orElse(null);
 
@@ -50,13 +39,17 @@ public class RoomKickPlayerRequestPacketHandler extends AbstractPacketHandler {
                         .orElse(null);
 
                 if (client != null) {
-                    Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
-                    answerPacket.write((short) 0);
-                    client.getConnection().sendTCP(answerPacket);
+                    SMSGRoomLeave answer = SMSGRoomLeave.builder().result((short) 0).build();
+                    client.getConnection().sendTCP(answer);
 
                     GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);
 
-                    S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
+                    SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                            .result((char) -4)
+                            .roomType((byte) 0)
+                            .mode((byte) 0)
+                            .mapId((byte) 0)
+                            .build();
                     client.getConnection().sendTCP(roomJoinAnswerPacket);
 
                     room.getBannedPlayers().add(client.getPlayer().getId());

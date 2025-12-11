@@ -1,0 +1,3 @@
+message SMSG_SetHost (0x177E) {
+    byte result = 1;
+}

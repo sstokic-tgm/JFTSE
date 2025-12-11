@@ -23,8 +23,6 @@ import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
-import com.jftse.emulator.server.core.packets.item.S2CRequestItemSettingsPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomMapChangeAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardians;
 import com.jftse.emulator.server.core.packets.matchplay.*;
@@ -54,6 +52,9 @@ import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
+import com.jftse.server.core.shared.packets.item.SMSGItemSettings;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomChangeMap;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
@@ -128,8 +129,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             }
         }
 
-        S2CRequestItemSettingsPacket requestItemSettingsPacket = new S2CRequestItemSettingsPacket();
-        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(requestItemSettingsPacket, ftClient.getConnection());
+        SMSGItemSettings requestItemSettings = SMSGItemSettings.builder().build();
+        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(requestItemSettings, ftClient.getConnection());
 
         ThreadManager.getInstance().newTask(new GuardianAttackTask(ftClient.getConnection()));
         ThreadManager.getInstance().newTask(new DefeatTimerTask(ftClient.getConnection(), gameSession));
@@ -521,7 +522,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     }
 
     @Override
-    public void onPoint(FTClient ftClient, C2SMatchplayPointPacket matchplayPointPacket) {
+    public void onPoint(FTClient ftClient, CMSGPoint pointPacket) {
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide().get() == GameFieldSide.Guardian;
 
         byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
@@ -550,12 +551,12 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         int monsLavaBProbability = random.nextInt(101);
         if (isMonsLava && averagePlayerLevel >= 40 && monsLavaBProbability <= 26) {
             room.setMap((byte) 8); // MonsLavaB
-            S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(room.getMap());
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(roomMapChangeAnswerPacket, connection);
+            SMSGRoomChangeMap roomChangeMapPacket = SMSGRoomChangeMap.builder().map(room.getMap()).build();
+            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(roomChangeMapPacket, connection);
         } else if (room.getMap() == 8) {
             room.setMap((byte) 7); // MonsLava
-            S2CRoomMapChangeAnswerPacket roomMapChangeAnswerPacket = new S2CRoomMapChangeAnswerPacket(room.getMap());
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(roomMapChangeAnswerPacket, connection);
+            SMSGRoomChangeMap roomChangeMapPacket = SMSGRoomChangeMap.builder().map(room.getMap()).build();
+            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(roomChangeMapPacket, connection);
         }
     }
 

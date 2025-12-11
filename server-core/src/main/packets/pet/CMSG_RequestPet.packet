@@ -1,0 +1,3 @@
+message CMSG_RequestPet (0x1D56) {
+    byte slot = 1;
+}

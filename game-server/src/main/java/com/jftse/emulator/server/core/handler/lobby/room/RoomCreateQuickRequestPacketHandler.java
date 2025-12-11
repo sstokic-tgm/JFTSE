@@ -3,30 +3,21 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.server.core.constants.RoomType;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomCreateQuickRequestPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomCreateQuick;
 
 import java.util.Random;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomCreateQuick)
-public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
-    private C2SRoomCreateQuickRequestPacket roomQuickCreateRequestPacket;
-
+@PacketId(CMSGRoomCreateQuick.PACKET_ID)
+public class RoomCreateQuickRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomCreateQuick> {
     @Override
-    public boolean process(Packet packet) {
-        roomQuickCreateRequestPacket = new C2SRoomCreateQuickRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomCreateQuick packet) {
+        FTClient client = connection.getClient();
         // prevent multiple room creations, this might have to be adjusted into a "room join answer"
         if (client != null && client.getActiveRoom() != null)
             return;
@@ -34,7 +25,7 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
         if (client == null)
             return;
 
-        if (roomQuickCreateRequestPacket.getRoomType() == RoomType.BATTLEMON) {
+        if (packet.getRoomType() == RoomType.BATTLEMON) {
             //GameManager.getInstance().handleChatLobbyJoin(client);
             return;
         }
@@ -47,23 +38,23 @@ public class RoomCreateQuickRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
-        byte playerSize = roomQuickCreateRequestPacket.getPlayers();
+        byte playerSize = packet.getPlayers();
 
         Room room = new Room();
         room.setRoomId(GameManager.getInstance().getRoomId());
         room.setRoomName(String.format("%s's room", player.getName()));
-        room.setRoomType(roomQuickCreateRequestPacket.getRoomType());
+        room.setRoomType(packet.getRoomType());
         room.setAllowBattlemon(room.getRoomType() == 2 ? (byte) 1 : (byte) 0);
 
-        if (roomQuickCreateRequestPacket.getMode() == -1) {
+        if (packet.getMode() == -1) {
             final Random random = new Random();
-            roomQuickCreateRequestPacket.setMode((byte) random.nextInt(2));
+            packet.setMode((byte) random.nextInt(2));
         }
 
-        room.setMode(roomQuickCreateRequestPacket.getMode());
+        room.setMode(packet.getMode());
         room.setRule((byte) 0);
 
-        if (roomQuickCreateRequestPacket.getMode() == GameMode.GUARDIAN)
+        if (packet.getMode() == GameMode.GUARDIAN)
             room.setPlayers((byte) 4);
         else
             room.setPlayers(playerSize == 0 ? 2 : playerSize);

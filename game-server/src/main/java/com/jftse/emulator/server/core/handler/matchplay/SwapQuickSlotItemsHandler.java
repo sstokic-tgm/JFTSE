@@ -3,23 +3,20 @@ package com.jftse.emulator.server.core.handler.matchplay;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplaySwapQuickSlotItems;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayGivePlayerSkills;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
+import com.jftse.server.core.shared.packets.matchplay.CMSGSwapSpell;
 
-@PacketOperationIdentifier(PacketOperations.C2SMatchplaySwapQuickSlotItems)
-public class SwapQuickSlotItemsHandler extends AbstractPacketHandler {
-    private C2SMatchplaySwapQuickSlotItems swapQuickSlotItems;
-
+@PacketId(CMSGSwapSpell.PACKET_ID)
+public class SwapQuickSlotItemsHandler implements PacketHandler<FTConnection, CMSGSwapSpell> {
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
 
@@ -29,14 +26,8 @@ public class SwapQuickSlotItemsHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        swapQuickSlotItems = new C2SMatchplaySwapQuickSlotItems(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGSwapSpell packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getActiveGameSession() == null
                 || ftClient.getActiveRoom() == null || ftClient.getPlayer() == null)
             return;
@@ -56,7 +47,7 @@ public class SwapQuickSlotItemsHandler extends AbstractPacketHandler {
         }
 
         S2CMatchplayGivePlayerSkills givePlayerSkills
-                = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), swapQuickSlotItems.getTargetLeftSlotSkill(), swapQuickSlotItems.getTargetRightSlotSkill());
-        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(givePlayerSkills, ftClient.getConnection());
+                = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), packet.getTargetLeftSlotSkill(), packet.getTargetRightSlotSkill());
+        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(givePlayerSkills, connection);
     }
 }

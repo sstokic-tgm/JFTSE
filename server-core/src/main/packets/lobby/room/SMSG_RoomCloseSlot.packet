@@ -1,0 +1,4 @@
+message SMSG_RoomCloseSlot (0x1D4E) {
+    byte slot = 1;
+    bool close = 2;
+}

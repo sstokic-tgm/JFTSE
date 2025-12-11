@@ -11,9 +11,7 @@ import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayUsesSkill;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage;
-import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayUseSkill;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
@@ -24,25 +22,22 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.QuickSlotEquipment;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.matchplay.battle.SkillUse;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
-import com.jftse.server.core.thread.ThreadManager;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPlayerUseSkill;
+import com.jftse.server.core.shared.packets.matchplay.SMSGPlayerUseSkill;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SMatchplayPlayerUseSkill)
-public class PlayerUseSkillHandler extends AbstractPacketHandler {
-    private C2SMatchplayUsesSkill anyoneUsesSkill;
-
+@PacketId(CMSGPlayerUseSkill.PACKET_ID)
+public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPlayerUseSkill> {
     private final SkillService skillService;
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
@@ -63,17 +58,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        anyoneUsesSkill = new C2SMatchplayUsesSkill(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        ThreadManager.getInstance().newTask(() -> handle((FTConnection) connection));
-    }
-
-    private void handle(FTConnection connection) {
+    public void handle(FTConnection connection, CMSGPlayerUseSkill anyoneUsesSkill) {
         FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getActiveGameSession() == null
                 || ftClient.getPlayer() == null || ftClient.getRoomPlayer() == null)
@@ -84,7 +69,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
         byte attackerPosition = anyoneUsesSkill.getAttackerPosition();
         byte targetPosition = anyoneUsesSkill.getTargetPosition();
-        boolean isQuickSlot = anyoneUsesSkill.isQuickSlot();
+        boolean isQuickSlot = anyoneUsesSkill.getIsQuickSlot();
 
         boolean attackerIsGuardian = attackerPosition > 9;
         boolean attackerIsPlayer = attackerPosition < 4;
@@ -105,29 +90,36 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
 
         if (attackerIsGuardian) {
             if (skill != null) {
-                this.handleSpecialSkillsUseOfGuardians(ftClient.getConnection(), attackerPosition, (MatchplayGuardianGame) game, skill);
+                this.handleSpecialSkillsUseOfGuardians(connection, attackerPosition, (MatchplayGuardianGame) game, skill);
             }
         } else if (attackerIsPlayer) {
             if (roomPlayer != null) {
                 if (isQuickSlot) {
-                    if (!isQsUseValid(skillUseTimestamp, player, skill, skillUse, game, attackerPosition))
+                    if (!isQsUseValid(connection, skillUseTimestamp, player, skill, skillUse, game, attackerPosition, anyoneUsesSkill))
                         return;
 
-                    this.handleQuickSlotItemUse(ftClient.getConnection(), player, anyoneUsesSkill);
+                    this.handleQuickSlotItemUse(connection, player, anyoneUsesSkill);
                 }
             }
         }
 
-        S2CMatchplayUseSkill packet =
-                new S2CMatchplayUseSkill(attackerPosition, targetPosition, anyoneUsesSkill.getSkillIndex(), anyoneUsesSkill.getSeed(), anyoneUsesSkill.getXTarget(), anyoneUsesSkill.getZTarget(), anyoneUsesSkill.getYTarget());
+        SMSGPlayerUseSkill response = SMSGPlayerUseSkill.builder()
+                .attacker(attackerPosition)
+                .target(targetPosition)
+                .skillId(anyoneUsesSkill.getSkillIndex())
+                .seed(anyoneUsesSkill.getSeed())
+                .xTarget(anyoneUsesSkill.getXTarget())
+                .zTarget(anyoneUsesSkill.getZTarget())
+                .yTarget(anyoneUsesSkill.getYTarget())
+                .build();
         gameSession.getClients().forEach(c -> {
             if (c.getConnection().getId() != connection.getId()) {
-                c.getConnection().sendTCP(packet);
+                c.getConnection().sendTCP(response);
             }
         });
     }
 
-    private boolean isQsUseValid(long skillUseTimestamp, Player player, Skill skill, SkillUse skillUse, MatchplayGame game, byte attackerPosition) {
+    private boolean isQsUseValid(FTConnection connection, long skillUseTimestamp, Player player, Skill skill, SkillUse skillUse, MatchplayGame game, byte attackerPosition, CMSGPlayerUseSkill anyoneUsesSkill) {
         PlayerBattleState playerBattleState;
         if (game instanceof MatchplayGuardianGame) {
             playerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
@@ -180,7 +172,7 @@ public class PlayerUseSkillHandler extends AbstractPacketHandler {
         return true;
     }
 
-    private void handleQuickSlotItemUse(FTConnection connection, Player player, C2SMatchplayUsesSkill playerUseSkill) {
+    private void handleQuickSlotItemUse(FTConnection connection, Player player, CMSGPlayerUseSkill playerUseSkill) {
         Pocket pocket = player.getPocket();
 
         QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();

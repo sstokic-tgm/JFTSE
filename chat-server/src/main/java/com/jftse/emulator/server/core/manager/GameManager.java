@@ -64,7 +64,6 @@ public class GameManager implements ServerLoopHandler {
     @Autowired
     private ThreadManager threadManager;
 
-    private AtomicBoolean running;
     private ConcurrentLinkedQueue<FTConnection> addConnectionQueue;
     private ConcurrentLinkedDeque<FTClient> clients;
     private ConcurrentLinkedDeque<Room> rooms;

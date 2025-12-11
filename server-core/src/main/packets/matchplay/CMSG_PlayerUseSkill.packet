@@ -1,0 +1,13 @@
+message CMSG_PlayerUseSkill (0x18E9) {
+    byte attackerPosition = 1;
+    byte targetPosition = 2;
+    bool isQuickSlot = 3;
+    byte quickSlotIndex = 4;
+    byte skillIndex = 5;
+    int32 someKindOfTargeting = 6;
+    int32 unk0 = 7;
+    byte seed = 8;
+    float xTarget = 9;
+    float zTarget = 10;
+    float yTarget = 11;
+}

@@ -5,21 +5,17 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.matchplay.CMSGReadyToSkip;
+import com.jftse.server.core.shared.packets.matchplay.SMSGAllowSkip;
 
-@PacketOperationIdentifier(PacketOperations.C2SGameAnimationSkipReady)
-public class GameAnimationReadyToSkipPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGReadyToSkip.PACKET_ID)
+public class GameAnimationReadyToSkipPacketHandler implements PacketHandler<FTConnection, CMSGReadyToSkip> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGReadyToSkip packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null || ftClient.getActiveRoom() == null)
             return;
 
@@ -39,9 +35,8 @@ public class GameAnimationReadyToSkipPacketHandler extends AbstractPacketHandler
             if (room.getStatus() == roomStatus) {
                 room.setStatus(RoomStatus.AnimationSkipped);
 
-                Packet gameAnimationAllowSkipPacket = new Packet(PacketOperations.S2CGameAnimationAllowSkip);
-                gameAnimationAllowSkipPacket.write((char) 0);
-                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationAllowSkipPacket, ftClient.getConnection());
+                SMSGAllowSkip allowSkipPacket = SMSGAllowSkip.builder().result((char) 0).build();
+                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(allowSkipPacket, connection);
             }
         }
     }

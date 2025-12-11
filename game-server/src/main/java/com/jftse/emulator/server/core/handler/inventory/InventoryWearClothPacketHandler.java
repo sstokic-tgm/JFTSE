@@ -2,23 +2,20 @@ package com.jftse.emulator.server.core.handler.inventory;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.inventory.C2SInventoryWearClothReqPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearClothAnswerPacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.inventory.CMSGInventoryWearCloth;
 
 import java.util.Map;
 
-@PacketOperationIdentifier(PacketOperations.C2SInventoryWearClothRequest)
-public class InventoryWearClothPacketHandler extends AbstractPacketHandler {
-    private C2SInventoryWearClothReqPacket inventoryWearClothReqPacket;
-
+@PacketId(CMSGInventoryWearCloth.PACKET_ID)
+public class InventoryWearClothPacketHandler implements PacketHandler<FTConnection, CMSGInventoryWearCloth> {
     private final ClothEquipmentServiceImpl clothEquipmentService;
 
     public InventoryWearClothPacketHandler() {
@@ -26,20 +23,14 @@ public class InventoryWearClothPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        inventoryWearClothReqPacket = new C2SInventoryWearClothReqPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGInventoryWearCloth packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
         Player player = client.getPlayer();
 
-        clothEquipmentService.updateCloths(player, inventoryWearClothReqPacket);
+        clothEquipmentService.updateCloths(player, packet);
 
         StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
 

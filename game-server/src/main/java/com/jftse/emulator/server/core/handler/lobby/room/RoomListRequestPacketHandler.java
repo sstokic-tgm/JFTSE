@@ -2,35 +2,26 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomListRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomList;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomListReq)
-public class RoomListRequestPacketHandler extends AbstractPacketHandler {
-    private C2SRoomListRequestPacket roomListRequestPacket;
-
+@PacketId(CMSGRoomList.PACKET_ID)
+public class RoomListRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomList> {
     @Override
-    public boolean process(Packet packet) {
-        roomListRequestPacket = new C2SRoomListRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGRoomList packet) {
         if (connection.getClient() == null)
             return;
 
-        FTClient client = (FTClient) connection.getClient();
+        FTClient client = connection.getClient();
 
-        int roomType = roomListRequestPacket.getRoomTypeTab();
+        int roomType = packet.getRoomTypeTab();
         int gameMode;
         switch (roomType) {
             case 256:
@@ -50,7 +41,7 @@ public class RoomListRequestPacketHandler extends AbstractPacketHandler {
                 break;
         }
 
-        short direction = roomListRequestPacket.getDirection() == 0 ? (short) -1 : (short) 1;
+        short direction = packet.getDirection() == 0 ? (short) -1 : (short) 1;
         final short currentLobbyRoomListPage = (short) client.getLobbyCurrentRoomListPage();
         short newCurrentLobbyRoomListPage = currentLobbyRoomListPage;
 
@@ -76,7 +67,7 @@ public class RoomListRequestPacketHandler extends AbstractPacketHandler {
         client.setLobbyCurrentRoomListPage(newCurrentLobbyRoomListPage);
         client.setLobbyGameModeTabFilter(gameMode);
 
-        List<Room> roomList = GameManager.getInstance().getFilteredRoomsForClient((FTClient) connection.getClient());
+        List<Room> roomList = GameManager.getInstance().getFilteredRoomsForClient(connection.getClient());
         S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(roomList);
         connection.sendTCP(roomListAnswerPacket);
     }

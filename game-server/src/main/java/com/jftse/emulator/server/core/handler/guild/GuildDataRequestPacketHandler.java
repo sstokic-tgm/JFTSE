@@ -3,16 +3,16 @@ package com.jftse.emulator.server.core.handler.guild;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.guild.S2CGuildDataAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildData;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildDataRequest)
-public class GuildDataRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGGuildData.PACKET_ID)
+public class GuildDataRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildData> {
     private final GuildMemberService guildMemberService;
 
     public GuildDataRequestPacketHandler() {
@@ -20,13 +20,8 @@ public class GuildDataRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildData packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null) {
             connection.sendTCP(new S2CGuildDataAnswerPacket((short) -2, null));
             return;

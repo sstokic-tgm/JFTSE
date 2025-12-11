@@ -1,0 +1,3 @@
+message SMSG_StartGame (0x17DE) {
+    char result = 1;
+}

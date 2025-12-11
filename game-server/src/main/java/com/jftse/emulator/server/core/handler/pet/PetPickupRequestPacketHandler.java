@@ -1,22 +1,19 @@
 package com.jftse.emulator.server.core.handler.pet;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.pet.C2SPetPickupRequestPacket;
-import com.jftse.emulator.server.core.packets.pet.S2CPetPickupAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.pet.Pet;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.PetService;
+import com.jftse.server.core.shared.packets.pet.CMSGPickupPet;
+import com.jftse.server.core.shared.packets.pet.SMSGPickupPet;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SPetPickupRequest)
-public class PetPickupRequestPacketHandler extends AbstractPacketHandler {
-    private C2SPetPickupRequestPacket petPickupRequestPacket;
-
+@PacketId(CMSGPickupPet.PACKET_ID)
+public class PetPickupRequestPacketHandler implements PacketHandler<FTConnection, CMSGPickupPet> {
     private final PetService petService;
 
     public PetPickupRequestPacketHandler() {
@@ -24,27 +21,27 @@ public class PetPickupRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        petPickupRequestPacket = new C2SPetPickupRequestPacket(packet);
-        return true;
-    }
+    public void handle(FTConnection connection, CMSGPickupPet packet) {
+        FTClient ftClient = connection.getClient();
 
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
-
-        Integer newActivePetType = petPickupRequestPacket.getPetType();
+        int newActivePetType = packet.getPetType();
         List<Pet> petList = petService.findAllByPlayerId(ftClient.getPlayer().getId());
-        petList.removeIf(pet -> pet.getType() != newActivePetType.byteValue());
+        petList.removeIf(pet -> pet.getType() != (byte) newActivePetType);
 
-        S2CPetPickupAnswerPacket petPickupAnswerPacket;
+        SMSGPickupPet petPickup;
         if (newActivePetType == -1) {
             ftClient.setActivePet(null);
-            petPickupAnswerPacket = new S2CPetPickupAnswerPacket((short) 0, newActivePetType);
+            petPickup = SMSGPickupPet.builder()
+                    .result((short) 0)
+                    .petType(newActivePetType)
+                    .build();
         } else {
             ftClient.setActivePet(petList.getFirst());
-            petPickupAnswerPacket = new S2CPetPickupAnswerPacket((short) 0, petList.getFirst().getType().intValue());
+            petPickup = SMSGPickupPet.builder()
+                    .result((short) 0)
+                    .petType(petList.getFirst().getType().intValue())
+                    .build();
         }
-        connection.sendTCP(petPickupAnswerPacket);
+        connection.sendTCP(petPickup);
     }
 }

@@ -5,29 +5,19 @@ import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.C2SChatRoomReqPacket;
-import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.CMSGChatMessageRoom;
+import com.jftse.server.core.shared.packets.chat.SMSGChatMessageRoom;
 
-@PacketOperationIdentifier(PacketOperations.C2SChatRoomReq)
-public class ChatMessageRoomPacketHandler extends AbstractPacketHandler {
-    private C2SChatRoomReqPacket chatRoomReqPacket;
-
+@PacketId(CMSGChatMessageRoom.PACKET_ID)
+public class ChatMessageRoomPacketHandler implements PacketHandler<FTConnection, CMSGChatMessageRoom> {
     @Override
-    public boolean process(Packet packet) {
-        chatRoomReqPacket = new C2SChatRoomReqPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGChatMessageRoom chatRoomReqPacket) {
+        FTClient client = connection.getClient();
         final Room room = client.getActiveRoom();
         if (room == null)
             return;
@@ -37,11 +27,15 @@ public class ChatMessageRoomPacketHandler extends AbstractPacketHandler {
 
         boolean playerInSecretGmSlot = roomPlayer != null && roomPlayer.getPosition() == MiscConstants.InvisibleGmSlot;
         byte messageType = playerInSecretGmSlot ? (byte) 2 : chatRoomReqPacket.getType();
-        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket(messageType, player.getName(), chatRoomReqPacket.getMessage());
+        SMSGChatMessageRoom chatRoomMessage = SMSGChatMessageRoom.builder()
+                .type(messageType)
+                .sender(player.getName())
+                .message(chatRoomReqPacket.getMessage())
+                .build();
 
         if (CommandManager.getInstance().isCommand(chatRoomReqPacket.getMessage())) {
-            connection.sendTCP(chatRoomAnswerPacket);
-            CommandManager.getInstance().handle((FTConnection) connection, chatRoomReqPacket.getMessage());
+            connection.sendTCP(chatRoomMessage);
+            CommandManager.getInstance().handle(connection, chatRoomReqPacket.getMessage());
             return;
         }
 
@@ -57,12 +51,12 @@ public class ChatMessageRoomPacketHandler extends AbstractPacketHandler {
 
                 boolean playerCanSeeMessage = areInSameTeam(senderPos, rp.getPosition()) || rp.getPosition() == MiscConstants.InvisibleGmSlot;
                 if (c.getPlayer() != null && c.getPlayer().getId().equals(rp.getPlayerId()) && playerCanSeeMessage) {
-                    c.getConnection().sendTCP(chatRoomAnswerPacket);
+                    c.getConnection().sendTCP(chatRoomMessage);
                 }
             }
-            connection.sendTCP(chatRoomAnswerPacket); // Send to sender
+            connection.sendTCP(chatRoomMessage); // Send to sender
         } else {
-            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
+            GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomMessage));
         }
     }
 

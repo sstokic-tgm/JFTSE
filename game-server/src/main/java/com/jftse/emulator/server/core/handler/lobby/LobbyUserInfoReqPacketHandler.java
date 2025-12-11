@@ -1,24 +1,21 @@
 package com.jftse.emulator.server.core.handler.lobby;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.lobby.C2SLobbyUserInfoRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserInfoAnswerPacket;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.SocialService;
+import com.jftse.server.core.shared.packets.lobby.CMSGLobbyUserInfo;
 
-@PacketOperationIdentifier(PacketOperations.C2SLobbyUserInfoRequest)
-public class LobbyUserInfoReqPacketHandler extends AbstractPacketHandler {
-    private C2SLobbyUserInfoRequestPacket lobbyUserInfoRequestPacket;
-
+@PacketId(CMSGLobbyUserInfo.PACKET_ID)
+public class LobbyUserInfoReqPacketHandler implements PacketHandler<FTConnection, CMSGLobbyUserInfo> {
     private final PlayerService playerService;
     private final GuildMemberService guildMemberService;
     private final SocialService socialService;
@@ -30,14 +27,8 @@ public class LobbyUserInfoReqPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        lobbyUserInfoRequestPacket = new C2SLobbyUserInfoRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        Player player = playerService.findByIdFetched((long) lobbyUserInfoRequestPacket.getPlayerId());
+    public void handle(FTConnection connection, CMSGLobbyUserInfo packet) {
+        Player player = playerService.findByIdFetched((long) packet.getPlayerId());
         char result = (char) (player == null ? 1 : 0);
 
         GuildMember guildMember = guildMemberService.getByPlayer(player);

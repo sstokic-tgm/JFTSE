@@ -1,0 +1,4 @@
+message SMSG_RoomSwapPosition (0x1787) {
+    short oldPosition = 1;
+    short newPosition = 2;
+}

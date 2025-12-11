@@ -9,68 +9,6 @@ import com.jftse.server.core.protocol.PacketOperations;
 import java.util.Map;
 
 public class S2CInventoryWearClothAnswerPacket extends Packet {
-    public S2CInventoryWearClothAnswerPacket(char status, C2SInventoryWearClothReqPacket inventoryWearClothReqPacket, Player player, StatusPointsAddedDto statusPointsAddedDto) {
-        super(PacketOperations.S2CInventoryWearClothAnswer);
-
-        this.write(status); // status
-
-        if (status == 0) {
-            this.write(inventoryWearClothReqPacket.getHair());
-            this.write(inventoryWearClothReqPacket.getFace());
-            this.write(inventoryWearClothReqPacket.getDress());
-            this.write(inventoryWearClothReqPacket.getPants());
-            this.write(inventoryWearClothReqPacket.getSocks());
-            this.write(inventoryWearClothReqPacket.getShoes());
-            this.write(inventoryWearClothReqPacket.getGloves());
-            this.write(inventoryWearClothReqPacket.getRacket());
-            this.write(inventoryWearClothReqPacket.getGlasses());
-            this.write(inventoryWearClothReqPacket.getBag());
-            this.write(inventoryWearClothReqPacket.getHat());
-            this.write(inventoryWearClothReqPacket.getDye());
-
-            this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
-
-            // status points
-            this.write(player.getStrength());
-            this.write(player.getStamina());
-            this.write(player.getDexterity());
-            this.write(player.getWillpower());
-            // enchant added status points
-            this.write((byte) (statusPointsAddedDto.getAddStr() + statusPointsAddedDto.getStrength()));
-            this.write((byte) (statusPointsAddedDto.getAddSta() + statusPointsAddedDto.getStamina()));
-            this.write((byte) (statusPointsAddedDto.getAddDex() + statusPointsAddedDto.getDexterity()));
-            this.write((byte) (statusPointsAddedDto.getAddWil() + statusPointsAddedDto.getWillpower()));
-            // ??
-            for (int i = 5; i < 13; i++) {
-                this.write((byte) 0);
-            }
-            // element??
-            this.write((byte) 0);
-            this.write((byte) 0);
-
-            // earrings added status points
-            this.write(0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            // cards added status points
-            this.write(0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            this.write((byte) 0);
-            // ??
-            for (int i = 5; i < 13; i++) {
-                this.write((byte) 0);
-            }
-            // ??
-            for (int i = 5; i < 13; i++) {
-                this.write((byte) 0);
-            }
-        }
-    }
-
     public S2CInventoryWearClothAnswerPacket(char status, Map<String, Integer> inventoryEquippedCloths, Player player, StatusPointsAddedDto statusPointsAddedDto) {
         super(PacketOperations.S2CInventoryWearClothAnswer);
 

@@ -14,30 +14,27 @@ import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
-import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayPlayerPicksUpCrystal;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayGiveSpecificSkill;
 import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.battle.SkillDropRate;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import com.jftse.server.core.matchplay.battle.SkillDrop;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.SkillDropRateService;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPlayerPickupCrystal;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@PacketOperationIdentifier(PacketOperations.C2SMatchplayPlayerPicksUpCrystal)
-public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
-    private C2SMatchplayPlayerPicksUpCrystal playerPicksUpCrystalPacket;
-
+@PacketId(CMSGPlayerPickupCrystal.PACKET_ID)
+public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection, CMSGPlayerPickupCrystal> {
     private final SkillDropRateService skillDropRateService;
 
     private final EventHandler eventHandler;
@@ -49,14 +46,8 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        playerPicksUpCrystalPacket = new C2SMatchplayPlayerPicksUpCrystal(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGPlayerPickupCrystal packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getActiveGameSession() == null
                 || ftClient.getActiveRoom() == null || ftClient.getPlayer() == null)
             return;
@@ -86,11 +77,11 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
 
         SkillCrystal skillCrystal = isBattleGame ?
                 ((MatchplayBattleGame) game).getSkillCrystals().stream()
-                        .filter(x -> x.getId() == playerPicksUpCrystalPacket.getCrystalId())
+                        .filter(x -> x.getId() == packet.getCrystalId())
                         .findFirst()
                         .orElse(null) :
                 ((MatchplayGuardianGame) game).getSkillCrystals().stream()
-                        .filter(x -> x.getId() == playerPicksUpCrystalPacket.getCrystalId())
+                        .filter(x -> x.getId() == packet.getCrystalId())
                         .findFirst()
                         .orElse(null);
 
@@ -116,8 +107,8 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
                     .allMatch(p -> p.getPlayer().getLevel() >= 65);
 
             int randomSkillIndex = this.getRandomPlayerSkill(player, playerBattleState, levelRequired);
-            S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill(playerPicksUpCrystalPacket.getCrystalId(), playerPosition, randomSkillIndex);
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, ftClient.getConnection());
+            S2CMatchplayGiveSpecificSkill response = new S2CMatchplayGiveSpecificSkill(packet.getCrystalId(), playerPosition, randomSkillIndex);
+            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(response, connection);
 
             GameEventBus.call(GameEventType.MP_PLAYER_PICKING_UP_CRYSTAL, ftClient, skillCrystal, randomSkillIndex);
 
@@ -127,7 +118,7 @@ public class PlayerPickingUpCrystalHandler extends AbstractPacketHandler {
                 ((MatchplayGuardianGame) game).getSkillCrystals().removeIf(sc -> sc.getId() == skillCrystal.getId());
             }
 
-            PlaceCrystalRandomlyTask placeCrystalRandomlyTask = isBattleGame ? new PlaceCrystalRandomlyTask(ftClient.getConnection(), gameFieldSide) : new PlaceCrystalRandomlyTask(ftClient.getConnection());
+            PlaceCrystalRandomlyTask placeCrystalRandomlyTask = isBattleGame ? new PlaceCrystalRandomlyTask(connection, gameFieldSide) : new PlaceCrystalRandomlyTask(connection);
             long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval().get() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get();
 
             RunnableEvent runnableEvent = eventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);

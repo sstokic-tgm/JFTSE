@@ -11,29 +11,22 @@ import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameSetNameColorAndRemoveBlackBar;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.matchplay.CMSGSkipped;
+import com.jftse.server.core.shared.packets.matchplay.SMSGSkipped;
 import com.jftse.server.core.thread.ThreadManager;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-@PacketOperationIdentifier(PacketOperations.C2SGameAnimationSkipTriggered)
-public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandler {
-    private Packet packet;
-
+@PacketId(CMSGSkipped.PACKET_ID)
+public class GameAnimationSkipTriggeredPacketHandler implements PacketHandler<FTConnection, CMSGSkipped> {
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGSkipped packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getActiveRoom() == null
                 || ftClient.getPlayer() == null || ftClient.getActiveGameSession() == null)
             return;
@@ -67,9 +60,8 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
                 }
             }
 
-            Packet gameAnimationSkipPacket = new Packet(PacketOperations.S2CGameAnimationSkip);
-            gameAnimationSkipPacket.write((char) 0);
-            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(gameAnimationSkipPacket, ftClient.getConnection());
+            SMSGSkipped skippedPacket = SMSGSkipped.builder().result((char) 0).build();
+            GameManager.getInstance().sendPacketToAllClientsInSameGameSession(skippedPacket, ftClient.getConnection());
 
             GameEventBus.call(GameEventType.MP_GAME_ANIM_SKIP_TRIGGERED, ftClient, room, roomPlayer.get());
 
@@ -77,7 +69,7 @@ public class GameAnimationSkipTriggeredPacketHandler extends AbstractPacketHandl
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(playerStatsPacket, ftClient.getConnection());
 
             ThreadManager.getInstance().schedule(() -> {
-                FTClient client = (FTClient) connection.getClient();
+                FTClient client = connection.getClient();
                 if (client == null) return;
 
                 Room threadRoom = client.getActiveRoom();

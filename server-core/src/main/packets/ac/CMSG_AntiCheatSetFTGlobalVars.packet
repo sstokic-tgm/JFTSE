@@ -1,0 +1,4 @@
+message CMSG_AntiCheatSetFTGlobalVars (0x9798) {
+    string confName = 1;
+    int32 confValue = 2;
+}

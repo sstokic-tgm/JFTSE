@@ -1,0 +1,3 @@
+message SMSG_AntiCheatClientRegister (0x9791) {
+    byte result = 1;
+}

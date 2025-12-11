@@ -8,7 +8,6 @@ import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayReward;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayItemRewardPickupAnswer;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.player.Player;
@@ -18,6 +17,7 @@ import com.jftse.server.core.item.EItemUseType;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.service.ProductService;
+import com.jftse.server.core.shared.packets.matchplay.SMSGPickupItemReward;
 import com.jftse.server.core.thread.AbstractTask;
 
 import java.util.Calendar;
@@ -86,7 +86,13 @@ public class AutoItemRewardPickerTask extends AbstractTask {
 
                             itemReward.setClaimedPlayerPosition(rp.getPosition());
 
-                            S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) rp.getPosition(), requestingSlot, itemReward);
+                            SMSGPickupItemReward itemRewardPickup = SMSGPickupItemReward.builder()
+                                    .playerPos((byte) rp.getPosition())
+                                    .slot(requestingSlot)
+                                    .type((byte) 0) // 0 = product, 1 = material
+                                    .productIndex(itemReward.getProductIndex())
+                                    .quantity(itemReward.getProductAmount())
+                                    .build();
                             GameManager.getInstance().sendPacketToAllClientsInSameRoom(itemRewardPickup, client.getConnection());
 
                             // add reward to player pocket

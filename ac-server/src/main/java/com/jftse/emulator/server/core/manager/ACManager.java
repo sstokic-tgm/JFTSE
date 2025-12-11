@@ -32,7 +32,6 @@ public class ACManager {
         for (FTClient client : clients) {
             client.getConnection().close();
         }
-        log.info("All connections closed");
 
         clients.clear();
 

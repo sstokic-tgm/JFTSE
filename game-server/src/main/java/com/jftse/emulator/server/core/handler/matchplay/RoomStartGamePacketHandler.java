@@ -14,13 +14,15 @@ import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameNetworkSettingsPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.gameserver.GameServer;
 import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.AuthenticationService;
+import com.jftse.server.core.shared.packets.matchplay.*;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
@@ -30,10 +32,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SRoomTriggerStartGame)
-public class RoomStartGamePacketHandler extends AbstractPacketHandler {
-    private Packet packet;
-
+@PacketId(CMSGStartGame.PACKET_ID)
+public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, CMSGStartGame> {
     private final AuthenticationService authenticationService;
 
     public RoomStartGamePacketHandler() {
@@ -41,17 +41,11 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGStartGame packet) {
         Packet roomStartGameAck = new Packet(PacketOperations.S2CRoomStartGameAck);
         roomStartGameAck.write((char) 0);
 
-        FTClient ftClient = (FTClient) connection.getClient();
+        FTClient ftClient = connection.getClient();
 
         if (ftClient == null) {
             connection.sendTCP(roomStartGameAck);
@@ -95,8 +89,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
             gameSession.getClients().add(c);
         });
 
-        Packet unsetHostPacket = new Packet(PacketOperations.S2CUnsetHost);
-        unsetHostPacket.write((byte) 0);
+        SMSGUnsetHost unsetHostPacket = SMSGUnsetHost.builder().result((byte) 0).build();
 
         List<FTClient> clientInRoomLeftShiftList = new ArrayList<>(clientsInRoom);
         clientsInRoom.forEach(c -> {
@@ -127,8 +120,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
                     synchronized (threadRoom) {
                         if (!allReady || roomPlayerSizeChanged || threadRoom.getStatus() == RoomStatus.StartCancelled || threadRoom.getStatus() == RoomStatus.RelayConnectionFailed) {
                             threadRoom.setStatus(RoomStatus.NotRunning);
-                            Packet startGameCancelledPacket = new Packet(PacketOperations.S2CRoomStartGameCancelled);
-                            startGameCancelledPacket.write((char) 0);
+                            SMSGCancelStartGame cancelStartGamePacket = SMSGCancelStartGame.builder().result((char) 0).build();
 
                             threadRoom.getRoomPlayerList().forEach(rp -> {
                                 rp.setReady(false);
@@ -147,7 +139,7 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
                             GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), threadRoom);
                             GameManager.getInstance().getClientsInRoom(threadRoom.getRoomId()).forEach(c -> {
                                 if (c.getConnection() != null) {
-                                    c.getConnection().sendTCP(startGameCancelledPacket);
+                                    c.getConnection().sendTCP(cancelStartGamePacket);
                                     c.getConnection().sendTCP(roomStartGameAck);
                                     c.getConnection().sendTCP(unsetHostPacket);
                                 }
@@ -169,18 +161,16 @@ public class RoomStartGamePacketHandler extends AbstractPacketHandler {
             FTClient clientToHostGame = GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
                     .filter(x -> playerInSlot0 != null && x.getPlayer() != null && x.getPlayer().getId().equals(playerInSlot0.getPlayer().getId()))
                     .findFirst()
-                    .orElse((FTClient) connection.getClient());
-            Packet setHostPacket = new Packet(PacketOperations.S2CSetHost);
-            setHostPacket.write((byte) 1);
+                    .orElse(connection.getClient());
+            SMSGSetHost setHostPacket = SMSGSetHost.builder().result((byte) 1).build();
             clientToHostGame.getConnection().sendTCP(setHostPacket);
 
-            Packet setHostUnknownPacket = new Packet(PacketOperations.S2CSetHostUnknown);
+            SMSGSetHost setHostUnknownPacket = SMSGSetHost.builder().build();
             clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
 
             game.getHandleable().onPrepare(ftClient);
 
-            Packet startGamePacket = new Packet(PacketOperations.S2CRoomStartGame);
-            startGamePacket.write((char) 0);
+            SMSGStartGame startGamePacket = SMSGStartGame.builder().result((char) 0).build();
 
             synchronized (room) {
                 room.setStatus(RoomStatus.InitializingGame);

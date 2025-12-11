@@ -3,27 +3,18 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomSlotCloseRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSlotCloseAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomCloseSlot;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomCloseSlot;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomSlotCloseReq)
-public class RoomSlotCloseRequestPacketHandler extends AbstractPacketHandler {
-    private C2SRoomSlotCloseRequestPacket roomSlotCloseRequestPacket;
-
+@PacketId(CMSGRoomCloseSlot.PACKET_ID)
+public class RoomSlotCloseRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomCloseSlot> {
     @Override
-    public boolean process(Packet packet) {
-        roomSlotCloseRequestPacket = new C2SRoomSlotCloseRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomCloseSlot packet) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -31,17 +22,17 @@ public class RoomSlotCloseRequestPacketHandler extends AbstractPacketHandler {
             return;
         }
 
-        boolean deactivate = roomSlotCloseRequestPacket.isDeactivate();
+        boolean close = packet.getClose();
 
-        byte slot = roomSlotCloseRequestPacket.getSlot();
+        byte slot = packet.getSlot();
         Room room = client.getActiveRoom();
         if (room != null) {
-            room.getPositions().set(slot, deactivate ? RoomPositionState.Locked : RoomPositionState.Free);
+            room.getPositions().set(slot, close ? RoomPositionState.Locked : RoomPositionState.Free);
 
-            S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket(slot, deactivate);
+            SMSGRoomCloseSlot closeSlot = SMSGRoomCloseSlot.builder().slot(slot).close(close).build();
             GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
                 if (c.getConnection() != null) {
-                    c.getConnection().sendTCP(roomSlotCloseAnswerPacket);
+                    c.getConnection().sendTCP(closeSlot);
                 }
             });
         }

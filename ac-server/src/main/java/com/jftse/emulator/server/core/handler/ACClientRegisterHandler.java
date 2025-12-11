@@ -4,11 +4,11 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.ClientWhitelistService;
+import com.jftse.server.core.shared.packets.ac.CMSGAntiCheatClientRegister;
+import com.jftse.server.core.shared.packets.ac.SMSGAntiCheatClientRegister;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -16,12 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@PacketOperationIdentifier(PacketOperations.C2SAntiCheatClientRegister)
-public class ACClientRegisterHandler extends AbstractPacketHandler {
-    private Packet packet;
-
-    private String str;
-
+@PacketId(CMSGAntiCheatClientRegister.PACKET_ID)
+public class ACClientRegisterHandler implements PacketHandler<FTConnection, CMSGAntiCheatClientRegister> {
     private final ClientWhitelistService clientWhitelistService;
 
     public ACClientRegisterHandler() {
@@ -29,15 +25,8 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        str = packet.read(String.class);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTConnection connection = (FTConnection) this.connection;
+    public void handle(FTConnection connection, CMSGAntiCheatClientRegister packet) {
+        String str = packet.getStr();
 
         InetSocketAddress inetSocketAddress = connection.getRemoteAddressTCP();
         if (inetSocketAddress != null) {
@@ -58,9 +47,8 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
                     boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
 
                     if (!valid) {
-                        Packet unknownAnswer = new Packet((char) 0x9791);
-                        unknownAnswer.write((byte) 1);
-                        connection.sendTCP(unknownAnswer);
+                        SMSGAntiCheatClientRegister response = SMSGAntiCheatClientRegister.builder().result((byte) 1).build();
+                        connection.sendTCP(response);
                     }
                 } else {
                     boolean valid = files.entrySet().stream().allMatch(Map.Entry::getValue);
@@ -74,14 +62,12 @@ public class ACClientRegisterHandler extends AbstractPacketHandler {
                             clientWhitelist.setIsAuthenticated(true);
                             clientWhitelistService.save(clientWhitelist);
 
-                            Packet unknownAnswer = new Packet((char) 0x9791);
-                            unknownAnswer.write((byte) 0);
-                            connection.sendTCP(unknownAnswer);
+                            SMSGAntiCheatClientRegister response = SMSGAntiCheatClientRegister.builder().result((byte) 0).build();
+                            connection.sendTCP(response);
                         }
                     } else {
-                        Packet unknownAnswer = new Packet((char) 0x9791);
-                        unknownAnswer.write((byte) 2);
-                        connection.sendTCP(unknownAnswer);
+                        SMSGAntiCheatClientRegister response = SMSGAntiCheatClientRegister.builder().result((byte) 2).build();
+                        connection.sendTCP(response);
                     }
                 }
             }

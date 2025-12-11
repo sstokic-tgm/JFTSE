@@ -2,21 +2,18 @@ package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildChangeMasterRequestPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildChangeMasterAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildChangeMaster;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildChangeMaster;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildChangeMasterRequest)
-public class GuildChangeMasterRequestPacketHandler extends AbstractPacketHandler {
-    private C2SGuildChangeMasterRequestPacket guildChangeMasterRequestPacket;
-
+@PacketId(CMSGGuildChangeMaster.PACKET_ID)
+public class GuildChangeMasterRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildChangeMaster> {
     private final GuildMemberService guildMemberService;
 
     public GuildChangeMasterRequestPacketHandler() {
@@ -24,16 +21,10 @@ public class GuildChangeMasterRequestPacketHandler extends AbstractPacketHandler
     }
 
     @Override
-    public boolean process(Packet packet) {
-        guildChangeMasterRequestPacket = new C2SGuildChangeMasterRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildChangeMaster guildChangeMasterRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null) {
-            connection.sendTCP(new S2CGuildChangeMasterAnswerPacket((short) -1));
+            connection.sendTCP(SMSGGuildChangeMaster.builder().result((short) -1).build());
             return;
         }
 
@@ -52,10 +43,10 @@ public class GuildChangeMasterRequestPacketHandler extends AbstractPacketHandler
                 newClubMaster.setMemberRank((byte) 3);
                 guildMemberService.save(newClubMaster);
 
-                connection.sendTCP(new S2CGuildChangeMasterAnswerPacket((short) 0));
+                connection.sendTCP(SMSGGuildChangeMaster.builder().result((short) 0).build());
             }
         } else {
-            connection.sendTCP(new S2CGuildChangeMasterAnswerPacket((short) -1));
+            connection.sendTCP(SMSGGuildChangeMaster.builder().result((short) -1).build());
         }
     }
 }

@@ -2,21 +2,16 @@ package com.jftse.emulator.server.core.handler.lobby;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.CMSGLobbyLeave;
 
-@PacketOperationIdentifier(PacketOperations.C2SLobbyLeave)
-public class LobbyLeavePacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGLobbyLeave.PACKET_ID)
+public class LobbyLeavePacketHandler implements PacketHandler<FTConnection, CMSGLobbyLeave> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGLobbyLeave packet) {
+        FTClient client = connection.getClient();
 
         if (!client.getIsJoiningOrLeavingLobby().compareAndSet(false, true)) {
             return;

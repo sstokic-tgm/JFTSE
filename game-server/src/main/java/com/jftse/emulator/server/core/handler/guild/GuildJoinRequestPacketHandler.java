@@ -1,26 +1,23 @@
 package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildJoinRequestPacket;
 import com.jftse.emulator.server.core.packets.guild.S2CGuildDataAnswerPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildJoinAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.GuildService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildJoin;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildJoin;
 
 import java.util.Date;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildJoinRequest)
-public class GuildJoinRequestPacketHandler extends AbstractPacketHandler {
-    private C2SGuildJoinRequestPacket guildJoinRequestPacket;
-
+@PacketId(CMSGGuildJoin.PACKET_ID)
+public class GuildJoinRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildJoin> {
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
 
@@ -30,14 +27,8 @@ public class GuildJoinRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        guildJoinRequestPacket = new C2SGuildJoinRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildJoin guildJoinRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -45,28 +36,28 @@ public class GuildJoinRequestPacketHandler extends AbstractPacketHandler {
         GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
 
         if (guildMember != null && guildMember.getWaitingForApproval()) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -3));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) -3).build());
             return;
         }
 
         if (guildMember != null) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -2));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) -2).build());
             return;
         }
 
         Guild guild = guildService.findById((long) guildJoinRequestPacket.getGuildId());
         if (guild == null) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -1));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) -1).build());
             return;
         }
 
         if (guild.getMemberList().stream().filter(x -> !x.getWaitingForApproval()).count() >= guild.getMaxMemberCount()) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -7));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) -7).build());
             return;
         }
 
         if (activePlayer.getLevel() < guild.getLevelRestriction()) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -4));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) -4).build());
             return;
         }
 
@@ -77,7 +68,7 @@ public class GuildJoinRequestPacketHandler extends AbstractPacketHandler {
         }
 
         if (!characterAllowed) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) -5));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) -5).build());
             return;
         }
 
@@ -90,10 +81,10 @@ public class GuildJoinRequestPacketHandler extends AbstractPacketHandler {
         guildMemberService.save(guildMember);
 
         if (guild.getIsPublic()) {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) 1));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) 1).build());
             connection.sendTCP(new S2CGuildDataAnswerPacket((short) 0, guild));
         } else {
-            connection.sendTCP(new S2CGuildJoinAnswerPacket((short) 0));
+            connection.sendTCP(SMSGGuildJoin.builder().result((short) 0).build());
         }
     }
 }

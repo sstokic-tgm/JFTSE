@@ -1,12 +1,11 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.messenger.C2SSendParcelRequestPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CParcelListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedParcelNotificationPacket;
-import com.jftse.emulator.server.core.packets.messenger.S2CSendParcelAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
@@ -14,20 +13,18 @@ import com.jftse.entities.database.model.messenger.EParcelType;
 import com.jftse.entities.database.model.messenger.Parcel;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
+import com.jftse.server.core.shared.packets.messenger.CMSGSendParcel;
+import com.jftse.server.core.shared.packets.messenger.SMSGSendParcel;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SSendParcelRequest)
-public class SendParcelRequestHandler extends AbstractPacketHandler {
-    private C2SSendParcelRequestPacket c2SSendParcelRequestPacket;
-
+@PacketId(CMSGSendParcel.PACKET_ID)
+public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMSGSendParcel> {
     private final PlayerService playerService;
     private final ProductService productService;
     private final PlayerPocketService playerPocketService;
@@ -47,46 +44,40 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SSendParcelRequestPacket = new C2SSendParcelRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGSendParcel packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null)
             return;
 
-        PlayerPocket item = playerPocketService.findById(c2SSendParcelRequestPacket.getPlayerPocketId().longValue());
+        PlayerPocket item = playerPocketService.findById((long) packet.getPlayerPocketId());
         if (item == null) {
-            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
-            connection.sendTCP(s2CSendParcelAnswerPacket);
+            SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
+            connection.sendTCP(response);
             return;
         }
 
-        if (c2SSendParcelRequestPacket.getCashOnDelivery() > 1000000) {
-            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -5);
-            connection.sendTCP(s2CSendParcelAnswerPacket);
+        if (packet.getCashOnDelivery() > 1000000) {
+            SMSGSendParcel response = SMSGSendParcel.builder().status((short) -5).build();
+            connection.sendTCP(response);
             return;
         }
 
         Product product = productService.findProductByItemAndCategoryAndEnabledIsTrue(item.getItemIndex(), item.getCategory());
 
         if (product != null && !product.getEnableParcel()) {
-            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
-            connection.sendTCP(s2CSendParcelAnswerPacket);
+            SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
+            connection.sendTCP(response);
         } else {
             Player sender = ftClient.getPlayer();
             if (sender == null) {
-                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
-                connection.sendTCP(s2CSendParcelAnswerPacket);
+                SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
+                connection.sendTCP(response);
                 return;
             }
 
             if (!sender.getPocket().getId().equals(item.getPocket().getId())) {
-                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
-                connection.sendTCP(s2CSendParcelAnswerPacket);
+                SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
+                connection.sendTCP(response);
 
                 GameLog gameLog = new GameLog();
                 gameLog.setGameLogType(GameLogType.BANABLE);
@@ -97,22 +88,22 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
             }
 
             if (sender.getLevel() < 20) {
-                S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -4);
-                connection.sendTCP(s2CSendParcelAnswerPacket);
+                SMSGSendParcel response = SMSGSendParcel.builder().status((short) -4).build();
+                connection.sendTCP(response);
             } else {
-                Player receiver = playerService.findByName(c2SSendParcelRequestPacket.getReceiverName());
+                Player receiver = playerService.findByName(packet.getReceiverName());
                 if (receiver != null) {
                     if (receiver.getLevel() < 20) {
-                        S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -4);
-                        connection.sendTCP(s2CSendParcelAnswerPacket);
+                        SMSGSendParcel response = SMSGSendParcel.builder().status((short) -4).build();
+                        connection.sendTCP(response);
                         return;
                     }
 
                     List<Parcel> receiverParcels = parcelService.findByReceiver(receiver);
                     List<Parcel> senderParcels = parcelService.findBySender(sender);
                     if (receiverParcels.size() > 128 || senderParcels.size() > 128) {
-                        S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -1);
-                        connection.sendTCP(s2CSendParcelAnswerPacket);
+                        SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
+                        connection.sendTCP(response);
                         return;
                     }
 
@@ -120,8 +111,8 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
                     Parcel parcel = new Parcel();
                     parcel.setReceiver(receiver);
                     parcel.setSender(sender);
-                    parcel.setMessage(c2SSendParcelRequestPacket.getMessage());
-                    parcel.setGold(c2SSendParcelRequestPacket.getCashOnDelivery());
+                    parcel.setMessage(packet.getMessage());
+                    parcel.setGold(packet.getCashOnDelivery());
 
                     parcel.setItemCount(item.getItemCount());
                     parcel.setCategory(item.getCategory());
@@ -144,16 +135,16 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
                     sender = playerService.updateMoney(sender, -30); // fee 30 gold
                     if (sender.getGold() < 0) {
                         playerService.updateMoney(sender, 30);
-                        S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -2);
-                        connection.sendTCP(s2CSendParcelAnswerPacket);
+                        SMSGSendParcel response = SMSGSendParcel.builder().status((short) -2).build();
+                        connection.sendTCP(response);
                         return;
                     }
 
                     if (parcel.getEParcelType().equals(EParcelType.Gold)) {
                         final int newGold = sender.getGold() - parcel.getGold();
                         if (newGold < 0) {
-                            S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) -2);
-                            connection.sendTCP(s2CSendParcelAnswerPacket);
+                            SMSGSendParcel response = SMSGSendParcel.builder().status((short) -2).build();
+                            connection.sendTCP(response);
                             return;
                         }
                     }
@@ -177,8 +168,8 @@ public class SendParcelRequestHandler extends AbstractPacketHandler {
                     //-2 = You do not have enough gold
                     //-4 = Under level 20 user can not send parcel
                     //-5 = Gold transactions must be under 1.000.000
-                    S2CSendParcelAnswerPacket s2CSendParcelAnswerPacket = new S2CSendParcelAnswerPacket((short) 0);
-                    connection.sendTCP(s2CSendParcelAnswerPacket);
+                    SMSGSendParcel response = SMSGSendParcel.builder().status((short) 0).build();
+                    connection.sendTCP(response);
 
                     S2CInventoryItemRemoveAnswerPacket s2CInventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
                     connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);

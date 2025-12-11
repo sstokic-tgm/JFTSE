@@ -1,0 +1,3 @@
+message CMSG_AntiCheatHeartBeat (0x9792) {
+    int64 clientTimestamp = 1;
+}

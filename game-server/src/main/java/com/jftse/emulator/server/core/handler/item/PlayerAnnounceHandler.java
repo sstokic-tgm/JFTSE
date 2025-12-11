@@ -3,34 +3,24 @@ package com.jftse.emulator.server.core.handler.item;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.item.C2SPlayerAnnouncePacket;
-import com.jftse.emulator.server.core.packets.item.S2CPlayerAnnouncePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.item.CMSGPlayerAnnounce;
+import com.jftse.server.core.shared.packets.item.SMSGPlayerAnnounce;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SPlayerAnnounce)
-public class PlayerAnnounceHandler extends AbstractPacketHandler {
-    private C2SPlayerAnnouncePacket playerAnnouncePacket;
-
+@PacketId(CMSGPlayerAnnounce.PACKET_ID)
+public class PlayerAnnounceHandler implements PacketHandler<FTConnection, CMSGPlayerAnnounce> {
     @Override
-    public boolean process(Packet packet) {
-        playerAnnouncePacket = new C2SPlayerAnnouncePacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGPlayerAnnounce packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -40,7 +30,7 @@ public class PlayerAnnounceHandler extends AbstractPacketHandler {
         if (pocket == null)
             return;
 
-        BaseItem baseItem = ItemFactory.getItem(playerAnnouncePacket.getPlayerPocketId(), pocket);
+        BaseItem baseItem = ItemFactory.getItem(packet.getPlayerPocketId(), pocket);
         if (baseItem == null)
             return;
 
@@ -54,14 +44,19 @@ public class PlayerAnnounceHandler extends AbstractPacketHandler {
             textSize = 0;
             textColor = 0;
         } else {
-            textSize = playerAnnouncePacket.getTextSize();
-            textColor = playerAnnouncePacket.getTextColor();
+            textSize = packet.getTextSize();
+            textColor = packet.getTextColor();
         }
 
-        S2CPlayerAnnouncePacket playerAnnounceAnswerPacket = new S2CPlayerAnnouncePacket(player.getName(), textSize, textColor, playerAnnouncePacket.getMessage());
+        SMSGPlayerAnnounce playerAnnounceAnswerPacket = SMSGPlayerAnnounce.builder()
+                .playerName(player.getName())
+                .textSize(textSize)
+                .textColor(textColor)
+                .message(packet.getMessage())
+                .build();
         final ConcurrentLinkedDeque<FTClient> clients = GameManager.getInstance().getClients();
         clients.stream()
-                .filter(c -> c.getConnection() != null && c.getActiveGameSession() == null)
+                .filter(c -> c.getConnection() != null)
                 .map(FTClient::getConnection)
                 .forEach(c -> c.sendTCP(playerAnnounceAnswerPacket));
 

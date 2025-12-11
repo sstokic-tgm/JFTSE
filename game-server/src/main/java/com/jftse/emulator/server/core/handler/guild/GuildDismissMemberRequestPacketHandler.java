@@ -2,23 +2,20 @@ package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildDismissMemberRequestPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildDismissMemberAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.GuildService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildDismissMember;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildDismissMember;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildDismissMemberRequest)
-public class GuildDismissMemberRequestPacketHandler extends AbstractPacketHandler {
-    private C2SGuildDismissMemberRequestPacket guildDismissMemberRequestPacket;
-
+@PacketId(CMSGGuildDismissMember.PACKET_ID)
+public class GuildDismissMemberRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildDismissMember> {
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
 
@@ -28,14 +25,8 @@ public class GuildDismissMemberRequestPacketHandler extends AbstractPacketHandle
     }
 
     @Override
-    public boolean process(Packet packet) {
-        guildDismissMemberRequestPacket = new C2SGuildDismissMemberRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildDismissMember guildDismissMemberRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -49,8 +40,8 @@ public class GuildDismissMemberRequestPacketHandler extends AbstractPacketHandle
 
             if (dismissMember != null) {
                 if (dismissMember.getMemberRank() == 3) {
-                    S2CGuildDismissMemberAnswerPacket answerPacketForDismissedMember = new S2CGuildDismissMemberAnswerPacket((short) -5);
-                    connection.sendTCP(answerPacketForDismissedMember);
+                    SMSGGuildDismissMember dismissMemberPacket = SMSGGuildDismissMember.builder().result((short) -5).build();
+                    connection.sendTCP(dismissMemberPacket);
                 } else {
                     Guild guild = dismissMember.getGuild();
                     guild.getMemberList().removeIf(x -> x.getId().equals(dismissMember.getId()));
@@ -62,8 +53,8 @@ public class GuildDismissMemberRequestPacketHandler extends AbstractPacketHandle
                             .orElse(null);
 
                     if (targetClient != null) {
-                        S2CGuildDismissMemberAnswerPacket answerPacketForDismissedMember = new S2CGuildDismissMemberAnswerPacket((short) 0);
-                        targetClient.getConnection().sendTCP(answerPacketForDismissedMember);
+                        SMSGGuildDismissMember dismissMemberPacket = SMSGGuildDismissMember.builder().result((short) 0).build();
+                        targetClient.getConnection().sendTCP(dismissMemberPacket);
                     }
                 }
             }

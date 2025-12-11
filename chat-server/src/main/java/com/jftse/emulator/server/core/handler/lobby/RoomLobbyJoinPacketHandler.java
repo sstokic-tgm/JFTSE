@@ -11,7 +11,7 @@ import com.jftse.server.core.shared.packets.lobby.SMSGRoomLobbyJoin;
 public class RoomLobbyJoinPacketHandler implements PacketHandler<FTConnection, CMSGRoomLobbyJoin> {
     @Override
     public void handle(FTConnection connection, CMSGRoomLobbyJoin packet) {
-        FTClient client = (FTClient) connection.getClient();
+        FTClient client = connection.getClient();
         if (client == null) {
             return;
         }

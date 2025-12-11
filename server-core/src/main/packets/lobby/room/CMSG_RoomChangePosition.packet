@@ -1,0 +1,3 @@
+message CMSG_RoomChangePosition (0x1785) {
+    short position = 1;
+}

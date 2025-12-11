@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.net;
 
+import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
-import com.jftse.emulator.server.core.packets.gameserver.S2CGameServerAnswerPacket;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeGame;
 import com.jftse.emulator.server.core.singleplay.tutorial.TutorialGame;
 import com.jftse.entities.database.model.account.Account;
@@ -14,6 +14,7 @@ import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.net.Client;
+import com.jftse.server.core.shared.packets.game.SMSGReceiveData;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,6 +35,8 @@ public class FTClient extends Client<FTConnection> {
     private Room activeRoom;
     private RoomPlayer roomPlayer;
     private Integer gameSessionId;
+
+    private FruitManager fruitManager = new FruitManager();
 
     private volatile boolean inLobby = false;
     private volatile boolean isSpectator = false;
@@ -60,8 +63,12 @@ public class FTClient extends Client<FTConnection> {
     public boolean updateDataRequestStep(int step) {
         boolean valid = dataRequestStep.compareAndSet(step - 1, step);
 
-        S2CGameServerAnswerPacket gameServerAnswerPacket = new S2CGameServerAnswerPacket((byte) step, valid ? (byte) 0 : (byte) 1);
-        connection.sendTCP(gameServerAnswerPacket);
+        SMSGReceiveData response = SMSGReceiveData.builder()
+                .dataType((byte) step)
+                .unk0(valid ? (byte) 0 : (byte) 1)
+                .build();
+        connection.sendTCP(response);
+
         /*
         if (valid && dataRequestStep.get() == 4) {
             GameManager.getInstance().handleChatLobbyJoin(this);

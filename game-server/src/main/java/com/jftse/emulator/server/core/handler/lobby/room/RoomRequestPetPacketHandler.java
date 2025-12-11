@@ -2,36 +2,27 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SPetRequestRoomPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CPetRequestRoomAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.pet.Pet;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.pet.CMSGRequestPet;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SPetRequestRoom)
-public class RoomRequestPetPacketHandler extends AbstractPacketHandler {
-    private C2SPetRequestRoomPacket petRequestRoomPacket;
-
+@PacketId(CMSGRequestPet.PACKET_ID)
+public class RoomRequestPetPacketHandler implements PacketHandler<FTConnection, CMSGRequestPet> {
     public RoomRequestPetPacketHandler() {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        petRequestRoomPacket = new C2SPetRequestRoomPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        final byte slot = petRequestRoomPacket.getSlot();
+    public void handle(FTConnection connection, CMSGRequestPet packet) {
+        final byte slot = packet.getSlot();
 
         try {
-            FTClient ftClient = (FTClient) connection.getClient();
+            FTClient ftClient = connection.getClient();
             if (ftClient == null) {
                 return;
             }

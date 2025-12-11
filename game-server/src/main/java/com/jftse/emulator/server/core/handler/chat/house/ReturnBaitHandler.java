@@ -1,0 +1,55 @@
+package com.jftse.emulator.server.core.handler.chat.house;
+
+import com.jftse.emulator.server.core.life.housing.Fish;
+import com.jftse.emulator.server.core.life.housing.FishManager;
+import com.jftse.emulator.server.core.life.housing.FishState;
+import com.jftse.emulator.server.core.life.room.Room;
+import com.jftse.emulator.server.core.life.room.RoomPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.packets.chat.house.S2CFishMovePacket;
+import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.house.CMSGReturnBait;
+import com.jftse.server.core.shared.packets.chat.house.SMSGReturnBait;
+
+@PacketId(CMSGReturnBait.PACKET_ID)
+public class ReturnBaitHandler implements PacketHandler<FTConnection, CMSGReturnBait> {
+    @Override
+    public void handle(FTConnection connection, CMSGReturnBait packet) {
+        FTClient client = connection.getClient();
+        if (client == null)
+            return;
+
+        Room room = client.getActiveRoom();
+        RoomPlayer roomPlayer = client.getRoomPlayer();
+        if (room == null || roomPlayer == null)
+            return;
+
+        if (roomPlayer.getUsedRod().compareAndSet(true, false)) {
+            Fish claimedFish = FishManager.getInstance().getClaimedFish(room.getRoomId(), roomPlayer.getPosition());
+            if (claimedFish != null) {
+                claimedFish.setState(FishState.IDLE);
+                claimedFish.setBitBait(false);
+
+                S2CFishMovePacket movePacket = new S2CFishMovePacket(claimedFish.getId(), (byte) claimedFish.getState().getValue(), claimedFish.getX(), claimedFish.getY(), 0.0f);
+                GameManager.getInstance().sendPacketToAllClientsInSameRoom(movePacket, connection);
+
+                claimedFish.setSpeed(FishManager.getInstance().NORMAL_SPEED_1);
+                claimedFish.setTurningSpeed(FishManager.getInstance().NORMAL_TURNING_SPEED);
+
+                FishManager.getInstance().frightenFishes(room.getRoomId(), roomPlayer.getBaitX(), roomPlayer.getBaitY());
+            }
+
+            FishManager.getInstance().removeBaitPosition(roomPlayer.getBaitX(), roomPlayer.getBaitY());
+            roomPlayer.setBaitX(0.0f);
+            roomPlayer.setBaitY(0.0f);
+
+            SMSGReturnBait returnBait = SMSGReturnBait.builder()
+                    .playerPosition(roomPlayer.getPosition())
+                    .build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(returnBait, connection);
+        }
+    }
+}

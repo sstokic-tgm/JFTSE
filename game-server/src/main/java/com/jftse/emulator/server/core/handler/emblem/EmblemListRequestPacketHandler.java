@@ -1,19 +1,14 @@
 package com.jftse.emulator.server.core.handler.emblem;
 
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.emblem.CMSGEmblemList;
 
-@PacketOperationIdentifier(PacketOperations.C2SEmblemListRequest)
-public class EmblemListRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGEmblemList.PACKET_ID)
+public class EmblemListRequestPacketHandler implements PacketHandler<FTConnection, CMSGEmblemList> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
+    public void handle(FTConnection connection, CMSGEmblemList packet) {
         // empty..
     }
 }

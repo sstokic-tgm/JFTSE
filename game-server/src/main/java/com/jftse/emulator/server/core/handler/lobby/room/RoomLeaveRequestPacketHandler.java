@@ -2,21 +2,17 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomLeave;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomLeave;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomLeave)
-public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGRoomLeave.PACKET_ID)
+public class RoomLeaveRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomLeave> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomLeave packet) {
+        FTClient client = connection.getClient();
 
         if (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
             return;
@@ -26,9 +22,8 @@ public class RoomLeaveRequestPacketHandler extends AbstractPacketHandler {
 
         GameManager.getInstance().handleRoomPlayerChanges(client.getConnection(), true);
 
-        Packet answerPacket = new Packet(PacketOperations.S2CRoomLeaveAnswer);
-        answerPacket.write((short) 0);
-        connection.sendTCP(answerPacket);
+        SMSGRoomLeave answer = SMSGRoomLeave.builder().result((short) 0).build();
+        connection.sendTCP(answer);
 
         client.getIsJoiningOrLeavingRoom().set(false);
 

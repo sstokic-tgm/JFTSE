@@ -1,0 +1,3 @@
+message SMSG_AllowSkip (0x17E0) {
+    char result = 1;
+}

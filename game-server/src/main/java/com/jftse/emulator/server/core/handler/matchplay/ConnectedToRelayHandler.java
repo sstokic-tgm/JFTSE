@@ -4,31 +4,26 @@ import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.matchplay.CMSGConnectedToRelay;
+import com.jftse.server.core.shared.packets.matchplay.SMSGConnectedToRelay;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@PacketOperationIdentifier(PacketOperations.C2SMatchplayConnectedToRelay)
-public class ConnectedToRelayHandler extends AbstractPacketHandler {
+@PacketId(CMSGConnectedToRelay.PACKET_ID)
+public class ConnectedToRelayHandler implements PacketHandler<FTConnection, CMSGConnectedToRelay> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGConnectedToRelay packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null) {
             return;
         }
 
         RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer == null || !roomPlayer.getConnectedToRelay().compareAndSet(false, true)) {
-            Packet answer = new Packet(PacketOperations.S2CMatchplayAckRelayConnection);
-            answer.write((byte) 1);
+            SMSGConnectedToRelay answer = SMSGConnectedToRelay.builder().result((byte) 1).build();
             connection.sendTCP(answer);
 
             Room room = ftClient.getActiveRoom();

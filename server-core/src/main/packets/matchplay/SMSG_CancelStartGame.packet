@@ -1,0 +1,3 @@
+message SMSG_CancelStartGame (0x17F3) {
+    char result = 1;
+}

@@ -1,19 +1,16 @@
 package com.jftse.emulator.server.core.handler.shop;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.shop.C2SShopRequestDataPreparePacket;
-import com.jftse.emulator.server.core.packets.shop.S2CShopAnswerDataPreparePacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.ProductService;
+import com.jftse.server.core.shared.packets.shop.CMSGShopDataPrepare;
+import com.jftse.server.core.shared.packets.shop.SMSGShopDataPrepare;
 
-@PacketOperationIdentifier(PacketOperations.C2SShopRequestDataPrepare)
-public class ShopRequestDataPreparePacketHandler extends AbstractPacketHandler {
-    private C2SShopRequestDataPreparePacket shopRequestDataPreparePacket;
-
+@PacketId(CMSGShopDataPrepare.PACKET_ID)
+public class ShopRequestDataPreparePacketHandler implements PacketHandler<FTConnection, CMSGShopDataPrepare> {
     private final ProductService productService;
 
     public ShopRequestDataPreparePacketHandler() {
@@ -21,20 +18,14 @@ public class ShopRequestDataPreparePacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        shopRequestDataPreparePacket = new C2SShopRequestDataPreparePacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        byte category = shopRequestDataPreparePacket.getCategory();
-        byte part = shopRequestDataPreparePacket.getPart();
-        byte player = shopRequestDataPreparePacket.getPlayer();
+    public void handle(FTConnection connection, CMSGShopDataPrepare packet) {
+        byte category = packet.getCategory();
+        byte part = packet.getPart();
+        byte player = packet.getPlayer();
 
         int productListSize = productService.getProductListSize(category, part, player);
 
-        FTClient client = (FTClient) connection.getClient();
+        FTClient client = connection.getClient();
         if (client != null) {
             final boolean requestedShopDataPrepare = client.isRequestedShopDataPrepare();
             if (!requestedShopDataPrepare) {
@@ -42,7 +33,12 @@ public class ShopRequestDataPreparePacketHandler extends AbstractPacketHandler {
             }
         }
 
-        S2CShopAnswerDataPreparePacket shopAnswerDataPreparePacket = new S2CShopAnswerDataPreparePacket(category, part, player, productListSize);
-        connection.sendTCP(shopAnswerDataPreparePacket);
+        SMSGShopDataPrepare response = SMSGShopDataPrepare.builder()
+                .category(category)
+                .part(part)
+                .player(player)
+                .size(productListSize)
+                .build();
+        connection.sendTCP(response);
     }
 }

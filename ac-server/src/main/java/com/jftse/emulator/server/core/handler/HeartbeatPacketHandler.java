@@ -1,25 +1,19 @@
 package com.jftse.emulator.server.core.handler;
 
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.ac.CMSGAntiCheatHeartBeat;
+import com.jftse.server.core.shared.packets.ac.SMSGAntiCheatHeartBeat;
 
-@PacketOperationIdentifier(PacketOperations.C2SAntiCheatHeartbeat)
-public class HeartbeatPacketHandler extends AbstractPacketHandler {
-    private Packet packet;
-
+@PacketId(CMSGAntiCheatHeartBeat.PACKET_ID)
+public class HeartbeatPacketHandler implements PacketHandler<FTConnection, CMSGAntiCheatHeartBeat> {
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        Packet answerHeartBeat = new Packet(PacketOperations.S2CAntiCheatHeartbeat);
-        answerHeartBeat.write(packet.getClientTimestamp());
-        answerHeartBeat.write(System.currentTimeMillis());
-        connection.sendTCP(answerHeartBeat);
+    public void handle(FTConnection connection, CMSGAntiCheatHeartBeat packet) {
+        SMSGAntiCheatHeartBeat response = SMSGAntiCheatHeartBeat.builder()
+                .clientTimestamp(packet.getClientTimestamp())
+                .serverTimestamp(System.currentTimeMillis())
+                .build();
+        connection.sendTCP(response);
     }
 }

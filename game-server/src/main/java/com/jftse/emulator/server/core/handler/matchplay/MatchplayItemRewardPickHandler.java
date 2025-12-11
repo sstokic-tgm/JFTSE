@@ -8,18 +8,17 @@ import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayReward;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayItemRewardPickupRequest;
-import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayItemRewardPickupAnswer;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPickupItemReward;
+import com.jftse.server.core.shared.packets.matchplay.SMSGPickupItemReward;
 import com.jftse.server.core.thread.ThreadManager;
 
 import java.util.Calendar;
@@ -27,19 +26,11 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-@PacketOperationIdentifier(PacketOperations.C2SMatchplayItemRewardPickupRequest)
-public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
-    private C2SMatchplayItemRewardPickupRequest packet;
-
+@PacketId(CMSGPickupItemReward.PACKET_ID)
+public class MatchplayItemRewardPickHandler implements PacketHandler<FTConnection, CMSGPickupItemReward> {
     @Override
-    public boolean process(Packet packet) {
-        this.packet = new C2SMatchplayItemRewardPickupRequest(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGPickupItemReward packet) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null) {
             connection.close();
             return;
@@ -55,7 +46,7 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
 
         int roomId = room.getRoomId();
 
-        byte requestingSlot = this.packet.getSlot();
+        byte requestingSlot = packet.getSlot();
 
         if (GameSessionManager.getInstance().hasMatchplayReward(roomId)) {
             final MatchplayReward matchplayReward = GameSessionManager.getInstance().getMatchplayReward(roomId);
@@ -63,7 +54,14 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
             if (itemReward.getClaimed().compareAndSet(false, true)) {
                 itemReward.setClaimedPlayerPosition(roomPlayer.getPosition());
 
-                connection.sendTCP(new S2CMatchplayItemRewardPickupAnswer((byte) roomPlayer.getPosition(), requestingSlot, itemReward));
+                SMSGPickupItemReward response = SMSGPickupItemReward.builder()
+                        .playerPos((byte) roomPlayer.getPosition())
+                        .slot(requestingSlot)
+                        .type((byte) 0) // 0 = product, 1 = material
+                        .productIndex(itemReward.getProductIndex())
+                        .quantity(itemReward.getProductAmount())
+                        .build();
+                connection.sendTCP(response);
 
                 notifyOtherPlayersOfNewClaim(roomPlayer, (short) roomId, requestingSlot, itemReward);
 
@@ -117,8 +115,14 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
                     }
                 }
             } else {
-                S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) itemReward.getClaimedPlayerPosition(), requestingSlot, itemReward);
-                connection.sendTCP(itemRewardPickup);
+                SMSGPickupItemReward response = SMSGPickupItemReward.builder()
+                        .playerPos((byte) itemReward.getClaimedPlayerPosition())
+                        .slot(requestingSlot)
+                        .type((byte) 0) // 0 = product, 1 = material
+                        .productIndex(itemReward.getProductIndex())
+                        .quantity(itemReward.getProductAmount())
+                        .build();
+                connection.sendTCP(response);
             }
 
             long claimedRewardCount = matchplayReward.getSlotRewards().values().stream().filter(ir -> ir.getClaimed().get()).count();
@@ -134,11 +138,17 @@ public class MatchplayItemRewardPickHandler extends AbstractPacketHandler {
     private void notifyOtherPlayersOfNewClaim(RoomPlayer roomPlayer, short roomId, byte requestingSlot, MatchplayReward.ItemReward itemReward) {
         final List<FTClient> clientsInRoom = GameManager.getInstance().getClientsInRoom(roomId);
         ThreadManager.getInstance().schedule(() -> {
-            S2CMatchplayItemRewardPickupAnswer itemRewardPickup = new S2CMatchplayItemRewardPickupAnswer((byte) itemReward.getClaimedPlayerPosition(), requestingSlot, itemReward);
+            SMSGPickupItemReward response = SMSGPickupItemReward.builder()
+                    .playerPos((byte) itemReward.getClaimedPlayerPosition())
+                    .slot(requestingSlot)
+                    .type((byte) 0) // 0 = product, 1 = material
+                    .productIndex(itemReward.getProductIndex())
+                    .quantity(itemReward.getProductAmount())
+                    .build();
             clientsInRoom.stream()
                     .filter(c -> c.getConnection() != null && c.getRoomPlayer() != null && c.getRoomPlayer().getPosition() != roomPlayer.getPosition())
                     .map(FTClient::getConnection)
-                    .forEach(c -> c.sendTCP(itemRewardPickup));
+                    .forEach(c -> c.sendTCP(response));
         }, 20, TimeUnit.MILLISECONDS);
     }
 }

@@ -1,27 +1,22 @@
 package com.jftse.emulator.server.core.handler.lobby;
 
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.CMSGRoomLobbyJoin;
+import com.jftse.server.core.shared.packets.lobby.SMSGRoomLobbyJoin;
 
-@PacketOperationIdentifier(PacketOperations.C2SRequestRoomLobbyJoin)
-public class RoomLobbyJoinPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGRoomLobbyJoin.PACKET_ID)
+public class RoomLobbyJoinPacketHandler implements PacketHandler<FTConnection, CMSGRoomLobbyJoin> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomLobbyJoin packet) {
+        FTClient client = connection.getClient();
         if (client == null) {
             return;
         }
 
-        Packet requestRoomJoinPacket = new Packet(PacketOperations.S2CRequestRoomLobbyJoin);
-        requestRoomJoinPacket.write((short) 0);
-        connection.sendTCP(requestRoomJoinPacket);
+        SMSGRoomLobbyJoin response = SMSGRoomLobbyJoin.builder().result((short) 0).build();
+        connection.sendTCP(response);
     }
 }

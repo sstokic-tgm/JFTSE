@@ -13,7 +13,7 @@ public class PetPickupRequestPacketHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGPickupPet packet) {
         // To Do
-        Integer newActivePetType = packet.getPetType();
+        int newActivePetType = packet.getPetType();
 
         SMSGPickupPet response = SMSGPickupPet.builder().result((short) 0).petType(newActivePetType).build();
         connection.sendTCP(response);

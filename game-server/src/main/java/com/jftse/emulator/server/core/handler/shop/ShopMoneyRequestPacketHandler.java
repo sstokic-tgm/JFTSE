@@ -2,22 +2,17 @@ package com.jftse.emulator.server.core.handler.shop;
 
 import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.shop.CMSGGetMoney;
 
-@PacketOperationIdentifier(PacketOperations.C2SShopMoneyReq)
-public class ShopMoneyRequestPacketHandler extends AbstractPacketHandler {
+@PacketId(CMSGGetMoney.PACKET_ID)
+public class ShopMoneyRequestPacketHandler implements PacketHandler<FTConnection, CMSGGetMoney> {
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGetMoney packet) {
+        FTClient ftClient = connection.getClient();
         Player player = ftClient.getPlayer();
 
         S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);

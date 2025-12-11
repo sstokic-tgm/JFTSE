@@ -2,17 +2,15 @@ package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.C2SFTGlobalVarSetPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.AuthenticationService;
 import com.jftse.server.core.service.ClientWhitelistService;
+import com.jftse.server.core.shared.packets.ac.CMSGAntiCheatSetFTGlobalVars;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -25,10 +23,8 @@ import java.util.Optional;
 import java.util.Properties;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SAntiCheatFTGlobalVarsSet)
-public class FTGlobalVarSetHandler extends AbstractPacketHandler {
-    private C2SFTGlobalVarSetPacket packet;
-
+@PacketId(CMSGAntiCheatSetFTGlobalVars.PACKET_ID)
+public class FTGlobalVarSetHandler implements PacketHandler<FTConnection, CMSGAntiCheatSetFTGlobalVars> {
     private final ClientWhitelistService clientWhitelistService;
     private final AuthenticationService authenticationService;
 
@@ -38,14 +34,7 @@ public class FTGlobalVarSetHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        this.packet = new C2SFTGlobalVarSetPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTConnection connection = (FTConnection) this.connection;
+    public void handle(FTConnection connection, CMSGAntiCheatSetFTGlobalVars packet) {
         FTClient client = connection.getClient();
         if (client == null)
             return;

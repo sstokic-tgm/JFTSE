@@ -2,24 +2,20 @@ package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildChatRequestPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildChatAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildChatMessage;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildChatMessage;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildChatRequest)
-public class GuildChatRequestPacketHandler extends AbstractPacketHandler {
-    private C2SGuildChatRequestPacket guildChatRequestPacket;
-
+@PacketId(CMSGGuildChatMessage.PACKET_ID)
+public class GuildChatRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildChatMessage> {
     private final GuildMemberService guildMemberService;
 
     public GuildChatRequestPacketHandler() {
@@ -27,14 +23,8 @@ public class GuildChatRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        guildChatRequestPacket = new C2SGuildChatRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildChatMessage guildChatRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -43,17 +33,17 @@ public class GuildChatRequestPacketHandler extends AbstractPacketHandler {
 
         List<GuildMember> guildMembers = guildMember.getGuild().getMemberList().stream()
                 .filter(x -> !x.getWaitingForApproval())
-                .collect(Collectors.toList());
+                .toList();
         List<Integer> allPlayerIds = guildMembers.stream()
                 .map(x -> x.getPlayer().getId().intValue())
-                .collect(Collectors.toList());
+                .toList();
         List<FTClient> allClients = GameManager.getInstance().getClients().stream()
                 .filter(c -> c.getPlayer() != null && allPlayerIds.contains(c.getPlayer().getId().intValue()))
-                .collect(Collectors.toList());
+                .toList();
 
         allClients.forEach(c -> {
             if (c.getConnection() != null) {
-                c.getConnection().sendTCP(new S2CGuildChatAnswerPacket(activePlayer.getName(), guildChatRequestPacket.getMessage()));
+                c.getConnection().sendTCP(SMSGGuildChatMessage.builder().sender(activePlayer.getName()).message(guildChatRequestPacket.getMessage()).build());
             }
         });
     }

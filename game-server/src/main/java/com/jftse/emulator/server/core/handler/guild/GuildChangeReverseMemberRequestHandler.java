@@ -1,22 +1,19 @@
 package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildChangeReverseMemberRequestPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildChangeReverseMemberAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.GuildService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildChangeReverseMember;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildChangeReverseMember;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildChangeReverseMemberRequest)
-public class GuildChangeReverseMemberRequestHandler extends AbstractPacketHandler {
-    private C2SGuildChangeReverseMemberRequestPacket guildChangeReverseMemberRequestPacket;
-
+@PacketId(CMSGGuildChangeReverseMember.PACKET_ID)
+public class GuildChangeReverseMemberRequestHandler implements PacketHandler<FTConnection, CMSGGuildChangeReverseMember> {
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
 
@@ -26,14 +23,8 @@ public class GuildChangeReverseMemberRequestHandler extends AbstractPacketHandle
     }
 
     @Override
-    public boolean process(Packet packet) {
-        guildChangeReverseMemberRequestPacket = new C2SGuildChangeReverseMemberRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildChangeReverseMember guildChangeReverseMemberRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null || client.getPlayer() == null)
             return;
 
@@ -50,16 +41,16 @@ public class GuildChangeReverseMemberRequestHandler extends AbstractPacketHandle
                     reverseMember.setWaitingForApproval(false);
                     guildMemberService.save(reverseMember);
 
-                    connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 1, (short) 0));
+                    connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 1).result((short) 0).build());
                 } else {
                     reverseMember.getGuild().getMemberList().removeIf(x -> x.getId().equals(reverseMember.getId()));
                     guildService.save(reverseMember.getGuild());
 
-                    connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 0, (short) 0));
+                    connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 0).result((short) 0).build());
                 }
             }
         } else {
-            connection.sendTCP(new S2CGuildChangeReverseMemberAnswerPacket((byte) 0, (short) -4));
+            connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 0).result((short) -4).build());
         }
     }
 }

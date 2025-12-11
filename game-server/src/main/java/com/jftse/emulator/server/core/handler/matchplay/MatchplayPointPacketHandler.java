@@ -2,26 +2,17 @@ package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
-import com.jftse.emulator.server.core.packets.matchplay.C2SMatchplayPointPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
 
-@PacketOperationIdentifier(PacketOperations.C2SMatchplayPoint)
-public class MatchplayPointPacketHandler extends AbstractPacketHandler {
-    private C2SMatchplayPointPacket matchplayPointPacket;
-
+@PacketId(CMSGPoint.PACKET_ID)
+public class MatchplayPointPacketHandler implements PacketHandler<FTConnection, CMSGPoint> {
     @Override
-    public boolean process(Packet packet) {
-        this.matchplayPointPacket = new C2SMatchplayPointPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGPoint packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null)
             return;
 
@@ -33,6 +24,6 @@ public class MatchplayPointPacketHandler extends AbstractPacketHandler {
         if (game == null)
             return;
 
-        game.getHandleable().onPoint(ftClient, matchplayPointPacket);
+        game.getHandleable().onPoint(ftClient, packet);
     }
 }

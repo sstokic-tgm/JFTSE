@@ -2,34 +2,25 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomGameModeChangeRequestPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomInformationPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomChangeGameMode;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomGameModeChange)
-public class GameModeChangePacketHandler extends AbstractPacketHandler {
-    private C2SRoomGameModeChangeRequestPacket changeRoomGameModeRequestPacket;
-
+@PacketId(CMSGRoomChangeGameMode.PACKET_ID)
+public class GameModeChangePacketHandler implements PacketHandler<FTConnection, CMSGRoomChangeGameMode> {
     @Override
-    public boolean process(Packet packet) {
-        changeRoomGameModeRequestPacket = new C2SRoomGameModeChangeRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomChangeGameMode packet) {
+        FTClient client = connection.getClient();
         Room room = client.getActiveRoom();
 
         if (room != null) {
             synchronized (room) {
-                room.setMode(changeRoomGameModeRequestPacket.getMode());
+                room.setMode(packet.getMode());
             }
 
             S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);

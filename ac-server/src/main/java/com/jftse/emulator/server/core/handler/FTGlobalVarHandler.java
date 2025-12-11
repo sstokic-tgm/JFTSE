@@ -2,10 +2,10 @@ package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.server.core.packets.S2CFTGlobalVarStructPacket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.ac.CMSGAntiCheatFTGlobalVars;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -19,22 +19,13 @@ import java.util.Optional;
 import java.util.Properties;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SAntiCheatFTGlobalVarsReq)
-public class FTGlobalVarHandler extends AbstractPacketHandler {
-    private Packet packet;
-
+@PacketId(CMSGAntiCheatFTGlobalVars.PACKET_ID)
+public class FTGlobalVarHandler implements PacketHandler<FTConnection, CMSGAntiCheatFTGlobalVars> {
     public static final String FTGLOBALVARS_PROPERTIES = "ftglobalvars.properties";
 
     @Override
-    public boolean process(Packet packet) {
-        this.packet = packet;
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        byte n = packet.read(Byte.class);
-        if (n == 1) {
+    public void handle(FTConnection connection, CMSGAntiCheatFTGlobalVars packet) {
+        if (packet.getN() == 1) {
             Optional<Path> p = ResourceUtil.getPath(FTGLOBALVARS_PROPERTIES);
             if (p.isEmpty())
                 return;
@@ -55,7 +46,7 @@ public class FTGlobalVarHandler extends AbstractPacketHandler {
                 propValues.add(Integer.valueOf(properties.getProperty("enableCoupon", "0")));
 
             } catch (IOException e) {
-                log.error("Error reading the properties file: " + e.getMessage(), e);
+                log.error("Error reading the properties file: {}", e.getMessage(), e);
                 return;
             }
 

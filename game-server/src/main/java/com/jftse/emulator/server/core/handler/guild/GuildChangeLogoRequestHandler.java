@@ -1,24 +1,21 @@
 package com.jftse.emulator.server.core.handler.guild;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.guild.C2SGuildChangeLogoRequestPacket;
-import com.jftse.emulator.server.core.packets.guild.S2CGuildChangeLogoAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.GuildService;
 import com.jftse.server.core.service.PlayerPocketService;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildChangeLogo;
+import com.jftse.server.core.shared.packets.guild.SMSGGuildChangeLogo;
 
-@PacketOperationIdentifier(PacketOperations.C2SGuildChangeLogoRequest)
-public class GuildChangeLogoRequestHandler extends AbstractPacketHandler {
-    private C2SGuildChangeLogoRequestPacket c2SGuildChangeLogoRequestPacket;
-
+@PacketId(CMSGGuildChangeLogo.PACKET_ID)
+public class GuildChangeLogoRequestHandler implements PacketHandler<FTConnection, CMSGGuildChangeLogo> {
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
     private final PlayerPocketService playerPocketService;
@@ -30,14 +27,8 @@ public class GuildChangeLogoRequestHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        c2SGuildChangeLogoRequestPacket = new C2SGuildChangeLogoRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGGuildChangeLogo c2SGuildChangeLogoRequestPacket) {
+        FTClient client = connection.getClient();
         if (client == null ||client.getPlayer() == null)
             return;
 
@@ -74,10 +65,12 @@ public class GuildChangeLogoRequestHandler extends AbstractPacketHandler {
 
             guildService.save(guildMember.getGuild());
 
-            S2CGuildChangeLogoAnswerPacket answer = new S2CGuildChangeLogoAnswerPacket((short) 0);
+            SMSGGuildChangeLogo answer = SMSGGuildChangeLogo.builder()
+                    .result((short) 0)
+                    .build();
             connection.sendTCP(answer);
         } else {
-            connection.sendTCP(new S2CGuildChangeLogoAnswerPacket((short) -2));
+            connection.sendTCP(SMSGGuildChangeLogo.builder().result((short) -2).build());
         }
     }
 }

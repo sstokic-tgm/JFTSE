@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.core.handler;
 
 import com.jftse.emulator.server.core.manager.ServiceManager;
-import com.jftse.emulator.server.core.packets.gameserver.C2SGameServerRequestPacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.inventory.*;
 import com.jftse.emulator.server.core.packets.pet.S2CPetDataAnswerPacket;
@@ -11,6 +10,7 @@ import com.jftse.emulator.server.core.packets.player.S2CPlayerLevelExpPacket;
 import com.jftse.emulator.server.core.packets.player.S2CUnknownPlayerInfoDataPacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
@@ -21,21 +21,18 @@ import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.game.CMSGReceiveData;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 import java.util.Map;
 
 @Log4j2
-@PacketOperationIdentifier(PacketOperations.C2SGameReceiveData)
-public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
-    private C2SGameServerRequestPacket gameServerRequestPacket;
-
+@PacketId(CMSGReceiveData.PACKET_ID)
+public class GameServerDataRequestPacketHandler implements PacketHandler<FTConnection, CMSGReceiveData> {
     private final HomeService homeService;
     private final PetService petService;
     private final GuildMemberService guildMemberService;
@@ -67,18 +64,12 @@ public class GameServerDataRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        gameServerRequestPacket = new C2SGameServerRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGReceiveData packet) {
+        FTClient client = connection.getClient();
         Player player = client.getPlayer();
         Account account = client.getAccount();
 
-        byte requestType = gameServerRequestPacket.getRequestType();
+        byte requestType = packet.getDataType();
 
         /*while (client.getCurrentRequestType().get() != requestType) {
             try {

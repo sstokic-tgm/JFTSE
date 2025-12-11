@@ -2,27 +2,18 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.lobby.room.C2SRoomReadyChangeRequestPacket;
-import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomReadyChangeAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomChangeReady;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomChangeReady;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomReadyChange)
-public class RoomReadyChangeRequestPacketHandler extends AbstractPacketHandler {
-    private C2SRoomReadyChangeRequestPacket roomReadyChangeRequestPacket;
-
+@PacketId(CMSGRoomChangeReady.PACKET_ID)
+public class RoomReadyChangeRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomChangeReady> {
     @Override
-    public boolean process(Packet packet) {
-        roomReadyChangeRequestPacket = new C2SRoomReadyChangeRequestPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomChangeReady packet) {
+        FTClient ftClient = connection.getClient();
 
         if (!ftClient.getIsGoingReady().compareAndSet(false, true)) {
             return;
@@ -30,10 +21,10 @@ public class RoomReadyChangeRequestPacketHandler extends AbstractPacketHandler {
 
         RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer != null) {
-            roomPlayer.setReady(roomReadyChangeRequestPacket.isReady());
+            roomPlayer.setReady(packet.getReady());
 
-            S2CRoomReadyChangeAnswerPacket roomReadyChangeAnswerPacket = new S2CRoomReadyChangeAnswerPacket(roomPlayer.getPosition(), roomPlayer.isReady());
-            GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomReadyChangeAnswerPacket, ftClient.getConnection());
+            SMSGRoomChangeReady answer = SMSGRoomChangeReady.builder().position(roomPlayer.getPosition()).ready(roomPlayer.isReady()).build();
+            GameManager.getInstance().sendPacketToAllClientsInSameRoom(answer, connection);
         }
 
         ftClient.getIsGoingReady().set(false);

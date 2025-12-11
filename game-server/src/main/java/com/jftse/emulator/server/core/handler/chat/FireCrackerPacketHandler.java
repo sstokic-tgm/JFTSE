@@ -4,33 +4,20 @@ import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.chat.C2SFireCrackerReqPacket;
-import com.jftse.emulator.server.core.packets.chat.S2CFireCrackerAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.shared.packets.chat.CMSGFireCracker;
+import com.jftse.server.core.shared.packets.chat.SMSGFireCracker;
 
-@PacketOperationIdentifier(PacketOperations.C2SFireCrackerRequest)
-public class FireCrackerPacketHandler extends AbstractPacketHandler {
-    private C2SFireCrackerReqPacket fireCrackerReqPacket;
-
-    public FireCrackerPacketHandler() {
-
-    }
-
+@PacketId(CMSGFireCracker.PACKET_ID)
+public class FireCrackerPacketHandler implements PacketHandler<FTConnection, CMSGFireCracker> {
     @Override
-    public boolean process(Packet packet) {
-        fireCrackerReqPacket = new C2SFireCrackerReqPacket(packet);
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient client = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGFireCracker fireCrackerReqPacket) {
+        FTClient client = connection.getClient();
         if (client == null)
             return;
 
@@ -56,7 +43,10 @@ public class FireCrackerPacketHandler extends AbstractPacketHandler {
         }
 
         if (valid) {
-            S2CFireCrackerAnswerPacket fireCrackerAnswer = new S2CFireCrackerAnswerPacket(fireCrackerReqPacket.getFireCrackerType(), roomPlayer.getPosition());
+            SMSGFireCracker fireCrackerAnswer = SMSGFireCracker.builder()
+                    .fireCrackerType(fireCrackerReqPacket.getFireCrackerType())
+                    .position(roomPlayer.getPosition())
+                    .build();
             GameManager.getInstance().sendPacketToAllClientsInSameRoom(fireCrackerAnswer, client.getConnection());
 
             baseItem.getPacketsToSend().forEach((playerId, packets) -> {

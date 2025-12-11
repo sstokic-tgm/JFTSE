@@ -8,19 +8,19 @@ import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendListMessage;
 import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendRelationMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.SocialService;
+import com.jftse.server.core.shared.packets.messenger.CMSGFriendList;
 
 import java.util.List;
 
-@PacketOperationIdentifier(PacketOperations.C2SFriendListRequest)
-public class FriendListRequestHandler extends AbstractPacketHandler {
+@PacketId(CMSGFriendList.PACKET_ID)
+public class FriendListRequestHandler implements PacketHandler<FTConnection, CMSGFriendList> {
     private final SocialService socialService;
 
     private final RProducerService rProducerService;
@@ -29,15 +29,9 @@ public class FriendListRequestHandler extends AbstractPacketHandler {
         this.socialService = ServiceManager.getInstance().getSocialService();
         this.rProducerService = RProducerService.getInstance();
     }
-
     @Override
-    public boolean process(Packet packet) {
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGFriendList packet) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null) {
             return;
         }

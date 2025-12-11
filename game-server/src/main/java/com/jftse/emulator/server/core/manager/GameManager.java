@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.manager;
 import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomType;
@@ -18,13 +19,23 @@ import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
+import com.jftse.entities.database.model.Uptime;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
+import com.jftse.server.core.BuildInfoProperties;
+import com.jftse.server.core.ServerLoopHandler;
 import com.jftse.server.core.constants.GameMode;
+import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.shared.ServerConfService;
+import com.jftse.server.core.shared.packets.SMSGInitHandshake;
+import com.jftse.server.core.shared.packets.SMSGServerNotice;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomChangePosition;
 import com.jftse.server.core.thread.ThreadManager;
+import com.jftse.server.core.util.GameTime;
+import com.jftse.server.core.util.IntervalTimer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -32,13 +43,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -48,7 +56,7 @@ import java.util.stream.IntStream;
 @Getter
 @Setter
 @Log4j2
-public class GameManager {
+public class GameManager implements ServerLoopHandler {
     private static GameManager instance;
 
     @Autowired
@@ -64,15 +72,17 @@ public class GameManager {
     @Autowired
     private ThreadManager threadManager;
 
-    private AtomicBoolean running;
+    @Autowired
+    private BuildInfoProperties revisionInfo;
+    @Autowired
+    private ServerConfService serverConfService;
+
+    private ConcurrentLinkedQueue<FTConnection> addConnectionQueue;
     private ConcurrentLinkedDeque<FTClient> clients;
     private ConcurrentLinkedDeque<Room> rooms;
     private Room townSquare;
 
     private ConcurrentHashMap<Integer, String> personalBoardMessages;
-
-    private Future<?> eventHandlerTask;
-    private Future<?> updateLoopTask;
 
     private Optional<ScriptManager> scriptManager;
     private final Lock lock = new ReentrantLock();
@@ -80,6 +90,11 @@ public class GameManager {
     private Random rnd;
 
     private String motd;
+
+    private AtomicInteger playerCount = new AtomicInteger(0);
+    private int maxPlayerCount = 0;
+
+    private IntervalTimer[] timers = new IntervalTimer[ServerTimers.COUNT];
 
     @PostConstruct
     public void init() {
@@ -89,35 +104,67 @@ public class GameManager {
         clients = new ConcurrentLinkedDeque<>();
         rooms = new ConcurrentLinkedDeque<>();
         personalBoardMessages = new ConcurrentHashMap<>();
+        addConnectionQueue = new ConcurrentLinkedQueue<>();
 
         scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
 
-        running = new AtomicBoolean(true);
-
         //setupChatLobby();
-        setupGlobalTasks();
+
+        GameTime.updateGameTimers();
+        initTimers();
+
+        Uptime uptime = new Uptime();
+        uptime.setServerType(ServerType.GAME_SERVER);
+        uptime.setStartTime(GameTime.getStartTime().getEpochSecond());
+        uptime.setUptime(0L);
+        uptime.setRevision(revisionInfo.getFullVersion());
+        serviceManager.getUptimeService().save(uptime);
 
         log.info(this.getClass().getSimpleName() + " initialized");
     }
 
     public void onExit() {
-        if (running.compareAndSet(true, false)) {
-            if (eventHandlerTask != null && eventHandlerTask.cancel(false))
-                log.info("EventHandlerTask stopped");
+        log.info("Closing all connections");
 
-            if (updateLoopTask != null && updateLoopTask.cancel(false))
-                log.info("UpdateLoopTask stopped");
+        for (FTClient client : clients) {
+            client.getConnection().close();
+        }
 
-            log.info("Closing all connections");
-            for (FTClient client : clients) {
-                client.getConnection().close();
-            }
-            log.info("All connections closed");
+        rooms.clear();
+        clients.clear();
 
-            rooms.clear();
-            clients.clear();
+        serviceManager.getUptimeService().updateUptimeAndMaxPlayers(GameTime.getUptimeSeconds(), getMaxPlayerCount(), ServerType.GAME_SERVER, GameTime.getStartTime().getEpochSecond());
 
-            log.info("GameManager stopped");
+        log.info("GameManager stopped");
+    }
+
+    @Override
+    public void update(long diff) {
+        GameTime.updateGameTimers();
+
+        // update different timers
+        for (IntervalTimer timer : timers) {
+            if (timer.getCurrent() >= 0)
+                timer.update(diff);
+            else
+                timer.setCurrent(0);
+        }
+
+        try {
+            eventHandler.handleQueuedEvents();
+        } catch (Exception ex) {
+            log.error("Exception while handling queued events: {}", ex.getMessage(), ex);
+        }
+
+        GameEventBus.call(GameEventType.ON_TICK, diff);
+        updateSessions(diff);
+
+        if (timers[ServerTimers.SUPDATE_UPTIME.value()].passed()) {
+            long uptimeSeconds = GameTime.getUptimeSeconds();
+            int maxOnlinePlayers = getMaxPlayerCount();
+            timers[ServerTimers.SUPDATE_UPTIME.value()].reset();
+
+            serviceManager.getUptimeService().updateUptimeAndMaxPlayers(uptimeSeconds, maxOnlinePlayers, ServerType.GAME_SERVER, GameTime.getStartTime().getEpochSecond());
         }
     }
 
@@ -131,10 +178,17 @@ public class GameManager {
 
     public void addClient(FTClient client) {
         clients.add(client);
+        playerCount.getAndIncrement();
+        maxPlayerCount = Math.max(maxPlayerCount, playerCount.get());
     }
 
     public void removeClient(FTClient client) {
         clients.remove(client);
+        playerCount.getAndDecrement();
+    }
+
+    public void queueConnection(FTConnection connection) {
+        addConnectionQueue.offer(connection);
     }
 
     public void addRoom(Room room) {
@@ -170,34 +224,6 @@ public class GameManager {
                 .findFirst()
                 .map(FTClient::getConnection)
                 .orElse(null);
-    }
-
-    private void setupGlobalTasks() {
-        eventHandlerTask = threadManager.submit(() -> {
-            while (running.get()) {
-                try {
-                    eventHandler.handleQueuedEvents();
-                } catch (Exception ex) {
-                    log.error(String.format("Exception in runnable thread: %s", ex.getMessage()), ex);
-                }
-            }
-            log.info("EventHandlerTask stopped");
-        });
-        log.info("EventHandlerTask started");
-
-        AtomicLong lastTickTime = new AtomicLong(System.currentTimeMillis());
-        updateLoopTask = threadManager.scheduleAtFixedRate(() -> {
-            if (running.get()) {
-                long now = System.currentTimeMillis();
-                long diff = now - lastTickTime.getAndSet(now);
-                try {
-                    GameEventBus.call(GameEventType.ON_TICK, diff);
-                } catch (Exception e) {
-                    log.error("Error during update loop: " + e.getMessage(), e);
-                }
-            }
-        }, 1, 1, TimeUnit.SECONDS);
-        log.info("UpdateLoopTask started");
     }
 
     private void setupChatLobby() {
@@ -426,7 +452,7 @@ public class GameManager {
             if (newMaster != null) {
                 S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(newMaster, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                 S2CRoomFittingPlayerInfoPacket roomFittingPlayerInfoPacket = new S2CRoomFittingPlayerInfoPacket(newMaster.getPosition(), newMaster);
-                S2CRoomPositionChangeAnswerPacket roomPositionChangeAnswerPacket = new S2CRoomPositionChangeAnswerPacket((char) 0, newMaster.getPosition(), newMaster.getPosition());
+                SMSGRoomChangePosition roomPositionChangeAnswerPacket = SMSGRoomChangePosition.builder().result((char) 0).oldPosition(newMaster.getPosition()).newPosition(newMaster.getPosition()).build();
                 getClientsInRoom(room.getRoomId()).forEach(c -> {
                     if (c.getConnection() != null && !c.getActivePlayerId().equals(activePlayer.getId())) {
                         c.getConnection().sendTCP(roomFittingPlayerInfoPacket);
@@ -563,27 +589,19 @@ public class GameManager {
         return activePlayingPlayers.stream().allMatch(x -> x.getPlayer().getLevel() >= configService.getValue("command.room.mode.change.player.level", 60));
     }
 
-    public void sendPacketToAllClientsInSameGameSession(Packet packet, FTConnection connection) {
-        lock.lock();
-        try {
-            if (connection == null || connection.getClient() == null) {
-                return;
-            }
-            final GameSession gameSession = connection.getClient().getActiveGameSession();
-            if (gameSession != null) {
-                final ArrayList<FTClient> clientsInGameSession = new ArrayList<>(gameSession.getClients());
-                clientsInGameSession.forEach(c -> {
-                    if (c.getConnection() != null) {
-                        c.getConnection().sendTCP(packet);
-                    }
-                });
-            }
-        } finally {
-            lock.unlock();
+    public void sendPacketToAllClientsInSameGameSession(IPacket packet, FTConnection connection) {
+        final GameSession gameSession = connection.getClient().getActiveGameSession();
+        if (gameSession != null) {
+            final ArrayList<FTClient> clientsInGameSession = new ArrayList<>(gameSession.getClients());
+            clientsInGameSession.forEach(c -> {
+                if (c.getConnection() != null) {
+                    c.getConnection().sendTCP(packet);
+                }
+            });
         }
     }
 
-    public void sendPacketToAllClientsInSameRoom(Packet packet, FTConnection connection) {
+    public void sendPacketToAllClientsInSameRoom(IPacket packet, FTConnection connection) {
         final Room room = connection.getClient().getActiveRoom();
         if (room != null) {
             final List<FTClient> clientsInRoom = new ArrayList<>(getClientsInRoom(room.getRoomId()));
@@ -592,6 +610,67 @@ public class GameManager {
                     c.getConnection().sendTCP(packet);
                 }
             });
+        }
+    }
+
+    private void updateSessions(long diff) {
+        while (!addConnectionQueue.isEmpty()) {
+            FTConnection conn = addConnectionQueue.poll();
+            if (conn != null) {
+                initializeConnection(conn);
+            }
+        }
+
+        final ConcurrentLinkedDeque<FTClient> clientsSnapshot = new ConcurrentLinkedDeque<>(getClients());
+        for (FTClient client : clientsSnapshot) {
+            FTConnection conn = client.getConnection();
+            if (conn != null && !conn.update(diff)) {
+                removeClient(client);
+                conn.close();
+            }
+        }
+    }
+
+    private void initializeConnection(FTConnection conn) {
+        InetSocketAddress inetSocketAddress = conn.getRemoteAddressTCP();
+        String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
+
+        FTClient client = new FTClient();
+        client.setIp(remoteAddress.substring(1, remoteAddress.lastIndexOf(":")));
+        client.setPort(Integer.parseInt(remoteAddress.substring(remoteAddress.indexOf(":") + 1)));
+        client.setConnection(conn);
+        conn.setClient(client);
+        addClient(client);
+
+        SMSGInitHandshake initHandshakePacket = SMSGInitHandshake.builder()
+                .decKey(conn.getDecryptionKey())
+                .encKey(conn.getEncryptionKey())
+                .decTblIdx(0)
+                .encTblIdx(0)
+                .build();
+        conn.sendTCP(initHandshakePacket);
+
+        final String motd = GameManager.getInstance().getMotd();
+        SMSGServerNotice serverNotice = SMSGServerNotice.builder().message(motd).build();
+        if (!StringUtils.isEmpty(motd)) {
+            ThreadManager.getInstance().schedule(() -> conn.sendTCP(serverNotice), 100, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void initTimers() {
+        for (int i = 0; i < ServerTimers.COUNT; i++) {
+            timers[i] = new IntervalTimer();
+        }
+        timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(serverConfService.get("UpdateUptimeInterval", Integer.class)));
+    }
+
+    public enum ServerTimers {
+        SUPDATE_UPTIME;
+
+        public static final int COUNT = values().length;
+
+        public int value() {
+            return this.ordinal();
         }
     }
 }

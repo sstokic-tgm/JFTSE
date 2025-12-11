@@ -11,27 +11,28 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
-import com.jftse.entities.database.model.account.Account;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
-import com.jftse.server.core.handler.AbstractPacketHandler;
-import com.jftse.server.core.handler.PacketOperationIdentifier;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.CardSlotEquipmentService;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.SocialService;
 import com.jftse.server.core.service.SpecialSlotEquipmentService;
+import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomJoin;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomCloseSlot;
+import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomJoin;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.IntStream;
 
-@PacketOperationIdentifier(PacketOperations.C2SRoomJoin)
-public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
-    private C2SRoomJoinRequestPacket roomJoinRequestPacket;
-
+@PacketId(CMSGRoomJoin.PACKET_ID)
+public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomJoin> {
     private final GuildMemberService guildMemberService;
     private final ClothEquipmentServiceImpl clothEquipmentService;
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
@@ -47,17 +48,16 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
     }
 
     @Override
-    public boolean process(Packet packet) {
-        roomJoinRequestPacket = new C2SRoomJoinRequestPacket(packet, new ArrayList<>(GameManager.getInstance().getRooms()));
-        return true;
-    }
-
-    @Override
-    public void handle() {
-        FTClient ftClient = (FTClient) connection.getClient();
+    public void handle(FTConnection connection, CMSGRoomJoin roomJoinRequestPacket) {
+        FTClient ftClient = connection.getClient();
         if (ftClient == null || ftClient.getPlayer() == null) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
-            connection.sendTCP(roomJoinAnswerPacket);
+            SMSGRoomJoin answer = SMSGRoomJoin.builder()
+                    .result((char) -10)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
+            connection.sendTCP(answer);
             return;
         }
 
@@ -71,7 +71,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
                 .orElse(null);
 
         if (room == null) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -10)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             S2CRoomListAnswerPacket roomListAnswerPacket = new S2CRoomListAnswerPacket(new ArrayList<>(GameManager.getInstance().getRooms().stream().filter(r -> !(r.getRoomType() == 1 && r.getMode() == 2)).toList()));
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -84,7 +89,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
 
         if (room.getStatus() != RoomStatus.NotRunning) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -1, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -1)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             connection.sendTCP(roomJoinAnswerPacket);
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -95,7 +105,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
 
         Player activePlayer = ftClient.getPlayer();
         if (!ftClient.isGameMaster() && room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -5, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -5)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             connection.sendTCP(roomJoinAnswerPacket);
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -112,7 +127,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         }
 
         if (!anyPositionAvailable) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -10)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             connection.sendTCP(roomJoinAnswerPacket);
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -124,14 +144,19 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         // prevent abusive room joins
         if (ftClient.getActiveRoom() != null) {
             Room clientRoom = ftClient.getActiveRoom();
-            handleRoomUponJoin(clientRoom, true);
+            handleRoomUponJoin(connection, clientRoom, true);
 
             resetIsJoiningOrLeavingRoom(ftClient);
             return;
         }
 
         if ((room.isHardMode() || room.isArcade()) && activePlayer.getLevel() < ConfigService.getInstance().getValue("command.room.mode.change.player.level", 60)) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -10)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             connection.sendTCP(roomJoinAnswerPacket);
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -141,7 +166,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         }
 
         if (room.getBannedPlayers().contains(activePlayer.getId())) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -4, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -4)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             connection.sendTCP(roomJoinAnswerPacket);
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -167,7 +197,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
                 if (!isGmSlotInUse) {
                     useGmSlot = true;
                 } else if (!anyPositionAvailable) {
-                    S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+                    SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                            .result((char) -10)
+                            .roomType((byte) 0)
+                            .mode((byte) 0)
+                            .mapId((byte) 0)
+                            .build();
                     connection.sendTCP(roomJoinAnswerPacket);
 
                     resetIsJoiningOrLeavingRoom(ftClient);
@@ -179,7 +214,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         }
 
         if (activePlayer.getLevel() < (room.getLevel() - room.getLevelRange()) && activePlayer.getLevel() > room.getLevel()) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -10)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             connection.sendTCP(roomJoinAnswerPacket);
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -201,7 +241,12 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         }
 
         if (newPosition == -1) {
-            S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) -10, (byte) 0, (byte) 0, (byte) 0);
+            SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                    .result((char) -10)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
             connection.sendTCP(roomJoinAnswerPacket);
 
             resetIsJoiningOrLeavingRoom(ftClient);
@@ -243,17 +288,22 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
             ftClient.setInLobby(false);
         }
 
-        handleRoomUponJoin(room, false);
+        handleRoomUponJoin(connection, room, false);
 
         ftClient.getIsJoiningOrLeavingRoom().set(false);
     }
 
-    private void handleRoomUponJoin(Room room, boolean existingRoom) {
-        FTClient client = (FTClient) connection.getClient();
+    private void handleRoomUponJoin(final FTConnection connection, Room room, boolean existingRoom) {
+        FTClient client = connection.getClient();
         RoomPlayer roomPlayer = client.getRoomPlayer();
         final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
 
-        S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) 0, room.getRoomType(), room.getMode(), room.getMap());
+        SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                .result((char) 0)
+                .roomType(room.getRoomType())
+                .mode(room.getMode())
+                .mapId(room.getMap())
+                .build();
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
 
         connection.sendTCP(roomJoinAnswerPacket);
@@ -263,8 +313,7 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         float spawnX = 0.0f, spawnY = 0.0f;
         if (!isTownSquare) {
             final ArrayList<Short> positions = room.getPositions();
-            List<Packet> roomSlotCloseAnswerPackets = new ArrayList<>();
-            closeRoomSlots(positions, roomSlotCloseAnswerPackets);
+            closeRoomSlots(connection, positions);
 
             S2CRoomPlayerListInformationPacket roomPlayerListInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
             connection.sendTCP(roomPlayerListInformationPacket);
@@ -303,17 +352,16 @@ public class RoomJoinRequestPacketHandler extends AbstractPacketHandler {
         GameManager.getInstance().refreshLobbyPlayerListForAllClients();
     }
 
-    private void closeRoomSlots(ArrayList<Short> positions, List<Packet> roomSlotCloseAnswerPackets) {
+    private void closeRoomSlots(final FTConnection connection, ArrayList<Short> positions) {
         int i = 0;
         for (Iterator<Short> it = positions.iterator(); it.hasNext(); ) {
             short positionState = it.next();
             if (positionState == RoomPositionState.Locked) {
-                S2CRoomSlotCloseAnswerPacket roomSlotCloseAnswerPacket = new S2CRoomSlotCloseAnswerPacket((byte) i, true);
-                roomSlotCloseAnswerPackets.add(roomSlotCloseAnswerPacket);
+                SMSGRoomCloseSlot closeSlot = SMSGRoomCloseSlot.builder().slot((byte) i).close(true).build();
+                connection.sendTCP(closeSlot);
             }
             i++;
         }
-        connection.sendTCP(roomSlotCloseAnswerPackets.toArray(Packet[]::new));
     }
 
     private void resetIsJoiningOrLeavingRoom(FTClient ftClient) {
