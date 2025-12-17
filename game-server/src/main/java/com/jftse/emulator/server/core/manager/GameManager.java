@@ -14,6 +14,7 @@ import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
@@ -155,6 +156,8 @@ public class GameManager implements ServerLoopHandler {
         } catch (Exception ex) {
             log.error("Exception while handling queued events: {}", ex.getMessage(), ex);
         }
+
+        updatePhaseManagers(diff);
 
         GameEventBus.call(GameEventType.ON_TICK, diff);
         updateSessions(diff);
@@ -610,6 +613,16 @@ public class GameManager implements ServerLoopHandler {
                     c.getConnection().sendTCP(packet);
                 }
             });
+        }
+    }
+
+    private void updatePhaseManagers(long diff) {
+        final ConcurrentHashMap<Integer, GameSession> gameSessionsSnapshot = new ConcurrentHashMap<>(gameSessionManager.getGameSessionList());
+
+        for (GameSession gameSession : gameSessionsSnapshot.values()) {
+            if (gameSession.isGuardianMode()) {
+                ((MatchplayGuardianGame) gameSession.getMatchplayGame()).getPhaseManager().update(diff);
+            }
         }
     }
 

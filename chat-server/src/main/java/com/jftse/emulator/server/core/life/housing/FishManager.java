@@ -359,7 +359,7 @@ public class FishManager {
                             S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) fish.getState().getValue(), newX, newY, fish.getSpeed());
                             broadcast(movePacket, clients);
 
-                            log.info("Fish {} exceeded spawn radius, correcting position towards ({}, {})", fish.getId(), newX, newY);
+                            //log.info("Fish {} exceeded spawn radius, correcting position towards ({}, {})", fish.getId(), newX, newY);
                         }
                         break;
                     }
@@ -371,7 +371,7 @@ public class FishManager {
                         S2CFishStopPacket stopPacket = new S2CFishStopPacket(fish.getId(), (byte) fish.getState().getValue());
                         broadcast(stopPacket, clients);
 
-                        log.info("Fish {} reached destination at ({}, {})", fish.getId(), fish.getX(), fish.getY());
+                        //log.info("Fish {} reached destination at ({}, {})", fish.getId(), fish.getX(), fish.getY());
                     }
                 }
                 case IDLE -> {
@@ -383,7 +383,7 @@ public class FishManager {
                         S2CFishMovePacket movePacket = new S2CFishMovePacket(fish.getId(), (byte) fish.getState().getValue(), fish.getDestX(), fish.getDestY(), fish.getSpeed());
                         broadcast(movePacket, clients);
 
-                        log.info("Fish {} changed from IDLE to MOVING towards ({}, {})", fish.getId(), fish.getDestX(), fish.getDestY());
+                        //log.info("Fish {} changed from IDLE to MOVING towards ({}, {})", fish.getId(), fish.getDestX(), fish.getDestY());
                     }
                 }
                 case FRIGHTENED -> {

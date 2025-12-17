@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.matchplay.guardian;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.emulator.server.core.matchplay.event.EventHandler;
+import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.task.GuardianAttackTask;
 import com.jftse.emulator.server.net.FTConnection;
@@ -14,34 +16,24 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Setter
 @Log4j2
 public class PhaseManager {
+    private FTConnection hostConnection;
+
     private AtomicReference<PhaseScript> currentPhase;
     private List<PhaseScript> phases;
-    private Future<?> updateTask;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
     private AtomicBoolean isUpdating = new AtomicBoolean(false);
 
     private AtomicBoolean isChangingPhase = new AtomicBoolean(false);
     private AtomicBoolean isPhaseEnding = new AtomicBoolean(false);
 
-    private final BlockingDeque<Runnable> taskQueue = new LinkedBlockingDeque<>();
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setName("PhaseManager-Executor-" + thread.threadId());
-        thread.setDaemon(true);
-        return thread;
-    });
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setName("PhaseManager-Scheduled-Executor-" + thread.threadId());
-        thread.setDaemon(true);
-        return thread;
-    });
+    private final EventHandler eventHandler = GameManager.getInstance().getEventHandler();
 
     private PhaseCallback defaultPhaseCallback = new PhaseCallback() {
         @Override
@@ -54,36 +46,25 @@ public class PhaseManager {
                 PhaseScript nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
                 final String nextPhaseName = nextPhase.getPhaseName();
 
-                Future<?> countdownTask = executorService.submit(() -> {
-                    for (int i = 5; i > 0; i--) {
-                        S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
+                AtomicInteger countdown = new AtomicInteger(5);
+                ThreadManager.getInstance().scheduleAtFixedRate(() -> {
+                    int count = countdown.getAndDecrement();
+                    if (count >= 1) {
+                        S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + count + "...");
                         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
-
-                        if (i != 1) {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                log.error("Countdown interrupted exception", e);
-                            }
-                        }
                     }
-                });
+                }, 5, TimeUnit.SECONDS);
 
-                try {
-                    countdownTask.get();
-                } catch (InterruptedException e) {
-                    log.error("Countdown task interrupted exception", e);
-                } catch (ExecutionException e) {
-                    log.error("Countdown task execution exception", e);
-                }
+                RunnableEvent runnableEvent = eventHandler.createRunnableEvent(() -> {
+                    currentPhase.get().end();
+                    currentPhase.compareAndSet(currentPhase.get(), nextPhase);
 
-                currentPhase.get().end();
-                currentPhase.compareAndSet(currentPhase.get(), nextPhase);
+                    currentPhase.get().start();
+                    isChangingPhase.set(false);
 
-                currentPhase.get().start();
-                isChangingPhase.set(false);
-
-                ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+                    ThreadManager.getInstance().newTask(new GuardianAttackTask(connection));
+                }, TimeUnit.SECONDS.toMillis(5));
+                eventHandler.offer(runnableEvent);
             } else {
                 isChangingPhase.set(false);
                 onPhaseEnd(connection);
@@ -101,15 +82,6 @@ public class PhaseManager {
             }
 
             currentPhase.get().end();
-            try {
-                updateTask.get();
-            } catch (InterruptedException e) {
-                log.error("updateTask interrupted exception", e);
-            } catch (ExecutionException e) {
-                log.error("updateTask execution exception", e);
-            }
-            updateTask = null;
-
             isPhaseEnding.set(false);
         }
     };
@@ -117,39 +89,29 @@ public class PhaseManager {
     public PhaseManager(List<PhaseScript> phases) {
         this.phases = phases;
         currentPhase = new AtomicReference<>(phases.getFirst());
-
-        final CompletableFuture<Thread> threadCapture = new CompletableFuture<>();
-        executorService.submit(() -> {
-            Thread currentThread = Thread.currentThread();
-            threadCapture.complete(currentThread);
-            log.debug("PhaseManager thread started: {}", currentThread.getName());
-        });
     }
 
     public void start(FTConnection connection) {
         final PhaseScript current = currentPhase.get();
         if (current != null) {
+            this.hostConnection = connection;
             current.start();
             isRunning.set(true);
-
-            updateTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
-                if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())
-                    return;
-
-                update(connection);
-            }, 0, 250, TimeUnit.MILLISECONDS);
         }
     }
 
-    public void update(FTConnection connection) {
+    public void update(long diff) {
+        if (!getIsRunning().get() || getIsChangingPhase().get() || getIsPhaseEnding().get())
+            return;
+
         try {
             if (isUpdating.compareAndSet(false, true)) {
-                PhaseUpdateResult result = currentPhase.get().update(connection);
+                PhaseUpdateResult result = currentPhase.get().update(hostConnection);
                 log.debug("Phase update result: {}", result);
 
                 switch (result) {
-                    case NEXT_PHASE -> defaultPhaseCallback.onNextPhase(connection);
-                    case END_PHASE -> defaultPhaseCallback.onPhaseEnd(connection);
+                    case NEXT_PHASE -> defaultPhaseCallback.onNextPhase(hostConnection);
+                    case END_PHASE -> defaultPhaseCallback.onPhaseEnd(hostConnection);
                     case ERROR -> log.error("Error during phase update for {}", currentPhase.get().getPhaseName());
                     default -> {
                     }

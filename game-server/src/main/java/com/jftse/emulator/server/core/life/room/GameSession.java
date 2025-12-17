@@ -3,7 +3,10 @@ package com.jftse.emulator.server.core.life.room;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.event.Fireable;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
+import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.server.core.constants.GameMode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,6 +28,31 @@ public class GameSession {
     private ConcurrentLinkedDeque<FTClient> clients;
     private ConcurrentLinkedDeque<Fireable> fireables;
     private volatile RunnableEvent countDownRunnable;
+    private int mode;
+
+    public void setMatchplayGame(MatchplayGame game) {
+        this.matchplayGame = game;
+
+        if (matchplayGame instanceof MatchplayBasicGame) {
+            mode = GameMode.BASIC;
+        } else if (matchplayGame instanceof MatchplayBattleGame) {
+            mode = GameMode.BATTLE;
+        } else {
+            mode = GameMode.GUARDIAN;
+        }
+    }
+
+    public boolean isBasicMode() {
+        return mode == GameMode.BASIC;
+    }
+
+    public  boolean isBattleMode() {
+        return mode == GameMode.BATTLE;
+    }
+
+    public boolean isGuardianMode() {
+        return mode == GameMode.GUARDIAN;
+    }
 
     public FTClient getClientByPlayerId(long playerId) {
         return clients.stream()

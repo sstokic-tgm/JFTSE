@@ -166,10 +166,6 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         if (game.isAdvancedBossGuardianMode()) {
             PhaseManager phaseManager = game.getPhaseManager();
             phaseManager.end();
-            if (phaseManager.getUpdateTask() != null) {
-                phaseManager.getUpdateTask().cancel(true);
-                phaseManager.setUpdateTask(null);
-            }
         }
 
         final boolean allPlayersDead = game.getPlayerBattleStates().stream().allMatch(x -> x.getCurrentHealth().get() < 1);
