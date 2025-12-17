@@ -22,6 +22,7 @@ import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.game.CMSGReceiveData;
+import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
@@ -79,68 +80,72 @@ public class GameServerDataRequestPacketHandler implements PacketHandler<FTConne
             return;
         }
 
-        if (requestType == 0) {
-            Player lastLoggedInPlayer = playerService.findById(account.getLastSelectedPlayerId());
-            Pocket pocket = pocketService.findById(lastLoggedInPlayer.getPocket().getId());
-            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
+        ThreadManager.getInstance().newTask(() -> {
+            if (requestType == 0) {
+                Player lastLoggedInPlayer = playerService.findById(account.getLastSelectedPlayerId());
+                if (lastLoggedInPlayer != null && !lastLoggedInPlayer.getId().equals(player.getId())) {
+                    Pocket pocket = pocketService.findById(lastLoggedInPlayer.getPocket().getId());
+                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
 
-            S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
-            connection.sendTCP(clearInventoryPacket);
+                    S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
+                    connection.sendTCP(clearInventoryPacket);
+                }
 
-            AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
+                AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
 
-            S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-            connection.sendTCP(homeDataPacket);
-        } else if (requestType == 1) {
-            Pocket pocket = pocketService.findById(player.getPocket().getId());
-            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
+                S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
+                connection.sendTCP(homeDataPacket);
+            } else if (requestType == 1) {
+                Pocket pocket = pocketService.findById(player.getPocket().getId());
+                List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
 
-            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-            connection.sendTCP(inventoryDataPacket);
+                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+                connection.sendTCP(inventoryDataPacket);
 
-            List<Pet> petList = petService.findAllByPlayerId(player.getId());
-            S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
-            connection.sendTCP(petDataAnswerPacket);
-        } else if (requestType == 2) {
-            S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
-            S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
+                List<Pet> petList = petService.findAllByPlayerId(player.getId());
+                S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
+                connection.sendTCP(petDataAnswerPacket);
+            } else if (requestType == 2) {
+                S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
+                S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
 
-            connection.sendTCP(playerLevelExpPacket);
-            connection.sendTCP(couplePointsDataPacket);
-        } else if (requestType == 3) {
-            Pocket pocket = pocketService.findById(player.getPocket().getId());
-            PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+                connection.sendTCP(playerLevelExpPacket);
+                connection.sendTCP(couplePointsDataPacket);
+            } else if (requestType == 3) {
+                Pocket pocket = pocketService.findById(player.getPocket().getId());
+                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
 
-            GuildMember guildMember = guildMemberService.getByPlayer(player);
-            Guild guild = null;
-            if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
-                guild = guildMember.getGuild();
+                GuildMember guildMember = guildMemberService.getByPlayer(player);
+                Guild guild = null;
+                if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
+                    guild = guildMember.getGuild();
 
-            StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-            Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
-            List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
-            List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
-            List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
-            List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
-            List<Integer> equippedBattlemonSlots = battlemonSlotEquipmentService.getEquippedBattlemonSlots(player);
+                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+                Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
+                List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+                List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
+                List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+                List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
+                List<Integer> equippedBattlemonSlots = battlemonSlotEquipmentService.getEquippedBattlemonSlots(player);
 
-            S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
-            S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
-            S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
-            S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
-            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
-            S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
-            S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(equippedBattlemonSlots);
-            S2CUnknownPlayerInfoDataPacket unknownPlayerInfoDataPacket = new S2CUnknownPlayerInfoDataPacket(player, pocket, equippedCloths, statusPointsAddedDto, playerStatistic, guild);
+                S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
+                S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
+                S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
+                S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
+                S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
+                S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+                S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(equippedBattlemonSlots);
+                S2CUnknownPlayerInfoDataPacket unknownPlayerInfoDataPacket = new S2CUnknownPlayerInfoDataPacket(player, pocket, equippedCloths, statusPointsAddedDto, playerStatistic, guild);
 
-            connection.sendTCP(inventoryWearQuickAnswerPacket);
-            connection.sendTCP(inventoryWearToolAnswerPacket);
-            connection.sendTCP(inventoryWearSpecialAnswerPacket);
-            connection.sendTCP(inventoryWearCardAnswerPacket);
-            connection.sendTCP(inventoryWearBattlemonAnswerPacket);
-            connection.sendTCP(inventoryWearClothAnswerPacket);
-            connection.sendTCP(unknownPlayerInfoDataPacket);
-            connection.sendTCP(playerInfoPlayStatsPacket);
-        }
+                connection.sendTCP(inventoryWearQuickAnswerPacket);
+                connection.sendTCP(inventoryWearToolAnswerPacket);
+                connection.sendTCP(inventoryWearSpecialAnswerPacket);
+                connection.sendTCP(inventoryWearCardAnswerPacket);
+                connection.sendTCP(inventoryWearBattlemonAnswerPacket);
+                connection.sendTCP(inventoryWearClothAnswerPacket);
+                connection.sendTCP(unknownPlayerInfoDataPacket);
+                connection.sendTCP(playerInfoPlayStatsPacket);
+            }
+        });
     }
 }

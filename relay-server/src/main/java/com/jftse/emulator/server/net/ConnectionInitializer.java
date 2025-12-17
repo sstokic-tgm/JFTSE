@@ -7,6 +7,8 @@ import com.jftse.server.core.codec.PacketEncoderV2;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +20,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
     private final AttributeKey<FTConnection> FT_CONNECTION_ATTRIBUTE_KEY;
     private final TCPChannelHandler tcpChannelHandler;
+    private final EventExecutorGroup group = new DefaultEventExecutorGroup(1);
 
     private final boolean encryptionEnabled;
 
@@ -38,7 +41,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         //ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoderV2(decryptionKey, packetLogger));
         ch.pipeline().addLast("encoder", new PacketEncoderV2(encryptionKey, packetLogger));
-        ch.pipeline().addLast(tcpChannelHandler);
+        ch.pipeline().addLast(group, tcpChannelHandler);
     }
 
     private BigInteger getRandomBigInteger() {

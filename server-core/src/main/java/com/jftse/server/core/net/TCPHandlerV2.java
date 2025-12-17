@@ -1,6 +1,8 @@
 package com.jftse.server.core.net;
 
+import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.protocol.IPacket;
+import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.packets.SMSGDisconnectMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -93,6 +95,19 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
     protected void disconnected0(T connection) {
         if (connection.getClient() != null) { // only call disconnected if the connection was fully established
             disconnected(connection);
+        }
+    }
+
+    protected void packetProcessed(T connection, IPacket packet) {
+        try {
+            PacketHandler<T, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
+            if (handler != null) {
+                handler.handle(connection, packet);
+            } else {
+                log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
+            }
+        } catch (Exception e) {
+            log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
         }
     }
 

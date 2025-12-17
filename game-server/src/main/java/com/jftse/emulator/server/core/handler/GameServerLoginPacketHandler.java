@@ -63,7 +63,7 @@ public class GameServerLoginPacketHandler implements PacketHandler<FTConnection,
                     .build();
             ServiceManager.getInstance().getGrpcAuthService().updateAccount(request);
 
-            log.info(player.getName() + " connected");
+            log.info("{} connected", player.getName());
 
             player.setOnline(true);
             client.savePlayer(player);

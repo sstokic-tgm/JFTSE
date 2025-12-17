@@ -14,6 +14,7 @@ import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetBossGuardiansStats;
+import com.jftse.emulator.server.core.packets.matchplay.CMSGSpellHitsTargetExtended;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayDealDamage;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayIncreaseBreathTimerBy60Seconds;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplaySpawnBossBattle;
@@ -82,23 +83,25 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
         if (game == null)
             return;
 
-        byte skillId = spellHitsTarget.getSkillId();
+        CMSGSpellHitsTargetExtended spellHitsTargetExt = new CMSGSpellHitsTargetExtended(spellHitsTarget);
+
+        byte skillId = spellHitsTargetExt.getSkillId();
 
         Skill skill = skillService.findSkillById((long) skillId);
 
         if (skill != null && this.isUniqueSkill(skill)) {
             GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, ftClient, game, skill);
 
-            this.handleUniqueSkill(ftClient.getConnection(), game, skill, spellHitsTarget);
+            this.handleUniqueSkill(ftClient.getConnection(), game, skill, spellHitsTargetExt);
             return;
         }
 
-        boolean denyDamage = spellHitsTarget.getDamageType() == 1;
+        boolean denyDamage = spellHitsTargetExt.getDamageType() == 1;
         if (skillId == 0 && !denyDamage) {
-            if (!this.handleBallLossDamage(ftClient.getConnection(), game, spellHitsTarget))
+            if (!this.handleBallLossDamage(ftClient.getConnection(), game, spellHitsTargetExt))
                 return;
         } else {
-            if (!this.handleSkillDamage(ftClient.getConnection(), spellHitsTarget.getTargetPosition(), game, skill, spellHitsTarget))
+            if (!this.handleSkillDamage(ftClient.getConnection(), spellHitsTargetExt.getTargetPosition(), game, skill, spellHitsTargetExt))
                 return;
         }
 
@@ -115,11 +118,11 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
         return skillId == 5 || skillId == 38;
     }
 
-    private void handleUniqueSkill(FTConnection connection, MatchplayGame game, Skill skill, CMSGSpellHitsTarget spellHitsTarget) {
+    private void handleUniqueSkill(FTConnection connection, MatchplayGame game, Skill skill, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
         int skillId = skill.getId().intValue();
         switch (skillId) {
             case 5 -> // Revive
-                    this.handleRevivePlayer(connection, game, skill, spellHitsTarget);
+                    this.handleRevivePlayer(connection, game, skill, spellHitsTargetExt);
             case 38 -> { // Sandglass
                 GameSession gameSession = connection.getClient().getActiveGameSession();
                 if (gameSession != null) {
@@ -133,7 +136,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
         }
     }
 
-    private void handleRevivePlayer(FTConnection connection, MatchplayGame game, Skill skill, CMSGSpellHitsTarget spellHitsTarget) {
+    private void handleRevivePlayer(FTConnection connection, MatchplayGame game, Skill skill, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
         boolean isBattleGame = game instanceof MatchplayBattleGame;
 
         PlayerBattleState playerBattleState = null;
@@ -150,17 +153,17 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), spellHitsTarget.getXKnockbackPosition(), spellHitsTarget.getYKnockbackPosition());
+                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), spellHitsTargetExt.getXKnockbackPosition(), spellHitsTargetExt.getYKnockbackPosition());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }
 
-    private boolean handleBallLossDamage(FTConnection connection, MatchplayGame game, CMSGSpellHitsTarget spellHitsTarget) {
-        short receiverPosition = spellHitsTarget.getTargetPosition();
-        short attackerPosition = spellHitsTarget.getAttackerPosition();
-        boolean attackerHasWillBuff = spellHitsTarget.getAttackerBuffId1() == 3 || spellHitsTarget.getAttackerBuffId2() == 3;
+    private boolean handleBallLossDamage(FTConnection connection, MatchplayGame game, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
+        short receiverPosition = spellHitsTargetExt.getTargetPosition();
+        short attackerPosition = spellHitsTargetExt.getAttackerPosition();
+        boolean attackerHasWillBuff = spellHitsTargetExt.getAttackerBuffId1() == 3 || spellHitsTargetExt.getAttackerBuffId2() == 3;
 
-        boolean guardianMadePoint = spellHitsTarget.getTargetPosition() < 4;
+        boolean guardianMadePoint = spellHitsTargetExt.getTargetPosition() < 4;
 
         short newHealth;
         try {
@@ -171,7 +174,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                 final boolean isAdvancedBossGuardianModeActive = guardianGame.isAdvancedBossGuardianMode() && guardianGame.getPhaseManager().getIsRunning().get();
 
                 if (guardianMadePoint) {
-                    if (!spellHitsTarget.getApplySkillEffect()) {
+                    if (!spellHitsTargetExt.getApplySkillEffect()) {
                         return false;
                     }
 
@@ -196,18 +199,18 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
             return false;
         }
 
-        GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, spellHitsTarget);
+        GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, spellHitsTargetExt);
 
-        S2CMatchplayDealDamage damagePacket = new S2CMatchplayDealDamage(spellHitsTarget.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
+        S2CMatchplayDealDamage damagePacket = new S2CMatchplayDealDamage(spellHitsTargetExt.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damagePacket, connection);
         return true;
     }
 
-    private boolean handleSkillDamage(FTConnection connection, short targetPosition, MatchplayGame game, Skill skill, CMSGSpellHitsTarget spellHitsTarget) {
-        boolean denyDamage = spellHitsTarget.getDamageType() == 1;
-        short attackerPosition = spellHitsTarget.getAttackerPosition();
-        boolean attackerHasStrBuff = spellHitsTarget.getAttackerBuffId1() == 0 || spellHitsTarget.getAttackerBuffId2() == 0;
-        boolean receiverHasDefBuff = spellHitsTarget.getReceiverBuffId1() == 1 || spellHitsTarget.getReceiverBuffId2() == 1;
+    private boolean handleSkillDamage(FTConnection connection, short targetPosition, MatchplayGame game, Skill skill, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
+        boolean denyDamage = spellHitsTargetExt.getDamageType() == 1;
+        short attackerPosition = spellHitsTargetExt.getAttackerPosition();
+        boolean attackerHasStrBuff = spellHitsTargetExt.getAttackerBuffId1() == 0 || spellHitsTargetExt.getAttackerBuffId2() == 0;
+        boolean receiverHasDefBuff = spellHitsTargetExt.getReceiverBuffId1() == 1 || spellHitsTargetExt.getReceiverBuffId2() == 1;
 
         short skillDamage = skill != null ? skill.getDamage().shortValue() : -1;
 
@@ -227,7 +230,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                     newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                 } else if (skillDamage == 0) {
                     newHealth = battleGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
-                } else if (!spellHitsTarget.getApplySkillEffect()) {
+                } else if (!spellHitsTargetExt.getApplySkillEffect()) {
                     return false;
                 } else {
                     newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
@@ -263,7 +266,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                         }
                     } else if (skillDamage == 0) {
                         newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
-                    } else if (!spellHitsTarget.getApplySkillEffect()) {
+                    } else if (!spellHitsTargetExt.getApplySkillEffect()) {
                         return false;
                     } else {
                         if (isAdvancedBossGuardianModeActive) {
@@ -313,11 +316,11 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
             }
         }
 
-        GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, skill, spellHitsTarget);
+        GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, skill, spellHitsTargetExt);
 
-        Skill skillToApply = this.getSkillToApply(skill, spellHitsTarget);
+        Skill skillToApply = this.getSkillToApply(skill, spellHitsTargetExt);
         S2CMatchplayDealDamage damageToPlayerPacket =
-                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply.getTargeting().shortValue(), skillToApply.getId().byteValue(), spellHitsTarget.getXKnockbackPosition(), spellHitsTarget.getYKnockbackPosition());
+                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply.getTargeting().shortValue(), skillToApply.getId().byteValue(), spellHitsTargetExt.getXKnockbackPosition(), spellHitsTargetExt.getYKnockbackPosition());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         return true;
     }
@@ -413,20 +416,20 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
         });
     }
 
-    private Skill getSkillToApply(Skill skill, CMSGSpellHitsTarget spellHitsTarget) {
-        boolean targetHittingHimself = spellHitsTarget.getAttackerPosition() == spellHitsTarget.getTargetPosition();
+    private Skill getSkillToApply(Skill skill, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
+        boolean targetHittingHimself = spellHitsTargetExt.getAttackerPosition() == spellHitsTargetExt.getTargetPosition();
         if (skill != null && skill.getId() == 64 && targetHittingHimself) {
             log.debug("skill.getId() == 64 && targetHittingHimself return 3");
             return skillService.findSkillById(3L);
         }
 
-        if (!spellHitsTarget.getApplySkillEffect()) {
-            log.debug("!spellHitsTarget.isApplySkillEffect() return 3");
+        if (!spellHitsTargetExt.getApplySkillEffect()) {
+            log.debug("!spellHitsTargetExt.isApplySkillEffect() return 3");
             return skillService.findSkillById(3L);
         }
 
-        Skill skillToApply = skillService.findSkillById((long) spellHitsTarget.getSkillId());
-        if (skillToApply == null && spellHitsTarget.getSkillId() == 0) {
+        Skill skillToApply = skillService.findSkillById((long) spellHitsTargetExt.getSkillId());
+        if (skillToApply == null && spellHitsTargetExt.getSkillId() == 0) {
             skillToApply = new Skill();
             skillToApply.setId(0L);
             skillToApply.setTargeting(0);

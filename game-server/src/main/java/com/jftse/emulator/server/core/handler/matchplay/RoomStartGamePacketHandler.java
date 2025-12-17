@@ -22,6 +22,7 @@ import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.AuthenticationService;
+import com.jftse.server.core.shared.ServerConfService;
 import com.jftse.server.core.shared.packets.matchplay.*;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
@@ -35,9 +36,11 @@ import java.util.stream.Collectors;
 @PacketId(CMSGStartGame.PACKET_ID)
 public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, CMSGStartGame> {
     private final AuthenticationService authenticationService;
+    private final ServerConfService serverConfService;
 
     public RoomStartGamePacketHandler() {
         this.authenticationService = ServiceManager.getInstance().getAuthenticationService();
+        this.serverConfService = GameManager.getInstance().getServerConfService();
     }
 
     @Override
@@ -67,7 +70,7 @@ public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, C
             room.setStatus(RoomStatus.StartingGame);
         }
 
-        GameServer relayServer = authenticationService.getGameServerByPort(5895 + 1);
+        GameServer relayServer = authenticationService.getGameServerByPort(this.serverConfService.get("RelayPort", Integer.class));
 
         List<FTClient> clientsInRoom = new ArrayList<>(GameManager.getInstance().getClientsInRoom(room.getRoomId()));
 
@@ -165,7 +168,7 @@ public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, C
             SMSGSetHost setHostPacket = SMSGSetHost.builder().result((byte) 1).build();
             clientToHostGame.getConnection().sendTCP(setHostPacket);
 
-            SMSGSetHost setHostUnknownPacket = SMSGSetHost.builder().build();
+            SMSGSetHostUnknown setHostUnknownPacket = SMSGSetHostUnknown.builder().build();
             clientToHostGame.getConnection().sendTCP(setHostUnknownPacket);
 
             game.getHandleable().onPrepare(ftClient);

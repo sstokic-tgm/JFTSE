@@ -33,6 +33,7 @@ import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.server.core.shared.packets.matchplay.CMSGPlayerUseSkill;
 import com.jftse.server.core.shared.packets.matchplay.SMSGPlayerUseSkill;
+import com.jftse.server.core.util.GameTime;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -64,7 +65,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
                 || ftClient.getPlayer() == null || ftClient.getRoomPlayer() == null)
             return;
 
-        long skillUseTimestamp = System.currentTimeMillis() + TIMESTAMP_DELTA;
+        long skillUseTimestamp = GameTime.getGameTimeMS() + TIMESTAMP_DELTA;
         Player player = ftClient.getPlayer();
 
         byte attackerPosition = anyoneUsesSkill.getAttackerPosition();

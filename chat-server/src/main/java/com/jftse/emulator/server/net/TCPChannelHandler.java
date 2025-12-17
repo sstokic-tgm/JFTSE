@@ -13,6 +13,7 @@ import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.net.TCPHandlerV2;
 import com.jftse.server.core.protocol.IPacket;
+import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.CMSGDisconnectRequest;
@@ -31,6 +32,9 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
         super(ftConnectionAttributeKey);
 
         this.blockedIPService = ServiceManager.getInstance().getBlockedIPService();
+
+        PacketRegistry.register(CMSGDisconnectRequest.PACKET_ID, this::handleDisconnectRequest);
+        //PacketRegistry.register(CMSGHeartbeat.PACKET_ID, this::handleHeartBeat);
     }
 
     @Override
@@ -40,10 +44,8 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
 
     @Override
     protected void packetReceived(FTConnection connection, IPacket packet) {
-        if (packet instanceof CMSGHeartbeat heartbeat) {
-            handleHeartBeat(connection, heartbeat);
-        } else if (packet instanceof CMSGDisconnectRequest disconnectRequest) {
-            handleDisconnectRequest(connection, disconnectRequest);
+        if (packet instanceof CMSGHeartbeat p) {
+            handleHeartBeat(connection, p);
         } else {
             connection.queuePacket(packet);
         }

@@ -33,7 +33,11 @@ public class FTConnection extends Connection<FTClient> {
         final FTClient client = getClient();
         int processedPackets = 0;
 
-        while (!getIsClosingConnection().get() && !recvQueue.isEmpty()) {
+        while (!getIsClosingConnection().get()) {
+            if (processedPackets >= MAX_PROCESSED_PACKETS_PER_UPDATE || recvQueue.isEmpty()) {
+                break;
+            }
+
             IPacket packet = recvQueue.poll();
             if (packet == null)
                 continue;
@@ -50,10 +54,6 @@ public class FTConnection extends Connection<FTClient> {
             }
 
             processedPackets++;
-
-            if (processedPackets > MAX_PROCESSED_PACKETS_PER_UPDATE) {
-                break;
-            }
         }
 
         if (processedPackets > 0) {

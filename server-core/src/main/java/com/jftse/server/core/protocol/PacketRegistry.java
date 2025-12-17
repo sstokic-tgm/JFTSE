@@ -33,6 +33,13 @@ public final class PacketRegistry {
         REGISTRY.put(packetId, factory);
     }
 
+    public static <C extends Connection<? extends Client<C>>, T extends IPacket> void register(int packetId, PacketHandler<C, T> handler) {
+        String className = handler.getClass().getName();
+        className = className.substring(0, className.indexOf("$"));
+        log.info("{} {}", className, String.format("0x%X(%d)", packetId, packetId));
+        HANDLERS.put(packetId, handler);
+    }
+
     public static void autoRegisterOldClientPackets() {
         log.info("Registering old client packets...");
 
