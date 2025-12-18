@@ -46,12 +46,16 @@ public class GameSession {
         return mode == GameMode.BASIC;
     }
 
-    public  boolean isBattleMode() {
+    public boolean isBattleMode() {
         return mode == GameMode.BATTLE;
     }
 
     public boolean isGuardianMode() {
         return mode == GameMode.GUARDIAN;
+    }
+
+    public boolean isValid() {
+        return matchplayGame != null;
     }
 
     public FTClient getClientByPlayerId(long playerId) {

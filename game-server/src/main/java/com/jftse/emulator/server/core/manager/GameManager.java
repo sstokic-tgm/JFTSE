@@ -620,6 +620,10 @@ public class GameManager implements ServerLoopHandler {
         final ConcurrentHashMap<Integer, GameSession> gameSessionsSnapshot = new ConcurrentHashMap<>(gameSessionManager.getGameSessionList());
 
         for (GameSession gameSession : gameSessionsSnapshot.values()) {
+            if (!gameSession.isValid()) {
+                continue;
+            }
+
             if (gameSession.isGuardianMode()) {
                 ((MatchplayGuardianGame) gameSession.getMatchplayGame()).getPhaseManager().update(diff);
             }
