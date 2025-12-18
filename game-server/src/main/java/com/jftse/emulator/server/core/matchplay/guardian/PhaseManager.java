@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.matchplay.guardian;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
@@ -16,7 +17,6 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
@@ -46,14 +46,10 @@ public class PhaseManager {
                 PhaseScript nextPhase = phases.get(phases.indexOf(currentPhase.get()) + 1);
                 final String nextPhaseName = nextPhase.getPhaseName();
 
-                AtomicInteger countdown = new AtomicInteger(5);
-                ThreadManager.getInstance().scheduleAtFixedRate(() -> {
-                    int count = countdown.getAndDecrement();
-                    if (count >= 1) {
-                        S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + count + "...");
-                        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
-                    }
-                }, 5, TimeUnit.SECONDS);
+                for (int i = 5; i >= 1; i--) {
+                    S2CChatRoomAnswerPacket packet = new S2CChatRoomAnswerPacket((byte) 2, "Server", nextPhaseName + " starts in " + i + "...");
+                    eventHandler.offer(eventHandler.createPacketEvent(connection.getClient(), packet, PacketEventType.DEFAULT, TimeUnit.SECONDS.toMillis(5 - i)));
+                }
 
                 RunnableEvent runnableEvent = eventHandler.createRunnableEvent(() -> {
                     currentPhase.get().end();
