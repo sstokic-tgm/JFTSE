@@ -15,6 +15,7 @@ import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
+import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.net.FTClient;
@@ -625,7 +626,11 @@ public class GameManager implements ServerLoopHandler {
             }
 
             if (gameSession.isGuardianMode()) {
-                ((MatchplayGuardianGame) gameSession.getMatchplayGame()).getPhaseManager().update(diff);
+                final MatchplayGuardianGame game = (MatchplayGuardianGame) gameSession.getMatchplayGame();
+                final PhaseManager phaseManager = game.getPhaseManager();
+                if (phaseManager != null) {
+                    phaseManager.update(diff);
+                }
             }
         }
     }
