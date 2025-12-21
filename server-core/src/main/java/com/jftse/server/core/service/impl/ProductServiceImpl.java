@@ -157,39 +157,52 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getProductList(byte category, byte part, byte player, int page) {
         List<Product> productList;
 
-        Pageable pageWithSixElements = PageRequest.of(page == 1 ? 0 : (page - 1), 6, Sort.by("productIndex"));
+        int pageIndex = (page <= 1) ? 0 : (page - 1);
+        Pageable pageWithSixElements = PageRequest.of(
+                pageIndex,
+                6,
+                Sort.by(
+                        Sort.Order.asc("noBuy"),
+                        Sort.Order.asc("price0"),
+                        Sort.Order.asc("productIndex")
+                )
+        );
 
         switch (EItemCategory.valueOf(category)) {
 
-        case PARTS: {
-            List<Integer> itemIndexList = part == EItemPart.SET.getValue() ?
-                itemPartRepository.findItemIndexListByForPlayer(EItemChar.getNameByValue(player)) :
-                itemPartRepository.findItemIndexListByForPlayerAndPartIn(EItemChar.getNameByValue(player), EItemSubPart.getNamesByValue(part));
-            productList = part == EItemPart.SET.getValue() ?
-                productRepository.findAllByCategoryAndEnabledAndItem0InAndItem1Not(EItemCategory.getNameByValue(category), true, itemIndexList, 0, pageWithSixElements) :
-                productRepository.findAllByCategoryAndEnabledAndItem0InAndItem1Is(EItemCategory.getNameByValue(category), true, itemIndexList, 0, pageWithSixElements);
-        } break;
-        case HOUSE_DECO:
-            productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemHouseDecoRepository.findItemIndexListByKind(EItemHouseDeco.getNameByValue(part)), pageWithSixElements);
-            break;
+            case PARTS: {
+                String categoryName = EItemCategory.getNameByValue(category);
+                String charName = EItemChar.getNameByValue(player);
 
-        case RECIPE: {
-            List<Integer> itemIndexList = part == EItemRecipe.CHAR_ITEM.getValue() ?
-                itemRecipeRepository.findItemIndexListByKindAndForPlayer(EItemRecipe.getNameByValue(part), EItemChar.getNameByValue(player)) :
-                itemRecipeRepository.findItemIndexListByKind(EItemRecipe.getNameByValue(part));
-            productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemIndexList, pageWithSixElements);
-        } break;
-        case LOTTERY:
-            productList = productRepository.findAllByCategoryAndEnabledAndPriceType(EItemCategory.getNameByValue(category), true, part == 0 ? "MINT" : "GOLD", pageWithSixElements);
-            break;
+                if (part == EItemPart.SET.getValue()) {
+                    return productRepository.findShopPartsSetSortedByLevel(categoryName, charName, PageRequest.of(pageIndex, 6));
+                } else {
+                    List<String> subPartNames = EItemSubPart.getNamesByValue(part);
+                    return productRepository.findShopPartsNonSetSortedByLevel(categoryName, charName, subPartNames, PageRequest.of(pageIndex, 6));
+                }
+            }
+            case HOUSE_DECO:
+                productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemHouseDecoRepository.findItemIndexListByKind(EItemHouseDeco.getNameByValue(part)), pageWithSixElements);
+                break;
 
-        case ENCHANT:
-            productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemEnchantRepository.getItemIndexListByKind(EItemEnchant.getNameByValue(part)), pageWithSixElements);
+            case RECIPE: {
+                List<Integer> itemIndexList = part == EItemRecipe.CHAR_ITEM.getValue() ?
+                        itemRecipeRepository.findItemIndexListByKindAndForPlayer(EItemRecipe.getNameByValue(part), EItemChar.getNameByValue(player)) :
+                        itemRecipeRepository.findItemIndexListByKind(EItemRecipe.getNameByValue(part));
+                productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemIndexList, pageWithSixElements);
+            }
             break;
+            case LOTTERY:
+                productList = productRepository.findAllByCategoryAndEnabledAndPriceType(EItemCategory.getNameByValue(category), true, part == 0 ? "MINT" : "GOLD", pageWithSixElements);
+                break;
 
-        default:
-            productList = productRepository.findAllByCategoryAndEnabled(EItemCategory.getNameByValue(category), true, pageWithSixElements);
-            break;
+            case ENCHANT:
+                productList = productRepository.findAllByCategoryAndEnabledAndItem0In(EItemCategory.getNameByValue(category), true, itemEnchantRepository.getItemIndexListByKind(EItemEnchant.getNameByValue(part)), pageWithSixElements);
+                break;
+
+            default:
+                productList = productRepository.findAllByCategoryAndEnabled(EItemCategory.getNameByValue(category), true, pageWithSixElements);
+                break;
         }
 
         return productList;

@@ -150,8 +150,8 @@ public class AuthenticationManager implements ServerLoopHandler {
             });
         }
 
-        processUpdateAccountRequestQueue();
         updateSessions(diff);
+        processUpdateAccountRequestQueue();
 
         if (timers[ServerTimers.SUPDATE_UPTIME.value()].passed()) {
             long uptimeSeconds = GameTime.getUptimeSeconds();
