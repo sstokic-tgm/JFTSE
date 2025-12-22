@@ -45,4 +45,4 @@
 *.iml
 *.ipr
 
-./target/*
+target/**
