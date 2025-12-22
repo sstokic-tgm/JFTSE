@@ -7,6 +7,8 @@
     <groupId>com.jftse</groupId>
     <artifactId>emulator-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <name>JFTSE Emulator</name>
+    <description>Fantasy Tennis server emulator</description>
     <packaging>pom</packaging>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -43,4 +45,17 @@
         <module>packet-generator</module>
     </modules>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <source>21</source>
+                    <windowtitle>JFTSE API</windowtitle>
+                    <doctitle><![CDATA[<h1>JFTSE Emulator API</h1>]]></doctitle>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
