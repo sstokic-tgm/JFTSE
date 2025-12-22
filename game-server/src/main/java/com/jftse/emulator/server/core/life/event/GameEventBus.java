@@ -6,6 +6,8 @@ import com.jftse.emulator.server.core.life.script.ScriptContextHelper;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.server.core.service.ScriptStateService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ import java.util.*;
 @Log4j2
 public class GameEventBus {
     private static GameEventBus instance;
+
+    private static final Logger scriptLogger = LogManager.getLogger("ScriptLogger");
 
     private static final Map<GameEventType, List<GameEventCallback>> eventListeners = new HashMap<>();
 
@@ -83,6 +87,7 @@ public class GameEventBus {
                     bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
                     bindings.put("state", new ScriptContextHelper(scriptStateService, scriptFile));
                     bindings.put("geb", this);
+                    bindings.put("log", scriptLogger);
 
                     sm.eval(scriptFile, bindings);
                     count++;

@@ -2,8 +2,13 @@ package com.jftse.emulator.server.core.life.event;
 
 import com.jftse.emulator.common.scripting.ScriptFile;
 import com.jftse.emulator.common.scripting.ScriptManager;
+import com.jftse.emulator.server.core.life.script.ScriptContextHelper;
 import com.jftse.emulator.server.core.manager.GameManager;
+import com.jftse.server.core.service.ScriptStateService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -16,7 +21,12 @@ import java.util.*;
 public class GameEventBus {
     private static GameEventBus instance;
 
+    private static final Logger scriptLogger = LogManager.getLogger("ScriptLogger");
+
     private static final Map<GameEventType, List<GameEventCallback>> eventListeners = new HashMap<>();
+
+    @Autowired
+    private ScriptStateService scriptStateService;
 
     @PostConstruct
     public void init() {
@@ -64,7 +74,10 @@ public class GameEventBus {
                     Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
                     bindings.put("gameManager", GameManager.getInstance());
                     bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
+                    bindings.put("threadManager", GameManager.getInstance().getThreadManager());
+                    bindings.put("state", new ScriptContextHelper(scriptStateService, scriptFile));
                     bindings.put("geb", this);
+                    bindings.put("log", scriptLogger);
 
                     sm.eval(scriptFile, bindings);
                     count++;

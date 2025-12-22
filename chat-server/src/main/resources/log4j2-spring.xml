@@ -62,6 +62,10 @@
         <Logger name="PacketLogger" level="trace" additivity="false">
             <AppenderRef ref="PacketsFile"/>
         </Logger>
+        <Logger name="ScriptLogger" level="trace" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="ServerFile"/>
+        </Logger>
     </Loggers>
 
 </Configuration>
