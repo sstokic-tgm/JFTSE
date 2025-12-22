@@ -84,7 +84,7 @@ public class GameServerDataRequestPacketHandler implements PacketHandler<FTConne
             return;
         }
 
-        ThreadManager.getInstance().newTask(() -> {
+        //ThreadManager.getInstance().newTask(() -> {
             if (requestType == 0) {
                 Player lastLoggedInPlayer = playerService.findById(account.getLastSelectedPlayerId());
                 if (lastLoggedInPlayer != null && !lastLoggedInPlayer.getId().equals(player.getId())) {
@@ -164,6 +164,6 @@ public class GameServerDataRequestPacketHandler implements PacketHandler<FTConne
                 connection.sendTCP(unknownPlayerInfoDataPacket);
                 connection.sendTCP(playerInfoPlayStatsPacket);
             }
-        });
+        //});
     }
 }
