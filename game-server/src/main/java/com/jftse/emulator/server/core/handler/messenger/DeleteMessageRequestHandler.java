@@ -20,9 +20,9 @@ public class DeleteMessageRequestHandler implements PacketHandler<FTConnection, 
 
     @Override
     public void handle(FTConnection connection, CMSGDeleteMessage packet) {
-        if (packet.getType() == 0) {
+        if (packet.getType() == 0 || packet.getType() == 1) {
             packet.getMessageIds().forEach(m -> messageService.remove(m.longValue()));
-        } else if (packet.getType() == 2) {
+        } else if (packet.getType() == 2 || packet.getType() == 3) {
             packet.getMessageIds().forEach(m -> giftService.remove(m.longValue()));
         }
     }

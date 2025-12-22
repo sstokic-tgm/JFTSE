@@ -20,10 +20,12 @@ import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnsw
 import com.jftse.server.core.shared.packets.messenger.CMSGSendParcel;
 import com.jftse.server.core.shared.packets.messenger.SMSGSendParcel;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
 @PacketId(CMSGSendParcel.PACKET_ID)
+@Log4j2
 public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMSGSendParcel> {
     private final PlayerService playerService;
     private final ProductService productService;
@@ -53,6 +55,7 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
         if (item == null) {
             SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
             connection.sendTCP(response);
+            log.debug("SendParcelRequestHandler: PlayerPocket item is null for id {}", packet.getPlayerPocketId());
             return;
         }
 
@@ -67,11 +70,15 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
         if (product != null && !product.getEnableParcel()) {
             SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
             connection.sendTCP(response);
+
+            log.debug("SendParcelRequestHandler: Product is null or parceling on item disabled for id {}", packet.getPlayerPocketId());
         } else {
             Player sender = ftClient.getPlayer();
             if (sender == null) {
                 SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
                 connection.sendTCP(response);
+
+                log.debug("SendParcelRequestHandler: Player is null for id {}", packet.getPlayerPocketId());
                 return;
             }
 
@@ -104,6 +111,8 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
                     if (receiverParcels.size() > 128 || senderParcels.size() > 128) {
                         SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
                         connection.sendTCP(response);
+
+                        log.debug("SendParcelRequestHandler: Receiver or sender has more than 128 parcels. ReceiverId: {}, SenderId: {}", receiver.getId(), sender.getId());
                         return;
                     }
 
