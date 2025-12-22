@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler;
 
+import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.inventory.*;
@@ -86,9 +87,16 @@ public class GameServerDataRequestPacketHandler implements PacketHandler<FTConne
                 if (lastLoggedInPlayer != null && !lastLoggedInPlayer.getId().equals(player.getId())) {
                     Pocket pocket = pocketService.findById(lastLoggedInPlayer.getPocket().getId());
                     List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
-
-                    S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
-                    connection.sendTCP(clearInventoryPacket);
+                    final int playerPocketListSize = playerPocketList.size();
+                    if (playerPocketListSize > 60) {
+                        StreamUtils.batches(playerPocketList, 60).forEach(batch -> {
+                            S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(batch);
+                            connection.sendTCP(clearInventoryPacket);
+                        });
+                    } else {
+                        S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
+                        connection.sendTCP(clearInventoryPacket);
+                    }
                 }
 
                 AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
@@ -98,9 +106,16 @@ public class GameServerDataRequestPacketHandler implements PacketHandler<FTConne
             } else if (requestType == 1) {
                 Pocket pocket = pocketService.findById(player.getPocket().getId());
                 List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
-
-                S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                connection.sendTCP(inventoryDataPacket);
+                final int playerPocketListSize = playerPocketList.size();
+                if (playerPocketListSize > 60) {
+                    StreamUtils.batches(playerPocketList, 60).forEach(batch -> {
+                        S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(batch);
+                        connection.sendTCP(inventoryDataPacket);
+                    });
+                } else {
+                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+                    connection.sendTCP(inventoryDataPacket);
+                }
 
                 List<Pet> petList = petService.findAllByPlayerId(player.getId());
                 S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
