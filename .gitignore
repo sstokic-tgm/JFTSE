@@ -44,3 +44,5 @@
 .idea/modules
 *.iml
 *.ipr
+
+./target/*
