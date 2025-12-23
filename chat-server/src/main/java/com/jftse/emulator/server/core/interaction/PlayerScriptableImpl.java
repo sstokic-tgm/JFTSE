@@ -3,21 +3,49 @@ package com.jftse.emulator.server.core.interaction;
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
+import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.messenger.Gift;
+import com.jftse.entities.database.model.messenger.Message;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Optional;
 
+/**
+ * Implementation of PlayerScriptable interface to interact with a player.
+ * Provides methods to give experience, gold, ability points, items,
+ * send gifts, and send messages to the player.
+ *
+ * Usage:
+ * <pre>
+ *     PlayerScriptable playerScriptable = new PlayerScriptableImpl(playerId);
+ *     playerScriptable.giveExp(1000);
+ *     playerScriptable.sendMessage("Hello, Player!");
+ * </pre>
+ *
+ * Usage within scripts:
+ * <pre>
+ *     const PlayerScriptableImpl = Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl");
+ *
+ *     let player = new PlayerScriptableImpl(playerId);
+ *     player.giveGold(500);
+ *     player.giveItem(12345, 2);
+ *     player.sendGift(67890, 1, "Enjoy this gift!");
+ * </pre>
+ */
 @Getter
 @Setter
 public class PlayerScriptableImpl implements PlayerScriptable {
@@ -25,21 +53,44 @@ public class PlayerScriptableImpl implements PlayerScriptable {
     private FTPlayer ftPlayer;
 
     private final ServiceManager serviceManager;
+    private final GameManager gameManager;
 
     private PlayerScriptableImpl() {
         this.serviceManager = ServiceManager.getInstance();
+        this.gameManager = GameManager.getInstance();
     }
 
+    /**
+     * Constructs a PlayerScriptableImpl for the given player ID.
+     *
+     * @param playerId the ID of the player
+     * @throws ValidationException if the player ID is invalid
+     */
     public PlayerScriptableImpl(Long playerId) throws ValidationException {
         this();
         this.ftPlayer = new FTPlayer(playerId);
+
+        FTConnection connection = gameManager.getConnectionByPlayerId(playerId);
+        if (connection != null)
+            this.client = connection.getClient();
     }
 
+    /**
+     * Constructs a PlayerScriptableImpl for the given FTClient.
+     *
+     * @param client the FTClient instance
+     */
     public PlayerScriptableImpl(FTClient client) {
         this();
         this.client = client;
     }
 
+    /**
+     * Retrieves the FTPlayer instance associated with this scriptable.
+     * If the FTPlayer is not already set, it attempts to create it using the client.
+     *
+     * @return an Optional containing the FTPlayer if available, otherwise an empty Optional
+     */
     public Optional<FTPlayer> getPlayer() {
         if (this.ftPlayer == null && this.client != null) {
             try {
@@ -149,6 +200,76 @@ public class PlayerScriptableImpl implements PlayerScriptable {
 
         player.getInventory().addItem(productIndex, quantity);
     }
+
+    @Override
+    public void sendMessage(String message) {
+        Optional<FTPlayer> optionalPlayer = getPlayer();
+        if (optionalPlayer.isEmpty() || message == null || message.isEmpty())
+            return;
+
+        FTPlayer player = optionalPlayer.get();
+
+        Player sender = serviceManager.getPlayerService().findByName("JFTSE");
+        if (sender == null) {
+            sender = new Player();
+            sender.setId(player.getPlayer().getId());
+        }
+
+        Message msg = new Message();
+        msg.setSeen(false);
+        msg.setSender(sender);
+        msg.setReceiver(player.getPlayer());
+        msg.setMessage(message);
+        serviceManager.getMessageService().save(msg);
+
+        FTConnection connection = gameManager.getConnectionByPlayerId(player.getPlayer().getId());
+        if (connection != null) {
+            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg);
+
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(player.getPlayer().getId())
+                    .packet(notifyPacket)
+                    .build();
+            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getPlayer().getName() + "(GameServer)");
+        }
+    }
+
+    @Override
+    public void sendMessage(String sender, String message) {
+        Optional<FTPlayer> optionalPlayer = getPlayer();
+        if (optionalPlayer.isEmpty() || sender == null || sender.isEmpty() || message == null || message.isEmpty())
+            return;
+
+        FTPlayer player = optionalPlayer.get();
+
+        Player senderPlayer = serviceManager.getPlayerService().findByName(sender);
+        if (senderPlayer == null) {
+            senderPlayer = serviceManager.getPlayerService().findByName("JFTSE");
+            if (senderPlayer == null) {
+                senderPlayer = new Player();
+                senderPlayer.setId(player.getPlayer().getId());
+            }
+        }
+
+        Message msg = new Message();
+        msg.setSeen(false);
+        msg.setSender(senderPlayer);
+        msg.setReceiver(player.getPlayer());
+        msg.setMessage(message);
+        serviceManager.getMessageService().save(msg);
+
+        FTConnection connection = gameManager.getConnectionByPlayerId(player.getPlayer().getId());
+        if (connection != null) {
+            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg);
+
+            PacketMessage packetMessage = PacketMessage.builder()
+                    .receivingPlayerId(player.getPlayer().getId())
+                    .packet(notifyPacket)
+                    .build();
+            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getPlayer().getName() + "(GameServer)");
+        }
+    }
+
 
     @Override
     public void sendChat(String name, String message) {

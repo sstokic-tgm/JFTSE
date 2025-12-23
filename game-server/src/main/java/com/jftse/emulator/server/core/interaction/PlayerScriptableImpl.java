@@ -24,6 +24,28 @@ import lombok.Setter;
 
 import java.util.Optional;
 
+/**
+ * Implementation of PlayerScriptable interface to interact with a player.
+ * Provides methods to give experience, gold, ability points, items,
+ * send gifts, and send messages to the player.
+ *
+ * Usage:
+ * <pre>
+ *     PlayerScriptable playerScriptable = new PlayerScriptableImpl(playerId);
+ *     playerScriptable.giveExp(1000);
+ *     playerScriptable.sendMessage("Hello, Player!");
+ * </pre>
+ *
+ * Usage within scripts:
+ * <pre>
+ *     const PlayerScriptableImpl = Java.type("com.jftse.emulator.server.core.interaction.PlayerScriptableImpl");
+ *
+ *     let player = new PlayerScriptableImpl(playerId);
+ *     player.giveGold(500);
+ *     player.giveItem(12345, 2);
+ *     player.sendGift(67890, 1, "Enjoy this gift!");
+ * </pre>
+ */
 @Getter
 @Setter
 public class PlayerScriptableImpl implements PlayerScriptable {
@@ -38,6 +60,12 @@ public class PlayerScriptableImpl implements PlayerScriptable {
         this.gameManager = GameManager.getInstance();
     }
 
+    /**
+     * Constructs a PlayerScriptableImpl for the given player ID.
+     *
+     * @param playerId the ID of the player
+     * @throws ValidationException if the player ID is invalid
+     */
     public PlayerScriptableImpl(Long playerId) throws ValidationException {
         this();
         this.ftPlayer = new FTPlayer(playerId);
@@ -47,11 +75,22 @@ public class PlayerScriptableImpl implements PlayerScriptable {
             this.client = connection.getClient();
     }
 
+    /**
+     * Constructs a PlayerScriptableImpl for the given FTClient.
+     *
+     * @param client the FTClient instance
+     */
     public PlayerScriptableImpl(FTClient client) {
         this();
         this.client = client;
     }
 
+    /**
+     * Retrieves the FTPlayer instance associated with this scriptable.
+     * If the FTPlayer is not already set, it attempts to create it using the client.
+     *
+     * @return an Optional containing the FTPlayer if available, otherwise an empty Optional
+     */
     public Optional<FTPlayer> getPlayer() {
         if (this.ftPlayer == null && this.client != null) {
             try {

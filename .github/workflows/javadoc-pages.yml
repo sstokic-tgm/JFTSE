@@ -29,7 +29,7 @@ jobs:
           cache: maven
 
       - name: Build aggregated Javadocs
-        run: mvn clean javadoc:aggregate
+        run: mvn -DskipTests javadoc:aggregate
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

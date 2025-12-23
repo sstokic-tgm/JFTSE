@@ -16,10 +16,27 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
+/**
+ * Implementation of the Inventory interface for managing a player's inventory.
+ * Provides methods to add and remove items from the inventory.
+ *
+ * Usage:
+ * <pre>
+ *     Inventory in = new InventoryImpl(player, serviceManager);
+ *     in.addItem(productIndex, quantity);
+ *     in.removeItem(itemIndex, category, quantity);
+ * </pre>
+ */
 public class InventoryImpl implements Inventory {
     private final ServiceManager serviceManager;
     private final Player player;
 
+    /**
+     * Constructs an InventoryImpl instance for the given player and service manager.
+     *
+     * @param player the player whose inventory is being managed
+     * @param serviceManager the service manager for accessing various services
+     */
     public InventoryImpl(Player player, ServiceManager serviceManager) {
         this.player = player;
         this.serviceManager = serviceManager;
@@ -42,6 +59,14 @@ public class InventoryImpl implements Inventory {
         return addItem(product, quantity);
     }
 
+    /**
+     * Adds an item to the player's inventory based on the provided product and quantity.
+     * Handles different item categories and updates the player's pocket accordingly.
+     *
+     * @param product the product to be added
+     * @param quantity the quantity of the product to be added
+     * @return true if the item was added successfully, false otherwise
+     */
     private boolean addItem(Product product, int quantity) {
         if (product.getCategory().equals(EItemCategory.PET_CHAR.getName())) {
             return false;
