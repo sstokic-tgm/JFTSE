@@ -2,6 +2,7 @@ package com.jftse.emulator.server.net;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CClearInventoryPacket;
 import com.jftse.emulator.server.core.rabbit.messages.NotifyGuildMemberListOnDisconnectMessage;
 import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendListMessage;
 import com.jftse.emulator.server.core.rabbit.messages.RefreshFriendRelationMessage;
@@ -9,6 +10,8 @@ import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.net.TCPHandlerV2;
@@ -22,6 +25,8 @@ import com.jftse.server.core.shared.packets.SMSGDisconnectResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.List;
 
 @Log4j2
 @ChannelHandler.Sharable
@@ -61,6 +66,11 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
 
     private void handleDisconnectRequest(FTConnection connection, CMSGDisconnectRequest packet) {
         GameManager.getInstance().handleRoomPlayerChanges(connection, true);
+
+        Pocket pocket = ServiceManager.getInstance().getPocketService().findById(connection.getClient().getPlayer().getPocket().getId());
+        List<PlayerPocket> playerPocketList = ServiceManager.getInstance().getPlayerPocketService().getPlayerPocketItems(pocket);
+        S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
+        connection.sendTCP(clearInventoryPacket);
 
         SMSGDisconnectResponse response = SMSGDisconnectResponse.builder().status((byte) 0).build();
         connection.sendTCP(response);

@@ -6,6 +6,7 @@ import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.inventory.*;
 import com.jftse.emulator.server.core.packets.pet.S2CPetDataAnswerPacket;
 import com.jftse.emulator.server.core.packets.player.*;
+import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
@@ -81,86 +82,66 @@ public class GameServerDataRequestPacketHandler implements PacketHandler<FTConne
             return;
         }
 
-       // ThreadManager.getInstance().newTask(() -> {
-            if (requestType == 0) {
-                Player lastLoggedInPlayer = playerService.findById(account.getLastSelectedPlayerId());
-                if (lastLoggedInPlayer != null && !lastLoggedInPlayer.getId().equals(player.getId())) {
-                    Pocket pocket = pocketService.findById(lastLoggedInPlayer.getPocket().getId());
-                    List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
-                    final int playerPocketListSize = playerPocketList.size();
-                    if (playerPocketListSize > 60) {
-                        StreamUtils.batches(playerPocketList, 60).forEach(batch -> {
-                            S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(batch);
-                            connection.sendTCP(clearInventoryPacket);
-                        });
-                    } else {
-                        S2CClearInventoryPacket clearInventoryPacket = new S2CClearInventoryPacket(playerPocketList);
-                        connection.sendTCP(clearInventoryPacket);
-                    }
-                }
+        //ThreadManager.getInstance().newTask(() -> {
+        if (requestType == 0) {
+            Pocket pocket = pocketService.findById(player.getPocket().getId());
+            PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+            GuildMember guildMember = guildMemberService.getByPlayer(player);
+            Guild guild = null;
+            if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
+                guild = guildMember.getGuild();
 
-                AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
+            StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+            Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
+            S2CUnknownPlayerInfoDataPacket unknownPlayerInfoDataPacket = new S2CUnknownPlayerInfoDataPacket(player, pocket, equippedCloths, statusPointsAddedDto, playerStatistic, guild);
+            connection.sendTCP(unknownPlayerInfoDataPacket);
 
-                S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-                connection.sendTCP(homeDataPacket);
-            } else if (requestType == 1) {
-                Pocket pocket = pocketService.findById(player.getPocket().getId());
-                List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
-                final int playerPocketListSize = playerPocketList.size();
-                if (playerPocketListSize > 60) {
-                    StreamUtils.batches(playerPocketList, 60).forEach(batch -> {
-                        S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(batch);
-                        connection.sendTCP(inventoryDataPacket);
-                    });
-                } else {
-                    S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
-                    connection.sendTCP(inventoryDataPacket);
-                }
+            S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
+            connection.sendTCP(playerLevelExpPacket);
+        } else if (requestType == 1) {
+            Pocket pocket = pocketService.findById(player.getPocket().getId());
+            List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(pocket);
+            S2CInventoryDataPacket inventoryDataPacket = new S2CInventoryDataPacket(playerPocketList);
+            connection.sendTCP(inventoryDataPacket);
+        } else if (requestType == 2) {
+            AccountHome accountHome = homeService.findAccountHomeByAccountId(account.getId());
+            S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
+            connection.sendTCP(homeDataPacket);
 
-                List<Pet> petList = petService.findAllByPlayerId(player.getId());
-                S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
-                connection.sendTCP(petDataAnswerPacket);
-            } else if (requestType == 2) {
-                S2CPlayerLevelExpPacket playerLevelExpPacket = new S2CPlayerLevelExpPacket(player.getLevel(), player.getExpPoints());
-                S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
+            List<Pet> petList = petService.findAllByPlayerId(player.getId());
+            S2CPetDataAnswerPacket petDataAnswerPacket = new S2CPetDataAnswerPacket(petList);
+            connection.sendTCP(petDataAnswerPacket);
+        } else if (requestType == 3) {
+            StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
+            Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
+            List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
+            List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
+            List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
+            List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
+            List<Integer> equippedBattlemonSlots = battlemonSlotEquipmentService.getEquippedBattlemonSlots(player);
 
-                connection.sendTCP(playerLevelExpPacket);
-                connection.sendTCP(couplePointsDataPacket);
-            } else if (requestType == 3) {
-                Pocket pocket = pocketService.findById(player.getPocket().getId());
-                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+            S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
+            S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
+            S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
+            S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
+            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
+            S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
+            S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(equippedBattlemonSlots);
 
-                GuildMember guildMember = guildMemberService.getByPlayer(player);
-                Guild guild = null;
-                if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
-                    guild = guildMember.getGuild();
+            connection.sendTCP(inventoryWearQuickAnswerPacket);
+            connection.sendTCP(inventoryWearToolAnswerPacket);
+            connection.sendTCP(inventoryWearSpecialAnswerPacket);
+            connection.sendTCP(inventoryWearCardAnswerPacket);
+            connection.sendTCP(inventoryWearBattlemonAnswerPacket);
+            connection.sendTCP(inventoryWearClothAnswerPacket);
+            connection.sendTCP(playerInfoPlayStatsPacket);
+        } else if (requestType == 4) {
+            S2CShopMoneyAnswerPacket moneyPacket = new S2CShopMoneyAnswerPacket(player);
+            connection.sendTCP(moneyPacket);
 
-                StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-                Map<String, Integer> equippedCloths = clothEquipmentService.getEquippedCloths(player);
-                List<Integer> equippedQuickSlots = quickSlotEquipmentService.getEquippedQuickSlots(player);
-                List<Integer> equippedToolSlots = toolSlotEquipmentService.getEquippedToolSlots(player);
-                List<Integer> equippedSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
-                List<Integer> equippedCardSlots = cardSlotEquipmentService.getEquippedCardSlots(player);
-                List<Integer> equippedBattlemonSlots = battlemonSlotEquipmentService.getEquippedBattlemonSlots(player);
-
-                S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(player.getPlayerStatistic());
-                S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, equippedCloths, player, statusPointsAddedDto);
-                S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(equippedQuickSlots);
-                S2CInventoryWearToolAnswerPacket inventoryWearToolAnswerPacket = new S2CInventoryWearToolAnswerPacket(equippedToolSlots);
-                S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(equippedSpecialSlots);
-                S2CInventoryWearCardAnswerPacket inventoryWearCardAnswerPacket = new S2CInventoryWearCardAnswerPacket(equippedCardSlots);
-                S2CInventoryWearBattlemonAnswerPacket inventoryWearBattlemonAnswerPacket = new S2CInventoryWearBattlemonAnswerPacket(equippedBattlemonSlots);
-                S2CUnknownPlayerInfoDataPacket unknownPlayerInfoDataPacket = new S2CUnknownPlayerInfoDataPacket(player, pocket, equippedCloths, statusPointsAddedDto, playerStatistic, guild);
-
-                connection.sendTCP(inventoryWearQuickAnswerPacket);
-                connection.sendTCP(inventoryWearToolAnswerPacket);
-                connection.sendTCP(inventoryWearSpecialAnswerPacket);
-                connection.sendTCP(inventoryWearCardAnswerPacket);
-                connection.sendTCP(inventoryWearBattlemonAnswerPacket);
-                connection.sendTCP(inventoryWearClothAnswerPacket);
-                connection.sendTCP(unknownPlayerInfoDataPacket);
-                connection.sendTCP(playerInfoPlayStatsPacket);
-            }
+            S2CCouplePointsDataPacket couplePointsDataPacket = new S2CCouplePointsDataPacket(player.getCouplePoints());
+            connection.sendTCP(couplePointsDataPacket);
+        }
         //});
     }
 }
