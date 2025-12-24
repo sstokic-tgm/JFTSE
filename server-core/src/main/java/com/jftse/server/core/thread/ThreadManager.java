@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @Getter
@@ -18,6 +19,8 @@ public class ThreadManager {
 
     private ExecutorService virtualThreadExecutor;
     private ScheduledExecutorService virtualScheduledExecutor;
+
+    private final AtomicLong seqThreadCounter = new AtomicLong(0);
 
     @PostConstruct
     public void init() {
@@ -73,7 +76,7 @@ public class ThreadManager {
     }
 
     public ExecutorService createSequentialExecutor() {
-        return Executors.newSingleThreadExecutor(Thread.ofVirtual().factory());
+        return Executors.newSingleThreadExecutor(Thread.ofVirtual().name("ThreadManager-Seq-VT-", seqThreadCounter.getAndIncrement()).factory());
     }
 
     @PreDestroy

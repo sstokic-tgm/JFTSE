@@ -5,11 +5,14 @@ import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.PacketRegistry;
+import com.jftse.server.core.thread.ThreadManager;
+import com.jftse.server.core.util.Time;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 
 @Getter
 @Setter
@@ -21,8 +24,11 @@ public class FTConnection extends Connection<FTClient> {
 
     private final static int MAX_PROCESSED_PACKETS_PER_UPDATE = 100;
 
+    private final ExecutorService executor;
+
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         super(decryptionKey, encryptionKey, serverType);
+        this.executor = ThreadManager.getInstance().createSequentialExecutor();
     }
 
     public void queuePacket(IPacket packet) {
@@ -42,16 +48,21 @@ public class FTConnection extends Connection<FTClient> {
             if (packet == null)
                 continue;
 
-            try {
-                PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
-                if (handler != null) {
-                    handler.handle(this, packet);
-                } else {
-                    log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
+            executor.execute(() -> {
+                // final long updateStartTime = Time.getNSTime();
+                try {
+                    PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
+                    if (handler != null) {
+                        handler.handle(this, packet);
+                    } else {
+                        log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
+                    }
+                } catch (Exception e) {
+                    log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
                 }
-            } catch (Exception e) {
-                log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
-            }
+                // final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
+                // log.debug("Processed packet id: 0x{} ({}) in {} ms", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), updateTime);
+            });
 
             processedPackets++;
         }

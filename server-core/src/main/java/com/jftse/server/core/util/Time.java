@@ -26,6 +26,22 @@ public final class Time {
         return getMSTimeDiff(oldMSTime, getMSTime());
     }
 
+    public static long getNSTime() {
+        return System.nanoTime();
+    }
+
+    public static long getNSTimeDiff(long oldNSTime, long newNSTime) {
+        return oldNSTime > newNSTime ? (Long.MAX_VALUE - oldNSTime) + newNSTime : newNSTime - oldNSTime;
+    }
+
+    public static long getNSTimeDiffToNow(long oldNSTime) {
+        return getNSTimeDiff(oldNSTime, getNSTime());
+    }
+
+    public static long nanoToMillis(long nanoTime) {
+        return nanoTime / 1_000_000;
+    }
+
     public static String getServerUptime() {
         long uptime = Time.getMSTime() / 1000;
         long hours = uptime / 3600;

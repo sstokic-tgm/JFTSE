@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.rabbit.service;
 import com.jftse.emulator.common.utilities.RandomUtils;
 import com.jftse.emulator.server.rabbit.RabbitMQConfig;
 import com.jftse.server.core.rabbit.AbstractBaseMessage;
+import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -16,13 +17,15 @@ public class RProducerService {
 
     private final RabbitMQConfig rabbitMQConfig;
     private final RabbitTemplate rabbitTemplate;
+    private final ThreadManager threadManager;
 
     @Autowired
-    public RProducerService(RabbitMQConfig rabbitMQConfig, RabbitTemplate rabbitTemplate) {
+    public RProducerService(RabbitMQConfig rabbitMQConfig, RabbitTemplate rabbitTemplate, ThreadManager threadManager) {
         instance = this;
 
         this.rabbitMQConfig = rabbitMQConfig;
         this.rabbitTemplate = rabbitTemplate;
+        this.threadManager = threadManager;
     }
 
     public static RProducerService getInstance() {
@@ -30,6 +33,10 @@ public class RProducerService {
     }
 
     public void send(AbstractBaseMessage message, String routingKey, String sender) {
+        threadManager.newTask(() -> send0(message, routingKey, sender));
+    }
+
+    private void send0(AbstractBaseMessage message, String routingKey, String sender) {
         String[] routingKeys = routingKey.split("\\s+");
         for (String key : routingKeys) {
             message.setCorrelationId(RandomUtils.getUUID());

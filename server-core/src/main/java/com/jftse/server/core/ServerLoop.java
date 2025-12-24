@@ -27,7 +27,12 @@ public class ServerLoop {
     private Thread watchdogThread;
     private int minUpdateDiff;
     private int maxCoreStuckTime;
-    private AtomicLong loopCounter = new AtomicLong(0);
+
+    private final AtomicLong loopCounter = new AtomicLong(0);
+    private final AtomicLong totalTickDiff = new AtomicLong(0);
+    private final AtomicLong totalUpdateTime = new AtomicLong(0);
+    private final AtomicLong maxTickDiff = new AtomicLong(0);
+    private final AtomicLong maxUpdateTime = new AtomicLong(0);
 
     public ServerLoop(Optional<ServerLoopHandler> handler, ServerConfService confService) {
         this.handler = handler.orElse(null);
@@ -75,8 +80,13 @@ public class ServerLoop {
 
         while (running.get()) {
             loopCounter.incrementAndGet();
+
             realCurrTime = Time.getMSTime();
             final long diff = Time.getMSTimeDiff(realPrevTime, realCurrTime);
+
+            totalTickDiff.addAndGet(diff);
+            maxTickDiff.accumulateAndGet(diff, Math::max);
+
             if (diff < minUpdateDiff) {
                 try {
                     final long sleepTime = minUpdateDiff - diff;
@@ -91,14 +101,29 @@ public class ServerLoop {
                 continue;
             }
 
+            final long updateStartTime = Time.getNSTime();
             try {
                 handler.update(diff);
             } catch (Exception e) {
                 log.error("Exception in server loop update", e);
             }
+            final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
+
+            totalUpdateTime.addAndGet(updateTime);
+            maxUpdateTime.accumulateAndGet(updateTime, Math::max);
+
             realPrevTime = realCurrTime;
         }
 
-        log.info("Uptime: {}, loops: {}, average loop time: {} ms", Time.getServerUptime(), loopCounter, Time.getMSTime() / (float) loopCounter.get());
+        final long loops = loopCounter.get();
+        log.info(
+                "Uptime: {}, loops: {}, avg tick: {} ms, max tick: {} ms, avg update: {} ms, max update: {} ms",
+                Time.getServerUptime(),
+                loops,
+                totalTickDiff.get() / (double) loops,
+                maxTickDiff.get(),
+                totalUpdateTime.get() / (double) loops,
+                maxUpdateTime.get()
+        );
     }
 }
