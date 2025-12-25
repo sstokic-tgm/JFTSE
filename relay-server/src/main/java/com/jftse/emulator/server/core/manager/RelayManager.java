@@ -8,6 +8,7 @@ import com.jftse.server.core.BuildInfoProperties;
 import com.jftse.server.core.ServerLoopHandler;
 import com.jftse.server.core.service.BlockedIPService;
 import com.jftse.server.core.service.UptimeService;
+import com.jftse.server.core.shared.MetricsService;
 import com.jftse.server.core.shared.ServerConfService;
 import com.jftse.server.core.shared.packets.SMSGInitHandshake;
 import com.jftse.server.core.util.GameTime;
@@ -42,6 +43,8 @@ public class RelayManager implements ServerLoopHandler {
     private BuildInfoProperties revisionInfo;
     @Autowired
     private ServerConfService serverConfService;
+    @Autowired
+    private MetricsService metricsService;
 
     private ConcurrentLinkedQueue<FTConnection> addConnectionQueue;
     private ConcurrentLinkedDeque<FTClient> clients;

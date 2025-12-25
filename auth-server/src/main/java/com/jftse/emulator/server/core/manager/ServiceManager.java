@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.MetricsService;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,8 @@ public class ServiceManager {
     private ProfaneWordsService profaneWordsService;
     @Autowired
     private UptimeService uptimeService;
+    @Autowired
+    private MetricsService metricsService;
 
     @Autowired
     private BlockedIPService blockedIPService;

@@ -4,6 +4,7 @@ import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.rpc.GrpcAuthService;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.MetricsService;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,8 @@ public class ServiceManager {
 
     @Autowired
     private UptimeService uptimeService;
+    @Autowired
+    private MetricsService metricsService;
 
     @Autowired
     private ModuleService moduleService;
