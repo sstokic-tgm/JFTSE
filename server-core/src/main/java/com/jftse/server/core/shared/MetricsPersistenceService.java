@@ -18,6 +18,8 @@ public class MetricsPersistenceService {
     @PersistenceContext
     private EntityManager em;
 
+    private static final double EMA_ALPHA = 0.20;
+
     @Transactional
     public void flushBatch(List<Map.Entry<MetricsService.MetricKey, MetricsService.AccumulatorSnapshot>> batch) {
         long ts = Time.getNSTime();
@@ -28,20 +30,7 @@ public class MetricsPersistenceService {
 
             Metric m = getMetric(key.name(), key.serverType());
 
-            long newValue;
-            if (snap.hasSet()) {
-                newValue = snap.setValue();
-            } else {
-                long base = (m == null || m.getValue() == null) ? 0L : m.getValue();
-                newValue = base;
-
-                if (snap.delta() != 0) {
-                    newValue += snap.delta();
-                }
-                if (snap.sampleCount() > 0) {
-                    newValue = snap.sampleSum() / snap.sampleCount();
-                }
-            }
+            long newValue = updateValue(m, snap);
 
             if (m == null) {
                 m = new Metric();
@@ -59,6 +48,31 @@ public class MetricsPersistenceService {
 
         em.flush();
         em.clear();
+    }
+
+    private long updateValue(Metric m, MetricsService.AccumulatorSnapshot snap) {
+        long base = (m == null || m.getValue() == null) ? 0L : m.getValue();
+        long newValue = base;
+
+        if (snap.hasSet()) {
+            newValue = snap.setValue();
+        } else {
+            if (snap.delta() != 0) {
+                newValue += snap.delta();
+            }
+
+            if (snap.sampleCount() > 0) {
+                long sampleAvg = snap.sampleSum() / snap.sampleCount();
+
+                if (m == null || m.getValue() == null) {
+                    newValue = sampleAvg;
+                } else {
+                    double ema = base + EMA_ALPHA * (sampleAvg - base);
+                    newValue = Math.round(ema);
+                }
+            }
+        }
+        return newValue;
     }
 
     @Transactional(readOnly = true)
