@@ -648,7 +648,7 @@ public class GameManager implements ServerLoopHandler {
             FTConnection conn = client.getConnection();
             if (conn != null && !conn.update(diff)) {
                 removeClient(client);
-                conn.close();
+                //conn.close();
             }
         }
     }
