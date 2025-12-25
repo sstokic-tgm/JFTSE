@@ -160,8 +160,8 @@ public class RelayManager implements ServerLoopHandler {
         final ConcurrentLinkedDeque<FTClient> clientsSnapshot = new ConcurrentLinkedDeque<>(getClients());
         for (FTClient client : clientsSnapshot) {
             FTConnection conn = client.getConnection();
-            if (conn != null && !conn.update(diff)) {
-                conn.close();
+            if (conn != null) {
+                conn.update(diff);
             }
         }
     }
