@@ -11,6 +11,50 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Main fixed-step update loop of the server ("core loop").
+ * <p>
+ * This component owns the server's update thread and periodically calls a {@link ServerLoopHandler}
+ * with a time delta in milliseconds.
+ * </p>
+ *
+ * <h2>Threading model</h2>
+ * <ul>
+ *     <li><b>Update thread</b> ({@code "ServerUpdateLoop"}): runs {@link #updateLoop()} and calls {@link ServerLoopHandler#update(long)}.</li>
+ *     <li><b>Watchdog thread</b> ({@code "ServerWatchdog"}): daemon thread that monitors the loop counter and terminates the JVM if the core appears stuck.</li>
+ * </ul>
+ *
+ * <h2>Update cadence</h2>
+ * <p>
+ * The loop measures elapsed time using {@link Time#getMSTime()} and passes {@code diff} (milliseconds)
+ * to the handler. If {@code diff < MinServerUpdateTime}, the loop sleeps the remaining time to enforce
+ * a minimum tick length.
+ * </p>
+ *
+ * <h2>Configuration</h2>
+ * <ul>
+ *     <li>{@code MinServerUpdateTime} (int, ms): minimum time between updates (sleep is applied if the loop runs faster).</li>
+ *     <li>{@code MaxCoreStuckTime} (int, seconds): watchdog threshold; if the loop does not progress for this duration, the JVM is terminated; internally converted to milliseconds.</li>
+ * </ul>
+ *
+ * <h2>Statistics</h2>
+ * <p>
+ * The loop tracks counters such as max/avg tick time and update handler execution time. These are logged
+ * when the loop stops.
+ * </p>
+ *
+ * <h2>Important</h2>
+ * <p>
+ * This class requires a {@link ServerLoopHandler} bean to be present in the Spring context. If it is missing,
+ * the current implementation will set the handler to {@code null} and throw a {@link NullPointerException}
+ * when trying to call {@code handler.update(diff)}. This is intentional to fail fast and highlight the misconfiguration.
+ * </p>
+ *
+ * @see ServerLoopHandler
+ * @see ServerLoopWatchdog
+ * @see ServerConfService
+ * @see Time
+ */
 @Component
 @Getter
 @Setter
@@ -19,16 +63,41 @@ public class ServerLoop {
     @Getter
     private static ServerLoop instance;
 
+    /**
+     * Update callback invoked each tick.
+     */
     private final ServerLoopHandler handler;
+    /**
+     * Configuration access for loop timing parameters.
+     */
     private final ServerConfService confService;
 
+    /**
+     * Indicates whether the update loop should keep running.
+     */
     private final AtomicBoolean running = new AtomicBoolean(false);
+    /**
+     * Thread running {@link #updateLoop()}.
+     */
     private Thread updateThread;
+    /**
+     * Daemon thread running {@link ServerLoopWatchdog}.
+     */
     private Thread watchdogThread;
+    /**
+     * Minimum tick duration in milliseconds ({@code MinServerUpdateTime}).
+     */
     private int minUpdateDiff;
+    /**
+     * Watchdog threshold in milliseconds ({@code MaxCoreStuckTime} seconds converted to ms).
+     */
     private int maxCoreStuckTime;
 
+    /**
+     * Number of loop iterations executed since start. Used by the watchdog and for statistics.
+     */
     private final AtomicLong loopCounter = new AtomicLong(0);
+
     private final AtomicLong totalTickDiff = new AtomicLong(0);
     private final AtomicLong totalUpdateTime = new AtomicLong(0);
     private final AtomicLong maxTickDiff = new AtomicLong(0);
@@ -41,6 +110,16 @@ public class ServerLoop {
         instance = this;
     }
 
+    /**
+     * Starts the update loop and watchdog thread if not already running.
+     * <p>
+     * Reads timing configuration from {@link ServerConfService} and then starts:
+     * <ul>
+     *     <li>{@code "ServerUpdateLoop"} (non-daemon)</li>
+     *     <li>{@code "ServerWatchdog"} (daemon)</li>
+     * </ul>
+     * </p>
+     */
     public void start() {
         if (running.compareAndSet(false, true)) {
             this.minUpdateDiff = confService.get("MinServerUpdateTime", Integer.class);
@@ -55,6 +134,12 @@ public class ServerLoop {
         }
     }
 
+    /**
+     * Requests the update loop to stop and waits up to 5 seconds for the update thread to join.
+     * <p>
+     * The watchdog thread is a daemon and will terminate with the JVM.
+     * </p>
+     */
     public void stop() {
         if (running.compareAndSet(true, false)) {
             try {
@@ -69,6 +154,13 @@ public class ServerLoop {
         }
     }
 
+    /**
+     * Update loop body executed by {@code "ServerUpdateLoop"}.
+     * <p>
+     * Computes elapsed time between iterations (ms) and calls {@link ServerLoopHandler#update(long)}.
+     * If the elapsed time is below the configured minimum, the loop sleeps the remaining time.
+     * </p>
+     */
     private void updateLoop() {
         int halfMaxCoreStuckTime = maxCoreStuckTime / 2;
         if (halfMaxCoreStuckTime <= 0) {

@@ -105,7 +105,7 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
         FTClient client = connection.getClient();
         Account account = client.getAccount();
         if (account != null) {
-            log.error("({}) exceptionCaught for account ID {}: {}", account.getId(), cause.getMessage(), cause);
+            log.error("({}) exceptionCaught: {}", account.getId(), cause.getMessage(), cause);
         }
     }
 }
