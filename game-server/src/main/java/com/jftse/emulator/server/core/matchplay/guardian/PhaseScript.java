@@ -23,15 +23,19 @@ public class PhaseScript {
     public String getPhaseName() {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.getPhaseName();
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -42,15 +46,19 @@ public class PhaseScript {
     public void start() {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 phase.start();
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -61,15 +69,19 @@ public class PhaseScript {
     public PhaseUpdateResult update(FTConnection connection) {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.update(connection);
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -80,15 +92,19 @@ public class PhaseScript {
     public void end() {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 phase.end();
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -99,15 +115,19 @@ public class PhaseScript {
     public long phaseTime() {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.phaseTime();
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -118,15 +138,19 @@ public class PhaseScript {
     public long playTime() {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.playTime();
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -137,15 +161,19 @@ public class PhaseScript {
     public boolean hasEnded() {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.hasEnded();
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -156,15 +184,19 @@ public class PhaseScript {
     public long getGuardianAttackLoopTime(AdvancedGuardianState guardian) {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.getGuardianAttackLoopTime(guardian);
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -175,15 +207,19 @@ public class PhaseScript {
     public int onHeal(int target, int healAmount, boolean isGuardian) {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.onHeal(target, healAmount, isGuardian);
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -194,15 +230,19 @@ public class PhaseScript {
     public int onDealDamage(int attackingPlayer, int targetGuardian, int damage, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.onDealDamage(attackingPlayer, targetGuardian, damage, hasAttackerDmgBuff, hasTargetDefBuff, skill);
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -213,15 +253,19 @@ public class PhaseScript {
     public int onDealDamageToPlayer(int attackingGuardian, int targetPlayer, int damageAmount, boolean hasAttackerDmgBuff, boolean hasTargetDefBuff, Skill skill) {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.onDealDamageToPlayer(attackingGuardian, targetPlayer, damageAmount, hasAttackerDmgBuff, hasTargetDefBuff, skill);
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -232,15 +276,19 @@ public class PhaseScript {
     public int onDealDamageOnBallLoss(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.onDealDamageOnBallLoss(attackerPos, targetPos, hasAttackerWillBuff);
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
@@ -251,15 +299,19 @@ public class PhaseScript {
     public int onDealDamageOnBallLossToPlayer(int attackerPos, int targetPos, boolean hasAttackerWillBuff) {
         lock.lock();
         try {
+            boolean entered = false;
             try {
                 context.enter();
+                entered = true;
                 return phase.onDealDamageOnBallLossToPlayer(attackerPos, targetPos, hasAttackerWillBuff);
             } finally {
-                try {
-                    context.leave();
-                } catch (IllegalStateException e) {
-                    // we can safely ignore this exception due to the context being already exited
-                    logException(e);
+                if (entered) {
+                    try {
+                        context.leave();
+                    } catch (IllegalStateException e) {
+                        // we can safely ignore this exception due to the context being already exited
+                        logException(e);
+                    }
                 }
             }
         } finally {
