@@ -36,10 +36,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>
  * The connection may be interacted with from Netty event-loop threads and/or server update threads
  * depending on the concrete implementation. This base class provides only minimal atomic state
- * ({@link #isClosingConnection}); other access is not synchronized.
+ * ({@link #getIsClosingConnection}); other access is not synchronized.
  * </p>
  *
- * @param <T> the client type associated with this connection
+ * @param <T>
+ *           the client type associated with this connection
+ *
  * @see Client
  * @see IPacket
  * @see CompositePacket

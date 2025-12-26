@@ -2,14 +2,12 @@ package com.jftse.server.core;
 
 /**
  * Callback interface invoked by {@link ServerLoop} each server tick.
- * <p>
- * Implementations typically drive game/server state forward, such as:
+ * <p>Implementations typically drive game/server state forward, such as: </p>
  * <ul>
  *     <li>updating active connections/sessions</li>
  *     <li>processing scheduled tasks</li>
  *     <li>running managers (e.g., world, match, chat, etc.)</li>
  * </ul>
- * </p>
  *
  * <h2>Diff semantics</h2>
  * <p>

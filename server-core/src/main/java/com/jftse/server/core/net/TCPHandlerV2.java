@@ -50,7 +50,6 @@ import org.springframework.dao.DataAccessException;
  * </p>
  *
  * @param <T> the concrete connection type handled by this Netty handler
- *
  * @see Connection
  * @see Client
  * @see IPacket
@@ -226,7 +225,7 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
     protected abstract void connected(T connection);
 
     /**
-     * Called when the established session disconnects (see {@link #disconnected0(Connection)}).
+     * Called when the established session disconnects.
      */
     protected abstract void disconnected(T connection);
 

@@ -27,7 +27,9 @@ package com.jftse.server.core.net;
  * across multiple threads, external coordination is required.
  * </p>
  *
- * @param <T> the concrete connection type associated with this client
+ * @param <T>
+ *           the concrete connection type associated with this client
+ *
  * @see Connection
  */
 public abstract class Client<T extends Connection<? extends Client<T>>> {

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <h2>Update cadence</h2>
  * <p>
- * The loop measures elapsed time using {@link Time#getMSTime()} and passes {@code diff} (milliseconds)
+ * The loop measures elapsed time using {@link com.jftse.server.core.util.Time#getMSTime()} and passes {@code diff} (milliseconds)
  * to the handler. If {@code diff < MinServerUpdateTime}, the loop sleeps the remaining time to enforce
  * a minimum tick length.
  * </p>
@@ -45,9 +45,8 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <h2>Important</h2>
  * <p>
- * This class requires a {@link ServerLoopHandler} bean to be present in the Spring context. If it is missing,
- * the current implementation will set the handler to {@code null} and throw a {@link NullPointerException}
- * when trying to call {@code handler.update(diff)}. This is intentional to fail fast and highlight the misconfiguration.
+ * This class requires a {@link ServerLoopHandler} bean to be present in the Spring context. If it is missing, the current implementation will
+ * throw a {@link NullPointerException} when trying to call {@code handler.update(diff)}.
  * </p>
  *
  * @see ServerLoopHandler
@@ -112,13 +111,11 @@ public class ServerLoop {
 
     /**
      * Starts the update loop and watchdog thread if not already running.
-     * <p>
-     * Reads timing configuration from {@link ServerConfService} and then starts:
+     * <p>Reads timing configuration from {@link ServerConfService} and then starts:</p>
      * <ul>
      *     <li>{@code "ServerUpdateLoop"} (non-daemon)</li>
      *     <li>{@code "ServerWatchdog"} (daemon)</li>
      * </ul>
-     * </p>
      */
     public void start() {
         if (running.compareAndSet(false, true)) {

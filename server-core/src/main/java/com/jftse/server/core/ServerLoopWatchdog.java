@@ -6,7 +6,8 @@ import lombok.extern.log4j.Log4j2;
 /**
  * Watchdog that monitors the {@link ServerLoop} and terminates the JVM if the core loop appears stuck.
  * <p>
- * The watchdog periodically checks {@link ServerLoop#getLoopCounter()}.
+ * The watchdog periodically checks the server loop's iteration counter
+ * (incremented once per tick by {@link ServerLoop}).
  * If the counter does not change for longer than {@code maxCoreStuckTime}, it logs an error and calls
  * {@link System#exit(int)} with exit code {@code 1}.
  * </p>
