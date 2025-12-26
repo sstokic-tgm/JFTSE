@@ -122,6 +122,12 @@ public class PhaseManager {
     }
 
     public void end() {
+        try {
+            validate();
+        } catch (ValidationException e) {
+            log.error("validate() threw exception {}", e.getMessage(), e);
+            return;
+        }
         currentPhase.get().end();
     }
 
@@ -134,6 +140,12 @@ public class PhaseManager {
     }
 
     public long getGuardianAttackLoopTime(AdvancedGuardianState guardian) {
+        try {
+            validate();
+        } catch (ValidationException e) {
+            log.error("validate() threw exception {}", e.getMessage(), e);
+            return -1;
+        }
         return currentPhase.get().getGuardianAttackLoopTime(guardian);
     }
 
@@ -176,6 +188,10 @@ public class PhaseManager {
 
     private boolean canExecuteTask() {
         return isRunning.get() && !isChangingPhase.get() && !isPhaseEnding.get() && !isUpdating.get();
+    }
+
+    private boolean isUpdating() {
+        return isUpdating.get();
     }
 
     private void validate() throws ValidationException {
