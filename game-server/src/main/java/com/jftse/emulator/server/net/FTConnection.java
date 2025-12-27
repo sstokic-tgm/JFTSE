@@ -9,6 +9,7 @@ import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.MetricsService;
 import com.jftse.server.core.shared.packets.game.CMSGLoginData;
 import com.jftse.server.core.shared.packets.game.CMSGReceiveData;
+import com.jftse.server.core.shared.packets.matchplay.CMSGPlayerUseSkill;
 import com.jftse.server.core.thread.ThreadManager;
 import com.jftse.server.core.util.Time;
 import lombok.Getter;
@@ -53,7 +54,7 @@ public class FTConnection extends Connection<FTClient> {
 
             PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
             if (handler != null) {
-                if (packet.getPacketId() == CMSGLoginData.PACKET_ID) {
+                if (packet.getPacketId() == CMSGLoginData.PACKET_ID || packet.getPacketId() == CMSGPlayerUseSkill.PACKET_ID) {
                     ThreadManager.getInstance().newTask(() -> runHandler(handler, packet));
                 } else {
                     runHandler(handler, packet);
