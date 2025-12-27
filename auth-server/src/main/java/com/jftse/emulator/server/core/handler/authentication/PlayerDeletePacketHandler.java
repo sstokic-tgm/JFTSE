@@ -14,6 +14,7 @@ import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.auth.CMSGPlayerDelete;
 import com.jftse.server.core.shared.packets.auth.SMSGPlayerDelete;
 import com.jftse.server.core.shared.packets.auth.SMSGPlayerList;
+import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
@@ -50,45 +51,13 @@ public class PlayerDeletePacketHandler implements PacketHandler<FTConnection, CM
             Account account = client.getAccount();
             Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
             if (account != null && player != null) {
-                try {
-                    GuildMember guildMember = guildMemberService.getByPlayer(player);
-                    if (guildMember != null) {
-                        if (guildMember.getMemberRank() != 3) {
-                            Guild guild = guildMember.getGuild();
-                            guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
-                            guildService.save(guild);
-                        } else {
-                            SMSGPlayerDelete playerDelete = SMSGPlayerDelete.builder().result((char) -2).build();
-                            connection.sendTCP(playerDelete);
-                            return;
-                        }
-                    }
+                List<Player> playerList = playerService.findAllByAccount(account);
+                int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
 
-                    friendService.deleteAllByPlayer(player);
-                    friendService.deleteAllByFriend(player);
-                    giftService.deleteBySender(player);
-                    giftService.deleteByReceiver(player);
-                    messageService.deleteBySender(player);
-                    messageService.deleteByReceiver(player);
-                    parcelService.deleteBySender(player);
-                    parcelService.deleteByReceiver(player);
-                    proposalService.deleteBySender(player);
-                    proposalService.deleteByReceiver(player);
-
-                    List<CommandLog> commandLogList = commandLogService.findAllByPlayerId(player.getId());
-                    for (CommandLog commandLog : commandLogList) {
-                        commandLog.setPlayer(null);
-                        commandLog.setCommand(commandLog.getCommand() + " by " + player.getName() + " (deleted)");
-                        commandLogService.save(commandLog);
-                    }
-
-                    playerService.remove(player.getId());
-
-                    SMSGPlayerDelete playerDelete = SMSGPlayerDelete.builder().result((char) 0).build();
-                    connection.sendTCP(playerDelete);
-
-                    List<Player> playerList = playerService.findAllByAccount(account);
-                    int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
+                boolean removed = playerList.removeIf(p -> p.getId().equals(player.getId()));
+                if (removed) {
+                    SMSGPlayerDelete response = SMSGPlayerDelete.builder().result((char) 0).build();
+                    connection.sendTCP(response);
 
                     SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
                             .account(
@@ -133,10 +102,47 @@ public class PlayerDeletePacketHandler implements PacketHandler<FTConnection, CM
                                     .build()).toList()
                             ).build();
                     connection.sendTCP(playerListPacket);
-                } catch (Exception e) {
-                    log.error("Error while deleting player: " + e.getMessage(), e);
-                    SMSGPlayerDelete playerDelete = SMSGPlayerDelete.builder().result((char) -1).build();
-                    connection.sendTCP(playerDelete);
+
+                    ThreadManager.getInstance().newTask(() -> {
+                        try {
+                            GuildMember guildMember = guildMemberService.getByPlayer(player);
+                            if (guildMember != null) {
+                                if (guildMember.getMemberRank() != 3) {
+                                    Guild guild = guildMember.getGuild();
+                                    guild.getMemberList().removeIf(x -> x.getId().equals(guildMember.getId()));
+                                    guildService.save(guild);
+                                } else {
+                                    SMSGPlayerDelete playerDelete = SMSGPlayerDelete.builder().result((char) -2).build();
+                                    connection.sendTCP(playerDelete);
+                                    return;
+                                }
+                            }
+
+                            friendService.deleteAllByPlayer(player);
+                            friendService.deleteAllByFriend(player);
+                            giftService.deleteBySender(player);
+                            giftService.deleteByReceiver(player);
+                            messageService.deleteBySender(player);
+                            messageService.deleteByReceiver(player);
+                            parcelService.deleteBySender(player);
+                            parcelService.deleteByReceiver(player);
+                            proposalService.deleteBySender(player);
+                            proposalService.deleteByReceiver(player);
+
+                            List<CommandLog> commandLogList = commandLogService.findAllByPlayerId(player.getId());
+                            for (CommandLog commandLog : commandLogList) {
+                                commandLog.setPlayer(null);
+                                commandLog.setCommand(commandLog.getCommand() + " by " + player.getName() + " (deleted)");
+                                commandLogService.save(commandLog);
+                            }
+
+                            playerService.remove(player.getId());
+                        } catch (Exception e) {
+                            log.error("Error while deleting player: " + e.getMessage(), e);
+                            SMSGPlayerDelete playerDelete = SMSGPlayerDelete.builder().result((char) -1).build();
+                            connection.sendTCP(playerDelete);
+                        }
+                    });
                 }
             } else {
                 SMSGPlayerDelete playerDelete = SMSGPlayerDelete.builder().result((char) -1).build();

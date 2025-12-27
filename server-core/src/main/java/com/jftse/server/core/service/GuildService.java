@@ -16,4 +16,6 @@ public interface GuildService {
     Guild findById(Long id);
 
     List<Guild> findAll();
+
+    List<Guild> findAll(int offset);
 }

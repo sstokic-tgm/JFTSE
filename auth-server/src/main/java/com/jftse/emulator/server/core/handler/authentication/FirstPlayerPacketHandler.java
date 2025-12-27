@@ -11,6 +11,7 @@ import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.auth.CMSGLoginFirstPlayer;
 import com.jftse.server.core.shared.packets.auth.SMSGLoginFirstPlayer;
+import com.jftse.server.core.thread.ThreadManager;
 
 import java.util.List;
 
@@ -51,44 +52,8 @@ public class FirstPlayerPacketHandler implements PacketHandler<FTConnection, CMS
             player.setPlayerType(firstPlayerPacket.getPlayerType());
             player.setFirstPlayer(true);
 
-            ClothEquipment clothEquipment = new ClothEquipment();
-            clothEquipment = clothEquipmentService.save(clothEquipment);
-            player.setClothEquipment(clothEquipment);
-
-            QuickSlotEquipment quickSlotEquipment = new QuickSlotEquipment();
-            quickSlotEquipment = quickSlotEquipmentService.save(quickSlotEquipment);
-            player.setQuickSlotEquipment(quickSlotEquipment);
-
-            SpecialSlotEquipment specialSlotEquipment = new SpecialSlotEquipment();
-            specialSlotEquipment = specialSlotEquipmentService.save(specialSlotEquipment);
-            player.setSpecialSlotEquipment(specialSlotEquipment);
-
-            ToolSlotEquipment toolSlotEquipment = new ToolSlotEquipment();
-            toolSlotEquipment = toolSlotEquipmentService.save(toolSlotEquipment);
-            player.setToolSlotEquipment(toolSlotEquipment);
-
-            CardSlotEquipment cardSlotEquipment = new CardSlotEquipment();
-            cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
-            player.setCardSlotEquipment(cardSlotEquipment);
-
-            /*BattlemonSlotEquipment battlemonSlotEquipment = new BattlemonSlotEquipment();
-            battlemonSlotEquipment = battlemonSlotEquipmentService.save(battlemonSlotEquipment);
-            player.setBattlemonSlotEquipment(battlemonSlotEquipment);
-            */
-
-            Pocket pocket = new Pocket();
-            pocket = pocketService.save(pocket);
-            player.setPocket(pocket);
-
-            PlayerStatistic playerStatistic = new PlayerStatistic();
-            playerStatistic = playerStatisticService.save(playerStatistic);
-            player.setPlayerStatistic(playerStatistic);
-
             player = playerService.save(player);
-
-            AccountHome accountHome = new AccountHome();
-            accountHome.setAccount(client.getAccount());
-            accountHome = homeService.save(accountHome);
+            final long playerId = player.getId();
 
             SMSGLoginFirstPlayer response = SMSGLoginFirstPlayer.builder()
                     .result((char) 0)
@@ -96,11 +61,54 @@ public class FirstPlayerPacketHandler implements PacketHandler<FTConnection, CMS
                     .playerType(player.getPlayerType())
                     .build();
             connection.sendTCP(response);
+
+            ThreadManager.getInstance().newTask(() -> {
+                Player currentPlayer = playerService.findById(playerId);
+
+                ClothEquipment clothEquipment = new ClothEquipment();
+                clothEquipment = clothEquipmentService.save(clothEquipment);
+                currentPlayer.setClothEquipment(clothEquipment);
+
+                QuickSlotEquipment quickSlotEquipment = new QuickSlotEquipment();
+                quickSlotEquipment = quickSlotEquipmentService.save(quickSlotEquipment);
+                currentPlayer.setQuickSlotEquipment(quickSlotEquipment);
+
+                SpecialSlotEquipment specialSlotEquipment = new SpecialSlotEquipment();
+                specialSlotEquipment = specialSlotEquipmentService.save(specialSlotEquipment);
+                currentPlayer.setSpecialSlotEquipment(specialSlotEquipment);
+
+                ToolSlotEquipment toolSlotEquipment = new ToolSlotEquipment();
+                toolSlotEquipment = toolSlotEquipmentService.save(toolSlotEquipment);
+                currentPlayer.setToolSlotEquipment(toolSlotEquipment);
+
+                CardSlotEquipment cardSlotEquipment = new CardSlotEquipment();
+                cardSlotEquipment = cardSlotEquipmentService.save(cardSlotEquipment);
+                currentPlayer.setCardSlotEquipment(cardSlotEquipment);
+
+                /*BattlemonSlotEquipment battlemonSlotEquipment = new BattlemonSlotEquipment();
+                battlemonSlotEquipment = battlemonSlotEquipmentService.save(battlemonSlotEquipment);
+                currentPlayer.setBattlemonSlotEquipment(battlemonSlotEquipment);
+                */
+
+                Pocket pocket = new Pocket();
+                pocket = pocketService.save(pocket);
+                currentPlayer.setPocket(pocket);
+
+                PlayerStatistic playerStatistic = new PlayerStatistic();
+                playerStatistic = playerStatisticService.save(playerStatistic);
+                currentPlayer.setPlayerStatistic(playerStatistic);
+
+                playerService.save(currentPlayer);
+
+                AccountHome accountHome = new AccountHome();
+                accountHome.setAccount(client.getAccount());
+                homeService.save(accountHome);
+            });
         } else {
             SMSGLoginFirstPlayer response = SMSGLoginFirstPlayer.builder()
                     .result((char) -1)
                     .playerId(0)
-                    .playerType((byte) 0)
+                    .playerType(firstPlayerPacket.getPlayerType())
                     .build();
             connection.sendTCP(response);
         }

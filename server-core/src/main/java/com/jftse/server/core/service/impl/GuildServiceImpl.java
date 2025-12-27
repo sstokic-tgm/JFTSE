@@ -4,6 +4,7 @@ import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.repository.guild.GuildRepository;
 import com.jftse.server.core.service.GuildService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,4 +43,10 @@ public class GuildServiceImpl implements GuildService {
 
     @Override
     public List<Guild> findAll() { return guildRepository.findAll(); }
+
+    @Override
+    public List<Guild> findAll(int offset) {
+        Long lastId = offset > 0 ? (long) offset : 0L;
+        return guildRepository.findByIdGreaterThanOrderByIdAsc(lastId, PageRequest.of(0, 10));
+    }
 }

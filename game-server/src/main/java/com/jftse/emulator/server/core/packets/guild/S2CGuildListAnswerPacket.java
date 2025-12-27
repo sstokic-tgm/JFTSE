@@ -30,7 +30,7 @@ public class S2CGuildListAnswerPacket extends Packet {
             GuildMember clubMaster = memberList.stream().filter(gm -> gm.getMemberRank() == 3).findFirst().orElse(null);
             if (clubMaster == null)
                 log.debug("clubMaster == null, guild id: " + guild.getId() + " guild name: " + guild.getName());
-            this.write(clubMaster.getPlayer().getName());
+            this.write(clubMaster != null ? clubMaster.getPlayer().getName() : "Unknown");
             this.write(guild.getLevel());
             this.write(guild.getLevelRestriction());
             this.write((byte)memberList.stream().filter(x -> !x.getWaitingForApproval()).count());

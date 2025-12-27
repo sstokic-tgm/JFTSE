@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler.guild;
 
-import com.jftse.emulator.common.utilities.StreamUtils;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.guild.S2CGuildListAnswerPacket;
 import com.jftse.emulator.server.net.FTConnection;
@@ -22,9 +21,7 @@ public class GuildListRequestPacketHandler implements PacketHandler<FTConnection
 
     @Override
     public void handle(FTConnection connection, CMSGGuildList guildListRequestPacket) {
-        if (guildListRequestPacket.getPage() == 0) {
-            List<Guild> guildList = this.guildService.findAll();
-            StreamUtils.batches(guildList, 10).forEach(guilds -> connection.sendTCP(new S2CGuildListAnswerPacket(guilds)));
-        }
+        List<Guild> guildList = this.guildService.findAll(guildListRequestPacket.getPage());
+        connection.sendTCP(new S2CGuildListAnswerPacket(guildList));
     }
 }
