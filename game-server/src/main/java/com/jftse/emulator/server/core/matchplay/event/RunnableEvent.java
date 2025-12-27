@@ -20,7 +20,8 @@ public class RunnableEvent implements Fireable {
     @Override
     public void fire() {
         fired = true;
-        ThreadManager.getInstance().newTask(runnable);
+        //ThreadManager.getInstance().newTask(runnable);
+        runnable.run();
     }
 
     @Override
