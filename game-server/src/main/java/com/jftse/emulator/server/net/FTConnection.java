@@ -7,6 +7,9 @@ import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.MetricsService;
+import com.jftse.server.core.shared.packets.game.CMSGLoginData;
+import com.jftse.server.core.shared.packets.game.CMSGReceiveData;
+import com.jftse.server.core.thread.ThreadManager;
 import com.jftse.server.core.util.Time;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,25 +51,33 @@ public class FTConnection extends Connection<FTClient> {
             if (packet == null)
                 continue;
 
-            final long updateStartTime = Time.getNSTime();
-            try {
-                PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
-                if (handler != null) {
-                    handler.handle(this, packet);
+            PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
+            if (handler != null) {
+                if (packet.getPacketId() == CMSGLoginData.PACKET_ID) {
+                    ThreadManager.getInstance().newTask(() -> runHandler(handler, packet));
                 } else {
-                    log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
+                    runHandler(handler, packet);
                 }
-            } catch (Exception e) {
-                log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
+            } else {
+                log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
             }
-            final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
-
-            // track avg per packet id
-            metrics.average("packet_process_time." + Integer.toHexString(packet.getPacketId()), updateTime, ServerType.GAME_SERVER);
 
             processedPackets++;
         }
 
         return !getIsClosingConnection().get();
+    }
+
+    private void runHandler(final PacketHandler<FTConnection, IPacket> handler, final IPacket packet) {
+        final long updateStartTime = Time.getNSTime();
+        try {
+            handler.handle(this, packet);
+        } catch (Exception e) {
+            log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
+        }
+        final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
+
+        // track avg per packet id
+        metrics.average("packet_process_time." + Integer.toHexString(packet.getPacketId()), updateTime, ServerType.GAME_SERVER);
     }
 }
