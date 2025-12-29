@@ -7,13 +7,22 @@ import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.MetricsService;
+import com.jftse.server.core.shared.packets.enchant.CMSGEnchantRequest;
+import com.jftse.server.core.shared.packets.gacha.CMSGOpenGacha;
 import com.jftse.server.core.shared.packets.game.CMSGLoginData;
+import com.jftse.server.core.shared.packets.guild.CMSGGuildJoin;
+import com.jftse.server.core.shared.packets.inventory.CMSGCombineNowRecipe;
+import com.jftse.server.core.shared.packets.inventory.CMSGInventoryItemTimeExpired;
+import com.jftse.server.core.shared.packets.inventory.CMSGInventorySellItemCheck;
+import com.jftse.server.core.shared.packets.messenger.*;
+import com.jftse.server.core.shared.packets.shop.CMSGShopBuy;
 import com.jftse.server.core.thread.ThreadManager;
 import com.jftse.server.core.util.Time;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
@@ -28,6 +37,23 @@ public class FTConnection extends Connection<FTClient> {
 
     private final MetricsService metrics;
 
+    private final static List<Integer> THREAD_HANDLED_PACKETS = List.of(
+            CMSGLoginData.PACKET_ID,
+            CMSGCombineNowRecipe.PACKET_ID,
+            CMSGEnchantRequest.PACKET_ID,
+            CMSGAddFriendApproval.PACKET_ID,
+            CMSGSendParcel.PACKET_ID,
+            CMSGAcceptParcel.PACKET_ID,
+            CMSGDenyParcel.PACKET_ID,
+            CMSGSendGift.PACKET_ID,
+            CMSGInventorySellItemCheck.PACKET_ID,
+            CMSGDeleteFriend.PACKET_ID,
+            CMSGShopBuy.PACKET_ID,
+            CMSGGuildJoin.PACKET_ID,
+            CMSGInventoryItemTimeExpired.PACKET_ID,
+            CMSGOpenGacha.PACKET_ID
+    );
+
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         super(decryptionKey, encryptionKey, serverType);
         this.metrics = ServiceManager.getInstance().getMetricsService();
@@ -35,6 +61,10 @@ public class FTConnection extends Connection<FTClient> {
 
     public void queuePacket(IPacket packet) {
         recvQueue.add(packet);
+    }
+
+    private boolean isThreadedPacket(int packetId) {
+        return THREAD_HANDLED_PACKETS.contains(packetId);
     }
 
     public boolean update(long diff) {
@@ -52,7 +82,7 @@ public class FTConnection extends Connection<FTClient> {
 
             PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
             if (handler != null) {
-                if (packet.getPacketId() == CMSGLoginData.PACKET_ID) {
+                if (isThreadedPacket(packet.getPacketId())) {
                     ThreadManager.getInstance().newTask(() -> runHandler(handler, packet));
                 } else {
                     runHandler(handler, packet);

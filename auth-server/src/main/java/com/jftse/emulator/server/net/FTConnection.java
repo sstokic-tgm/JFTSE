@@ -6,11 +6,15 @@ import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.*;
 import com.jftse.server.core.shared.MetricsService;
+import com.jftse.server.core.shared.packets.auth.CMSGAuthLogin;
+import com.jftse.server.core.shared.packets.auth.CMSGLogin;
+import com.jftse.server.core.thread.ThreadManager;
 import com.jftse.server.core.util.Time;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
@@ -25,6 +29,12 @@ public class FTConnection extends Connection<FTClient> {
 
     private final MetricsService metrics;
 
+    private final static List<Integer> THREAD_HANDLED_PACKETS = List.of(
+            CMSGLogin.PACKET_ID,
+            CMSGAuthLogin.PACKET_ID
+    );
+
+
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         super(decryptionKey, encryptionKey, serverType);
         this.metrics = ServiceManager.getInstance().getMetricsService();
@@ -32,6 +42,10 @@ public class FTConnection extends Connection<FTClient> {
 
     public void queuePacket(IPacket packet) {
         recvQueue.add(packet);
+    }
+
+    private boolean isThreadedPacket(int packetId) {
+        return THREAD_HANDLED_PACKETS.contains(packetId);
     }
 
     public boolean update(long diff) {
@@ -47,25 +61,33 @@ public class FTConnection extends Connection<FTClient> {
             if (packet == null)
                 continue;
 
-            final long updateStartTime = Time.getNSTime();
-            try {
-                PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
-                if (handler != null) {
-                    handler.handle(this, packet);
+            PacketHandler<FTConnection, IPacket> handler = PacketRegistry.getHandler(packet.getPacketId());
+            if (handler != null) {
+                if (isThreadedPacket(packet.getPacketId())) {
+                    ThreadManager.getInstance().newTask(() -> runHandler(handler, packet));
                 } else {
-                    log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
+                    runHandler(handler, packet);
                 }
-            } catch (Exception e) {
-                log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
+            } else {
+                log.warn("No handler for packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId());
             }
-            final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
-
-            // track avg per packet id
-            metrics.average("packet_process_time." + Integer.toHexString(packet.getPacketId()), updateTime, ServerType.AUTH_SERVER);
 
             processedPackets++;
         }
 
         return !getIsClosingConnection().get();
+    }
+
+    private void runHandler(final PacketHandler<FTConnection, IPacket> handler, final IPacket packet) {
+        final long updateStartTime = Time.getNSTime();
+        try {
+            handler.handle(this, packet);
+        } catch (Exception e) {
+            log.error("Error processing packet id: 0x{} ({})", Integer.toHexString(packet.getPacketId()), (int) packet.getPacketId(), e);
+        }
+        final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
+
+        // track avg per packet id
+        metrics.average("packet_process_time." + Integer.toHexString(packet.getPacketId()), updateTime, ServerType.GAME_SERVER);
     }
 }
