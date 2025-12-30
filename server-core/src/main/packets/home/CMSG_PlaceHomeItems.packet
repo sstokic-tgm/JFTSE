@@ -9,5 +9,6 @@ message HomeItem {
 }
 
 message CMSG_PlaceHomeItems (0x2550) {
-    repeated HomeItem items = 1 [type = char];
+    char itemCount = 1;
+    repeated HomeItem items = 2 [len = msg.itemCount];
 }
