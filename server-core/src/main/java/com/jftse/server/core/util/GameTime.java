@@ -6,7 +6,7 @@ import java.time.*;
 
 public final class GameTime {
     @Getter private static Instant gameTime;
-    private static long gameMsTime;
+    private static long gameNsTime;
 
     private static Instant gameTimeSystemPoint;
     private static Instant gameTimeSteadyPoint;
@@ -25,7 +25,7 @@ public final class GameTime {
 
     public static void updateGameTimers() {
         gameTime = Instant.now();
-        gameMsTime = System.currentTimeMillis();
+        gameNsTime = System.nanoTime();
         gameTimeSystemPoint = Instant.now();
         gameTimeSteadyPoint = Instant.now();
 
@@ -56,6 +56,10 @@ public final class GameTime {
     }
 
     public static long getGameTimeMS() {
-        return gameMsTime;
+        return gameNsTime / 1_000_000;
+    }
+
+    public  static long getGameTimeNS() {
+        return gameNsTime;
     }
 }

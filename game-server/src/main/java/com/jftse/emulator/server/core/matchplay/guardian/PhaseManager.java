@@ -122,13 +122,17 @@ public class PhaseManager {
     }
 
     public void end() {
-        try {
-            validate();
-        } catch (ValidationException e) {
-            log.error("validate() threw exception {}", e.getMessage(), e);
-            return;
-        }
-        currentPhase.get().end();
+        // end() is called from outside origin thread so we must requeue it to event handler
+        eventHandler.createRunnableEvent(() -> {
+            try {
+                validate();
+            } catch (ValidationException e) {
+                log.error("validate() threw exception {}", e.getMessage(), e);
+                return;
+            }
+
+            defaultPhaseCallback.onPhaseEnd(hostConnection);
+        }, 0);
     }
 
     public boolean hasNextPhase() {

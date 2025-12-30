@@ -3,17 +3,17 @@ package com.jftse.emulator.server.core.matchplay.event;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.util.GameTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @Getter
@@ -21,7 +21,6 @@ import java.util.concurrent.locks.ReentrantLock;
 @Log4j2
 public class EventHandler {
     private BlockingQueue<Fireable> fireableDeque;
-    private final Lock lock = new ReentrantLock();
 
     @PostConstruct
     public void init() {
@@ -39,17 +38,14 @@ public class EventHandler {
 
     /**
      * Appends packetEvent to the end of this list.
-     * This method is thread-safe and should be used only for calls from JavaScript code.
+     * This method should be used only for fireables created in JS context
+     * that mutate JS state.
      *
      * @param fireable to be added to the queue
      */
     public void offerJS(Fireable fireable) {
-        try {
-            lock.lock();
-            fireableDeque.offer(fireable);
-        } finally {
-            lock.unlock();
-        }
+        fireable.setExecutionMode(ExecutionMode.JS_INLINE);
+        fireableDeque.offer(fireable);
     }
 
     /**
@@ -83,42 +79,40 @@ public class EventHandler {
     }
 
     public void handleQueuedEvents() {
-        long currentTime = Instant.now().toEpochMilli();
+        long now = GameTime.getGameTimeMS();
+        List<Fireable> snapshot = new ArrayList<>();
+        fireableDeque.drainTo(snapshot);
 
-        int queueSize = fireableDeque.size();
-        for (int i = 0; i < queueSize; i++) {
-            Fireable fireable = poll();
-            if (fireable != null) {
-                if (!fireable.isFired() && fireable.shouldFire(currentTime) && !fireable.isCancelled()) {
-                    fireable.fire();
-                    log.info("Fired fireable: {}", fireable.getSelf().getClass().getSimpleName());
-                } else if (!fireable.isCancelled()) {
-                    offer(fireable);
-                }
+        for (Fireable fireable : snapshot) {
+            if (fireable.isCancelled() || fireable.isFired()) {
+                continue;
+            }
+
+            if (fireable.shouldFire(now)) {
+                fireable.fire();
+                log.info("Fired fireable: {}", fireable.getClass().getSimpleName());
+            } else {
+                fireableDeque.offer(fireable);
             }
         }
     }
 
-    public PacketEvent createPacketEvent(FTClient client, Packet packet, PacketEventType packetEventType, long eventFireTime) {
-        long packetTimestamp = Instant.now().toEpochMilli();
-
-        PacketEvent packetEvent = new PacketEvent();
-        packetEvent.setSender(client.getConnection());
-        packetEvent.setClient(client);
-        packetEvent.setPacket(packet);
-        packetEvent.setPacketTimestamp(packetTimestamp);
-        packetEvent.setPacketEventType(packetEventType);
-        packetEvent.setEventFireTime(eventFireTime);
-
-        return packetEvent;
+    public PacketEvent createPacketEvent(FTClient client, Packet packet, PacketEventType packetEventType, long delayMS) {
+        return PacketEvent.builder()
+                        .sender(client.getConnection())
+                        .client(client)
+                        .packet(packet)
+                        .packetEventType(packetEventType)
+                        .currentTime(GameTime.getGameTimeMS())
+                        .delayMS(delayMS)
+                        .build();
     }
 
-    public RunnableEvent createRunnableEvent(Runnable runnable, long eventFireTime) {
-        long packetTimestamp = Instant.now().toEpochMilli();
-        RunnableEvent runnableEvent = new RunnableEvent();
-        runnableEvent.setRunnable(runnable);
-        runnableEvent.setRunnableTimeStamp(packetTimestamp);
-        runnableEvent.setEventFireTime(eventFireTime);
-        return runnableEvent;
+    public RunnableEvent createRunnableEvent(Runnable runnable, long delayMS) {
+        return RunnableEvent.builder()
+                .runnable(runnable)
+                .currentTime(GameTime.getGameTimeMS())
+                .delayMS(delayMS)
+                .build();
     }
 }

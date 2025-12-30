@@ -128,7 +128,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                 if (gameSession != null) {
                     RunnableEvent countDownRunnable = gameSession.getCountDownRunnable();
                     if (countDownRunnable != null) {
-                        countDownRunnable.setEventFireTime(countDownRunnable.getEventFireTime() + TimeUnit.SECONDS.toMillis(60));
+                        countDownRunnable.extendDelay(TimeUnit.SECONDS.toMillis(60));
                         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(new S2CMatchplayIncreaseBreathTimerBy60Seconds(), connection);
                     }
                 }

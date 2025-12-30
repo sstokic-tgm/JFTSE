@@ -4,38 +4,30 @@ import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.protocol.Packet;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class PacketEvent implements Fireable {
+public class PacketEvent extends AbstractFireableEvent {
     private FTConnection sender;
     private FTClient client;
     private Packet packet;
-    private long packetTimestamp;
     private PacketEventType packetEventType; // unused as of current state, might be useful later on
-    private long eventFireTime;
-    private boolean fired = false;
-    private boolean cancelled = false;
+
+    @Builder
+    public PacketEvent(FTConnection sender, FTClient client, Packet packet, PacketEventType packetEventType, long currentTime, long delayMS) {
+        super(currentTime, delayMS);
+
+        this.sender = sender;
+        this.client = client;
+        this.packet = packet;
+        this.packetEventType = packetEventType;
+    }
 
     @Override
-    public void fire() {
-        fired = true;
+    protected void execute() {
         sender.sendTCP(packet);
-    }
-
-    @Override
-    public boolean shouldFire(long currentTime) {
-        return currentTime - packetTimestamp > eventFireTime;
-    }
-
-    @Override
-    public Fireable getSelf() {
-        return this;
     }
 }
