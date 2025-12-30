@@ -88,6 +88,6 @@ public class FTConnection extends Connection<FTClient> {
         final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
 
         // track avg per packet id
-        metrics.average("packet_process_time." + Integer.toHexString(packet.getPacketId()), updateTime, ServerType.GAME_SERVER);
+        metrics.average("packet_process_time." + Integer.toHexString(packet.getPacketId()), updateTime, ServerType.AUTH_SERVER);
     }
 }
