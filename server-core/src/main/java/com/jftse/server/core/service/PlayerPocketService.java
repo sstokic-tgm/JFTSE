@@ -14,6 +14,8 @@ public interface PlayerPocketService {
 
     List<PlayerPocket> getPlayerPocketItems(Pocket pocket);
 
+    List<PlayerPocket> getPlayerPocketItemsByCategory(Pocket pocket, String category);
+
     int getSellPrice(PlayerPocket playerPocket);
 
     PlayerPocket decrementPocketItemCount(PlayerPocket playerPocket);

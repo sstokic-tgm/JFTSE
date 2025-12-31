@@ -11,6 +11,7 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.service.HomeService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
@@ -35,15 +36,17 @@ public class HomeItemsPlaceRequestPacketHandler implements PacketHandler<FTConne
     @Override
     public void handle(FTConnection connection, CMSGPlaceHomeItems homeItemsPlaceReqPacket) {
         FTClient client = connection.getClient();
-        List<HomeItem> homeItemDataList = homeItemsPlaceReqPacket.getItems();
-        AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         Player player = client.getPlayer();
 
-        homeItemDataList.forEach(hidl -> {
+        AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
+        List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItemsByCategory(player.getPocket(), EItemCategory.HOUSE_DECO.getName());
+        List<HomeItem> homeItemDataList = homeItemsPlaceReqPacket.getItems();
+
+        for (HomeItem hidl : homeItemDataList) {
             int inventoryItemId = hidl.getInventoryItemId();
 
             if (inventoryItemId > 0) {
-                PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) inventoryItemId, player.getPocket());
+                PlayerPocket playerPocket = ppList.stream().filter(pp -> pp.getId().equals((long) inventoryItemId)).findFirst().orElse(null);
                 if (playerPocket != null) {
                     int itemCount = playerPocket.getItemCount();
 
@@ -67,7 +70,7 @@ public class HomeItemsPlaceRequestPacketHandler implements PacketHandler<FTConne
                     homeInventory.setId((long) inventoryItemId);
                     homeInventory.setAccountHome(accountHome);
                     homeInventory.setItemIndex(hidl.getItemIndex());
-                    setHomeInventoryPositioningAndUpdateHomeStats(accountHome, hidl, homeInventory);
+                    accountHome = setHomeInventoryPositioningAndUpdateHomeStats(accountHome, hidl, homeInventory, true);
                 }
             } else if (inventoryItemId == -1) {
                 // Not placed from player inventory but repositioned from home inventory
@@ -75,23 +78,26 @@ public class HomeItemsPlaceRequestPacketHandler implements PacketHandler<FTConne
 
                 HomeInventory homeInventory = homeService.findById(homeInventoryId);
                 if (homeInventory != null) {
-                    setHomeInventoryPositioningAndUpdateHomeStats(accountHome, hidl, homeInventory);
+                    accountHome = setHomeInventoryPositioningAndUpdateHomeStats(accountHome, hidl, homeInventory, false);
                 }
             }
-        });
+        }
 
-        AccountHome upToDateAccountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
-        S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(upToDateAccountHome);
+        accountHome = homeService.save(accountHome);
+        S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
         connection.sendTCP(homeDataPacket);
     }
 
-    private void setHomeInventoryPositioningAndUpdateHomeStats(AccountHome accountHome, HomeItem hidl, HomeInventory homeInventory) {
+    private AccountHome setHomeInventoryPositioningAndUpdateHomeStats(AccountHome accountHome, HomeItem hidl, HomeInventory homeInventory, boolean updateStats) {
         homeInventory.setUnk0(hidl.getUnk0());
         homeInventory.setRotation(hidl.getRotation());
         homeInventory.setXPos(hidl.getX());
         homeInventory.setYPos(hidl.getY());
         homeInventory = homeService.save(homeInventory);
 
-        homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
+        if (updateStats) {
+            return homeService.updateAccountHomeStatsByHomeInventory(accountHome, homeInventory, true);
+        }
+        return accountHome;
     }
 }

@@ -75,10 +75,21 @@ public class PlayerPocketServiceImpl implements PlayerPocketService {
     @Override
     public List<PlayerPocket> getPlayerPocketItems(Pocket pocket) {
         List<PlayerPocket> playerPocketItems = playerPocketRepository.findAllByPocket(pocket);
+        return filterExpiredItems(playerPocketItems, pocket);
+    }
+
+    @Override
+    public List<PlayerPocket> getPlayerPocketItemsByCategory(Pocket pocket, String category) {
+        List<PlayerPocket> playerPocketItems = playerPocketRepository.findAllByPocketAndCategory(pocket, category);
+        return filterExpiredItems(playerPocketItems, pocket);
+    }
+
+    private List<PlayerPocket> filterExpiredItems(List<PlayerPocket> playerPocketItems, Pocket pocket) {
         List<PlayerPocket> result = new ArrayList<>();
 
+        long now = new Date().getTime();
         for (PlayerPocket item : playerPocketItems) {
-            if (((item.getCreated().getTime() * 10000) - (new Date().getTime() * 10000) <= 0) && item.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
+            if (((item.getCreated().getTime() * 10000) - (now * 10000) <= 0) && item.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
                 remove(item.getId());
                 pocket = pocketService.decrementPocketBelongings(pocket);
                 continue;

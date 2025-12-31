@@ -11,6 +11,8 @@ import com.jftse.server.core.shared.packets.enchant.CMSGEnchantRequest;
 import com.jftse.server.core.shared.packets.gacha.CMSGOpenGacha;
 import com.jftse.server.core.shared.packets.game.CMSGLoginData;
 import com.jftse.server.core.shared.packets.guild.CMSGGuildJoin;
+import com.jftse.server.core.shared.packets.home.CMSGClearHomeItems;
+import com.jftse.server.core.shared.packets.home.CMSGPlaceHomeItems;
 import com.jftse.server.core.shared.packets.inventory.CMSGCombineNowRecipe;
 import com.jftse.server.core.shared.packets.inventory.CMSGInventoryItemTimeExpired;
 import com.jftse.server.core.shared.packets.inventory.CMSGInventorySellItemCheck;
@@ -53,7 +55,8 @@ public class FTConnection extends Connection<FTClient> {
             CMSGShopBuy.PACKET_ID,
             CMSGGuildJoin.PACKET_ID,
             CMSGInventoryItemTimeExpired.PACKET_ID,
-            CMSGOpenGacha.PACKET_ID
+            CMSGOpenGacha.PACKET_ID,
+            CMSGPlaceHomeItems.PACKET_ID
     );
 
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {

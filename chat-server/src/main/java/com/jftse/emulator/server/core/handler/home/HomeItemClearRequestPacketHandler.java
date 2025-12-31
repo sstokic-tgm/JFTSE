@@ -38,14 +38,15 @@ public class HomeItemClearRequestPacketHandler implements PacketHandler<FTConnec
     @Override
     public void handle(FTConnection connection, CMSGClearHomeItems packet) {
         FTClient client = connection.getClient();
-        AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
-        List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
         Player player = client.getPlayer();
 
-        List<PlayerPocket> playerPocketsToPlace = new ArrayList<>();
+        AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
+        List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
+        List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItemsByCategory(player.getPocket(), EItemCategory.HOUSE_DECO.getName());
 
-        homeInventoryList.forEach(hil -> {
-            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hil.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), player.getPocket());
+        List<PlayerPocket> playerPocketsToPlace = new ArrayList<>();
+        for (HomeInventory hil : homeInventoryList) {
+            PlayerPocket playerPocket = ppList.stream().filter(p -> p.getItemIndex().equals(hil.getItemIndex())).findFirst().orElse(null);
             //ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
 
             // create a new one if null, null indicates that all items are placed
@@ -66,9 +67,10 @@ public class HomeItemClearRequestPacketHandler implements PacketHandler<FTConnec
 
             playerPocketsToPlace.add(playerPocket);
 
-            homeService.updateAccountHomeStatsByHomeInventory(accountHome, hil, false);
+            accountHome = homeService.updateAccountHomeStatsByHomeInventory(accountHome, hil, false);
             homeService.removeItemFromHomeInventory(hil.getId());
-        });
+        }
+        accountHome = homeService.save(accountHome);
 
         S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(new ArrayList<>());
         connection.sendTCP(homeItemsLoadAnswerPacket);

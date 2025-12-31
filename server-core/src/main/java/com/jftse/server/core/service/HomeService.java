@@ -24,7 +24,7 @@ public interface HomeService {
 
     ItemHouseDeco findItemHouseDecoByItemIndex(Integer itemIndex);
 
-    void updateAccountHomeStatsByHomeInventory(AccountHome accountHome, HomeInventory homeInventory, boolean addition);
+    AccountHome updateAccountHomeStatsByHomeInventory(AccountHome accountHome, HomeInventory homeInventory, boolean addition);
 
     void removeItemFromHomeInventory(Long homeInventoryId);
 }

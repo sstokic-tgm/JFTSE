@@ -55,7 +55,8 @@ public class HomeItemsRemoveHandler implements PacketHandler<FTConnection, CMSGR
 
             playerPocket = playerPocketService.save(playerPocket);
 
-            homeService.updateAccountHomeStatsByHomeInventory(accountHome, hiItem, false);
+            accountHome = homeService.updateAccountHomeStatsByHomeInventory(accountHome, hiItem, false);
+            homeService.save(accountHome);
             homeService.removeItemFromHomeInventory(hiItem.getId());
 
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(List.of(playerPocket));

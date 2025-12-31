@@ -74,7 +74,7 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
-    public void updateAccountHomeStatsByHomeInventory(AccountHome accountHome, HomeInventory homeInventory, boolean addition) {
+    public AccountHome updateAccountHomeStatsByHomeInventory(AccountHome accountHome, HomeInventory homeInventory, boolean addition) {
         ItemHouse itemHouse = itemHouseRepository.findItemHouseByLevel(accountHome.getLevel()).orElse(null);
         ItemHouseDeco itemHouseDeco = itemHouseDecoRepository.findItemHouseDecoByItemIndex(homeInventory.getItemIndex()).orElse(null);
 
@@ -83,7 +83,7 @@ public class HomeServiceImpl implements HomeService {
                 byte basicBonusGold = (byte) (accountHome.getBasicBonusGold() + itemHouseDeco.getAddGold());
                 byte basicBonusExp = (byte) (accountHome.getBasicBonusExp() + itemHouseDeco.getAddExp());
                 byte battleBonusGold = (byte) (accountHome.getBattleBonusGold() + itemHouseDeco.getAddBattleGold());
-                byte battleBonusExp = (byte) (accountHome.getBattleBonusGold() + itemHouseDeco.getAddBattleExp());
+                byte battleBonusExp = (byte) (accountHome.getBattleBonusExp() + itemHouseDeco.getAddBattleExp());
 
                 accountHome.setBasicBonusGold(basicBonusGold <= itemHouse.getMaxAddPercent() ? basicBonusGold : itemHouse.getMaxAddPercent());
                 accountHome.setBasicBonusExp(basicBonusExp <= itemHouse.getMaxAddPercent() ? basicBonusExp : itemHouse.getMaxAddPercent());
@@ -98,7 +98,7 @@ public class HomeServiceImpl implements HomeService {
                 byte basicBonusGold = (byte) (accountHome.getBasicBonusGold() - itemHouseDeco.getAddGold());
                 byte basicBonusExp = (byte) (accountHome.getBasicBonusExp() - itemHouseDeco.getAddExp());
                 byte battleBonusGold = (byte) (accountHome.getBattleBonusGold() - itemHouseDeco.getAddBattleGold());
-                byte battleBonusExp = (byte) (accountHome.getBattleBonusGold() - itemHouseDeco.getAddBattleExp());
+                byte battleBonusExp = (byte) (accountHome.getBattleBonusExp() - itemHouseDeco.getAddBattleExp());
                 int housingPoints = accountHome.getHousingPoints() - itemHouseDeco.getHousingPoint();
 
                 accountHome.setBasicBonusGold(basicBonusGold >= 0 ? basicBonusGold : 0);
@@ -110,9 +110,8 @@ public class HomeServiceImpl implements HomeService {
                 if (itemHouseDeco.getKind().equals(EItemHouseDeco.FURNITURE.getName()))
                     accountHome.setFurnitureCount(accountHome.getFurnitureCount() - 1);
             }
-
-            save(accountHome);
         }
+        return accountHome;
     }
 
     @Override
