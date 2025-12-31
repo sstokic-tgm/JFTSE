@@ -59,21 +59,22 @@ public class HomeItemClearRequestPacketHandler implements PacketHandler<FTConnec
                 playerPocket.setUseType(StringUtils.firstCharToUpperCase(EItemUseType.COUNT.getName().toLowerCase()));
 
                 pocketService.incrementPocketBelongings(player.getPocket());
+
+                ppList.add(playerPocket);
             } else {
                 playerPocket.setItemCount(playerPocket.getItemCount() + 1);
             }
-
-            playerPocket = playerPocketService.save(playerPocket);
-
             playerPocketsToPlace.add(playerPocket);
 
             accountHome = homeService.updateAccountHomeStatsByHomeInventory(accountHome, hil, false);
             homeService.removeItemFromHomeInventory(hil.getId());
         }
-        accountHome = homeService.save(accountHome);
 
         S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(new ArrayList<>());
         connection.sendTCP(homeItemsLoadAnswerPacket);
+
+        playerPocketsToPlace = playerPocketService.saveAll(playerPocketsToPlace);
+        accountHome = homeService.save(accountHome);
 
         S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
         connection.sendTCP(homeDataPacket);

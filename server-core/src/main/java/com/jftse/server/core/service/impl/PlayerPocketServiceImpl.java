@@ -162,6 +162,11 @@ public class PlayerPocketServiceImpl implements PlayerPocketService {
     }
 
     @Override
+    public List<PlayerPocket> saveAll(List<PlayerPocket> playerPockets) {
+        return playerPocketRepository.saveAll(playerPockets);
+    }
+
+    @Override
     public void remove(Long playerPocketId) {
         playerPocketRepository.deleteById(playerPocketId);
     }

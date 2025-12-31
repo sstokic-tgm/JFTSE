@@ -58,12 +58,10 @@ public class HomeItemsPlaceRequestPacketHandler implements PacketHandler<FTConne
 
                         S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
                         connection.sendTCP(inventoryItemRemoveAnswerPacket);
+
+                        ppList.remove(playerPocket);
                     } else {
                         playerPocket.setItemCount(itemCount);
-                        playerPocketService.save(playerPocket);
-
-                        S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
-                        connection.sendTCP(inventoryItemCountPacket);
                     }
 
                     HomeInventory homeInventory = new HomeInventory();
@@ -81,6 +79,13 @@ public class HomeItemsPlaceRequestPacketHandler implements PacketHandler<FTConne
                     accountHome = setHomeInventoryPositioningAndUpdateHomeStats(accountHome, hidl, homeInventory, false);
                 }
             }
+        }
+
+        ppList = playerPocketService.saveAll(ppList);
+
+        for (PlayerPocket pp : ppList) {
+            S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(pp);
+            connection.sendTCP(inventoryItemCountPacket);
         }
 
         accountHome = homeService.save(accountHome);

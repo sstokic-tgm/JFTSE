@@ -21,6 +21,7 @@ public interface PlayerPocketService {
     PlayerPocket decrementPocketItemCount(PlayerPocket playerPocket);
 
     PlayerPocket save(PlayerPocket playerPocket);
+    List<PlayerPocket> saveAll(List<PlayerPocket> playerPockets);
 
     void remove(Long playerPocketId);
 }
