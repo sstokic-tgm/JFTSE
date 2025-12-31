@@ -6,6 +6,7 @@ import com.jftse.entities.database.model.item.ItemHouse;
 import com.jftse.entities.database.model.item.ItemHouseDeco;
 
 import java.util.List;
+import java.util.Map;
 
 public interface HomeService {
     AccountHome save(AccountHome accountHome);
@@ -26,5 +27,9 @@ public interface HomeService {
 
     AccountHome updateAccountHomeStatsByHomeInventory(AccountHome accountHome, HomeInventory homeInventory, boolean addition);
 
+    AccountHome subtractStatsForRemovedHomeItems(AccountHome accountHome, Map<Integer, Integer> removedItems);
+
     void removeItemFromHomeInventory(Long homeInventoryId);
+
+    void removeAllHomeItemsByAccountHome(AccountHome accountHome);
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -115,7 +116,54 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
+    public AccountHome subtractStatsForRemovedHomeItems(AccountHome accountHome, Map<Integer, Integer> removedItems) {
+        if (removedItems == null || removedItems.isEmpty())
+            return accountHome;
+
+        ItemHouse itemHouse = itemHouseRepository.findItemHouseByLevel(accountHome.getLevel()).orElse(null);
+        if (itemHouse == null)
+            return accountHome;
+
+        List<Integer> itemIndices = removedItems.keySet().stream().toList();
+        List<ItemHouseDeco> decos = itemHouseDecoRepository.findAllByItemIndexIn(itemIndices);
+
+        int maxPercent = itemHouse.getMaxAddPercent();
+        for (ItemHouseDeco deco : decos) {
+            Integer removeCount = removedItems.get(deco.getItemIndex());
+            if (removeCount != null && removeCount > 0) {
+                int basicGold = accountHome.getBasicBonusGold() - (deco.getAddGold() * removeCount);
+                int basicExp  = accountHome.getBasicBonusExp()  - (deco.getAddExp() * removeCount);
+                int battleGold = accountHome.getBattleBonusGold() - (deco.getAddBattleGold() * removeCount);
+                int battleExp  = accountHome.getBattleBonusExp()  - (deco.getAddBattleExp() * removeCount);
+
+                int housingPoints = accountHome.getHousingPoints() - (deco.getHousingPoint() * removeCount);
+
+                accountHome.setBasicBonusGold((byte) clamp(basicGold, 0, maxPercent));
+                accountHome.setBasicBonusExp((byte) clamp(basicExp, 0, maxPercent));
+                accountHome.setBattleBonusGold((byte) clamp(battleGold, 0, maxPercent));
+                accountHome.setBattleBonusExp((byte) clamp(battleExp, 0, maxPercent));
+
+                accountHome.setHousingPoints(Math.max(housingPoints, 0));
+
+                if (EItemHouseDeco.FURNITURE.getName().equals(deco.getKind())) {
+                    accountHome.setFurnitureCount(Math.max(accountHome.getFurnitureCount() - removeCount, 0));
+                }
+            }
+        }
+        return accountHome;
+    }
+
+    private int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    @Override
     public void removeItemFromHomeInventory(Long homeInventoryId) {
         homeInventoryRepository.deleteById(homeInventoryId);
+    }
+
+    @Override
+    public void removeAllHomeItemsByAccountHome(AccountHome accountHome) {
+        homeInventoryRepository.deleteAllByAccountHome(accountHome);
     }
 }

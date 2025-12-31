@@ -11,6 +11,7 @@ import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.home.HomeInventory;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
@@ -21,7 +22,11 @@ import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.shared.packets.home.CMSGClearHomeItems;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @PacketId(CMSGClearHomeItems.PACKET_ID)
 public class HomeItemClearRequestPacketHandler implements PacketHandler<FTConnection, CMSGClearHomeItems> {
@@ -39,47 +44,62 @@ public class HomeItemClearRequestPacketHandler implements PacketHandler<FTConnec
     public void handle(FTConnection connection, CMSGClearHomeItems packet) {
         FTClient client = connection.getClient();
         Player player = client.getPlayer();
+        Pocket pocket = pocketService.findById(player.getPocket().getId());
 
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
-        List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItemsByCategory(player.getPocket(), EItemCategory.HOUSE_DECO.getName());
+        if (homeInventoryList.isEmpty()) {
+            S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(new ArrayList<>());
+            connection.sendTCP(homeItemsLoadAnswerPacket);
+            return;
+        }
 
-        List<PlayerPocket> playerPocketsToPlace = new ArrayList<>();
-        for (HomeInventory hil : homeInventoryList) {
-            PlayerPocket playerPocket = ppList.stream().filter(p -> p.getItemIndex().equals(hil.getItemIndex())).findFirst().orElse(null);
-            //ItemHouseDeco itemHouseDeco = homeService.findItemHouseDecoByItemIndex(hil.getItemIndex());
+        List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItemsByCategory(pocket, EItemCategory.HOUSE_DECO.getName());
+        Map<Integer, PlayerPocket> pocketByItemIndex = ppList.stream()
+                .collect(
+                        Collectors.toMap(
+                                PlayerPocket::getItemIndex,
+                                Function.identity(),
+                                (a, b) -> a)
+                );
 
+        Map<Integer, Integer> returnedCounts = new HashMap<>();
+        for (HomeInventory homeInventory : homeInventoryList) {
+            returnedCounts.merge(homeInventory.getItemIndex(), 1, Integer::sum);
+        }
+
+        List<PlayerPocket> playerPocketsToPlace = new ArrayList<>(returnedCounts.size());
+        for (Map.Entry<Integer, Integer> entry : returnedCounts.entrySet()) {
+            Integer itemIndex = entry.getKey();
+            Integer count = entry.getValue();
+
+            PlayerPocket playerPocket = pocketByItemIndex.get(itemIndex);
             // create a new one if null, null indicates that all items are placed
             if (playerPocket == null) {
                 playerPocket = new PlayerPocket();
-                playerPocket.setItemIndex(hil.getItemIndex());
-                playerPocket.setPocket(player.getPocket());
-                playerPocket.setItemCount(1);
+                playerPocket.setItemIndex(itemIndex);
+                playerPocket.setPocket(pocket);
+                playerPocket.setItemCount(count);
                 playerPocket.setCategory(EItemCategory.HOUSE_DECO.getName());
                 playerPocket.setUseType(StringUtils.firstCharToUpperCase(EItemUseType.COUNT.getName().toLowerCase()));
 
-                pocketService.incrementPocketBelongings(player.getPocket());
-
-                ppList.add(playerPocket);
+                pocket.setBelongings(pocket.getBelongings() + 1);
+                pocketByItemIndex.put(itemIndex, playerPocket);
+                playerPocketsToPlace.add(playerPocket);
             } else {
-                playerPocket.setItemCount(playerPocket.getItemCount() + 1);
+                playerPocket.setItemCount(playerPocket.getItemCount() + count);
             }
-            playerPocketsToPlace.add(playerPocket);
-
-            accountHome = homeService.updateAccountHomeStatsByHomeInventory(accountHome, hil, false);
-            homeService.removeItemFromHomeInventory(hil.getId());
         }
 
-        S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(new ArrayList<>());
-        connection.sendTCP(homeItemsLoadAnswerPacket);
-
-        playerPocketsToPlace = playerPocketService.saveAll(playerPocketsToPlace);
+        homeService.removeAllHomeItemsByAccountHome(accountHome);
+        accountHome = homeService.subtractStatsForRemovedHomeItems(accountHome, returnedCounts);
         accountHome = homeService.save(accountHome);
 
-        S2CHomeDataPacket homeDataPacket = new S2CHomeDataPacket(accountHome);
-        connection.sendTCP(homeDataPacket);
+        pocketService.save(pocket);
+        playerPocketsToPlace = playerPocketService.saveAll(playerPocketsToPlace);
 
-        S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketsToPlace);
-        connection.sendTCP(inventoryDataPacket);
+        connection.sendTCP(new S2CHomeItemsLoadAnswerPacket(new ArrayList<>()));
+        connection.sendTCP(new S2CHomeDataPacket(accountHome));
+        connection.sendTCP(new S2CInventoryItemsPlacePacket(playerPocketsToPlace));
     }
 }

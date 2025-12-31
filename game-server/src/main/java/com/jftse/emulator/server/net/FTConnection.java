@@ -56,7 +56,8 @@ public class FTConnection extends Connection<FTClient> {
             CMSGGuildJoin.PACKET_ID,
             CMSGInventoryItemTimeExpired.PACKET_ID,
             CMSGOpenGacha.PACKET_ID,
-            CMSGPlaceHomeItems.PACKET_ID
+            CMSGPlaceHomeItems.PACKET_ID,
+            CMSGClearHomeItems.PACKET_ID
     );
 
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {

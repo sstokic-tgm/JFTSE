@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface HomeInventoryRepository extends JpaRepository<HomeInventory, Long> {
     List<HomeInventory> findAllByAccountHome(AccountHome accountHome);
+    void deleteAllByAccountHome(AccountHome accountHome);
 }
