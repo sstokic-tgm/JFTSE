@@ -10,10 +10,13 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.server.core.BuildInfoProperties;
+import com.jftse.server.core.ServerLoop;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.ServerLoopHandler;
+import com.jftse.server.core.service.ServerLoopMetricsService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.ServerConfService;
+import com.jftse.server.core.shared.ServerMetricsContext;
 import com.jftse.server.core.shared.packets.SMSGInitHandshake;
 import com.jftse.server.core.shared.packets.SMSGServerNotice;
 import com.jftse.server.core.thread.ThreadManager;
@@ -57,6 +60,8 @@ public class AuthenticationManager implements ServerLoopHandler {
     private BuildInfoProperties revisionInfo;
     @Autowired
     private ServerConfService serverConfService;
+    @Autowired
+    private ServerLoopMetricsService serverLoopMetrics;
 
     private String motd;
 
@@ -152,6 +157,15 @@ public class AuthenticationManager implements ServerLoopHandler {
 
         updateSessions(diff);
         processUpdateAccountRequestQueue();
+
+        if (timers[ServerTimers.SUPDATE_METRICS.value()].passed()) {
+            timers[ServerTimers.SUPDATE_METRICS.value()].reset();
+
+            ServerMetricsContext ctx = ServerMetricsContext
+                    .of(ServerType.AUTH_SERVER, revisionInfo, ServerLoop.getInstance())
+                    .attr("connections", clients.size());
+            serverLoopMetrics.publishMetrics(ctx);
+        }
 
         if (timers[ServerTimers.SUPDATE_UPTIME.value()].passed()) {
             long uptimeSeconds = GameTime.getUptimeSeconds();
@@ -283,17 +297,14 @@ public class AuthenticationManager implements ServerLoopHandler {
     }
 
     private void updateSessions(long diff) {
-        while (!addConnectionQueue.isEmpty()) {
-            FTConnection conn = addConnectionQueue.poll();
-            if (conn != null) {
-                initializeConnection(conn);
-            }
+        FTConnection conn;
+        while ((conn = addConnectionQueue.poll()) != null) {
+            initializeConnection(conn);
         }
 
-        final ConcurrentLinkedDeque<FTClient> clientsSnapshot = new ConcurrentLinkedDeque<>(getClients());
-        for (FTClient client : clientsSnapshot) {
-            FTConnection conn = client.getConnection();
-            if (conn != null && !conn.update(diff)) {
+        for (FTClient client : clients) {
+            FTConnection connection = client.getConnection();
+            if (connection != null && !connection.update(diff)) {
                 removeClient(client);
             }
         }
@@ -326,11 +337,13 @@ public class AuthenticationManager implements ServerLoopHandler {
         }
         timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(serverConfService.get("UpdateUptimeInterval", Integer.class)));
         timers[ServerTimers.SUPDATE_ECONOMY.value()].setInterval(TimeUnit.HOURS.toMillis(serverConfService.get("UpdateEconomyInterval", Integer.class)));
+        timers[ServerTimers.SUPDATE_METRICS.value()].setInterval(TimeUnit.SECONDS.toMillis(serverConfService.get("UpdateMetricsInterval", Integer.class)));
     }
 
 
     public enum ServerTimers {
         SUPDATE_ECONOMY,
+        SUPDATE_METRICS,
         SUPDATE_UPTIME;
 
         public static final int COUNT = values().length;

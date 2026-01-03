@@ -5,11 +5,14 @@ import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.Uptime;
 import com.jftse.server.core.BuildInfoProperties;
+import com.jftse.server.core.ServerLoop;
 import com.jftse.server.core.ServerLoopHandler;
 import com.jftse.server.core.service.BlockedIPService;
+import com.jftse.server.core.service.ServerLoopMetricsService;
 import com.jftse.server.core.service.UptimeService;
 import com.jftse.server.core.shared.MetricsService;
 import com.jftse.server.core.shared.ServerConfService;
+import com.jftse.server.core.shared.ServerMetricsContext;
 import com.jftse.server.core.shared.packets.SMSGInitHandshake;
 import com.jftse.server.core.util.GameTime;
 import com.jftse.server.core.util.IntervalTimer;
@@ -45,6 +48,8 @@ public class RelayManager implements ServerLoopHandler {
     private ServerConfService serverConfService;
     @Autowired
     private MetricsService metricsService;
+    @Autowired
+    private ServerLoopMetricsService serverLoopMetrics;
 
     private ConcurrentLinkedQueue<FTConnection> addConnectionQueue;
     private ConcurrentLinkedDeque<FTClient> clients;
@@ -54,7 +59,7 @@ public class RelayManager implements ServerLoopHandler {
 
     private final Object lock = new Object();
 
-    private IntervalTimer uptimeTimer = new IntervalTimer();
+    private IntervalTimer[] timers = new IntervalTimer[ServerTimers.COUNT];
 
     @PostConstruct
     public void init() {
@@ -65,7 +70,7 @@ public class RelayManager implements ServerLoopHandler {
         sessionMap = new ConcurrentHashMap<>();
 
         GameTime.updateGameTimers();
-        uptimeTimer.setInterval(TimeUnit.MINUTES.toMillis(serverConfService.get("UpdateUptimeInterval", Integer.class)));
+        initTimers();
 
         Uptime uptime = new Uptime();
         uptime.setServerType(ServerType.RELAY_SERVER);
@@ -133,35 +138,44 @@ public class RelayManager implements ServerLoopHandler {
     public void update(long diff) {
         GameTime.updateGameTimers();
 
-        if (uptimeTimer.getCurrent() >= 0)
-            uptimeTimer.update(diff);
-        else
-            uptimeTimer.setCurrent(0);
+        // update different timers
+        for (IntervalTimer timer : timers) {
+            if (timer.getCurrent() >= 0)
+                timer.update(diff);
+            else
+                timer.setCurrent(0);
+        }
 
         updateSessions(diff);
 
-        if (uptimeTimer.passed()) {
+        if (timers[ServerTimers.SUPDATE_METRICS.value()].passed()) {
+            timers[ServerTimers.SUPDATE_METRICS.value()].reset();
+
+            ServerMetricsContext ctx = ServerMetricsContext
+                    .of(ServerType.RELAY_SERVER, revisionInfo, ServerLoop.getInstance())
+                    .attr("connections", clients.size());
+            serverLoopMetrics.publishMetrics(ctx);
+        }
+
+        if (timers[ServerTimers.SUPDATE_UPTIME.value()].passed()) {
             long uptimeSeconds = GameTime.getUptimeSeconds();
             int maxOnlinePlayers = getMaxPlayerCount();
-            uptimeTimer.reset();
+            timers[ServerTimers.SUPDATE_UPTIME.value()].reset();
 
             uptimeService.updateUptimeAndMaxPlayers(uptimeSeconds, maxOnlinePlayers, ServerType.RELAY_SERVER, GameTime.getStartTime().getEpochSecond());
         }
     }
 
     private void updateSessions(long diff) {
-        while (!addConnectionQueue.isEmpty()) {
-            FTConnection conn = addConnectionQueue.poll();
-            if (conn != null) {
-                initializeConnection(conn);
-            }
+        FTConnection conn;
+        while ((conn = addConnectionQueue.poll()) != null) {
+            initializeConnection(conn);
         }
 
-        final ConcurrentLinkedDeque<FTClient> clientsSnapshot = new ConcurrentLinkedDeque<>(getClients());
-        for (FTClient client : clientsSnapshot) {
-            FTConnection conn = client.getConnection();
-            if (conn != null) {
-                conn.update(diff);
+        for (FTClient client : clients) {
+            FTConnection connection = client.getConnection();
+            if (connection != null) {
+                connection.update(diff);
             }
         }
     }
@@ -179,5 +193,24 @@ public class RelayManager implements ServerLoopHandler {
                 .encTblIdx(0)
                 .build();
         conn.sendTCP(initHandshakePacket);
+    }
+
+    private void initTimers() {
+        for (int i = 0; i < ServerTimers.COUNT; i++) {
+            timers[i] = new IntervalTimer();
+        }
+        timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(serverConfService.get("UpdateUptimeInterval", Integer.class)));
+        timers[ServerTimers.SUPDATE_METRICS.value()].setInterval(TimeUnit.SECONDS.toMillis(serverConfService.get("UpdateMetricsInterval", Integer.class)));
+    }
+
+    public enum ServerTimers {
+        SUPDATE_METRICS,
+        SUPDATE_UPTIME;
+
+        public static final int COUNT = values().length;
+
+        public int value() {
+            return this.ordinal();
+        }
     }
 }

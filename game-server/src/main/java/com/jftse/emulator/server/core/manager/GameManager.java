@@ -18,6 +18,7 @@ import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
+import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
@@ -26,12 +27,15 @@ import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.server.core.BuildInfoProperties;
+import com.jftse.server.core.ServerLoop;
 import com.jftse.server.core.ServerLoopHandler;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
+import com.jftse.server.core.service.ServerLoopMetricsService;
 import com.jftse.server.core.shared.ServerConfService;
+import com.jftse.server.core.shared.ServerMetricsContext;
 import com.jftse.server.core.shared.packets.SMSGInitHandshake;
 import com.jftse.server.core.shared.packets.SMSGServerNotice;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomChangePosition;
@@ -67,6 +71,8 @@ public class GameManager implements ServerLoopHandler {
     private EventHandler eventHandler;
     @Autowired
     private ServiceManager serviceManager;
+    @Autowired
+    private RProducerService rProducerService;
 
     @Autowired
     private ConfigService configService;
@@ -79,6 +85,9 @@ public class GameManager implements ServerLoopHandler {
     @Autowired
     private ServerConfService serverConfService;
 
+    @Autowired
+    private ServerLoopMetricsService serverLoopMetrics;
+
     private ConcurrentLinkedQueue<FTConnection> addConnectionQueue;
     private ConcurrentLinkedDeque<FTClient> clients;
     private ConcurrentLinkedDeque<Room> rooms;
@@ -87,7 +96,6 @@ public class GameManager implements ServerLoopHandler {
     private ConcurrentHashMap<Integer, String> personalBoardMessages;
 
     private Optional<ScriptManager> scriptManager;
-    private final Lock lock = new ReentrantLock();
 
     private Random rnd;
 
@@ -162,6 +170,15 @@ public class GameManager implements ServerLoopHandler {
 
         GameEventBus.call(GameEventType.ON_TICK, diff);
         updateSessions(diff);
+
+        if (timers[ServerTimers.SUPDATE_METRICS.value()].passed()) {
+            timers[ServerTimers.SUPDATE_METRICS.value()].reset();
+
+            ServerMetricsContext ctx = ServerMetricsContext
+                    .of(ServerType.GAME_SERVER, revisionInfo, ServerLoop.getInstance())
+                    .attr("connections", clients.size());
+            serverLoopMetrics.publishMetrics(ctx);
+        }
 
         if (timers[ServerTimers.SUPDATE_UPTIME.value()].passed()) {
             long uptimeSeconds = GameTime.getUptimeSeconds();
@@ -618,9 +635,9 @@ public class GameManager implements ServerLoopHandler {
     }
 
     private void updatePhaseManagers(long diff) {
-        final ConcurrentHashMap<Integer, GameSession> gameSessionsSnapshot = new ConcurrentHashMap<>(gameSessionManager.getGameSessionList());
+        final ConcurrentHashMap<Integer, GameSession> gameSessions = gameSessionManager.getGameSessionList();
 
-        for (GameSession gameSession : gameSessionsSnapshot.values()) {
+        for (GameSession gameSession : gameSessions.values()) {
             if (!gameSession.isValid()) {
                 continue;
             }
@@ -636,17 +653,14 @@ public class GameManager implements ServerLoopHandler {
     }
 
     private void updateSessions(long diff) {
-        while (!addConnectionQueue.isEmpty()) {
-            FTConnection conn = addConnectionQueue.poll();
-            if (conn != null) {
-                initializeConnection(conn);
-            }
+        FTConnection conn;
+        while ((conn = addConnectionQueue.poll()) != null) {
+            initializeConnection(conn);
         }
 
-        final ConcurrentLinkedDeque<FTClient> clientsSnapshot = new ConcurrentLinkedDeque<>(getClients());
-        for (FTClient client : clientsSnapshot) {
-            FTConnection conn = client.getConnection();
-            if (conn != null && !conn.update(diff)) {
+        for (FTClient client : clients) {
+            FTConnection connection = client.getConnection();
+            if (connection != null && !connection.update(diff)) {
                 removeClient(client);
             }
         }
@@ -683,9 +697,11 @@ public class GameManager implements ServerLoopHandler {
             timers[i] = new IntervalTimer();
         }
         timers[ServerTimers.SUPDATE_UPTIME.value()].setInterval(TimeUnit.MINUTES.toMillis(serverConfService.get("UpdateUptimeInterval", Integer.class)));
+        timers[ServerTimers.SUPDATE_METRICS.value()].setInterval(TimeUnit.SECONDS.toMillis(serverConfService.get("UpdateMetricsInterval", Integer.class)));
     }
 
     public enum ServerTimers {
+        SUPDATE_METRICS,
         SUPDATE_UPTIME;
 
         public static final int COUNT = values().length;

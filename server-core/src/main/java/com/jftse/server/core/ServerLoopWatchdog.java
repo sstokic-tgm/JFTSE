@@ -55,7 +55,7 @@ public class ServerLoopWatchdog implements Runnable {
             }
 
             final long curTime = Time.getMSTime();
-            final long serverLoopCounter = ServerLoop.getInstance().getLoopCounter().get();
+            final long serverLoopCounter = ServerLoop.getInstance().getTicks();
             if (this.serverLoopCounter != serverLoopCounter) {
                 this.lastChangeMsTime = curTime;
                 this.serverLoopCounter = serverLoopCounter;

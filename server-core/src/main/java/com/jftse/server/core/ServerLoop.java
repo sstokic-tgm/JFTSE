@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Main fixed-step update loop of the server ("core loop").
+ * Main update loop with minimum tick interval of the server ("core loop").
  * <p>
  * This component owns the server's update thread and periodically calls a {@link ServerLoopHandler}
  * with a time delta in milliseconds.
@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Getter
 @Setter
 @Log4j2
-public class ServerLoop {
+public class ServerLoop implements ServerLoopMetrics {
     @Getter
     private static ServerLoop instance;
 
@@ -118,6 +118,11 @@ public class ServerLoop {
      * </ul>
      */
     public void start() {
+        if (handler == null) {
+            log.error("Cannot start ServerLoop: no ServerLoopHandler available");
+            throw new IllegalStateException("Cannot start ServerLoop: no ServerLoopHandler available");
+        }
+
         if (running.compareAndSet(false, true)) {
             this.minUpdateDiff = confService.get("MinServerUpdateTime", Integer.class);
             this.maxCoreStuckTime = confService.get("MaxCoreStuckTime", Integer.class) * 1000; // convert to milliseconds
@@ -164,23 +169,17 @@ public class ServerLoop {
             halfMaxCoreStuckTime = Integer.MAX_VALUE;
         }
 
-        long realCurrTime = 0;
-        long realPrevTime = Time.getMSTime();
+        long lastTickMs = Time.getMSTime();
+        long nextTickAtMs = lastTickMs + minUpdateDiff;
 
         while (running.get()) {
-            loopCounter.incrementAndGet();
+            long nowMs = Time.getMSTime();
 
-            realCurrTime = Time.getMSTime();
-            final long diff = Time.getMSTimeDiff(realPrevTime, realCurrTime);
-
-            totalTickDiff.addAndGet(diff);
-            maxTickDiff.accumulateAndGet(diff, Math::max);
-
-            if (diff < minUpdateDiff) {
+            if (nowMs < nextTickAtMs) {
                 try {
-                    final long sleepTime = minUpdateDiff - diff;
+                    final long sleepTime = nextTickAtMs - nowMs;
                     if (sleepTime >= halfMaxCoreStuckTime)
-                        log.error("Waiting for {} ms with maxCoreStuckTime set to {} ms (diff: {})", sleepTime, maxCoreStuckTime, diff);
+                        log.error("Waiting for {} ms with maxCoreStuckTime set to {} ms", sleepTime, maxCoreStuckTime);
 
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
@@ -190,18 +189,27 @@ public class ServerLoop {
                 continue;
             }
 
-            final long updateStartTime = Time.getNSTime();
+            // real time since last tick
+            nowMs = Time.getMSTime();
+            final long diff = Time.getMSTimeDiff(lastTickMs, nowMs);
+
+            loopCounter.incrementAndGet();
+            totalTickDiff.addAndGet(diff);
+            maxTickDiff.accumulateAndGet(diff, Math::max);
+
+            final long updateStartTimeNs = Time.getNSTime();
             try {
                 handler.update(diff);
             } catch (Exception e) {
                 log.error("Exception in server loop update", e);
             }
-            final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTime, Time.getNSTime()));
+            final long updateTime = Time.nanoToMillis(Time.getNSTimeDiff(updateStartTimeNs, Time.getNSTime()));
 
             totalUpdateTime.addAndGet(updateTime);
             maxUpdateTime.accumulateAndGet(updateTime, Math::max);
 
-            realPrevTime = realCurrTime;
+            lastTickMs = nowMs;
+            nextTickAtMs = lastTickMs + minUpdateDiff;
         }
 
         final long loops = loopCounter.get();
@@ -209,10 +217,37 @@ public class ServerLoop {
                 "Uptime: {}, loops: {}, avg tick: {} ms, max tick: {} ms, avg update: {} ms, max update: {} ms",
                 Time.getServerUptime(),
                 loops,
-                totalTickDiff.get() / (double) loops,
+                loops == 0 ? 0.0 : totalTickDiff.get() / (double) loops,
                 maxTickDiff.get(),
-                totalUpdateTime.get() / (double) loops,
+                loops == 0 ? 0.0 : totalUpdateTime.get() / (double) loops,
                 maxUpdateTime.get()
         );
+    }
+
+    @Override
+    public long getTicks() {
+        return loopCounter.get();
+    }
+
+    @Override
+    public double getAvgTickMs() {
+        long ticks = loopCounter.get();
+        return ticks == 0 ? 0.0 : totalTickDiff.get() / (double) ticks;
+    }
+
+    @Override
+    public long getMaxTickMs() {
+        return maxTickDiff.get();
+    }
+
+    @Override
+    public double getAvgUpdateMs() {
+        long ticks = loopCounter.get();
+        return ticks == 0 ? 0.0 : totalUpdateTime.get() / (double) ticks;
+    }
+
+    @Override
+    public long getMaxUpdateMs() {
+        return maxUpdateTime.get();
     }
 }

@@ -59,6 +59,7 @@
 
         <Logger name="com.jftse.emulator" level="trace"/>
         <Logger name="com.jftse.emulator.server.core.matchplay.guardian.PhaseManager" level="info"/>
+        <!-- <Logger name="com.jftse.server.core.rabbit" level="debug"/> -->
         <!-- <Logger name="io.netty" level="trace"/> -->
 
         <Logger name="PacketLogger" level="trace" additivity="false">
