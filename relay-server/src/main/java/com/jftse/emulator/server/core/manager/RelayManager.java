@@ -123,6 +123,9 @@ public class RelayManager implements ServerLoopHandler {
 
             if (clientList.isEmpty())
                 sessionMap.remove(sessionId);
+        } else {
+            log.warn("Client not found in session ({}). Cleaning up client anyway ({}).", sessionId, client.getConnection().getIPString());
+            removeClient(client);
         }
     }
 
