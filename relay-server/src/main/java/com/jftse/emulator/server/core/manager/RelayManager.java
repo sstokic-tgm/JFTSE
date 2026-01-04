@@ -102,12 +102,7 @@ public class RelayManager implements ServerLoopHandler {
     }
 
     public void addClientToSession(final int sessionId, final FTClient client) {
-        ConcurrentLinkedDeque<FTClient> clientList;
-        if (sessionMap.containsKey(sessionId)) {
-            clientList = sessionMap.get(sessionId);
-        } else {
-            clientList = new ConcurrentLinkedDeque<>();
-        }
+        ConcurrentLinkedDeque<FTClient> clientList = sessionMap.computeIfAbsent(sessionId, k -> new ConcurrentLinkedDeque<>());
         clientList.add(client);
         sessionMap.put(sessionId, clientList);
 
@@ -116,16 +111,14 @@ public class RelayManager implements ServerLoopHandler {
     }
 
     public void removeClient(final int sessionId, final FTClient client) {
-        if (sessionMap.containsKey(sessionId)) {
-            ConcurrentLinkedDeque<FTClient> clientList = sessionMap.get(sessionId);
+        ConcurrentLinkedDeque<FTClient> clientList = sessionMap.get(sessionId);
+        if (clientList != null) {
             clientList.remove(client);
-            removeClient(client);
 
             if (clientList.isEmpty())
-                sessionMap.remove(sessionId);
+                sessionMap.remove(sessionId, clientList);
         } else {
-            log.warn("Client not found in session ({}). Cleaning up client anyway ({}).", sessionId, client.getConnection().getIPString());
-            removeClient(client);
+            log.warn("({}) Client not found in session ({}).", client.getConnection().getIPString(), sessionId);
         }
     }
 
@@ -177,8 +170,8 @@ public class RelayManager implements ServerLoopHandler {
 
         for (FTClient client : clients) {
             FTConnection connection = client.getConnection();
-            if (connection != null) {
-                connection.update(diff);
+            if (connection != null && !connection.update(diff)) {
+                removeClient(client);
             }
         }
     }

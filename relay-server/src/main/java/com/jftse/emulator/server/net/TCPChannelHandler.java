@@ -53,12 +53,7 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
     @Override
     public void disconnected(FTConnection connection) {
         FTClient client = connection.getClient();
-        client.getGameSessionId().ifPresentOrElse(
-                sessionId -> RelayManager.getInstance().removeClient(sessionId, client),
-                () -> {
-                    log.warn("({}) Client disconnected without a session.", connection.getIPString());
-                    RelayManager.getInstance().removeClient(client);
-                });
+        client.getGameSessionId().ifPresent(sessionId -> RelayManager.getInstance().removeClient(sessionId, client));
     }
 
     @Override
