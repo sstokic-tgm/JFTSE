@@ -101,6 +101,8 @@ public class ServerLoop implements ServerLoopMetrics {
     private final AtomicLong totalUpdateTime = new AtomicLong(0);
     private final AtomicLong maxTickDiff = new AtomicLong(0);
     private final AtomicLong maxUpdateTime = new AtomicLong(0);
+    private final AtomicLong maxTickDiffWindow = new AtomicLong(0);
+    private final AtomicLong maxUpdateTimeWindow = new AtomicLong(0);
 
     public ServerLoop(Optional<ServerLoopHandler> handler, ServerConfService confService) {
         this.handler = handler.orElse(null);
@@ -196,6 +198,7 @@ public class ServerLoop implements ServerLoopMetrics {
             loopCounter.incrementAndGet();
             totalTickDiff.addAndGet(diff);
             maxTickDiff.accumulateAndGet(diff, Math::max);
+            maxTickDiffWindow.accumulateAndGet(diff, Math::max);
 
             final long updateStartTimeNs = Time.getNSTime();
             try {
@@ -207,6 +210,7 @@ public class ServerLoop implements ServerLoopMetrics {
 
             totalUpdateTime.addAndGet(updateTime);
             maxUpdateTime.accumulateAndGet(updateTime, Math::max);
+            maxUpdateTimeWindow.accumulateAndGet(updateTime, Math::max);
 
             lastTickMs = nowMs;
             nextTickAtMs = lastTickMs + minUpdateDiff;
@@ -249,5 +253,15 @@ public class ServerLoop implements ServerLoopMetrics {
     @Override
     public long getMaxUpdateMs() {
         return maxUpdateTime.get();
+    }
+
+    @Override
+    public long consumeMaxUpdateMsWindow() {
+        return maxUpdateTimeWindow.getAndSet(0);
+    }
+
+    @Override
+    public long consumeMaxTickMsWindow() {
+        return maxTickDiffWindow.getAndSet(0);
     }
 }

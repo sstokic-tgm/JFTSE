@@ -6,4 +6,6 @@ public interface ServerLoopMetrics {
     long getMaxTickMs();
     double getAvgUpdateMs();
     long getMaxUpdateMs();
+    long consumeMaxTickMsWindow();
+    long consumeMaxUpdateMsWindow();
 }

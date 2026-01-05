@@ -46,6 +46,8 @@ public class ServerLoopMetricsServiceImpl implements ServerLoopMetricsService {
         final long maxTickMsTotal = metrics.getMaxTickMs();
         final double avgUpdateMsTotal = metrics.getAvgUpdateMs();
         final long maxUpdateMsTotal = metrics.getMaxUpdateMs();
+        final long maxUpdateMsWindow = metrics.consumeMaxUpdateMsWindow();
+        final long maxTickMsWindow = metrics.consumeMaxTickMsWindow();
 
         long ticksDelta = 0;
         double ticksPerSec = 0.0;
@@ -79,6 +81,8 @@ public class ServerLoopMetricsServiceImpl implements ServerLoopMetricsService {
                 .maxTickMsTotal(maxTickMsTotal)
                 .avgUpdateMsTotal(avgUpdateMsTotal)
                 .maxUpdateMsTotal(maxUpdateMsTotal)
+                .maxUpdateMsWindow(maxUpdateMsWindow)
+                .maxTickMsWindow(maxTickMsWindow)
                 .avgTickMsWindow(avgTickMsWindow)
                 .attributes(context.attributes())
                 .build();

@@ -21,6 +21,8 @@ public class ServerMetricsMessage extends AbstractBaseMessage {
     private long maxTickMsTotal;
     private double avgUpdateMsTotal;
     private long maxUpdateMsTotal;
+    private long maxUpdateMsWindow;
+    private long maxTickMsWindow;
     private long ticksDelta;
     private double ticksPerSec;
     private double avgTickMsWindow;
@@ -35,6 +37,8 @@ public class ServerMetricsMessage extends AbstractBaseMessage {
                                 long maxTickMsTotal,
                                 double avgUpdateMsTotal,
                                 long maxUpdateMsTotal,
+                                long maxUpdateMsWindow,
+                                long maxTickMsWindow,
                                 long ticksDelta,
                                 double ticksPerSec,
                                 double avgTickMsWindow,
@@ -47,6 +51,8 @@ public class ServerMetricsMessage extends AbstractBaseMessage {
         this.maxTickMsTotal = maxTickMsTotal;
         this.avgUpdateMsTotal = avgUpdateMsTotal;
         this.maxUpdateMsTotal = maxUpdateMsTotal;
+        this.maxUpdateMsWindow = maxUpdateMsWindow;
+        this.maxTickMsWindow = maxTickMsWindow;
         this.ticksDelta = ticksDelta;
         this.ticksPerSec = ticksPerSec;
         this.avgTickMsWindow = avgTickMsWindow;
