@@ -7,13 +7,14 @@ import com.jftse.server.core.shared.packets.CMSGServerTime;
 import com.jftse.server.core.shared.packets.tutorial.SMSGServerTime;
 import com.jftse.server.core.util.GameTime;
 
+import java.time.ZoneId;
 import java.util.Date;
 
 @PacketId(CMSGServerTime.PACKET_ID)
 public class ServerTimeRequestPacketHandler implements PacketHandler<FTConnection, CMSGServerTime> {
     @Override
     public void handle(FTConnection connection, CMSGServerTime packet) {
-        Date currentTime = new Date(GameTime.getGameTimeMS());
+        Date currentTime = Date.from(GameTime.getDateAndTime().atZone(ZoneId.systemDefault()).toInstant());
         SMSGServerTime time = SMSGServerTime.builder().currentTime(currentTime).build();
         connection.sendTCP(time);
     }
