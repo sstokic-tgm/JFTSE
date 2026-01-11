@@ -269,7 +269,7 @@ public class AuthenticationManager implements ServerLoopHandler {
         try {
             serviceManager.getAuthenticationService().updateAccount(account);
             clients.stream()
-                    .filter(c -> c.getAccountId().equals(request.getAccountId()))
+                    .filter(c -> c.getAccountId() != null && c.getAccountId().equals(request.getAccountId()))
                     .findFirst()
                     .ifPresent(c -> c.prepareAccount(account));
             log.info("Account ID {} updated successfully with action {}", request.getAccountId(), action);

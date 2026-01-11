@@ -54,17 +54,16 @@ public class AuthLoginDataPacketHandler implements PacketHandler<FTConnection, C
                     .build();
             connection.sendTCP(authLogin);
 
+            client.prepareAccount(account);
+            log.info("{} connected", account.getUsername());
+
             UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
                     .setAccountId(account.getId())
                     .setTimestamp(System.currentTimeMillis())
                     .setServer(ServerType.AUTH_SERVER.getValue())
                     .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.RELOG.getValue()).build())
                     .build();
-
             ThreadManager.getInstance().schedule(() -> AuthenticationManager.getInstance().addUpdateAccountRequest(request), 50, TimeUnit.MILLISECONDS);
-
-            client.prepareAccount(account);
-            log.info("{} connected", account.getUsername());
 
             String token = StringUtils.randomString(16);
             long timestamp = Instant.now().toEpochMilli();
