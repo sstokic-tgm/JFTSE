@@ -93,8 +93,6 @@ public class ServiceManager {
     @Autowired
     private SkillService skillService;
     @Autowired
-    private WillDamageService willDamageService;
-    @Autowired
     private EnchantService enchantService;
 
     @Autowired

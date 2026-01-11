@@ -76,7 +76,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private ConcurrentLinkedDeque<PlayerBattleState> playerBattleStates;
     private ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates;
     private ConcurrentLinkedDeque<SkillCrystal> skillCrystals;
-    private List<WillDamage> willDamages;
     private AtomicInteger lastCrystalId;
     private AtomicBoolean bossBattleActive;
     private AtomicInteger lastGuardianServeSide;
@@ -117,7 +116,6 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.guardianBattleStates = new ConcurrentLinkedDeque<>();
         this.skillCrystals = new ConcurrentLinkedDeque<>();
         this.lastCrystalId = new AtomicInteger(-1);
-        this.willDamages = new ArrayList<>();
         this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.Guardian);
         this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.finished = new AtomicBoolean(false);

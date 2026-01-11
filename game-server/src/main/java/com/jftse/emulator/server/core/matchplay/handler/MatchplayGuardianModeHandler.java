@@ -75,7 +75,6 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     private final LevelService levelService;
     private final PlayerPocketService playerPocketService;
     private final ClothEquipmentService clothEquipmentService;
-    private final WillDamageService willDamageService;
     private final GuardianService guardianService;
     private final BossGuardianService bossGuardianService;
     private final ScenarioService scenarioService;
@@ -92,7 +91,6 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         this.levelService = ServiceManager.getInstance().getLevelService();
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
-        this.willDamageService = ServiceManager.getInstance().getWillDamageService();
         this.guardianService = ServiceManager.getInstance().getGuardianService();
         this.bossGuardianService = ServiceManager.getInstance().getBossGuardianService();
         this.scenarioService = ServiceManager.getInstance().getScenarioService();
@@ -416,7 +414,6 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
         game.getIsHardMode().set(room.isHardMode());
         game.getIsRandomGuardiansMode().set(room.isRandomGuardians());
-        game.setWillDamages(willDamageService.getWillDamages());
 
         ConcurrentLinkedDeque<RoomPlayer> roomPlayers = room.getRoomPlayerList();
 

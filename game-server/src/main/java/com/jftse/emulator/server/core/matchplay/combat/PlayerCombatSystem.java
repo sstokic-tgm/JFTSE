@@ -135,11 +135,7 @@ public class PlayerCombatSystem implements PlayerCombatable {
                             .orElse(null);
 
             if (attackingPlayer != null) {
-                WillDamage willDamage = game.getWillDamages().stream()
-                        .filter(x -> x.getWill() == attackingPlayer.getWill())
-                        .findFirst()
-                        .orElse(game.getWillDamages().get(game.getWillDamages().size() - 1));
-                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+                lossBallDamage = -BattleUtils.calculateBallDmg(attackingPlayer.getWill(), hasAttackerWillBuff);
             }
         }
 

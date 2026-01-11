@@ -94,8 +94,6 @@ public class ServiceManager {
     @Autowired
     private SkillService skillService;
     @Autowired
-    private WillDamageService willDamageService;
-    @Autowired
     private ScenarioService scenarioService;
     @Autowired
     private MapService mapService;

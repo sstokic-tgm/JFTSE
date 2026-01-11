@@ -66,7 +66,6 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
     private final PlayerPocketService playerPocketService;
     private final PlayerStatisticService playerStatisticService;
     private final ClothEquipmentService clothEquipmentService;
-    private final WillDamageService willDamageService;
 
     private final MapService mapService;
 
@@ -78,7 +77,6 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
-        this.willDamageService = ServiceManager.getInstance().getWillDamageService();
         this.mapService = ServiceManager.getInstance().getMapService();
     }
 
@@ -327,7 +325,6 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
     @Override
     public void onPrepare(FTClient ftClient) {
         Room room = ftClient.getActiveRoom();
-        game.setWillDamages(willDamageService.getWillDamages());
 
         room.getRoomPlayerList().forEach(roomPlayer -> {
             if (roomPlayer.getPosition() < 4)

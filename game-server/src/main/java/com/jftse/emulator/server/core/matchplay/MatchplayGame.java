@@ -20,8 +20,6 @@ public abstract class MatchplayGame {
     protected AtomicBoolean finished;
     protected ConcurrentLinkedDeque<ScheduledFuture<?>> scheduledFutures;
 
-    protected List<WillDamage> willDamages;
-
     private MatchplayHandleable handleable;
 
     protected MatchplayGame() {

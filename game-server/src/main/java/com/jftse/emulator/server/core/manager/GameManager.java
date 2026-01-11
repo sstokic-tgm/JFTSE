@@ -19,6 +19,7 @@ import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
+import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
@@ -117,6 +118,7 @@ public class GameManager implements ServerLoopHandler {
         addConnectionQueue = new ConcurrentLinkedQueue<>();
 
         scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
+        BattleUtils.loadStatConfig();
 
         //setupChatLobby();
 

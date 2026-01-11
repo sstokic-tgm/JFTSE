@@ -80,7 +80,6 @@ public class MatchplayBattleGame extends MatchplayGame {
         this.skillCrystals = new ConcurrentLinkedDeque<>();
         this.lastCrystalId = new AtomicInteger(-1);
         this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.RedTeam);
-        this.willDamages = new ArrayList<>();
         this.spiderMineIdentifier = new AtomicInteger(0);
         this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.finished = new AtomicBoolean(false);

@@ -4,7 +4,6 @@ import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.entities.database.model.battle.Skill;
-import com.jftse.entities.database.model.battle.WillDamage;
 import com.jftse.server.core.item.EElementalProperty;
 import com.jftse.server.core.matchplay.Elementable;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
@@ -108,11 +107,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
                     .orElse(null);
             if (attackingPlayer != null) {
                 int playerWill = attackingPlayer.getWill();
-                WillDamage willDamage = game.getWillDamages().stream()
-                        .filter(x -> x.getWill() == playerWill)
-                        .findFirst()
-                        .orElse(game.getWillDamages().get(game.getWillDamages().size() - 1));
-                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+                lossBallDamage = -BattleUtils.calculateBallDmg(playerWill, hasAttackerWillBuff);
 
                 int additionalWillDmg = (int) (targetGuardian.getMaxHealth() * (playerWill / 10000d));
                 lossBallDamage -= additionalWillDmg;
@@ -243,12 +238,7 @@ public class GuardianCombatSystem implements GuardianCombatable {
                     .findFirst()
                     .orElse(null);
             if (attackingGuardian != null) {
-                int guardianWill = attackingGuardian.getWill();
-                WillDamage willDamage = game.getWillDamages().stream()
-                        .filter(x -> x.getWill() == guardianWill)
-                        .findFirst()
-                        .orElse(game.getWillDamages().get(game.getWillDamages().size() - 1));
-                lossBallDamage = -BattleUtils.calculateBallDamageByWill(willDamage, hasAttackerWillBuff);
+                lossBallDamage = -BattleUtils.calculateBallDmg(attackingGuardian.getWill(), hasAttackerWillBuff);
             }
         }
 
