@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.handler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
@@ -28,22 +27,22 @@ public class PlayerListRequestHandler implements PacketHandler<FTConnection, CMS
             return;
         }
 
-        Account account = client.getAccount();
-        if (account == null) {
+        Long accountId = client.getAccountId();
+        if (accountId == null) {
             return;
         }
 
-        int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
-        List<Player> playerList = playerService.findAllByAccount(account);
+        int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(accountId);
+        List<Player> playerList = playerService.findAllByAccount(accountId);
 
         SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
                 .account(
                         com.jftse.server.core.shared.packets.auth.Account.builder()
-                                .id(Math.toIntExact(account.getId()))
-                                .id2(Math.toIntExact(account.getId()))
+                                .id(Math.toIntExact(accountId))
+                                .id2(Math.toIntExact(accountId))
                                 .tutorialCount((byte) tutorialCount)
-                                .gameMaster(account.getGameMaster())
-                                .lastPlayedPlayerId(Math.toIntExact(account.getLastSelectedPlayerId() == null ? 0 : account.getLastSelectedPlayerId()))
+                                .gameMaster(client.isGameMaster())
+                                .lastPlayedPlayerId(Math.toIntExact(client.getLastPlayedPlayerId() == null ? 0 : client.getLastPlayedPlayerId()))
                                 .build()
                 )
                 .players(playerList.stream().map(p -> com.jftse.server.core.shared.packets.auth.Player.builder()

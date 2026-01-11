@@ -54,6 +54,11 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findAllByAccount_Id(account.getId());
     }
 
+    @Override
+    public List<Player> findAllByAccount(Long accountId) {
+        return playerRepository.findAllByAccount_Id(accountId);
+    }
+
 
     @Override
     public int getPlayerRankingByName(String name, byte gameMode) {

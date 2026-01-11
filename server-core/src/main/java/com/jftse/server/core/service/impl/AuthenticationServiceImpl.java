@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,13 +33,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     
     private final AccountRepository accountRepository;
     private final GameServerRepository gameServerRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private final ConfigService configService;
+    private boolean passwordEncryptionEnabled;
 
-    @Override
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2Y, 12);
+    @PostConstruct
+    public void init() {
+        passwordEncryptionEnabled = configService.getValue("password.encryption.enabled", false);
     }
 
     @Override
@@ -47,8 +49,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (optionalAccount.isPresent() && optionalAccount.get().getUsername().equals(username)) {
             Account account = optionalAccount.get();
 
-            if (configService.getValue("password.encryption.enabled", false)) {
-                if (passwordEncoder().matches(password, account.getPassword()))
+            if (passwordEncryptionEnabled) {
+                if (passwordEncoder.matches(password, account.getPassword()))
                     return SUCCESS;
                 else
                     return ACCOUNT_INVALID_PASSWORD;
@@ -63,11 +65,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public int checkPassword(String expectedPassword, String actualPassword) {
+        if (passwordEncryptionEnabled) {
+            if (passwordEncoder.matches(actualPassword, expectedPassword))
+                return SUCCESS;
+            else
+                return ACCOUNT_INVALID_PASSWORD;
+        } else {
+            if (actualPassword.equals(expectedPassword))
+                return SUCCESS;
+            else
+                return ACCOUNT_INVALID_PASSWORD;
+        }
+    }
+
+    @Override
     public Account updateAccount(Account account) {
         return accountRepository.save(account);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Account findAccountByUsername(String username) {
         Optional<Account> account = accountRepository.findAccountByUsername(username);
         if (account.isPresent() && account.get().getUsername().equals(username))
@@ -76,27 +94,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Account findAccountById(Long id) {
         Optional<Account> account = accountRepository.findAccountById(id);
         return account.orElse(null);
     }
 
+    @Transactional(readOnly = true)
+    public Account getAccountRef(Long accountId) {
+        return accountRepository.getReferenceById(accountId);
+    }
+
     @Override
+    @Transactional(readOnly = true)
     public List<Account> findByStatus(Integer status) {
         return accountRepository.findByStatus(status);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Account> findByStatusAndLoggedInServer(Integer status, ServerType loggedInServer) {
         return accountRepository.findByStatusAndLoggedInServer(status, loggedInServer);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GameServer> getGameServerList() {
         return gameServerRepository.findAllFetched();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public GameServer getGameServerByPort(Integer port) {
         Optional<GameServer> gameServer = gameServerRepository.findGameServerByPort(port);
         return gameServer.orElse(null);

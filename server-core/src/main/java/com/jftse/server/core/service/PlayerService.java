@@ -20,6 +20,7 @@ public interface PlayerService {
     List<Player> findAllByAlreadyCreatedPageable(Pageable pageable);
 
     List<Player> findAllByAccount(Account account);
+    List<Player> findAllByAccount(Long accountId);
 
     int getPlayerRankingByName(String name, byte gameMode);
 

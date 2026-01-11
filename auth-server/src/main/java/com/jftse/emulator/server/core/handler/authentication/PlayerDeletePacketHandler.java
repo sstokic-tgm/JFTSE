@@ -3,7 +3,6 @@ package com.jftse.emulator.server.core.handler.authentication;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.log.CommandLog;
@@ -48,11 +47,11 @@ public class PlayerDeletePacketHandler implements PacketHandler<FTConnection, CM
     public void handle(FTConnection connection, CMSGPlayerDelete playerDeletePacket) {
         FTClient client = connection.getClient();
         if (client != null) {
-            Account account = client.getAccount();
+            Long accountId = client.getAccountId();
             Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
-            if (account != null && player != null) {
-                List<Player> playerList = playerService.findAllByAccount(account);
-                int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
+            if (accountId != null && player != null) {
+                List<Player> playerList = playerService.findAllByAccount(accountId);
+                int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(accountId);
 
                 boolean removed = playerList.removeIf(p -> p.getId().equals(player.getId()));
                 if (removed) {
@@ -62,11 +61,11 @@ public class PlayerDeletePacketHandler implements PacketHandler<FTConnection, CM
                     SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
                             .account(
                                     com.jftse.server.core.shared.packets.auth.Account.builder()
-                                            .id(Math.toIntExact(account.getId()))
-                                            .id2(Math.toIntExact(account.getId()))
+                                            .id(Math.toIntExact(accountId))
+                                            .id2(Math.toIntExact(accountId))
                                             .tutorialCount((byte) tutorialCount)
-                                            .gameMaster(account.getGameMaster())
-                                            .lastPlayedPlayerId(Math.toIntExact(account.getLastSelectedPlayerId() == null ? 0 : account.getLastSelectedPlayerId()))
+                                            .gameMaster(client.isGameMaster())
+                                            .lastPlayedPlayerId(Math.toIntExact(client.getLastPlayedPlayerId() == null ? 0 : client.getLastPlayedPlayerId()))
                                             .build()
                             )
                             .players(playerList.stream().map(p -> com.jftse.server.core.shared.packets.auth.Player.builder()

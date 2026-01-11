@@ -9,16 +9,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 
 public interface AuthenticationService {
-    @Bean
-    PasswordEncoder passwordEncoder();
-
     int login(String username, String password);
+
+    int checkPassword(String expectedPassword, String actualPassword);
 
     Account updateAccount(Account account);
 
     Account findAccountByUsername(String username);
 
     Account findAccountById(Long id);
+
+    Account getAccountRef(Long accountId);
 
     List<Account> findByStatus(Integer status);
 

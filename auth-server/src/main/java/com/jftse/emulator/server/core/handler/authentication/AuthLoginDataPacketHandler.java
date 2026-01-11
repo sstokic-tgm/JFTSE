@@ -63,8 +63,8 @@ public class AuthLoginDataPacketHandler implements PacketHandler<FTConnection, C
 
             ThreadManager.getInstance().schedule(() -> AuthenticationManager.getInstance().addUpdateAccountRequest(request), 50, TimeUnit.MILLISECONDS);
 
-            client.setAccount(account.getId());
-            log.info(account.getUsername() + " connected");
+            client.prepareAccount(account);
+            log.info("{} connected", account.getUsername());
 
             String token = StringUtils.randomString(16);
             long timestamp = Instant.now().toEpochMilli();
@@ -82,7 +82,7 @@ public class AuthLoginDataPacketHandler implements PacketHandler<FTConnection, C
                     .build();
             connection.sendTCP(loginAnswerPacket);
 
-            int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(account.getId());
+            int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(client.getAccountId());
 
             List<Player> playerList = playerService.findAllByAccount(account);
             for (Player p : playerList) {
@@ -98,11 +98,11 @@ public class AuthLoginDataPacketHandler implements PacketHandler<FTConnection, C
             SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
                     .account(
                             com.jftse.server.core.shared.packets.auth.Account.builder()
-                                    .id(Math.toIntExact(account.getId()))
-                                    .id2(Math.toIntExact(account.getId()))
+                                    .id(Math.toIntExact(client.getAccountId()))
+                                    .id2(Math.toIntExact(client.getAccountId()))
                                     .tutorialCount((byte) tutorialCount)
-                                    .gameMaster(account.getGameMaster())
-                                    .lastPlayedPlayerId(Math.toIntExact(account.getLastSelectedPlayerId() == null ? 0 : account.getLastSelectedPlayerId()))
+                                    .gameMaster(client.isGameMaster())
+                                    .lastPlayedPlayerId(Math.toIntExact(client.getLastPlayedPlayerId() == null ? 0 : client.getLastPlayedPlayerId()))
                                     .build()
                     )
                     .players(playerList.stream().map(p -> com.jftse.server.core.shared.packets.auth.Player.builder()

@@ -3,12 +3,10 @@ package com.jftse.emulator.server.core.handler;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.gameserver.GameServer;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.AuthenticationService;
-import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.auth.CMSGRequestChannelList;
 import com.jftse.server.core.shared.packets.auth.SMSGChannelList;
 
@@ -17,11 +15,9 @@ import java.util.List;
 @PacketId(CMSGRequestChannelList.PACKET_ID)
 public class LoginAliveClientHandler implements PacketHandler<FTConnection, CMSGRequestChannelList> {
     private final AuthenticationService authenticationService;
-    private final PlayerService playerService;
 
     public LoginAliveClientHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
-        playerService = ServiceManager.getInstance().getPlayerService();
     }
 
     @Override
@@ -30,8 +26,8 @@ public class LoginAliveClientHandler implements PacketHandler<FTConnection, CMSG
         if (client == null)
             return;
 
-        Account account = client.getAccount();
-        if (account == null)
+        Long accountId = client.getAccountId();
+        if (accountId == null)
             return;
 
         if (client.isClientAlive().compareAndSet(false, true)) {

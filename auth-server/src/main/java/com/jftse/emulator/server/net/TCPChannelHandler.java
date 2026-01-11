@@ -3,7 +3,6 @@ package com.jftse.emulator.server.net;
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.ServerType;
-import com.jftse.entities.database.model.account.Account;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.net.TCPHandlerV2;
@@ -48,8 +47,7 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
 
     private void handleHeartBeat(FTConnection connection, CMSGHeartbeat packet) {
         FTClient client = connection.getClient();
-        Account account = client.getAccount();
-        if (account != null && account.getStatus() == AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
+        if (client.getAccountId() != null && client.getAccountStatus() == AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
             connection.wantsToCloseConnection();
         }
     }
@@ -63,10 +61,10 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
     @Override
     public void disconnected(FTConnection connection) {
         final FTClient client = connection.getClient();
-        final Account account = client.getAccount();
-        if (account != null) {
+        Long accountId = client.getAccountId();
+        if (accountId != null) {
             UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
-                    .setAccountId(account.getId())
+                    .setAccountId(accountId)
                     .setTimestamp(System.currentTimeMillis())
                     .setServer(ServerType.AUTH_SERVER.getValue())
                     .setAccountAction(AccountAction.newBuilder().setAction(com.jftse.server.core.util.AccountAction.DISCONNECT.getValue()).build())
@@ -78,9 +76,9 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
     @Override
     public void exceptionCaught(FTConnection connection, Throwable cause) throws Exception {
         FTClient client = connection.getClient();
-        Account account = client.getAccount();
-        if (account != null) {
-            log.error("({}) exceptionCaught: {}", account.getId(), cause.getMessage(), cause);
+        Long accountId = client.getAccountId();
+        if (accountId != null) {
+            log.error("({}) exceptionCaught: {}", accountId, cause.getMessage(), cause);
         }
     }
 }

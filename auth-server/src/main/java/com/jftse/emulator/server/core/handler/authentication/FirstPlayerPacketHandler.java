@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.handler.authentication;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.entities.database.model.pocket.Pocket;
@@ -11,7 +12,6 @@ import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.auth.CMSGLoginFirstPlayer;
 import com.jftse.server.core.shared.packets.auth.SMSGLoginFirstPlayer;
-import com.jftse.server.core.thread.ThreadManager;
 
 import java.util.List;
 
@@ -27,6 +27,7 @@ public class FirstPlayerPacketHandler implements PacketHandler<FTConnection, CMS
     private final PlayerStatisticService playerStatisticService;
     private final PlayerService playerService;
     private final HomeService homeService;
+    private final AuthenticationService authenticationService;
 
     public FirstPlayerPacketHandler() {
         clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
@@ -39,20 +40,22 @@ public class FirstPlayerPacketHandler implements PacketHandler<FTConnection, CMS
         playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         playerService = ServiceManager.getInstance().getPlayerService();
         homeService = ServiceManager.getInstance().getHomeService();
+        authenticationService = ServiceManager.getInstance().getAuthenticationService();
     }
 
     @Override
     public void handle(FTConnection connection, CMSGLoginFirstPlayer firstPlayerPacket) {
         FTClient client = connection.getClient();
-        List<Player> playerList = playerService.findAllByAccount(client.getAccount());
+        List<Player> playerList = playerService.findAllByAccount(client.getAccountId());
 
+        Account accRef = authenticationService.getAccountRef(client.getAccountId());
         if (playerList.isEmpty()) {
             AccountHome accountHome = new AccountHome();
-            accountHome.setAccount(client.getAccount());
+            accountHome.setAccount(accRef);
             homeService.save(accountHome);
 
             Player player = new Player();
-            player.setAccount(client.getAccount());
+            player.setAccount(accRef);
             player.setPlayerType(firstPlayerPacket.getPlayerType());
             player.setFirstPlayer(true);
 

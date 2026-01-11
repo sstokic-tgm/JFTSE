@@ -67,6 +67,9 @@ public class AuthenticationManager implements ServerLoopHandler {
 
     private IntervalTimer[] timers = new IntervalTimer[ServerTimers.COUNT];
 
+    private boolean handleDevPackets = false;
+    private boolean antiCheatEnabled = false;
+
     @PostConstruct
     public void init() {
         instance = this;
@@ -74,6 +77,8 @@ public class AuthenticationManager implements ServerLoopHandler {
         clients = new ConcurrentLinkedDeque<>();
         updateAccountQueue = new LinkedBlockingQueue<>();
         addConnectionQueue = new ConcurrentLinkedQueue<>();
+        handleDevPackets = serviceManager.getConfigService().getValue("dev.packets.handle", false);
+        antiCheatEnabled = serviceManager.getConfigService().getValue("anticheat.enabled", false);
 
         GameTime.updateGameTimers();
         initTimers();
@@ -263,6 +268,10 @@ public class AuthenticationManager implements ServerLoopHandler {
 
         try {
             serviceManager.getAuthenticationService().updateAccount(account);
+            clients.stream()
+                    .filter(c -> c.getAccountId().equals(request.getAccountId()))
+                    .findFirst()
+                    .ifPresent(c -> c.prepareAccount(account));
             log.info("Account ID {} updated successfully with action {}", request.getAccountId(), action);
         } catch (Exception e) {
             log.error("Failed to update account ID {}: {}", request.getAccountId(), e.getMessage(), e);
