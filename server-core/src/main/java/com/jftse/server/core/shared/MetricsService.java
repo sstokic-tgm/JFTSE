@@ -51,7 +51,7 @@ public class MetricsService {
 
     @PostConstruct
     private void startFlusher() {
-        flushExecutor.scheduleWithFixedDelay(this::flushSafely, 10, 10, TimeUnit.SECONDS);
+        flushExecutor.scheduleWithFixedDelay(this::flushSafely, 5, 5, TimeUnit.MINUTES);
     }
 
     public void set(String name, long value, ServerType serverType) {
