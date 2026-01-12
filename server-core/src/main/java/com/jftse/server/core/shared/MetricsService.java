@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -17,10 +19,11 @@ import java.util.concurrent.atomic.LongAdder;
 public class MetricsService {
     private final MetricsPersistenceService persistence;
 
-    private static final int FLUSH_THRESHOLD_CALLS = 50;
-    private static final int BATCH_SIZE = 100;
+    private static final int FLUSH_THRESHOLD_CALLS = 50_000;
+    private static final int BATCH_SIZE = 5_000;
 
     private final AtomicInteger callCounter = new AtomicInteger(0);
+    private final AtomicBoolean flushInProgress = new AtomicBoolean(false);
 
     private final ScheduledExecutorService flushExecutor =
             Executors.newSingleThreadScheduledExecutor(r -> {
@@ -46,6 +49,11 @@ public class MetricsService {
         }
     }
 
+    @PostConstruct
+    private void startFlusher() {
+        flushExecutor.scheduleWithFixedDelay(this::flushSafely, 10, 10, TimeUnit.SECONDS);
+    }
+
     public void set(String name, long value, ServerType serverType) {
         acc.computeIfAbsent(new MetricKey(name, serverType), k -> new Accumulator()).set(value);
         requestFlushIfNeeded();
@@ -62,27 +70,36 @@ public class MetricsService {
     }
 
     private void requestFlushIfNeeded() {
-        if (callCounter.incrementAndGet() % FLUSH_THRESHOLD_CALLS == 0) {
+        final int c = callCounter.incrementAndGet();
+        if (c % FLUSH_THRESHOLD_CALLS == 0) {
             flushExecutor.execute(this::flushSafely);
+
+            if (c > FLUSH_THRESHOLD_CALLS * 100) callCounter.set(0);
         }
     }
 
     private void flushSafely() {
+        if (!flushInProgress.compareAndSet(false, true)) {
+            return; // another flush is in progress
+        }
+
         try {
             flush();
         } catch (Throwable t) {
             log.error("Error flushing metrics", t);
+        } finally {
+            flushInProgress.set(false);
         }
     }
 
     private void flush() {
-        List<Map.Entry<MetricKey, AccumulatorSnapshot>> batch = drainSnapshots();
-        if (batch.isEmpty()) return;
+        while (true) {
+            List<Map.Entry<MetricKey, AccumulatorSnapshot>> batch = drainSnapshots();
+            if (batch.isEmpty()) break;
 
-        persistence.flushBatch(batch);
+            persistence.flushBatch(batch);
 
-        if (!acc.isEmpty()) {
-            flushExecutor.execute(this::flushSafely);
+            if (batch.size() < BATCH_SIZE) break;
         }
     }
 

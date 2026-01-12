@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,11 +26,34 @@ public class MetricsPersistenceService {
     public void flushBatch(List<Map.Entry<MetricsService.MetricKey, MetricsService.AccumulatorSnapshot>> batch) {
         long ts = Time.getNSTime();
 
-        for (Map.Entry<MetricsService.MetricKey, MetricsService.AccumulatorSnapshot> e : batch) {
-            MetricsService.MetricKey key = e.getKey();
-            MetricsService.AccumulatorSnapshot snap = e.getValue();
+        Map<ServerType, List<String>> namesByType = new HashMap<>();
+        for (var e : batch) {
+            namesByType.computeIfAbsent(e.getKey().serverType(), k -> new ArrayList<>()).add(e.getKey().name());
+        }
 
-            Metric m = getMetric(key.name(), key.serverType());
+        // load existing metrics in bulk
+        Map<String, Metric> existing = new HashMap<>();
+        for (var entry : namesByType.entrySet()) {
+            ServerType st = entry.getKey();
+            List<String> names = entry.getValue();
+
+            List<Metric> found = em.createQuery(
+                            "SELECT m FROM Metric m WHERE m.serverType = :st AND m.name IN :names", Metric.class)
+                    .setParameter("st", st)
+                    .setParameter("names", names)
+                    .getResultList();
+
+            for (Metric m : found) {
+                existing.put(st.name() + "|" + m.getName(), m);
+            }
+        }
+
+        for (var e : batch) {
+            var key = e.getKey();
+            var snap = e.getValue();
+
+            String mapKey = key.serverType().name() + "|" + key.name();
+            Metric m = existing.get(mapKey);
 
             long newValue = updateValue(m, snap);
 
@@ -36,18 +61,15 @@ public class MetricsPersistenceService {
                 m = new Metric();
                 m.setName(key.name());
                 m.setServerType(key.serverType());
-                m.setValue(newValue);
-                m.setTimestamp(ts);
                 em.persist(m);
-            } else {
-                m.setValue(newValue);
-                m.setTimestamp(ts);
-                em.merge(m);
+                existing.put(mapKey, m);
             }
+
+            m.setValue(newValue);
+            m.setTimestamp(ts);
         }
 
         em.flush();
-        em.clear();
     }
 
     private long updateValue(Metric m, MetricsService.AccumulatorSnapshot snap) {
