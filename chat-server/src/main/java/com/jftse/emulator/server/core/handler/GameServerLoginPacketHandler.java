@@ -15,7 +15,10 @@ import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.AuthTokenService;
+import com.jftse.server.core.service.AuthenticationService;
+import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
+import com.jftse.server.core.shared.PlayerLoadType;
 import com.jftse.server.core.shared.packets.game.CMSGLoginData;
 import com.jftse.server.core.shared.packets.game.SMSGLoginData;
 import lombok.extern.log4j.Log4j2;
@@ -24,9 +27,13 @@ import lombok.extern.log4j.Log4j2;
 @PacketId(CMSGLoginData.PACKET_ID)
 public class GameServerLoginPacketHandler implements PacketHandler<FTConnection, CMSGLoginData> {
     private final AuthTokenService authTokenService;
+    private final PlayerService playerService;
+    private final AuthenticationService authenticationService;
 
     public GameServerLoginPacketHandler() {
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
+        playerService = ServiceManager.getInstance().getPlayerService();
+        authenticationService = ServiceManager.getInstance().getAuthenticationService();
     }
 
     @Override
@@ -47,13 +54,11 @@ public class GameServerLoginPacketHandler implements PacketHandler<FTConnection,
             return;
         }
         FTClient client = connection.getClient();
-        client.setPlayer((long) packet.getPlayerId());
-
-        Player player = client.getPlayer();
-        if (player != null && player.getAccount() != null && player.getAccount().getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && player.getAccount().getUsername().equals(packet.getAccountName()) && !StringUtils.isEmpty(player.getName())) {
+        Player player = playerService.findWithAccountById((long) packet.getPlayerId());
+        if (player != null && player.getAccount().getStatus().shortValue() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID && player.getAccount().getUsername().equals(packet.getAccountName()) && !StringUtils.isEmpty(player.getName())) {
             Account account = player.getAccount();
             account.setLastSelectedPlayerId(player.getId());
-            client.saveAccount(account);
+            authenticationService.updateAccount(account);
 
             UpdateAccountRequest request = UpdateAccountRequest.newBuilder()
                     .setAccountId(account.getId())
@@ -63,12 +68,10 @@ public class GameServerLoginPacketHandler implements PacketHandler<FTConnection,
                     .build();
             ServiceManager.getInstance().getGrpcAuthService().updateAccount(request);
 
-            log.info("{} connected", player.getName());
-
             player.setOnline(true);
-            client.savePlayer(player);
+            player = playerService.save(player);
 
-            client.setAccount(account.getId());
+            client.loadPlayer(account, player, PlayerLoadType.BASIC);
             connection.setClient(client);
             connection.setHwid(packet.getHwid());
 
@@ -77,6 +80,8 @@ public class GameServerLoginPacketHandler implements PacketHandler<FTConnection,
                     .serverType((byte) 0)
                     .build();
             connection.sendTCP(response);
+
+            log.info("{} connected", player.getName());
 
             GameEventBus.call(GameEventType.ON_LOGIN, client);
         } else {

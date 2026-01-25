@@ -4,6 +4,7 @@ import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomType;
@@ -24,6 +25,7 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.ServerType;
 import com.jftse.entities.database.model.Uptime;
+import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
@@ -54,8 +56,6 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -222,7 +222,7 @@ public class GameManager implements ServerLoopHandler {
         rooms.remove(room);
     }
 
-    public List<Player> getPlayersInLobby() {
+    public List<FTPlayer> getPlayersInLobby() {
         return clients.stream()
                 .filter(FTClient::isInLobby)
                 .map(FTClient::getPlayer)
@@ -243,7 +243,7 @@ public class GameManager implements ServerLoopHandler {
 
     public final FTConnection getConnectionByPlayerId(Long playerId) {
         return clients.stream()
-                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerId))
+                .filter(c -> c.hasPlayer() && playerId.equals(c.getPlayer().getId()))
                 .findFirst()
                 .map(FTClient::getConnection)
                 .orElse(null);
@@ -271,7 +271,7 @@ public class GameManager implements ServerLoopHandler {
 
     public synchronized void handleChatLobbyJoin(FTClient client) {
         FTConnection connection = client.getConnection();
-        if (connection == null) {
+        if (connection == null || !client.hasPlayer()) {
             return;
         }
 
@@ -279,15 +279,10 @@ public class GameManager implements ServerLoopHandler {
             return;
         }
 
-        Player player = client.getPlayer();
+        FTPlayer player = client.getPlayer();
 
         S2CRoomJoinAnswerPacket roomJoinAnswerPacket = new S2CRoomJoinAnswerPacket((char) 0, townSquare.getRoomType(), townSquare.getMode(), townSquare.getMap());
         connection.sendTCP(roomJoinAnswerPacket);
-
-        if (player == null) {
-            client.getIsJoiningOrLeavingLobby().set(false);
-            return;
-        }
 
         final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = townSquare.getRoomPlayerList();
         boolean anyPositionAvailable = roomPlayerList.size() < townSquare.getPlayers();
@@ -322,30 +317,22 @@ public class GameManager implements ServerLoopHandler {
             return;
         }
 
-        RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayerId(player.getId());
+        Friend couple = serviceManager.getSocialService().getRelationshipWithFriend(player.getPlayerRef());
+        if (couple != null) {
+            player.setCoupleId(couple.getFriend().getId());
+            player.setCoupleName(couple.getFriend().getName());
+        }
 
-        GuildMember guildMember = ServiceManager.getInstance().getGuildMemberService().getByPlayer(player);
-        Friend couple = ServiceManager.getInstance().getSocialService().getRelationship(player);
-        ClothEquipment clothEquipment = ServiceManager.getInstance().getClothEquipmentService().findClothEquipmentById(player.getClothEquipment().getId());
-        SpecialSlotEquipment specialSlotEquipment = ServiceManager.getInstance().getSpecialSlotEquipmentService().findById(player.getSpecialSlotEquipment().getId());
-        CardSlotEquipment cardSlotEquipment = ServiceManager.getInstance().getCardSlotEquipmentService().findById(player.getCardSlotEquipment().getId());
-        StatusPointsAddedDto statusPointsAddedDto = ServiceManager.getInstance().getClothEquipmentService().getStatusPointsFromCloths(player);
-
-        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
-        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
-        roomPlayer.setClothEquipmentId(clothEquipment.getId());
-        roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
-        roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
-        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
+        RoomPlayer roomPlayer = new RoomPlayer(player);
+        roomPlayer.setGameMaster(client.isGameMaster());
         roomPlayer.setPosition(position);
         roomPlayer.setMaster(false);
         roomPlayer.setFitting(false);
 
-        townSquare.getRoomPlayerList().add(roomPlayer);
-
         client.setActiveRoom(townSquare);
         client.setInLobby(true);
+
+        townSquare.getRoomPlayerList().add(roomPlayer);
 
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(townSquare);
         connection.sendTCP(roomInformationPacket);
@@ -375,7 +362,7 @@ public class GameManager implements ServerLoopHandler {
         clientsInLobby.forEach(c -> {
             if (c.getConnection() != null) {
                 final int currentPage = c.getLobbyCurrentPlayerListPage();
-                final List<Player> playersInLobby = getPlayersInLobby().stream()
+                final List<FTPlayer> playersInLobby = getPlayersInLobby().stream()
                         .skip(currentPage == 1 ? 0 : (currentPage * 10L) - 10)
                         .limit(10)
                         .collect(Collectors.toList());
@@ -387,19 +374,17 @@ public class GameManager implements ServerLoopHandler {
 
     public synchronized void handleRoomPlayerChanges(final FTConnection connection, final boolean notifyClients) {
         FTClient client = connection.getClient();
-        if (client == null)
+        if (!client.hasPlayer())
             return;
 
-        Player activePlayer = client.getPlayer();
-        if (activePlayer == null)
-            return;
+        FTPlayer activePlayer = client.getPlayer();
 
         Room room = client.getActiveRoom();
         if (room == null)
             return;
 
         final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
-        ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+        final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
         final Optional<RoomPlayer> roomPlayer = Optional.ofNullable(client.getRoomPlayer());
 
         final short playerPosition = roomPlayer.isPresent() ? roomPlayer.get().getPosition() : -1;
@@ -439,7 +424,7 @@ public class GameManager implements ServerLoopHandler {
             }
         }
 
-        roomPlayerList.removeIf(rp -> rp.getPlayerId().equals(activePlayer.getId()));
+        roomPlayerList.removeIf(rp -> rp.getPlayerId() == activePlayer.getId());
         if (room.getRoomPlayerList().isEmpty() && !isTownSquare) {
             removeRoom(room);
         }
@@ -452,7 +437,7 @@ public class GameManager implements ServerLoopHandler {
             } else {
                 GameSession gameSession = gameSessionManager.getGameSessionBySessionId(client.getGameSessionId());
                 if (gameSession != null) {
-                    gameSession.getClients().removeIf(c -> c.getPlayer() != null && c.getPlayer().getId().equals(activePlayer.getId()));
+                    gameSession.getClients().removeIf(c -> c.hasPlayer() && c.getPlayer().getId() == activePlayer.getId());
                 }
                 client.setActiveGameSession(null);
             }
@@ -462,7 +447,7 @@ public class GameManager implements ServerLoopHandler {
             if (notifyClients) {
                 S2CLeaveRoomWithPositionPacket leaveRoomWithPositionPacket = new S2CLeaveRoomWithPositionPacket(playerPosition);
                 getClientsInRoom(room.getRoomId()).forEach(c -> {
-                    if (c.getPlayer() != null && c.getConnection() != null) {
+                    if (c.hasPlayer() && c.getConnection() != null) {
                         c.getConnection().sendTCP(leaveRoomWithPositionPacket);
                     }
                 });
@@ -477,7 +462,7 @@ public class GameManager implements ServerLoopHandler {
                 S2CRoomFittingPlayerInfoPacket roomFittingPlayerInfoPacket = new S2CRoomFittingPlayerInfoPacket(newMaster.getPosition(), newMaster);
                 SMSGRoomChangePosition roomPositionChangeAnswerPacket = SMSGRoomChangePosition.builder().result((char) 0).oldPosition(newMaster.getPosition()).newPosition(newMaster.getPosition()).build();
                 getClientsInRoom(room.getRoomId()).forEach(c -> {
-                    if (c.getConnection() != null && !c.getActivePlayerId().equals(activePlayer.getId())) {
+                    if (c.getConnection() != null && c.getPlayer().getId() != activePlayer.getId()) {
                         c.getConnection().sendTCP(roomFittingPlayerInfoPacket);
                         c.getConnection().sendTCP(roomPlayerInformationPacket);
                         c.getConnection().sendTCP(roomPositionChangeAnswerPacket);
@@ -544,32 +529,26 @@ public class GameManager implements ServerLoopHandler {
             room.getPositions().set(3, RoomPositionState.Locked);
         }
 
-        Player activePlayer = connection.getClient().getPlayer();
+        FTClient client = connection.getClient();
+        FTPlayer activePlayer = client.getPlayer();
 
-        RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayerId(activePlayer.getId());
+        Friend couple = serviceManager.getSocialService().getRelationshipWithFriend(activePlayer.getPlayerRef());
+        if (couple != null) {
+            activePlayer.setCoupleId(couple.getFriend().getId());
+            activePlayer.setCoupleName(couple.getFriend().getName());
+        }
 
-        GuildMember guildMember = serviceManager.getGuildMemberService().getByPlayer(activePlayer);
-        Friend couple = serviceManager.getSocialService().getRelationship(activePlayer);
-        ClothEquipment clothEquipment = serviceManager.getClothEquipmentService().findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
-        SpecialSlotEquipment specialSlotEquipment = serviceManager.getSpecialSlotEquipmentService().findById(roomPlayer.getPlayer().getSpecialSlotEquipment().getId());
-        CardSlotEquipment cardSlotEquipment = serviceManager.getCardSlotEquipmentService().findById(roomPlayer.getPlayer().getCardSlotEquipment().getId());
-        StatusPointsAddedDto statusPointsAddedDto = serviceManager.getClothEquipmentService().getStatusPointsFromCloths(roomPlayer.getPlayer());
-
-        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
-        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
-        roomPlayer.setClothEquipmentId(clothEquipment.getId());
-        roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
-        roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
-        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
+        RoomPlayer roomPlayer = new RoomPlayer(activePlayer);
+        roomPlayer.setGameMaster(client.isGameMaster());
         roomPlayer.setPosition((short) 0);
         roomPlayer.setMaster(true);
         roomPlayer.setFitting(false);
-        room.getRoomPlayerList().add(roomPlayer);
 
+        client.setActiveRoom(room);
+        client.setInLobby(false);
+
+        room.getRoomPlayerList().add(roomPlayer);
         addRoom(room);
-        connection.getClient().setActiveRoom(room);
-        connection.getClient().setInLobby(false);
 
         S2CRoomCreateAnswerPacket roomCreateAnswerPacket = new S2CRoomCreateAnswerPacket((char) 0, room.getRoomType(), room.getMode(), room.getMap());
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
@@ -596,10 +575,15 @@ public class GameManager implements ServerLoopHandler {
     }
 
     public GuildMember getGuildMemberByPlayerPositionInGuild(int playerPositionInGuild, final GuildMember guildMember) {
-        final List<GuildMember> memberList = guildMember.getGuild().getMemberList().stream()
+        Guild guild = serviceManager.getGuildService().findWithMembersById(guildMember.getGuild().getId());
+        return getGuildMemberByPlayerPositionInGuild(guild, playerPositionInGuild);
+    }
+
+    public GuildMember getGuildMemberByPlayerPositionInGuild(Guild guild, int playerPositionInGuild) {
+        final List<GuildMember> memberList = guild.getMemberList().stream()
                 .filter(x -> !x.getWaitingForApproval())
                 .sorted(Comparator.comparing(GuildMember::getMemberRank).reversed())
-                .collect(Collectors.toList());
+                .toList();
         if (memberList.size() < playerPositionInGuild) {
             return null;
         }
@@ -608,8 +592,8 @@ public class GameManager implements ServerLoopHandler {
     }
 
     public boolean isAllowedToChangeMode(Room room) {
-        List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream().filter(x -> x.getPosition() < 4).collect(Collectors.toList());
-        return activePlayingPlayers.stream().allMatch(x -> x.getPlayer().getLevel() >= configService.getValue("command.room.mode.change.player.level", 60));
+        List<RoomPlayer> activePlayingPlayers = room.getRoomPlayerList().stream().filter(x -> x.getPosition() < 4).toList();
+        return activePlayingPlayers.stream().allMatch(x -> x.getLevel() >= configService.getValue("command.room.mode.change.player.level", 60));
     }
 
     public void sendPacketToAllClientsInSameGameSession(IPacket packet, FTConnection connection) {
@@ -662,13 +646,18 @@ public class GameManager implements ServerLoopHandler {
 
         for (FTClient client : clients) {
             FTConnection connection = client.getConnection();
-            if (connection != null && !connection.update(diff)) {
+            if (connection == null || !connection.update(diff)) {
                 removeClient(client);
             }
         }
     }
 
     private void initializeConnection(FTConnection conn) {
+        if (conn.getClient() != null) {
+            log.warn("({}) Connection already has a client assigned", conn.getIPString());
+            return;
+        }
+
         InetSocketAddress inetSocketAddress = conn.getRemoteAddressTCP();
         String remoteAddress = inetSocketAddress != null ? inetSocketAddress.toString() : "null";
 

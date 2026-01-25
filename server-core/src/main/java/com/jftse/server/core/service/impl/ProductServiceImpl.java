@@ -14,14 +14,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -209,6 +207,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public Player createNewPlayer(Account account, byte forPlayer) {
         ItemChar itemChar = itemCharService.findByPlayerType(forPlayer);
 

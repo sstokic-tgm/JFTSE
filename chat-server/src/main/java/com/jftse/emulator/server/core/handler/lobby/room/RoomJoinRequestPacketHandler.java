@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -104,7 +105,7 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             return;
         }
 
-        Player activePlayer = ftClient.getPlayer();
+        FTPlayer activePlayer = ftClient.getPlayer();
         if (!ftClient.isGameMaster() && room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
             SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
                     .result((char) -5)
@@ -196,30 +197,22 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             return;
         }
 
-        RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayerId(activePlayer.getId());
+        Friend couple = socialService.getRelationshipWithFriend(activePlayer.getPlayerRef());
+        if (couple != null) {
+            activePlayer.setCoupleId(couple.getFriend().getId());
+            activePlayer.setCoupleName(couple.getFriend().getName());
+        }
 
-        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
-        Friend couple = socialService.getRelationship(activePlayer);
-        ClothEquipment clothEquipment = clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
-        SpecialSlotEquipment specialSlotEquipment = specialSlotEquipmentService.findById(roomPlayer.getPlayer().getSpecialSlotEquipment().getId());
-        CardSlotEquipment cardSlotEquipment = cardSlotEquipmentService.findById(roomPlayer.getPlayer().getCardSlotEquipment().getId());
-        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer());
-
-        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
-        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
-        roomPlayer.setClothEquipmentId(clothEquipment.getId());
-        roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
-        roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
-        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
+        RoomPlayer roomPlayer = new RoomPlayer(activePlayer);
+        roomPlayer.setGameMaster(ftClient.isGameMaster());
         roomPlayer.setPosition(position);
         roomPlayer.setMaster(false);
         roomPlayer.setFitting(false);
 
-        room.getRoomPlayerList().add(roomPlayer);
-
         ftClient.setActiveRoom(room);
         ftClient.setInLobby(room.getMode() == 2);
+
+        room.getRoomPlayerList().add(roomPlayer);
 
         handleRoomUponJoin(connection, room, false);
 
@@ -246,8 +239,7 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
         AccountHome accountHome = null;
         if (roomPlayerMaster.isPresent() && room.getMode() == 1) {
             RoomPlayer master = roomPlayerMaster.get();
-            Long accountId = master.getPlayer().getAccount().getId();
-            accountHome = homeService.findAccountHomeByAccountId(accountId);
+            accountHome = homeService.findAccountHomeByAccountId(master.getAccountId());
             List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);
 
             S2CHomeItemsLoadAnswerPacket homeItemsLoadAnswerPacket = new S2CHomeItemsLoadAnswerPacket(homeInventoryList);

@@ -21,7 +21,6 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class GuardianSkillsServiceImpl implements GuardianSkillsService {
     private final Random random = new Random();
 
@@ -29,6 +28,7 @@ public class GuardianSkillsServiceImpl implements GuardianSkillsService {
     private final Guardian2MapsRepository guardian2MapsRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Skill getRandomGuardianSkillBasedOnProbability(int btItemId, int guardianId, boolean isBoss, MScenarios scenario, SMaps map) {
         final List<Skill2Guardians> skill2Guardians = skill2GuardiansRepository.findAllByBtItemId(btItemId);
         assert !skill2Guardians.isEmpty() : "Skill2Guardians with btItemId " + btItemId + " not found";
@@ -67,16 +67,19 @@ public class GuardianSkillsServiceImpl implements GuardianSkillsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Skill2Guardians> findAllByBtItemId(Integer btItemId) {
         return skill2GuardiansRepository.findAllByBtItemId(btItemId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Skill2Guardians> getSkillsByMapAndGuardianAndScenario(Long mapId, Long guardianId, Long scenarioId) {
         return skill2GuardiansRepository.findAllByMapAndGuardianAndScenario(mapId, guardianId, scenarioId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Skill2Guardians> getSkillsByMapAndBossGuardianAndScenario(Long mapId, Long guardianId, Long scenarioId) {
         return skill2GuardiansRepository.findAllByMapAndBossGuardianAndScenario(mapId, guardianId, scenarioId);
     }

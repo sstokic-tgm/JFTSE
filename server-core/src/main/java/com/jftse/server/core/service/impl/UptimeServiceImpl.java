@@ -11,16 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class UptimeServiceImpl implements UptimeService {
     private final UptimeRepository uptimeRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void save(Uptime uptime) {
         uptimeRepository.save(uptime);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateUptimeAndMaxPlayers(Long uptime, Integer maxPlayers, ServerType serverType, Long startTime) {
         uptimeRepository.updateUptimeAndMaxPlayers(uptime, maxPlayers, serverType, startTime);
     }

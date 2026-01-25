@@ -40,8 +40,8 @@ public class S2CMatchplaySetExperienceGainInfoData extends Packet {
         this.write(0);
         this.write(0);
 
-        List<Integer> specialSlotEquipment = roomPlayer.getSpecialSlotEquipment();
-        List<Integer> cardSlotEquipment = roomPlayer.getCardSlotEquipment();
+        List<Integer> specialSlotEquipment = roomPlayer.getEquippedSpecialSlots().toList();
+        List<Integer> cardSlotEquipment = roomPlayer.getEquippedCardSlots().toList();
 
         specialSlotEquipment.forEach(this::write);
         cardSlotEquipment.forEach(this::write);

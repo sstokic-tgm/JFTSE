@@ -1,11 +1,11 @@
 package com.jftse.emulator.server.core.handler.lobby.room;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.RoomType;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
@@ -19,10 +19,10 @@ public class RoomCreateQuickRequestPacketHandler implements PacketHandler<FTConn
     public void handle(FTConnection connection, CMSGRoomCreateQuick packet) {
         FTClient client = connection.getClient();
         // prevent multiple room creations, this might have to be adjusted into a "room join answer"
-        if (client != null && client.getActiveRoom() != null)
+        if (client.getActiveRoom() != null)
             return;
 
-        if (client == null)
+        if (!client.hasPlayer())
             return;
 
         if (packet.getRoomType() == RoomType.BATTLEMON) {
@@ -30,9 +30,7 @@ public class RoomCreateQuickRequestPacketHandler implements PacketHandler<FTConn
             return;
         }
 
-        Player player = client.getPlayer();
-        if (player == null)
-            return;
+        FTPlayer player = client.getPlayer();
 
         if (!client.getIsJoiningOrLeavingRoom().compareAndSet(false, true)) {
             return;
@@ -65,7 +63,7 @@ public class RoomCreateQuickRequestPacketHandler implements PacketHandler<FTConn
         room.setPrivate(false);
         room.setSkillFree(false);
         room.setQuickSlot(false);
-        room.setLevel(player.getLevel());
+        room.setLevel((byte) player.getLevel());
         room.setLevelRange((byte) -1);
         room.setBettingType('0');
         room.setBettingAmount(0);

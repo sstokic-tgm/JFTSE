@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.client.EquippedQuickSlots;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.event.GameEventBus;
 import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.room.GameSession;
@@ -19,7 +21,6 @@ import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.QuickSlotEquipment;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
@@ -35,6 +36,9 @@ import com.jftse.server.core.shared.packets.matchplay.CMSGPlayerUseSkill;
 import com.jftse.server.core.shared.packets.matchplay.SMSGPlayerUseSkill;
 import com.jftse.server.core.util.GameTime;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Log4j2
 @PacketId(CMSGPlayerUseSkill.PACKET_ID)
@@ -61,12 +65,11 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
     @Override
     public void handle(FTConnection connection, CMSGPlayerUseSkill anyoneUsesSkill) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getActiveGameSession() == null
-                || ftClient.getPlayer() == null || ftClient.getRoomPlayer() == null)
+        if (!ftClient.hasPlayer() || ftClient.getActiveGameSession() == null || ftClient.getRoomPlayer() == null)
             return;
 
         long skillUseTimestamp = GameTime.getGameTimeMS() + TIMESTAMP_DELTA;
-        Player player = ftClient.getPlayer();
+        FTPlayer player = ftClient.getPlayer();
 
         byte attackerPosition = anyoneUsesSkill.getAttackerPosition();
         byte targetPosition = anyoneUsesSkill.getTargetPosition();
@@ -120,7 +123,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
         });
     }
 
-    private boolean isQsUseValid(FTConnection connection, long skillUseTimestamp, Player player, Skill skill, SkillUse skillUse, MatchplayGame game, byte attackerPosition, CMSGPlayerUseSkill anyoneUsesSkill) {
+    private boolean isQsUseValid(FTConnection connection, long skillUseTimestamp, FTPlayer player, Skill skill, SkillUse skillUse, MatchplayGame game, byte attackerPosition, CMSGPlayerUseSkill anyoneUsesSkill) {
         PlayerBattleState playerBattleState;
         if (game instanceof MatchplayGuardianGame) {
             playerBattleState = ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
@@ -157,7 +160,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
                     gameLog.setContent(player.getId() + " used " + skill.getName() + " before cooldown has passed. QS cooldown: " + coolingTime + ", cooldown difference: " + diff);
                     gameLog = gameLogService.save(gameLog);
 
-                    Account account = authenticationService.findAccountById(player.getAccount().getId());
+                    Account account = authenticationService.findAccountById(player.getPlayer().getAccount().getId());
                     if (account != null) {
                         account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID);
                         account.setBanReason("gameLogId: " + gameLog.getId());
@@ -173,16 +176,17 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
         return true;
     }
 
-    private void handleQuickSlotItemUse(FTConnection connection, Player player, CMSGPlayerUseSkill playerUseSkill) {
-        Pocket pocket = player.getPocket();
+    private void handleQuickSlotItemUse(FTConnection connection, FTPlayer player, CMSGPlayerUseSkill playerUseSkill) {
+        Pocket pocket = pocketService.findById(player.getPocketId());
+        int slotIndex = playerUseSkill.getQuickSlotIndex();
 
-        QuickSlotEquipment quickSlotEquipment = player.getQuickSlotEquipment();
-        int itemId = switch (playerUseSkill.getQuickSlotIndex()) {
-            case 0 -> quickSlotEquipment.getSlot1();
-            case 1 -> quickSlotEquipment.getSlot2();
-            case 2 -> quickSlotEquipment.getSlot3();
-            case 3 -> quickSlotEquipment.getSlot4();
-            case 4 -> quickSlotEquipment.getSlot5();
+        EquippedQuickSlots equippedQuickSlots = player.getQuickSlots();
+        int itemId = switch (slotIndex) {
+            case 0 -> equippedQuickSlots.slot1();
+            case 1 -> equippedQuickSlots.slot2();
+            case 2 -> equippedQuickSlots.slot3();
+            case 3 -> equippedQuickSlots.slot4();
+            case 4 -> equippedQuickSlots.slot5();
             default -> -1;
         };
 
@@ -196,7 +200,12 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
                     playerPocketService.remove(playerPocket.getId());
                     pocketService.decrementPocketBelongings(pocket);
 
-                    quickSlotEquipmentService.updateQuickSlots(quickSlotEquipment, itemId);
+                    List<Integer> quickItemSlotsList = new ArrayList<>(equippedQuickSlots.toList());
+                    quickItemSlotsList.set(slotIndex, 0);
+
+                    Player dbPlayer = player.getPlayer();
+                    quickSlotEquipmentService.updateQuickSlots(dbPlayer, quickItemSlotsList);
+                    player.setQuickSlots(EquippedQuickSlots.of(dbPlayer.getQuickSlotEquipment().getId(), quickItemSlotsList));
 
                     S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(itemId);
                     connection.sendTCP(inventoryItemRemoveAnswerPacket);

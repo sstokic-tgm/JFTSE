@@ -10,21 +10,21 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.gameserver.GameServer;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.service.AuthTokenService;
 import com.jftse.server.core.service.AuthenticationService;
-import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.auth.*;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
+import javax.persistence.Query;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,13 +35,13 @@ public class AuthLoginDataPacketHandler implements PacketHandler<FTConnection, C
     private final AuthenticationService authenticationService;
     private final AuthTokenService authTokenService;
     private final PlayerService playerService;
-    private final PlayerPocketService playerPocketService;
+    private final JdbcUtil jdbcUtil;
 
     public AuthLoginDataPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
         playerService = ServiceManager.getInstance().getPlayerService();
-        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
+        jdbcUtil = AuthenticationManager.getInstance().getJdbcUtil();
     }
 
     @Override
@@ -82,17 +82,27 @@ public class AuthLoginDataPacketHandler implements PacketHandler<FTConnection, C
             connection.sendTCP(loginAnswerPacket);
 
             int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(client.getAccountId());
-
-            List<Player> playerList = playerService.findAllByAccount(account);
-            for (Player p : playerList) {
-                List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItems(p.getPocket());
-                final boolean nameChangeItemPresent = ppList.stream()
-                        .anyMatch(pp -> pp.getCategory().equals(EItemCategory.SPECIAL.getName()) && pp.getItemIndex() == 4);
-                if (nameChangeItemPresent && !p.getNameChangeAllowed()) {
-                    p.setNameChangeAllowed(true);
-                    p = playerService.save(p);
-                }
-            }
+            jdbcUtil.execute(em -> {
+                Query q = em.createQuery("""
+                        UPDATE Player p
+                            SET p.nameChangeAllowed = true
+                        WHERE p.account.id = :accountId
+                            AND p.alreadyCreated = true
+                            AND p.nameChangeAllowed = false
+                            AND EXISTS (
+                                SELECT 1
+                                FROM PlayerPocket pp
+                                WHERE pp.pocket = p.pocket
+                                    AND pp.category = :category
+                                    AND pp.itemIndex = :itemIndex
+                            )
+                        """);
+                q.setParameter("accountId", client.getAccountId());
+                q.setParameter("category", EItemCategory.SPECIAL.getName());
+                q.setParameter("itemIndex", 4);
+                q.executeUpdate();
+            });
+            List<Player> playerList = playerService.getPlayerListByAccountId(client.getAccountId());
 
             SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
                     .account(

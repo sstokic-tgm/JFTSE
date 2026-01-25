@@ -23,7 +23,7 @@ public class TutorialProgressRequestPacketHandler implements PacketHandler<FTCon
     @Override
     public void handle(FTConnection connection, CMSGTutorialProgress packet) {
         FTClient client = connection.getClient();
-        List<TutorialProgress> tutorialProgressList = tutorialService.findAllByPlayerIdFetched(client.getPlayer().getId());
+        List<TutorialProgress> tutorialProgressList = client.hasPlayer() ? tutorialService.findAllByPlayerId(client.getPlayer().getId()) : List.of();
 
         S2CTutorialProgressAnswerPacket tutorialProgressAnswerPacket = new S2CTutorialProgressAnswerPacket(tutorialProgressList);
         connection.sendTCP(tutorialProgressAnswerPacket);

@@ -14,7 +14,11 @@ public interface GiftService {
 
     List<Gift> findBySender(Player sender);
 
+    List<Gift> findWithPlayerBySender(Long senderId);
+
     List<Gift> findByReceiver(Player receiver);
+
+    List<Gift> findWithPlayerByReceiver(Long receiverId);
 
     long deleteBySender(Player sender);
 

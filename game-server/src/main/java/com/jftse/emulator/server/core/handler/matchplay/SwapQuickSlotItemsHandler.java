@@ -28,15 +28,14 @@ public class SwapQuickSlotItemsHandler implements PacketHandler<FTConnection, CM
     @Override
     public void handle(FTConnection connection, CMSGSwapSpell packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getActiveGameSession() == null
-                || ftClient.getActiveRoom() == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer() || ftClient.getActiveGameSession() == null || ftClient.getActiveRoom() == null )
             return;
 
         RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer == null)
             return;
 
-        Pocket pocket = pocketService.findById(roomPlayer.getPlayer().getPocket().getId());
+        Pocket pocket = pocketService.findById(roomPlayer.getPocketId());
         PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(21, EItemCategory.SPECIAL.getName(), pocket);
         if (playerPocket != null) {
             playerPocket = playerPocketService.decrementPocketItemCount(playerPocket);

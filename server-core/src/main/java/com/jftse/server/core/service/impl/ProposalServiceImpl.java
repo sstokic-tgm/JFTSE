@@ -13,35 +13,59 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ProposalServiceImpl implements ProposalService {
     private final ProposalRepository proposalRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Proposal save(Proposal proposal) {
         return proposalRepository.save(proposal);
     }
 
     @Override
+    @Transactional
     public void remove(Long proposalId) {
         proposalRepository.deleteById(proposalId);
     }
 
     @Override
-    public Proposal findById(Long id) { return proposalRepository.findById(id).orElse(null); }
+    @Transactional(readOnly = true)
+    public Proposal findById(Long id) {
+        return proposalRepository.findById(id).orElse(null);
+    }
 
     @Override
-    public List<Proposal> findBySender(Player sender) { return proposalRepository.findBySender(sender); }
+    @Transactional(readOnly = true)
+    public List<Proposal> findBySender(Player sender) {
+        return proposalRepository.findBySender(sender);
+    }
 
     @Override
-    public List<Proposal> findByReceiver(Player receiver) { return proposalRepository.findByReceiver(receiver); }
+    @Transactional(readOnly = true)
+    public List<Proposal> findWithPlayerBySender(Long playerId) {
+        return proposalRepository.findWithPlayerBySender(playerId);
+    }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Proposal> findByReceiver(Player receiver) {
+        return proposalRepository.findByReceiver(receiver);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Proposal> findWithPlayerByReceiver(Long playerId) {
+        return proposalRepository.findWithPlayerByReceiver(playerId);
+    }
+
+    @Override
+    @Transactional
     public long deleteBySender(Player sender) {
         return proposalRepository.deleteBySender(sender);
     }
 
     @Override
+    @Transactional
     public long deleteByReceiver(Player receiver) {
         return proposalRepository.deleteByReceiver(receiver);
     }

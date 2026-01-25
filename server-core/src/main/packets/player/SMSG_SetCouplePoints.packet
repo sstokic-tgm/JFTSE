@@ -1,0 +1,3 @@
+message SMSG_SetCouplePoints (0x252D) {
+    int32 amount = 1;
+}

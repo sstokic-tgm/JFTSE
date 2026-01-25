@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.chat.house;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.housing.Fish;
 import com.jftse.emulator.server.core.life.housing.FishManager;
 import com.jftse.emulator.server.core.life.housing.FishState;
@@ -13,7 +14,6 @@ import com.jftse.emulator.server.core.packets.chat.house.S2CHousingRewardItemPac
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
@@ -42,16 +42,16 @@ public class FishingEndHandler implements PacketHandler<FTConnection, CMSGFishin
     @Override
     public void handle(FTConnection connection, CMSGFishingEnd packet) {
         FTClient client = connection.getClient();
-        if (client == null)
+        if (!client.hasPlayer())
             return;
 
         Room room = client.getActiveRoom();
         RoomPlayer roomPlayer = client.getRoomPlayer();
-        Player player = client.getPlayer();
-        if (room == null || roomPlayer == null || player == null || !roomPlayer.getUsedRod().get())
+        FTPlayer player = client.getPlayer();
+        if (room == null || roomPlayer == null || !roomPlayer.getUsedRod().get())
             return;
 
-        Pocket pocket = player.getPocket();
+        Pocket pocket = pocketService.findById(player.getPocketId());
 
         roomPlayer.getUsedRod().set(false);
         roomPlayer.setBaitX(0.0f);

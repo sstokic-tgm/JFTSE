@@ -1,14 +1,13 @@
 package com.jftse.emulator.server.core.handler.enchant;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.ItemEnchant;
 import com.jftse.entities.database.model.item.ItemEnchantLevel;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.enchant.EnchantForge;
@@ -24,6 +23,7 @@ import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.shared.packets.enchant.CMSGEnchantRequest;
 import com.jftse.server.core.shared.packets.enchant.SMSGEnchantAnswer;
 import com.jftse.server.core.shared.packets.inventory.SMSGInventoryRemoveItem;
+import com.jftse.server.core.shared.packets.shop.SMSGSetMoney;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,13 +46,11 @@ public class ItemEnchantHandler implements PacketHandler<FTConnection, CMSGEncha
     @Override
     public void handle(FTConnection connection, CMSGEnchantRequest enchantRequestPacket) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player player = client.getPlayer();
-        Pocket pocket = player.getPocket();
-        if (pocket == null)
-            return;
+        FTPlayer player = client.getPlayer();
+        Pocket pocket = pocketService.findById(player.getPocketId());
 
         int itemPocketId = enchantRequestPacket.getItemPocketId();
         boolean isValidPlayerPocketId = enchantService.isValidPlayerPocketId(itemPocketId, pocket);
@@ -145,9 +143,14 @@ public class ItemEnchantHandler implements PacketHandler<FTConnection, CMSGEncha
         EnchantForge enchantForge = new EnchantForge();
         EnchantingItem enchantingItem = enchantForge.createEnchantingItem(itemJewel, itemEnchantLevel, grade != 1 ? currentEnchantLevel : 0);
 
-        player = playerService.setMoney(player, player.getGold() - costs);
+        int newGold = player.getGold() - costs;
+        player.syncGold(newGold);
+        playerService.setMoney(player.getPlayer(), newGold);
 
-        S2CShopMoneyAnswerPacket moneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
+        SMSGSetMoney moneyAnswerPacket = SMSGSetMoney.builder()
+                .ap(client.getAp().get())
+                .gold(player.getGold())
+                .build();
         connection.sendTCP(moneyAnswerPacket);
 
         consumeIngredients(connection, pocket, elementPocket);

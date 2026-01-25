@@ -1,13 +1,12 @@
 package com.jftse.emulator.server.core.packets.guild;
 
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class S2CGuildDataAnswerPacket extends Packet {
     public S2CGuildDataAnswerPacket(short guildStatus, Guild guild) {
@@ -32,7 +31,7 @@ public class S2CGuildDataAnswerPacket extends Packet {
 
             List<GuildMember> memberList = guild.getMemberList().stream()
                     .sorted(Comparator.comparing(GuildMember::getMemberRank).reversed())
-                    .collect(Collectors.toList());
+                    .toList();
 
             GuildMember clubMaster = memberList.stream()
                     .filter(gm -> gm.getMemberRank() == 3)
@@ -42,7 +41,7 @@ public class S2CGuildDataAnswerPacket extends Packet {
 
             List<GuildMember> subMasterList = memberList.stream()
                     .filter(gm -> gm.getMemberRank() == 2)
-                    .collect(Collectors.toList());
+                    .toList();
             this.write((byte) subMasterList.size());
             for (GuildMember subMaster : subMasterList)
                 this.write(subMaster.getPlayer().getName());
@@ -53,7 +52,7 @@ public class S2CGuildDataAnswerPacket extends Packet {
 
             List<GuildMember> reverseMemberList = memberList.stream()
                     .filter(GuildMember::getWaitingForApproval)
-                    .collect(Collectors.toList());
+                    .toList();
             this.write((byte) reverseMemberList.size());
 
             this.write(guild.getLevel());

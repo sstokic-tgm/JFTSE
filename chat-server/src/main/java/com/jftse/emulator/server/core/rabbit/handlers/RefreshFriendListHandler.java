@@ -50,7 +50,9 @@ public class RefreshFriendListHandler extends AbstractMessageHandler<RefreshFrie
         AtomicInteger notifyCount = new AtomicInteger();
         List<Friend> friends = friendService.findByPlayer(player);
         friends.forEach(x -> {
-            List<Friend> friendList = socialService.getFriendList(x.getFriend(), EFriendshipState.Friends);
+            List<Player> friendList = socialService.getFriendList(x.getFriend(), EFriendshipState.Friends).stream()
+                    .map(Friend::getFriend)
+                    .toList();
             S2CFriendsListAnswerPacket friendListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
             FTConnection friendConnection = gameManager.getConnectionByPlayerId(x.getFriend().getId());
             if (friendConnection != null) {

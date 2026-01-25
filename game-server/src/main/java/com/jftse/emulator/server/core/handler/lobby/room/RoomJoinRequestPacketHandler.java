@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -9,20 +10,15 @@ import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
-import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.guild.GuildMember;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
-import com.jftse.server.core.service.CardSlotEquipmentService;
-import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.SocialService;
-import com.jftse.server.core.service.SpecialSlotEquipmentService;
 import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomJoin;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomCloseSlot;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomJoin;
@@ -33,24 +29,16 @@ import java.util.stream.IntStream;
 
 @PacketId(CMSGRoomJoin.PACKET_ID)
 public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection, CMSGRoomJoin> {
-    private final GuildMemberService guildMemberService;
-    private final ClothEquipmentServiceImpl clothEquipmentService;
-    private final SpecialSlotEquipmentService specialSlotEquipmentService;
-    private final CardSlotEquipmentService cardSlotEquipmentService;
     private final SocialService socialService;
 
     public RoomJoinRequestPacketHandler() {
-        guildMemberService = ServiceManager.getInstance().getGuildMemberService();
-        clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
-        specialSlotEquipmentService = ServiceManager.getInstance().getSpecialSlotEquipmentService();
-        cardSlotEquipmentService = ServiceManager.getInstance().getCardSlotEquipmentService();
         socialService = ServiceManager.getInstance().getSocialService();
     }
 
     @Override
     public void handle(FTConnection connection, CMSGRoomJoin roomJoinRequestPacket) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null) {
+        if (!ftClient.hasPlayer()) {
             SMSGRoomJoin answer = SMSGRoomJoin.builder()
                     .result((char) -10)
                     .roomType((byte) 0)
@@ -103,7 +91,7 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             return;
         }
 
-        Player activePlayer = ftClient.getPlayer();
+        FTPlayer activePlayer = ftClient.getPlayer();
         if (!ftClient.isGameMaster() && room.isPrivate() && (StringUtils.isEmpty(roomJoinRequestPacket.getPassword()) || !roomJoinRequestPacket.getPassword().equals(room.getPassword()))) {
             SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
                     .result((char) -5)
@@ -126,7 +114,7 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             anyPositionAvailable = room.getPositions().stream().anyMatch(x -> x == RoomPositionState.Free);
         }
 
-        if (!anyPositionAvailable) {
+        if (!anyPositionAvailable && !ftClient.isGameMaster()) {
             SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
                     .result((char) -10)
                     .roomType((byte) 0)
@@ -259,27 +247,17 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             room.getPositions().set(newPosition, RoomPositionState.InUse);
         }
 
-        RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setPlayerId(activePlayer.getId());
+        Friend couple = socialService.getRelationshipWithFriend(activePlayer.getPlayerRef());
+        if (couple != null) {
+            activePlayer.setCoupleId(couple.getFriend().getId());
+            activePlayer.setCoupleName(couple.getFriend().getName());
+        }
 
-        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
-        Friend couple = socialService.getRelationship(activePlayer);
-        ClothEquipment clothEquipment = clothEquipmentService.findClothEquipmentById(roomPlayer.getPlayer().getClothEquipment().getId());
-        SpecialSlotEquipment specialSlotEquipment = specialSlotEquipmentService.findById(roomPlayer.getPlayer().getSpecialSlotEquipment().getId());
-        CardSlotEquipment cardSlotEquipment = cardSlotEquipmentService.findById(roomPlayer.getPlayer().getCardSlotEquipment().getId());
-        StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(roomPlayer.getPlayer());
-
-        roomPlayer.setGuildMemberId(guildMember == null ? null : guildMember.getId());
-        roomPlayer.setCoupleId(couple == null ? null : couple.getId());
-        roomPlayer.setClothEquipmentId(clothEquipment.getId());
-        roomPlayer.setSpecialSlotEquipmentId(specialSlotEquipment.getId());
-        roomPlayer.setCardSlotEquipmentId(cardSlotEquipment.getId());
-        roomPlayer.setStatusPointsAddedDto(statusPointsAddedDto);
+        RoomPlayer roomPlayer = new RoomPlayer(activePlayer);
+        roomPlayer.setGameMaster(ftClient.isGameMaster());
         roomPlayer.setPosition((short) newPosition);
         roomPlayer.setMaster(false);
         roomPlayer.setFitting(false);
-
-        room.getRoomPlayerList().add(roomPlayer);
 
         ftClient.setActiveRoom(room);
         if (isTownSquare) {
@@ -287,6 +265,8 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
         } else {
             ftClient.setInLobby(false);
         }
+
+        room.getRoomPlayerList().add(roomPlayer);
 
         handleRoomUponJoin(connection, room, false);
 
@@ -336,7 +316,7 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(rp, isTownSquare ? rp.getLastX() : 0.0f, isTownSquare ? rp.getLastY() : 0.0f, 0.0f, 0.0f, rp.getLastMapLayer());
             if (!isTownSquare) {
                 GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
-                        .filter(c -> !c.getActivePlayerId().equals(client.getActivePlayerId()))
+                        .filter(c -> c.getPlayer().getId() != client.getPlayer().getId())
                         .forEach(c -> c.getConnection().sendTCP(roomPlayerInformationPacket));
             } else {
                 GameManager.getInstance().sendPacketToAllClientsInSameRoom(roomPlayerInformationPacket, client.getConnection());

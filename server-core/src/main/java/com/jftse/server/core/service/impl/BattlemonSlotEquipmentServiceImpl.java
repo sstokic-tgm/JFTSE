@@ -15,22 +15,24 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class BattlemonSlotEquipmentServiceImpl implements BattlemonSlotEquipmentService {
     private final BattlemonSlotEquipmentRepository battlemonSlotEquipmentRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public BattlemonSlotEquipment save(BattlemonSlotEquipment battlemonSlotEquipment) {
         return battlemonSlotEquipmentRepository.save(battlemonSlotEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BattlemonSlotEquipment findById(Long id) {
         Optional<BattlemonSlotEquipment> battlemonSlotEquipment = battlemonSlotEquipmentRepository.findById(id);
         return battlemonSlotEquipment.orElse(null);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateBattlemonSlots(BattlemonSlotEquipment battlemonSlotEquipment, Integer battlemonSlotId) {
         battlemonSlotEquipment = findById(battlemonSlotEquipment.getId());
 
@@ -43,6 +45,7 @@ public class BattlemonSlotEquipmentServiceImpl implements BattlemonSlotEquipment
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateBattlemonSlots(BattlemonSlotEquipment battlemonSlotEquipment, List<Integer> battlemonSlotItems) {
         battlemonSlotEquipment = findById(battlemonSlotEquipment.getId());
 
@@ -53,6 +56,7 @@ public class BattlemonSlotEquipmentServiceImpl implements BattlemonSlotEquipment
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Integer> getEquippedBattlemonSlots(Player player) {
         List<Integer> result = new ArrayList<>();
 

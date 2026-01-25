@@ -12,46 +12,61 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class PocketServiceImpl implements PocketService {
     private final PocketRepository pocketRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Pocket save(Pocket pocket) {
         return pocketRepository.save(pocket);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Pocket findById(Long pocketId) {
         Optional<Pocket> pocket = pocketRepository.findById(pocketId);
         return pocket.orElse(null);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Pocket incrementPocketBelongings(Pocket pocket) {
-        Optional<Pocket> tmpPocket = pocketRepository.findById(pocket.getId());
+        return incrementPocketBelongings(pocket.getId());
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Pocket incrementPocketBelongings(Long pocketId) {
+        Optional<Pocket> tmpPocket = pocketRepository.findById(pocketId);
         if (tmpPocket.isPresent()) {
-            pocket = tmpPocket.get();
+            Pocket pocket = tmpPocket.get();
 
             pocket.setBelongings(pocket.getBelongings() + 1);
             return save(pocket);
         }
         else {
-            return pocket;
+            return null;
         }
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Pocket decrementPocketBelongings(Pocket pocket) {
-        Optional<Pocket> tmpPocket = pocketRepository.findById(pocket.getId());
+        return decrementPocketBelongings(pocket.getId());
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Pocket decrementPocketBelongings(Long pocketId) {
+        Optional<Pocket> tmpPocket = pocketRepository.findById(pocketId);
         if (tmpPocket.isPresent()) {
-            pocket = tmpPocket.get();
+            Pocket pocket = tmpPocket.get();
 
             pocket.setBelongings(pocket.getBelongings() - 1);
             return save(pocket);
         }
         else {
-            return pocket;
+            return null;
         }
     }
 }

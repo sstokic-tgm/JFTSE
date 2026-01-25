@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -11,12 +12,12 @@ import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePa
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemUseType;
+import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.shared.packets.matchplay.CMSGPickupItemReward;
 import com.jftse.server.core.shared.packets.matchplay.SMSGPickupItemReward;
 import com.jftse.server.core.thread.ThreadManager;
@@ -28,15 +29,21 @@ import java.util.concurrent.TimeUnit;
 
 @PacketId(CMSGPickupItemReward.PACKET_ID)
 public class MatchplayItemRewardPickHandler implements PacketHandler<FTConnection, CMSGPickupItemReward> {
+    private final PocketService pocketService;
+
+    public MatchplayItemRewardPickHandler() {
+        pocketService = ServiceManager.getInstance().getPocketService();
+    }
+
     @Override
     public void handle(FTConnection connection, CMSGPickupItemReward packet) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null) {
-            connection.close();
+        if (!client.hasPlayer()) {
+            connection.close(); // ??
             return;
         }
 
-        Player player = client.getPlayer();
+        FTPlayer player = client.getPlayer();
         Room room = client.getActiveRoom();
         RoomPlayer roomPlayer = client.getRoomPlayer();
         if (room == null  || roomPlayer == null) { // shouldn't happen
@@ -73,7 +80,7 @@ public class MatchplayItemRewardPickHandler implements PacketHandler<FTConnectio
                     if (product == null)
                         return;
 
-                    Pocket pocket = player.getPocket();
+                    Pocket pocket = pocketService.findById(player.getPocketId());
                     PlayerPocket playerPocket = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
                     boolean existingItem = false;
 
@@ -101,10 +108,7 @@ public class MatchplayItemRewardPickHandler implements PacketHandler<FTConnectio
 
                     ServiceManager.getInstance().getPlayerPocketService().save(playerPocket);
                     if (!existingItem)
-                        pocket = ServiceManager.getInstance().getPocketService().incrementPocketBelongings(pocket);
-
-                    player.setPocket(pocket);
-                    client.savePlayer(player);
+                        ServiceManager.getInstance().getPocketService().incrementPocketBelongings(pocket);
 
                     if (!existingItem) {
                         S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(List.of(playerPocket));

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.item;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -11,7 +12,6 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.battle.Skill;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.AuthenticationService;
@@ -44,7 +44,7 @@ public class ItemSettingsHandler implements PacketHandler<FTConnection, CMSGItem
     @Override
     public void handle(FTConnection connection, CMSGItemSettings packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
         GameSession gameSession = ftClient.getActiveGameSession();
@@ -53,7 +53,7 @@ public class ItemSettingsHandler implements PacketHandler<FTConnection, CMSGItem
 
         Integer gameSessionId = ftClient.getGameSessionId();
 
-        Player player = ftClient.getPlayer();
+        FTPlayer player = ftClient.getPlayer();
 
         final Map<Skill, ItemSetting> mapOfNonMatchingSkills = new HashMap<>();
         final List<ItemSetting> itemSettings = packet.getItemSettings();
@@ -100,7 +100,8 @@ public class ItemSettingsHandler implements PacketHandler<FTConnection, CMSGItem
         S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
         connection.sendTCP(msgPacket);
 
-        Account account = authenticationService.findAccountById(player.getAccount().getId());
+        Account account = authenticationService.findAccountById(ftClient.getAccountId());
+        ftClient.setAccountStatus((int) AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID);
         if (account != null) {
             account.setStatus((int) AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID);
             account.setBanReason("gameLogId: " + gameLog.getId());

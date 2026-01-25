@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
@@ -32,31 +33,32 @@ public class SendMessageRequestHandler implements PacketHandler<FTConnection, CM
     @Override
     public void handle(FTConnection connection, CMSGSendMessage packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
+        FTPlayer player = ftClient.getPlayer();
         Player receiver = playerService.findByName(packet.getReceiverName());
         if (receiver != null) {
             List<Message> messages = messageService.findByReceiver(receiver);
-            List<Message> senderMessages = messageService.findBySender(ftClient.getPlayer());
+            List<Message> senderMessages = messageService.findBySender(player.getPlayerRef());
             if (messages.size() > 128 || senderMessages.size() > 128) {
                 return;
             }
 
             Message message = new Message();
             message.setReceiver(receiver);
-            message.setSender(ftClient.getPlayer());
+            message.setSender(player.getPlayerRef());
             message.setMessage(packet.getMessage());
             message.setSeen(false);
             messageService.save(message);
 
-            S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
+            S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message, player.getName());
 
             PacketMessage packetMessage = PacketMessage.builder()
                     .receivingPlayerId(receiver.getId())
                     .packet(s2CReceivedMessageNotificationPacket)
                     .build();
-            rProducerService.send(packetMessage, "game.messenger.message chat.messenger.message", ftClient.getPlayer().getName() + "(ChatServer)");
+            rProducerService.send(packetMessage, "game.messenger.message chat.messenger.message", player.getName() + "(ChatServer)");
         }
     }
 }

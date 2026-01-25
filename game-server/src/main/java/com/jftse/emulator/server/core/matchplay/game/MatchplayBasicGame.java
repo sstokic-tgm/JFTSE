@@ -17,7 +17,6 @@ import com.jftse.emulator.server.core.matchplay.handler.MatchplayBasicModeHandle
 import com.jftse.entities.database.model.SRelationships;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.map.SMaps;
-import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import lombok.Getter;
@@ -357,7 +356,7 @@ public class MatchplayBasicGame extends MatchplayGame {
                 int rewardGoldSimple = expGoldBonusSimple.calculateGold();
 
                 // add house bonus
-                ExpGoldBonus expGoldBonus = new BasicHouseBonus(expGoldBonusSimple, rp.getPlayer().getAccount().getId());
+                ExpGoldBonus expGoldBonus = new BasicHouseBonus(expGoldBonusSimple, rp.getAccountId());
                 int rewardExp = expGoldBonus.calculateExp();
                 int rewardGold = expGoldBonus.calculateGold();
 
@@ -396,16 +395,15 @@ public class MatchplayBasicGame extends MatchplayGame {
                 playerReward.setGold(rewardGold);
 
                 // add couple bonus
-                Friend friend = rp.getCouple();
-                if (friend != null) {
+                Long coupleId = rp.getCoupleId();
+                if (coupleId != null) {
                     final boolean hasCoupleInTeam = roomPlayers.stream()
                             .filter(roomPlayer -> roomPlayer.getPosition() != rp.getPosition())
                             .anyMatch(roomPlayer -> {
                                 final boolean isInRedTeam = this.isRedTeam(roomPlayer.getPosition());
                                 final boolean isInBlueTeam = this.isBlueTeam(roomPlayer.getPosition());
                                 if (isInRedTeam == isCurrentPlayerInRedTeam || isInBlueTeam == !isCurrentPlayerInRedTeam) {
-                                    Friend f = roomPlayer.getCouple();
-                                    return f != null && f.getFriend().getId().equals(friend.getPlayer().getId()) && f.getEFriendshipState() == friend.getEFriendshipState();
+                                    return coupleId.equals(roomPlayer.getPlayerId());
                                 }
                                 return false;
                             });

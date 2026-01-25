@@ -28,7 +28,16 @@ public interface PlayerService {
 
     Player findById(Long playerId);
 
+    Player getPlayerRef(Long playerId);
+
     Player findByIdFetched(Long playerId);
+
+    Player findWithEquipmentById(Long playerId);
+    Player findWithAccountById(Long playerId);
+    Player findWithPocketById(Long playerId);
+    Player findWithStatisticById(Long playerId);
+
+    List<Player> getPlayerListByAccountId(Long accountId);
 
     Player findByName(String name);
 
@@ -39,8 +48,6 @@ public interface PlayerService {
     Player setMoney(Player player, int gold);
 
     void remove(Long playerId);
-
-    boolean isStatusPointHack(C2SPlayerStatusPointChangePacket playerStatusPointChangePacket, Player player);
 
     boolean isStatusPointHack(CMSGPlayerCreate playerCreatePacket, Player player);
 

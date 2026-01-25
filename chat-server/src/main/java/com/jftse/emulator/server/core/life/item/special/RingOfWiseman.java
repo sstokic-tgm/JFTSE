@@ -1,5 +1,7 @@
 package com.jftse.emulator.server.core.life.item.special;
 
+import com.jftse.emulator.server.core.client.EquippedSpecialSlots;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
@@ -24,6 +26,8 @@ public class RingOfWiseman extends BaseItem {
     private final PlayerService playerService;
     private final SpecialSlotEquipmentService specialSlotEquipmentService;
 
+    private FTPlayer player;
+
     public RingOfWiseman(int itemIndex, String name, String category) {
         super(itemIndex, name, category);
 
@@ -34,31 +38,23 @@ public class RingOfWiseman extends BaseItem {
     }
 
     @Override
-    public boolean processPlayer(Player player) {
-        player = playerService.findById(player.getId());
-        if (player == null)
-            return false;
-
+    public boolean processPlayer(FTPlayer player) {
         this.localPlayerId = player.getId();
+        this.player = player;
 
-        log.info("Ring of Wiseman, now trying to process player, PlayerId is: " + localPlayerId);
         return true;
     }
 
     @Override
-    public boolean processPocket(Pocket pocket) {
-        pocket = pocketService.findById(pocket.getId());
+    public boolean processPocket(Long pocketId) {
+        Pocket pocket = pocketService.findById(pocketId);
         if (pocket == null)
             return false;
 
-        List<Integer> playersSpecialSlotsToSet = new ArrayList<>();
-
-        Player player = playerService.findById(localPlayerId);
-        List<Integer> playersSpecialSlots = specialSlotEquipmentService.getEquippedSpecialSlots(player);
-        int i = 1;
-        for (Integer idSpecialSlot : playersSpecialSlots) {
-            log.info("processing players special slots " + i + " ... id on that slot is: " + idSpecialSlot);
-            i++;
+        EquippedSpecialSlots equippedSpecialSlots = this.player.getSpecialSlots();
+        if (equippedSpecialSlots == null) {
+            Player player = playerService.findWithEquipmentById(this.localPlayerId);
+            equippedSpecialSlots = EquippedSpecialSlots.of(player);
         }
 
         PlayerPocket playerPocketROWiseman = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(this.getItemIndex(), this.getCategory(), pocket);
@@ -68,31 +64,28 @@ public class RingOfWiseman extends BaseItem {
         }
 
         int idOfWisemanRingInPlayersPocket = playerPocketROWiseman.getId().intValue();
-        log.info("Ring of Wiseman in players pocket has id: " + idOfWisemanRingInPlayersPocket + " and item index: " + playerPocketROWiseman.getItemIndex());
-        boolean playerSpecialSlotHasWisemanRingEquipped = playersSpecialSlots.contains(idOfWisemanRingInPlayersPocket);
+        int wisemanRingIdInSpecialSlot = equippedSpecialSlots.hasItem(idOfWisemanRingInPlayersPocket);
 
-        if (!playerSpecialSlotHasWisemanRingEquipped){
-            log.info("Ring of Wiseman is not equipped in players slot");
+        if (wisemanRingIdInSpecialSlot == 0) {
             return false;
         }
 
-        log.info("Ring of Wiseman, itemCount before: " + playerPocketROWiseman.getItemCount());
         int itemCount = playerPocketROWiseman.getItemCount() - 1;
         if (itemCount <= 0) {
             playerPocketService.remove(playerPocketROWiseman.getId());
             pocketService.decrementPocketBelongings(pocket);
 
-            for (Integer playersSpecialSlot : playersSpecialSlots) {
-                if (playersSpecialSlot == playerPocketROWiseman.getId().intValue()) {
-                    log.info("Special Slot value 0 added");
-                    playersSpecialSlotsToSet.add(0);
-                } else {
-                    log.info("Special Slot value: " + playersSpecialSlot + " added");
-                    playersSpecialSlotsToSet.add(playersSpecialSlot);
-                }
+            int slotIndex = equippedSpecialSlots.getSlotIndex(idOfWisemanRingInPlayersPocket);
+            List<Integer> specialSlotsList = new ArrayList<>(equippedSpecialSlots.toList());
+            if (slotIndex > 0) {
+                specialSlotsList.set(slotIndex - 1, 0);
             }
-            specialSlotEquipmentService.updateSpecialSlots(player, playersSpecialSlotsToSet);
-            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(playersSpecialSlotsToSet);
+
+            Player player = this.player.getPlayer();
+            specialSlotEquipmentService.updateSpecialSlots(player, specialSlotsList);
+            this.player.setSpecialSlots(EquippedSpecialSlots.of(player.getSpecialSlotEquipment().getId(), specialSlotsList));
+
+            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(specialSlotsList);
             packetsToSend.add(localPlayerId, inventoryWearSpecialAnswerPacket);
 
             S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(Math.toIntExact(playerPocketROWiseman.getId()));
@@ -103,12 +96,8 @@ public class RingOfWiseman extends BaseItem {
 
             S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocketROWiseman);
             packetsToSend.add(localPlayerId, inventoryItemCountPacket);
-
-            specialSlotEquipmentService.updateSpecialSlots(player, playersSpecialSlots);
-            S2CInventoryWearSpecialAnswerPacket inventoryWearSpecialAnswerPacket = new S2CInventoryWearSpecialAnswerPacket(playersSpecialSlots);
-            packetsToSend.add(localPlayerId, inventoryWearSpecialAnswerPacket);
         }
-        log.info("Ring of Wiseman, itemCount now: " + itemCount);
+
         return true;
     }
 }

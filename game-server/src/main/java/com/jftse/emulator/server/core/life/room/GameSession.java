@@ -60,7 +60,7 @@ public class GameSession {
 
     public FTClient getClientByPlayerId(long playerId) {
         return clients.stream()
-                .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerId))
+                .filter(c -> c.hasPlayer() && c.getPlayer().getId() == playerId)
                 .findFirst()
                 .orElse(null);
     }

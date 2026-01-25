@@ -9,11 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.function.Function;
 
 @Getter
 @Service
 @Log4j2
-@Transactional(isolation = Isolation.SERIALIZABLE)
+@Transactional(isolation = Isolation.READ_COMMITTED)
 public class JdbcUtil {
     @PersistenceContext
     private EntityManager entityManager;
@@ -29,5 +30,9 @@ public class JdbcUtil {
 
     public void execute(Operation operation) {
         operation.doInTransaction(entityManager);
+    }
+
+    public <T> T execute(Function<EntityManager, T> function) {
+        return function.apply(entityManager);
     }
 }

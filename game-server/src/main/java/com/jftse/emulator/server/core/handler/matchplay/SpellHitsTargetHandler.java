@@ -71,8 +71,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
     @Override
     public void handle(FTConnection connection, CMSGSpellHitsTarget spellHitsTarget) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getActiveGameSession() == null
-                || ftClient.getActiveRoom() == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer() || ftClient.getActiveGameSession() == null || ftClient.getActiveRoom() == null)
             return;
 
         GameSession gameSession = ftClient.getActiveGameSession();

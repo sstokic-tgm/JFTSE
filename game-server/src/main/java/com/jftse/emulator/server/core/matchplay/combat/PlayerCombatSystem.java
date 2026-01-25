@@ -7,7 +7,6 @@ import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.entities.database.model.battle.Skill;
-import com.jftse.entities.database.model.battle.WillDamage;
 import com.jftse.server.core.item.EElementalProperty;
 import com.jftse.server.core.matchplay.Elementable;
 import com.jftse.server.core.matchplay.battle.BattleState;

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.chat;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.command.CommandManager;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -7,7 +8,6 @@ import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.chat.CMSGChatMessageRoom;
@@ -22,7 +22,11 @@ public class ChatMessageRoomPacketHandler implements PacketHandler<FTConnection,
         if (room == null)
             return;
 
-        final Player player = client.getPlayer();
+        if (!client.hasPlayer()) {
+            return;
+        }
+
+        final FTPlayer player = client.getPlayer();
         final RoomPlayer roomPlayer = client.getRoomPlayer();
 
         boolean playerInSecretGmSlot = roomPlayer != null && roomPlayer.getPosition() == MiscConstants.InvisibleGmSlot;
@@ -50,7 +54,7 @@ public class ChatMessageRoomPacketHandler implements PacketHandler<FTConnection,
                     continue;
 
                 boolean playerCanSeeMessage = areInSameTeam(senderPos, rp.getPosition()) || rp.getPosition() == MiscConstants.InvisibleGmSlot;
-                if (c.getPlayer() != null && c.getPlayer().getId().equals(rp.getPlayerId()) && playerCanSeeMessage) {
+                if (c.hasPlayer() && rp.getPlayerId() == c.getPlayer().getId() && playerCanSeeMessage) {
                     c.getConnection().sendTCP(chatRoomMessage);
                 }
             }

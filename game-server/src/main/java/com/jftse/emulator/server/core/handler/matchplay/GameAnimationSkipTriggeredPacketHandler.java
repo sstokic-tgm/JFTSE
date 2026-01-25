@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.life.event.GameEventBus;
 import com.jftse.emulator.server.core.life.event.GameEventType;
@@ -12,13 +13,13 @@ import com.jftse.emulator.server.core.packets.matchplay.S2CGameDisplayPlayerStat
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameSetNameColorAndRemoveBlackBar;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.matchplay.CMSGSkipped;
 import com.jftse.server.core.shared.packets.matchplay.SMSGSkipped;
 import com.jftse.server.core.thread.ThreadManager;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -27,8 +28,7 @@ public class GameAnimationSkipTriggeredPacketHandler implements PacketHandler<FT
     @Override
     public void handle(FTConnection connection, CMSGSkipped packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getActiveRoom() == null
-                || ftClient.getPlayer() == null || ftClient.getActiveGameSession() == null)
+        if (!ftClient.hasPlayer() || ftClient.getActiveRoom() == null || ftClient.getActiveGameSession() == null)
             return;
 
         Room room = ftClient.getActiveRoom();
@@ -47,10 +47,10 @@ public class GameAnimationSkipTriggeredPacketHandler implements PacketHandler<FT
             return;
         }
 
-        Player player = ftClient.getPlayer();
+        FTPlayer player = ftClient.getPlayer();
 
         Optional<RoomPlayer> roomPlayer = room.getRoomPlayerList().stream()
-                .filter(x -> x.getPlayerId().equals(player.getId()))
+                .filter(x -> x.getPlayerId() == player.getId())
                 .findFirst();
 
         if (roomPlayer.isPresent()) {
@@ -65,7 +65,7 @@ public class GameAnimationSkipTriggeredPacketHandler implements PacketHandler<FT
 
             GameEventBus.call(GameEventType.MP_GAME_ANIM_SKIP_TRIGGERED, ftClient, room, roomPlayer.get());
 
-            S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(room);
+            S2CGameDisplayPlayerStatsPacket playerStatsPacket = new S2CGameDisplayPlayerStatsPacket(new ArrayList<>(room.getRoomPlayerList()), room.getMode());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(playerStatsPacket, ftClient.getConnection());
 
             ThreadManager.getInstance().schedule(() -> {

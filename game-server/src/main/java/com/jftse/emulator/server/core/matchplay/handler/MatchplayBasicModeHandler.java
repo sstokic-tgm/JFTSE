@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.matchplay.handler;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.client.PlayerStatisticView;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.constants.ServeType;
@@ -33,12 +35,8 @@ import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.map.SMaps;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.player.PlayerStatistic;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
-import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.constants.GameMode;
-import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
@@ -60,26 +58,18 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
     private final EventHandler eventHandler;
     private final GameLogService gameLogService;
     private final LevelService levelService;
-    private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
-    private final ClothEquipmentService clothEquipmentService;
-    private final ProductService productService;
     private final MapService mapService;
-    private final RProducerService rProducerService;
 
     public MatchplayBasicModeHandler(MatchplayBasicGame game) {
         this.game = game;
         this.eventHandler = GameManager.getInstance().getEventHandler();
         this.gameLogService = ServiceManager.getInstance().getGameLogService();
         this.levelService = ServiceManager.getInstance().getLevelService();
-        this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
-        this.clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
-        this.productService = ServiceManager.getInstance().getProductService();
         this.mapService = ServiceManager.getInstance().getMapService();
-        this.rProducerService = RProducerService.getInstance();
     }
 
     @Override
@@ -144,7 +134,10 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
 
         MatchplayReward matchplayReward = game.getMatchRewards();
         ConcurrentLinkedDeque<FTClient> clients = gameSession.getClients();
-        final List<Player> playerList = activeRoom.getRoomPlayerList().stream().map(RoomPlayer::getPlayer).collect(Collectors.toList());
+        List<FTPlayer> playerList = clients.stream()
+                .filter(FTClient::hasPlayer)
+                .map(FTClient::getPlayer)
+                .collect(Collectors.toList());
 
         game.addBonusesToRewards(activeRoom.getRoomPlayerList(), matchplayReward.getPlayerRewards());
 
@@ -153,6 +146,9 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         List<MatchFinishedMessage.PlayerDto> playerDtoList = new ArrayList<>();
 
         for (final FTClient client : clients) {
+            if (!client.hasPlayer())
+                continue;
+
             RoomPlayer rp = client.getRoomPlayer();
             if (rp == null)
                 continue;
@@ -160,7 +156,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
             final boolean isActivePlayer = rp.getPosition() < 4;
             final boolean isCurrentPlayerInRedTeam = game.isRedTeam(rp.getPosition());
             if (isActivePlayer) {
-                gameLogContent.append(isCurrentPlayerInRedTeam ? "red " : "blue ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
+                gameLogContent.append(isCurrentPlayerInRedTeam ? "red " : "blue ").append(rp.getName()).append(" acc: ").append(rp.getAccountId()).append("; ");
 
                 boolean wonGame = (isCurrentPlayerInRedTeam && game.getSetsRedTeam().get() == 2) || (!isCurrentPlayerInRedTeam && game.getSetsBlueTeam().get() == 2);
 
@@ -169,36 +165,33 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                     playerReward = new PlayerReward(rp.getPosition());
                 }
 
-                Player player = rp.getPlayer();
+                FTPlayer player = client.getPlayer();
 
                 playerDtoList.add(new MatchFinishedMessage.PlayerDto(player.getName(), isCurrentPlayerInRedTeam ? "red" : "blue"));
 
                 List<BaseItem> ringItemList = new ArrayList<>();
                 if (!rp.isRingOfWisemanEquipped()) {
                     if (rp.isRingOfExpEquipped()) {
-                        final PlayerPocket pp = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(1, EItemCategory.SPECIAL.getName(), player.getPocket());
-                        RingOfExp ringOfExp = (RingOfExp) ItemFactory.getItem(pp.getId(), player.getPocket());
+                        RingOfExp ringOfExp = (RingOfExp) ItemFactory.getItem(rp.getPpIdRingExp(), player.getPocketId());
                         if (ringOfExp != null) {
                             ringItemList.add(ringOfExp);
                         }
                     }
                     if (rp.isRingOfGoldEquipped()) {
-                        final PlayerPocket pp = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(2, EItemCategory.SPECIAL.getName(), player.getPocket());
-                        RingOfGold ringOfGold = (RingOfGold) ItemFactory.getItem(pp.getId(), player.getPocket());
+                        RingOfGold ringOfGold = (RingOfGold) ItemFactory.getItem(rp.getPpIdRingGold(), player.getPocketId());
                         if (ringOfGold != null) {
                             ringItemList.add(ringOfGold);
                         }
                     }
                 } else {
-                    final PlayerPocket pp = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(3, EItemCategory.SPECIAL.getName(), player.getPocket());
-                    RingOfWiseman ringOfWiseman = (RingOfWiseman) ItemFactory.getItem(pp.getId(), player.getPocket());
+                    RingOfWiseman ringOfWiseman = (RingOfWiseman) ItemFactory.getItem(rp.getPpIdRingWiseman(), player.getPocketId());
                     if (ringOfWiseman != null) {
                         ringItemList.add(ringOfWiseman);
                     }
                 }
 
                 for (BaseItem ring : ringItemList) {
-                    if (ring.processPlayer(player) && ring.processPocket(player.getPocket())) {
+                    if (ring.processPlayer(player) && ring.processPocket(player.getPocketId())) {
                         ring.getPacketsToSend().forEach((playerId, packets) -> {
                             final FTConnection connectionByPlayerId = GameManager.getInstance().getConnectionByPlayerId(playerId);
                             if (connectionByPlayerId != null)
@@ -207,17 +200,16 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                     }
                 }
 
-                final byte oldLevel = player.getLevel();
-                final byte level = levelService.getLevel(playerReward.getExp(), player.getExpPoints(), oldLevel);
+                final int oldLevel = player.getLevel();
+                final int level = levelService.getLevel(playerReward.getExp(), player.getExpPoints(), (byte) oldLevel);
                 if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
-                    player.setExpPoints(player.getExpPoints() + playerReward.getExp());
-                player.setGold(player.getGold() + playerReward.getGold());
-                player = levelService.setNewLevelStatusPoints(level, player);
+                    player.syncExpPoints(player.getExpPoints() + playerReward.getExp());
+                player.syncGold(player.getGold() + playerReward.getGold());
+                player.syncCouplePoints(player.getCouplePoints() + playerReward.getCouplePoints());
+                levelService.setNewLevelStatusPoints((byte) level, player.getPlayer());
+                player.syncLevel(level);
 
-                player.setCouplePoints(player.getCouplePoints() + playerReward.getCouplePoints());
-                client.savePlayer(player);
-
-                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatistic().getId());
+                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatisticId());
                 if (wonGame) {
                     playerStatistic.setBasicRecordWin(playerStatistic.getBasicRecordWin() + 1);
 
@@ -241,29 +233,24 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 playerStatistic.setBasicRP(Math.max(playerNewRating, 0));
 
                 playerStatistic = playerStatisticService.save(playerStatistic);
-
-                player.setPlayerStatistic(playerStatistic);
-                client.savePlayer(player);
+                player.setPlayerStatistic(PlayerStatisticView.fromEntity(playerStatistic));
 
                 rp.setReady(false);
-                byte playerLevel = player.getLevel();
+                int playerLevel = player.getLevel();
                 byte resultTitle = (byte) (wonGame ? 1 : 0);
                 if (playerLevel != oldLevel) {
-                    StatusPointsAddedDto statusPointsAddedDto = clothEquipmentService.getStatusPointsFromCloths(player);
-                    rp.setStatusPointsAddedDto(statusPointsAddedDto);
-
-                    S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player, rp.getStatusPointsAddedDto());
+                    S2CGameEndLevelUpPlayerStatsPacket gameEndLevelUpPlayerStatsPacket = new S2CGameEndLevelUpPlayerStatsPacket(rp.getPosition(), player);
                     eventHandler.offer(eventHandler.createPacketEvent(client, gameEndLevelUpPlayerStatsPacket, PacketEventType.DEFAULT, 0));
                 }
 
                 S2CMatchplayItemRewardsPacket itemRewardsPacket = new S2CMatchplayItemRewardsPacket(matchplayReward);
                 client.getConnection().sendTCP(itemRewardsPacket);
 
-                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, playerLevel, rp);
+                S2CMatchplaySetExperienceGainInfoData setExperienceGainInfoData = new S2CMatchplaySetExperienceGainInfoData(resultTitle, (int) Math.ceil((double) game.getTimeNeeded() / 1000), playerReward, (byte) playerLevel, rp);
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
-                gameLogContent.append("spec: ").append(rp.getPlayer().getName()).append(" acc: ").append(rp.getPlayer().getAccount().getId()).append("; ");
-                playerDtoList.add(new MatchFinishedMessage.PlayerDto(rp.getPlayer().getName(), "spectator"));
+                gameLogContent.append("spec: ").append(rp.getName()).append(" acc: ").append(rp.getAccountId()).append("; ");
+                playerDtoList.add(new MatchFinishedMessage.PlayerDto(rp.getName(), "spectator"));
             }
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(matchplayReward.getPlayerRewards());
             eventHandler.offer(eventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0));

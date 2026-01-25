@@ -92,7 +92,7 @@ public class ChatHouseMovePacketHandler implements PacketHandler<FTConnection, C
 
         Product product = productService.findProductsByName("Hot Pink Watch", EItemCategory.PARTS.getName()).getFirst();
 
-        Pocket pocket = pocketService.findById(roomPlayer.getPlayer().getPocket().getId());
+        Pocket pocket = pocketService.findById(roomPlayer.getPocketId());
         PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
         int existingItemCount = 0;
         boolean existingItem = false;

@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.handler.lobby;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.lobby.CMSGLobbyUserList;
@@ -28,7 +28,7 @@ public class LobbyUserListReqPacketHandler implements PacketHandler<FTConnection
 
         int newClientLobbyCurrentPlayerListPage = clientLobbyCurrentPlayerListPage + page;
         client.setLobbyCurrentPlayerListPage(newClientLobbyCurrentPlayerListPage);
-        List<Player> lobbyPlayerList = GameManager.getInstance().getPlayersInLobby().stream()
+        List<FTPlayer> lobbyPlayerList = GameManager.getInstance().getPlayersInLobby().stream()
                 .skip(newClientLobbyCurrentPlayerListPage == 1 ? 0 : (newClientLobbyCurrentPlayerListPage * 10L) - 10)
                 .limit(10)
                 .collect(Collectors.toList());

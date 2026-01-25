@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.home;
 
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.home.S2CHomeItemsLoadAnswerPacket;
@@ -9,7 +10,6 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.home.HomeInventory;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
@@ -43,8 +43,8 @@ public class HomeItemClearRequestPacketHandler implements PacketHandler<FTConnec
     @Override
     public void handle(FTConnection connection, CMSGClearHomeItems packet) {
         FTClient client = connection.getClient();
-        Player player = client.getPlayer();
-        Pocket pocket = pocketService.findById(player.getPocket().getId());
+        FTPlayer player = client.getPlayer();
+        Pocket pocket = pocketService.findById(player.getPocketId());
 
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         List<HomeInventory> homeInventoryList = homeService.findAllByAccountHome(accountHome);

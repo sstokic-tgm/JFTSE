@@ -75,12 +75,8 @@ public class PlayerNameChangeHandler implements PacketHandler<FTConnection, CMSG
         }
 
         Pocket pocket = pocketService.findById(player.getPocket().getId());
-        List<PlayerPocket> inventory = playerPocketService.getPlayerPocketItems(pocket);
-        Optional<PlayerPocket> optNameChangeItem = inventory.stream()
-                .filter(pp -> pp.getCategory().equals(EItemCategory.SPECIAL.getName()) && pp.getItemIndex() == 4)
-                .findFirst();
-        if (optNameChangeItem.isPresent()) {
-            PlayerPocket nameChangeItem = optNameChangeItem.get();
+        PlayerPocket nameChangeItem = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(4, EItemCategory.SPECIAL.getName(), pocket);
+        if (nameChangeItem != null) {
             player.setName(packet.getNewPlayerName());
             player.setLastNameChangeDate(currentCalendar.getTime());
             player.setNameChangeAllowed(false);

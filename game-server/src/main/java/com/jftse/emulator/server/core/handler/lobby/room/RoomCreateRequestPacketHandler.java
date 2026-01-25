@@ -15,7 +15,7 @@ public class RoomCreateRequestPacketHandler implements PacketHandler<FTConnectio
     public void handle(FTConnection connection, CMSGRoomCreate packet) {
         FTClient client = connection.getClient();
         // prevent multiple room creations, this might have to be adjusted into a "room join answer"
-        if ((client != null && client.getActiveRoom() != null) || client == null || client.getPlayer() == null)
+        if (client.getActiveRoom() != null || !client.hasPlayer())
             return;
 
         if (packet.getRoomType() == RoomType.BATTLEMON) {
@@ -40,7 +40,7 @@ public class RoomCreateRequestPacketHandler implements PacketHandler<FTConnectio
         room.setPassword(packet.getPassword());
         room.setSkillFree(packet.getSkillFree());
         room.setQuickSlot(packet.getQuickSlot());
-        room.setLevel(client.getPlayer().getLevel());
+        room.setLevel((byte) client.getPlayer().getLevel());
         room.setLevelRange(packet.getLevelRange());
         room.setBettingType(packet.getBettingType());
         room.setBettingAmount(packet.getBettingAmount());

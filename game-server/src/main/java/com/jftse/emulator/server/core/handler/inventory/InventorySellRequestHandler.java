@@ -25,10 +25,14 @@ public class InventorySellRequestHandler implements PacketHandler<FTConnection, 
     @Override
     public void handle(FTConnection connection, CMSGInventorySell packet) {
         FTClient client = connection.getClient();
+        if (!client.hasPlayer()) {
+            return;
+        }
+
         byte status = SUCCESS;
         int itemPocketId = packet.getItemPocketId();
 
-        PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, client.getPlayer().getPocket());
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemPocketId, client.getPlayer().getPocketId());
 
         if (playerPocket == null) {
             status = NO_ITEM;

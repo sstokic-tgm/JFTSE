@@ -1,9 +1,9 @@
 package com.jftse.emulator.server.core.handler.enchant;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.enchant.CMSGEnchantAnnounce;
@@ -16,13 +16,11 @@ public class EnchantAnnounceHandler implements PacketHandler<FTConnection, CMSGE
     @Override
     public void handle(FTConnection connection, CMSGEnchantAnnounce packet) {
         FTClient client = connection.getClient();
-        if (client == null) {
+        if (!client.hasPlayer()) {
             return;
         }
-        Player player = client.getPlayer();
-        if (player == null) {
-            return;
-        }
+        FTPlayer player = client.getPlayer();
+
         String playerName = player.getName();
         String message = packet.getMessage();
 

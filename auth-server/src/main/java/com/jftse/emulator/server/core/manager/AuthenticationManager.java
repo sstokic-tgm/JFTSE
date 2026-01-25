@@ -313,13 +313,18 @@ public class AuthenticationManager implements ServerLoopHandler {
 
         for (FTClient client : clients) {
             FTConnection connection = client.getConnection();
-            if (connection != null && !connection.update(diff)) {
+            if (connection == null || !connection.update(diff)) {
                 removeClient(client);
             }
         }
     }
 
     private void initializeConnection(FTConnection conn) {
+        if (conn.getClient() != null) {
+            log.warn("({}) Connection already has a client assigned", conn.getIPString());
+            return;
+        }
+
         FTClient client = new FTClient();
         client.setConnection(conn);
         conn.setClient(client);

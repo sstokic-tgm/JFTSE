@@ -97,8 +97,9 @@ public class RelayManager implements ServerLoopHandler {
     }
 
     public void removeClient(FTClient client) {
-        clients.remove(client);
-        playerCount.getAndDecrement();
+        if (!clients.remove(client)) {
+            log.warn("({}) Client could not be removed from the client list", client.getConnection().getIPString());
+        }
     }
 
     public void addClientToSession(final int sessionId, final FTClient client) {
@@ -113,12 +114,14 @@ public class RelayManager implements ServerLoopHandler {
     public void removeClient(final int sessionId, final FTClient client) {
         ConcurrentLinkedDeque<FTClient> clientList = sessionMap.get(sessionId);
         if (clientList != null) {
-            clientList.remove(client);
+            if (clientList.remove(client)) {
+                playerCount.getAndDecrement();
+            }
 
             if (clientList.isEmpty())
                 sessionMap.remove(sessionId, clientList);
         } else {
-            log.warn("({}) Client not found in session ({}).", client.getConnection().getIPString(), sessionId);
+            log.warn("({}) Client not found in session ({})", client.getConnection().getIPString(), sessionId);
         }
     }
 
@@ -170,13 +173,18 @@ public class RelayManager implements ServerLoopHandler {
 
         for (FTClient client : clients) {
             FTConnection connection = client.getConnection();
-            if (connection != null && !connection.update(diff)) {
+            if (connection == null || !connection.update(diff)) {
                 removeClient(client);
             }
         }
     }
 
     private void initializeConnection(FTConnection conn) {
+        if (conn.getClient() != null) {
+            log.warn("({}) Connection already has a client assigned", conn.getIPString());
+            return;
+        }
+
         FTClient client = new FTClient();
         client.setConnection(conn);
         conn.setClient(client);

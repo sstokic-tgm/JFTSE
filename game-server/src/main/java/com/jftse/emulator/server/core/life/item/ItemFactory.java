@@ -17,6 +17,11 @@ public class ItemFactory {
     private ItemFactory() {
     }
 
+    public static BaseItem getItem(long playerPocketIdOfItem, Long pocketIdOfPlayer) {
+        Pocket pocketOfPlayer = ServiceManager.getInstance().getPocketService().findById(pocketIdOfPlayer);
+        return getItem(playerPocketIdOfItem, pocketOfPlayer);
+    }
+
     public static BaseItem getItem(long playerPocketIdOfItem, Pocket pocketOfPlayer) {
         final PlayerPocketService playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         final PlayerPocket playerPocket = playerPocketService.getItemAsPocket(playerPocketIdOfItem, pocketOfPlayer);

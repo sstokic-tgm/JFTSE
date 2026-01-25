@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.packets.messenger;
 
-import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
@@ -12,10 +11,10 @@ import java.util.List;
 @Getter
 @Setter
 public class S2CFriendRequestNotificationPacket extends Packet {
-    public S2CFriendRequestNotificationPacket(List<Friend> friendList) {
+    public S2CFriendRequestNotificationPacket(List<Player> friendList) {
         super(PacketOperations.S2CFriendRequestNotification);
 
         this.write((byte) friendList.size());
-        friendList.stream().map(Friend::getPlayer).map(Player::getName).forEach(this::write);
+        friendList.stream().map(Player::getName).forEach(this::write);
     }
 }

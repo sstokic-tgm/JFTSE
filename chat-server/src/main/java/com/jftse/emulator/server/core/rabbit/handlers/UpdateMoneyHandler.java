@@ -1,14 +1,15 @@
 package com.jftse.emulator.server.core.rabbit.handlers;
 
 import com.jftse.emulator.server.core.manager.GameManager;
-import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.MessageTypes;
 import com.jftse.emulator.server.core.rabbit.messages.UpdateMoneyMessage;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.rabbit.AbstractMessageHandler;
 import com.jftse.server.core.rabbit.MessageHandlerRegistry;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.shared.packets.shop.SMSGSetMoney;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,20 +29,27 @@ public class UpdateMoneyHandler extends AbstractMessageHandler<UpdateMoneyMessag
 
     @Override
     public void handle(UpdateMoneyMessage message) {
-        log.info("Updating money on client for player {}", message.getPlayerId());
-
         final FTConnection connection = gameManager.getConnectionByPlayerId(message.getPlayerId());
-        final Player player = playerService.findById(message.getPlayerId());
-        if (player == null) {
+        if (connection == null || connection.getClient() == null) {
+            return;
+        }
+
+        FTClient client = connection.getClient();
+        if (!client.hasPlayer()) {
             log.error("Player {} not found", message.getPlayerId());
             return;
         }
 
-        S2CShopMoneyAnswerPacket moneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
-        if (connection != null) {
-            connection.sendTCP(moneyAnswerPacket);
+        Player dbPlayer = playerService.findWithAccountById(client.getPlayer().getId());
+        SMSGSetMoney moneyPacket = SMSGSetMoney.builder()
+                .ap(dbPlayer.getAccount().getAp())
+                .gold(dbPlayer.getGold())
+                .build();
+        connection.sendTCP(moneyPacket);
 
-            log.info("Money updated on client for player {}", message.getPlayerId());
-        }
+        client.getAp().compareAndSet(client.getAp().get(), dbPlayer.getAccount().getAp());
+        client.getPlayer().syncGold(dbPlayer.getGold());
+
+        log.info("Money updated on client for player {}", message.getPlayerId());
     }
 }

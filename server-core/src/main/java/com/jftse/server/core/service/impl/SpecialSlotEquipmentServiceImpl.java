@@ -18,59 +18,61 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class SpecialSlotEquipmentServiceImpl implements SpecialSlotEquipmentService {
     private final SpecialSlotEquipmentRepository specialSlotEquipmentRepository;
     private final PlayerPocketService playerPocketService;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public SpecialSlotEquipment save(SpecialSlotEquipment specialSlotEquipment) {
         return specialSlotEquipmentRepository.save(specialSlotEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SpecialSlotEquipment findById(Long id) {
         Optional<SpecialSlotEquipment> specialSlotEquipment = specialSlotEquipmentRepository.findById(id);
         return specialSlotEquipment.orElse(null);
     }
 
     @Override
-    public void updateSpecialSlots(SpecialSlotEquipment specialSlotEquipment, Integer specialSlotId) {
-        specialSlotEquipment = findById(specialSlotEquipment.getId());
-
-        if (specialSlotEquipment.getSlot1().equals(specialSlotId))
-            specialSlotEquipment.setSlot1(0);
-        else if (specialSlotEquipment.getSlot2().equals(specialSlotId))
-            specialSlotEquipment.setSlot2(0);
-        else if (specialSlotEquipment.getSlot3().equals(specialSlotId))
-            specialSlotEquipment.setSlot3(0);
-        else if (specialSlotEquipment.getSlot4().equals(specialSlotId))
-            specialSlotEquipment.setSlot4(0);
-
-        save(specialSlotEquipment);
-    }
-
-    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateSpecialSlots(Player player, List<Integer> specialSlotItems) {
         Pocket pocket = player.getPocket();
         SpecialSlotEquipment specialSlotEquipment = findById(player.getSpecialSlotEquipment().getId());
 
-        PlayerPocket item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(0), pocket);
-        specialSlotEquipment.setSlot1(item == null ? 0 : item.getId().intValue());
+        List<PlayerPocket> playerPockets = playerPocketService.getItemsAsPocket(
+                List.of(
+                        Long.valueOf(specialSlotItems.get(0)),
+                        Long.valueOf(specialSlotItems.get(1)),
+                        Long.valueOf(specialSlotItems.get(2)),
+                        Long.valueOf(specialSlotItems.get(3))
+                ),
+                pocket
+        );
 
-        item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(1), pocket);
-        specialSlotEquipment.setSlot2(item == null ? 0 : item.getId().intValue());
+        for (int i = 0; i < specialSlotItems.size(); i++) {
+            Integer itemId = specialSlotItems.get(i);
+            PlayerPocket item = playerPockets.stream()
+                    .filter(pp -> pp.getId().intValue() == itemId)
+                    .findFirst()
+                    .orElse(null);
 
-        item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(2), pocket);
-        specialSlotEquipment.setSlot3(item == null ? 0 : item.getId().intValue());
+            int slotValue = item == null ? 0 : item.getId().intValue();
 
-        item = playerPocketService.getItemAsPocket((long) specialSlotItems.get(3), pocket);
-        specialSlotEquipment.setSlot4(item == null ? 0 : item.getId().intValue());
+            switch (i) {
+                case 0 -> specialSlotEquipment.setSlot1(slotValue);
+                case 1 -> specialSlotEquipment.setSlot2(slotValue);
+                case 2 -> specialSlotEquipment.setSlot3(slotValue);
+                case 3 -> specialSlotEquipment.setSlot4(slotValue);
+            }
+        }
 
         save(specialSlotEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Integer> getEquippedSpecialSlots(Player player) {
         List<Integer> result = new ArrayList<>();
 

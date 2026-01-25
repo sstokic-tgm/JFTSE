@@ -8,8 +8,6 @@ import com.jftse.entities.database.repository.account.AccountRepository;
 import com.jftse.entities.database.repository.gameserver.GameServerRepository;
 import com.jftse.server.core.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -21,7 +19,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class AuthenticationServiceImpl implements AuthenticationService {
     public final static short SUCCESS = 0;
     public final static short ACCOUNT_INVALID_PASSWORD = -1;
@@ -44,6 +41,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int login(String username, String password) {
         Optional<Account> optionalAccount = accountRepository.findAccountByUsername(username);
         if (optionalAccount.isPresent() && optionalAccount.get().getUsername().equals(username)) {
@@ -80,6 +78,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Account updateAccount(Account account) {
         return accountRepository.save(account);
     }

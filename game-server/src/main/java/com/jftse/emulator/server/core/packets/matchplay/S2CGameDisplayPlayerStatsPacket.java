@@ -1,35 +1,28 @@
 package com.jftse.emulator.server.core.packets.matchplay;
 
-import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 public class S2CGameDisplayPlayerStatsPacket extends Packet {
-    public S2CGameDisplayPlayerStatsPacket(Room room) {
+    public S2CGameDisplayPlayerStatsPacket(List<RoomPlayer> roomPlayers, short gameMode) {
         super(PacketOperations.S2CGameDisplayPlayerStats);
 
-        final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
-        short gameMode = room.getMode();
-        List<RoomPlayer> activePlayers = roomPlayerList.stream()
+        List<RoomPlayer> activePlayers = roomPlayers.stream()
                 .filter(x -> x.getPosition() < 4)
-                .collect(Collectors.toList());
+                .toList();
 
         this.write((char)activePlayers.size());
         for (RoomPlayer roomPlayer : activePlayers) {
-            Player player = roomPlayer.getPlayer();
             this.write(roomPlayer.getPosition());
-            this.write(player.getName());
-            this.write(player.getLevel());
-            this.write(gameMode == GameMode.BASIC ? player.getPlayerStatistic().getBasicRecordWin() :  player.getPlayerStatistic().getBattleRecordWin());
-            this.write(gameMode == GameMode.BASIC ? player.getPlayerStatistic().getBasicRecordLoss() : player.getPlayerStatistic().getBattleRecordLoss());
-            this.write(player.getPlayerStatistic().getConsecutiveWins());
+            this.write(roomPlayer.getName());
+            this.write((byte) roomPlayer.getLevel());
+            this.write(gameMode == GameMode.BASIC ? roomPlayer.getPlayerStatistic().basicRecordWin() :  roomPlayer.getPlayerStatistic().battleRecordWin());
+            this.write(gameMode == GameMode.BASIC ? roomPlayer.getPlayerStatistic().basicRecordLoss() : roomPlayer.getPlayerStatistic().battleRecordLoss());
+            this.write(roomPlayer.getPlayerStatistic().consecutiveWins());
         }
     }
 }

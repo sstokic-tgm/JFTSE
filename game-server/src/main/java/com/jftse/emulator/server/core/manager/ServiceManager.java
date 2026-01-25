@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.manager;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.rpc.GrpcAuthService;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.MetricsService;
@@ -80,7 +81,7 @@ public class ServiceManager {
     @Autowired
     private TutorialService tutorialService;
     @Autowired
-    private LotteryService lotteryService;
+    private LotteryService<FTConnection> lotteryService;
     @Autowired
     private LevelService levelService;
     @Autowired
@@ -99,6 +100,8 @@ public class ServiceManager {
     private MapService mapService;
     @Autowired
     private EnchantService enchantService;
+    @Autowired
+    private InventoryService inventoryService;
 
     @Autowired
     private ProfaneWordsService profaneWordsService;

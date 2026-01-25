@@ -16,7 +16,7 @@ public class GameAnimationReadyToSkipPacketHandler implements PacketHandler<FTCo
     @Override
     public void handle(FTConnection connection, CMSGReadyToSkip packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null || ftClient.getActiveRoom() == null)
+        if (!ftClient.hasPlayer() || ftClient.getActiveRoom() == null)
             return;
 
         Room room = ftClient.getActiveRoom();

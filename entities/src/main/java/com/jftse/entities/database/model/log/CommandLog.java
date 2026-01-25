@@ -14,7 +14,7 @@ public class CommandLog extends AbstractBaseModel {
     private String command;
     private String arguments;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 }

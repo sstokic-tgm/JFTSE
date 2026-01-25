@@ -131,7 +131,6 @@ public class CommandManager {
         registerCommand("unban", 1, new UnbanPlayerCommand());
         registerCommand("sN", 1, new ServerNoticeCommand());
         registerCommand("serverKick", 1, new ServerKickCommand());
-        registerCommand("rsLogin", 1, new ResetLoginStatusCommand());
         registerCommand("reloadScripts", 1, new ReloadScriptsCommand());
         registerCommand("reloadFish", 1, new ReloadFishSettingsCommand());
     }
@@ -159,7 +158,7 @@ public class CommandManager {
         CommandLog commandLog = new CommandLog();
         commandLog.setCommand(command.getCommandName());
         commandLog.setArguments(sb.toString());
-        commandLog.setPlayer(client.getPlayer());
+        commandLog.setPlayer(client.getPlayer().getPlayerRef());
         GameManager.getInstance().getServiceManager().getCommandLogService().save(commandLog);
     }
 

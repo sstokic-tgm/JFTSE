@@ -14,11 +14,11 @@ import java.util.Date;
 @Audited
 @Entity
 public class GuildGoldUsage extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "guild_id", referencedColumnName = "id")
     private Guild guild;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 

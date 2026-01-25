@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.utils;
 
-import com.jftse.entities.database.model.player.Player;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.server.core.constants.GameMode;
 
 import java.util.HashMap;
@@ -11,15 +11,15 @@ public class RankingUtils {
         return Math.pow(10, rating / 400);
     }
 
-    private static double expectedScore(Player player1, Player player2, byte gameMode) {
+    private static double expectedScore(FTPlayer player1, FTPlayer player2, byte gameMode) {
         double expectedScore = 0.0;
         if (gameMode == GameMode.BASIC) {
-            double player1TransformedRating = transformedRating(player1.getPlayerStatistic().getBasicRP());
-            double player2TransformedRating = transformedRating(player2.getPlayerStatistic().getBasicRP());
+            double player1TransformedRating = transformedRating(player1.getPlayerStatistic().basicRP());
+            double player2TransformedRating = transformedRating(player2.getPlayerStatistic().basicRP());
             expectedScore = player1TransformedRating / (player1TransformedRating + player2TransformedRating);
         } else if (gameMode == GameMode.BATTLE) {
-            double player1TransformedRating = transformedRating(player1.getPlayerStatistic().getBattleRP());
-            double player2TransformedRating = transformedRating(player2.getPlayerStatistic().getBattleRP());
+            double player1TransformedRating = transformedRating(player1.getPlayerStatistic().battleRP());
+            double player2TransformedRating = transformedRating(player2.getPlayerStatistic().battleRP());
             expectedScore = player1TransformedRating / (player1TransformedRating + player2TransformedRating);
         }
         return expectedScore;
@@ -34,40 +34,39 @@ public class RankingUtils {
             return  16;
     }
 
-    public static HashMap<Long, Integer> calculateNewRating(List<Player> playerList, Player currentPlayer, boolean won, byte gameMode) {
+    public static HashMap<Long, Integer> calculateNewRating(List<FTPlayer> playerList, FTPlayer currentPlayer, boolean won, byte gameMode) {
         HashMap<Long, Integer> result = new HashMap<>();
 
         double Q = 0.0;
-        for (Player player : playerList) {
+        for (FTPlayer player : playerList) {
             if (gameMode == GameMode.BASIC) {
-                Q += transformedRating(player.getPlayerStatistic().getBasicRP());
+                Q += transformedRating(player.getPlayerStatistic().basicRP());
             } else if (gameMode == GameMode.BATTLE) {
-                Q += transformedRating(player.getPlayerStatistic().getBattleRP());
+                Q += transformedRating(player.getPlayerStatistic().battleRP());
             }
         }
 
-        for (Player player : playerList) {
-
+        for (FTPlayer player : playerList) {
             double expected = 0.0;
             if (gameMode == GameMode.BASIC) {
-                expected = transformedRating(player.getPlayerStatistic().getBasicRP()) / Q;
+                expected = transformedRating(player.getPlayerStatistic().basicRP()) / Q;
             } else if (gameMode == GameMode.BATTLE) {
-                expected = transformedRating(player.getPlayerStatistic().getBattleRP()) / Q;
+                expected = transformedRating(player.getPlayerStatistic().battleRP()) / Q;
             }
 
             int actualScore;
-            if (player.getId().equals(currentPlayer.getId()) && won)
+            if (player.getId() == currentPlayer.getId() && won)
                 actualScore = 1;
             else
                 actualScore = 0;
 
             int newRating = 0;
             if (gameMode == GameMode.BASIC) {
-                int K = determineKFactor(player.getPlayerStatistic().getBasicRP());
-                newRating = (int) Math.round(player.getPlayerStatistic().getBasicRP() + K * (actualScore - expected));
+                int K = determineKFactor(player.getPlayerStatistic().basicRP());
+                newRating = (int) Math.round(player.getPlayerStatistic().basicRP() + K * (actualScore - expected));
             } else if (gameMode == GameMode.BATTLE) {
-                int K = determineKFactor(player.getPlayerStatistic().getBattleRP());
-                newRating = (int) Math.round(player.getPlayerStatistic().getBattleRP() + K * (actualScore - expected));
+                int K = determineKFactor(player.getPlayerStatistic().battleRP());
+                newRating = (int) Math.round(player.getPlayerStatistic().battleRP() + K * (actualScore - expected));
             }
 
             result.put(player.getId(), newRating);
@@ -76,7 +75,7 @@ public class RankingUtils {
         return result;
     }
 
-    public static int calculateNewRating(Player player1, Player player2, boolean won, byte gameMode) {
+    public static int calculateNewRating(FTPlayer player1, FTPlayer player2, boolean won, byte gameMode) {
         int actualScore;
         if (won)
             actualScore = 1;
@@ -85,11 +84,11 @@ public class RankingUtils {
 
         int newRating = 0;
         if (gameMode == GameMode.BASIC) {
-            int K = determineKFactor(player1.getPlayerStatistic().getBasicRP());
-            newRating = (int) Math.round(player1.getPlayerStatistic().getBasicRP() + K * (actualScore - expectedScore(player1, player2, gameMode)));
+            int K = determineKFactor(player1.getPlayerStatistic().basicRP());
+            newRating = (int) Math.round(player1.getPlayerStatistic().basicRP() + K * (actualScore - expectedScore(player1, player2, gameMode)));
         } else if (gameMode == GameMode.BATTLE) {
-            int K = determineKFactor(player1.getPlayerStatistic().getBattleRP());
-            newRating = (int) Math.round(player1.getPlayerStatistic().getBattleRP() + K * (actualScore - expectedScore(player1, player2, gameMode)));
+            int K = determineKFactor(player1.getPlayerStatistic().battleRP());
+            newRating = (int) Math.round(player1.getPlayerStatistic().battleRP() + K * (actualScore - expectedScore(player1, player2, gameMode)));
         }
         return newRating;
     }

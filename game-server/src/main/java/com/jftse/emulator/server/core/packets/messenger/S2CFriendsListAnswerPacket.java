@@ -1,8 +1,7 @@
 package com.jftse.emulator.server.core.packets.messenger;
 
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.account.Account;
-import com.jftse.entities.database.model.messenger.Friend;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import lombok.Getter;
@@ -13,20 +12,20 @@ import java.util.List;
 @Getter
 @Setter
 public class S2CFriendsListAnswerPacket extends Packet {
-    public S2CFriendsListAnswerPacket(List<Friend> friends) {
+    public S2CFriendsListAnswerPacket(List<Player> friends) {
         super(PacketOperations.S2CFriendsListAnswer);
 
         this.write((byte) friends.size());
-        for (Friend friend : friends) {
-            this.write(friend.getFriend().getId().intValue());
-            this.write(friend.getFriend().getName());
-            this.write(friend.getFriend().getPlayerType());
+        for (Player friend : friends) {
+            this.write(friend.getId().intValue());
+            this.write(friend.getName());
+            this.write(friend.getPlayerType());
 
-            if (!friend.getFriend().getOnline()) {
+            if (!friend.getOnline()) {
                 this.write((short) -1);
             } else {
-                Account account = ServiceManager.getInstance().getAuthenticationService().findAccountById(friend.getFriend().getAccount().getId());
-                if (account == null) {
+                Account account = friend.getAccount();
+                if (account == null || account.getLoggedInServer() == null) {
                     this.write((short) -1);
                 } else {
                     this.write((short) account.getLoggedInServer().getValue());

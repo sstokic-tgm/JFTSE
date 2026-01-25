@@ -6,8 +6,6 @@ import com.jftse.entities.database.repository.item.ItemMaterialRepository;
 import com.jftse.server.core.service.ItemMaterialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +20,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ItemMaterialServiceImpl implements ItemMaterialService {
     private final ItemMaterialRepository itemMaterialRepository;
 

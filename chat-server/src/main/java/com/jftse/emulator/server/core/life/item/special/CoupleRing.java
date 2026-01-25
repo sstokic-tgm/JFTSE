@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.life.item.special;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
@@ -7,7 +8,7 @@ import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPack
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CRemoveCoupleRingPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CYouBrokeUpWithYourCoupleAnswer;
-import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
+import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.messenger.Message;
@@ -15,6 +16,7 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.service.*;
+import com.jftse.server.core.shared.packets.shop.SMSGSetMoney;
 
 import java.util.List;
 
@@ -25,6 +27,7 @@ public class CoupleRing extends BaseItem {
     private final FriendService friendService;
     private final MessageService messageService;
     private final PlayerService playerService;
+    private final AuthenticationService authService;
 
     private Long playerCoupleId;
     private Long pocketCoupleId;
@@ -38,17 +41,15 @@ public class CoupleRing extends BaseItem {
         friendService = ServiceManager.getInstance().getFriendService();
         messageService = ServiceManager.getInstance().getMessageService();
         playerService = ServiceManager.getInstance().getPlayerService();
+        authService = ServiceManager.getInstance().getAuthenticationService();
     }
 
     @Override
-    public boolean processPlayer(Player player) {
-        player = playerService.findById(player.getId());
-        if (player == null)
-            return false;
-
+    public boolean processPlayer(FTPlayer player) {
         this.localPlayerId = player.getId();
+        Account account = authService.findAccountById(player.getPlayer().getAccount().getId());
 
-        Friend playerCouple = socialService.getRelationship(player);
+        Friend playerCouple = socialService.getRelationshipWithFriend(player.getPlayerRef());
         if (playerCouple == null)
             return false;
 
@@ -69,39 +70,45 @@ public class CoupleRing extends BaseItem {
         S2CYouBrokeUpWithYourCoupleAnswer brokeUpWithYourCoupleAnswer = new S2CYouBrokeUpWithYourCoupleAnswer();
         this.packetsToSend.add(this.localPlayerId, brokeUpWithYourCoupleAnswer);
 
-        Integer currentGold = player.getGold();
-        player.setGold(currentGold - 20000);
-        player = playerService.save(player);
+        int newGold = player.getGold() - 20000;
+        player.syncGold(newGold);
+        playerService.setMoney(player.getPlayer(), newGold);
 
-        S2CShopMoneyAnswerPacket shopMoneyAnswerPacket = new S2CShopMoneyAnswerPacket(player);
-        this.packetsToSend.add(this.localPlayerId, shopMoneyAnswerPacket);
+        SMSGSetMoney moneyPacket = SMSGSetMoney.builder()
+                .ap(account.getAp())
+                .gold(player.getGold())
+                .build();
+        this.packetsToSend.add(this.localPlayerId, moneyPacket);
 
-        List<Friend> friends = socialService.getFriendList(player, EFriendshipState.Friends);
+        List<Player> friends = socialService.getFriendList(player.getPlayerRef(), EFriendshipState.Friends).stream()
+                .map(Friend::getFriend)
+                .toList();
         S2CFriendsListAnswerPacket friendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
         this.packetsToSend.add(this.localPlayerId, friendsListAnswerPacket);
 
         Message message = new Message();
         message.setSeen(false);
-        message.setSender(player);
+        message.setSender(player.getPlayerRef());
         message.setReceiver(playerCouple.getFriend());
         message.setMessage("[Automatic response] I divorced you");
         messageService.save(message);
 
-        friends.clear();
-        friends = socialService.getFriendList(playerCouple.getFriend(), EFriendshipState.Friends);
+        friends = socialService.getFriendList(playerCouple.getFriend(), EFriendshipState.Friends).stream()
+                .map(Friend::getFriend)
+                .toList();
 
         friendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
         this.packetsToSend.add(this.playerCoupleId, friendsListAnswerPacket);
 
-        S2CReceivedMessageNotificationPacket receivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
+        S2CReceivedMessageNotificationPacket receivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message, player.getName());
         this.packetsToSend.add(this.playerCoupleId, receivedMessageNotificationPacket);
 
         return true;
     }
 
     @Override
-    public boolean processPocket(Pocket pocket) {
-        pocket = pocketService.findById(pocket.getId());
+    public boolean processPocket(Long pocketId) {
+        Pocket pocket = pocketService.findById(pocketId);
         Pocket pocketCouple = pocketService.findById(this.pocketCoupleId);
         if (pocket == null && pocketCouple == null)
             return false;

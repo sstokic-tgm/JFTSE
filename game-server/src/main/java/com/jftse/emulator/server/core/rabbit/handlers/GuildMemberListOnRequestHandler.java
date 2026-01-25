@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.rabbit.handlers;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CClubMembersListAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.MessageTypes;
@@ -38,7 +39,7 @@ public class GuildMemberListOnRequestHandler extends AbstractMessageHandler<Guil
         log.info("Player {} requested guild member list", message.getPlayerId());
 
         final FTConnection connection = gameManager.getConnectionByPlayerId(message.getPlayerId());
-        List<GuildMember> guildMembers = null;
+        List<Player> guildMembers = null;
         if (connection != null) {
             final FTClient client = connection.getClient();
             // shouldn't be null, but just in case
@@ -47,8 +48,10 @@ public class GuildMemberListOnRequestHandler extends AbstractMessageHandler<Guil
                 return;
             }
 
-            Player activePlayer = client.getPlayer();
-            guildMembers = socialService.getGuildMemberList(activePlayer);
+            FTPlayer activePlayer = client.getPlayer();
+            guildMembers = socialService.getGuildMemberList(activePlayer.getPlayerRef()).stream()
+                    .map(GuildMember::getPlayer)
+                    .toList();
 
             S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
             connection.sendTCP(s2CClubMembersListAnswerPacket);
@@ -61,14 +64,18 @@ public class GuildMemberListOnRequestHandler extends AbstractMessageHandler<Guil
                 return;
             }
 
-            guildMembers = socialService.getGuildMemberList(player);
+            guildMembers = socialService.getGuildMemberList(player).stream()
+                    .map(GuildMember::getPlayer)
+                    .toList();
         }
 
         guildMembers.forEach(gm -> {
-            List<GuildMember> otherGuildMembers = socialService.getGuildMemberList(gm.getPlayer());
+            List<Player> otherGuildMembers = socialService.getGuildMemberList(gm).stream()
+                    .map(GuildMember::getPlayer)
+                    .toList();
 
             S2CClubMembersListAnswerPacket otherGuildMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(otherGuildMembers);
-            FTConnection guildMemberConnection = GameManager.getInstance().getConnectionByPlayerId(gm.getPlayer().getId());
+            FTConnection guildMemberConnection = GameManager.getInstance().getConnectionByPlayerId(gm.getId());
             if (guildMemberConnection != null) {
                 guildMemberConnection.sendTCP(otherGuildMembersListAnswerPacket);
             }

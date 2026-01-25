@@ -15,7 +15,15 @@ public interface GuildService {
 
     Guild findById(Long id);
 
+    Guild findWithMembersById(Long id);
+
+    Guild findWithMembersByPlayerId(Long playerId);
+
     List<Guild> findAll();
 
     List<Guild> findAll(int offset);
+
+    Guild changeInformation(Long guildId, String introduction, byte minLevel, boolean isPublic, Byte[] allowedCharacterTypes);
+
+    void changeReverseMemberStatus(Long guildId, int playerId, boolean isApproved);
 }

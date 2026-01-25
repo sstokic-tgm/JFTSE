@@ -13,33 +13,37 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class AuthTokenServiceImpl implements AuthTokenService {
     private final AuthTokenRepository authTokenRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AuthToken save(AuthToken authToken) {
         return authTokenRepository.save(authToken);
     }
 
     @Override
+    @Transactional
     public void remove(AuthToken authToken) {
         authTokenRepository.findById(authToken.getId()).ifPresent(at -> authTokenRepository.deleteById(at.getId()));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthToken findAuthToken(String token, Long timestamp, String accountName) {
         Optional<AuthToken> optional = authTokenRepository.findAuthTokenByTokenAndLoginTimestampAndAccountName(token, timestamp, accountName);
         return optional.orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthToken findAuthToken(String token) {
         Optional<AuthToken> optional = authTokenRepository.findAuthTokenByToken(token);
         return optional.orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AuthToken> findAuthTokensByAccountName(String accountName) {
         return authTokenRepository.findAuthTokensByAccountName(accountName);
     }

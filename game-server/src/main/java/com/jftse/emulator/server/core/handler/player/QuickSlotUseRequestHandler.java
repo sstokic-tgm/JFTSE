@@ -1,15 +1,14 @@
 package com.jftse.emulator.server.core.handler.player;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.shared.packets.player.CMSGUseQuickSlot;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 import org.springframework.util.MultiValueMap;
@@ -25,27 +24,24 @@ public class QuickSlotUseRequestHandler implements PacketHandler<FTConnection, C
     @Override
     public void handle(FTConnection connection, CMSGUseQuickSlot quickSlotUseRequestPacket) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
-        Player player = ftClient.getPlayer();
-        Pocket pocket = player.getPocket();
-        if (pocket == null)
-            return;
+        FTPlayer player = ftClient.getPlayer();
 
-        BaseItem baseItem = ItemFactory.getItem(quickSlotUseRequestPacket.getQuickSlotId(), pocket);
+        BaseItem baseItem = ItemFactory.getItem(quickSlotUseRequestPacket.getQuickSlotId(), player.getPocketId());
         if (baseItem == null)
             return;
 
         if (baseItem.processPlayer(player)) {
-            baseItem.processPocket(pocket);
+            baseItem.processPocket(player.getPocketId());
         }
         sendPackets(baseItem.getPacketsToSend());
     }
 
-    private void sendPackets(MultiValueMap<Long, Packet> packetsToSend) {
+    private void sendPackets(MultiValueMap<Long, IPacket> packetsToSend) {
         packetsToSend.forEach((playerId, packets) -> {
-            for (Packet p : packets) {
+            for (IPacket p : packets) {
                 PacketMessage packetMessage = PacketMessage.builder()
                         .packet(p)
                         .receivingPlayerId(playerId)

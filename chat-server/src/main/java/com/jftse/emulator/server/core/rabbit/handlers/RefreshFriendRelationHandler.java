@@ -48,7 +48,8 @@ public class RefreshFriendRelationHandler extends AbstractMessageHandler<Refresh
         Friend friendRelation = socialService.getRelationship(myRelation.getFriend());
         FTConnection relationshipConnection = gameManager.getConnectionByPlayerId(myRelation.getFriend().getId());
         if (relationshipConnection != null && friendRelation != null) {
-            S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(friendRelation);
+            Player pFriendRelation = playerService.findById(friendRelation.getFriend().getId());
+            S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(pFriendRelation);
             relationshipConnection.sendTCP(s2CRelationshipAnswerPacket);
 
             log.info("Notified relationship");

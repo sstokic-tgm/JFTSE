@@ -50,7 +50,7 @@ public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, C
 
         FTClient ftClient = connection.getClient();
 
-        if (ftClient == null) {
+        if (!ftClient.hasPlayer()) {
             connection.sendTCP(roomStartGameAck);
             return;
         }
@@ -162,7 +162,7 @@ public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, C
                     .filter(x -> x.getPosition() == 0)
                     .findFirst().orElse(null);
             FTClient clientToHostGame = GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
-                    .filter(x -> playerInSlot0 != null && x.getPlayer() != null && x.getPlayer().getId().equals(playerInSlot0.getPlayer().getId()))
+                    .filter(x -> playerInSlot0 != null && x.hasPlayer() && x.getPlayer().getId() == playerInSlot0.getPlayerId())
                     .findFirst()
                     .orElse(connection.getClient());
             SMSGSetHost setHostPacket = SMSGSetHost.builder().result((byte) 1).build();

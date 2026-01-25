@@ -15,7 +15,7 @@ import javax.persistence.ManyToOne;
 @Audited
 @Entity
 public class HomeInventory extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private AccountHome accountHome;
 
     private Integer itemIndex;

@@ -2,7 +2,6 @@ package com.jftse.emulator.server.core.interaction;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.common.service.ConfigService;
-import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
@@ -50,7 +49,7 @@ import java.util.Optional;
 @Setter
 public class PlayerScriptableImpl implements PlayerScriptable {
     private FTClient client;
-    private FTPlayer ftPlayer;
+    private Long playerId;
 
     private final ServiceManager serviceManager;
     private final GameManager gameManager;
@@ -68,7 +67,7 @@ public class PlayerScriptableImpl implements PlayerScriptable {
      */
     public PlayerScriptableImpl(Long playerId) throws ValidationException {
         this();
-        this.ftPlayer = new FTPlayer(playerId);
+        this.playerId = playerId;
 
         FTConnection connection = gameManager.getConnectionByPlayerId(playerId);
         if (connection != null)
@@ -86,79 +85,93 @@ public class PlayerScriptableImpl implements PlayerScriptable {
     }
 
     /**
-     * Retrieves the FTPlayer instance associated with this scriptable.
-     * If the FTPlayer is not already set, it attempts to create it using the client.
+     * Retrieves the db Player associated with this scriptable.
+     * If the Player ID is not set, it attempts to fetch it from the client.
      *
-     * @return an Optional containing the FTPlayer if available, otherwise an empty Optional
+     * @return an Optional containing the Player if available, otherwise an empty Optional
      */
-    public Optional<FTPlayer> getPlayer() {
-        if (this.ftPlayer == null && this.client != null) {
+    public Optional<Player> getPlayer() {
+        if (this.playerId == null && this.client != null) {
             try {
-                this.ftPlayer = new FTPlayer(this.client.getPlayer().getId());
-            } catch (ValidationException e) {
+                this.playerId = this.client.getPlayer().getId();
+            } catch (Exception e) {
                 return Optional.empty();
             }
         }
-        return Optional.ofNullable(ftPlayer);
+
+        Player p = serviceManager.getPlayerService().findById(this.playerId);
+        return Optional.ofNullable(p);
     }
 
     @Override
     public void giveExp(int exp) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
+        Optional<Player> optionalPlayer = getPlayer();
         if (optionalPlayer.isEmpty() || exp <= 0)
             return;
 
-        Player player = optionalPlayer.get().getPlayer();
+        Player player = optionalPlayer.get();
 
         final byte currentLevel = player.getLevel();
         final byte level = serviceManager.getLevelService().getLevel(exp, player.getExpPoints(), currentLevel);
         if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (currentLevel < level))
             player.setExpPoints(player.getExpPoints() + exp);
         serviceManager.getLevelService().setNewLevelStatusPoints(level, player);
+
+        if (client != null && client.hasPlayer()) {
+            client.getPlayer().syncExpPoints(player.getExpPoints());
+            client.getPlayer().syncLevel(player.getLevel());
+        }
     }
 
     @Override
     public void giveGold(int gold) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
+        Optional<Player> optionalPlayer = getPlayer();
         if (optionalPlayer.isEmpty() || gold <= 0)
             return;
 
-        Player player = optionalPlayer.get().getPlayer();
+        Player player = optionalPlayer.get();
 
         player.setGold(player.getGold() + gold);
         serviceManager.getPlayerService().save(player);
+
+        if (client != null && client.hasPlayer()) {
+            client.getPlayer().syncGold(player.getGold());
+        }
     }
 
     @Override
     public void giveAp(int ap) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
+        Optional<Player> optionalPlayer = getPlayer();
         if (optionalPlayer.isEmpty() || ap <= 0)
             return;
 
-        Player player = optionalPlayer.get().getPlayer();
+        Player player = optionalPlayer.get();
 
         Account account = ServiceManager.getInstance().getAuthenticationService().findAccountById(player.getAccount().getId());
         if (account == null)
             return;
 
-        account.setAp(account.getAp() + ap);
+        int currentAp = account.getAp();
+        int newAp = currentAp + ap;
+        account.setAp(newAp);
         serviceManager.getAuthenticationService().updateAccount(account);
+
+        if (client != null && client.hasPlayer()) {
+            client.getAp().compareAndSet(currentAp, newAp);
+        }
     }
 
     @Override
     public void giveItem(int productIndex, int quantity) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
-        if (optionalPlayer.isEmpty() || productIndex <= 0 || quantity <= 0)
+        if (playerId == null || productIndex <= 0 || quantity <= 0)
             return;
 
-        FTPlayer player = optionalPlayer.get();
-        player.getInventory().addItem(productIndex, quantity);
+        serviceManager.getInventoryService().addItem(playerId, productIndex, quantity, null);
     }
 
     @Override
     public void giveItem(int itemIndex, String category, int quantity) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
-        if (optionalPlayer.isEmpty() || itemIndex <= 0 || quantity <= 0)
+        if (playerId == null || itemIndex <= 0 || quantity <= 0)
             return;
 
         try {
@@ -167,13 +180,12 @@ public class PlayerScriptableImpl implements PlayerScriptable {
             return;
         }
 
-        FTPlayer player = optionalPlayer.get();
-        player.getInventory().addItem(itemIndex, category, quantity);
+        serviceManager.getInventoryService().addItem(playerId, itemIndex, category, quantity, null);
     }
 
     @Override
     public void sendGift(int productIndex, int quantity, String message) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
+        Optional<Player> optionalPlayer = getPlayer();
         if (optionalPlayer.isEmpty() || productIndex <= 0 || quantity <= 0)
             return;
 
@@ -181,16 +193,16 @@ public class PlayerScriptableImpl implements PlayerScriptable {
         if (product == null)
             return;
 
-        FTPlayer player = optionalPlayer.get();
+        Player player = optionalPlayer.get();
 
         Player sender = serviceManager.getPlayerService().findByName("JFTSE");
         if (sender == null) {
             sender = new Player();
-            sender.setId(player.getPlayer().getId());
+            sender.setId(player.getId());
         }
 
         Gift gift = new Gift();
-        gift.setReceiver(player.getPlayer());
+        gift.setReceiver(player);
         gift.setSender(sender);
         gift.setMessage(message);
         gift.setSeen(false);
@@ -198,75 +210,75 @@ public class PlayerScriptableImpl implements PlayerScriptable {
         gift.setUseTypeOption((byte) 0);
         serviceManager.getGiftService().save(gift);
 
-        player.getInventory().addItem(productIndex, quantity);
+        serviceManager.getInventoryService().addItem(player.getId(), productIndex, quantity, null);
     }
 
     @Override
     public void sendMessage(String message) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
+        Optional<Player> optionalPlayer = getPlayer();
         if (optionalPlayer.isEmpty() || message == null || message.isEmpty())
             return;
 
-        FTPlayer player = optionalPlayer.get();
+        Player player = optionalPlayer.get();
 
         Player sender = serviceManager.getPlayerService().findByName("JFTSE");
         if (sender == null) {
             sender = new Player();
-            sender.setId(player.getPlayer().getId());
+            sender.setId(player.getId());
         }
 
         Message msg = new Message();
         msg.setSeen(false);
         msg.setSender(sender);
-        msg.setReceiver(player.getPlayer());
+        msg.setReceiver(player);
         msg.setMessage(message);
         serviceManager.getMessageService().save(msg);
 
-        FTConnection connection = gameManager.getConnectionByPlayerId(player.getPlayer().getId());
+        FTConnection connection = gameManager.getConnectionByPlayerId(player.getId());
         if (connection != null) {
-            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg);
+            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg, sender.getName());
 
             PacketMessage packetMessage = PacketMessage.builder()
-                    .receivingPlayerId(player.getPlayer().getId())
+                    .receivingPlayerId(player.getId())
                     .packet(notifyPacket)
                     .build();
-            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getPlayer().getName() + "(GameServer)");
+            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getName() + "(ChatServer)");
         }
     }
 
     @Override
     public void sendMessage(String sender, String message) {
-        Optional<FTPlayer> optionalPlayer = getPlayer();
+        Optional<Player> optionalPlayer = getPlayer();
         if (optionalPlayer.isEmpty() || sender == null || sender.isEmpty() || message == null || message.isEmpty())
             return;
 
-        FTPlayer player = optionalPlayer.get();
+        Player player = optionalPlayer.get();
 
         Player senderPlayer = serviceManager.getPlayerService().findByName(sender);
         if (senderPlayer == null) {
             senderPlayer = serviceManager.getPlayerService().findByName("JFTSE");
             if (senderPlayer == null) {
                 senderPlayer = new Player();
-                senderPlayer.setId(player.getPlayer().getId());
+                senderPlayer.setId(player.getId());
             }
         }
 
         Message msg = new Message();
         msg.setSeen(false);
         msg.setSender(senderPlayer);
-        msg.setReceiver(player.getPlayer());
+        msg.setReceiver(player);
         msg.setMessage(message);
         serviceManager.getMessageService().save(msg);
 
-        FTConnection connection = gameManager.getConnectionByPlayerId(player.getPlayer().getId());
+        FTConnection connection = gameManager.getConnectionByPlayerId(player.getId());
         if (connection != null) {
-            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg);
+            S2CReceivedMessageNotificationPacket notifyPacket = new S2CReceivedMessageNotificationPacket(msg, senderPlayer.getName());
 
             PacketMessage packetMessage = PacketMessage.builder()
-                    .receivingPlayerId(player.getPlayer().getId())
+                    .receivingPlayerId(player.getId())
                     .packet(notifyPacket)
                     .build();
-            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getPlayer().getName() + "(GameServer)");
+            RProducerService.getInstance().send(packetMessage, "game.messenger.message chat.messenger.message", player.getName() + "(ChatServer)");
         }
     }
 

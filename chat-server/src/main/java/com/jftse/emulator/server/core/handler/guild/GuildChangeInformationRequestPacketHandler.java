@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.core.handler.guild;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.guild.S2CGuildDataAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
@@ -26,22 +26,21 @@ public class GuildChangeInformationRequestPacketHandler implements PacketHandler
     @Override
     public void handle(FTConnection connection, CMSGGuildChangeInformation guildChangeInformationRequestPacket) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player activePlayer = client.getPlayer();
-        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        FTPlayer activePlayer = client.getPlayer();
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer.getId());
 
         if (guildMember != null && guildMember.getMemberRank() > 1) {
-            Guild guild = guildMember.getGuild();
+            Guild guild = guildService.changeInformation(guildMember.getGuild().getId(),
+                    guildChangeInformationRequestPacket.getIntroduction(),
+                    guildChangeInformationRequestPacket.getMinLevel(),
+                    guildChangeInformationRequestPacket.getIsPublic(),
+                    guildChangeInformationRequestPacket.getAllowedCharacterTypes().toArray(new Byte[0]));
 
-            guild.setIntroduction(guildChangeInformationRequestPacket.getIntroduction());
-            guild.setLevelRestriction(guildChangeInformationRequestPacket.getMinLevel());
-            guild.setIsPublic(guildChangeInformationRequestPacket.getIsPublic());
-            guild.setAllowedCharacterType(guildChangeInformationRequestPacket.getAllowedCharacterTypes().toArray(new Byte[0]));
-            guildService.save(guild);
-
-            connection.sendTCP(new S2CGuildDataAnswerPacket((byte) 0, guild));
+            if (guild != null)
+                connection.sendTCP(new S2CGuildDataAnswerPacket((byte) 0, guild));
         }
     }
 }

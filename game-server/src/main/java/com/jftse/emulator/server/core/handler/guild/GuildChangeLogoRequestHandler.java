@@ -1,10 +1,11 @@
 package com.jftse.emulator.server.core.handler.guild;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
@@ -29,41 +30,42 @@ public class GuildChangeLogoRequestHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGGuildChangeLogo c2SGuildChangeLogoRequestPacket) {
         FTClient client = connection.getClient();
-        if (client == null ||client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player player = client.getPlayer();
-        GuildMember guildMember = guildMemberService.getByPlayer(player);
+        FTPlayer player = client.getPlayer();
+        GuildMember guildMember = guildMemberService.getByPlayer(player.getId());
 
-        if (guildMember.getMemberRank() == 3) {
+        if (guildMember != null && guildMember.getMemberRank() == 3) {
+            Guild guild = guildMember.getGuild();
             if (c2SGuildChangeLogoRequestPacket.getPocketIdLogoBackground() > 0) {
                 PlayerPocket backgroundImagePocket = playerPocketService.findById((long) c2SGuildChangeLogoRequestPacket.getPocketIdLogoBackground());
-                guildMember.getGuild().setLogoBackgroundId(backgroundImagePocket.getItemIndex());
-                guildMember.getGuild().setLogoBackgroundColor(c2SGuildChangeLogoRequestPacket.getLogoBackgroundColor());
+                guild.setLogoBackgroundId(backgroundImagePocket.getItemIndex());
+                guild.setLogoBackgroundColor(c2SGuildChangeLogoRequestPacket.getLogoBackgroundColor());
             } else {
-                guildMember.getGuild().setLogoBackgroundId(-1);
-                guildMember.getGuild().setLogoBackgroundColor(-1);
+                guild.setLogoBackgroundId(-1);
+                guild.setLogoBackgroundColor(-1);
             }
 
             if (c2SGuildChangeLogoRequestPacket.getPocketIdLogoPattern() > 0) {
                 PlayerPocket patternPocket = playerPocketService.findById((long) c2SGuildChangeLogoRequestPacket.getPocketIdLogoPattern());
-                guildMember.getGuild().setLogoPatternId(patternPocket.getItemIndex());
-                guildMember.getGuild().setLogoPatternColor(c2SGuildChangeLogoRequestPacket.getLogoPatternColor());
+                guild.setLogoPatternId(patternPocket.getItemIndex());
+                guild.setLogoPatternColor(c2SGuildChangeLogoRequestPacket.getLogoPatternColor());
             } else {
-                guildMember.getGuild().setLogoPatternId(-1);
-                guildMember.getGuild().setLogoPatternColor(-1);
+                guild.setLogoPatternId(-1);
+                guild.setLogoPatternColor(-1);
             }
 
             if (c2SGuildChangeLogoRequestPacket.getPocketIdLogoMark() > 0) {
                 PlayerPocket markPocket = playerPocketService.findById((long) c2SGuildChangeLogoRequestPacket.getPocketIdLogoMark());
-                guildMember.getGuild().setLogoMarkId(markPocket.getItemIndex());
-                guildMember.getGuild().setLogoMarkColor(c2SGuildChangeLogoRequestPacket.getLogoMarkColor());
+                guild.setLogoMarkId(markPocket.getItemIndex());
+                guild.setLogoMarkColor(c2SGuildChangeLogoRequestPacket.getLogoMarkColor());
             } else {
-                guildMember.getGuild().setLogoMarkId(-1);
-                guildMember.getGuild().setLogoMarkColor(-1);
+                guild.setLogoMarkId(-1);
+                guild.setLogoMarkColor(-1);
             }
 
-            guildService.save(guildMember.getGuild());
+            guildService.save(guild);
 
             SMSGGuildChangeLogo answer = SMSGGuildChangeLogo.builder()
                     .result((short) 0)

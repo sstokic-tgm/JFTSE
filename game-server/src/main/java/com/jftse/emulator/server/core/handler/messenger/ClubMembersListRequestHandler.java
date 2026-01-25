@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.rabbit.messages.GuildMemberListOnRequestMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.messenger.CMSGGuildMemberList;
@@ -20,10 +20,10 @@ public class ClubMembersListRequestHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGGuildMemberList packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
-        Player activePlayer = ftClient.getPlayer();
+        FTPlayer activePlayer = ftClient.getPlayer();
 
         GuildMemberListOnRequestMessage message = GuildMemberListOnRequestMessage.builder()
                 .playerId(activePlayer.getId())

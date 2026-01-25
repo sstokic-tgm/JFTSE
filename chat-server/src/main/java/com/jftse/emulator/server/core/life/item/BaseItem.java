@@ -1,8 +1,7 @@
 package com.jftse.emulator.server.core.life.item;
 
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.pocket.Pocket;
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.server.core.protocol.IPacket;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -12,7 +11,7 @@ public abstract class BaseItem {
     private final String category;
 
     protected Long localPlayerId;
-    protected final MultiValueMap<Long, Packet> packetsToSend;
+    protected final MultiValueMap<Long, IPacket> packetsToSend;
 
     protected BaseItem(final int itemIndex, final String name, final String category) {
         this.itemIndex = itemIndex;
@@ -34,10 +33,10 @@ public abstract class BaseItem {
         return category;
     }
 
-    public abstract boolean processPlayer(Player player);
-    public abstract boolean processPocket(Pocket pocket);
+    public abstract boolean processPlayer(FTPlayer player);
+    public abstract boolean processPocket(Long pocketId);
 
-    public final MultiValueMap<Long, Packet> getPacketsToSend() {
+    public final MultiValueMap<Long, IPacket> getPacketsToSend() {
         return packetsToSend;
     }
 }

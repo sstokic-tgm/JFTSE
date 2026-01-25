@@ -21,7 +21,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class HomeServiceImpl implements HomeService {
     private final AccountHomeRepository accountHomeRepository;
     private final HomeInventoryRepository homeInventoryRepository;
@@ -29,46 +28,54 @@ public class HomeServiceImpl implements HomeService {
     private final ItemHouseDecoRepository itemHouseDecoRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AccountHome save(AccountHome accountHome) {
         return accountHomeRepository.save(accountHome);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public HomeInventory save(HomeInventory homeInventory) {
         return homeInventoryRepository.save(homeInventory);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public HomeInventory findById(long homeInventoryId) {
         Optional<HomeInventory> homeInventory = homeInventoryRepository.findById(homeInventoryId);
         return homeInventory.orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AccountHome findById(Long accountHomeId) {
         Optional<AccountHome> accountHome = accountHomeRepository.findById(accountHomeId);
         return accountHome.orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AccountHome findAccountHomeByAccountId(Long accountId) {
 
-        Optional<AccountHome> accountHome = accountHomeRepository.findAccountHomeByAccountId(accountId);
+        Optional<AccountHome> accountHome = accountHomeRepository.findByAccountId(accountId);
         return accountHome.orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<HomeInventory> findAllByAccountHome(AccountHome accountHome) {
         return homeInventoryRepository.findAllByAccountHome(accountHome);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemHouse findItemHouseByItemIndex(Integer itemIndex) {
         Optional<ItemHouse> itemHouse = itemHouseRepository.findItemHouseByItemIndex(itemIndex);
         return itemHouse.orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemHouseDeco findItemHouseDecoByItemIndex(Integer itemIndex) {
         Optional<ItemHouseDeco> itemHouseDeco = itemHouseDecoRepository.findItemHouseDecoByItemIndex(itemIndex);
         return itemHouseDeco.orElse(null);
@@ -158,11 +165,13 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
+    @Transactional
     public void removeItemFromHomeInventory(Long homeInventoryId) {
         homeInventoryRepository.deleteById(homeInventoryId);
     }
 
     @Override
+    @Transactional
     public void removeAllHomeItemsByAccountHome(AccountHome accountHome) {
         homeInventoryRepository.deleteAllByAccountHome(accountHome);
     }

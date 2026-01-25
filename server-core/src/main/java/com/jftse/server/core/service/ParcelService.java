@@ -14,7 +14,11 @@ public interface ParcelService {
 
     List<Parcel> findBySender(Player sender);
 
+    List<Parcel> findWithPlayerBySender(Long senderId);
+
     List<Parcel> findByReceiver(Player receiver);
+
+    List<Parcel> findWithPlayerByReceiver(Long receiverId);
 
     long deleteBySender(Player sender);
 

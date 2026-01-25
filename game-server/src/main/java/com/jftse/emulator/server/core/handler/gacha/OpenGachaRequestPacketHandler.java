@@ -13,7 +13,7 @@ import java.util.List;
 
 @PacketId(CMSGOpenGacha.PACKET_ID)
 public class OpenGachaRequestPacketHandler implements PacketHandler<FTConnection, CMSGOpenGacha> {
-    private final LotteryService lotteryService;
+    private final LotteryService<FTConnection> lotteryService;
 
     public OpenGachaRequestPacketHandler() {
         lotteryService = ServiceManager.getInstance().getLotteryService();

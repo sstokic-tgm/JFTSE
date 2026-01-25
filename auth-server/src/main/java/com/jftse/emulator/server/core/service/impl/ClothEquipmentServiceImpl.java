@@ -3,7 +3,7 @@ package com.jftse.emulator.server.core.service.impl;
 import com.jftse.entities.database.model.item.ItemPart;
 import com.jftse.entities.database.model.player.ClothEquipment;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.entities.database.model.player.EquippedItemStats;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.repository.item.ItemPartRepository;
 import com.jftse.entities.database.repository.player.ClothEquipmentRepository;
@@ -19,7 +19,6 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ClothEquipmentServiceImpl implements ClothEquipmentService {
     private final ItemPartRepository itemPartRepository;
     private final ClothEquipmentRepository clothEquipmentRepository;
@@ -27,17 +26,20 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
     private final PlayerPocketService playerPocketService;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ClothEquipment save(ClothEquipment clothEquipment) {
         return clothEquipmentRepository.save(clothEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClothEquipment findClothEquipmentById(Long id) {
         Optional<ClothEquipment> clothEquipment = clothEquipmentRepository.findById(id);
         return clothEquipment.orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Integer> getEquippedCloths(Player player) {
         Map<String, Integer> result = new HashMap<>();
 
@@ -83,7 +85,8 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
     }
 
     @Override
-    public StatusPointsAddedDto getStatusPointsFromCloths(Player player) {
+    @Transactional(readOnly = true)
+    public EquippedItemStats getStatusPointsFromCloths(Player player) {
         ClothEquipment clothEquipment = findClothEquipmentById(player.getClothEquipment().getId());
 
         List<Integer> itemIndexList = new ArrayList<>();
@@ -102,10 +105,10 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
 
         List<ItemPart> itemPartList = itemPartRepository.findByItemIndexIn(itemIndexList);
 
-        byte strength = 0;
-        byte stamina = 0;
-        byte dexterity = 0;
-        byte willpower = 0;
+        int strength = 0;
+        int stamina = 0;
+        int dexterity = 0;
+        int willpower = 0;
         int addHp = 0;
 
         for (ItemPart itemPart : itemPartList) {
@@ -116,13 +119,13 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
             addHp += itemPart.getAddHp();
         }
 
-        StatusPointsAddedDto statusPointsAddedDto = new StatusPointsAddedDto();
-        statusPointsAddedDto.setStrength(strength);
-        statusPointsAddedDto.setStamina(stamina);
-        statusPointsAddedDto.setDexterity(dexterity);
-        statusPointsAddedDto.setWillpower(willpower);
-        statusPointsAddedDto.setAddHp(addHp);
+        EquippedItemStats equippedItemStats = new EquippedItemStats();
+        equippedItemStats.setStrength(strength);
+        equippedItemStats.setStamina(stamina);
+        equippedItemStats.setDexterity(dexterity);
+        equippedItemStats.setWillpower(willpower);
+        equippedItemStats.setAddHp(addHp);
 
-        return statusPointsAddedDto;
+        return equippedItemStats;
     }
 }

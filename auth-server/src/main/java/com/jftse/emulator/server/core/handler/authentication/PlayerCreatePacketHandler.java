@@ -17,14 +17,12 @@ public class PlayerCreatePacketHandler implements PacketHandler<FTConnection, CM
     private final PlayerService playerService;
     private final ItemCharService itemCharService;
     private final HomeService homeService;
-    private final ClothEquipmentService clothEquipmentService;
 
     public PlayerCreatePacketHandler() {
         profaneWordsService = ServiceManager.getInstance().getProfaneWordsService();
         playerService = ServiceManager.getInstance().getPlayerService();
         itemCharService = ServiceManager.getInstance().getItemCharService();
         homeService = ServiceManager.getInstance().getHomeService();
-        clothEquipmentService = ServiceManager.getInstance().getClothEquipmentService();
     }
 
     @Override
@@ -32,7 +30,7 @@ public class PlayerCreatePacketHandler implements PacketHandler<FTConnection, CM
         String playerName = playerCreatePacket.getNickname();
         boolean isPlayerNameValid = !profaneWordsService.textContainsProfaneWord(playerName);
 
-        Player player = playerService.findByIdFetched((long) playerCreatePacket.getPlayerId());
+        Player player = playerService.findById((long) playerCreatePacket.getPlayerId());
         if (player == null || !isPlayerNameValid) {
             SMSGPlayerCreate playerCreate = SMSGPlayerCreate.builder().result((char) -1).build();
             connection.sendTCP(playerCreate);

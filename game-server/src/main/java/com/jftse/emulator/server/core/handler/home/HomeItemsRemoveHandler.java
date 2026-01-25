@@ -1,14 +1,15 @@
 package com.jftse.emulator.server.core.handler.home;
 
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.home.HomeInventory;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
@@ -35,20 +36,22 @@ public class HomeItemsRemoveHandler implements PacketHandler<FTConnection, CMSGR
     @Override
     public void handle(FTConnection connection, CMSGRemoveHomeItems packet) {
         FTClient client = connection.getClient();
-        Player player = client.getPlayer();
+        FTPlayer player = client.getPlayer();
+        Pocket pocket = pocketService.findById(player.getPocketId());
+
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
         HomeInventory hiItem = homeService.findById(packet.getHomeInventoryId());
         if (hiItem != null && hiItem.getAccountHome().getId().equals(accountHome.getId())) {
-            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hiItem.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), player.getPocket());
+            PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(hiItem.getItemIndex(), EItemCategory.HOUSE_DECO.getName(), pocket);
             if (playerPocket == null) {
                 playerPocket = new PlayerPocket();
                 playerPocket.setItemIndex(hiItem.getItemIndex());
-                playerPocket.setPocket(player.getPocket());
+                playerPocket.setPocket(pocket);
                 playerPocket.setItemCount(1);
                 playerPocket.setCategory(EItemCategory.HOUSE_DECO.getName());
                 playerPocket.setUseType(StringUtils.firstCharToUpperCase(EItemUseType.COUNT.getName().toLowerCase()));
 
-                pocketService.incrementPocketBelongings(player.getPocket());
+                pocketService.incrementPocketBelongings(pocket);
             } else {
                 playerPocket.setItemCount(playerPocket.getItemCount() + 1);
             }

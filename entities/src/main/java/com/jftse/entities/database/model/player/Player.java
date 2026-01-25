@@ -19,31 +19,32 @@ import java.util.List;
 @Audited
 @Entity
 public class Player extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private Account account;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pocket_id", referencedColumnName = "id", unique = true)
     private Pocket pocket;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "clothEquipment_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "clothEquipment_id", referencedColumnName = "id", unique = true)
     private ClothEquipment clothEquipment;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "quickSlotEquipment_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quickSlotEquipment_id", referencedColumnName = "id", unique = true)
     private QuickSlotEquipment quickSlotEquipment;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "toolSlotEquipment_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "toolSlotEquipment_id", referencedColumnName = "id", unique = true)
     private ToolSlotEquipment toolSlotEquipment;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "specialSlotEquipment_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialSlotEquipment_id", referencedColumnName = "id", unique = true)
     private SpecialSlotEquipment specialSlotEquipment;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "cardSlotEquipment_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cardSlotEquipment_id", referencedColumnName = "id", unique = true)
     private CardSlotEquipment cardSlotEquipment;
 
     /* @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
@@ -51,8 +52,8 @@ public class Player extends AbstractBaseModel {
     private BattlemonSlotEquipment battlemonSlotEquipment;
      */
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "playerStatistic_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "playerStatistic_id", referencedColumnName = "id", unique = true)
     private PlayerStatistic playerStatistic;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "player")

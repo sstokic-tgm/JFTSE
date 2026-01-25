@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
@@ -37,10 +38,10 @@ public class AddFriendApprovalRequestHandler implements PacketHandler<FTConnecti
     @Override
     public void handle(FTConnection connection, CMSGAddFriendApproval packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
-        Player activePlayer = ftClient.getPlayer();
+        FTPlayer activePlayer = ftClient.getPlayer();
         Player targetPlayer = playerService.findByName(packet.getPlayerName());
 
         List<Friend> friends = friendService.findByPlayer(targetPlayer);
@@ -61,18 +62,19 @@ public class AddFriendApprovalRequestHandler implements PacketHandler<FTConnecti
         if (packet.getApproved()) {
             friend.setEFriendshipState(EFriendshipState.Friends);
             Friend newFriend = new Friend();
-            newFriend.setPlayer(activePlayer);
+            newFriend.setPlayer(activePlayer.getPlayerRef());
             newFriend.setFriend(targetPlayer);
             newFriend.setEFriendshipState(EFriendshipState.Friends);
 
             friendService.save(friend);
             friendService.save(newFriend);
 
-            friends.clear();
-            friends = socialService.getFriendList(activePlayer, EFriendshipState.Friends);
-            S2CFriendsListAnswerPacket friendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
+            List<Player> friendList = socialService.getFriendList(activePlayer.getPlayerRef(), EFriendshipState.Friends).stream()
+                    .map(Friend::getFriend)
+                    .toList();
+            S2CFriendsListAnswerPacket friendsListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
             GameManager.getInstance().getClients().stream()
-                    .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(activePlayer.getId()))
+                    .filter(c -> c.hasPlayer() && c.getPlayer().getId() == activePlayer.getId())
                     .findFirst()
                     .ifPresent(c -> {
                         if (c.getConnection() != null) {
@@ -80,9 +82,10 @@ public class AddFriendApprovalRequestHandler implements PacketHandler<FTConnecti
                         }
                     });
 
-            friends.clear();
-            friends = socialService.getFriendList(targetPlayer, EFriendshipState.Friends);
-            S2CFriendsListAnswerPacket targetFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
+            friendList = socialService.getFriendList(targetPlayer, EFriendshipState.Friends).stream()
+                    .map(Friend::getFriend)
+                    .toList();
+            S2CFriendsListAnswerPacket targetFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friendList);
 
             PacketMessage packetMessage = PacketMessage.builder()
                     .receivingPlayerId(targetPlayer.getId())

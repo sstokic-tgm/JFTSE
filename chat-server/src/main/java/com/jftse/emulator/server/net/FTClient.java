@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.net;
 
-import com.jftse.emulator.server.core.constants.ChatMode;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -9,35 +9,76 @@ import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.singleplay.challenge.ChallengeGame;
 import com.jftse.emulator.server.core.singleplay.tutorial.TutorialGame;
 import com.jftse.entities.database.model.account.Account;
+import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.player.Player;
+import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.net.Client;
+import com.jftse.server.core.shared.PlayerLoadType;
 import com.jftse.server.core.shared.packets.game.SMSGReceiveData;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Setter
 public class FTClient extends Client<FTConnection> {
     private Long accountId;
-    private Long activePlayerId;
+    private boolean gameMaster = false;
+    private Integer accountStatus;
+    private final AtomicInteger ap = new AtomicInteger(0);
+    private AtomicReference<FTPlayer> ftPlayer = new AtomicReference<>();
 
-    private boolean isGameMaster = false;
+    public void loadPlayer(Account account, Player player, PlayerLoadType playerLoadType) {
+        this.accountId = account.getId();
+        this.gameMaster = account.getGameMaster();
+        this.accountStatus = account.getStatus();
+        this.ap.set(account.getAp());
+        this.ftPlayer.set(loadPlayer(player, playerLoadType));
+    }
+
+    public FTPlayer loadPlayer(Player player, PlayerLoadType playerLoadType) {
+        return switch (playerLoadType) {
+            case FULL_EQUIPMENT -> FTPlayer.initWithFullEquipment(player);
+            case EQUIPPED_ITEM_PARTS -> FTPlayer.initWithEquippedItemParts(player);
+            case EQUIPPED_QUICK_SLOTS -> FTPlayer.initWithEquippedQuickSlots(player);
+            case EQUIPPED_TOOL_SLOTS -> FTPlayer.initWithEquippedToolSlots(player);
+            case EQUIPPED_SPECIAL_SLOTS -> FTPlayer.initWithEquippedSpecialSlots(player);
+            case EQUIPPED_CARD_SLOTS -> FTPlayer.initWithEquippedCardSlots(player);
+            default -> FTPlayer.init(player);
+        };
+    }
+
+    public boolean refreshPlayer(FTPlayer player) {
+        return this.ftPlayer.compareAndSet(this.ftPlayer.get(), player);
+    }
+
+    public FTPlayer getPlayer() {
+        return this.ftPlayer.get();
+    }
+
+    public Optional<FTPlayer> getPlayerOptional() {
+        return Optional.ofNullable(this.ftPlayer.get());
+    }
+
+    public boolean hasPlayer() {
+        return this.ftPlayer.get() != null;
+    }
 
     private ChallengeGame activeChallengeGame;
     private TutorialGame activeTutorialGame;
 
     private Room activeRoom;
-    private RoomPlayer roomPlayer;
 
     private FruitManager fruitManager = new FruitManager();
 
     private volatile boolean inLobby = false;
     private volatile boolean isSpectator = false;
 
-    private volatile int lobbyGameModeTabFilter = ChatMode.ALL;
+    private volatile int lobbyGameModeTabFilter = GameMode.ALL;
     private volatile int lobbyCurrentPlayerListPage = 1;
     private volatile int lobbyCurrentRoomListPage = -1;
 
@@ -50,11 +91,17 @@ public class FTClient extends Client<FTConnection> {
     private AtomicBoolean isJoiningOrLeavingRoom = new AtomicBoolean(false);
     private AtomicBoolean isGoingReady = new AtomicBoolean(false);
     private AtomicBoolean isClosingSlot = new AtomicBoolean(false);
+    private AtomicBoolean isChangingSlot = new AtomicBoolean(false);
 
     private AtomicInteger dataRequestStep = new AtomicInteger(-1);
 
+    private Pet activePet;
+
     public boolean updateDataRequestStep(int step) {
         boolean valid = dataRequestStep.compareAndSet(step - 1, step);
+
+        if (!hasPlayer())
+            valid = false;
 
         SMSGReceiveData response = SMSGReceiveData.builder()
                 .dataType((byte) step)
@@ -70,33 +117,7 @@ public class FTClient extends Client<FTConnection> {
         return valid;
     }
 
-    public void setPlayer(Long id) {
-        this.activePlayerId = id;
-    }
-
-    public void setAccount(Long id) {
-        this.accountId = id;
-        final Account account = getAccount();
-        if (account != null) {
-            isGameMaster = account.getGameMaster();
-        }
-    }
-
-    public Player getPlayer() {
-        if (this.activePlayerId == null)
-            return null;
-        return ServiceManager.getInstance().getPlayerService().findById(activePlayerId);
-    }
-
-    public void savePlayer(Player player) {
-        ServiceManager.getInstance().getPlayerService().save(player);
-    }
-
     public Account getAccount() {
-        if (this.accountId == null && this.activePlayerId != null) {
-            final Player player = getPlayer();
-            return ServiceManager.getInstance().getAuthenticationService().findAccountById(player.getAccount().getId());
-        }
         if (this.accountId == null)
             return null;
         return ServiceManager.getInstance().getAuthenticationService().findAccountById(this.accountId);
@@ -112,7 +133,7 @@ public class FTClient extends Client<FTConnection> {
 
         final Room activeRoom = this.activeRoom;
         return activeRoom.getRoomPlayerList().stream()
-                .filter(p -> p.getPlayerId().equals(this.activePlayerId))
+                .filter(p -> p.getPlayerId() == this.getPlayer().getId())
                 .findFirst()
                 .orElse(null);
     }

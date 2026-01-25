@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CDeleteFriendResponsePacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendsListAnswerPacket;
@@ -12,6 +13,7 @@ import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.FriendService;
+import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.SocialService;
 import com.jftse.server.core.shared.packets.messenger.CMSGDeleteFriend;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
@@ -22,26 +24,30 @@ import java.util.List;
 public class DeleteFriendRequestHandler implements PacketHandler<FTConnection, CMSGDeleteFriend> {
     private final FriendService friendService;
     private final SocialService socialService;
+    private final PlayerService playerService;
 
     private final RProducerService rProducerService;
 
     public DeleteFriendRequestHandler() {
         friendService = ServiceManager.getInstance().getFriendService();
         socialService = ServiceManager.getInstance().getSocialService();
+        playerService = ServiceManager.getInstance().getPlayerService();
         rProducerService = RProducerService.getInstance();
     }
 
     @Override
     public void handle(FTConnection connection, CMSGDeleteFriend packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
-        Player activePlayer = ftClient.getPlayer();
+        FTPlayer activePlayer = ftClient.getPlayer();
         Friend friend1 = friendService.findByPlayerIdAndFriendId(activePlayer.getId(), packet.getFriendId());
         if (friend1 != null) {
             friendService.remove(friend1.getId());
-            S2CDeleteFriendResponsePacket s2CDeleteFriendResponsePacket = new S2CDeleteFriendResponsePacket(friend1.getFriend());
+            Player pFriend = playerService.findById(friend1.getFriend().getId());
+
+            S2CDeleteFriendResponsePacket s2CDeleteFriendResponsePacket = new S2CDeleteFriendResponsePacket(pFriend);
             connection.sendTCP(s2CDeleteFriendResponsePacket);
         }
 
@@ -49,7 +55,9 @@ public class DeleteFriendRequestHandler implements PacketHandler<FTConnection, C
         if (friend2 != null) {
             friendService.remove(friend2.getId());
 
-            List<Friend> friends = socialService.getFriendList(friend2.getPlayer(), EFriendshipState.Friends);
+            List<Player> friends = socialService.getFriendList(friend2.getPlayer(), EFriendshipState.Friends).stream()
+                    .map(Friend::getFriend)
+                    .toList();
             S2CFriendsListAnswerPacket targetFriendsListAnswerPacket = new S2CFriendsListAnswerPacket(friends);
 
             PacketMessage packetMessage = PacketMessage.builder()

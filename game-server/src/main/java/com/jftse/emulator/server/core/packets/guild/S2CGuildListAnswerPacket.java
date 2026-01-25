@@ -7,6 +7,7 @@ import com.jftse.server.core.protocol.PacketOperations;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
+import java.util.Set;
 
 @Log4j2
 public class S2CGuildListAnswerPacket extends Packet {
@@ -26,7 +27,7 @@ public class S2CGuildListAnswerPacket extends Packet {
             this.write(guild.getLogoMarkColor());
             this.write(guild.getName());
             this.write(guild.getIsPublic());
-            List<GuildMember> memberList = guild.getMemberList();
+            Set<GuildMember> memberList = guild.getMemberList();
             GuildMember clubMaster = memberList.stream().filter(gm -> gm.getMemberRank() == 3).findFirst().orElse(null);
             if (clubMaster == null)
                 log.debug("clubMaster == null, guild id: " + guild.getId() + " guild name: " + guild.getName());

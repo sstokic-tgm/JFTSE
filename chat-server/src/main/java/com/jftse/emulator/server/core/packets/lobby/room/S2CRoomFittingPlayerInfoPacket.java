@@ -1,12 +1,10 @@
 package com.jftse.emulator.server.core.packets.lobby.room;
 
+import com.jftse.emulator.server.core.client.EquippedItemParts;
+import com.jftse.emulator.server.core.client.GuildView;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.utils.BattleUtils;
-import com.jftse.entities.database.model.guild.Guild;
-import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.entities.database.model.player.ClothEquipment;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.entities.database.model.player.EquippedItemStats;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
@@ -14,43 +12,39 @@ public class S2CRoomFittingPlayerInfoPacket extends Packet {
     public S2CRoomFittingPlayerInfoPacket(short position, RoomPlayer roomPlayer) {
         super(PacketOperations.S2CRoomFittingPlayerInfo);
 
-        this.write(position);
-
-        Guild guild = null;
-        GuildMember guildMember = roomPlayer.getGuildMember();
-        if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
-            guild = guildMember.getGuild();
-
-        Player player = roomPlayer.getPlayer();
-        ClothEquipment clothEquipment = roomPlayer.getClothEquipment();
-        StatusPointsAddedDto statusPointsAddedDto = roomPlayer.getStatusPointsAddedDto();
+        EquippedItemParts equippedItemParts = roomPlayer.getEquippedItemPartsIDX();
+        EquippedItemStats equippedItemStats = roomPlayer.getEquippedItemStats();
 
         boolean isSpectator = roomPlayer.getPosition() > 3;
-        this.write(player.getName());
-        this.write(player.getLevel());
-        this.write(player.getAccount().getGameMaster());
+
+        this.write(position);
+        this.write(roomPlayer.getName());
+        this.write((byte) roomPlayer.getLevel());
+        this.write(roomPlayer.isGameMaster());
         this.write(roomPlayer.isMaster());
         this.write(roomPlayer.isReady());
         this.write(roomPlayer.isFitting());
-        this.write(player.getPlayerType());
+        this.write((byte) roomPlayer.getPlayerType());
         this.write(isSpectator);
         this.write((byte) 0); // unk3
-        this.write(guild != null ? guild.getName() : "");
+
+        GuildView guild = roomPlayer.getGuild();
+        this.write(guild != null ? guild.name() : "");
 
         if (guild != null) {
-            this.write(guild.getLogoBackgroundId());
-            this.write(guild.getLogoBackgroundColor());
-            this.write(guild.getLogoPatternId());
-            this.write(guild.getLogoPatternColor());
-            this.write(guild.getLogoMarkId());
-            this.write(guild.getLogoMarkColor());
+            this.write(guild.logoBackgroundId());
+            this.write(guild.logoBackgroundColor());
+            this.write(guild.logoPatternId());
+            this.write(guild.logoPatternColor());
+            this.write(guild.logoMarkId());
+            this.write(guild.logoMarkColor());
         } else {
             for (int i = 0; i < 6; i++)
                 this.write(0);
         }
 
         this.write((byte) 0);
-        this.write(roomPlayer.getCoupleId() != null ? roomPlayer.getCouple().getFriend().getName() : "");
+        this.write(roomPlayer.getCoupleName());
         this.write(0);
         this.write((byte) 0);
         this.write((short) 0); // emblem slot 1
@@ -58,18 +52,18 @@ public class S2CRoomFittingPlayerInfoPacket extends Packet {
         this.write((short) 0); // emblem slot 3
         this.write((short) 0); // emblem slot 4
 
-        this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
+        this.write((BattleUtils.calculatePlayerHp(roomPlayer.getLevel()) + equippedItemStats.getAddHp()));
 
         // status points
-        this.write(player.getStrength());
-        this.write(player.getStamina());
-        this.write(player.getDexterity());
-        this.write(player.getWillpower());
+        this.write((byte) roomPlayer.getStrength());
+        this.write((byte) roomPlayer.getStamina());
+        this.write((byte) roomPlayer.getDexterity());
+        this.write((byte) roomPlayer.getWillpower());
         // enchant added status points
-        this.write((byte) (statusPointsAddedDto.getAddStr() + statusPointsAddedDto.getStrength()));
-        this.write((byte) (statusPointsAddedDto.getAddSta() + statusPointsAddedDto.getStamina()));
-        this.write((byte) (statusPointsAddedDto.getAddDex() + statusPointsAddedDto.getDexterity()));
-        this.write((byte) (statusPointsAddedDto.getAddWil() + statusPointsAddedDto.getWillpower()));
+        this.write((byte) (equippedItemStats.getEnchantStr() + equippedItemStats.getStrength()));
+        this.write((byte) (equippedItemStats.getEnchantSta() + equippedItemStats.getStamina()));
+        this.write((byte) (equippedItemStats.getEnchantDex() + equippedItemStats.getDexterity()));
+        this.write((byte) (equippedItemStats.getEnchantWil() + equippedItemStats.getWillpower()));
         // ??
         for (int i = 5; i < 13; i++) {
             this.write((byte) 0);
@@ -100,17 +94,17 @@ public class S2CRoomFittingPlayerInfoPacket extends Packet {
         }
         /* end - status points */
 
-        this.write(clothEquipment.getHair());
-        this.write(clothEquipment.getFace());
-        this.write(clothEquipment.getDress());
-        this.write(clothEquipment.getPants());
-        this.write(clothEquipment.getSocks());
-        this.write(clothEquipment.getShoes());
-        this.write(clothEquipment.getGloves());
-        this.write(clothEquipment.getRacket());
-        this.write(clothEquipment.getGlasses());
-        this.write(clothEquipment.getBag());
-        this.write(clothEquipment.getHat());
-        this.write(clothEquipment.getDye());
+        this.write(equippedItemParts.hair());
+        this.write(equippedItemParts.face());
+        this.write(equippedItemParts.dress());
+        this.write(equippedItemParts.pants());
+        this.write(equippedItemParts.socks());
+        this.write(equippedItemParts.shoes());
+        this.write(equippedItemParts.gloves());
+        this.write(equippedItemParts.racket());
+        this.write(equippedItemParts.glasses());
+        this.write(equippedItemParts.bag());
+        this.write(equippedItemParts.hat());
+        this.write(equippedItemParts.dye());
     }
 }

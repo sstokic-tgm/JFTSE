@@ -18,23 +18,25 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ToolSlotEquipmentServiceImpl implements ToolSlotEquipmentService {
     private final ToolSlotEquipmentRepository toolSlotEquipmentRepository;
     private final PlayerPocketService playerPocketService;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ToolSlotEquipment save(ToolSlotEquipment toolSlotEquipment) {
         return toolSlotEquipmentRepository.save(toolSlotEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ToolSlotEquipment findById(Long id) {
         Optional<ToolSlotEquipment> toolSlotEquipment = toolSlotEquipmentRepository.findById(id);
         return toolSlotEquipment.orElse(null);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateToolSlots(ToolSlotEquipment toolSlotEquipment, Integer toolSlotId) {
         toolSlotEquipment = findById(toolSlotEquipment.getId());
 
@@ -53,29 +55,45 @@ public class ToolSlotEquipmentServiceImpl implements ToolSlotEquipmentService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateToolSlots(Player player, List<Integer> toolSlotItems) {
         Pocket pocket = player.getPocket();
         ToolSlotEquipment toolSlotEquipment = findById(player.getToolSlotEquipment().getId());
 
-        PlayerPocket item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(0), pocket);
-        toolSlotEquipment.setSlot1(item == null ? 0 : item.getId().intValue());
+        List<PlayerPocket> playerPockets = playerPocketService.getItemsAsPocket(
+                List.of(
+                        Long.valueOf(toolSlotItems.get(0)),
+                        Long.valueOf(toolSlotItems.get(1)),
+                        Long.valueOf(toolSlotItems.get(2)),
+                        Long.valueOf(toolSlotItems.get(3)),
+                        Long.valueOf(toolSlotItems.get(4))
+                ),
+                pocket
+        );
 
-        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(1), pocket);
-        toolSlotEquipment.setSlot2(item == null ? 0 : item.getId().intValue());
+        for (int i = 0; i < toolSlotItems.size(); i++) {
+            Integer itemId = toolSlotItems.get(i);
+            PlayerPocket item = playerPockets.stream()
+                    .filter(p -> p.getId().intValue() == itemId)
+                    .findFirst()
+                    .orElse(null);
 
-        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(2), pocket);
-        toolSlotEquipment.setSlot3(item == null ? 0 : item.getId().intValue());
+            int slotValue = item == null ? 0 : item.getId().intValue();
 
-        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(3), pocket);
-        toolSlotEquipment.setSlot4(item == null ? 0 : item.getId().intValue());
-
-        item = playerPocketService.getItemAsPocket((long) toolSlotItems.get(4), pocket);
-        toolSlotEquipment.setSlot5(item == null ? 0 : item.getId().intValue());
+            switch (i) {
+                case 0 -> toolSlotEquipment.setSlot1(slotValue);
+                case 1 -> toolSlotEquipment.setSlot2(slotValue);
+                case 2 -> toolSlotEquipment.setSlot3(slotValue);
+                case 3 -> toolSlotEquipment.setSlot4(slotValue);
+                case 4 -> toolSlotEquipment.setSlot5(slotValue);
+            }
+        }
 
         save(toolSlotEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Integer> getEquippedToolSlots(Player player) {
         List<Integer> result = new ArrayList<>();
 

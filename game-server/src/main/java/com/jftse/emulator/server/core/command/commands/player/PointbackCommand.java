@@ -63,9 +63,9 @@ public class PointbackCommand extends AbstractCommand {
 
                 boolean isActivePlayer = rp.getPosition() < 4;
                 if (isActivePlayer) {
-                    if (roomPlayer.getPlayerId().equals(rp.getPlayerId())) {
+                    if (roomPlayer.getPlayerId() == rp.getPlayerId()) {
                         game.setPointBackVote(rp.getPosition());
-                        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", rp.getPlayer().getName() + " voted for point back");
+                        S2CChatRoomAnswerPacket chatRoomAnswerPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", rp.getName() + " voted for point back");
                         GameManager.getInstance().getClientsInRoom(activeRoom.getRoomId()).forEach(c -> c.getConnection().sendTCP(chatRoomAnswerPacket));
                     }
                 }

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.chat;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.rabbit.messages.ChatWhisperMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
@@ -16,10 +17,9 @@ public class ChatMessageWhisperPacketHandler implements PacketHandler<FTConnecti
     @Override
     public void handle(FTConnection connection, CMSGChatMessageWhisper whisperReqPacket) {
         FTClient client = connection.getClient();
-        Player player = client.getPlayer();
-        if (player == null) {
+        if (!client.hasPlayer())
             return;
-        }
+        FTPlayer player = client.getPlayer();
 
         Player receiver = ServiceManager.getInstance().getPlayerService().findByName(whisperReqPacket.getReceiver());
         if (receiver == null) {

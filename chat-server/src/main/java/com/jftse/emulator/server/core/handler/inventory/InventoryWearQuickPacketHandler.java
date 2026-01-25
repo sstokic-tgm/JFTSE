@@ -1,16 +1,14 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryWearQuickAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.QuickSlotEquipmentService;
 import com.jftse.server.core.shared.packets.inventory.CMSGInventoryWearQuick;
-
-import java.util.List;
 
 @PacketId(CMSGInventoryWearQuick.PACKET_ID)
 public class InventoryWearQuickPacketHandler implements PacketHandler<FTConnection, CMSGInventoryWearQuick> {
@@ -23,15 +21,14 @@ public class InventoryWearQuickPacketHandler implements PacketHandler<FTConnecti
     @Override
     public void handle(FTConnection connection, CMSGInventoryWearQuick packet) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player player = client.getPlayer();
+        FTPlayer player = client.getPlayer();
+        quickSlotEquipmentService.updateQuickSlots(player.getPlayer(), packet.getQuickSlotList());
+        player.loadQuickSlots();
 
-        quickSlotEquipmentService.updateQuickSlots(player, packet.getQuickSlotList());
-
-        List<Integer> quickSlotList = quickSlotEquipmentService.getEquippedQuickSlots(player);
-        S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(quickSlotList);
+        S2CInventoryWearQuickAnswerPacket inventoryWearQuickAnswerPacket = new S2CInventoryWearQuickAnswerPacket(packet.getQuickSlotList());
         connection.sendTCP(inventoryWearQuickAnswerPacket);
     }
 }

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.home;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.home.S2CHomeDataPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
@@ -7,8 +8,8 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.home.AccountHome;
 import com.jftse.entities.database.model.home.HomeInventory;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
@@ -36,10 +37,11 @@ public class HomeItemsPlaceRequestPacketHandler implements PacketHandler<FTConne
     @Override
     public void handle(FTConnection connection, CMSGPlaceHomeItems homeItemsPlaceReqPacket) {
         FTClient client = connection.getClient();
-        Player player = client.getPlayer();
+        FTPlayer player = client.getPlayer();
+        Pocket pocket = pocketService.findById(player.getPocketId());
 
         AccountHome accountHome = homeService.findAccountHomeByAccountId(client.getAccount().getId());
-        List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItemsByCategory(player.getPocket(), EItemCategory.HOUSE_DECO.getName());
+        List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItemsByCategory(pocket, EItemCategory.HOUSE_DECO.getName());
         List<HomeItem> homeItemDataList = homeItemsPlaceReqPacket.getItems();
 
         for (HomeItem hidl : homeItemDataList) {
@@ -54,7 +56,7 @@ public class HomeItemsPlaceRequestPacketHandler implements PacketHandler<FTConne
 
                     if (itemCount == 0) {
                         playerPocketService.remove((long) inventoryItemId);
-                        pocketService.decrementPocketBelongings(player.getPocket());
+                        pocketService.decrementPocketBelongings(pocket);
 
                         S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(inventoryItemId);
                         connection.sendTCP(inventoryItemRemoveAnswerPacket);

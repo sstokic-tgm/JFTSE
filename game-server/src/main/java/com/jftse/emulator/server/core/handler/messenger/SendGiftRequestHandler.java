@@ -1,11 +1,12 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedGiftNotificationPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CSendGiftAnswerPacket;
+import com.jftse.emulator.server.core.packets.pet.S2CPetAddPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
-import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
@@ -13,53 +14,51 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.auctionhouse.PriceType;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.messenger.Gift;
+import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
-import com.jftse.server.core.item.EItemCategory;
-import com.jftse.server.core.item.EItemUseType;
+import com.jftse.server.core.item.GoldBackAdded;
+import com.jftse.server.core.item.PetCreated;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.messenger.CMSGSendGift;
+import com.jftse.server.core.shared.packets.shop.SMSGSetMoney;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
-import org.springframework.util.ReflectionUtils;
+import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Log4j2
 @PacketId(CMSGSendGift.PACKET_ID)
 public class SendGiftRequestHandler implements PacketHandler<FTConnection, CMSGSendGift> {
     private final PlayerService playerService;
     private final ProductService productService;
-    private final PocketService pocketService;
-    private final PlayerPocketService playerPocketService;
     private final GiftService giftService;
+    private final InventoryService inventoryService;
 
     private final RProducerService rProducerService;
 
     public SendGiftRequestHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         productService = ServiceManager.getInstance().getProductService();
-        pocketService = ServiceManager.getInstance().getPocketService();
-        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         giftService = ServiceManager.getInstance().getGiftService();
+        inventoryService = ServiceManager.getInstance().getInventoryService();
         rProducerService = RProducerService.getInstance();
     }
 
     @Override
     public void handle(FTConnection connection, CMSGSendGift packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
         byte option = packet.getOption();
 
         Product product = productService.findProductByProductItemIndex(packet.getProductIndex());
-        Player sender = ftClient.getPlayer();
-        Account senderAcc = ftClient.getAccount();
+        FTPlayer sender = ftClient.getPlayer();
+        Account account = ftClient.getAccount();
         Player receiver = playerService.findByName(packet.getReceiverName());
 
         if (receiver != null && product != null) {
@@ -74,8 +73,8 @@ public class SendGiftRequestHandler implements PacketHandler<FTConnection, CMSGS
                 return;
             }
 
-            List<Gift> gifts = giftService.findByReceiver(receiver);
-            List<Gift> senderGifts = giftService.findBySender(sender);
+            List<Gift> gifts = giftService.findWithPlayerByReceiver(receiver.getId());
+            List<Gift> senderGifts = giftService.findWithPlayerBySender(sender.getId());
             if (gifts.size() > 128 || senderGifts.size() > 128) {
                 S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket((short) -9, null);
                 connection.sendTCP(s2CSendGiftAnswerPacket);
@@ -84,14 +83,14 @@ public class SendGiftRequestHandler implements PacketHandler<FTConnection, CMSGS
 
             Gift gift = new Gift();
             gift.setReceiver(receiver);
-            gift.setSender(sender);
+            gift.setSender(sender.getPlayer());
             gift.setMessage(packet.getMessage());
             gift.setSeen(false);
             gift.setProduct(product);
             gift.setUseTypeOption(option);
 
             int gold = sender.getGold();
-            int ap = senderAcc.getAp();
+            int ap = ftClient.getAp().get();
 
             int costsGold = 0;
             int costsAp = 0;
@@ -113,8 +112,8 @@ public class SendGiftRequestHandler implements PacketHandler<FTConnection, CMSGS
                     costsAp = product.getPrice2();
             }
 
-            int resultGold = gold - costsGold;
-            if (resultGold < 0) {
+            AtomicInteger resultGold = new AtomicInteger(gold - costsGold);
+            if (resultGold.get() < 0) {
                 S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket(S2CShopBuyPacket.NEED_MORE_GOLD, null);
                 connection.sendTCP(s2CSendGiftAnswerPacket);
                 return;
@@ -127,121 +126,45 @@ public class SendGiftRequestHandler implements PacketHandler<FTConnection, CMSGS
                 return;
             }
 
-            List<PlayerPocket> playerPocketList = new ArrayList<>();
-
-            Pocket receiverPocket = receiver.getPocket();
-            if (!product.getCategory().equals(EItemCategory.CHAR.getName())) {
-                if (!product.getCategory().equals(EItemCategory.HOUSE.getName())) {
-                    // gold back
-                    if (product.getGoldBack() != 0)
-                        resultGold += product.getGoldBack();
-
-                    if (product.getItem1() != 0) {
-
-                        List<Integer> itemPartList = new ArrayList<>();
-
-                        // use reflection to get indexes of item0-9
-                        ReflectionUtils.doWithFields(product.getClass(), field -> {
-
-                            if (field.getName().startsWith("item")) {
-
-                                field.setAccessible(true);
-
-                                Integer itemIndex = (Integer) field.get(product);
-                                if (itemIndex != 0) {
-                                    itemPartList.add(itemIndex);
+            int quantity = switch (option) {
+                case 0 -> product.getUse0() == 0 ? 1 : product.getUse0();
+                case 1 -> product.getUse1();
+                case 2 -> product.getUse2();
+                default -> 1;
+            };
+            List<PlayerPocket> playerPocketList = inventoryService.addItem(
+                    receiver.getId(), product.getProductIndex(), quantity,
+                    List.of(
+                            h -> {
+                                if (h instanceof PetCreated(Pet pet)) {
+                                    S2CPetAddPacket petAddPacket = new S2CPetAddPacket(pet);
+                                    connection.sendTCP(petAddPacket);
                                 }
-
-                                field.setAccessible(false);
+                            },
+                            h -> {
+                                if (h instanceof GoldBackAdded(int goldBack)) {
+                                    resultGold.addAndGet(goldBack);
+                                }
                             }
-                        });
+                    )
+            );
 
-                        // case if set has player included, items are transferred to the new player
-                        if (product.getForPlayer() != -1) {
-
-                            Player newPlayer = productService.createNewPlayer(receiver.getAccount(), product.getForPlayer());
-                            Pocket newPlayerPocket = pocketService.findById(newPlayer.getPocket().getId());
-
-                            for (Integer itemIndex : itemPartList) {
-
-                                PlayerPocket playerPocket = new PlayerPocket();
-                                playerPocket.setCategory(product.getCategory());
-                                playerPocket.setItemIndex(itemIndex);
-                                playerPocket.setUseType(product.getUseType());
-                                playerPocket.setItemCount(1);
-                                playerPocket.setPocket(newPlayerPocket);
-
-                                playerPocketService.save(playerPocket);
-                                newPlayerPocket = pocketService.incrementPocketBelongings(newPlayerPocket);
-                            }
-                        } else {
-                            for (Integer itemIndex : itemPartList) {
-
-                                PlayerPocket playerPocket = new PlayerPocket();
-                                playerPocket.setCategory(product.getCategory());
-                                playerPocket.setItemIndex(itemIndex);
-                                playerPocket.setUseType(product.getUseType());
-                                playerPocket.setItemCount(1);
-                                playerPocket.setPocket(receiverPocket);
-
-                                playerPocket = playerPocketService.save(playerPocket);
-                                receiverPocket = pocketService.incrementPocketBelongings(receiverPocket);
-
-                                // add item to result
-                                playerPocketList.add(playerPocket);
-                            }
-                        }
-                    } else {
-                        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), receiverPocket);
-                        int existingItemCount = 0;
-                        boolean existingItem = false;
-
-                        if (playerPocket != null && !playerPocket.getUseType().equals("N/A")) {
-                            existingItemCount = playerPocket.getItemCount();
-                            existingItem = true;
-                        } else {
-                            playerPocket = new PlayerPocket();
-                        }
-
-                        playerPocket.setCategory(product.getCategory());
-                        playerPocket.setItemIndex(product.getItem0());
-                        playerPocket.setUseType(product.getUseType());
-
-                        if (option <= 0)
-                            playerPocket.setItemCount(product.getUse0() == 0 ? 1 : product.getUse0());
-                        else if (option == 1)
-                            playerPocket.setItemCount(product.getUse1());
-                        else
-                            playerPocket.setItemCount(product.getUse2());
-
-                        // no idea how itemCount can be null here, but ok
-                        playerPocket.setItemCount((playerPocket.getItemCount() == null ? 0 : playerPocket.getItemCount()) + existingItemCount);
-
-                        if (playerPocket.getUseType().equalsIgnoreCase(EItemUseType.TIME.getName())) {
-                            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                            cal.add(Calendar.DAY_OF_MONTH, playerPocket.getItemCount());
-
-                            playerPocket.setCreated(cal.getTime());
-                            playerPocket.setItemCount(1);
-                        }
-                        playerPocket.setPocket(receiverPocket);
-
-                        playerPocket = playerPocketService.save(playerPocket);
-                        if (!existingItem)
-                            receiverPocket = pocketService.incrementPocketBelongings(receiverPocket);
-
-                        // add item to result
-                        playerPocketList.add(playerPocket);
-                    }
-                    receiver.setPocket(receiverPocket);
-                    playerService.save(receiver);
-                }
-            }
-            sender = playerService.setMoney(sender, resultGold);
             giftService.save(gift);
-            ftClient.savePlayer(sender);
-            senderAcc.setAp(resultAp);
-            ftClient.saveAccount(senderAcc);
+
+            int newGold = Math.max(resultGold.get(), 0);
+            sender.syncGold(newGold);
+            boolean success = ftClient.getAp().compareAndSet(ap, resultAp);
+            playerService.setMoney(sender.getPlayer(), resultGold.get());
+            if (!success) {
+                log.warn("Failed to update AP for player {} ({}): expected {}, actual {}, new {}",
+                        sender.getName(),
+                        sender.getId(),
+                        ap,
+                        ftClient.getAp().get(),
+                        resultAp);
+            }
+            account.setAp(resultAp);
+            ftClient.saveAccount(account);
 
             S2CReceivedGiftNotificationPacket s2CReceivedGiftNotificationPacket = new S2CReceivedGiftNotificationPacket(gift);
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
@@ -263,8 +186,11 @@ public class SendGiftRequestHandler implements PacketHandler<FTConnection, CMSGS
             S2CSendGiftAnswerPacket s2CSendGiftAnswerPacket = new S2CSendGiftAnswerPacket(S2CShopBuyPacket.SUCCESS, gift);
             connection.sendTCP(s2CSendGiftAnswerPacket);
 
-            S2CShopMoneyAnswerPacket senderMoneyPacket = new S2CShopMoneyAnswerPacket(sender);
-            connection.sendTCP(senderMoneyPacket);
+            SMSGSetMoney moneyPacket = SMSGSetMoney.builder()
+                    .ap(ftClient.getAp().get())
+                    .gold(sender.getGold())
+                    .build();
+            connection.sendTCP(moneyPacket);
         }
     }
 }

@@ -19,7 +19,7 @@ public class RoomPositionChangeRequestPacketHandler implements PacketHandler<FTC
     @Override
     public void handle(FTConnection connection, CMSGRoomChangePosition packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
         if (!ftClient.getIsChangingSlot().compareAndSet(false, true)) {

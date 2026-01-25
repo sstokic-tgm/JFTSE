@@ -16,6 +16,10 @@ public class ChatMessageLobbyPacketHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGChatMessageLobby chatLobbyReqPacket) {
         FTClient client = connection.getClient();
+        if (!client.hasPlayer()) {
+            return;
+        }
+
         SMSGChatMessageLobby chatLobbyMessage = SMSGChatMessageLobby.builder()
                 .unk(chatLobbyReqPacket.getUnk())
                 .sender(client.getPlayer().getName())

@@ -5,15 +5,12 @@ import com.jftse.entities.database.repository.scenario.ScenariosRepository;
 import com.jftse.server.core.service.ScenarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ScenarioServiceImpl implements ScenarioService {
     private final ScenariosRepository scenariosRepository;
 

@@ -2,18 +2,17 @@ package com.jftse.emulator.server.core.service.impl;
 
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.common.utilities.StringUtils;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.lottery.LotteryItemDto;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemChar;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.net.Client;
 import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.service.LotteryService;
 import com.jftse.server.core.service.PlayerPocketService;
@@ -38,8 +37,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
-public class LotteryServiceImpl implements LotteryService {
+public class LotteryServiceImpl implements LotteryService<FTConnection> {
     private final ProductService productService;
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
@@ -53,28 +51,26 @@ public class LotteryServiceImpl implements LotteryService {
     }
 
     @Override
-    public List<PlayerPocket> drawLottery(Connection<? extends Client<?>> connection, long playerPocketId, int productIndex) {
-        FTClient ftClient = (FTClient) connection.getClient();
-        Player player = ftClient.getPlayer();
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<PlayerPocket> drawLottery(FTConnection connection, long playerPocketId, int productIndex) {
+        FTClient ftClient = connection.getClient();
+        FTPlayer player = ftClient.getPlayer();
 
         List<PlayerPocket> result = new ArrayList<>();
 
         handlePlayerPocket(connection, playerPocketId);
 
         List<Product> productList = productService.findProductsByItemList(Stream.of(productIndex).collect(Collectors.toList()));
-        List<LotteryItemDto> lotteryItemList = getLotteryItemsByGachaIndex(player.getPlayerType(), productList.get(0).getItem0());
+        List<LotteryItemDto> lotteryItemList = getLotteryItemsByGachaIndex((byte) player.getPlayerType(), productList.getFirst().getItem0());
 
         LotteryItemDto lotteryItem = pickItemLotteryFromList(lotteryItemList);
         Product winningItem = productService.findProductsByItemList(Stream.of(lotteryItem.getShopIndex()).collect(Collectors.toList())).get(0);
 
         productList.clear();
-        Pocket pocket = pocketService.findById(player.getPocket().getId());
+        Pocket pocket = pocketService.findById(player.getPocketId());
 
         PlayerPocket playerPocket = saveWinningItem(winningItem, lotteryItem, pocket);
         result.add(playerPocket);
-
-        player.setPocket(playerPocket.getPocket());
-        ftClient.savePlayer(player);
 
         return result;
     }
@@ -141,7 +137,7 @@ public class LotteryServiceImpl implements LotteryService {
         int size = lotteryItemList.size();
 
         double[] cumProb = new double[size];
-        cumProb[0] = lotteryItemList.get(0).getChansPer() / 100.0;
+        cumProb[0] = lotteryItemList.getFirst().getChansPer() / 100.0;
 
         for (int i = 1; i < size; i++) {
             cumProb[i] = cumProb[i - 1] + lotteryItemList.get(i).getChansPer() / 100.0;

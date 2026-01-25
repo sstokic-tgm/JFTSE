@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.task;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
@@ -10,7 +11,6 @@ import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPac
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.item.Product;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.item.EItemUseType;
@@ -52,9 +52,12 @@ public class AutoItemRewardPickerTask extends AbstractTask {
             final Map<Byte, MatchplayReward.ItemReward> slotRewards = matchplayReward.getSlotRewards();
 
             for (final FTClient client : clients) {
+                if (!client.hasPlayer())
+                    continue;
+
                 RoomPlayer rp = client.getRoomPlayer();
-                Player player = client.getPlayer();
-                if (rp == null || player == null)
+                FTPlayer player = client.getPlayer();
+                if (rp == null)
                     continue;
 
                 final boolean isActivePlayer = rp.getPosition() < 4;
@@ -103,7 +106,7 @@ public class AutoItemRewardPickerTask extends AbstractTask {
                                 if (product == null)
                                     break;
 
-                                Pocket pocket = player.getPocket();
+                                Pocket pocket = pocketService.findById(player.getPocketId());
                                 PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
                                 boolean existingItem = false;
 
@@ -131,10 +134,7 @@ public class AutoItemRewardPickerTask extends AbstractTask {
 
                                 playerPocketService.save(playerPocket);
                                 if (!existingItem)
-                                    pocket = pocketService.incrementPocketBelongings(pocket);
-
-                                player.setPocket(pocket);
-                                client.savePlayer(player);
+                                    pocketService.incrementPocketBelongings(pocket);
 
                                 if (!existingItem) {
                                     S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(List.of(playerPocket));

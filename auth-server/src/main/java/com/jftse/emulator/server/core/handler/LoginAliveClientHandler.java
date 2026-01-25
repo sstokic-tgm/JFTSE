@@ -26,10 +26,6 @@ public class LoginAliveClientHandler implements PacketHandler<FTConnection, CMSG
         if (client == null)
             return;
 
-        Long accountId = client.getAccountId();
-        if (accountId == null)
-            return;
-
         if (client.isClientAlive().compareAndSet(false, true)) {
             List<GameServer> gameServerList = authenticationService.getGameServerList();
             SMSGChannelList channelList = SMSGChannelList.builder()

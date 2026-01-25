@@ -14,12 +14,12 @@ import javax.persistence.*;
 @Audited
 @Entity
 public class ChallengeProgress extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 
     @NotAudited
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Challenge challenge;
 
     // char

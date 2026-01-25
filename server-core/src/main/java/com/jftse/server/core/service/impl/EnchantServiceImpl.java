@@ -21,7 +21,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class EnchantServiceImpl implements EnchantService {
     private final ItemEnchantRepository itemEnchantRepository;
     private final ItemEnchantLevelRepository itemEnchantLevelRepository;
@@ -30,6 +29,7 @@ public class EnchantServiceImpl implements EnchantService {
     private final PocketService pocketService;
 
     @Override
+    @Transactional(readOnly = true)
     public PlayerPocket getPlayerPocket(int playerPocketId) {
         return playerPocketRepository.findById((long) playerPocketId).orElse(null);
     }
@@ -45,6 +45,7 @@ public class EnchantServiceImpl implements EnchantService {
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public boolean isValidPlayerPocketId(int playerPocketId, Pocket pocket) {
         if (pocket == null) {
             return false;
@@ -60,6 +61,7 @@ public class EnchantServiceImpl implements EnchantService {
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public boolean isEnchantable(int playerPocketId) {
         PlayerPocket pp = playerPocketRepository.findById((long) playerPocketId).orElse(null);
         ItemPart ip = getItemPart(playerPocketId);
@@ -75,6 +77,7 @@ public class EnchantServiceImpl implements EnchantService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isElemental(int playerPocketId) {
         ItemPart ip = getItemPart(playerPocketId);
         if (ip == null) {
@@ -84,6 +87,7 @@ public class EnchantServiceImpl implements EnchantService {
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public boolean isMaxEnchantLevel(int playerPocketId, boolean forElemental, EElementalKind elementalKind) {
         PlayerPocket pp = playerPocketRepository.findById((long) playerPocketId).orElse(null);
         ItemPart ip = getItemPart(playerPocketId);
@@ -127,6 +131,7 @@ public class EnchantServiceImpl implements EnchantService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemEnchant getItemEnchant(int playerPocketId) {
         PlayerPocket pp = playerPocketRepository.findById((long) playerPocketId).orElse(null);
         if (pp == null) {
@@ -143,21 +148,22 @@ public class EnchantServiceImpl implements EnchantService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemEnchantLevel getItemEnchantLevel(String elementalKind, int grade) {
         return itemEnchantLevelRepository.findByGradeAndElementalKind(grade, elementalKind).orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public boolean hasJewel(int playerPocketId, Pocket pocket) {
         ItemEnchant ie = getItemEnchant(playerPocketId, pocket);
         return ie != null && ie.getKind().equals("JEWEL");
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public boolean hasElemental(int playerPocketId, Pocket pocket) {
         ItemEnchant ie = getItemEnchant(playerPocketId, pocket);
         return ie != null && ie.getKind().equals("ELEMENTAL");
     }
-
-
 }

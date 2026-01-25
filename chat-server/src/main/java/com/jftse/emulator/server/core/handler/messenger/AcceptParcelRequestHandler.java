@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
-import com.jftse.emulator.server.core.packets.shop.S2CShopMoneyAnswerPacket;
 import com.jftse.emulator.server.core.rabbit.messages.UpdateMoneyMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.net.FTClient;
@@ -23,6 +23,7 @@ import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.messenger.CMSGAcceptParcel;
 import com.jftse.server.core.shared.packets.messenger.SMSGAcceptParcel;
 import com.jftse.server.core.shared.packets.messenger.SMSGDeleteParcel;
+import com.jftse.server.core.shared.packets.shop.SMSGSetMoney;
 
 import java.util.List;
 
@@ -50,15 +51,13 @@ public class AcceptParcelRequestHandler implements PacketHandler<FTConnection, C
         if (parcel == null) return;
 
         FTClient ftClient = connection.getClient();
-        if (ftClient == null)
+        if (!ftClient.hasPlayer())
             return;
 
-        Player player = ftClient.getPlayer();
-        if (player == null)
-            return;
+        FTPlayer player = ftClient.getPlayer();
 
-        Player receiver = parcel.getReceiver();
-        Player sender = parcel.getSender();
+        Player receiver = playerService.findById(parcel.getReceiver().getId());
+        Player sender = playerService.findById(parcel.getSender().getId());
 
         if (!receiver.getId().equals(player.getId())) {
             SMSGAcceptParcel answer = SMSGAcceptParcel.builder().status((short) -1).build();
@@ -86,9 +85,12 @@ public class AcceptParcelRequestHandler implements PacketHandler<FTConnection, C
                 return;
             }
             receiver.setGold(newGoldReceiver);
+            player.syncGold(newGoldReceiver);
+            playerService.setMoney(receiver, newGoldReceiver);
 
             final int newGoldSender = sender.getGold() + parcel.getGold();
             sender.setGold(newGoldSender);
+            playerService.setMoney(sender, newGoldSender);
         }
 
         if (parcel.getEParcelType().equals(EParcelType.Gold)) {
@@ -96,6 +98,7 @@ public class AcceptParcelRequestHandler implements PacketHandler<FTConnection, C
             playerService.setMoney(sender, newGoldSender);
 
             final int newGoldReceiver = receiver.getGold() + parcel.getGold();
+            player.syncGold(Math.max(newGoldReceiver, 0));
             playerService.setMoney(receiver, newGoldReceiver);
         }
 
@@ -120,8 +123,6 @@ public class AcceptParcelRequestHandler implements PacketHandler<FTConnection, C
 
         item = playerPocketService.save(item);
         parcelService.remove(parcel.getId());
-        playerService.save(receiver);
-        playerService.save(sender);
 
         UpdateMoneyMessage updateMoneyMessage = UpdateMoneyMessage.builder()
                 .playerId(sender.getId())
@@ -131,8 +132,11 @@ public class AcceptParcelRequestHandler implements PacketHandler<FTConnection, C
         SMSGDeleteParcel answer = SMSGDeleteParcel.builder().parcelId(parcel.getId().intValue()).build();
         connection.sendTCP(answer);
 
-        S2CShopMoneyAnswerPacket receiverMoneyPacket = new S2CShopMoneyAnswerPacket(receiver);
-        connection.sendTCP(receiverMoneyPacket);
+        SMSGSetMoney moneyPacket = SMSGSetMoney.builder()
+                .ap(ftClient.getAp().get())
+                .gold(player.getGold())
+                .build();
+        connection.sendTCP(moneyPacket);
 
         S2CInventoryItemsPlacePacket inventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(List.of(item));
         connection.sendTCP(inventoryItemsPlacePacket);

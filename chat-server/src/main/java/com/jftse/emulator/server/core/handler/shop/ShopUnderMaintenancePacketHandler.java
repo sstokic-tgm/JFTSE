@@ -19,7 +19,7 @@ public class ShopUnderMaintenancePacketHandler implements PacketHandler<FTConnec
          * unk0: unknown int
          */
         FTClient client = connection.getClient();
-        int playerId = client.getActivePlayerId() == null ? 0 : Math.toIntExact(client.getActivePlayerId());
+        int playerId = !client.hasPlayer() ? 0 : Math.toIntExact(client.getPlayer().getId());
 
         SMSGShopMaintenance response = SMSGShopMaintenance.builder().result((short) 0).playerId(playerId).build();
         connection.sendTCP(response);

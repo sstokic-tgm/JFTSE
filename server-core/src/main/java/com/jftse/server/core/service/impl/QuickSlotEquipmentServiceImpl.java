@@ -18,23 +18,25 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class QuickSlotEquipmentServiceImpl implements QuickSlotEquipmentService {
     private final QuickSlotEquipmentRepository quickSlotEquipmentRepository;
     private final PlayerPocketService playerPocketService;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public QuickSlotEquipment save(QuickSlotEquipment quickSlotEquipment) {
         return quickSlotEquipmentRepository.save(quickSlotEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public QuickSlotEquipment findById(Long id) {
         Optional<QuickSlotEquipment> quickSlotEquipment = quickSlotEquipmentRepository.findById(id);
         return quickSlotEquipment.orElse(null);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateQuickSlots(QuickSlotEquipment quickSlotEquipment, Integer quickSlotId) {
         quickSlotEquipment = findById(quickSlotEquipment.getId());
 
@@ -53,29 +55,45 @@ public class QuickSlotEquipmentServiceImpl implements QuickSlotEquipmentService 
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateQuickSlots(Player player, List<Integer> quickSlotItems) {
         Pocket pocket = player.getPocket();
         QuickSlotEquipment quickSlotEquipment = findById(player.getQuickSlotEquipment().getId());
 
-        PlayerPocket item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(0), pocket);
-        quickSlotEquipment.setSlot1(item == null ? 0 : item.getId().intValue());
+        List<PlayerPocket> playerPockets = playerPocketService.getItemsAsPocket(
+                List.of(
+                        Long.valueOf(quickSlotItems.get(0)),
+                        Long.valueOf(quickSlotItems.get(1)),
+                        Long.valueOf(quickSlotItems.get(2)),
+                        Long.valueOf(quickSlotItems.get(3)),
+                        Long.valueOf(quickSlotItems.get(4))
+                        ),
+                pocket
+        );
 
-        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(1), pocket);
-        quickSlotEquipment.setSlot2(item == null ? 0 : item.getId().intValue());
+        for (int i = 0; i < quickSlotItems.size(); i++) {
+            Integer itemId = quickSlotItems.get(i);
+            PlayerPocket item = playerPockets.stream()
+                    .filter(p -> p.getId().intValue() == itemId)
+                    .findFirst()
+                    .orElse(null);
 
-        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(2), pocket);
-        quickSlotEquipment.setSlot3(item == null ? 0 : item.getId().intValue());
+            int slotValue = item == null ? 0 : item.getId().intValue();
 
-        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(3), pocket);
-        quickSlotEquipment.setSlot4(item == null ? 0 : item.getId().intValue());
-
-        item = playerPocketService.getItemAsPocket((long) quickSlotItems.get(4), pocket);
-        quickSlotEquipment.setSlot5(item == null ? 0 : item.getId().intValue());
+            switch (i) {
+                case 0 -> quickSlotEquipment.setSlot1(slotValue);
+                case 1 -> quickSlotEquipment.setSlot2(slotValue);
+                case 2 -> quickSlotEquipment.setSlot3(slotValue);
+                case 3 -> quickSlotEquipment.setSlot4(slotValue);
+                case 4 -> quickSlotEquipment.setSlot5(slotValue);
+            }
+        }
 
         save(quickSlotEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Integer> getEquippedQuickSlots(Player player) {
         List<Integer> result = new ArrayList<>();
 

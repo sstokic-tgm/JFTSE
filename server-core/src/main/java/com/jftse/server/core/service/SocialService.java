@@ -14,5 +14,7 @@ public interface SocialService {
 
     Friend getRelationship(Player player);
 
+    Friend getRelationshipWithFriend(Player player);
+
     List<GuildMember> getGuildMemberList(Player player);
 }

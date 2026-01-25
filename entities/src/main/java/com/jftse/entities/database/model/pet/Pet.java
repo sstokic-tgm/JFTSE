@@ -14,11 +14,11 @@ import java.util.Date;
 @Audited
 @Entity
 public class Pet extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "petStatistic_id", referencedColumnName = "id")
     private PetStatistic petStatistic;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
     private Byte type;

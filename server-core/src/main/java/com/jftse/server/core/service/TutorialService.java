@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface TutorialService {
     List<TutorialProgress> findAllByPlayerIdFetched(Long playerId);
+    List<TutorialProgress> findAllByPlayerId(Long playerId);
 
     Tutorial findByTutorialIndex(Integer tutorialIndex);
 

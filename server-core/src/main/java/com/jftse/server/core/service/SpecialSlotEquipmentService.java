@@ -10,8 +10,6 @@ public interface SpecialSlotEquipmentService {
 
     SpecialSlotEquipment findById(Long id);
 
-    void updateSpecialSlots(SpecialSlotEquipment specialSlotEquipment, Integer specialSlotId);
-
     void updateSpecialSlots(Player player, List<Integer> specialSlotItems);
 
     List<Integer> getEquippedSpecialSlots(Player player);

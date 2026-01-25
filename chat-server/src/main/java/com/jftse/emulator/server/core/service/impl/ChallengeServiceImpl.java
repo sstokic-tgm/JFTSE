@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.service.impl;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonus;
 import com.jftse.emulator.server.core.life.progression.ExpGoldBonusImpl;
 import com.jftse.emulator.server.core.life.progression.bonuses.BasicHouseBonus;
@@ -13,7 +14,6 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.entities.database.model.challenge.Challenge;
 import com.jftse.entities.database.model.challenge.ChallengeProgress;
 import com.jftse.entities.database.model.item.Product;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.repository.challenge.ChallengeProgressRepository;
 import com.jftse.entities.database.repository.challenge.ChallengeRepository;
 import com.jftse.server.core.net.Client;
@@ -21,6 +21,7 @@ import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.service.ChallengeService;
 import com.jftse.server.core.service.ItemRewardService;
 import com.jftse.server.core.service.LevelService;
+import com.jftse.server.core.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -33,33 +34,42 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
 
     private final ItemRewardService itemRewardService;
     private final LevelService levelService;
+    private final PlayerService playerService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChallengeProgress> findAllByPlayerIdFetched(Long playerId) {
         return challengeProgressRepository.findAllByPlayerIdFetched(playerId);
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ChallengeProgress> findAllByPlayerId(Long playerId) {
+        return challengeProgressRepository.findAllByPlayerId(playerId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Challenge findChallengeByChallengeIndex(Integer challengeIndex) {
         Optional<Challenge> challenge = challengeRepository.findChallengeByChallengeIndex(challengeIndex);
         return challenge.orElse(null);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void finishGame(Connection<? extends Client<?>> connection, boolean win) {
         FTClient ftClient = (FTClient) connection.getClient();
         long timeNeeded = ftClient.getActiveChallengeGame().getTimeNeeded();
 
         Challenge challenge = findChallengeByChallengeIndex(ftClient.getActiveChallengeGame().getChallengeIndex());
-        Player player = ftClient.getPlayer();
-        ChallengeProgress challengeProgress = challengeProgressRepository.findByPlayerAndChallenge(player, challenge).orElse(null);
+        FTPlayer player = ftClient.getPlayer();
+        ChallengeProgress challengeProgress = challengeProgressRepository.findByPlayerIdAndChallenge(player.getId(), challenge).orElse(null);
 
         int rewardExp = 0;
         int rewardGold = 0;
@@ -78,7 +88,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             rewardExp = itemRewardService.getRewardExp(disableItemReward, challenge.getRewardExp(), win);
 
             challengeProgress = new ChallengeProgress();
-            challengeProgress.setPlayer(player);
+            challengeProgress.setPlayer(player.getPlayerRef());
             challengeProgress.setChallenge(challenge);
             challengeProgress.setSuccess(successCount);
             challengeProgress.setAttempts(1);
@@ -97,7 +107,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
         challengeProgressRepository.save(challengeProgress);
 
-        List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(player, rewardProductList));
+        List<Map<String, Object>> rewardItemList = new ArrayList<>(itemRewardService.prepareRewardItemList(playerService.findWithPocketById(player.getId()), rewardProductList));
 
         // add account home bonuses to exp and gold
         ExpGoldBonus expGoldBonus = new ExpGoldBonusImpl(rewardExp, rewardGold);
@@ -111,15 +121,15 @@ public class ChallengeServiceImpl implements ChallengeService {
         rewardExp = expGoldBonus.calculateExp();
         rewardGold = expGoldBonus.calculateGold();
 
-        byte oldLevel = player.getLevel();
-        byte level = levelService.getLevel(rewardExp, player.getExpPoints(), player.getLevel());
+        int oldLevel = player.getLevel();
+        int level = levelService.getLevel(rewardExp, player.getExpPoints(), (byte) player.getLevel());
         if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
-            player.setExpPoints(player.getExpPoints() + rewardExp);
-        player.setGold(player.getGold() + rewardGold);
-        player = levelService.setNewLevelStatusPoints(level, player);
-        ftClient.savePlayer(player);
+            player.syncExpPoints(player.getExpPoints() + rewardExp);
+        player.syncGold(player.getGold() + rewardGold);
+        levelService.setNewLevelStatusPoints((byte) level, player.getPlayer());
+        player.syncLevel(level);
 
-        S2CChallengeFinishPacket challengeFinishPacket = new S2CChallengeFinishPacket(win, level, rewardExp, rewardGold, (int) Math.ceil((double) timeNeeded / 1000), rewardItemList);
+        S2CChallengeFinishPacket challengeFinishPacket = new S2CChallengeFinishPacket(win, (byte) level, rewardExp, rewardGold, (int) Math.ceil((double) timeNeeded / 1000), rewardItemList);
         connection.sendTCP(challengeFinishPacket);
     }
 }

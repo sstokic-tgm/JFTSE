@@ -1,7 +1,6 @@
 package com.jftse.emulator.server.core.matchplay;
 
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
-import com.jftse.entities.database.model.battle.WillDamage;
 import lombok.Getter;
 import lombok.Setter;
 

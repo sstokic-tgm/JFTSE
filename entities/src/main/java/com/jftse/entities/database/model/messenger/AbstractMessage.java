@@ -13,11 +13,11 @@ import javax.persistence.*;
 @Audited
 @MappedSuperclass
 public class AbstractMessage extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sender_id", referencedColumnName = "id")
     private Player sender;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "receiver_id", referencedColumnName = "id")
     private Player receiver;
 

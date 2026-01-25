@@ -78,7 +78,7 @@ public class ChatWhisperHandler extends AbstractMessageHandler<ChatWhisperMessag
         final FTClient senderClient = senderConn.getClient();
         final FTClient receiverClient = receiverConn.getClient();
 
-        if (senderClient != null && receiverClient != null) {
+        if (senderClient != null && receiverClient != null && senderClient.hasPlayer() && receiverClient.hasPlayer()) {
             S2CWhisperAnswerPacket whisperPacket = new S2CWhisperAnswerPacket(senderClient.getPlayer().getName(), receiverClient.getPlayer().getName(), message);
             senderConn.sendTCP(whisperPacket);
             receiverConn.sendTCP(whisperPacket);
@@ -94,6 +94,10 @@ public class ChatWhisperHandler extends AbstractMessageHandler<ChatWhisperMessag
      * @param senderConn The connection of the sender
      */
     private void handleOutgoingWhisper(ChatWhisperMessage message, final FTConnection senderConn) {
+        if (senderConn.getClient() == null || !senderConn.getClient().hasPlayer()) {
+            handleNotOnline(message.getSenderId());
+            return;
+        }
         rProducerService.send(message, "chat.messenger.whisper", senderConn.getClient().getPlayer().getName() + "(GameServer)");
     }
 
@@ -106,7 +110,7 @@ public class ChatWhisperHandler extends AbstractMessageHandler<ChatWhisperMessag
      */
     private void handleIncomingWhisper(Long senderId, final FTConnection conn, String message) throws ValidationException {
         final FTClient client = conn.getClient();
-        if (client != null) {
+        if (client != null && client.hasPlayer()) {
             Player sendingPlayer = playerService.findById(senderId);
             S2CWhisperAnswerPacket whisperPacket = new S2CWhisperAnswerPacket(sendingPlayer.getName(), client.getPlayer().getName(), message);
             conn.sendTCP(whisperPacket);

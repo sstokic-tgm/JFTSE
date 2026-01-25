@@ -13,7 +13,7 @@ import java.util.Date;
 public class PasswordToken extends AbstractIdBaseModel {
     private Date created;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private Account account;
 

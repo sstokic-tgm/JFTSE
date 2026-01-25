@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ItemRewardServiceImpl implements ItemRewardService {
     private final ProductRepository productRepository;
     private final PlayerPocketService playerPocketService;
@@ -94,6 +93,7 @@ public class ItemRewardServiceImpl implements ItemRewardService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<Map<String, Object>> prepareRewardItemList(Player player, List<Product> rewardProductList) {
         List<Map<String, Object>> rewardItemList = new ArrayList<>();
 

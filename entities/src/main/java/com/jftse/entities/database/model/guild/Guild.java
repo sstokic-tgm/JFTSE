@@ -6,18 +6,19 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Audited
 @Entity
 public class Guild extends AbstractBaseModel {
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "guild")
-    private List<GuildMember> memberList;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "guild")
+    private Set<GuildMember> memberList = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "guild")
-    private List<GuildGoldUsage> goldUsageList;
+    private Set<GuildGoldUsage> goldUsageList = new HashSet<>();
 
     @Column(unique = true)
     private String name;

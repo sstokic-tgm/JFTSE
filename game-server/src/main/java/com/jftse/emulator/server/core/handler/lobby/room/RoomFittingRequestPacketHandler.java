@@ -15,7 +15,7 @@ public class RoomFittingRequestPacketHandler implements PacketHandler<FTConnecti
     @Override
     public void handle(FTConnection connection, CMSGRoomFitting packet) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
         boolean fitting = packet.getFitting();

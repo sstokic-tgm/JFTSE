@@ -1,9 +1,9 @@
 package com.jftse.emulator.server.core.matchplay.game;
 
 import com.jftse.emulator.common.scripting.ScriptFile;
-import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.scripting.ScriptManagerV2;
+import com.jftse.emulator.server.core.client.EquippedItemParts;
 import com.jftse.emulator.server.core.constants.BonusIconHighlightValues;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.life.event.GameEventBus;
@@ -34,7 +34,6 @@ import com.jftse.entities.database.model.battle.*;
 import com.jftse.entities.database.model.item.ItemEnchantLevel;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.map.SMaps;
-import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.entities.database.model.scenario.MScenarios;
@@ -50,8 +49,6 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import javax.persistence.TypedQuery;
-import javax.script.Bindings;
-import javax.script.ScriptContext;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -270,43 +267,35 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public PlayerBattleState createPlayerBattleState(RoomPlayer roomPlayer) {
-        short baseHp = (short) BattleUtils.calculatePlayerHp(roomPlayer.getPlayer().getLevel());
-        short baseStr = roomPlayer.getPlayer().getStrength();
-        short baseSta = roomPlayer.getPlayer().getStamina();
-        short baseDex = roomPlayer.getPlayer().getDexterity();
-        short baseWill = roomPlayer.getPlayer().getWillpower();
-        short totalHp = (short) (baseHp + roomPlayer.getStatusPointsAddedDto().getAddHp());
-        short totalStr = (short) (baseStr + roomPlayer.getStatusPointsAddedDto().getStrength() + roomPlayer.getStatusPointsAddedDto().getAddStr());
-        short totalSta = (short) (baseSta + roomPlayer.getStatusPointsAddedDto().getStamina() + roomPlayer.getStatusPointsAddedDto().getAddSta());
-        short totalDex = (short) (baseDex + roomPlayer.getStatusPointsAddedDto().getDexterity() + roomPlayer.getStatusPointsAddedDto().getAddDex());
-        short totalWill = (short) (baseWill + roomPlayer.getStatusPointsAddedDto().getWillpower() + roomPlayer.getStatusPointsAddedDto().getAddWil());
+        int baseHp = BattleUtils.calculatePlayerHp(roomPlayer.getLevel());
+        int baseStr = roomPlayer.getStrength();
+        int baseSta = roomPlayer.getStamina();
+        int baseDex = roomPlayer.getDexterity();
+        int baseWill = roomPlayer.getWillpower();
+        int totalHp = baseHp + roomPlayer.getEquippedItemStats().getAddHp();
+        int totalStr = baseStr + roomPlayer.getEquippedItemStats().getStrength() + roomPlayer.getEquippedItemStats().getEnchantStr();
+        int totalSta = baseSta + roomPlayer.getEquippedItemStats().getStamina() + roomPlayer.getEquippedItemStats().getEnchantSta();
+        int totalDex = baseDex + roomPlayer.getEquippedItemStats().getDexterity() + roomPlayer.getEquippedItemStats().getEnchantDex();
+        int totalWill = baseWill + roomPlayer.getEquippedItemStats().getWillpower() + roomPlayer.getEquippedItemStats().getEnchantWil();
 
         PlayerBattleState pbs = new PlayerBattleState(roomPlayer.getPosition(), roomPlayer.getPlayerId(), totalHp, totalStr, totalSta, totalDex, totalWill);
 
-        Map<String, Integer> equipment = ServiceManager.getInstance().getClothEquipmentService().getEquippedCloths(roomPlayer.getPlayer());
-        Pocket pocket = roomPlayer.getPlayer().getPocket();
-        pocket = ServiceManager.getInstance().getPocketService().findById(pocket.getId());
-        if (!equipment.isEmpty()) {
-            Integer racketPlayerPocketId = equipment.get("racket");
-            PlayerPocket offensivePP = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocket(racketPlayerPocketId.longValue(), pocket);
-            if (offensivePP != null) {
-                Elementable element = getElementalProperties(offensivePP);
-                pbs.setOffensiveElement(element);
-            }
-            final Pocket finalPocket = pocket;
-            equipment.entrySet().stream()
-                    .filter(e -> !e.getKey().equals("racket")) // we dont need offensive element here
-                    .forEach(e -> {
-                        Integer playerPocketId = e.getValue();
-                        PlayerPocket pp = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocket(playerPocketId.longValue(), finalPocket);
-                        if (pp != null) {
-                            Elementable element = getElementalProperties(pp);
-                            if (element != null) {
-                                pbs.getDefensiveElements().add(element);
-                            }
-                        }
-                    });
+        Pocket pocket = ServiceManager.getInstance().getPocketService().findById(roomPlayer.getPocketId());
+        EquippedItemParts equippedItemParts = roomPlayer.getEquippedItemParts();
+        PlayerPocket offensivePP = ServiceManager.getInstance().getPlayerPocketService().getItemAsPocket((long) equippedItemParts.racket(), pocket);
+        if (offensivePP != null) {
+            Elementable element = getElementalProperties(offensivePP);
+            pbs.setOffensiveElement(element);
         }
+
+        List<Long> equippedItemPartsIds = equippedItemParts.toList().stream().map(Integer::longValue).toList();
+        List<PlayerPocket> ppEquipment = ServiceManager.getInstance().getPlayerPocketService().getItemsAsPocket(equippedItemPartsIds, pocket);
+        ppEquipment.forEach(pp -> {
+            Elementable element = getElementalProperties(pp);
+            if (element != null) {
+                pbs.getDefensiveElements().add(element);
+            }
+        });
 
         return pbs;
     }
@@ -668,7 +657,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 int rewardGoldSimple = expGoldBonusSimple.calculateGold();
 
                 // add house bonus
-                ExpGoldBonus expGoldBonus = new BattleHouseBonus(expGoldBonusSimple, rp.getPlayer().getAccount().getId());
+                ExpGoldBonus expGoldBonus = new BattleHouseBonus(expGoldBonusSimple, rp.getAccountId());
                 int rewardExp = expGoldBonus.calculateExp();
                 int rewardGold = expGoldBonus.calculateGold();
 
@@ -704,15 +693,14 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 playerReward.setGold(rewardGold);
 
                 // add couple bonus
-                Friend friend = rp.getCouple();
-                if (friend != null) {
+                Long coupleId = rp.getCoupleId();
+                if (coupleId != null) {
                     final boolean hasCoupleInTeam = roomPlayers.stream()
                             .filter(roomPlayer -> roomPlayer.getPosition() != rp.getPosition())
                             .anyMatch(roomPlayer -> {
                                 final boolean isInRedTeam = this.isRedTeam(roomPlayer.getPosition());
                                 if (isInRedTeam == isCurrentPlayerInRedTeam) {
-                                    Friend f = roomPlayer.getCouple();
-                                    return f != null && f.getFriend().getId().equals(friend.getPlayer().getId()) && f.getEFriendshipState() == friend.getEFriendshipState();
+                                    return coupleId.equals(roomPlayer.getPlayerId());
                                 }
                                 return false;
                             });

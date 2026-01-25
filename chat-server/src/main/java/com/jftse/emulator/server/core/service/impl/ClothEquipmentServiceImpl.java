@@ -2,8 +2,8 @@ package com.jftse.emulator.server.core.service.impl;
 
 import com.jftse.entities.database.model.item.ItemPart;
 import com.jftse.entities.database.model.player.ClothEquipment;
+import com.jftse.entities.database.model.player.EquippedItemStats;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.entities.database.repository.item.ItemPartRepository;
@@ -21,7 +21,6 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ClothEquipmentServiceImpl implements ClothEquipmentService {
     private final ItemPartRepository itemPartRepository;
     private final ClothEquipmentRepository clothEquipmentRepository;
@@ -29,60 +28,79 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
     private final PlayerPocketService playerPocketService;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ClothEquipment save(ClothEquipment clothEquipment) {
         return clothEquipmentRepository.save(clothEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClothEquipment findClothEquipmentById(Long id) {
         Optional<ClothEquipment> clothEquipment = clothEquipmentRepository.findById(id);
         return clothEquipment.orElse(null);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateCloths(Player player, CMSGInventoryWearCloth inventoryWearClothReqPacket) {
         Pocket pocket = player.getPocket();
         ClothEquipment clothEquipment = findClothEquipmentById(player.getClothEquipment().getId());
 
-        PlayerPocket item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getHair(), pocket);
-        clothEquipment.setHair(item == null ? 0 : item.getItemIndex());
+        List<Long> itemIdList = List.of(
+                (long) inventoryWearClothReqPacket.getHair(),
+                (long) inventoryWearClothReqPacket.getFace(),
+                (long) inventoryWearClothReqPacket.getDress(),
+                (long) inventoryWearClothReqPacket.getPants(),
+                (long) inventoryWearClothReqPacket.getSocks(),
+                (long) inventoryWearClothReqPacket.getShoes(),
+                (long) inventoryWearClothReqPacket.getGloves(),
+                (long) inventoryWearClothReqPacket.getRacket(),
+                (long) inventoryWearClothReqPacket.getGlasses(),
+                (long) inventoryWearClothReqPacket.getBag(),
+                (long) inventoryWearClothReqPacket.getHat(),
+                (long) inventoryWearClothReqPacket.getDye()
+        );
 
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getFace(), pocket);
-        clothEquipment.setFace(item == null ? 0 : item.getItemIndex());
+        List<PlayerPocket> playerPockets = playerPocketService.getItemsAsPocket(itemIdList, pocket);
 
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getDress(), pocket);
-        clothEquipment.setDress(item == null ? 0 : item.getItemIndex());
+        for (Long itemId : itemIdList) {
+            PlayerPocket item = playerPockets.stream()
+                    .filter(p -> p.getId().equals(itemId))
+                    .findFirst()
+                    .orElse(null);
 
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getPants(), pocket);
-        clothEquipment.setPants(item == null ? 0 : item.getItemIndex());
+            int finalItemIndex = item == null ? 0 : item.getItemIndex();
 
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getSocks(), pocket);
-        clothEquipment.setSocks(item == null ? 0 : item.getItemIndex());
-
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getShoes(), pocket);
-        clothEquipment.setShoes(item == null ? 0 : item.getItemIndex());
-
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getGloves(), pocket);
-        clothEquipment.setGloves(item == null ? 0 : item.getItemIndex());
-
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getRacket(), pocket);
-        clothEquipment.setRacket(item == null ? 0 : item.getItemIndex());
-
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getGlasses(), pocket);
-        clothEquipment.setGlasses(item == null ? 0 : item.getItemIndex());
-
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getBag(), pocket);
-        clothEquipment.setBag(item == null ? 0 : item.getItemIndex());
-
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getHat(), pocket);
-        clothEquipment.setHat(item == null ? 0 : item.getItemIndex());
-
-        item = playerPocketService.getItemAsPocket((long) inventoryWearClothReqPacket.getDye(), pocket);
-        clothEquipment.setDye(item == null ? 0 : item.getItemIndex());
+            if (itemId.equals((long) inventoryWearClothReqPacket.getHair()))
+                clothEquipment.setHair(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getFace()))
+                clothEquipment.setFace(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getDress()))
+                clothEquipment.setDress(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getPants()))
+                clothEquipment.setPants(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getSocks()))
+                clothEquipment.setSocks(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getShoes()))
+                clothEquipment.setShoes(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getGloves()))
+                clothEquipment.setGloves(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getRacket()))
+                clothEquipment.setRacket(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getGlasses()))
+                clothEquipment.setGlasses(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getBag()))
+                clothEquipment.setBag(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getHat()))
+                clothEquipment.setHat(finalItemIndex);
+            else if (itemId.equals((long) inventoryWearClothReqPacket.getDye()))
+                clothEquipment.setDye(finalItemIndex);
+        }
 
         save(clothEquipment);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Integer> getEquippedCloths(Player player) {
         Map<String, Integer> result = new HashMap<>();
 
@@ -128,7 +146,8 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
     }
 
     @Override
-    public StatusPointsAddedDto getStatusPointsFromCloths(Player player) {
+    @Transactional(readOnly = true)
+    public EquippedItemStats getStatusPointsFromCloths(Player player) {
         ClothEquipment clothEquipment = findClothEquipmentById(player.getClothEquipment().getId());
 
         List<Integer> itemIndexList = new ArrayList<>();
@@ -149,10 +168,10 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
         List<PlayerPocket> playerPocketList = playerPocketService.getPlayerPocketItems(player.getPocket());
         playerPocketList.removeIf(playerPocket -> !itemIndexList.contains(playerPocket.getItemIndex()));
 
-        byte strength = 0;
-        byte stamina = 0;
-        byte dexterity = 0;
-        byte willpower = 0;
+        int strength = 0;
+        int stamina = 0;
+        int dexterity = 0;
+        int willpower = 0;
         int addHp = 0;
         int addStr = 0;
         int addSta = 0;
@@ -174,17 +193,17 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
             addWil += playerPocket.getEnchantWil();
         }
 
-        StatusPointsAddedDto statusPointsAddedDto = new StatusPointsAddedDto();
-        statusPointsAddedDto.setStrength(strength);
-        statusPointsAddedDto.setStamina(stamina);
-        statusPointsAddedDto.setDexterity(dexterity);
-        statusPointsAddedDto.setWillpower(willpower);
-        statusPointsAddedDto.setAddHp(addHp);
-        statusPointsAddedDto.setAddStr(addStr);
-        statusPointsAddedDto.setAddSta(addSta);
-        statusPointsAddedDto.setAddDex(addDex);
-        statusPointsAddedDto.setAddWil(addWil);
+        EquippedItemStats equippedItemStats = new EquippedItemStats();
+        equippedItemStats.setStrength(strength);
+        equippedItemStats.setStamina(stamina);
+        equippedItemStats.setDexterity(dexterity);
+        equippedItemStats.setWillpower(willpower);
+        equippedItemStats.setAddHp(addHp);
+        equippedItemStats.setEnchantStr(addStr);
+        equippedItemStats.setEnchantSta(addSta);
+        equippedItemStats.setEnchantDex(addDex);
+        equippedItemStats.setEnchantWil(addWil);
 
-        return statusPointsAddedDto;
+        return equippedItemStats;
     }
 }

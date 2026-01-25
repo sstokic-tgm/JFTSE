@@ -12,16 +12,17 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class CommandLogServiceImpl implements CommandLogService {
     private final CommandLogRepository commandLogRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public CommandLog save(CommandLog commandLog) {
         return commandLogRepository.save(commandLog);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommandLog> findAllByPlayerId(Long playerId) {
         return commandLogRepository.findAllByPlayerId(playerId);
     }

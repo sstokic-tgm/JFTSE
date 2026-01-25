@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface ChallengeService {
     List<ChallengeProgress> findAllByPlayerIdFetched(Long playerId);
+    List<ChallengeProgress> findAllByPlayerId(Long playerId);
 
     Challenge findChallengeByChallengeIndex(Integer challengeIndex);
 

@@ -1,11 +1,12 @@
 package com.jftse.emulator.server.core.task;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.item.EItemCategory;
@@ -27,7 +28,7 @@ public class GachaMachineTask extends AbstractTask {
     private final ProductService productService;
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
-    private final LotteryService lotteryService;
+    private final LotteryService<FTConnection> lotteryService;
 
     public GachaMachineTask(FTConnection connection, List<String> commandArgumentList) {
         this.connection = connection;
@@ -41,11 +42,13 @@ public class GachaMachineTask extends AbstractTask {
 
     @Override
     public void run() {
-        if (connection.getClient() == null)
+        FTClient client = connection.getClient();
+        if (!client.hasPlayer()) {
             return;
+        }
 
-        Player player = connection.getClient().getPlayer();
-        Pocket pocket = pocketService.findById(player.getPocket().getId());
+        FTPlayer player = client.getPlayer();
+        Pocket pocket = pocketService.findById(player.getPocketId());
 
         String gachaName = commandArgumentList.get(0);
         Integer count = Integer.valueOf(commandArgumentList.get(1));

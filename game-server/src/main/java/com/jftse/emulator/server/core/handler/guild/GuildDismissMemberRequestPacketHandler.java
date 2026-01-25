@@ -1,12 +1,12 @@
 package com.jftse.emulator.server.core.handler.guild;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
@@ -27,32 +27,36 @@ public class GuildDismissMemberRequestPacketHandler implements PacketHandler<FTC
     @Override
     public void handle(FTConnection connection, CMSGGuildDismissMember guildDismissMemberRequestPacket) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player activePlayer = client.getPlayer();
-        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        FTPlayer activePlayer = client.getPlayer();
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer.getId());
 
         if (guildMember != null && guildMember.getMemberRank() > 1) {
+            Guild guild = guildService.findWithMembersById(guildMember.getGuild().getId());
             GuildMember dismissMember = GameManager.getInstance().getGuildMemberByPlayerPositionInGuild(
-                    guildDismissMemberRequestPacket.getPlayerPositionInGuild(),
-                    guildMember);
+                    guild,
+                    guildDismissMemberRequestPacket.getPlayerPositionInGuild());
 
             if (dismissMember != null) {
                 if (dismissMember.getMemberRank() == 3) {
                     SMSGGuildDismissMember dismissMemberPacket = SMSGGuildDismissMember.builder().result((short) -5).build();
                     connection.sendTCP(dismissMemberPacket);
                 } else {
-                    Guild guild = dismissMember.getGuild();
                     guild.getMemberList().removeIf(x -> x.getId().equals(dismissMember.getId()));
                     guildService.save(guild);
 
                     FTClient targetClient = GameManager.getInstance().getClients().stream()
-                            .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(dismissMember.getPlayer().getId()))
+                            .filter(c -> c.hasPlayer() && dismissMember.getPlayer().getId().equals(c.getPlayer().getId()))
                             .findFirst()
                             .orElse(null);
 
                     if (targetClient != null) {
+                        FTPlayer targetPlayer = targetClient.getPlayer();
+                        targetPlayer.setGuildMemberId(null);
+                        targetPlayer.setGuild(null);
+
                         SMSGGuildDismissMember dismissMemberPacket = SMSGGuildDismissMember.builder().result((short) 0).build();
                         targetClient.getConnection().sendTCP(dismissMemberPacket);
                     }

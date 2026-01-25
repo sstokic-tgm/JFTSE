@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedMessageNotificationPacket;
@@ -12,6 +13,7 @@ import com.jftse.entities.database.model.messenger.EFriendshipState;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.messenger.Message;
 import com.jftse.entities.database.model.messenger.Proposal;
+import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
@@ -30,6 +32,7 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
     private final MessageService messageService;
     private final PlayerPocketService playerPocketService;
     private final SocialService socialService;
+    private final PlayerService playerService;
 
     private final RProducerService rProducerService;
 
@@ -39,29 +42,39 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
         messageService = ServiceManager.getInstance().getMessageService();
         playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
         socialService = ServiceManager.getInstance().getSocialService();
+        playerService = ServiceManager.getInstance().getPlayerService();
         rProducerService = RProducerService.getInstance();
     }
 
     @Override
     public void handle(FTConnection connection, CMSGAcceptProposal packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
+        FTPlayer player = ftClient.getPlayer();
         Proposal proposal = proposalService.findById((long) packet.getProposalId());
         if (proposal == null) return;
 
-        List<Friend> senderFriend = friendService.findByPlayer(proposal.getSender());
+        Player sendPlayer = playerService.findById(proposal.getSender().getId());
+        Player receivePlayer = playerService.findById(proposal.getReceiver().getId());
+        if (sendPlayer == null || receivePlayer == null) {
+            proposalService.remove(proposal.getId());
+            // maybe additional cleanup needed
+            return;
+        }
+
+        List<Friend> senderFriend = friendService.findByPlayer(sendPlayer);
         if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
             if (packet.getAccept()) {
                 Message message = new Message();
                 message.setSeen(false);
-                message.setSender(proposal.getSender());
-                message.setReceiver(proposal.getReceiver());
+                message.setSender(sendPlayer);
+                message.setReceiver(receivePlayer);
                 message.setMessage("[Automatic response] I'm sorry but I'm already in a relationship");
                 messageService.save(message);
 
-                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
+                S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message, sendPlayer.getName());
                 connection.sendTCP(s2CReceivedMessageNotificationPacket);
             }
 
@@ -71,10 +84,10 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
 
         Message message = new Message();
         message.setSeen(false);
-        message.setSender(proposal.getReceiver());
-        message.setReceiver(proposal.getSender());
+        message.setSender(receivePlayer);
+        message.setReceiver(sendPlayer);
         if (packet.getAccept()) {
-            List<Friend> receiverFriend = friendService.findByPlayer(proposal.getReceiver());
+            List<Friend> receiverFriend = friendService.findByPlayer(receivePlayer);
             if (receiverFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
                 proposalService.remove(proposal.getId());
                 return;
@@ -83,12 +96,12 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
             message.setMessage("[Automatic response] I accepted your proposal <3");
 
             Friend friendOfSender = friendService.findByPlayerIdAndFriendId(
-                    proposal.getSender().getId(),
-                    proposal.getReceiver().getId());
+                    sendPlayer.getId(),
+                    receivePlayer.getId());
             if (friendOfSender == null) {
                 friendOfSender = new Friend();
-                friendOfSender.setPlayer(proposal.getSender());
-                friendOfSender.setFriend(proposal.getReceiver());
+                friendOfSender.setPlayer(sendPlayer);
+                friendOfSender.setFriend(receivePlayer);
             }
 
             friendOfSender.setEFriendshipState(EFriendshipState.Relationship);
@@ -98,8 +111,8 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
                     proposal.getSender().getId());
             if (friendOfReceiver == null) {
                 friendOfReceiver = new Friend();
-                friendOfReceiver.setPlayer(proposal.getReceiver());
-                friendOfReceiver.setFriend(proposal.getSender());
+                friendOfReceiver.setPlayer(receivePlayer);
+                friendOfReceiver.setFriend(sendPlayer);
             }
 
             friendOfReceiver.setEFriendshipState(EFriendshipState.Relationship);
@@ -107,19 +120,20 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
             friendService.save(friendOfSender);
             friendService.save(friendOfReceiver);
 
-            Friend myRelation = socialService.getRelationship(ftClient.getPlayer());
+            Friend myRelation = socialService.getRelationship(player.getPlayerRef());
             if (myRelation != null) {
-                S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(myRelation);
+                Player pMyRelation = playerService.findWithAccountById(myRelation.getFriend().getId());
+                S2CRelationshipAnswerPacket s2CRelationshipAnswerPacket = new S2CRelationshipAnswerPacket(pMyRelation);
                 connection.sendTCP(s2CRelationshipAnswerPacket);
 
                 RefreshFriendRelationMessage refreshFriendRelationMessage = RefreshFriendRelationMessage.builder()
-                        .playerId(ftClient.getPlayer().getId())
+                        .playerId(player.getId())
                         .build();
-                rProducerService.send(refreshFriendRelationMessage, "game.messenger.relationship chat.messenger.relationship", "ChatServer");
+                rProducerService.send(refreshFriendRelationMessage, "game.messenger.relationship chat.messenger.relationship", "GameServer");
             }
 
             PlayerPocket senderPocket = new PlayerPocket();
-            senderPocket.setPocket(proposal.getSender().getPocket());
+            senderPocket.setPocket(sendPlayer.getPocket());
             senderPocket.setCategory(EItemCategory.SPECIAL.getName());
             senderPocket.setUseType(EItemUseType.INSTANT.getName());
             senderPocket.setItemCount(1);
@@ -127,7 +141,7 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
             senderPocket = playerPocketService.save(senderPocket);
 
             PlayerPocket receiverPocket = new PlayerPocket();
-            receiverPocket.setPocket(proposal.getReceiver().getPocket());
+            receiverPocket.setPocket(receivePlayer.getPocket());
             receiverPocket.setCategory(EItemCategory.SPECIAL.getName());
             receiverPocket.setUseType(EItemUseType.INSTANT.getName());
             receiverPocket.setItemCount(1);
@@ -140,9 +154,9 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
 
             PacketMessage packetMessage = PacketMessage.builder()
                     .packet(senderInventoryPacket)
-                    .receivingPlayerId(proposal.getSender().getId())
+                    .receivingPlayerId(sendPlayer.getId())
                     .build();
-            rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", "ChatServer");
+            rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", "GameServer");
         } else {
             message.setMessage("[Automatic response] I denied your proposal ＞﹏＜");
         }
@@ -150,11 +164,11 @@ public class ProposalAnswerRequestHandler implements PacketHandler<FTConnection,
         messageService.save(message);
         proposalService.remove(proposal.getId());
 
-        S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message);
+        S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message, receivePlayer.getName());
         PacketMessage packetMessage = PacketMessage.builder()
                 .packet(s2CReceivedMessageNotificationPacket)
-                .receivingPlayerId(proposal.getSender().getId())
+                .receivingPlayerId(sendPlayer.getId())
                 .build();
-        rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", "ChatServer");
+        rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", "GameServer");
     }
 }

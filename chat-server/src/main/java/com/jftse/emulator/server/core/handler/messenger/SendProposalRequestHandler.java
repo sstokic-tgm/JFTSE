@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CProposalListPacket;
@@ -47,7 +48,7 @@ public class SendProposalRequestHandler implements PacketHandler<FTConnection, C
     @Override
     public void handle(FTConnection connection, CMSGSendProposal packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null)
+        if (!ftClient.hasPlayer())
             return;
 
         PlayerPocket item = playerPocketService.findById((long) packet.getPlayerPocketId());
@@ -69,17 +70,15 @@ public class SendProposalRequestHandler implements PacketHandler<FTConnection, C
             return;
         }
 
-        Player sender = ftClient.getPlayer();
-        if (sender == null)
-            return;
+        FTPlayer sender = ftClient.getPlayer();
 
-        if (!sender.getPocket().getId().equals(item.getPocket().getId())) {
+        if (!item.getPocket().getId().equals(sender.getPocketId())) {
             SMSGSendProposal response = SMSGSendProposal.builder().status((byte) -2).build();
             connection.sendTCP(response);
 
             GameLog gameLog = new GameLog();
             gameLog.setGameLogType(GameLogType.BANABLE);
-            gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requested playerPocketId: " + item.getId() + ", requesting player pocketId: " + sender.getPocket().getId() + ", requesting playerId: " + sender.getId());
+            gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requested playerPocketId: " + item.getId() + ", requesting player pocketId: " + sender.getPocketId() + ", requesting playerId: " + sender.getId());
             gameLogService.save(gameLog);
 
             return;
@@ -87,7 +86,7 @@ public class SendProposalRequestHandler implements PacketHandler<FTConnection, C
 
         Player receiver = playerService.findByName(packet.getReceiverName());
 
-        List<Friend> senderFriend = friendService.findByPlayer(sender);
+        List<Friend> senderFriend = friendService.findByPlayer(sender.getPlayerRef());
         if (senderFriend.stream().anyMatch(x -> x.getEFriendshipState().equals(EFriendshipState.Relationship))) {
             SMSGSendProposal response = SMSGSendProposal.builder().status((byte) -3).build();
             connection.sendTCP(response);
@@ -104,7 +103,7 @@ public class SendProposalRequestHandler implements PacketHandler<FTConnection, C
 
             Proposal proposal = new Proposal();
             proposal.setReceiver(receiver);
-            proposal.setSender(sender);
+            proposal.setSender(sender.getPlayer());
             proposal.setMessage(packet.getMessage());
             proposal.setSeen(false);
             proposal.setCategory(item.getCategory());
@@ -132,12 +131,12 @@ public class SendProposalRequestHandler implements PacketHandler<FTConnection, C
                     .build();
             rProducerService.send(packetMessage, "game.messenger.proposal chat.messenger.proposal", sender.getName() + "(ChatServer)");
 
-            List<Proposal> sentProposals = proposalService.findBySender(sender);
-            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
-            connection.sendTCP(s2CSentProposalListPacket);
-
             SMSGSendProposal response = SMSGSendProposal.builder().status((byte) 0).build();
             connection.sendTCP(response);
+
+            List<Proposal> sentProposals = proposalService.findWithPlayerBySender(sender.getId());
+            S2CProposalListPacket s2CSentProposalListPacket = new S2CProposalListPacket((byte) 1, sentProposals);
+            connection.sendTCP(s2CSentProposalListPacket);
         }
     }
 }

@@ -9,4 +9,7 @@ public interface GuildMemberService {
     GuildMember save(GuildMember guildMember);
 
     GuildMember getByPlayer(Player player);
+    GuildMember getByPlayer(Long playerId);
+
+    boolean isWaitingForApproval(Long playerId);
 }

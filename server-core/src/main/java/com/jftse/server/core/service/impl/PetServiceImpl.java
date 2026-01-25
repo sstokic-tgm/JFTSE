@@ -17,21 +17,24 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class PetServiceImpl implements PetService {
     private final PetRepository petRepository;
     private final PetStatisticRepository petStatisticRepository;
 
+    @Override
+    @Transactional(readOnly = true)
     public Pet findById(Long id) {
         return petRepository.findById(id).orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Pet> findAllByPlayerId(Long playerId) {
         return petRepository.findAllByPlayerId(playerId);
     }
 
     @Override
+    @Transactional
     public Pet createPet(Integer itemIndex, Player player) {
         PetStatistic petStatistic = new PetStatistic();
         petStatistic = petStatisticRepository.save(petStatistic);

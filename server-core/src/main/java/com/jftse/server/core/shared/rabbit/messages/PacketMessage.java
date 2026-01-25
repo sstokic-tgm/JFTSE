@@ -1,6 +1,6 @@
 package com.jftse.server.core.shared.rabbit.messages;
 
-import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.rabbit.AbstractBaseMessage;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,11 +11,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class PacketMessage extends AbstractBaseMessage {
-    private Packet packet;
+    private IPacket packet;
     private Long receivingPlayerId;
 
     @Builder
-    public PacketMessage(Packet packet, Long receivingPlayerId) {
+    public PacketMessage(IPacket packet, Long receivingPlayerId) {
         this.packet = packet;
         this.receivingPlayerId = receivingPlayerId;
     }

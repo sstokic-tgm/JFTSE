@@ -1,43 +1,36 @@
 package com.jftse.emulator.server.core.life.item.special;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.service.PlayerPocketService;
-import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 
 public class MegaphoneSpeaker extends BaseItem {
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
-    private final PlayerService playerService;
 
     public MegaphoneSpeaker(int itemIndex, String name, String category) {
         super(itemIndex, name, category);
 
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
-        this.playerService = ServiceManager.getInstance().getPlayerService();
     }
 
     @Override
-    public boolean processPlayer(Player player) {
-        player = playerService.findById(player.getId());
-        if (player == null)
-            return false;
-
+    public boolean processPlayer(FTPlayer player) {
         this.localPlayerId = player.getId();
 
         return true;
     }
 
     @Override
-    public boolean processPocket(Pocket pocket) {
-        pocket = pocketService.findById(pocket.getId());
+    public boolean processPocket(Long pocketId) {
+        Pocket pocket = pocketService.findById(pocketId);
         if (pocket == null)
             return false;
 

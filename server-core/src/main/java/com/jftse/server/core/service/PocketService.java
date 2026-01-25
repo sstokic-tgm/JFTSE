@@ -8,6 +8,8 @@ public interface PocketService {
     Pocket findById(Long pocketId);
 
     Pocket incrementPocketBelongings(Pocket pocket);
+    Pocket incrementPocketBelongings(Long pocketId);
 
     Pocket decrementPocketBelongings(Pocket pocket);
+    Pocket decrementPocketBelongings(Long pocketId);
 }

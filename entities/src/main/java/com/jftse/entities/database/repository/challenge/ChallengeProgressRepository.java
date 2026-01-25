@@ -14,5 +14,9 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
     @Query(value = "FROM ChallengeProgress cp LEFT JOIN FETCH cp.player player LEFT JOIN FETCH cp.challenge challenge WHERE player_id = :playerId")
     List<ChallengeProgress> findAllByPlayerIdFetched(@Param("playerId") Long playerId);
 
-    Optional<ChallengeProgress> findByPlayerAndChallenge(Player player, Challenge challenge);
+    @Query(value = "SELECT cp FROM ChallengeProgress cp JOIN FETCH cp.challenge c WHERE cp.player.id = :playerId")
+    List<ChallengeProgress> findAllByPlayerId(Long playerId);
+
+    @Query(value = "SELECT cp FROM ChallengeProgress cp JOIN FETCH cp.challenge c WHERE cp.player.id = :playerId AND cp.challenge = :challenge")
+    Optional<ChallengeProgress> findByPlayerIdAndChallenge(Long playerId, Challenge challenge);
 }

@@ -1,11 +1,12 @@
 package com.jftse.emulator.server.core.packets.guild;
 
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
 
 import java.util.List;
+import java.util.Set;
 
 public class S2CGuildSearchAnswerPacket extends Packet {
     public S2CGuildSearchAnswerPacket(List<Guild> guildList) {
@@ -22,7 +23,7 @@ public class S2CGuildSearchAnswerPacket extends Packet {
             this.write(guild.getLogoMarkColor());
             this.write(guild.getName());
             this.write(guild.getIsPublic());
-            List<GuildMember> memberList = guild.getMemberList();
+            Set<GuildMember> memberList = guild.getMemberList();
             GuildMember clubMaster = memberList.stream().filter(gm -> gm.getMemberRank() == 3).findFirst().orElse(null);
             this.write(clubMaster.getPlayer().getName());
             this.write(guild.getLevel());

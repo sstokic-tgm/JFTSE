@@ -15,11 +15,11 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class ClientWhitelistServiceImpl implements ClientWhitelistService {
     private final ClientWhitelistRepository clientWhitelistRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ClientWhitelist save(ClientWhitelist clientWhitelist) {
         return clientWhitelistRepository.save(clientWhitelist);
     }
@@ -61,11 +61,13 @@ public class ClientWhitelistServiceImpl implements ClientWhitelistService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ClientWhitelist> findAll() {
         return clientWhitelistRepository.findAll();
     }
 
     @Override
+    @Transactional
     public void remove(Long clientWhitelistId) {
         clientWhitelistRepository.deleteById(clientWhitelistId);
     }

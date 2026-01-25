@@ -14,7 +14,11 @@ public interface ProposalService {
 
     List<Proposal> findBySender(Player sender);
 
+    List<Proposal> findWithPlayerBySender(Long playerId);
+
     List<Proposal> findByReceiver(Player receiver);
+
+    List<Proposal> findWithPlayerByReceiver(Long playerId);
 
     long deleteBySender(Player sender);
 

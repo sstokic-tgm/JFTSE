@@ -1,11 +1,11 @@
 package com.jftse.emulator.server.core.life.item.recipe;
 
 import com.jftse.emulator.common.utilities.StringTokenizer;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.item.ItemRecipe;
 import com.jftse.entities.database.model.item.Product;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.item.EItemCategory;
@@ -16,6 +16,7 @@ import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.service.ProductService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Recipe extends BaseItem {
     private final PocketService pocketService;
@@ -44,10 +45,8 @@ public class Recipe extends BaseItem {
     }
 
     @Override
-    public boolean processPlayer(Player player) {
-        player = playerService.findById(player.getId());
-
-        if (itemRecipe == null || player == null)
+    public boolean processPlayer(FTPlayer player) {
+        if (itemRecipe == null)
             return false;
 
         int requireGold = itemRecipe.getRequireGold();
@@ -57,18 +56,18 @@ public class Recipe extends BaseItem {
 
         int newGold = player.getGold() - requireGold;
         newGold = Math.max(newGold, 0);
-
-        player = playerService.setMoney(player, newGold);
+        player.syncGold(newGold);
+        playerService.setMoney(player.getPlayer(), newGold);
 
         return true;
     }
 
     @Override
-    public boolean processPocket(Pocket pocket) {
+    public boolean processPocket(Long pocketId) {
         if (itemRecipe == null)
             return false;
 
-        pocket = pocketService.findById(pocket.getId());
+        Pocket pocket = pocketService.findById(pocketId);
         if (pocket == null)
             return false;
 
@@ -91,21 +90,27 @@ public class Recipe extends BaseItem {
         neededMaterialsList.removeIf(map -> map.get("material") == 0);
 
         // check if needed materials are present in the pocket
-        boolean hasNeededMaterials = false;
-        for (Map<String, Integer> neededMaterialsMap : neededMaterialsList) {
-            Integer material = neededMaterialsMap.get("material");
-            Integer count = neededMaterialsMap.get("count");
+        Map<Integer, Integer> required = neededMaterialsList.stream()
+                .collect(Collectors.toMap(
+                        m -> m.get("material"),
+                        m -> m.get("count"),
+                        Integer::sum
+                ));
 
-            PlayerPocket ppMaterial = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(material, EItemCategory.MATERIAL.getName(), pocket);
-            if (ppMaterial == null)
-                break;
+        List<Integer> materialIndexes = new ArrayList<>(required.keySet());
+        List<PlayerPocket> playerPockets = playerPocketService.getItemsAsPocketByItemIndexListAndCategoryAndPocket(materialIndexes, EItemCategory.MATERIAL.getName(), pocket);
 
-            if (ppMaterial.getItemCount() < count) {
-                hasNeededMaterials = false;
-                break;
-            }
-            hasNeededMaterials = true;
-        }
+        Map<Integer, PlayerPocket> byIndex = playerPockets.stream()
+                .collect(Collectors.toMap(
+                        PlayerPocket::getItemIndex,
+                        pp -> pp,
+                        (a, b) -> a
+                ));
+
+        boolean hasNeededMaterials = required.entrySet().stream().allMatch(e -> {
+            PlayerPocket pp = byIndex.get(e.getKey());
+            return pp != null && pp.getItemCount() >= e.getValue();
+        });
 
         // if not enough materials
         if (!hasNeededMaterials)
@@ -193,31 +198,28 @@ public class Recipe extends BaseItem {
             pocket = pocketService.incrementPocketBelongings(pocket);
 
         // remove needed materials
-        for (Map<String, Integer> neededMaterialsMap : neededMaterialsList) {
-            Integer material = neededMaterialsMap.get("material");
-            Integer count = neededMaterialsMap.get("count");
+        for (Map.Entry<Integer, Integer> entry : required.entrySet()) {
+            PlayerPocket ppMaterial = byIndex.get(entry.getKey());
+            int count = entry.getValue();
 
-            PlayerPocket ppMaterial = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(material, EItemCategory.MATERIAL.getName(), pocket);
-            if (ppMaterial != null) {
-                int newItemCount = ppMaterial.getItemCount() - count;
-                if (newItemCount <= 0) {
-                    playerPocketService.remove(ppMaterial.getId());
-                    pocket = pocketService.decrementPocketBelongings(pocket);
+            int newItemCount = ppMaterial.getItemCount() - count;
+            if (newItemCount <= 0) {
+                playerPocketService.remove(ppMaterial.getId());
+                pocket = pocketService.decrementPocketBelongings(pocket);
 
-                    itemsToRemoveFromClient.add(ppMaterial.getId());
-                } else {
-                    ppMaterial.setItemCount(newItemCount);
-                    ppMaterial = playerPocketService.save(ppMaterial);
+                itemsToRemoveFromClient.add(ppMaterial.getId());
+            } else {
+                ppMaterial.setItemCount(newItemCount);
+                ppMaterial = playerPocketService.save(ppMaterial);
 
-                    itemsToUpdateFromClient.add(ppMaterial);
-                }
+                itemsToUpdateFromClient.add(ppMaterial);
             }
         }
 
         int newItemCount = playerPocketRecipe.getItemCount() - 1;
         if (newItemCount <= 0) {
             playerPocketService.remove(playerPocketRecipe.getId());
-            pocket = pocketService.decrementPocketBelongings(pocket);
+            pocketService.decrementPocketBelongings(pocket);
 
             itemsToRemoveFromClient.add(playerPocketRecipe.getId());
         } else {

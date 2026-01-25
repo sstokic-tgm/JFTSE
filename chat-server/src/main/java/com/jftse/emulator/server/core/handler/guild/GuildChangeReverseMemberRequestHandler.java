@@ -1,10 +1,10 @@
 package com.jftse.emulator.server.core.handler.guild;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
@@ -25,29 +25,25 @@ public class GuildChangeReverseMemberRequestHandler implements PacketHandler<FTC
     @Override
     public void handle(FTConnection connection, CMSGGuildChangeReverseMember guildChangeReverseMemberRequestPacket) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player activePlayer = client.getPlayer();
-        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        FTPlayer activePlayer = client.getPlayer();
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer.getId());
+
+        boolean isApproved = guildChangeReverseMemberRequestPacket.getStatus() == 1;
 
         if (guildMember != null && guildMember.getMemberRank() > 1) {
-            GuildMember reverseMember = guildMember.getGuild().getMemberList().stream()
-                    .filter(gm -> gm.getPlayer().getId() == guildChangeReverseMemberRequestPacket.getPlayerId())
-                    .findFirst().orElse(null);
+            guildService.changeReverseMemberStatus(
+                    guildMember.getGuild().getId(),
+                    guildChangeReverseMemberRequestPacket.getPlayerId(),
+                    isApproved
+            );
 
-            if (reverseMember != null) {
-                if (guildChangeReverseMemberRequestPacket.getStatus() == 1) {
-                    reverseMember.setWaitingForApproval(false);
-                    guildMemberService.save(reverseMember);
-
-                    connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 1).result((short) 0).build());
-                } else {
-                    reverseMember.getGuild().getMemberList().removeIf(x -> x.getId().equals(reverseMember.getId()));
-                    guildService.save(reverseMember.getGuild());
-
-                    connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 0).result((short) 0).build());
-                }
+            if (isApproved) {
+                connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 1).result((short) 0).build());
+            } else {
+                connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 0).result((short) 0).build());
             }
         } else {
             connection.sendTCP(SMSGGuildChangeReverseMember.builder().status((byte) 0).result((short) -4).build());

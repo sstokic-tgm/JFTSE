@@ -5,8 +5,6 @@ import com.jftse.entities.database.repository.battle.GuardianRepository;
 import com.jftse.server.core.service.GuardianService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class GuardianServiceImpl implements GuardianService {
     private final GuardianRepository guardianRepository;
 

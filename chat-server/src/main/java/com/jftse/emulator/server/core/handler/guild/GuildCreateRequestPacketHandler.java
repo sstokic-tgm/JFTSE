@@ -1,35 +1,38 @@
 package com.jftse.emulator.server.core.handler.guild;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
 import com.jftse.server.core.service.GuildService;
+import com.jftse.server.core.service.PlayerService;
 import com.jftse.server.core.shared.packets.guild.CMSGGuildCreate;
 import com.jftse.server.core.shared.packets.guild.SMSGGuildCreate;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @PacketId(CMSGGuildCreate.PACKET_ID)
 public class GuildCreateRequestPacketHandler implements PacketHandler<FTConnection, CMSGGuildCreate> {
     private final GuildService guildService;
     private final GuildMemberService guildMemberService;
+    private final PlayerService playerService;
 
     public GuildCreateRequestPacketHandler() {
         guildService = ServiceManager.getInstance().getGuildService();
         guildMemberService = ServiceManager.getInstance().getGuildMemberService();
+        playerService = ServiceManager.getInstance().getPlayerService();
     }
 
     @Override
     public void handle(FTConnection connection, CMSGGuildCreate guildCreateRequestPacket) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
         String guildName = guildCreateRequestPacket.getName();
@@ -38,8 +41,8 @@ public class GuildCreateRequestPacketHandler implements PacketHandler<FTConnecti
             return;
         }
 
-        Player activePlayer = client.getPlayer();
-        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        FTPlayer activePlayer = client.getPlayer();
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer.getId());
         if (guildMember != null) {
             connection.sendTCP(SMSGGuildCreate.builder().result((char) -2).build()); // You already have a Club.
             return;
@@ -61,16 +64,17 @@ public class GuildCreateRequestPacketHandler implements PacketHandler<FTConnecti
 
         guildMember = new GuildMember();
         guildMember.setGuild(guild);
-        guildMember.setPlayer(activePlayer);
+        guildMember.setPlayer(activePlayer.getPlayerRef());
         guildMember.setMemberRank((byte) 3); // ClubMaster
         guildMember.setRequestDate(new Date());
         guildMember.setWaitingForApproval(false);
         guildMemberService.save(guildMember);
 
-        activePlayer.setGold(activePlayer.getGold() - 5000);
-        client.savePlayer(activePlayer);
+        int newGold = activePlayer.getGold() - 5000;
+        activePlayer.syncGold(newGold);
+        playerService.setMoney(activePlayer.getPlayer(),  newGold);
 
-        guild.setMemberList(List.of(guildMember));
+        guild.setMemberList(Set.of(guildMember));
         connection.sendTCP(SMSGGuildCreate.builder().result((char) 0).build());
     }
 }

@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.net;
 
-import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.server.core.net.Client;
 import lombok.Getter;
@@ -15,7 +14,7 @@ public class FTClient extends Client<FTConnection> {
 
     @Getter
     @Setter
-    private boolean gameMaster;
+    private boolean gameMaster = false;
 
     @Getter
     @Setter

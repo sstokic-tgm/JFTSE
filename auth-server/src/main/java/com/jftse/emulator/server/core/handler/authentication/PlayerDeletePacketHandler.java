@@ -50,7 +50,7 @@ public class PlayerDeletePacketHandler implements PacketHandler<FTConnection, CM
             Long accountId = client.getAccountId();
             Player player = playerService.findById((long) playerDeletePacket.getPlayerId());
             if (accountId != null && player != null) {
-                List<Player> playerList = playerService.findAllByAccount(accountId);
+                List<Player> playerList = playerService.getPlayerListByAccountId(accountId);
                 int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(accountId);
 
                 boolean removed = playerList.removeIf(p -> p.getId().equals(player.getId()));

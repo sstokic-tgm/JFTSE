@@ -11,8 +11,16 @@ import javax.persistence.*;
 @Setter
 @Audited
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_pp_category", columnList = "category"),
+        @Index(name = "idx_pp_itemIndex", columnList = "itemIndex"),
+        @Index(name = "idx_pp_category_itemIndex", columnList = "category, itemIndex"),
+        @Index(name = "idx_pp_category_itemIndex_pocket", columnList = "category, itemIndex, pocket_id"),
+        @Index(name = "idx_pp_pocket", columnList = "pocket_id"),
+        @Index(name = "idx_pp_pocket_category", columnList = "pocket_id, category")
+})
 public class PlayerPocket extends AbstractBaseModel {
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Pocket pocket;
 
     private String category;

@@ -90,7 +90,7 @@ public class ShakeTreeSuccessHandler implements PacketHandler<FTConnection, CMSG
         int quantity = fruitReward.getQuantity();
 
         if (quantity != 0) {
-            Pocket pocket = pocketService.findById(roomPlayer.getPlayer().getPocket().getId());
+            Pocket pocket = pocketService.findById(roomPlayer.getPocketId());
             PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(item.getItemIndex(), EItemCategory.MATERIAL.getName(), pocket);
             int existingItemCount = 0;
             boolean existingItem = false;

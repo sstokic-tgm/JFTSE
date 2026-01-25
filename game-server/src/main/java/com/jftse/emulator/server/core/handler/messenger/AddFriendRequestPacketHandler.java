@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CFriendRequestNotificationPacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
@@ -16,7 +17,6 @@ import com.jftse.server.core.shared.packets.messenger.CMSGAddFriend;
 import com.jftse.server.core.shared.packets.messenger.SMSGAddFriend;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
-import java.util.Collections;
 import java.util.List;
 
 @PacketId(CMSGAddFriend.PACKET_ID)
@@ -35,10 +35,10 @@ public class AddFriendRequestPacketHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGAddFriend packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer())
             return;
 
-        Player player = ftClient.getPlayer();
+        FTPlayer player = ftClient.getPlayer();
         Player targetPlayer = playerService.findByName(packet.getPlayerName());
         if (targetPlayer == null) {
             SMSGAddFriend response = SMSGAddFriend.builder().result((short) -1).build();
@@ -46,7 +46,7 @@ public class AddFriendRequestPacketHandler implements PacketHandler<FTConnection
             return;
         }
 
-        List<Friend> friends = friendService.findByPlayer(player);
+        List<Friend> friends = friendService.findByPlayer(player.getPlayerRef());
         final long count = friends.stream()
                 .filter(x -> x.getEFriendshipState() == EFriendshipState.Friends || x.getEFriendshipState() == EFriendshipState.Relationship)
                 .count();
@@ -63,7 +63,7 @@ public class AddFriendRequestPacketHandler implements PacketHandler<FTConnection
 
         if (targetFriend == null) {
             Friend friend = new Friend();
-            friend.setPlayer(player);
+            friend.setPlayer(player.getPlayerRef());
             friend.setFriend(targetPlayer);
             friend.setEFriendshipState(EFriendshipState.WaitingApproval);
             friendService.save(friend);
@@ -71,7 +71,7 @@ public class AddFriendRequestPacketHandler implements PacketHandler<FTConnection
             SMSGAddFriend response = SMSGAddFriend.builder().result((short) 0).build();
             connection.sendTCP(response);
 
-            S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(Collections.singletonList(friend));
+            S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(List.of(player.getPlayer()));
 
             PacketMessage packetMessage = PacketMessage.builder()
                     .receivingPlayerId(targetPlayer.getId())

@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
 import com.jftse.emulator.common.utilities.StringTokenizer;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.life.event.GameEventBus;
 import com.jftse.emulator.server.core.life.event.GameEventType;
@@ -19,7 +20,6 @@ import com.jftse.emulator.server.core.task.PlaceCrystalRandomlyTask;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.battle.SkillDropRate;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
@@ -48,13 +48,10 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGPlayerPickupCrystal packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null || ftClient.getActiveGameSession() == null
-                || ftClient.getActiveRoom() == null || ftClient.getPlayer() == null)
+        if (!ftClient.hasPlayer() || ftClient.getActiveGameSession() == null || ftClient.getActiveRoom() == null)
             return;
 
-        final Player player = ftClient.getPlayer();
-        if (player == null)
-            return;
+        FTPlayer player = ftClient.getPlayer();
 
         final RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer == null)
@@ -103,10 +100,9 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
                             .findFirst()
                             .orElse(null);
             boolean levelRequired = !isBattleGame && activeRoom.getRoomPlayerList().stream()
-                    .filter(rp -> rp.getPlayer() != null)
-                    .allMatch(p -> p.getPlayer().getLevel() >= 65);
+                    .allMatch(p -> p.getLevel() >= 65);
 
-            int randomSkillIndex = this.getRandomPlayerSkill(player, playerBattleState, levelRequired);
+            int randomSkillIndex = this.getRandomPlayerSkill(player.getLevel(), playerBattleState, levelRequired);
             S2CMatchplayGiveSpecificSkill response = new S2CMatchplayGiveSpecificSkill(packet.getCrystalId(), playerPosition, randomSkillIndex);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(response, connection);
 
@@ -127,8 +123,8 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
         }
     }
 
-    private int getRandomPlayerSkill(Player player, PlayerBattleState otherPlayerBattleStateDead, boolean levelRequired) {
-        final SkillDropRate skillDropRate = skillDropRateService.findSkillDropRateByPlayer(player);
+    private int getRandomPlayerSkill(int playerLevel, PlayerBattleState otherPlayerBattleStateDead, boolean levelRequired) {
+        final SkillDropRate skillDropRate = skillDropRateService.findSkillDropRateByPlayerLevel(playerLevel);
         StringTokenizer st = new StringTokenizer(skillDropRate.getDropRates(), ",");
         final List<Integer> dropRates = st.get().stream().map(Integer::parseInt).limit(16).collect(Collectors.toList());
 

@@ -27,7 +27,7 @@ public class GuildSearchRequestPacketHandler implements PacketHandler<FTConnecti
 
         switch (searchType) {
             case 0 -> {
-                Guild guild = guildService.findById((long) packet.getNumber());
+                Guild guild = guildService.findWithMembersById((long) packet.getNumber());
                 if (guild != null)
                     connection.sendTCP(new S2CGuildSearchAnswerPacket(List.of(guild)));
                 else

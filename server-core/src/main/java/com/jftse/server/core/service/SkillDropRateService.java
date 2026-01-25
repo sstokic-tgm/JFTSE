@@ -4,5 +4,5 @@ import com.jftse.entities.database.model.battle.SkillDropRate;
 import com.jftse.entities.database.model.player.Player;
 
 public interface SkillDropRateService {
-    SkillDropRate findSkillDropRateByPlayer(Player player);
+    SkillDropRate findSkillDropRateByPlayerLevel(int playerLevel);
 }

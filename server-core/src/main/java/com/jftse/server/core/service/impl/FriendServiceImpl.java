@@ -13,39 +13,66 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class FriendServiceImpl implements FriendService {
     private final FriendRepository friendRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Friend save(Friend friend) {
         return friendRepository.save(friend);
     }
 
     @Override
+    @Transactional
     public void remove(Long friendMemberId) {
         friendRepository.deleteById(friendMemberId);
     }
 
     @Override
-    public Friend findById(Long id) { return friendRepository.findById(id).orElse(null); }
+    @Transactional(readOnly = true)
+    public Friend findById(Long id) {
+        return friendRepository.findById(id).orElse(null);
+    }
 
     @Override
-    public List<Friend> findByPlayer(Player player) { return friendRepository.findByPlayer(player); }
+    @Transactional(readOnly = true)
+    public List<Friend> findByPlayer(Player player) {
+        return friendRepository.findByPlayer(player);
+    }
 
     @Override
-    public List<Friend> findByFriend(Player friend) { return friendRepository.findByFriend(friend); }
+    @Transactional(readOnly = true)
+    public List<Friend> findByFriend(Player friend) {
+        return friendRepository.findByFriend(friend);
+    }
 
     @Override
-    public Friend findByPlayerIdAndFriendId(long playerId, long friendId) { return friendRepository.findByPlayerIdAndFriendId(playerId, friendId); }
+    @Transactional(readOnly = true)
+    public Friend findByPlayerIdAndFriendId(long playerId, long friendId) {
+        return friendRepository.findByPlayerIdAndFriendId(playerId, friendId);
+    }
 
     @Override
+    @Transactional
     public long deleteAllByPlayer(Player player) {
         return friendRepository.deleteAllByPlayer(player);
     }
 
     @Override
+    @Transactional
     public long deleteAllByFriend(Player friend) {
         return friendRepository.deleteAllByFriend(friend);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Friend> findWithFriendByPlayer(Player player) {
+        return friendRepository.findWithFriendByPlayer(player);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Friend> findWithFriendByFriend(Player player) {
+        return friendRepository.findWithFriendByFriend(player);
     }
 }

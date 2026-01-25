@@ -13,35 +13,59 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Message save(Message message) {
         return messageRepository.save(message);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void remove(Long messageId) {
         messageRepository.findById(messageId).ifPresent(m -> messageRepository.deleteById(m.getId()));
     }
 
     @Override
-    public Message findById(Long id) { return messageRepository.findById(id).orElse(null); }
+    @Transactional(readOnly = true)
+    public Message findById(Long id) {
+        return messageRepository.findById(id).orElse(null);
+    }
 
     @Override
-    public List<Message> findBySender(Player sender) { return messageRepository.findBySender(sender); }
+    @Transactional(readOnly = true)
+    public List<Message> findBySender(Player sender) {
+        return messageRepository.findBySender(sender);
+    }
 
     @Override
-    public List<Message> findByReceiver(Player receiver) { return messageRepository.findByReceiver(receiver); }
+    @Transactional(readOnly = true)
+    public List<Message> findWithPlayerBySender(Long senderId) {
+        return messageRepository.findWithPlayerBySender(senderId);
+    }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Message> findByReceiver(Player receiver) {
+        return messageRepository.findByReceiver(receiver);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Message> findWithPlayerByReceiver(Long receiverId) {
+        return messageRepository.findWithPlayerByReceiver(receiverId);
+    }
+
+    @Override
+    @Transactional
     public long deleteBySender(Player sender) {
         return messageRepository.deleteBySender(sender);
     }
 
     @Override
+    @Transactional
     public long deleteByReceiver(Player receiver) {
         return messageRepository.deleteByReceiver(receiver);
     }

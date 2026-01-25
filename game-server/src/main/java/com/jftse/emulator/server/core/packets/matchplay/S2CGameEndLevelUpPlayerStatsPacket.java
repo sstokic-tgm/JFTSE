@@ -1,30 +1,32 @@
 package com.jftse.emulator.server.core.packets.matchplay;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.utils.BattleUtils;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.player.StatusPointsAddedDto;
+import com.jftse.entities.database.model.player.EquippedItemStats;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
-    public S2CGameEndLevelUpPlayerStatsPacket(short playerPosition, Player player, StatusPointsAddedDto statusPointsAddedDto) {
+    public S2CGameEndLevelUpPlayerStatsPacket(short playerPosition, FTPlayer player) {
         super(PacketOperations.S2CGameEndLevelUpPlayerStats);
 
-        this.write(playerPosition); // not sure if it's the pos
-        this.write(player.getLevel());
+        EquippedItemStats equippedItemStats = player.getItemStats();
 
-        this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + statusPointsAddedDto.getAddHp()));
+        this.write(playerPosition); // not sure if it's the pos
+        this.write((byte) player.getLevel());
+
+        this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + equippedItemStats.getAddHp()));
 
         // status points
-        this.write(player.getStrength());
-        this.write(player.getStamina());
-        this.write(player.getDexterity());
-        this.write(player.getWillpower());
+        this.write((byte) player.getStrength());
+        this.write((byte) player.getStamina());
+        this.write((byte) player.getDexterity());
+        this.write((byte) player.getWillpower());
         // enchant added status points
-        this.write((byte) (statusPointsAddedDto.getAddStr() + statusPointsAddedDto.getStrength()));
-        this.write((byte) (statusPointsAddedDto.getAddSta() + statusPointsAddedDto.getStamina()));
-        this.write((byte) (statusPointsAddedDto.getAddDex() + statusPointsAddedDto.getDexterity()));
-        this.write((byte) (statusPointsAddedDto.getAddWil() + statusPointsAddedDto.getWillpower()));
+        this.write((byte) (equippedItemStats.getEnchantStr() + equippedItemStats.getStrength()));
+        this.write((byte) (equippedItemStats.getEnchantSta() + equippedItemStats.getStamina()));
+        this.write((byte) (equippedItemStats.getEnchantDex() + equippedItemStats.getDexterity()));
+        this.write((byte) (equippedItemStats.getEnchantWil() + equippedItemStats.getWillpower()));
         // ??
         for (int i = 5; i < 13; i++) {
             this.write((byte) 0);

@@ -1,12 +1,13 @@
 package com.jftse.emulator.server.core.handler.guild;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.client.GuildView;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.guild.S2CGuildDataAnswerPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.guild.Guild;
 import com.jftse.entities.database.model.guild.GuildMember;
-import com.jftse.entities.database.model.player.Player;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.GuildMemberService;
@@ -29,11 +30,11 @@ public class GuildJoinRequestPacketHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGGuildJoin guildJoinRequestPacket) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player activePlayer = client.getPlayer();
-        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer);
+        FTPlayer activePlayer = client.getPlayer();
+        GuildMember guildMember = guildMemberService.getByPlayer(activePlayer.getId());
 
         if (guildMember != null && guildMember.getWaitingForApproval()) {
             connection.sendTCP(SMSGGuildJoin.builder().result((short) -3).build());
@@ -45,7 +46,7 @@ public class GuildJoinRequestPacketHandler implements PacketHandler<FTConnection
             return;
         }
 
-        Guild guild = guildService.findById((long) guildJoinRequestPacket.getGuildId());
+        Guild guild = guildService.findWithMembersById((long) guildJoinRequestPacket.getGuildId());
         if (guild == null) {
             connection.sendTCP(SMSGGuildJoin.builder().result((short) -1).build());
             return;
@@ -74,15 +75,19 @@ public class GuildJoinRequestPacketHandler implements PacketHandler<FTConnection
 
         guildMember = new GuildMember();
         guildMember.setGuild(guild);
-        guildMember.setPlayer(activePlayer);
+        guildMember.setPlayer(activePlayer.getPlayer());
         guildMember.setMemberRank((byte) 1);
         guildMember.setRequestDate(new Date());
         guildMember.setWaitingForApproval(!guild.getIsPublic());
-        guildMemberService.save(guildMember);
+        guildMember = guildMemberService.save(guildMember);
+        guild.getMemberList().add(guildMember);
 
         if (guild.getIsPublic()) {
             connection.sendTCP(SMSGGuildJoin.builder().result((short) 1).build());
             connection.sendTCP(new S2CGuildDataAnswerPacket((short) 0, guild));
+
+            activePlayer.setGuildMemberId(guildMember.getId());
+            activePlayer.setGuild(GuildView.fromEntity(guild));
         } else {
             connection.sendTCP(SMSGGuildJoin.builder().result((short) 0).build());
         }

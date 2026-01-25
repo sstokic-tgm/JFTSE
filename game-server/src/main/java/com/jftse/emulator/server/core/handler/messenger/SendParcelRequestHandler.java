@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.messenger;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.messenger.S2CParcelListPacket;
 import com.jftse.emulator.server.core.packets.messenger.S2CReceivedParcelNotificationPacket;
@@ -46,8 +47,11 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
     @Override
     public void handle(FTConnection connection, CMSGSendParcel packet) {
         FTClient ftClient = connection.getClient();
-        if (ftClient == null)
+        if (ftClient == null || !ftClient.hasPlayer()) {
+            SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
+            connection.sendTCP(response);
             return;
+        }
 
         PlayerPocket item = playerPocketService.findById((long) packet.getPlayerPocketId());
         if (item == null) {
@@ -68,20 +72,15 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
             SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
             connection.sendTCP(response);
         } else {
-            Player sender = ftClient.getPlayer();
-            if (sender == null) {
-                SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
-                connection.sendTCP(response);
-                return;
-            }
+            FTPlayer sender = ftClient.getPlayer();
 
-            if (!sender.getPocket().getId().equals(item.getPocket().getId())) {
+            if (!item.getPocket().getId().equals(sender.getPocketId())) {
                 SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
                 connection.sendTCP(response);
 
                 GameLog gameLog = new GameLog();
                 gameLog.setGameLogType(GameLogType.BANABLE);
-                gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requested playerPocketId: " + item.getId() + ", requesting player pocketId: " + sender.getPocket().getId() + ", requesting playerId: " + sender.getId());
+                gameLog.setContent("pockets are not equal! requested pocketId: " + item.getPocket().getId() + ", requested playerPocketId: " + item.getId() + ", requesting player pocketId: " + sender.getPocketId() + ", requesting playerId: " + sender.getId());
                 gameLogService.save(gameLog);
 
                 return;
@@ -99,8 +98,8 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
                         return;
                     }
 
-                    List<Parcel> receiverParcels = parcelService.findByReceiver(receiver);
-                    List<Parcel> senderParcels = parcelService.findBySender(sender);
+                    List<Parcel> receiverParcels = parcelService.findWithPlayerByReceiver(receiver.getId());
+                    List<Parcel> senderParcels = parcelService.findWithPlayerBySender(sender.getId());
                     if (receiverParcels.size() > 128 || senderParcels.size() > 128) {
                         SMSGSendParcel response = SMSGSendParcel.builder().status((short) -1).build();
                         connection.sendTCP(response);
@@ -110,7 +109,7 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
                     // TODO: Parcels should have a retention of 7days. -> After 7 days delete parcels and return items back to senders pocket.
                     Parcel parcel = new Parcel();
                     parcel.setReceiver(receiver);
-                    parcel.setSender(sender);
+                    parcel.setSender(sender.getPlayer());
                     parcel.setMessage(packet.getMessage());
                     parcel.setGold(packet.getCashOnDelivery());
 
@@ -132,16 +131,15 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
                         parcel.setEParcelType(EParcelType.CashOnDelivery);
                     }
 
-                    sender = playerService.updateMoney(sender, -30); // fee 30 gold
-                    if (sender.getGold() < 0) {
-                        playerService.updateMoney(sender, 30);
+                    int newGold = sender.getGold() - 30; // fee 30 gold
+                    if (newGold < 0) {
                         SMSGSendParcel response = SMSGSendParcel.builder().status((short) -2).build();
                         connection.sendTCP(response);
                         return;
                     }
 
                     if (parcel.getEParcelType().equals(EParcelType.Gold)) {
-                        final int newGold = sender.getGold() - parcel.getGold();
+                        newGold = sender.getGold() - parcel.getGold();
                         if (newGold < 0) {
                             SMSGSendParcel response = SMSGSendParcel.builder().status((short) -2).build();
                             connection.sendTCP(response);
@@ -149,7 +147,9 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
                         }
                     }
 
-                    playerService.save(sender);
+                    sender.syncGold(newGold);
+                    playerService.setMoney(sender.getPlayer(), newGold);
+
                     parcelService.save(parcel);
                     playerPocketService.remove(item.getId());
 
@@ -174,7 +174,7 @@ public class SendParcelRequestHandler implements PacketHandler<FTConnection, CMS
                     S2CInventoryItemRemoveAnswerPacket s2CInventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(item.getId().intValue());
                     connection.sendTCP(s2CInventoryItemRemoveAnswerPacket);
 
-                    List<Parcel> sentParcels = parcelService.findBySender(parcel.getSender());
+                    List<Parcel> sentParcels = parcelService.findWithPlayerBySender(sender.getId());
                     S2CParcelListPacket s2CSentParcelListPacket = new S2CParcelListPacket((byte) 1, sentParcels);
                     connection.sendTCP(s2CSentParcelListPacket);
                 }

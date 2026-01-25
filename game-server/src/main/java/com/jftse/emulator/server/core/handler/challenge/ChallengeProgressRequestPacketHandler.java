@@ -23,7 +23,7 @@ public class ChallengeProgressRequestPacketHandler implements PacketHandler<FTCo
     @Override
     public void handle(FTConnection connection, CMSGChallengeProgress packet) {
         FTClient client = connection.getClient();
-        List<ChallengeProgress> challengeProgressList = challengeService.findAllByPlayerIdFetched(client.getPlayer().getId());
+        List<ChallengeProgress> challengeProgressList = client.hasPlayer() ? challengeService.findAllByPlayerId(client.getPlayer().getId()) : List.of();
 
         S2CChallengeProgressAnswerPacket challengeProgressAnswerPacket = new S2CChallengeProgressAnswerPacket(challengeProgressList);
         connection.sendTCP(challengeProgressAnswerPacket);

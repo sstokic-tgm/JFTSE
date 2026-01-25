@@ -34,7 +34,7 @@ public class RoomKickPlayerRequestPacketHandler implements PacketHandler<FTConne
             if (playerToKick != null) {
                 final List<FTClient> clientsInRoom = GameManager.getInstance().getClientsInRoom(room.getRoomId());
                 final FTClient client = clientsInRoom.stream()
-                        .filter(c -> c.getPlayer() != null && c.getPlayer().getId().equals(playerToKick.getPlayer().getId()))
+                        .filter(c -> c.hasPlayer() && c.getPlayer().getId() == playerToKick.getPlayerId())
                         .findFirst()
                         .orElse(null);
 

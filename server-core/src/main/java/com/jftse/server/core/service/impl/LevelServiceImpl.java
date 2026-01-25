@@ -15,7 +15,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class LevelServiceImpl implements LevelService {
     private final LevelExpRepository levelExpRepository;
 
@@ -35,11 +34,11 @@ public class LevelServiceImpl implements LevelService {
         if (levelExpList.isEmpty())
             return currentLevel;
 
-        LevelExp levelExp = levelExpList.get(0);
+        LevelExp levelExp = levelExpList.getFirst();
 
         if (newExp >= levelExp.getExpValue()) {
             List<LevelExp> newLevelExp = findAllByExpValue(newExp);
-            return (byte) (newLevelExp.get(0).getLevel() + 1);
+            return (byte) (newLevelExp.getFirst().getLevel() + 1);
         } else {
             return currentLevel;
         }
@@ -51,6 +50,7 @@ public class LevelServiceImpl implements LevelService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Player setNewLevelStatusPoints(byte level, Player player) {
         if (level > player.getLevel() && level <= 65)
             player.setStatusPoints((byte) (player.getStatusPoints() + (level - player.getLevel())));

@@ -31,12 +31,14 @@ public class LobbyUserInfoReqPacketHandler implements PacketHandler<FTConnection
         Player player = playerService.findByIdFetched((long) packet.getPlayerId());
         char result = (char) (player == null ? 1 : 0);
 
-        GuildMember guildMember = guildMemberService.getByPlayer(player);
         Guild guild = null;
-        if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
-            guild = guildMember.getGuild();
+        if (player != null) {
+            GuildMember guildMember = guildMemberService.getByPlayer(player.getId());
+            if (guildMember != null && !guildMember.getWaitingForApproval() && guildMember.getGuild() != null)
+                guild = guildMember.getGuild();
+        }
 
-        Friend couple = socialService.getRelationship(player);
+        Friend couple = socialService.getRelationshipWithFriend(player);
         S2CLobbyUserInfoAnswerPacket lobbyUserInfoAnswerPacket = new S2CLobbyUserInfoAnswerPacket(result, player, guild, couple);
         connection.sendTCP(lobbyUserInfoAnswerPacket);
     }

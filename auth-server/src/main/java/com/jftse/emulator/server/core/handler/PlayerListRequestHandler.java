@@ -33,7 +33,7 @@ public class PlayerListRequestHandler implements PacketHandler<FTConnection, CMS
         }
 
         int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(accountId);
-        List<Player> playerList = playerService.findAllByAccount(accountId);
+        List<Player> playerList = playerService.getPlayerListByAccountId(accountId);
 
         SMSGPlayerList playerListPacket = SMSGPlayerList.builder()
                 .account(

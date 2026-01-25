@@ -13,8 +13,10 @@ public interface MessageService {
     Message findById(Long id);
 
     List<Message> findBySender(Player sender);
+    List<Message> findWithPlayerBySender(Long senderId);
 
     List<Message> findByReceiver(Player receiver);
+    List<Message> findWithPlayerByReceiver(Long receiverId);
 
     long deleteBySender(Player sender);
 

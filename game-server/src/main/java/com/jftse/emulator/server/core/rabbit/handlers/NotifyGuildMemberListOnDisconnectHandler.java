@@ -50,18 +50,19 @@ public class NotifyGuildMemberListOnDisconnectHandler extends AbstractMessageHan
             return;
         }
 
-        GuildMember guildMember = guildMemberService.getByPlayer(player);
-        if (guildMember == null) {
+        AtomicInteger notifyCount = new AtomicInteger();
+        Guild guild = guildService.findWithMembersByPlayerId(message.getPlayerId());
+        if (guild == null) {
             log.error("Player {} is not a guild member", message.getPlayerId());
             return;
         }
 
-        AtomicInteger notifyCount = new AtomicInteger();
-        Guild guild = guildService.findById(guildMember.getGuild().getId());
         guild.getMemberList().stream()
                 .filter(m -> !m.getPlayer().getId().equals(player.getId()))
                 .forEach(m -> {
-                    List<GuildMember> guildMembers = socialService.getGuildMemberList(m.getPlayer());
+                    List<Player> guildMembers = socialService.getGuildMemberList(m.getPlayer()).stream()
+                            .map(GuildMember::getPlayer)
+                            .toList();
 
                     S2CClubMembersListAnswerPacket s2CClubMembersListAnswerPacket = new S2CClubMembersListAnswerPacket(guildMembers);
                     FTConnection guildMemberConnection = gameManager.getConnectionByPlayerId(m.getPlayer().getId());

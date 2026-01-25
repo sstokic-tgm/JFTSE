@@ -23,6 +23,9 @@ public class PetPickupRequestPacketHandler implements PacketHandler<FTConnection
     @Override
     public void handle(FTConnection connection, CMSGPickupPet packet) {
         FTClient ftClient = connection.getClient();
+        if (!ftClient.hasPlayer()) {
+            return;
+        }
 
         int newActivePetType = packet.getPetType();
         List<Pet> petList = petService.findAllByPlayerId(ftClient.getPlayer().getId());

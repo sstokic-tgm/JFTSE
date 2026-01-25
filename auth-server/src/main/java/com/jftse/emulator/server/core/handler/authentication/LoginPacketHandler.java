@@ -10,12 +10,12 @@ import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.anticheat.ClientWhitelist;
 import com.jftse.entities.database.model.auth.AuthToken;
 import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.proto.auth.UpdateAccountRequest;
 import com.jftse.proto.util.AccountAction;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
+import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
 import com.jftse.server.core.shared.packets.auth.CMSGLogin;
@@ -23,6 +23,8 @@ import com.jftse.server.core.shared.packets.auth.SMSGLogin;
 import com.jftse.server.core.shared.packets.auth.SMSGPlayerList;
 import lombok.extern.log4j.Log4j2;
 
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
@@ -33,17 +35,15 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Log4j2
 public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin> {
     private final AuthenticationService authenticationService;
-    private final ClientWhitelistService clientWhitelistService;
     private final AuthTokenService authTokenService;
     private final PlayerService playerService;
-    private final PlayerPocketService playerPocketService;
+    private final JdbcUtil jdbcUtil;
 
     public LoginPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
-        clientWhitelistService = ServiceManager.getInstance().getClientWhitelistService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
         playerService = ServiceManager.getInstance().getPlayerService();
-        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
+        jdbcUtil = AuthenticationManager.getInstance().getJdbcUtil();
     }
 
     @Override
@@ -142,16 +142,27 @@ public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin
             AuthenticationManager.getInstance().addUpdateAccountRequest(request);
 
             int tutorialCount = playerService.getTutorialProgressSucceededCountByAccount(client.getAccountId());
-            List<Player> playerList = playerService.findAllByAccount(client.getAccountId());
-            for (Player p : playerList) {
-                List<PlayerPocket> ppList = playerPocketService.getPlayerPocketItems(p.getPocket());
-                final boolean nameChangeItemPresent = ppList.stream()
-                        .anyMatch(pp -> pp.getCategory().equals(EItemCategory.SPECIAL.getName()) && pp.getItemIndex() == 4);
-                if (nameChangeItemPresent && !p.getNameChangeAllowed()) {
-                    p.setNameChangeAllowed(true);
-                    p = playerService.save(p);
-                }
-            }
+            jdbcUtil.execute(em -> {
+                Query q = em.createQuery("""
+                        UPDATE Player p
+                            SET p.nameChangeAllowed = true
+                        WHERE p.account.id = :accountId
+                            AND p.alreadyCreated = true
+                            AND p.nameChangeAllowed = false
+                            AND EXISTS (
+                                SELECT 1
+                                FROM PlayerPocket pp
+                                WHERE pp.pocket = p.pocket
+                                    AND pp.category = :category
+                                    AND pp.itemIndex = :itemIndex
+                            )
+                        """);
+                q.setParameter("accountId", client.getAccountId());
+                q.setParameter("category", EItemCategory.SPECIAL.getName());
+                q.setParameter("itemIndex", 4);
+                q.executeUpdate();
+            });
+            List<Player> playerList = playerService.getPlayerListByAccountId(client.getAccountId());
 
             connection.setHwid(loginPacket.getHwid());
 
@@ -233,26 +244,43 @@ public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin
         if (inetSocketAddress == null)
             return false;
         String hostAddress = inetSocketAddress.getAddress().getHostAddress();
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, hwid);
+
+        ClientWhitelist clientWhitelist = jdbcUtil.execute(em -> {
+           TypedQuery<ClientWhitelist> q = em.createQuery("SELECT cw FROM ClientWhitelist cw WHERE cw.ip = :ip AND cw.hwid = :hwid ORDER BY cw.created DESC", ClientWhitelist.class);
+           q.setParameter("ip", hostAddress);
+           q.setParameter("hwid", hwid);
+           return q.getResultStream().findFirst().orElse(null);
+        });
         return clientWhitelist != null;
     }
 
     private boolean isClientFlagged(String hwid) {
-        ClientWhitelist clientWhitelist = clientWhitelistService.findByHwidAndFlaggedTrue(hwid);
-        return clientWhitelist != null && clientWhitelist.getFlagged();
+        ClientWhitelist clientWhitelist = jdbcUtil.execute(em -> {
+            TypedQuery<ClientWhitelist> q = em.createQuery("SELECT cw FROM ClientWhitelist cw WHERE cw.hwid = :hwid AND cw.flagged = true ORDER BY cw.created DESC", ClientWhitelist.class);
+            q.setParameter("hwid", hwid);
+            return q.getResultStream().findFirst().orElse(null);
+        });
+        return clientWhitelist != null;
     }
 
     private boolean linkAccountToClientWhitelist(InetSocketAddress inetSocketAddress, String hwid, Account account) {
         if (inetSocketAddress != null) {
             String hostAddress = inetSocketAddress.getAddress().getHostAddress();
-            ClientWhitelist clientWhitelist = clientWhitelistService.findByIpAndHwid(hostAddress, hwid);
-            if (clientWhitelist != null) {
-                clientWhitelist.setAccount(account);
-                clientWhitelistService.save(clientWhitelist);
+
+            return jdbcUtil.execute(em -> {
+                ClientWhitelist cw = em.createQuery("SELECT cw FROM ClientWhitelist cw WHERE cw.ip = :ip AND cw.hwid = :hwid ORDER BY cw.created DESC", ClientWhitelist.class)
+                        .setParameter("ip", hostAddress)
+                        .setParameter("hwid", hwid)
+                        .setMaxResults(1)
+                        .getResultStream()
+                        .findFirst()
+                        .orElse(null);
+
+                if (cw == null) return false;
+
+                cw.setAccount(account);
                 return true;
-            } else {
-                return false;
-            }
+            });
         } else
             return false;
     }

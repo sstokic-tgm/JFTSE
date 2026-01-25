@@ -1,12 +1,11 @@
 package com.jftse.emulator.server.core.handler.item;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.item.BaseItem;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.player.Player;
-import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.item.CMSGPlayerAnnounce;
@@ -21,21 +20,17 @@ public class PlayerAnnounceHandler implements PacketHandler<FTConnection, CMSGPl
     @Override
     public void handle(FTConnection connection, CMSGPlayerAnnounce packet) {
         FTClient client = connection.getClient();
-        if (client == null || client.getPlayer() == null)
+        if (!client.hasPlayer())
             return;
 
-        Player player = client.getPlayer();
+        FTPlayer player = client.getPlayer();
 
-        Pocket pocket = player.getPocket();
-        if (pocket == null)
-            return;
-
-        BaseItem baseItem = ItemFactory.getItem(packet.getPlayerPocketId(), pocket);
+        BaseItem baseItem = ItemFactory.getItem(packet.getPlayerPocketId(), player.getPocketId());
         if (baseItem == null)
             return;
 
         if (baseItem.processPlayer(player)) {
-            baseItem.processPocket(pocket);
+            baseItem.processPocket(player.getPocketId());
         }
 
         byte textSize;

@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.net;
 
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -80,10 +81,11 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
         final FTClient client = connection.getClient();
         boolean notifyClients = true;
 
-        Player player = client.getPlayer();
+        final FTPlayer player = client.getPlayer();
         if (player != null) {
-            player.setOnline(false);
-            client.savePlayer(player);
+            Player p = player.getPlayer();
+            p.setOnline(false);
+            ServiceManager.getInstance().getPlayerService().save(p);
 
             Account account = client.getAccount();
             if (account != null && account.getStatus() != AuthenticationServiceImpl.ACCOUNT_BLOCKED_USER_ID) {
@@ -111,12 +113,9 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
             Room currentClientRoom = client.getActiveRoom();
             if (currentClientRoom != null) {
                 if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
-                    PlayerStatistic playerStatistic = player.getPlayerStatistic();
+                    PlayerStatistic playerStatistic = ServiceManager.getInstance().getPlayerStatisticService().findPlayerStatisticById(player.getPlayerStatisticId());
                     playerStatistic.setNumberOfDisconnects(playerStatistic.getNumberOfDisconnects() + 1);
-                    playerStatistic = ServiceManager.getInstance().getPlayerStatisticService().save(player.getPlayerStatistic());
-
-                    player.setPlayerStatistic(playerStatistic);
-                    client.savePlayer(player);
+                    ServiceManager.getInstance().getPlayerStatisticService().save(playerStatistic);
                 }
 
                 RoomPlayer roomPlayer = client.getRoomPlayer();
@@ -157,6 +156,8 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
         Account account = client.getAccount();
         if (account != null) {
             log.error("({}) exceptionCaught: {}", account.getId(), cause.getMessage(), cause);
+        } else {
+            log.error("exceptionCaught: {}", cause.getMessage(), cause);
         }
     }
 }
