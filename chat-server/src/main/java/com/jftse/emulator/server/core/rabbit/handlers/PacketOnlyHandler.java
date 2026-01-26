@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.rabbit.handlers;
 
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.rabbit.AbstractMessageHandler;
 import com.jftse.server.core.rabbit.MessageHandlerRegistry;
@@ -25,8 +26,8 @@ public class PacketOnlyHandler extends AbstractMessageHandler<PacketMessage> {
     public void handle(PacketMessage message) {
         final FTConnection connection = gameManager.getConnectionByPlayerId(message.getReceivingPlayerId());
         if (connection != null) {
-            connection.sendTCP(message.getPacket());
-            log.info("Sent packet to player {}: {}", message.getReceivingPlayerId(), String.format("0x%X(%s)", (int) message.getPacket().getPacketId(), PacketOperations.getNameByValue(message.getPacket().getPacketId())));
+            connection.sendTCP(new Packet(message.getPacket()));
+            log.info("Sent packet to player {}: {}", message.getReceivingPlayerId(), String.format("0x%X(%s)", message.getPacketId(), PacketOperations.getNameByValue(message.getPacketId())));
         }
     }
 }
