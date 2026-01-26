@@ -19,6 +19,6 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     @Query(value = "SELECT f FROM Friend f JOIN FETCH f.friend fp JOIN FETCH fp.account acc WHERE f.player = :player")
     List<Friend> findWithFriendByPlayer(Player player);
 
-    @Query(value = "SELECT f FROM Friend f JOIN FETCH f.player fp JOIN FETCH fp.account acc WHERE f.friend = :friend")
+    @Query(value = "SELECT f FROM Friend f JOIN FETCH f.friend fp JOIN FETCH fp.account acc WHERE f.friend = :friend")
     List<Friend> findWithFriendByFriend(Player friend);
 }
