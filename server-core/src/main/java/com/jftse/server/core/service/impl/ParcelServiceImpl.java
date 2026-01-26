@@ -30,11 +30,15 @@ public class ParcelServiceImpl implements ParcelService {
 
     @Override
     @Transactional(readOnly = true)
-    public Parcel findById(Long id) { return parcelRepository.findById(id).orElse(null); }
+    public Parcel findById(Long id) {
+        return parcelRepository.findByIdFetched(id).orElse(null);
+    }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Parcel> findBySender(Player sender) { return parcelRepository.findBySender(sender); }
+    public List<Parcel> findBySender(Player sender) {
+        return parcelRepository.findBySender(sender);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -44,7 +48,9 @@ public class ParcelServiceImpl implements ParcelService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Parcel> findByReceiver(Player receiver) { return parcelRepository.findByReceiver(receiver); }
+    public List<Parcel> findByReceiver(Player receiver) {
+        return parcelRepository.findByReceiver(receiver);
+    }
 
     @Override
     @Transactional(readOnly = true)

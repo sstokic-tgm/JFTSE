@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ParcelRepository extends JpaRepository<Parcel, Long> {
-    Optional<Parcel> findById(Long id);
+    @Query(value = "SELECT p FROM Parcel p JOIN FETCH p.sender ps JOIN FETCH p.receiver pr WHERE p.id = :id")
+    Optional<Parcel> findByIdFetched(Long id);
     List<Parcel> findBySender(Player sender);
     List<Parcel> findByReceiver(Player receiver);
 
