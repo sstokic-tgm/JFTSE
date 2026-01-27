@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
+import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -133,7 +134,17 @@ public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, C
 
                             GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
 
-                            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(threadRoom.getRoomPlayerList()));
+                            RoomPlayer threadRoomPlayer = threadRoom.getRoomPlayerList().stream()
+                                    .filter(x -> x.getPlayerId() == ftClient.getPlayer().getId())
+                                    .findFirst()
+                                    .orElse(null);
+
+                            List<RoomPlayer> filteredRoomPlayerList = threadRoomPlayer == null || threadRoomPlayer.getPosition() == MiscConstants.InvisibleGmSlot
+                                    ? threadRoom.getRoomPlayerList().stream().toList()
+                                    : threadRoom.getRoomPlayerList().stream()
+                                            .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
+                                            .toList();
+                            S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(filteredRoomPlayerList);
                             GameManager.getInstance().getClientsInRoom(threadRoom.getRoomId()).forEach(c -> {
                                 if (c.getConnection() != null) {
                                     c.getConnection().sendTCP(roomPlayerInformationPacket);

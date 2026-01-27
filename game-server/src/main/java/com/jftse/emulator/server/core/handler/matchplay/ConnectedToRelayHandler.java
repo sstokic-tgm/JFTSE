@@ -36,11 +36,9 @@ public class ConnectedToRelayHandler implements PacketHandler<FTConnection, CMSG
         }
 
         Room room = ftClient.getActiveRoom();
-        synchronized (room) {
-            ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
-            if (roomPlayerList.stream().allMatch(rp -> rp.getConnectedToRelay().get())) {
-                room.setStatus(RoomStatus.RelayConnectionSuccess);
-            }
+        ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
+        if (roomPlayerList.stream().allMatch(rp -> rp.getConnectedToRelay().get())) {
+            room.setStatus(RoomStatus.RelayConnectionSuccess);
         }
     }
 }

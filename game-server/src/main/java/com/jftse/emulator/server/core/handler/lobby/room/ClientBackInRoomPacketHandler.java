@@ -22,7 +22,6 @@ import com.jftse.server.core.shared.packets.lobby.room.CMSGClientBackInRoom;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGClientBackInRoom;
 import com.jftse.server.core.shared.packets.player.SMSGSetCouplePoints;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @PacketId(CMSGClientBackInRoom.PACKET_ID)
@@ -73,16 +72,16 @@ public class ClientBackInRoomPacketHandler implements PacketHandler<FTConnection
         S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player);
         S2CPlayerInfoPlayStatsPacket playerInfoPlayStatsPacket = new S2CPlayerInfoPlayStatsPacket(playerStatistic);
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(currentClientRoom);
-        S2CRoomPlayerListInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(currentClientRoom.getRoomPlayerList()));
 
-        List<RoomPlayer> filteredRoomPlayerList = currentClientRoom.getRoomPlayerList().stream()
-                .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
-                .toList();
-        S2CRoomPlayerListInformationPacket roomPlayerInformationPacketWithoutInvisibleGm =
-                new S2CRoomPlayerListInformationPacket(new ArrayList<>(filteredRoomPlayerList));
+        List<RoomPlayer> filteredRoomPlayerList = position == MiscConstants.InvisibleGmSlot
+                ? currentClientRoom.getRoomPlayerList().stream().toList()
+                : currentClientRoom.getRoomPlayerList().stream()
+                        .filter(x -> x.getPosition() != MiscConstants.InvisibleGmSlot)
+                        .toList();
+        S2CRoomPlayerListInformationPacket roomPlayerListInformationPacket = new S2CRoomPlayerListInformationPacket(filteredRoomPlayerList);
 
         connection.sendTCP(couplePointsPacket);
         connection.sendTCP(playerStatusPointChangePacket, playerInfoPlayStatsPacket);
-        connection.sendTCP(roomInformationPacket, position == MiscConstants.InvisibleGmSlot ? roomPlayerInformationPacket : roomPlayerInformationPacketWithoutInvisibleGm);
+        connection.sendTCP(roomInformationPacket, roomPlayerListInformationPacket);
     }
 }

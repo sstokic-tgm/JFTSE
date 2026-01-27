@@ -87,6 +87,10 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
         byte skillId = spellHitsTargetExt.getSkillId();
 
         Skill skill = skillService.findSkillById((long) skillId);
+        if (skill == null && skillId != 0) {
+            log.warn("Skill not found for skillId: {}", skillId);
+            return;
+        }
 
         if (skill != null && this.isUniqueSkill(skill)) {
             GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, ftClient, game, skill);
@@ -416,9 +420,8 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
     }
 
     private Skill getSkillToApply(Skill skill, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
-        boolean targetHittingHimself = spellHitsTargetExt.getAttackerPosition() == spellHitsTargetExt.getTargetPosition();
-        if (skill != null && skill.getId() == 64 && targetHittingHimself) {
-            log.debug("skill.getId() == 64 && targetHittingHimself return 3");
+        if (skill.getId() == 64) {
+            // 64 is Fireball skill which is also a DoT so we need to send BigMeteo (3) skill back so FT can deactivate the DoT effect properly
             return skillService.findSkillById(3L);
         }
 

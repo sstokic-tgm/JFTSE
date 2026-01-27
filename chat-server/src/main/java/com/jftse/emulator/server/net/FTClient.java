@@ -32,6 +32,57 @@ public class FTClient extends Client<FTConnection> {
     private final AtomicInteger ap = new AtomicInteger(0);
     private AtomicReference<FTPlayer> ftPlayer = new AtomicReference<>();
 
+    private ChallengeGame activeChallengeGame;
+    private TutorialGame activeTutorialGame;
+
+    private Room activeRoom;
+
+    private FruitManager fruitManager = new FruitManager();
+
+    private volatile boolean inLobby = false;
+    private volatile boolean isSpectator = false;
+
+    private volatile int lobbyGameModeTabFilter = GameMode.ALL;
+    private volatile int lobbyCurrentPlayerListPage = 1;
+    private volatile int lobbyCurrentRoomListPage = -1;
+
+    private volatile boolean usingGachaMachine = false;
+
+    // hack
+    private volatile boolean requestedShopDataPrepare = false;
+
+    private AtomicBoolean isJoiningOrLeavingLobby = new AtomicBoolean(false);
+    private AtomicBoolean isJoiningOrLeavingRoom = new AtomicBoolean(false);
+    private AtomicBoolean isGoingReady = new AtomicBoolean(false);
+    private AtomicBoolean isClosingSlot = new AtomicBoolean(false);
+    private AtomicBoolean isChangingSlot = new AtomicBoolean(false);
+
+    private AtomicInteger dataRequestStep = new AtomicInteger(-1);
+
+    private int sceneId = -1;
+
+    private Pet activePet;
+
+    public boolean updateDataRequestStep(int step) {
+        boolean valid = dataRequestStep.compareAndSet(step - 1, step);
+
+        if (!hasPlayer())
+            valid = false;
+
+        SMSGReceiveData response = SMSGReceiveData.builder()
+                .dataType((byte) step)
+                .unk0(valid ? (byte) 0 : (byte) 1)
+                .build();
+        connection.sendTCP(response);
+
+        /*
+        if (valid && dataRequestStep.get() == 4) {
+            GameManager.getInstance().handleChatLobbyJoin(this);
+        }
+        */
+        return valid;
+    }
+
     public void loadPlayer(Account account, Player player, PlayerLoadType playerLoadType) {
         this.accountId = account.getId();
         this.gameMaster = account.getGameMaster();
@@ -66,55 +117,6 @@ public class FTClient extends Client<FTConnection> {
 
     public boolean hasPlayer() {
         return this.ftPlayer.get() != null;
-    }
-
-    private ChallengeGame activeChallengeGame;
-    private TutorialGame activeTutorialGame;
-
-    private Room activeRoom;
-
-    private FruitManager fruitManager = new FruitManager();
-
-    private volatile boolean inLobby = false;
-    private volatile boolean isSpectator = false;
-
-    private volatile int lobbyGameModeTabFilter = GameMode.ALL;
-    private volatile int lobbyCurrentPlayerListPage = 1;
-    private volatile int lobbyCurrentRoomListPage = -1;
-
-    private volatile boolean usingGachaMachine = false;
-
-    // hack
-    private volatile boolean requestedShopDataPrepare = false;
-
-    private AtomicBoolean isJoiningOrLeavingLobby = new AtomicBoolean(false);
-    private AtomicBoolean isJoiningOrLeavingRoom = new AtomicBoolean(false);
-    private AtomicBoolean isGoingReady = new AtomicBoolean(false);
-    private AtomicBoolean isClosingSlot = new AtomicBoolean(false);
-    private AtomicBoolean isChangingSlot = new AtomicBoolean(false);
-
-    private AtomicInteger dataRequestStep = new AtomicInteger(-1);
-
-    private Pet activePet;
-
-    public boolean updateDataRequestStep(int step) {
-        boolean valid = dataRequestStep.compareAndSet(step - 1, step);
-
-        if (!hasPlayer())
-            valid = false;
-
-        SMSGReceiveData response = SMSGReceiveData.builder()
-                .dataType((byte) step)
-                .unk0(valid ? (byte) 0 : (byte) 1)
-                .build();
-        connection.sendTCP(response);
-
-        /*
-        if (valid && dataRequestStep.get() == 4) {
-            GameManager.getInstance().handleChatLobbyJoin(this);
-        }
-        */
-        return valid;
     }
 
     public Account getAccount() {

@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.handler.lobby.room;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -289,13 +290,19 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
         connection.sendTCP(roomJoinAnswerPacket);
         connection.sendTCP(roomInformationPacket);
 
+        List<RoomPlayer> filteredRoomPlayerList = roomPlayer.getPosition() == MiscConstants.InvisibleGmSlot
+                ? room.getRoomPlayerList().stream().toList()
+                : room.getRoomPlayerList().stream()
+                        .filter(x -> isTownSquare || x.getPosition() != MiscConstants.InvisibleGmSlot)
+                        .toList();
+
         Random rnd = new Random();
         float spawnX = 0.0f, spawnY = 0.0f;
         if (!isTownSquare) {
             final ArrayList<Short> positions = room.getPositions();
             closeRoomSlots(connection, positions);
 
-            S2CRoomPlayerListInformationPacket roomPlayerListInformationPacket = new S2CRoomPlayerListInformationPacket(new ArrayList<>(room.getRoomPlayerList()));
+            S2CRoomPlayerListInformationPacket roomPlayerListInformationPacket = new S2CRoomPlayerListInformationPacket(filteredRoomPlayerList);
             connection.sendTCP(roomPlayerListInformationPacket);
         } else {
             spawnX = rnd.nextFloat(40.0f, 46.0f);
@@ -312,7 +319,7 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
         }
         roomPlayer.setLastMapLayer(0);
 
-        for (final RoomPlayer rp : room.getRoomPlayerList()) {
+        for (RoomPlayer rp : filteredRoomPlayerList) {
             S2CRoomPlayerInformationPacket roomPlayerInformationPacket = new S2CRoomPlayerInformationPacket(rp, isTownSquare ? rp.getLastX() : 0.0f, isTownSquare ? rp.getLastY() : 0.0f, 0.0f, 0.0f, rp.getLastMapLayer());
             if (!isTownSquare) {
                 GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
