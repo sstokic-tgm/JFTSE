@@ -56,6 +56,6 @@ public class S2CPlayerStatusPointChangePacket extends Packet {
             this.write((byte) 0);
         }
 
-        this.write(player.getStatusPoints());
+        this.write((byte) player.getStatusPoints());
     }
 }

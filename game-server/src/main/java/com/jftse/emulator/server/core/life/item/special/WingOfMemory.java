@@ -46,8 +46,9 @@ public class WingOfMemory extends BaseItem {
         dbPlayer.setDexterity(itemChar.getDexterity());
         dbPlayer.setWillpower(itemChar.getWillpower());
         dbPlayer.setStatusPoints(player.getLevel() > 65 ? (byte) (65 + 5 - 1) : (byte) (player.getLevel() + 5 - 1));
-        playerService.save(dbPlayer);
 
+        player.syncStats(dbPlayer.getStrength(), dbPlayer.getStamina(), dbPlayer.getDexterity(), dbPlayer.getWillpower(), dbPlayer.getStatusPoints());
+        dbPlayer = playerService.save(dbPlayer);
         player.loadItemParts(dbPlayer);
 
         S2CPlayerStatusPointChangePacket playerStatusPointChangePacket = new S2CPlayerStatusPointChangePacket(player);
