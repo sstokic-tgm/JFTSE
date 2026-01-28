@@ -3,6 +3,7 @@ package com.jftse.emulator.server.core.matchplay.handler;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.client.PlayerStatisticView;
+import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.PacketEventType;
 import com.jftse.emulator.server.core.constants.RoomStatus;
 import com.jftse.emulator.server.core.constants.ServeType;
@@ -250,7 +251,10 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 eventHandler.offer(eventHandler.createPacketEvent(client, setExperienceGainInfoData, PacketEventType.DEFAULT, 0));
             } else {
                 gameLogContent.append("spec: ").append(rp.getName()).append(" acc: ").append(rp.getAccountId()).append("; ");
-                playerDtoList.add(new MatchFinishedMessage.PlayerDto(rp.getName(), "spectator"));
+
+                if (rp.getPosition() != MiscConstants.InvisibleGmSlot) {
+                    playerDtoList.add(new MatchFinishedMessage.PlayerDto(rp.getName(), "spectator"));
+                }
             }
             S2CMatchplaySetGameResultData setGameResultData = new S2CMatchplaySetGameResultData(matchplayReward.getPlayerRewards());
             eventHandler.offer(eventHandler.createPacketEvent(client, setGameResultData, PacketEventType.DEFAULT, 0));
