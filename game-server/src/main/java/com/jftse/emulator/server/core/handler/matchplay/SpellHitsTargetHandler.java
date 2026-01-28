@@ -420,7 +420,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
     }
 
     private Skill getSkillToApply(Skill skill, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
-        if (skill.getId() == 64) {
+        if (skill != null && skill.getId() == 64) {
             // 64 is Fireball skill which is also a DoT so we need to send BigMeteo (3) skill back so FT can deactivate the DoT effect properly
             return skillService.findSkillById(3L);
         }
