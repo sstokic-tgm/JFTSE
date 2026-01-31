@@ -4,4 +4,5 @@ import com.jftse.entities.database.model.battle.Skill;
 
 public interface SkillService {
     Skill findSkillById(Long id);
+    Skill findSkillByIndex(int index);
 }

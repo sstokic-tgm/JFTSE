@@ -47,9 +47,9 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
 
         Point2D point = isBattleGame ? this.getRandomPoint(gameFieldSide) : this.getRandomPoint();
 
-        short crystalId = (short) (isBattleGame ?
+        int crystalId = isBattleGame ?
                 (((MatchplayBattleGame) game).getLastCrystalId().incrementAndGet()) :
-                (((MatchplayGuardianGame) game).getLastCrystalId().incrementAndGet()));
+                (((MatchplayGuardianGame) game).getLastCrystalId().incrementAndGet());
         if (crystalId > 100) {
             crystalId = 0;
             if (isBattleGame)
@@ -58,14 +58,13 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
                 ((MatchplayGuardianGame) game).getLastCrystalId().set(0);
         }
 
-        SkillCrystal skillCrystal = new SkillCrystal();
-        skillCrystal.setId(crystalId);
+        SkillCrystal skillCrystal = new SkillCrystal(crystalId);
         if (isBattleGame)
             ((MatchplayBattleGame) game).getSkillCrystals().add(skillCrystal);
         else
             ((MatchplayGuardianGame) game).getSkillCrystals().add(skillCrystal);
 
-        S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal(skillCrystal.getId(), point);
+        S2CMatchplayPlaceSkillCrystal placeSkillCrystal = new S2CMatchplayPlaceSkillCrystal((short) skillCrystal.getId(), point);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(placeSkillCrystal, connection);
 
         RunnableEvent runnableEvent;

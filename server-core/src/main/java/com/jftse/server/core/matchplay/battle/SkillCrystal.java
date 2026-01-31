@@ -1,20 +1,19 @@
 package com.jftse.server.core.matchplay.battle;
 
+import com.jftse.server.core.util.Time;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-
 @Getter
-@Setter
 public class SkillCrystal {
-    private short id;
-    private Date timeSpawned;
+    private final int id;
+    private final long timestamp;
 
-    public SkillCrystal() {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        this.setTimeSpawned(cal.getTime());
+    @Setter private long pickedUpByPlayerId = -1;
+    @Setter private int skillIndex = -1;
+
+    public SkillCrystal(int id) {
+        this.id = id;
+        this.timestamp = Time.getNSTime();
     }
 }

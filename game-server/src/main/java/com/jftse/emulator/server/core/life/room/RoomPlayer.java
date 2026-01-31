@@ -6,9 +6,12 @@ import com.jftse.entities.database.model.pet.Pet;
 import com.jftse.entities.database.model.player.EquippedItemStats;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.item.EItemCategory;
+import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,6 +30,8 @@ public class RoomPlayer {
     private AtomicBoolean gameAnimationSkipReady = new AtomicBoolean(false);
     private AtomicBoolean connectedToRelay = new AtomicBoolean(false);
     private Long petId;
+
+    private Queue<SkillCrystal> pickedUpSkillCrystals = new LinkedBlockingQueue<>(2);
 
     private long ppIdRingExp = 0;
     private long ppIdRingGold = 0;

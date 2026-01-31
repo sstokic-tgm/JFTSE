@@ -14,6 +14,17 @@ public class S2CMatchplayDealDamage extends Packet {
         this.write(xKnockbackPosition);
         this.write(yKnockbackPosition);
     }
+
+    public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, short targeting, byte skillAnimation, float hitDirX, float hitDirY) {
+        super(PacketOperations.S2CMatchplayDamageToPlayer);
+
+        this.write(entityPosition);
+        this.write(entityHpToSet);
+        this.write(targeting);
+        this.write(skillAnimation);
+        this.write(hitDirX);
+        this.write(hitDirY);
+    }
 }
 
 

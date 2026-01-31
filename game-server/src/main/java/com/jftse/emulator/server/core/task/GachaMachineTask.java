@@ -3,10 +3,12 @@ package com.jftse.emulator.server.core.task;
 import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
+import com.jftse.entities.database.model.lottery.LotteryItemDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.item.EItemCategory;
@@ -14,6 +16,7 @@ import com.jftse.server.core.service.LotteryService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.service.ProductService;
+import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.server.core.thread.AbstractTask;
 
 import java.util.ArrayList;
@@ -28,7 +31,7 @@ public class GachaMachineTask extends AbstractTask {
     private final ProductService productService;
     private final PocketService pocketService;
     private final PlayerPocketService playerPocketService;
-    private final LotteryService<FTConnection> lotteryService;
+    private final LotteryService lotteryService;
 
     public GachaMachineTask(FTConnection connection, List<String> commandArgumentList) {
         this.connection = connection;
@@ -60,6 +63,8 @@ public class GachaMachineTask extends AbstractTask {
                 return;
             }
 
+            List<LotteryItemDto> lotteryItemList = lotteryService.getLotteryItemsByGachaIndex(player.getPlayerType(), product.getItem0());
+
             PlayerPocket playerPocketGacha = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(product.getItem0(), product.getCategory(), pocket);
             if (playerPocketGacha != null) {
                 connection.getClient().setUsingGachaMachine(true);
@@ -83,17 +88,45 @@ public class GachaMachineTask extends AbstractTask {
 
                         connection.sendTCP(chatLobbyAnswerPacket);
                     }
-                    result.addAll(lotteryService.drawLottery(connection, playerPocketGacha.getId(), product.getProductIndex()));
+
+                    playerPocketGacha.setItemCount(playerPocketGacha.getItemCount() - 1);
+                    result.add(lotteryService.drawLottery(lotteryItemList, pocket));
                 }
+
+                int itemCount = playerPocketGacha.getItemCount();
+                if (itemCount <= 0) {
+                    pocketService.decrementPocketBelongings(player.getPocketId());
+                    playerPocketService.remove(playerPocketGacha.getId());
+
+                    // if current count is 0 remove the item
+                    S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(Math.toIntExact(playerPocketGacha.getId()));
+                    connection.sendTCP(inventoryItemRemoveAnswerPacket);
+                } else {
+                    playerPocketGacha.setItemCount(itemCount);
+                    playerPocketGacha = playerPocketService.save(playerPocketGacha);
+
+                    S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocketGacha);
+                    connection.sendTCP(inventoryItemCountPacket);
+                }
+
                 chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Finished. Preparing drawn items...");
                 connection.sendTCP(chatLobbyAnswerPacket);
 
-                result.forEach(pp -> {
+                Map<Integer, PlayerPocket> filteredResult = new HashMap<>();
+                for (PlayerPocket pp : result) {
+                    PlayerPocket existing = filteredResult.get(pp.getItemIndex());
+
+                    // we only keep the playerpocket with highest item count in result
+                    if (existing == null || pp.getItemCount() > existing.getItemCount()) {
+                        filteredResult.put(pp.getItemIndex(), pp);
+                    }
+
                     Product p = this.productService.findProductByItemAndCategory(pp.getItemIndex(), pp.getCategory());
-                    Integer itemCount = resultDisplay.get(p.getName()) == null ? 0 : resultDisplay.get(p.getName());
-                    itemCount++;
-                    resultDisplay.put(p.getName(), itemCount);
-                });
+                    Integer timesDrawn = resultDisplay.get(p.getName()) == null ? 0 : resultDisplay.get(p.getName());
+                    timesDrawn++;
+                    resultDisplay.put(p.getName(), timesDrawn);
+                }
+                result = new ArrayList<>(filteredResult.values());
 
                 if (connection.getClient() != null)
                     connection.getClient().setUsingGachaMachine(false);

@@ -52,7 +52,7 @@ public class DespawnCrystalTask extends AbstractTask {
                 !isBattleGame && (((MatchplayGuardianGame) game).getSkillCrystals().stream().anyMatch(x -> x.getId() == skillCrystal.getId()));
 
         if (isCrystalStillAvailable) {
-            S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear(skillCrystal.getId());
+            S2CMatchplayLetCrystalDisappear letCrystalDisappearPacket = new S2CMatchplayLetCrystalDisappear((short) skillCrystal.getId());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(letCrystalDisappearPacket, connection);
 
             ConcurrentLinkedDeque<SkillCrystal> skillCrystals = isBattleGame ? ((MatchplayBattleGame) game).getSkillCrystals() : ((MatchplayGuardianGame) game).getSkillCrystals();

@@ -16,7 +16,7 @@ message CMSG_SpellHitsTarget (0x22F1) {
     byte unk6 = 13;
     byte applySkillEffect = 14;
     byte unk7 = 15;
-    int32 xKnockbackPosition = 16;
-    int32 yKnockbackPosition = 17;
+    float hitDirX = 16;
+    float hitDirY = 17;
     byte unk8 = 18;
 }

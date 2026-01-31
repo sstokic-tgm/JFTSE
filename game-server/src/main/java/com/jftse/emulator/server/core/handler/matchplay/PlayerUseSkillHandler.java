@@ -22,11 +22,11 @@ import com.jftse.entities.database.model.log.GameLog;
 import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.player.Player;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
+import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import com.jftse.server.core.matchplay.battle.SkillUse;
 import com.jftse.server.core.service.*;
 import com.jftse.server.core.service.impl.AuthenticationServiceImpl;
@@ -34,11 +34,12 @@ import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import com.jftse.server.core.shared.packets.matchplay.CMSGPlayerUseSkill;
 import com.jftse.server.core.shared.packets.matchplay.SMSGPlayerUseSkill;
-import com.jftse.server.core.util.GameTime;
+import com.jftse.server.core.util.Time;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 @Log4j2
 @PacketId(CMSGPlayerUseSkill.PACKET_ID)
@@ -68,8 +69,13 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
         if (!ftClient.hasPlayer() || ftClient.getActiveGameSession() == null || ftClient.getRoomPlayer() == null)
             return;
 
-        long skillUseTimestamp = GameTime.getGameTimeMS() + TIMESTAMP_DELTA;
+        long skillUseTimestamp = Time.nanoToMillis(Time.getNSTime()) + TIMESTAMP_DELTA;
         FTPlayer player = ftClient.getPlayer();
+        RoomPlayer roomPlayer = ftClient.getRoomPlayer();
+        GameSession gameSession = ftClient.getActiveGameSession();
+
+        MatchplayGame game = gameSession.getMatchplayGame();
+        if (game == null) return;
 
         byte attackerPosition = anyoneUsesSkill.getAttackerPosition();
         byte targetPosition = anyoneUsesSkill.getTargetPosition();
@@ -77,15 +83,17 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
 
         boolean attackerIsGuardian = attackerPosition > 9;
         boolean attackerIsPlayer = attackerPosition < 4;
-        GameSession gameSession = ftClient.getActiveGameSession();
-        // sometimes we are faster when cleaning up game sessions till the player is thrown back to the room
-        if (gameSession == null) return;
 
-        MatchplayGame game = gameSession.getMatchplayGame();
-        if (game == null) return;
+        if (attackerIsPlayer && !isQuickSlot) {
+            try {
+                validateSkillCrystal(roomPlayer.getPickedUpSkillCrystals(), anyoneUsesSkill.getSourceValue(), anyoneUsesSkill.getSkillIndex());
+            } catch (ValidationException ve) {
+                log.warn("({}) {}", player.getId(), ve.getMessage());
+                return;
+            }
+        }
 
-        RoomPlayer roomPlayer = ftClient.getRoomPlayer();
-        Skill skill = skillService.findSkillById((long) anyoneUsesSkill.getSkillIndex() + 1);
+        Skill skill = skillService.findSkillByIndex(anyoneUsesSkill.getSkillIndex());
         SkillUse skillUse = null;
         if (skill != null)
             skillUse = new SkillUse(skill, attackerPosition, targetPosition, isQuickSlot, skillUseTimestamp, false);
@@ -102,7 +110,12 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
                     if (!isQsUseValid(connection, skillUseTimestamp, player, skill, skillUse, game, attackerPosition, anyoneUsesSkill))
                         return;
 
-                    this.handleQuickSlotItemUse(connection, player, anyoneUsesSkill);
+                    try {
+                        this.handleQuickSlotItemUse(connection, player, anyoneUsesSkill);
+                    } catch (ValidationException ve) {
+                        log.warn("({}) {}", player.getId(), ve.getMessage());
+                        return;
+                    }
                 }
             }
         }
@@ -176,8 +189,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
         return true;
     }
 
-    private void handleQuickSlotItemUse(FTConnection connection, FTPlayer player, CMSGPlayerUseSkill playerUseSkill) {
-        Pocket pocket = pocketService.findById(player.getPocketId());
+    private void handleQuickSlotItemUse(FTConnection connection, FTPlayer player, CMSGPlayerUseSkill playerUseSkill) throws ValidationException {
         int slotIndex = playerUseSkill.getQuickSlotIndex();
 
         EquippedQuickSlots equippedQuickSlots = player.getQuickSlots();
@@ -191,14 +203,22 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
         };
 
         if (itemId > -1) {
-            PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemId, pocket);
+            if (equippedQuickSlots.hasItem(playerUseSkill.getPlayerPocketId()) != itemId) {
+                throw new ValidationException("Player tried to use a quick slot item they do not possess");
+            }
+
+            PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemId, player.getPocketId());
             if (playerPocket != null) {
+                if (playerPocket.getItemCount() != playerUseSkill.getSourceValue()) {
+                    throw new ValidationException("Player tried to use a quick slot item with invalid item count");
+                }
+
                 int itemCount = playerPocket.getItemCount() - 1;
 
                 if (itemCount <= 0) {
 
                     playerPocketService.remove(playerPocket.getId());
-                    pocketService.decrementPocketBelongings(pocket);
+                    pocketService.decrementPocketBelongings(player.getPocketId());
 
                     List<Integer> quickItemSlotsList = new ArrayList<>(equippedQuickSlots.toList());
                     quickItemSlotsList.set(slotIndex, 0);
@@ -225,7 +245,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
         if (skill.getId() == 29) { // RebirthOne
             this.handleReviveGuardian(connection, game, skill);
         } else if (skill.getDamage() > 1) {
-            Short newHealth;
+            short newHealth;
             try {
                 newHealth = game.getGuardianCombatSystem().heal(guardianPos, skill.getDamage().shortValue());
             } catch (ValidationException ve) {
@@ -251,6 +271,13 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
             S2CMatchplayDealDamage damageToPlayerPacket =
                     new S2CMatchplayDealDamage((short) guardianBattleState.getPosition(), (short) guardianBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
+        }
+    }
+
+    private void validateSkillCrystal(Queue<SkillCrystal> skillCrystals, int crystalId, int skillIndex) throws ValidationException {
+        SkillCrystal skillCrystal = skillCrystals.poll();
+        if (skillCrystal == null || skillCrystal.getId() != crystalId || skillCrystal.getSkillIndex() != skillIndex) {
+            throw new ValidationException("Player tried to use a skill crystal they do not possess");
         }
     }
 }

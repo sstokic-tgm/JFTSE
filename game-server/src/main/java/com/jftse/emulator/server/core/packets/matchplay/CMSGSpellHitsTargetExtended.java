@@ -71,12 +71,12 @@ public class CMSGSpellHitsTargetExtended {
         return delegate.getUnk7();
     }
 
-    public int getXKnockbackPosition() {
-        return delegate.getXKnockbackPosition();
+    public float getHitDirX() {
+        return delegate.getHitDirX();
     }
 
-    public int getYKnockbackPosition() {
-        return delegate.getYKnockbackPosition();
+    public float getHitDirY() {
+        return delegate.getHitDirY();
     }
 
     public byte getUnk8() {

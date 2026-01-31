@@ -2,10 +2,6 @@ package com.jftse.emulator.server.core.service.impl;
 
 import com.jftse.emulator.common.utilities.ResourceUtil;
 import com.jftse.emulator.common.utilities.StringUtils;
-import com.jftse.emulator.server.core.client.FTPlayer;
-import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
-import com.jftse.emulator.server.net.FTClient;
-import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.item.Product;
 import com.jftse.entities.database.model.lottery.LotteryItemDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
@@ -13,12 +9,10 @@ import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.item.EItemCategory;
 import com.jftse.server.core.item.EItemChar;
 import com.jftse.server.core.item.EItemUseType;
-import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.service.LotteryService;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.service.ProductService;
-import com.jftse.server.core.shared.packets.inventory.S2CInventoryItemRemoveAnswerPacket;
 import lombok.RequiredArgsConstructor;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -37,7 +31,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class LotteryServiceImpl implements LotteryService<FTConnection> {
+public class LotteryServiceImpl implements LotteryService {
     private final ProductService productService;
     private final PlayerPocketService playerPocketService;
     private final PocketService pocketService;
@@ -45,67 +39,26 @@ public class LotteryServiceImpl implements LotteryService<FTConnection> {
     private Random random;
 
     @PostConstruct
-    @Override
     public void init() {
         random = new Random();
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<PlayerPocket> drawLottery(FTConnection connection, long playerPocketId, int productIndex) {
-        FTClient ftClient = connection.getClient();
-        FTPlayer player = ftClient.getPlayer();
-
-        List<PlayerPocket> result = new ArrayList<>();
-
-        handlePlayerPocket(connection, playerPocketId);
-
-        List<Product> productList = productService.findProductsByItemList(Stream.of(productIndex).collect(Collectors.toList()));
-        List<LotteryItemDto> lotteryItemList = getLotteryItemsByGachaIndex((byte) player.getPlayerType(), productList.getFirst().getItem0());
-
+    public PlayerPocket drawLottery(List<LotteryItemDto> lotteryItemList, Pocket pocket) {
         LotteryItemDto lotteryItem = pickItemLotteryFromList(lotteryItemList);
-        Product winningItem = productService.findProductsByItemList(Stream.of(lotteryItem.getShopIndex()).collect(Collectors.toList())).get(0);
-
-        productList.clear();
-        Pocket pocket = pocketService.findById(player.getPocketId());
-
-        PlayerPocket playerPocket = saveWinningItem(winningItem, lotteryItem, pocket);
-        result.add(playerPocket);
-
-        return result;
+        Product winningItem = productService.findProductsByItemList(Stream.of(lotteryItem.getShopIndex()).collect(Collectors.toList())).getFirst();
+        return saveWinningItem(winningItem, lotteryItem, pocket);
     }
 
-    private void handlePlayerPocket(Connection<?> connection, long playerPocketId) {
-        PlayerPocket playerPocket = playerPocketService.findById(playerPocketId);
-
-        if (playerPocket != null) {
-            int itemCount = playerPocket.getItemCount() - 1;
-
-            if (itemCount <= 0) {
-                pocketService.decrementPocketBelongings(playerPocket.getPocket());
-                playerPocketService.remove(playerPocket.getId());
-
-                // if current count is 0 remove the item
-                S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket((int) playerPocketId);
-                connection.sendTCP(inventoryItemRemoveAnswerPacket);
-            }
-            else {
-                playerPocket.setItemCount(itemCount);
-                playerPocket = playerPocketService.save(playerPocket);
-
-                S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
-                connection.sendTCP(inventoryItemCountPacket);
-            }
-        }
-    }
-
-    private List<LotteryItemDto> getLotteryItemsByGachaIndex(byte playerType, int gachaIndex) {
+    @Override
+    public List<LotteryItemDto> getLotteryItemsByGachaIndex(int playerType, int gachaIndex) {
         List<LotteryItemDto> result = new ArrayList<>();
 
-        String playerTypeName = StringUtils.firstCharToUpperCase(EItemChar.getNameByValue(playerType).toLowerCase());
+        String playerTypeName = StringUtils.firstCharToUpperCase(EItemChar.getNameByValue((byte) playerType).toLowerCase());
 
         try {
-            InputStream lotteryItemFile = ResourceUtil.getResource("res/lottery/Ini3_Lot_" + (gachaIndex < 10 ? ("0" + gachaIndex) : gachaIndex ) + ".xml");
+            InputStream lotteryItemFile = ResourceUtil.getResource("res/lottery/Ini3_Lot_" + (gachaIndex < 10 ? ("0" + gachaIndex) : gachaIndex) + ".xml");
             SAXReader reader = new SAXReader();
             reader.setEncoding("UTF-8");
             Document document = reader.read(lotteryItemFile);
@@ -125,8 +78,7 @@ public class LotteryServiceImpl implements LotteryService<FTConnection> {
                 result.add(lotteryItemDto);
             }
             lotteryItemFile.close();
-        }
-        catch (DocumentException | IOException de) {
+        } catch (DocumentException | IOException de) {
             return new ArrayList<>();
         }
 
@@ -162,11 +114,9 @@ public class LotteryServiceImpl implements LotteryService<FTConnection> {
         if (playerPocket != null && !playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
             existingItemCount = playerPocket.getItemCount();
             existingItem = true;
-        }
-        else if (playerPocket != null && playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
+        } else if (playerPocket != null && playerPocket.getCategory().equals(EItemCategory.PARTS.getName())) {
             existingPartItem = true;
-        }
-        else {
+        } else {
             playerPocket = new PlayerPocket();
         }
 

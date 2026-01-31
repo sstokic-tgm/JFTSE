@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,41 +61,21 @@ public class ClothEquipmentServiceImpl implements ClothEquipmentService {
                 (long) inventoryWearClothReqPacket.getDye()
         );
 
-        List<PlayerPocket> playerPockets = playerPocketService.getItemsAsPocket(itemIdList, pocket);
+        Map<Long, Integer> playerPockets = playerPocketService.getItemsAsPocket(itemIdList, pocket).stream()
+                .collect(Collectors.toMap(PlayerPocket::getId, PlayerPocket::getItemIndex));
 
-        for (Long itemId : itemIdList) {
-            PlayerPocket item = playerPockets.stream()
-                    .filter(p -> p.getId().equals(itemId))
-                    .findFirst()
-                    .orElse(null);
-
-            int finalItemIndex = item == null ? 0 : item.getItemIndex();
-
-            if (itemId.equals((long) inventoryWearClothReqPacket.getHair()))
-                clothEquipment.setHair(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getFace()))
-                clothEquipment.setFace(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getDress()))
-                clothEquipment.setDress(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getPants()))
-                clothEquipment.setPants(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getSocks()))
-                clothEquipment.setSocks(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getShoes()))
-                clothEquipment.setShoes(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getGloves()))
-                clothEquipment.setGloves(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getRacket()))
-                clothEquipment.setRacket(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getGlasses()))
-                clothEquipment.setGlasses(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getBag()))
-                clothEquipment.setBag(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getHat()))
-                clothEquipment.setHat(finalItemIndex);
-            else if (itemId.equals((long) inventoryWearClothReqPacket.getDye()))
-                clothEquipment.setDye(finalItemIndex);
-        }
+        clothEquipment.setHair(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getHair(), 0));
+        clothEquipment.setFace(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getFace(), 0));
+        clothEquipment.setDress(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getDress(), 0));
+        clothEquipment.setPants(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getPants(), 0));
+        clothEquipment.setSocks(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getSocks(), 0));
+        clothEquipment.setShoes(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getShoes(), 0));
+        clothEquipment.setGloves(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getGloves(), 0));
+        clothEquipment.setRacket(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getRacket(), 0));
+        clothEquipment.setGlasses(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getGlasses(), 0));
+        clothEquipment.setBag(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getBag(), 0));
+        clothEquipment.setHat(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getHat(), 0));
+        clothEquipment.setDye(playerPockets.getOrDefault((long) inventoryWearClothReqPacket.getDye(), 0));
 
         save(clothEquipment);
     }

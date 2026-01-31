@@ -1,15 +1,13 @@
 package com.jftse.server.core.service;
 
+import com.jftse.entities.database.model.lottery.LotteryItemDto;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.server.core.net.Client;
-import com.jftse.server.core.net.Connection;
+import com.jftse.entities.database.model.pocket.Pocket;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
-public interface LotteryService<C extends Connection<? extends Client<C>>> {
-    @PostConstruct
-    void init();
+public interface LotteryService {
+    PlayerPocket drawLottery(List<LotteryItemDto> lotteryItemList, Pocket pocket);
 
-    List<PlayerPocket> drawLottery(C connection, long playerPocketId, int productIndex);
+    List<LotteryItemDto> getLotteryItemsByGachaIndex(int playerType, int gachaIndex);
 }

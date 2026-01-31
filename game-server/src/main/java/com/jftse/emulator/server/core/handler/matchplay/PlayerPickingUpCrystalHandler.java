@@ -1,6 +1,5 @@
 package com.jftse.emulator.server.core.handler.matchplay;
 
-import com.jftse.emulator.common.utilities.StringTokenizer;
 import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.GameFieldSide;
 import com.jftse.emulator.server.core.life.event.GameEventBus;
@@ -24,20 +23,23 @@ import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.matchplay.battle.SkillCrystal;
-import com.jftse.server.core.matchplay.battle.SkillDrop;
 import com.jftse.server.core.service.SkillDropRateService;
 import com.jftse.server.core.shared.packets.matchplay.CMSGPlayerPickupCrystal;
+import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.Queue;
+import java.util.concurrent.ThreadLocalRandom;
 
+@Log4j2
 @PacketId(CMSGPlayerPickupCrystal.PACKET_ID)
 public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection, CMSGPlayerPickupCrystal> {
     private final SkillDropRateService skillDropRateService;
 
     private final EventHandler eventHandler;
+
+    private static final int REBIRTH_SKILL_ID = 4;
+    private static final int REBIRTH_CHANCE_PERCENT = 35;
 
     public PlayerPickingUpCrystalHandler() {
         skillDropRateService = ServiceManager.getInstance().getSkillDropRateService();
@@ -52,19 +54,15 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
             return;
 
         FTPlayer player = ftClient.getPlayer();
+        final Room activeRoom = ftClient.getActiveRoom();
+        final GameSession gameSession = ftClient.getActiveGameSession();
 
         final RoomPlayer roomPlayer = ftClient.getRoomPlayer();
         if (roomPlayer == null)
             return;
 
-        final Room activeRoom = ftClient.getActiveRoom();
-        if (activeRoom == null)
-            return;
-
         short playerPosition = roomPlayer.getPosition();
-        final GameSession gameSession = ftClient.getActiveGameSession();
-        if (gameSession == null)
-            return;
+        Queue<SkillCrystal> pickedUpSkillCrystals = roomPlayer.getPickedUpSkillCrystals();
 
         final MatchplayGame game = gameSession.getMatchplayGame();
         if (game == null)
@@ -82,12 +80,21 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
                         .findFirst()
                         .orElse(null);
 
-        if (skillCrystal != null) {
-            short gameFieldSide = -1;
-            boolean isRedTeam = game.isRedTeam(playerPosition);
-            if (isBattleGame)
-                gameFieldSide = game.isRedTeam(playerPosition) ? GameFieldSide.RedTeam : GameFieldSide.BlueTeam;
+        if (skillCrystal == null) {
+            return;
+        }
 
+        if (isBattleGame)
+            ((MatchplayBattleGame) game).getSkillCrystals().remove(skillCrystal);
+        else
+            ((MatchplayGuardianGame) game).getSkillCrystals().remove(skillCrystal);
+
+        short gameFieldSide = -1;
+        boolean isRedTeam = game.isRedTeam(playerPosition);
+        if (isBattleGame)
+            gameFieldSide = game.isRedTeam(playerPosition) ? GameFieldSide.RedTeam : GameFieldSide.BlueTeam;
+
+        if (skillCrystal.getPickedUpByPlayerId() == -1) {
             PlayerBattleState playerBattleState = isBattleGame ?
                     ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
                             .filter(x -> isRedTeam == game.isRedTeam(x.getPosition()) && x.isDead()
@@ -103,66 +110,68 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
                     .allMatch(p -> p.getLevel() >= 65);
 
             int randomSkillIndex = this.getRandomPlayerSkill(player.getLevel(), playerBattleState, levelRequired);
+            skillCrystal.setPickedUpByPlayerId(player.getId());
+            skillCrystal.setSkillIndex(randomSkillIndex);
+
+            if (!pickedUpSkillCrystals.offer(skillCrystal)) {
+                pickedUpSkillCrystals.poll();
+                pickedUpSkillCrystals.offer(skillCrystal);
+            }
+
             S2CMatchplayGiveSpecificSkill response = new S2CMatchplayGiveSpecificSkill(packet.getCrystalId(), playerPosition, randomSkillIndex);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(response, connection);
 
             GameEventBus.call(GameEventType.MP_PLAYER_PICKING_UP_CRYSTAL, ftClient, skillCrystal, randomSkillIndex);
-
-            if (isBattleGame) {
-                ((MatchplayBattleGame) game).getSkillCrystals().removeIf(sc -> sc.getId() == skillCrystal.getId());
-            } else {
-                ((MatchplayGuardianGame) game).getSkillCrystals().removeIf(sc -> sc.getId() == skillCrystal.getId());
-            }
-
-            PlaceCrystalRandomlyTask placeCrystalRandomlyTask = isBattleGame ? new PlaceCrystalRandomlyTask(connection, gameFieldSide) : new PlaceCrystalRandomlyTask(connection);
-            long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval().get() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get();
-
-            RunnableEvent runnableEvent = eventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);
-            gameSession.getFireables().push(runnableEvent);
-            eventHandler.offer(runnableEvent);
         }
+
+        PlaceCrystalRandomlyTask placeCrystalRandomlyTask = isBattleGame ? new PlaceCrystalRandomlyTask(connection, gameFieldSide) : new PlaceCrystalRandomlyTask(connection);
+        long crystalSpawnInterval = isBattleGame ? ((MatchplayBattleGame) game).getCrystalSpawnInterval().get() : ((MatchplayGuardianGame) game).getCrystalSpawnInterval().get();
+        RunnableEvent runnableEvent = eventHandler.createRunnableEvent(placeCrystalRandomlyTask, crystalSpawnInterval);
+        gameSession.getFireables().push(runnableEvent);
+        eventHandler.offer(runnableEvent);
     }
 
     private int getRandomPlayerSkill(int playerLevel, PlayerBattleState otherPlayerBattleStateDead, boolean levelRequired) {
         final SkillDropRate skillDropRate = skillDropRateService.findSkillDropRateByPlayerLevel(playerLevel);
-        StringTokenizer st = new StringTokenizer(skillDropRate.getDropRates(), ",");
-        final List<Integer> dropRates = st.get().stream().map(Integer::parseInt).limit(16).collect(Collectors.toList());
-
-        final List<SkillDrop> skillDrops = new ArrayList<>();
-        int currentPercentage = 0;
-        for (int i = 0; i < dropRates.size(); i++) {
-            int rate = dropRates.get(i);
-            SkillDrop skillDrop = new SkillDrop();
-            skillDrop.setId(i);
-            skillDrop.setFrom(currentPercentage);
-            skillDrop.setTo(currentPercentage + rate);
-            skillDrops.add(skillDrop);
-            currentPercentage += rate;
+        if (skillDropRate == null) {
+            return 0;
         }
 
-        final Random random = new Random();
-        final int randValue = random.nextInt(101);
-        final SkillDrop skillDrop = skillDrops.stream()
-                .filter(x -> x.getFrom() <= randValue && x.getTo() >= randValue)
-                .findFirst()
-                .orElse(null);
-        if (skillDrop == null)
-            return 0;
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
-        if (levelRequired && skillDrop.getId() == 2) {
-            final Random r = new Random();
-            int gMeteoProbability = r.nextInt(101);
-            if (gMeteoProbability <= 26) {
-                skillDrop.setId(55);
+        if (otherPlayerBattleStateDead != null) { // if someone is dead
+            if (rnd.nextInt(100) < REBIRTH_CHANCE_PERCENT) {
+                return REBIRTH_SKILL_ID;
             }
         }
 
-        if (otherPlayerBattleStateDead != null) { // if someone is dead
-            // rebirth drop rate
-            final int dropRate = 35;
-            if (dropRate >= randValue) // override
-                skillDrop.setId(4);
+        List<Integer> weights = skillDropRateService.getDropRatesForSkillDropRate(skillDropRate);
+        int totalWeight = weights.stream().mapToInt(Integer::intValue).sum();
+        if (totalWeight <= 0) {
+            return 0;
         }
-        return skillDrop.getId();
+
+        if (totalWeight != 100) {
+            log.warn("Drop table total is {}, expected 100. level={}, rates={}", totalWeight, playerLevel, skillDropRate.getDropRates());
+        }
+
+        int roll = rnd.nextInt(totalWeight);
+        int cumulativeWeight = 0;
+        int selectedSkillId = 0;
+        for (int i = 0; i < weights.size(); i++) {
+            cumulativeWeight += weights.get(i);
+            if (roll < cumulativeWeight) {
+                selectedSkillId = i;
+                break;
+            }
+        }
+
+        if (levelRequired && selectedSkillId == 2) {
+            if (rnd.nextInt(100) < 26) {
+                selectedSkillId = 55;
+            }
+        }
+
+        return selectedSkillId;
     }
 }

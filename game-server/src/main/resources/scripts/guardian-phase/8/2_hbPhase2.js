@@ -197,7 +197,7 @@ var phase = {
                 skills.clear();
 
                 for (let skillId of phase2.enrageSkillIdLst) {
-                    let skill = serviceManager.getSkillService().findSkillById(skillId - 1);
+                    let skill = serviceManager.getSkillService().findSkillById(skillId);
                     if (skill) {
                         let skill2Guardian = new Skill2Guardians();
                         skill2Guardian.setSkill(skill);

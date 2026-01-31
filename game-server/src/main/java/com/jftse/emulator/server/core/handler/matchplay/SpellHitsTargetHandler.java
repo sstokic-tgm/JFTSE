@@ -156,7 +156,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), spellHitsTargetExt.getXKnockbackPosition(), spellHitsTargetExt.getYKnockbackPosition());
+                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), spellHitsTargetExt.getHitDirX(), spellHitsTargetExt.getHitDirY());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }
@@ -171,27 +171,36 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
         short newHealth;
         try {
             if (game instanceof MatchplayBattleGame battleGame) {
-                newHealth = battleGame.getPlayerCombatSystem().dealDamageOnBallLoss(attackerPosition, receiverPosition, attackerHasWillBuff);
+                if (!spellHitsTargetExt.getApplySkillEffect()) {
+                    newHealth = battleGame.getPlayerCombatSystem().getPlayerCurrentHealth(receiverPosition);
+                } else {
+                    newHealth = battleGame.getPlayerCombatSystem().dealDamageOnBallLoss(attackerPosition, receiverPosition, attackerHasWillBuff);
+                }
             } else {
                 MatchplayGuardianGame guardianGame = (MatchplayGuardianGame) game;
                 final boolean isAdvancedBossGuardianModeActive = guardianGame.isAdvancedBossGuardianMode() && guardianGame.getPhaseManager().getIsRunning().get();
 
                 if (guardianMadePoint) {
                     if (!spellHitsTargetExt.getApplySkillEffect()) {
-                        return false;
-                    }
-
-                    if (isAdvancedBossGuardianModeActive) {
-                        newHealth = (short) guardianGame.getPhaseManager().onDealDamageOnBallLossToPlayer(attackerPosition, receiverPosition, attackerHasWillBuff);
+                        newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(receiverPosition);
                     } else {
-                        newHealth = guardianGame.getGuardianCombatSystem().dealDamageOnBallLossToPlayer(attackerPosition, receiverPosition, attackerHasWillBuff);
+                        if (isAdvancedBossGuardianModeActive) {
+                            newHealth = (short) guardianGame.getPhaseManager().onDealDamageOnBallLossToPlayer(attackerPosition, receiverPosition, attackerHasWillBuff);
+                        } else {
+                            newHealth = guardianGame.getGuardianCombatSystem().dealDamageOnBallLossToPlayer(attackerPosition, receiverPosition, attackerHasWillBuff);
+                        }
                     }
                 } else {
-                    if (isAdvancedBossGuardianModeActive) {
-                        newHealth = (short) guardianGame.getPhaseManager().onDealDamageOnBallLoss(attackerPosition, receiverPosition, attackerHasWillBuff);
+                    if (!spellHitsTargetExt.getApplySkillEffect()) {
+                        newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(receiverPosition);
                     } else {
-                        newHealth = guardianGame.getGuardianCombatSystem().dealDamageOnBallLoss(attackerPosition, receiverPosition, attackerHasWillBuff);
+                        if (isAdvancedBossGuardianModeActive) {
+                            newHealth = (short) guardianGame.getPhaseManager().onDealDamageOnBallLoss(attackerPosition, receiverPosition, attackerHasWillBuff);
+                        } else {
+                            newHealth = guardianGame.getGuardianCombatSystem().dealDamageOnBallLoss(attackerPosition, receiverPosition, attackerHasWillBuff);
+                        }
                     }
+
                     if (newHealth < 1) {
                         this.increasePotsFromGuardiansDeath((MatchplayGuardianGame) game, receiverPosition);
                     }
@@ -234,7 +243,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                 } else if (skillDamage == 0) {
                     newHealth = battleGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                 } else if (!spellHitsTargetExt.getApplySkillEffect()) {
-                    return false;
+                    newHealth = battleGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                 } else {
                     newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                 }
@@ -270,7 +279,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                     } else if (skillDamage == 0) {
                         newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                     } else if (!spellHitsTargetExt.getApplySkillEffect()) {
-                        return false;
+                        newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                     } else {
                         if (isAdvancedBossGuardianModeActive) {
                             newHealth = (short) guardianGame.getPhaseManager().onDealDamageToPlayer(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
@@ -288,7 +297,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                             .filter(state -> state.getPosition() == targetPosition)
                             .findFirst()
                             .orElse(null);
-                    if (guardianBattleState != null && guardianBattleState.getCurrentHealth().get() < 1)
+                    if (guardianBattleState == null || guardianBattleState.getCurrentHealth().get() < 1)
                         return false;
 
                     if (isAdvancedBossGuardianModeActive) {
@@ -296,6 +305,10 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                             newHealth = (short) guardianGame.getPhaseManager().onHeal(targetPosition, skillDamage, true);
                         } else if (denyDamage) {
                             newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
+                        } else if (skillDamage == 0) {
+                            newHealth = (short) guardianBattleState.getCurrentHealth().get();
+                        } else if (!spellHitsTargetExt.getApplySkillEffect()) {
+                            newHealth = (short) guardianBattleState.getCurrentHealth().get();
                         } else {
                             newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                         }
@@ -304,6 +317,10 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                             newHealth = guardianGame.getGuardianCombatSystem().heal(targetPosition, skillDamage);
                         } else if (denyDamage) {
                             newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
+                        } else if (skillDamage == 0) {
+                            newHealth = (short) guardianBattleState.getCurrentHealth().get();
+                        } else if (!spellHitsTargetExt.getApplySkillEffect()) {
+                            newHealth = (short) guardianBattleState.getCurrentHealth().get();
                         } else {
                             newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
                         }
@@ -323,7 +340,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
         Skill skillToApply = this.getSkillToApply(skill, spellHitsTargetExt);
         S2CMatchplayDealDamage damageToPlayerPacket =
-                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply.getTargeting().shortValue(), skillToApply.getId().byteValue(), spellHitsTargetExt.getXKnockbackPosition(), spellHitsTargetExt.getYKnockbackPosition());
+                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply.getTargeting().shortValue(), skillToApply.getId().byteValue(), spellHitsTargetExt.getHitDirX(), spellHitsTargetExt.getHitDirY());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         return true;
     }
@@ -420,13 +437,17 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
     }
 
     private Skill getSkillToApply(Skill skill, CMSGSpellHitsTargetExtended spellHitsTargetExt) {
+        if (skill == null) {
+            log.debug("skill == null, skillId: {}", spellHitsTargetExt.getSkillId());
+        }
+
         if (skill != null && skill.getId() == 64) {
             // 64 is Fireball skill which is also a DoT so we need to send BigMeteo (3) skill back so FT can deactivate the DoT effect properly
             return skillService.findSkillById(3L);
         }
 
         if (!spellHitsTargetExt.getApplySkillEffect()) {
-            log.debug("!spellHitsTargetExt.isApplySkillEffect() return 3");
+            log.debug("!spellHitsTargetExt.isApplySkillEffect() return 3, skillId: {}", spellHitsTargetExt.getSkillId());
             return skillService.findSkillById(3L);
         }
 
