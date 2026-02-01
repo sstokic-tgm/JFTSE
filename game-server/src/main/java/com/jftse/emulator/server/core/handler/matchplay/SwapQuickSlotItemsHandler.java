@@ -11,9 +11,12 @@ import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
+import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import com.jftse.server.core.service.PlayerPocketService;
 import com.jftse.server.core.service.PocketService;
 import com.jftse.server.core.shared.packets.matchplay.CMSGSwapSpell;
+
+import java.util.Queue;
 
 @PacketId(CMSGSwapSpell.PACKET_ID)
 public class SwapQuickSlotItemsHandler implements PacketHandler<FTConnection, CMSGSwapSpell> {
@@ -35,6 +38,17 @@ public class SwapQuickSlotItemsHandler implements PacketHandler<FTConnection, CM
         if (roomPlayer == null)
             return;
 
+        Queue<SkillCrystal> pickedUpSkillCrystals = roomPlayer.getPickedUpSkillCrystals();
+        if (pickedUpSkillCrystals.isEmpty())
+            return;
+
+        // we just simply shift
+        SkillCrystal first = pickedUpSkillCrystals.poll();
+        SkillCrystal second = pickedUpSkillCrystals.peek();
+        if (first == null || second == null)
+            return;
+        pickedUpSkillCrystals.offer(first);
+
         Pocket pocket = pocketService.findById(roomPlayer.getPocketId());
         PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(21, EItemCategory.SPECIAL.getName(), pocket);
         if (playerPocket != null) {
@@ -46,7 +60,7 @@ public class SwapQuickSlotItemsHandler implements PacketHandler<FTConnection, CM
         }
 
         S2CMatchplayGivePlayerSkills givePlayerSkills
-                = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), packet.getTargetLeftSlotSkill(), packet.getTargetRightSlotSkill());
+                = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), packet.getTargetLeftSlotSkill(), second.getId(), packet.getTargetRightSlotSkill(), first.getId());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(givePlayerSkills, connection);
     }
 }

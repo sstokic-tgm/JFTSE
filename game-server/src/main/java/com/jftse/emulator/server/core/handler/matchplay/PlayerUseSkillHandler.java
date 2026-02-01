@@ -85,6 +85,12 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
         boolean attackerIsPlayer = attackerPosition < 4;
 
         if (attackerIsPlayer && !isQuickSlot) {
+            // a canceled skill use will have sourceValue -1 and skillIndex -6?, a less than zero check is enough
+            if (anyoneUsesSkill.getSourceValue() == -1 && anyoneUsesSkill.getSkillIndex() < 0) {
+                roomPlayer.getPickedUpSkillCrystals().poll();
+                return;
+            }
+
             try {
                 validateSkillCrystal(roomPlayer.getPickedUpSkillCrystals(), anyoneUsesSkill.getSourceValue(), anyoneUsesSkill.getSkillIndex());
             } catch (ValidationException ve) {

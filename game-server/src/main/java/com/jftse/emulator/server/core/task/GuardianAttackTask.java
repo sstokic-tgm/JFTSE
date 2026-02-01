@@ -73,7 +73,7 @@ public class GuardianAttackTask extends AbstractTask {
             final Skill skill = hasPhaseEnded || !game.isAdvancedBossGuardianMode() ?
                     guardianSkillsService.getRandomGuardianSkillBasedOnProbability(guardianBattleState.getBtItemId(), guardianBattleState.getId(), guardianBattleState.isBoss(), game.getScenario(), game.getMap())
                     : guardianBattleState.getRandomGuardianSkillBasedOnProbability();
-            final int skillIndex = skill.getId().intValue();
+            final int skillIndex = skill.getId().intValue() - 1;
 
             S2CMatchplayGiveSpecificSkill packet = new S2CMatchplayGiveSpecificSkill((short) 0, (short) guardianBattleState.getPosition(), skillIndex);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
