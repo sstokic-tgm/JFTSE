@@ -295,7 +295,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                 return;
 
             Elementable element = getElementalProperties(pp);
-            if (element != null && element != pbs.getOffensiveElement()) {
+            if (element != null) {
                 pbs.getDefensiveElements().add(element);
             }
         });
