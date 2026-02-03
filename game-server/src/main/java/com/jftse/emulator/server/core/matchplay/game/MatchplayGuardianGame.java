@@ -291,8 +291,11 @@ public class MatchplayGuardianGame extends MatchplayGame {
         List<Long> equippedItemPartsIds = equippedItemParts.toList().stream().map(Integer::longValue).toList();
         List<PlayerPocket> ppEquipment = ServiceManager.getInstance().getPlayerPocketService().getItemsAsPocket(equippedItemPartsIds, pocket);
         ppEquipment.forEach(pp -> {
+            if (offensivePP != null && pp.getId().equals(offensivePP.getId()))
+                return;
+
             Elementable element = getElementalProperties(pp);
-            if (element != null) {
+            if (element != null && element != pbs.getOffensiveElement()) {
                 pbs.getDefensiveElements().add(element);
             }
         });
