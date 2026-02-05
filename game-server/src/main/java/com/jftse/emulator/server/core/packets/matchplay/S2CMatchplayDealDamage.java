@@ -4,24 +4,13 @@ import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 
 public class S2CMatchplayDealDamage extends Packet {
-    public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, short targeting, byte skillAnimation, int xKnockbackPosition, int yKnockbackPosition) {
+    public S2CMatchplayDealDamage(short targetPosition, short targetHp, short attackerPosition, byte skillId, float hitDirX, float hitDirY) {
         super(PacketOperations.S2CMatchplayDamageToPlayer);
 
-        this.write(entityPosition);
-        this.write(entityHpToSet);
-        this.write(targeting);
-        this.write(skillAnimation);
-        this.write(xKnockbackPosition);
-        this.write(yKnockbackPosition);
-    }
-
-    public S2CMatchplayDealDamage(short entityPosition, short entityHpToSet, short targeting, byte skillAnimation, float hitDirX, float hitDirY) {
-        super(PacketOperations.S2CMatchplayDamageToPlayer);
-
-        this.write(entityPosition);
-        this.write(entityHpToSet);
-        this.write(targeting);
-        this.write(skillAnimation);
+        this.write(targetPosition);
+        this.write(targetHp);
+        this.write(attackerPosition);
+        this.write(skillId);
         this.write(hitDirX);
         this.write(hitDirY);
     }

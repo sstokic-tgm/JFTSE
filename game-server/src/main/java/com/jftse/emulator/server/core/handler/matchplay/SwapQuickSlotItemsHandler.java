@@ -7,7 +7,6 @@ import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayGivePlayerSk
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.pocket.PlayerPocket;
-import com.jftse.entities.database.model.pocket.Pocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.item.EItemCategory;
@@ -38,6 +37,10 @@ public class SwapQuickSlotItemsHandler implements PacketHandler<FTConnection, CM
         if (roomPlayer == null)
             return;
 
+        PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) packet.getItemPocketId(), roomPlayer.getPocketId());
+        if (playerPocket == null)
+            return;
+
         Queue<SkillCrystal> pickedUpSkillCrystals = roomPlayer.getPickedUpSkillCrystals();
         if (pickedUpSkillCrystals.isEmpty())
             return;
@@ -49,18 +52,16 @@ public class SwapQuickSlotItemsHandler implements PacketHandler<FTConnection, CM
             return;
         pickedUpSkillCrystals.offer(first);
 
-        Pocket pocket = pocketService.findById(roomPlayer.getPocketId());
-        PlayerPocket playerPocket = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(21, EItemCategory.SPECIAL.getName(), pocket);
-        if (playerPocket != null) {
+        if (playerPocket.getItemIndex().equals(21) && EItemCategory.SPECIAL.getName().equals(playerPocket.getCategory())) {
             playerPocket = playerPocketService.decrementPocketItemCount(playerPocket);
             if (playerPocket.getItemCount() == 0) {
                 playerPocketService.remove(playerPocket.getId());
-                pocketService.decrementPocketBelongings(pocket);
+                pocketService.decrementPocketBelongings(roomPlayer.getPocketId());
             }
         }
 
         S2CMatchplayGivePlayerSkills givePlayerSkills
-                = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), packet.getTargetLeftSlotSkill(), second.getId(), packet.getTargetRightSlotSkill(), first.getId());
+                = new S2CMatchplayGivePlayerSkills(roomPlayer.getPosition(), second.getSkillIndex(), second.getId(), first.getSkillIndex(), first.getId());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(givePlayerSkills, connection);
     }
 }

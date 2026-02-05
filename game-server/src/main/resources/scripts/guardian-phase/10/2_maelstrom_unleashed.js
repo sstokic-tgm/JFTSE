@@ -110,9 +110,9 @@ var phase = {
                         deadGuardian.getCurrentHealth().set(newHealth);
 
                         let packet = new S2CMatchplayUseSkill(pos, deadGuardian.getPosition(), rebirth.getId() - 1, Math.floor(Math.random() * 127), 0, 0, 0);
-                        gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
+                        //gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
 
-                        let dmgPacket = new S2CMatchplayDealDamage(deadGuardian.getPosition(), deadGuardian.getCurrentHealth().get(), rebirth.getTargeting(), rebirth.getId(), 0, 0);
+                        let dmgPacket = new S2CMatchplayDealDamage(deadGuardian.getPosition(), deadGuardian.getCurrentHealth().get(), 4, rebirth.getId(), 0.0, 0.0);
                         gameManager.sendPacketToAllClientsInSameGameSession(dmgPacket, connection);
 
                         maelstrom.rebirthUsed = true;

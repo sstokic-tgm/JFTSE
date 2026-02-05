@@ -96,12 +96,12 @@ var phase = {
                         g.getCurrentHealth().set(g.getMaxHealth());
 
                         const packet = new S2CMatchplayUseSkill(pos, posG, rebirth.getId() - 1, Math.floor(Math.random() * 127), 0, 0, 0);
-                        const dmgPacket = new S2CMatchplayDealDamage(posG, g.getCurrentHealth().get(), rebirth.getTargeting(), rebirth.getId(), 0, 0);
+                        const dmgPacket = new S2CMatchplayDealDamage(posG, g.getCurrentHealth().get(), 4, rebirth.getId(), 0.0, 0.0);
 
                         abyss.resurrectedGuardians.add(posG);
 
                         const event = eventHandler.createRunnableEvent(function () {
-                            gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
+                            //gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
                             gameManager.sendPacketToAllClientsInSameGameSession(dmgPacket, connection);
                         }, 3000);
                         eventHandler.offerJS(event);
@@ -127,9 +127,9 @@ var phase = {
                 if (heal) {
                     boss.getCurrentHealth().set(boss.getMaxHealth());
                     const packet = new S2CMatchplayUseSkill(pos, pos, heal.getId() - 1, Math.floor(Math.random() * 127), 0, 0, 0);
-                    gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
+                    //gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
 
-                    let dmgPacket = new S2CMatchplayDealDamage(pos, boss.getCurrentHealth().get(), heal.getTargeting(), heal.getId(), 0, 0);
+                    let dmgPacket = new S2CMatchplayDealDamage(pos, boss.getCurrentHealth().get(), 4, heal.getId(), 0.0, 0.0);
                     gameManager.sendPacketToAllClientsInSameGameSession(dmgPacket, connection);
 
                     abyss.fullHealUsed = true;

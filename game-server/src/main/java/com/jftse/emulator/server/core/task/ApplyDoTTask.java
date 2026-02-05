@@ -30,7 +30,7 @@ public class ApplyDoTTask extends AbstractTask {
     private final int interval;
     private final int damagePerTick;
 
-    private static final long BURN_SKILL_ID = 64L;
+    private static final long SKILL_ID = 3L;
 
     public ApplyDoTTask(FTConnection connection, PlayerBattleState player, int ticks, int interval, int damagePerTick) {
         this.connection = connection;
@@ -68,10 +68,10 @@ public class ApplyDoTTask extends AbstractTask {
 
         if (playerState == null || playerState.getCurrentHealth().get() <= 0) return;
 
-        Skill skill = skillService.findSkillById(BURN_SKILL_ID);
+        Skill skill = skillService.findSkillById(SKILL_ID);
         if (skill != null) {
             final short newHealth = (short) Math.max(0, playerState.getCurrentHealth().addAndGet(-damagePerTick));
-            final S2CMatchplayDealDamage packet = new S2CMatchplayDealDamage((short) playerState.getPosition(), newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
+            final S2CMatchplayDealDamage packet = new S2CMatchplayDealDamage((short) playerState.getPosition(), newHealth, (short) 4, skill.getId().byteValue(), 0.0f, 0.0f);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(packet, connection);
         }
 

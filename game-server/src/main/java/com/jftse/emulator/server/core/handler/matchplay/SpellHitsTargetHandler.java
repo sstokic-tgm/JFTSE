@@ -56,6 +56,9 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
     private final JdbcUtil jdbcUtil;
 
+    private static final long SKILL_MOAICO_ID = 15L;
+    private static final long SKILL_BLESSES_OF_MEDUSA_ID = 63L;
+
     public SpellHitsTargetHandler() {
         random = new Random();
 
@@ -156,7 +159,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
         if (playerBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), spellHitsTargetExt.getHitDirX(), spellHitsTargetExt.getHitDirY());
+                    new S2CMatchplayDealDamage((short) playerBattleState.getPosition(), (short) playerBattleState.getCurrentHealth().get(), spellHitsTargetExt.getAttackerPosition(), skill.getId().byteValue(), spellHitsTargetExt.getHitDirX(), spellHitsTargetExt.getHitDirY());
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }
@@ -213,7 +216,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
         GameEventBus.call(GameEventType.MP_PLAYER_HITS_TARGET, connection, game, newHealth, spellHitsTargetExt);
 
-        S2CMatchplayDealDamage damagePacket = new S2CMatchplayDealDamage(spellHitsTargetExt.getTargetPosition(), newHealth, (short) 0, (byte) 0, 0, 0);
+        S2CMatchplayDealDamage damagePacket = new S2CMatchplayDealDamage(spellHitsTargetExt.getTargetPosition(), newHealth, (short) 4, (byte) 0, 0.0f, 0.0f);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damagePacket, connection);
         return true;
     }
@@ -242,7 +245,11 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                     newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                 } else if (skillDamage == 0) {
                     newHealth = battleGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
-                } else if (!spellHitsTargetExt.getApplySkillEffect()) {
+                } else if (!spellHitsTargetExt.getApplySkillEffect() &&
+                        !(skill != null && (
+                                skill.getId() == SKILL_MOAICO_ID || skill.getId() == SKILL_BLESSES_OF_MEDUSA_ID
+                        ))
+                ) {
                     newHealth = battleGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                 } else {
                     newHealth = battleGame.getPlayerCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
@@ -278,7 +285,11 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                         }
                     } else if (skillDamage == 0) {
                         newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
-                    } else if (!spellHitsTargetExt.getApplySkillEffect()) {
+                    } else if (!spellHitsTargetExt.getApplySkillEffect() &&
+                            !(skill != null && (
+                                    skill.getId() == SKILL_MOAICO_ID || skill.getId() == SKILL_BLESSES_OF_MEDUSA_ID
+                            ))
+                    ) {
                         newHealth = guardianGame.getPlayerCombatSystem().getPlayerCurrentHealth(targetPosition);
                     } else {
                         if (isAdvancedBossGuardianModeActive) {
@@ -307,7 +318,11 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                             newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                         } else if (skillDamage == 0) {
                             newHealth = (short) guardianBattleState.getCurrentHealth().get();
-                        } else if (!spellHitsTargetExt.getApplySkillEffect()) {
+                        } else if (!spellHitsTargetExt.getApplySkillEffect() &&
+                                !(skill != null && (
+                                        skill.getId() == SKILL_MOAICO_ID || skill.getId() == SKILL_BLESSES_OF_MEDUSA_ID
+                                ))
+                        ) {
                             newHealth = (short) guardianBattleState.getCurrentHealth().get();
                         } else {
                             newHealth = (short) guardianGame.getPhaseManager().onDealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
@@ -319,7 +334,11 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
                             newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, (short) -1, false, false, skill);
                         } else if (skillDamage == 0) {
                             newHealth = (short) guardianBattleState.getCurrentHealth().get();
-                        } else if (!spellHitsTargetExt.getApplySkillEffect()) {
+                        } else if (!spellHitsTargetExt.getApplySkillEffect() &&
+                                !(skill != null && (
+                                        skill.getId() == SKILL_MOAICO_ID || skill.getId() == SKILL_BLESSES_OF_MEDUSA_ID
+                                ))
+                        ) {
                             newHealth = (short) guardianBattleState.getCurrentHealth().get();
                         } else {
                             newHealth = guardianGame.getGuardianCombatSystem().dealDamage(attackerPosition, targetPosition, skillDamage, attackerHasStrBuff, receiverHasDefBuff, skill);
@@ -340,7 +359,7 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
         Skill skillToApply = this.getSkillToApply(skill, spellHitsTargetExt);
         S2CMatchplayDealDamage damageToPlayerPacket =
-                new S2CMatchplayDealDamage(targetPosition, newHealth, skillToApply.getTargeting().shortValue(), skillToApply.getId().byteValue(), spellHitsTargetExt.getHitDirX(), spellHitsTargetExt.getHitDirY());
+                new S2CMatchplayDealDamage(targetPosition, newHealth, attackerPosition, skillToApply.getId().byteValue(), spellHitsTargetExt.getHitDirX(), spellHitsTargetExt.getHitDirY());
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         return true;
     }
@@ -443,11 +462,18 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
 
         if (skill != null && skill.getId() == 64) {
             // 64 is Fireball skill which is also a DoT so we need to send BigMeteo (3) skill back so FT can deactivate the DoT effect properly
+            // maybe returning a skill with id 0 would also work
             return skillService.findSkillById(3L);
         }
 
-        if (!spellHitsTargetExt.getApplySkillEffect()) {
-            log.debug("!spellHitsTargetExt.isApplySkillEffect() return 3, skillId: {}", spellHitsTargetExt.getSkillId());
+        if (!spellHitsTargetExt.getApplySkillEffect() &&
+                (skill != null && (
+                        skill.getId() == SKILL_MOAICO_ID || skill.getId() == SKILL_BLESSES_OF_MEDUSA_ID
+                ))
+        ) {
+            // for Moaico or Blesses of Medusa skill application, even if applySkillEffect is 1, we need to send BigMeteo (3) skill animation back so FT can apply the DoT effect properly
+            // maybe returning a skill with id 0 would also work
+            log.debug("Returning BigMeteo skill for Moaico or Blesses of Medusa skill application to apply the DoT effect properly, skillId: {}", spellHitsTargetExt.getSkillId());
             return skillService.findSkillById(3L);
         }
 
@@ -455,7 +481,6 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
         if (skillToApply == null && spellHitsTargetExt.getSkillId() == 0) {
             skillToApply = new Skill();
             skillToApply.setId(0L);
-            skillToApply.setTargeting(0);
         }
         return skillToApply;
     }

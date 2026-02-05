@@ -249,7 +249,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
     private void handleSpecialSkillsUseOfGuardians(FTConnection connection, byte guardianPos, MatchplayGuardianGame game, Skill skill) {
         // There could be more special skills which need to be handled here
         if (skill.getId() == 29) { // RebirthOne
-            this.handleReviveGuardian(connection, game, skill);
+            this.handleReviveGuardian(connection, game, guardianPos, skill);
         } else if (skill.getDamage() > 1) {
             short newHealth;
             try {
@@ -260,12 +260,12 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
             }
 
             S2CMatchplayDealDamage damagePacket =
-                    new S2CMatchplayDealDamage(guardianPos, newHealth, skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
+                    new S2CMatchplayDealDamage(guardianPos, newHealth, guardianPos, skill.getId().byteValue(), 0.0f, 0.0f);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damagePacket, connection);
         }
     }
 
-    private void handleReviveGuardian(FTConnection connection, MatchplayGuardianGame game, Skill skill) {
+    private void handleReviveGuardian(FTConnection connection, MatchplayGuardianGame game, short guardianPos, Skill skill) {
         GuardianBattleState guardianBattleState = null;
         try {
             guardianBattleState = game.getGuardianCombatSystem().reviveAnyGuardian(skill.getDamage().shortValue());
@@ -275,7 +275,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
 
         if (guardianBattleState != null) {
             S2CMatchplayDealDamage damageToPlayerPacket =
-                    new S2CMatchplayDealDamage((short) guardianBattleState.getPosition(), (short) guardianBattleState.getCurrentHealth().get(), skill.getTargeting().shortValue(), skill.getId().byteValue(), 0, 0);
+                    new S2CMatchplayDealDamage((short) guardianBattleState.getPosition(), (short) guardianBattleState.getCurrentHealth().get(), guardianPos, skill.getId().byteValue(), 0.0f, 0.0f);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(damageToPlayerPacket, connection);
         }
     }

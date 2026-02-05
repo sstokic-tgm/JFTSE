@@ -115,9 +115,9 @@ var phase = {
                 if (rebirth) {
                     deadGuardian.getCurrentHealth().set(Math.floor(deadGuardian.getMaxHealth() * 0.3));
                     let packet = new S2CMatchplayUseSkill(pos, deadGuardian.getPosition(), rebirth.getId() - 1, Math.floor(Math.random() * 127), 0, 0, 0);
-                    gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
+                    //gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
 
-                    let dmgPacket = new S2CMatchplayDealDamage(deadGuardian.getPosition(), deadGuardian.getCurrentHealth().get(), rebirth.getTargeting(), rebirth.getId(), 0, 0);
+                    let dmgPacket = new S2CMatchplayDealDamage(deadGuardian.getPosition(), deadGuardian.getCurrentHealth().get(), 4, rebirth.getId(), 0.0, 0.0);
                     gameManager.sendPacketToAllClientsInSameGameSession(dmgPacket, connection);
 
                     leviathan.rebirthUsed = true;
@@ -141,9 +141,9 @@ var phase = {
                 if (fullHeal) {
                     boss.getCurrentHealth().set(Math.floor(boss.getMaxHealth() * 0.45));
                     let packet = new S2CMatchplayUseSkill(pos, pos, fullHeal.getId() - 1, Math.floor(Math.random() * 127), 0, 0, 0);
-                    gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
+                    //gameManager.sendPacketToAllClientsInSameGameSession(packet, connection);
 
-                    let dmgPacket = new S2CMatchplayDealDamage(pos, boss.getCurrentHealth().get(), fullHeal.getTargeting(), fullHeal.getId(), 0, 0);
+                    let dmgPacket = new S2CMatchplayDealDamage(pos, boss.getCurrentHealth().get(), 4, fullHeal.getId(), 0.0, 0.0);
                     gameManager.sendPacketToAllClientsInSameGameSession(dmgPacket, connection);
 
                     leviathan.healedOnce = true;
