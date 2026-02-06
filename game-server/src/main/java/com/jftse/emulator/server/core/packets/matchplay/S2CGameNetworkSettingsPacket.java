@@ -12,7 +12,7 @@ public class S2CGameNetworkSettingsPacket extends Packet {
         super(PacketOperations.S2CGameNetworkSettings);
 
         this.write(host);
-        this.write((char) port);
+        this.write((short) port);
 
         this.write(gameSessionId);
 

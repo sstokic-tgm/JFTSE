@@ -24,6 +24,7 @@ public class ChatMessageLobbyPacketHandler implements PacketHandler<FTConnection
                 .unk(chatLobbyReqPacket.getUnk())
                 .sender(client.getPlayer().getName())
                 .message(chatLobbyReqPacket.getMessage())
+                .textColor(client.getTextMode())
                 .build();
 
         if (CommandManager.getInstance().isCommand(chatLobbyReqPacket.getMessage())) {

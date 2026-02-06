@@ -66,6 +66,8 @@ public class FTClient extends Client<FTConnection> {
 
     private Pet activePet;
 
+    private int textMode = 0;
+
     public boolean updateDataRequestStep(int step) {
         boolean valid = dataRequestStep.compareAndSet(step - 1, step);
 

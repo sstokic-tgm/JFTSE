@@ -35,6 +35,7 @@ public class ChatMessageRoomPacketHandler implements PacketHandler<FTConnection,
                 .type(messageType)
                 .sender(player.getName())
                 .message(chatRoomReqPacket.getMessage())
+                .textColor(client.getTextMode())
                 .build();
 
         if (CommandManager.getInstance().isCommand(chatRoomReqPacket.getMessage())) {
