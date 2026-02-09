@@ -72,7 +72,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Friend> findWithFriendByFriend(Player player) {
-        return friendRepository.findWithFriendByFriend(player);
+    public List<Friend> findWithPlayerByFriend(Player player) {
+        return friendRepository.findWithPlayerByFriend(player);
     }
 }

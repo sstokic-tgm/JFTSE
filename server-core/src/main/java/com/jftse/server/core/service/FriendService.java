@@ -24,5 +24,5 @@ public interface FriendService {
     long deleteAllByFriend(Player friend);
 
     List<Friend> findWithFriendByPlayer(Player player);
-    List<Friend> findWithFriendByFriend(Player player);
+    List<Friend> findWithPlayerByFriend(Player player);
 }

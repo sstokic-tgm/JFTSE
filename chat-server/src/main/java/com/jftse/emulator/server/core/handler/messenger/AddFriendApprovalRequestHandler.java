@@ -61,9 +61,12 @@ public class AddFriendApprovalRequestHandler implements PacketHandler<FTConnecti
 
         if (packet.getApproved()) {
             friend.setEFriendshipState(EFriendshipState.Friends);
-            Friend newFriend = new Friend();
-            newFriend.setPlayer(activePlayer.getPlayerRef());
-            newFriend.setFriend(targetPlayer);
+            Friend newFriend = friendService.findByPlayerIdAndFriendId(activePlayer.getId(), targetPlayer.getId());
+            if (newFriend == null) {
+                newFriend = new Friend();
+                newFriend.setPlayer(activePlayer.getPlayerRef());
+                newFriend.setFriend(targetPlayer);
+            }
             newFriend.setEFriendshipState(EFriendshipState.Friends);
 
             friendService.save(friend);

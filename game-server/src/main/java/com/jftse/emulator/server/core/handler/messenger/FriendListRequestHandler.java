@@ -54,7 +54,7 @@ public class FriendListRequestHandler implements PacketHandler<FTConnection, CMS
         rProducerService.send(refreshFriendListMessage, "game.messenger.friendList chat.messenger.friendList", "GameServer");
 
         List<Player> friendsWaitingForApproval = socialService.getFriendListByFriend(player.getPlayerRef(), EFriendshipState.WaitingApproval).stream()
-                .map(Friend::getFriend)
+                .map(Friend::getPlayer)
                 .toList();
         S2CFriendRequestNotificationPacket s2CFriendRequestNotificationPacket = new S2CFriendRequestNotificationPacket(friendsWaitingForApproval);
         connection.sendTCP(s2CFriendRequestNotificationPacket);

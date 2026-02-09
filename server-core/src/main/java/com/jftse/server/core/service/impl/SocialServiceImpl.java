@@ -35,9 +35,9 @@ public class SocialServiceImpl implements SocialService {
     @Override
     @Transactional(readOnly = true)
     public List<Friend> getFriendListByFriend(Player player, EFriendshipState friendshipState) {
-        return friendService.findWithFriendByFriend(player).stream()
+        return friendService.findWithPlayerByFriend(player).stream()
                 .filter(x -> x.getEFriendshipState() == friendshipState)
-                .sorted(Comparator.comparing(p -> (!p.getFriend().getOnline())))
+                .sorted(Comparator.comparing(p -> (!p.getPlayer().getOnline())))
                 .collect(Collectors.toList());
     }
 
