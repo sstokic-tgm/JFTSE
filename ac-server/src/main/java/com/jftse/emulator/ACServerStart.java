@@ -46,7 +46,7 @@ public class ACServerStart implements CommandLineRunner {
         PacketAutoRegister.registerAll();
 
         bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup(4);
+        workerGroup = new NioEventLoopGroup(2);
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)

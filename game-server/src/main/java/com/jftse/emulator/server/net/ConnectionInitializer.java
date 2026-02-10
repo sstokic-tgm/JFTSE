@@ -6,6 +6,7 @@ import com.jftse.server.core.codec.PacketDecoderV2;
 import com.jftse.server.core.codec.PacketEncoderV2;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.AttributeKey;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +39,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         ch.pipeline().addLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS));
-        //ch.pipeline().addLast(new FlushConsolidationHandler());
+        ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoderV2(decryptionKey, packetLogger));
         ch.pipeline().addLast("encoder", new PacketEncoderV2(encryptionKey, packetLogger));
         ch.pipeline().addLast(tcpChannelHandler);

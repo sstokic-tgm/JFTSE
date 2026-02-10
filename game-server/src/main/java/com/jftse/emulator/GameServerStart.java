@@ -58,7 +58,7 @@ public class GameServerStart implements CommandLineRunner {
         }
 
         bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup(20);
+        workerGroup = new NioEventLoopGroup(4);
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)

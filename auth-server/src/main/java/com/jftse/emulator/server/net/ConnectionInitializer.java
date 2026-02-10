@@ -6,6 +6,7 @@ import com.jftse.server.core.codec.PacketDecoderV2;
 import com.jftse.server.core.codec.PacketEncoderV2;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.util.AttributeKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +36,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         FTConnection connection = new FTConnection(decryptionKey, encryptionKey, ServerType.AUTH_SERVER);
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
-        //ch.pipeline().addLast(new FlushConsolidationHandler());
+        ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoderV2(decryptionKey, packetLogger));
         ch.pipeline().addLast("encoder", new PacketEncoderV2(encryptionKey, packetLogger));
         ch.pipeline().addLast(tcpChannelHandler);

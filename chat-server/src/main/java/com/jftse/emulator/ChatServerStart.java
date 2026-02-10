@@ -58,7 +58,7 @@ public class ChatServerStart implements CommandLineRunner {
         }
 
         bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup(10);
+        workerGroup = new NioEventLoopGroup(2);
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
