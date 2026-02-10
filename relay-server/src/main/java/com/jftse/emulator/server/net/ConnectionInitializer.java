@@ -36,9 +36,9 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         FTConnection connection = new FTConnection(decryptionKey, encryptionKey, ServerType.RELAY_SERVER);
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
-        ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast("decoder", new PacketDecoderV2(decryptionKey, packetLogger));
         ch.pipeline().addLast("encoder", new PacketEncoderV2(encryptionKey, packetLogger));
+        ch.pipeline().addLast(new FlushConsolidationHandler());
         ch.pipeline().addLast(tcpChannelHandler);
     }
 
