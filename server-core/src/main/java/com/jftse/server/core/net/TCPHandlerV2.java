@@ -6,6 +6,8 @@ import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.packets.SMSGDisconnectMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.EncoderException;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.AttributeKey;
 import org.apache.logging.log4j.LogManager;
@@ -84,10 +86,14 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
+        if (connection == null) {
+            log.warn("({}) Channel active but no connection found in channel attributes. Closing channel.", ctx.channel().remoteAddress());
+            ctx.close();
+            return;
+        }
+
         connection.setChannelHandlerContext(ctx);
-
         log.info("({}) Channel Active", connection.getIPString());
-
         connected(connection);
     }
 
@@ -101,6 +107,12 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IPacket packet) throws Exception {
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
+        if (connection == null) {
+            log.warn("({}) Packet received but no connection in channel attributes. Dropping packet and closing.", ctx.channel().remoteAddress());
+            ctx.close();
+            return;
+        }
+
         packetReceived(connection, packet);
     }
 
@@ -116,8 +128,12 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
-        log.info("({}) Channel Inactive", connection.getIPString());
+        if (connection == null) {
+            log.warn("({}) Channel inactive but no connection found in channel attributes.", ctx.channel().remoteAddress());
+            return;
+        }
 
+        log.info("({}) Channel Inactive", connection.getIPString());
         // channelInactive is only called once anyway
         connection.wantsToCloseConnection();
         disconnected0(connection);
@@ -134,40 +150,108 @@ public abstract class TCPHandlerV2<T extends Connection<? extends Client<T>>> ex
      * @param cause caught Throwable
      */
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public final void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         T connection = ctx.channel().attr(CONNECTION_ATTRIBUTE_KEY).get();
-        final String remoteAddress = connection.getIPString();
+        final String remoteAddress = connection != null ? connection.getIPString() : String.valueOf(ctx.channel().remoteAddress());
 
-        if (!(cause instanceof ReadTimeoutException)) {
-            var isConnectionResetError = switch (cause.getMessage()) {
-                case "Connection reset", "Connection timed out", "No route to host" -> true;
-                default -> false;
-            };
+        boolean isReadTimeout = cause instanceof ReadTimeoutException;
 
-            if (isConnectionResetError) {
-                log.warn("({}) Client closed connection abruptly: {}", remoteAddress, cause.getMessage());
-            } else {
-                log.error("({}) exceptionCaught: {}", remoteAddress, cause.getMessage(), cause);
-            }
+        Throwable root = rootCause(cause);
+        boolean isIoError = root instanceof java.io.IOException;
+        boolean isResetLike = isIoError && looksLikeReset(root);
+
+        boolean isCodecError = cause instanceof DecoderException || cause instanceof EncoderException ||
+                root instanceof DecoderException || root instanceof EncoderException;
+
+        boolean isDBError = cause instanceof DataAccessException || root instanceof DataAccessException;
+
+        if (isReadTimeout) {
+            log.warn("({}) Read timeout.", remoteAddress);
+        } else if (isResetLike) {
+            log.warn("({}) Connection lost: {}", remoteAddress, safeMsg(root));
+        } else if (isIoError) {
+            log.warn("({}) I/O error: {}", remoteAddress, safeMsg(root), cause);
         } else {
-            log.warn("({}) Read timeout, closing connection.", remoteAddress);
+            log.error("({}) exceptionCaught: {}", remoteAddress, safeMsg(cause), cause);
         }
 
-        exceptionCaught(connection, cause);
+        try {
+            exceptionCaught(connection, cause);
+        } catch (Throwable t) {
+            // never let subclass errors keep the channel alive or hide the original issue
+            log.error("({}) exceptionCaught hook threw: {}", remoteAddress, safeMsg(t), t);
+        }
 
-        if (cause instanceof DataAccessException) {
+        boolean shouldClose = isReadTimeout || isResetLike || isCodecError || isIoError || isDBError;
+
+        if (isDBError && connection != null && ctx.channel().isActive()) {
             SMSGDisconnectMessage dcPacket = SMSGDisconnectMessage.builder()
                     .result((byte) 0)
                     .build();
+
             connection.sendTCP(dcPacket).addListener((f) -> {
-                if (f.isSuccess()) {
-                    connection.close();
-                } else {
-                    log.warn("Failed to send disconnect packet to client before closing connection", f.cause());
-                    connection.close();
+                if (!f.isSuccess()) {
+                    log.warn("({}) Failed to send disconnect packet to client before closing connection: {}", remoteAddress, safeMsg(f.cause()), f.cause());
                 }
+                connection.close();
             });
+            return;
         }
+
+        if (shouldClose) {
+            if (connection != null) {
+                connection.close();
+            } else {
+                ctx.close();
+            }
+        }
+    }
+
+    /**
+     * Traverses the cause chain to find the root cause of an exception,
+     * which is often more informative for network errors.
+     *
+     * @param t the throwable to analyze
+     * @return the root cause throwable
+     */
+    private Throwable rootCause(Throwable t) {
+        Throwable cur = t;
+        while (cur.getCause() != null) cur = cur.getCause();
+        return cur;
+    }
+
+    /**
+     * Heuristic to determine if an IOException is likely a connection reset or similar network failure,
+     * based on common message patterns. This is not foolproof but can help reduce noise in
+     * logs by categorizing expected disconnects separately from other I/O errors.
+     *
+     * @param t the throwable to analyze
+     * @return true if the message suggests a connection reset or similar network issue, false otherwise
+     */
+    private boolean looksLikeReset(Throwable t) {
+        if (t instanceof java.nio.channels.ClosedChannelException) return true;
+        if (t instanceof java.net.NoRouteToHostException) return true;
+        if (t instanceof java.net.SocketTimeoutException) return true;
+        if (t instanceof java.net.SocketException) return true;
+
+        String msg = t.getMessage();
+        if (msg == null) return false;
+
+        return msg.contains("Connection reset")
+                || msg.contains("Broken pipe")
+                || msg.contains("Connection timed out")
+                || msg.contains("No route to host")
+                || msg.contains("Connection refused");
+    }
+
+    /**
+     * Safely extracts a message from a throwable for logging, falling back to the class name if the message is null.
+     *
+     * @param t the throwable to extract the message from
+     * @return the throwable's message if available, otherwise the simple class name of the throwable
+     */
+    private String safeMsg(Throwable t) {
+        return t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName();
     }
 
     /**
