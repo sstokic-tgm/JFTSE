@@ -65,7 +65,7 @@ public class ChatServerStart implements CommandLineRunner {
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 300)
                 .childHandler(new ConnectionInitializer())
-                .childOption(ChannelOption.TCP_NODELAY, false)
+                .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, false)
                 .childOption(ChannelOption.SO_REUSEADDR, true)
                 .childOption(ChannelOption.SO_RCVBUF, 16384)

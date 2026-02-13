@@ -112,7 +112,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
         this.playerBattleStates = new ConcurrentLinkedDeque<>();
         this.guardianBattleStates = new ConcurrentLinkedDeque<>();
         this.skillCrystals = new ConcurrentLinkedDeque<>();
-        this.lastCrystalId = new AtomicInteger(-1);
+        this.lastCrystalId = new AtomicInteger(0);
         this.lastGuardianServeSide = new AtomicInteger(GameFieldSide.Guardian);
         this.scheduledFutures = new ConcurrentLinkedDeque<>();
         this.finished = new AtomicBoolean(false);

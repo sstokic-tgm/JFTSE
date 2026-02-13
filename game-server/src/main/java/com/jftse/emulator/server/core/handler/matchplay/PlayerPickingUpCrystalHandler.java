@@ -118,7 +118,7 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
                 pickedUpSkillCrystals.offer(skillCrystal);
             }
 
-            S2CMatchplayGiveSpecificSkill response = new S2CMatchplayGiveSpecificSkill(packet.getCrystalId(), playerPosition, randomSkillIndex);
+            S2CMatchplayGiveSpecificSkill response = new S2CMatchplayGiveSpecificSkill((short) skillCrystal.getId(), playerPosition, randomSkillIndex);
             GameManager.getInstance().sendPacketToAllClientsInSameGameSession(response, connection);
 
             GameEventBus.call(GameEventType.MP_PLAYER_PICKING_UP_CRYSTAL, ftClient, skillCrystal, randomSkillIndex);

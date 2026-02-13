@@ -52,7 +52,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
 
     private final GameLogService gameLogService;
 
-    private static final int TIMESTAMP_DELTA = 300;
+    private static final int TIMESTAMP_DELTA = 500;
 
     public PlayerUseSkillHandler() {
         this.skillService = ServiceManager.getInstance().getSkillService();
@@ -170,7 +170,7 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
                 }
                 playerBattleState.getQuickSlotSkillUseMap().put(quickSlotIndex, skillUse);
 
-                if (playerBattleState.getQuickSlotSkillUseNoCDDetects().get() >= 4) {
+                if (playerBattleState.getQuickSlotSkillUseNoCDDetects().get() >= 5) {
                     S2CDCMsgPacket msgPacket = new S2CDCMsgPacket(4);
                     connection.sendTCP(msgPacket);
 
@@ -215,9 +215,12 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
 
             PlayerPocket playerPocket = playerPocketService.getItemAsPocket((long) itemId, player.getPocketId());
             if (playerPocket != null) {
+                /*
+                source value maybe not item count?
                 if (playerPocket.getItemCount() != playerUseSkill.getSourceValue()) {
                     throw new ValidationException("Player tried to use a quick slot item with invalid item count");
                 }
+                 */
 
                 int itemCount = playerPocket.getItemCount() - 1;
 
