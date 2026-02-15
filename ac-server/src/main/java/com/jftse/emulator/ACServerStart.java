@@ -3,6 +3,7 @@ package com.jftse.emulator;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.manager.ACManager;
 import com.jftse.emulator.server.net.ConnectionInitializer;
+import com.jftse.server.core.StartupBanner;
 import com.jftse.server.core.protocol.PacketAutoRegister;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
@@ -69,15 +70,7 @@ public class ACServerStart implements CommandLineRunner {
         final int port = configService.getValue("anticheat.port", 1337);
         b.bind(port).addListener(cf -> {
             if (cf.isSuccess()) {
-                log.info("""
-                        
-                        *************************************
-                        * ac-server successfully started!   *
-                        * Port: {}                        *
-                        * Transport: {}                    *
-                        *************************************""",
-                        port,
-                        useEpoll ? "Epoll" : "NIO");
+                StartupBanner.print(log, "ac-server", port, useEpoll);
             } else {
                 log.error("Failed to start ac-server: {}", cf.cause().getMessage(), cf.cause());
             }

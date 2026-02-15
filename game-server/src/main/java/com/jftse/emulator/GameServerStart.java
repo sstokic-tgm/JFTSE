@@ -3,6 +3,7 @@ package com.jftse.emulator;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.net.ConnectionInitializer;
 import com.jftse.server.core.ServerLoop;
+import com.jftse.server.core.StartupBanner;
 import com.jftse.server.core.YamlPropertySourceFactory;
 import com.jftse.server.core.protocol.PacketAutoRegister;
 import com.jftse.server.core.shared.ServerConfService;
@@ -83,16 +84,7 @@ public class GameServerStart implements CommandLineRunner {
             if (cf.isSuccess()) {
                 serverLoop.start();
 
-                log.info("""
-                        
-                        *************************************
-                        * game-server successfully started! *
-                        * Port: {}                        *
-                        * Transport: {}                    *
-                        *************************************""",
-                        port,
-                        useEpoll ? "Epoll" : "NIO");
-
+                StartupBanner.print(log, "game-server", port, useEpoll);
             } else {
                 log.error("Failed to start game-server: {}", cf.cause().getMessage(), cf.cause());
             }

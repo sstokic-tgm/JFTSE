@@ -3,6 +3,7 @@ package com.jftse.emulator;
 import com.jftse.emulator.server.core.manager.RelayManager;
 import com.jftse.emulator.server.net.ConnectionInitializer;
 import com.jftse.server.core.ServerLoop;
+import com.jftse.server.core.StartupBanner;
 import com.jftse.server.core.YamlPropertySourceFactory;
 import com.jftse.server.core.protocol.PacketAutoRegister;
 import com.jftse.server.core.shared.ServerConfService;
@@ -82,15 +83,7 @@ public class RelayServerStart implements CommandLineRunner {
             if (cf.isSuccess()) {
                 serverLoop.start();
 
-                log.info("""
-                        
-                        **************************************
-                        * relay-server successfully started! *
-                        * Port: {}                         *
-                        * Transport: {}                     *
-                        **************************************""",
-                        port,
-                        useEpoll ? "Epoll" : "NIO");
+                StartupBanner.print(log, "relay-server", port, useEpoll);
             } else {
                 log.error("Failed to start relay-server: {}", cf.cause().getMessage(), cf.cause());
             }
