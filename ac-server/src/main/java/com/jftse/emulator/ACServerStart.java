@@ -7,6 +7,10 @@ import com.jftse.server.core.protocol.PacketAutoRegister;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.ServerChannel;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.log4j.Log4j2;
@@ -45,12 +49,15 @@ public class ACServerStart implements CommandLineRunner {
     public void run(String... args) throws Exception {
         PacketAutoRegister.registerAll();
 
-        bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup(2);
+        final boolean useEpoll = Epoll.isAvailable();
+        bossGroup = useEpoll ? new EpollEventLoopGroup(1) : new NioEventLoopGroup(1);
+        workerGroup = useEpoll ? new EpollEventLoopGroup(2) : new NioEventLoopGroup(2);
+
+        Class<? extends ServerChannel> serverChannelClass = useEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(serverChannelClass)
                 .option(ChannelOption.SO_BACKLOG, 300)
                 .childHandler(new ConnectionInitializer())
                 .childOption(ChannelOption.TCP_NODELAY, true)
@@ -59,13 +66,18 @@ public class ACServerStart implements CommandLineRunner {
                 .childOption(ChannelOption.SO_RCVBUF, 16384)
                 .childOption(ChannelOption.SO_SNDBUF, 16384);
 
-        b.bind(configService.getValue("anticheat.port", 1337)).addListener(cf -> {
+        final int port = configService.getValue("anticheat.port", 1337);
+        b.bind(port).addListener(cf -> {
             if (cf.isSuccess()) {
                 log.info("""
                         
                         *************************************
-                        * ac-server successfully started! *
-                        *************************************""");
+                        * ac-server successfully started!   *
+                        * Port: {}                        *
+                        * Transport: {}                    *
+                        *************************************""",
+                        port,
+                        useEpoll ? "Epoll" : "NIO");
             } else {
                 log.error("Failed to start ac-server: {}", cf.cause().getMessage(), cf.cause());
             }
