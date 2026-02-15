@@ -4,6 +4,7 @@
         <Property name="LOG_DIR">./logs</Property>
         <Property name="PATTERN">%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable</Property>
         <Property name="MAX_SIZE">1GB</Property>
+        <Property name="PACKET_MAX_SIZE">128MB</Property>
         <Property name="KEEP_DAYS">7d</Property>
     </Properties>
 
@@ -14,7 +15,7 @@
 
         <RollingRandomAccessFile name="ServerFile"
                                  fileName="${LOG_DIR}/auth-server.log"
-                                 filePattern="${LOG_DIR}/auth-server-%d{yyyy-MM-dd}-%i.log.gz">
+                                 filePattern="${LOG_DIR}/auth-server-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="${PATTERN}"/>
 
             <Policies>
@@ -24,7 +25,7 @@
 
             <DefaultRolloverStrategy fileIndex="min" max="5">
                 <Delete basePath="${LOG_DIR}" maxDepth="1">
-                    <IfFileName glob="auth-server-*.log.gz"/>
+                    <IfFileName glob="auth-server-*.log"/>
                     <IfLastModified age="${KEEP_DAYS}"/>
                 </Delete>
             </DefaultRolloverStrategy>
@@ -32,17 +33,17 @@
 
         <RollingRandomAccessFile name="PacketsFile"
                                  fileName="${LOG_DIR}/packets.log"
-                                 filePattern="${LOG_DIR}/packets-%d{yyyy-MM-dd}-%i.log.gz">
+                                 filePattern="${LOG_DIR}/packets-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="${PATTERN}"/>
 
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="${MAX_SIZE}"/>
+                <SizeBasedTriggeringPolicy size="${PACKET_MAX_SIZE}"/>
             </Policies>
 
             <DefaultRolloverStrategy fileIndex="min" max="5">
                 <Delete basePath="${LOG_DIR}" maxDepth="1">
-                    <IfFileName glob="packets-*.log.gz"/>
+                    <IfFileName glob="packets-*.log"/>
                     <IfLastModified age="${KEEP_DAYS}"/>
                 </Delete>
             </DefaultRolloverStrategy>
