@@ -21,7 +21,7 @@
 
         <protobuf.version>3.19.1</protobuf.version>
         <protobuf-plugin.version>0.6.1</protobuf-plugin.version>
-        <grpc.version>1.54.0</grpc.version>
+        <grpc.version>1.79.0</grpc.version>
     </properties>
 
     <dependencies>
