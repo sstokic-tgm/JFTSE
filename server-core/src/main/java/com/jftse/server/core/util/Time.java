@@ -3,6 +3,9 @@ package com.jftse.server.core.util;
 public final class Time {
     private static final long serverStartTime;
 
+    // difference between Unix epoch and Windows FILETIME epoch in milliseconds
+    public static final long FILETIME_EPOCH_DIFFERENCE_MS = 11644473600000L;
+
     static {
         serverStartTime = System.currentTimeMillis();
     }
@@ -48,5 +51,9 @@ public final class Time {
         long minutes = (uptime % 3600) / 60;
         long seconds = uptime % 60;
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    public static long toFileTimeUTC(long timeMs) {
+        return (timeMs + FILETIME_EPOCH_DIFFERENCE_MS) * 10_000; // convert to 100-nanosecond intervals
     }
 }

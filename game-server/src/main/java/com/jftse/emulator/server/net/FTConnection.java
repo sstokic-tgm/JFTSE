@@ -7,6 +7,7 @@ import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.MetricsService;
+import com.jftse.server.core.shared.packets.SMSGTimeSyncRequest;
 import com.jftse.server.core.shared.packets.enchant.CMSGEnchantRequest;
 import com.jftse.server.core.shared.packets.gacha.CMSGOpenGacha;
 import com.jftse.server.core.shared.packets.game.CMSGLoginData;
@@ -27,6 +28,8 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
@@ -59,6 +62,9 @@ public class FTConnection extends Connection<FTClient> {
             CMSGPlaceHomeItems.PACKET_ID,
             CMSGClearHomeItems.PACKET_ID
     );
+
+    private ScheduledFuture<?> timeSyncTask;
+    private long lastTimeSyncSent = 0L;
 
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         super(decryptionKey, encryptionKey, serverType);
@@ -114,5 +120,24 @@ public class FTConnection extends Connection<FTClient> {
 
         // track avg per packet id
         metrics.average("packet_process_time." + Integer.toHexString(packet.getPacketId()), updateTime, ServerType.GAME_SERVER);
+    }
+
+    public void timeSync() {
+        final long nowMs = System.currentTimeMillis();
+        SMSGTimeSyncRequest timeSyncPacket = SMSGTimeSyncRequest.builder().currentTime(Time.toFileTimeUTC(nowMs)).build();
+        sendTCP(timeSyncPacket).addListener(future -> {
+            if (future.isSuccess()) {
+                lastTimeSyncSent = nowMs;
+                nextTimeSync();
+            }
+        });
+    }
+
+    public void nextTimeSync() {
+        if (timeSyncTask != null && !timeSyncTask.isDone()) {
+            return;
+        }
+
+        timeSyncTask = ThreadManager.getInstance().schedule(this::timeSync, 15, TimeUnit.SECONDS);
     }
 }

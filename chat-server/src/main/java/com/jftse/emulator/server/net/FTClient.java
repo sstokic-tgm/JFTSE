@@ -77,6 +77,10 @@ public class FTClient extends Client<FTConnection> {
                 .build();
         connection.sendTCP(response);
 
+        if (valid && step == 4) {
+            connection.timeSync();
+        }
+
         /*
         if (valid && dataRequestStep.get() == 4) {
             GameManager.getInstance().handleChatLobbyJoin(this);
