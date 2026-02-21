@@ -7,7 +7,7 @@ import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.MetricsService;
-import com.jftse.server.core.shared.packets.SMSGTimeSyncRequest;
+import com.jftse.server.core.shared.packets.SMSGServerTimeSync;
 import com.jftse.server.core.shared.packets.enchant.CMSGEnchantRequest;
 import com.jftse.server.core.shared.packets.gacha.CMSGOpenGacha;
 import com.jftse.server.core.shared.packets.game.CMSGLoginData;
@@ -124,7 +124,7 @@ public class FTConnection extends Connection<FTClient> {
 
     public void timeSync() {
         final long nowMs = System.currentTimeMillis();
-        SMSGTimeSyncRequest timeSyncPacket = SMSGTimeSyncRequest.builder().currentTime(Time.toFileTimeUTC(nowMs)).build();
+        SMSGServerTimeSync timeSyncPacket = SMSGServerTimeSync.builder().currentTime(Time.toFileTimeUTC(nowMs)).build();
         sendTCP(timeSyncPacket).addListener(future -> {
             if (future.isSuccess()) {
                 lastTimeSyncSent = nowMs;
@@ -138,6 +138,6 @@ public class FTConnection extends Connection<FTClient> {
             return;
         }
 
-        timeSyncTask = ThreadManager.getInstance().schedule(this::timeSync, 15, TimeUnit.SECONDS);
+        timeSyncTask = ThreadManager.getInstance().schedule(this::timeSync, 30, TimeUnit.SECONDS);
     }
 }

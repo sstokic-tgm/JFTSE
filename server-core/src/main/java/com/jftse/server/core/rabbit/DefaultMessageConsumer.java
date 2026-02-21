@@ -2,6 +2,7 @@ package com.jftse.server.core.rabbit;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jftse.server.core.util.Time;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -58,7 +59,7 @@ public class DefaultMessageConsumer {
 
     @RabbitListener(queues = "${jftse.rabbitmq.queue}")
     public void receiveMessage(AbstractBaseMessage message) {
-        final long start = System.currentTimeMillis();
+        final long start = Time.getNSTime();
 
         log.debug("[{}] Message received from {}: type={}",
                 message.getCorrelationId(),
@@ -80,9 +81,9 @@ public class DefaultMessageConsumer {
                     message.getMessageType());
         }
 
-        final long duration = System.currentTimeMillis() - start;
+        final long duration = Time.getNSTimeDiffToNow(start);
         log.debug("[{}] Message processed in {} ms",
                 message.getCorrelationId(),
-                duration);
+                Time.nanoToMillis(duration));
     }
 }

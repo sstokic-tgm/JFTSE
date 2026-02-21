@@ -1,3 +1,0 @@
-message SMSG_TimeSyncRequest (0x1452) {
-    uint64 currentTime = 1;
-}

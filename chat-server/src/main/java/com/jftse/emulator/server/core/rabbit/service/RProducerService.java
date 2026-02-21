@@ -4,6 +4,7 @@ import com.jftse.emulator.common.utilities.RandomUtils;
 import com.jftse.emulator.server.rabbit.RabbitMQConfig;
 import com.jftse.server.core.rabbit.AbstractBaseMessage;
 import com.jftse.server.core.thread.ThreadManager;
+import com.jftse.server.core.util.Time;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -42,7 +43,7 @@ public class RProducerService {
             message.setCorrelationId(RandomUtils.getUUID());
             message.setSender(sender);
             try {
-                final long start = System.currentTimeMillis();
+                final long start = Time.getNSTime();
 
                 log.debug("[{}] Sending message to {}: type={}, sender={}",
                         message.getCorrelationId(),
@@ -52,10 +53,10 @@ public class RProducerService {
 
                 rabbitTemplate.convertAndSend(rabbitMQConfig.getExchangeName(), key, message);
 
-                final long duration = System.currentTimeMillis() - start;
+                final long duration = Time.getNSTimeDiffToNow(start);
                 log.debug("[{}] Message sent in {} ms",
                         message.getCorrelationId(),
-                        duration);
+                        Time.nanoToMillis(duration));
 
             } catch (AmqpException ae) {
                 log.error("[{}] Failed to send message: {}",

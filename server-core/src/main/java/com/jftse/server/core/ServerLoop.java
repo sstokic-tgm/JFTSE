@@ -126,6 +126,8 @@ public class ServerLoop implements ServerLoopMetrics {
         }
 
         if (running.compareAndSet(false, true)) {
+            Time.resetServerStartTime(); // just in case, since start() is called at the very end of server initialization (bean creation, wiring, etc.)
+
             this.minUpdateDiff = confService.get("MinServerUpdateTime", Integer.class);
             this.maxCoreStuckTime = confService.get("MaxCoreStuckTime", Integer.class) * 1000; // convert to milliseconds
 
