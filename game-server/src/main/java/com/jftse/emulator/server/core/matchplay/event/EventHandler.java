@@ -90,7 +90,6 @@ public class EventHandler {
 
             if (fireable.shouldFire(now)) {
                 fireable.fire();
-                log.info("Fired fireable: {}", fireable.getClass().getSimpleName());
             } else {
                 fireableDeque.offer(fireable);
             }

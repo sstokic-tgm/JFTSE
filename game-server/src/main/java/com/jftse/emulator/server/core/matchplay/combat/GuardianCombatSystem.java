@@ -249,7 +249,6 @@ public class GuardianCombatSystem implements GuardianCombatable {
     public short updateHealthByDamage(GuardianBattleState targetGuardian, int dmg) {
         int currentHealth = targetGuardian.getCurrentHealth().get();
         currentHealth = Math.max(currentHealth, 0);
-        log.debug("updateHealthByDamage(GuardianBattleState targetGuardian, int dmg): " + currentHealth + ", " + dmg);
         short newGuardianHealth = (short) (currentHealth + dmg);
         newGuardianHealth = newGuardianHealth < 0 ? 0 : newGuardianHealth;
 
@@ -263,7 +262,6 @@ public class GuardianCombatSystem implements GuardianCombatable {
     public short updateHealthByDamage(PlayerBattleState targetPlayer, int dmg) {
         int currentHealth = targetPlayer.getCurrentHealth().get();
         currentHealth = Math.max(currentHealth, 0);
-        log.debug("updateHealthByDamage(PlayerBattleState targetPlayer, int dmg): " + currentHealth + ", " + dmg);
         short newPlayerHealth = (short) (currentHealth + dmg);
         if (newPlayerHealth < 1) {
             targetPlayer.setDead(true);
