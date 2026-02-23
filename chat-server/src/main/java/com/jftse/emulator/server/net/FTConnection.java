@@ -104,6 +104,10 @@ public class FTConnection extends Connection<FTClient> {
             processedPackets++;
         }
 
+        if (getIsClosingConnection().get() && timeSyncTask != null) {
+            timeSyncTask.cancel(false);
+        }
+
         return !getIsClosingConnection().get();
     }
 
