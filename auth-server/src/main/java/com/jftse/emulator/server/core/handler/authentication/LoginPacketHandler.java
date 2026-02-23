@@ -1,5 +1,6 @@
 package com.jftse.emulator.server.core.handler.authentication;
 
+import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.manager.AuthenticationManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
@@ -38,12 +39,14 @@ public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin
     private final AuthTokenService authTokenService;
     private final PlayerService playerService;
     private final JdbcUtil jdbcUtil;
+    private final ConfigService configService;
 
     public LoginPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
         playerService = ServiceManager.getInstance().getPlayerService();
         jdbcUtil = AuthenticationManager.getInstance().getJdbcUtil();
+        configService = ServiceManager.getInstance().getConfigService();
     }
 
     @Override
@@ -66,6 +69,25 @@ public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin
                     .build();
             connection.sendTCP(loginAnswer);
             return;
+        }
+
+        if (antiCheatEnabled) {
+            if (loginPacket.remaining() >= 4) {
+                int ver = loginPacket.read(Integer.class);
+                if (ver != configService.getValue("anticheat.version", 0)) {
+                    SMSGLogin loginAnswer = SMSGLogin.builder()
+                            .result(AuthenticationServiceImpl.INVAILD_VERSION)
+                            .build();
+                    connection.sendTCP(loginAnswer);
+                    return;
+                }
+            } else {
+                SMSGLogin loginAnswer = SMSGLogin.builder()
+                        .result(AuthenticationServiceImpl.INVAILD_VERSION)
+                        .build();
+                connection.sendTCP(loginAnswer);
+                return;
+            }
         }
 
         Account account = authenticationService.findAccountByUsername(loginPacket.getUsername());
