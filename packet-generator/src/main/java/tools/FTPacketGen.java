@@ -332,6 +332,7 @@ public class FTPacketGen {
         out.println("    @Override public char getPacketId() { return this.metaData.packetId; }");
         out.println("    @Override public char getCheckSerial() { return this.metaData.checkSerial; }");
         out.println("    @Override public char getCheckSum() { return this.metaData.checkSum; }");
+        out.println("    public int remaining() { return this.data.length - this.readPos; }");
         out.println();
         if (isClientMessage) {
             out.println("    public <T> T read(Class<T> type) {");

@@ -63,6 +63,8 @@ public class FTConnection extends Connection<FTClient> {
 
     private ScheduledFuture<?> timeSyncTask;
     private long lastTimeSyncSent = 0L;
+    private long lastTimeSyncRecv = 0L;
+    private long lastSteadyClockMs = 0L;
 
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         super(decryptionKey, encryptionKey, serverType);
