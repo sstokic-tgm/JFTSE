@@ -77,7 +77,7 @@ public class AuthServerStart implements CommandLineRunner {
                 .childOption(ChannelOption.SO_KEEPALIVE, false)
                 .childOption(ChannelOption.SO_RCVBUF, 256 * 1024) // 256 KB
                 .childOption(ChannelOption.SO_SNDBUF, 512 * 1024) // 512 KB
-                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(32 * 1024, 512 * 1024)); // 32 KB low, 512 KB high
+                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(32 * 1024, 128 * 1024)); // 32 KB low, 128 KB high
 
         final int port = serverConfService.get("ServerPort", Integer.class);
         b.bind(port).addListener(cf -> {

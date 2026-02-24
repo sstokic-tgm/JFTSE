@@ -128,6 +128,15 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
     }
 
     /**
+     * Checks if the underlying Netty channel is currently writable (i.e. its write buffer is not full).
+     *
+     * @return {@code true} if the channel is writable, {@code false} if the channel is not writable or the context is not set
+     */
+    public boolean isWritable() {
+        return ctx != null && ctx.channel().isWritable();
+    }
+
+    /**
      * Marks this connection as wanting to close.
      * <p>
      * This does not forcibly close the Netty channel by itself; it is a cooperative signal for
@@ -215,10 +224,31 @@ public abstract class Connection<T extends Client<? extends Connection<T>>> {
      * @throws IllegalArgumentException if {@code packets} is {@code null} or empty
      */
     public ChannelFuture sendTCP(IPacket... packets) {
+        if (ctx == null)
+            throw new IllegalStateException("ChannelHandlerContext is not set for this connection.");
+
         if (packets == null || packets.length == 0)
             throw new IllegalArgumentException("Packet cannot be null.");
 
+        if (!ctx.channel().isActive())
+            return ctx.newSucceededFuture(); // channel is not active, but we don't want to throw an exception if caller is depended on the future
+
+        if (!isWritable()) {
+            backPressure(packets);
+            return ctx.newSucceededFuture(); // we return a succeeded future here to avoid exceptions if caller decides to depend on the future
+        }
+
         IPacket toSend = new CompositePacket(packets);
         return ctx.writeAndFlush(toSend);
+    }
+
+    /**
+     * Invoked when the channel's write buffer is full and cannot accept more data.
+     * Concrete implementations can override this method to handle back-pressure situations (e.g. by dropping packets, queuing for later or initiating connection close).
+     *
+     * @param packets the packets that were attempted to be sent when back-pressure was detected
+     */
+    protected void backPressure(IPacket... packets) {
+        // silently drop packets by default; override to implement custom behavior
     }
 }
