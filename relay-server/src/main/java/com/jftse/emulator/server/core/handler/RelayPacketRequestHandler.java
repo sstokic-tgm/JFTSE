@@ -10,10 +10,12 @@ import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.PacketRegistry;
 import com.jftse.server.core.shared.packets.CMSGDefault;
 import com.jftse.server.core.shared.packets.relay.CMSGRelay;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
 @PacketId(CMSGRelay.PACKET_ID)
+@Log4j2
 public class RelayPacketRequestHandler implements PacketHandler<FTConnection, CMSGRelay> {
     @Override
     public void handle(FTConnection connection, CMSGRelay relay) {
@@ -30,6 +32,8 @@ public class RelayPacketRequestHandler implements PacketHandler<FTConnection, CM
                     if (c.getConnection() != null)
                         c.getConnection().sendTCP(defaultPacket);
                 });
+
+                log.warn("Unknown packet id: 0x{} ({})", Integer.toHexString(defaultPacket.getPacketId()), (int) defaultPacket.getPacketId());
             } else {
                 // just queue the packet for processing since we know about it
                 connection.queuePacket(relayPacket);

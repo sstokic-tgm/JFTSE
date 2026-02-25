@@ -7,6 +7,7 @@ import com.jftse.server.core.net.Connection;
 import com.jftse.server.core.protocol.*;
 import com.jftse.server.core.shared.MetricsService;
 import com.jftse.server.core.util.Time;
+import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -30,6 +31,10 @@ public class FTConnection extends Connection<FTClient> {
     public FTConnection(final int decryptionKey, final int encryptionKey, final ServerType serverType) {
         super(decryptionKey, encryptionKey, serverType);
         this.metrics = RelayManager.getInstance().getMetricsService();
+    }
+
+    public ChannelHandlerContext getChannelHandlerContext() {
+        return this.ctx;
     }
 
     public void queuePacket(IPacket packet) {

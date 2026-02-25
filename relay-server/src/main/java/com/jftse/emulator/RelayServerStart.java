@@ -75,7 +75,7 @@ public class RelayServerStart implements CommandLineRunner {
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .childHandler(new ConnectionInitializer())
                 .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, false)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.SO_RCVBUF, 256 * 1024) // 256 KB
                 .childOption(ChannelOption.SO_SNDBUF, 512 * 1024) // 512 KB
                 .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(64 * 1024, 256 * 1024)); // 64 KB low, 256 KB high

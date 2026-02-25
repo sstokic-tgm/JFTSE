@@ -15,15 +15,20 @@ public class RegisterPlayerForSessionHandler implements PacketHandler<FTConnecti
     @Override
     public void handle(FTConnection connection, CMSGPlayerJoinSession matchplayPlayerIdsInSessionPacket) {
         int playerId = matchplayPlayerIdsInSessionPacket.getPlayerIds().stream().findFirst().orElse(-1);
+        boolean isSpectator = matchplayPlayerIdsInSessionPacket.getIsSpectator();
         int sessionId = matchplayPlayerIdsInSessionPacket.getSessionId();
 
         SMSGPlayerJoinSessionResult.Builder sessionResultBuilder = new SMSGPlayerJoinSessionResult.Builder();
 
         if (playerId != -1) {
+            if (isSpectator) {
+                connection.getChannelHandlerContext().pipeline().remove("readTimeoutHandler");
+            }
+
             FTClient client = connection.getClient();
             client.setGameSessionId(sessionId);
 
-            log.info("playerId " + playerId + " connected for session: " + sessionId);
+            log.info("playerId {} connected for session: {}", playerId, sessionId);
 
             RelayManager.getInstance().addClientToSession(sessionId, client);
 
