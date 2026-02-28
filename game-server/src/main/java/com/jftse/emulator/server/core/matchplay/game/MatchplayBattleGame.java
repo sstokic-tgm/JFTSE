@@ -251,6 +251,7 @@ public class MatchplayBattleGame extends MatchplayGame {
                     }
                 }
 
+                qty = Math.max(qty, 1); // ensure at least 1 item is rewarded
                 itemRewards.add(new MatchplayReward.ItemReward(product.getProductIndex(), qty, weight));
             }
         }

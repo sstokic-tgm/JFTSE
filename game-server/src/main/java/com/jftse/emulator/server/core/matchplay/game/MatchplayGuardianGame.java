@@ -596,6 +596,7 @@ public class MatchplayGuardianGame extends MatchplayGame {
                     qty = qty / 2;
                 }
 
+                qty = Math.max(qty, 1); // ensure at least 1 item is rewarded
                 itemRewards.add(new MatchplayReward.ItemReward(product.getProductIndex(), qty, weight));
             }
         }
