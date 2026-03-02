@@ -2,7 +2,7 @@
 <Configuration>
     <Properties>
         <Property name="LOG_DIR">./logs</Property>
-        <Property name="PATTERN">%d{HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable</Property>
+        <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss,SSS} [%t] %c{1} [%M] %-5p %msg%n%throwable</Property>
         <Property name="MAX_SIZE">1GB</Property>
         <Property name="PACKET_MAX_SIZE">128MB</Property>
         <Property name="KEEP_DAYS">7d</Property>
