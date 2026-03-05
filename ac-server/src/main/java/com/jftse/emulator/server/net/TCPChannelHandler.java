@@ -90,8 +90,8 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
                 clientWhitelist.setIsActive(false);
                 clientWhitelist = clientWhitelistService.save(clientWhitelist);
             }
-            ACManager.getInstance().removeClient(client);
         }, 100, TimeUnit.MILLISECONDS);
+        ACManager.getInstance().removeClient(client);
     }
 
     @Override
