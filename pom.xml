@@ -34,7 +34,6 @@
 
     <modules>
         <module>entities</module>
-        <module>b2b-webservice</module>
         <module>auth-server</module>
         <module>commons</module>
         <module>server-core</module>
