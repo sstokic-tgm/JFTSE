@@ -47,6 +47,7 @@ public class ScriptContextHelper {
         this.scriptId = StringUtils.isEmpty(scriptFile.getSubType())
                 ? String.format("%s:%s:%s", type, id, scriptFile.getName())
                 : String.format("%s-%s:%s:%s", type, scriptFile.getSubType().toLowerCase(), id, scriptFile.getName());
+        log.debug(scriptId);
     }
 
     /**

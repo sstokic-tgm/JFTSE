@@ -1,6 +1,6 @@
 package com.jftse.emulator.server.core.manager;
 
-import com.jftse.emulator.common.scripting.ScriptManager;
+import com.jftse.emulator.common.scripting.ScriptManagerV2;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.common.utilities.StringUtils;
@@ -39,6 +39,8 @@ import com.jftse.server.core.util.IntervalTimer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +58,8 @@ import java.util.stream.IntStream;
 @Log4j2
 public class GameManager implements ServerLoopHandler {
     private static GameManager instance;
+
+    private static final Logger scriptLogger = LogManager.getLogger("ScriptLogger");
 
     @Autowired
     private ServiceManager serviceManager;
@@ -78,7 +82,7 @@ public class GameManager implements ServerLoopHandler {
 
     private ConcurrentHashMap<Integer, String> personalBoardMessages;
 
-    private Optional<ScriptManager> scriptManager;
+    private Optional<ScriptManagerV2> scriptManager;
 
     private Random rnd;
 
@@ -104,7 +108,7 @@ public class GameManager implements ServerLoopHandler {
         personalBoardMessages = new ConcurrentHashMap<>();
         addConnectionQueue = new ConcurrentLinkedQueue<>();
 
-        scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
+        scriptManager = ScriptManagerFactory.loadScriptsV2("scripts", () -> scriptLogger);
 
         setupChatLobby();
 

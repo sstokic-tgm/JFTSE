@@ -1,7 +1,7 @@
 package com.jftse.emulator.server.core.command;
 
 import com.jftse.emulator.common.scripting.ScriptFile;
-import com.jftse.emulator.common.scripting.ScriptManager;
+import com.jftse.emulator.common.scripting.ScriptManagerV2;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.command.commands.gm.*;
 import com.jftse.emulator.server.core.command.commands.player.*;
@@ -18,8 +18,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.script.Bindings;
-import javax.script.ScriptContext;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -139,9 +137,9 @@ public class CommandManager {
     }
 
     private void registerScriptFileCommands() {
-        Optional<ScriptManager> scriptManager = GameManager.getInstance().getScriptManager();
+        Optional<ScriptManagerV2> scriptManager = GameManager.getInstance().getScriptManager();
         if (scriptManager.isPresent()) {
-            ScriptManager sm = scriptManager.get();
+            ScriptManagerV2 sm = scriptManager.get();
             List<ScriptFile> scriptFiles = sm.getScriptFiles("COMMAND");
             for (ScriptFile scriptFile : scriptFiles) {
                 try {
@@ -165,13 +163,16 @@ public class CommandManager {
         GameManager.getInstance().getServiceManager().getCommandLogService().save(commandLog);
     }
 
-    public AbstractCommand getAbstractCommandObj(ScriptFile scriptFile, ScriptManager sm) throws Exception {
-        Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+    public AbstractCommand getAbstractCommandObj(ScriptFile scriptFile, ScriptManagerV2 sm) throws Exception {
+        Map<String, Object> bindings = new HashMap<>();
         bindings.put("gameManager", GameManager.getInstance());
         bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
         bindings.put("commandManager", this);
-        sm.eval(scriptFile, bindings);
 
-        return (AbstractCommand) sm.getScriptEngine().get("impl");
+        AbstractCommand command = sm.getInterfaceByImplementingObject(scriptFile, "impl", AbstractCommand.class, bindings);
+        if (command == null) {
+            throw new Exception("Script does not implement AbstractCommand interface or 'impl' key is missing in script bindings.");
+        }
+        return command;
     }
 }

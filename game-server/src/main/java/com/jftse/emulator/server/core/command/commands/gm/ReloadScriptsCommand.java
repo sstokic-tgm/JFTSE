@@ -1,8 +1,8 @@
 package com.jftse.emulator.server.core.command.commands.gm;
 
 import com.jftse.emulator.common.scripting.ScriptFile;
-import com.jftse.emulator.common.scripting.ScriptManager;
 import com.jftse.emulator.common.scripting.ScriptManagerFactory;
+import com.jftse.emulator.common.scripting.ScriptManagerV2;
 import com.jftse.emulator.server.core.command.AbstractCommand;
 import com.jftse.emulator.server.core.command.CommandManager;
 import com.jftse.emulator.server.core.interaction.PlayerScriptable;
@@ -35,7 +35,7 @@ public class ReloadScriptsCommand extends AbstractCommand {
     public void execute(FTConnection connection, List<String> params) {
         PlayerScriptableImpl playerScriptable = new PlayerScriptableImpl(connection.getClient());
 
-        Optional<ScriptManager> scriptManager = ScriptManagerFactory.loadScripts("scripts", () -> log);
+        Optional<ScriptManagerV2> scriptManager = ScriptManagerFactory.loadScriptsV2("scripts", () -> log);
         boolean valid = false;
         if (scriptManager.isPresent()) {
             gameManager.setScriptManager(scriptManager);
@@ -62,10 +62,10 @@ public class ReloadScriptsCommand extends AbstractCommand {
     }
 
     private boolean registerScriptFileCommands(PlayerScriptable playerScriptable) {
-        Optional<ScriptManager> scriptManager = gameManager.getScriptManager();
+        Optional<ScriptManagerV2> scriptManager = gameManager.getScriptManager();
         boolean hasRegisteredACommand = false;
         if (scriptManager.isPresent()) {
-            ScriptManager sm = scriptManager.get();
+            ScriptManagerV2 sm = scriptManager.get();
             List<ScriptFile> scriptFiles = sm.getScriptFiles("COMMAND");
             playerScriptable.sendChat("Server", "Reloading commands...");
             for (ScriptFile scriptFile : scriptFiles) {

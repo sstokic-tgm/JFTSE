@@ -1,35 +1,47 @@
 package com.jftse.emulator.server.core.life.event;
 
 import com.jftse.emulator.common.scripting.ScriptFile;
-import com.jftse.emulator.common.scripting.ScriptManager;
+import com.jftse.emulator.common.scripting.ScriptManagerV2;
 import com.jftse.emulator.server.core.life.script.ScriptContextHelper;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.server.core.service.ScriptStateService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 @Log4j2
+@AllArgsConstructor
 public class GameEventBus {
+    @Getter
     private static GameEventBus instance;
 
     private static final Logger scriptLogger = LogManager.getLogger("ScriptLogger");
 
-    private static final Map<GameEventType, List<GameEventCallback>> eventListeners = new HashMap<>();
+    private static final Map<GameEventType, CopyOnWriteArrayList<GameEventCallback>> eventListeners = new ConcurrentHashMap<>();
+    private static final Map<GameEventType, ReentrantLock> eventLocks = new ConcurrentHashMap<>();
+    private static final ReentrantReadWriteLock lifecycleLock = new ReentrantReadWriteLock();
 
-    @Autowired
-    private ScriptStateService scriptStateService;
+    @Getter
+    private final ScriptStateService scriptStateService;
 
     @PostConstruct
     public void init() {
+        instance = this;
+
         log.info("Loading events...");
         registerEvents();
         log.info("Game events has been loaded.");
@@ -37,41 +49,55 @@ public class GameEventBus {
         log.info(this.getClass().getSimpleName() + " initialized");
     }
 
-    public static GameEventBus getInstance() {
-        if (instance == null) {
-            instance = new GameEventBus();
-        }
-        return instance;
-    }
-
     public void on(String eventType, GameEventCallback listener) {
         GameEventType type = GameEventType.valueOf(eventType.toUpperCase());
-        eventListeners.computeIfAbsent(type, k -> new ArrayList<>()).add(listener);
+        eventListeners.computeIfAbsent(type, k -> new CopyOnWriteArrayList<>()).add(listener);
+        eventLocks.computeIfAbsent(type, k -> new ReentrantLock());
         log.info("Registered event for {}", type.getName());
     }
 
     public static void call(GameEventType eventType, Object... args) {
-        final List<GameEventCallback> list = eventListeners.getOrDefault(eventType, List.of());
-        for (GameEventCallback callback : list) {
+        lifecycleLock.readLock().lock();
+        try {
+            ReentrantLock lock = eventLocks.computeIfAbsent(eventType, k -> new ReentrantLock());
+            lock.lock();
             try {
-                callback.onEvent(args);
-            } catch (Exception e) {
-                log.error("[{}] Error while processing event: {}", eventType.getName(), e.getMessage(), e);
+                List<GameEventCallback> listeners = eventListeners.get(eventType);
+                if (listeners == null || listeners.isEmpty()) {
+                    return;
+                }
+
+                for (GameEventCallback listener : listeners) {
+                    try {
+                        listener.onEvent(args);
+                    } catch (Exception e) {
+                        log.error("Error while executing event: {}. Exception: {}", eventType.getName(), e.getMessage(), e);
+                    }
+                }
+            } finally {
+                lock.unlock();
             }
+        } finally {
+            lifecycleLock.readLock().unlock();
         }
     }
 
+    public void call(String eventType, Object... args) {
+        GameEventType type = GameEventType.valueOf(eventType.toUpperCase());
+        call(type, args);
+    }
+
     private boolean registerEvents() {
-        Optional<ScriptManager> scriptManager = GameManager.getInstance().getScriptManager();
+        Optional<ScriptManagerV2> scriptManager = GameManager.getInstance().getScriptManager();
         boolean isError = false;
         if (scriptManager.isPresent()) {
-            ScriptManager sm = scriptManager.get();
+            ScriptManagerV2 sm = scriptManager.get();
             List<ScriptFile> scriptFiles = sm.getScriptFiles("EVENT");
 
             int count = 0;
             for (ScriptFile scriptFile : scriptFiles) {
                 try {
-                    Bindings bindings = sm.getScriptEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+                    Map<String, Object> bindings = new HashMap<>();
                     bindings.put("gameManager", GameManager.getInstance());
                     bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
                     bindings.put("threadManager", GameManager.getInstance().getThreadManager());
@@ -95,9 +121,14 @@ public class GameEventBus {
     }
 
     public boolean reloadEvents() {
-        eventListeners.clear();
-        boolean result = registerEvents();
-        log.info("Game events reloaded.");
-        return result;
+        lifecycleLock.writeLock().lock();
+        try {
+            eventListeners.clear();
+            boolean result = registerEvents();
+            log.info("Game events reloaded.");
+            return result;
+        } finally {
+            lifecycleLock.writeLock().unlock();
+        }
     }
 }
