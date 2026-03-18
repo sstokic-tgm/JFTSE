@@ -129,6 +129,11 @@ public class GameManager implements ServerLoopHandler {
         log.info("Closing all connections");
 
         for (FTClient client : clients) {
+            ScheduledFuture<?> sf = client.getConnection().getTimeSyncTask();
+            if (sf != null) {
+                sf.cancel(true);
+            }
+
             client.getConnection().close();
         }
 
