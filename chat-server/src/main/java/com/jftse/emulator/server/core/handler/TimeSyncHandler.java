@@ -4,11 +4,13 @@ import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.CMSGServerTimeSync;
-import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Log4j2
 @PacketId(CMSGServerTimeSync.PACKET_ID)
 public class TimeSyncHandler implements PacketHandler<FTConnection, CMSGServerTimeSync> {
+    private static final Logger log = LogManager.getLogger("TimeSyncLogger");
+
     private static final long DIV = 20_000L;
     private static final long MAX_ABS_MS = 60_000L;
     private static final long MAX_REASONABLE_UNITS = MAX_ABS_MS / 2L;

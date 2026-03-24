@@ -10,16 +10,15 @@ import java.util.List;
 
 public class S2COpenGachaAnswerPacket extends Packet {
 
-    public S2COpenGachaAnswerPacket(List<PlayerPocket> playerPocketList) {
+    public S2COpenGachaAnswerPacket(int status, List<PlayerPocket> playerPocketList) {
         super(PacketOperations.S2COpenGachaAnswer);
 
-        this.write((byte) 0); // status
+        this.write((byte) status); // status
         this.write((byte) 1); // unknown
 
         this.write((char) playerPocketList.size());
 
         for (PlayerPocket playerPocket : playerPocketList) {
-
             this.write((int) playerPocket.getId().longValue());
             this.write(EItemCategory.valueOf(playerPocket.getCategory()).getValue());
             this.write(playerPocket.getItemIndex());
@@ -27,13 +26,13 @@ public class S2COpenGachaAnswerPacket extends Packet {
             this.write(playerPocket.getItemCount());
             this.write(playerPocket.getCreated());
 
-            this.write((byte) 0); // enchant str
-            this.write((byte) 0); // enchant sta
-            this.write((byte) 0); // enchant dex
-            this.write((byte) 0); // enchant wil
-            // ??
-            this.write((byte) 0);
-            this.write((byte) 0);
+            this.write(playerPocket.getEnchantStr().byteValue()); // enchant str
+            this.write(playerPocket.getEnchantSta().byteValue()); // enchant sta
+            this.write(playerPocket.getEnchantDex().byteValue()); // enchant dex
+            this.write(playerPocket.getEnchantWil().byteValue()); // enchant wil
+
+            this.write(playerPocket.getEnchantElement().byteValue()); // enchant element type 5=earth, 6=wind, 7=water, 8=fire
+            this.write(playerPocket.getEnchantLevel().byteValue()); // enchant element level
         }
     }
 }

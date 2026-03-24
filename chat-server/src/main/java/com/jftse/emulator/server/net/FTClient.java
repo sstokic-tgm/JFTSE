@@ -45,6 +45,7 @@ public class FTClient extends Client<FTConnection> {
     private volatile int lobbyGameModeTabFilter = GameMode.ALL;
     private volatile int lobbyCurrentPlayerListPage = 1;
     private volatile int lobbyCurrentRoomListPage = -1;
+    private volatile int highestLoadedGuildLeaguePage = 0;
 
     private volatile boolean usingGachaMachine = false;
 

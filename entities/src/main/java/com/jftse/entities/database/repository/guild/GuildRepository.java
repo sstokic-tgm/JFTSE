@@ -17,6 +17,8 @@ public interface GuildRepository extends JpaRepository<Guild, Long> {
     @Query("SELECT g.id FROM Guild g WHERE g.id > :id ORDER BY g.id ASC")
     List<Long> findIdsByIdGreaterThanOrderByIdAsc(Long id, Pageable pageable);
 
+    List<Guild> findAllByOrderByLeaguePointsDescIdAsc(Pageable pageable);
+
     @Query("""
               SELECT DISTINCT g
               FROM Guild g

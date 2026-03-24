@@ -86,16 +86,7 @@ public class PlayerPocketServiceImpl implements PlayerPocketService {
     }
 
     private PlayerPocket getPlayerPocketAndHandleDuplicates(List<PlayerPocket> playerPocketList) {
-        PlayerPocket playerPocket = null;
-        if (playerPocketList.size() >= 1) {
-            playerPocket = playerPocketList.getFirst();
-
-            for (int i = 1; i < playerPocketList.size(); i++) {
-                if (playerPocketList.get(i).getCategory().equals(EItemCategory.PARTS.getName()))
-                    playerPocketRepository.deleteById(playerPocketList.get(i).getId());
-            }
-        }
-        return playerPocket;
+        return playerPocketList.isEmpty() ? null : playerPocketList.getFirst();
     }
 
     @Override

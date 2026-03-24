@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.rpc.GrpcAuthService;
+import com.jftse.emulator.server.core.service.LotteryServiceV2;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.service.*;
@@ -80,7 +81,7 @@ public class ServiceManager {
     @Autowired
     private TutorialService tutorialService;
     @Autowired
-    private LotteryService lotteryService;
+    private LotteryServiceV2 lotteryServiceV2;
     @Autowired
     private LevelService levelService;
     @Autowired

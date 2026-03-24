@@ -70,6 +70,9 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="ServerFile"/>
         </Logger>
+        <Logger name="TimeSyncLogger" level="trace" additivity="false">
+            <AppenderRef ref="ServerFile"/>
+        </Logger>
     </Loggers>
 
 </Configuration>

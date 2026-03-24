@@ -26,4 +26,6 @@ public interface GuildService {
     Guild changeInformation(Long guildId, String introduction, byte minLevel, boolean isPublic, Byte[] allowedCharacterTypes);
 
     void changeReverseMemberStatus(Long guildId, int playerId, boolean isApproved);
+
+    List<Guild> findAllGuildLeagues(int page);
 }

@@ -82,6 +82,13 @@ public class GuildServiceImpl implements GuildService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Guild> findAllGuildLeagues(int page) {
+        int pageIndex = Math.max(page - 1, 0);
+        return guildRepository.findAllByOrderByLeaguePointsDescIdAsc(PageRequest.of(pageIndex, 10));
+    }
+
+    @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Guild changeInformation(Long guildId, String introduction, byte minLevel, boolean isPublic, Byte[] allowedCharacterTypes) {
         Optional<Guild> guildOptional = guildRepository.findWithMembersById(guildId);

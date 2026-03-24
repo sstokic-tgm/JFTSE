@@ -1,0 +1,18 @@
+message GuildLeagueInfo {
+    string name = 1;
+    byte level = 2;
+    int32 leaguePoints = 3;
+    int32 wins = 4;
+    int32 losses = 5;
+    int32 logoBackgroundId = 6;
+    int32 logoBackgroundColor = 7;
+    int32 logoPatternId = 8;
+    int32 logoPatternColor = 9;
+    int32 logoMarkId = 10;
+    int32 logoMarkColor = 11;
+}
+
+message SMSG_GuildLeagueList (0x26F3) {
+    byte state = 1;
+    repeated GuildLeagueInfo guildInfoList = 2 [type = short];
+}
