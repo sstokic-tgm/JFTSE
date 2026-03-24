@@ -1,6 +1,7 @@
 package com.jftse.emulator.server.core.handler.gacha;
 
 import com.jftse.emulator.common.exception.ValidationException;
+import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.life.lottery.GachaOpenResult;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
@@ -8,6 +9,7 @@ import com.jftse.emulator.server.core.packets.lottery.S2COpenGachaAnswerPacket;
 import com.jftse.emulator.server.core.service.LotteryServiceV2;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.gacha.CMSGOpenGacha;
@@ -46,6 +48,7 @@ public class OpenGachaRequestPacketHandler implements PacketHandler<FTConnection
 
         try {
             GachaOpenResult gachaOpenResult = lotteryService.openGacha(client, playerPocketId, productIndex);
+            logGachaResult(client.getPlayer(), productIndex, gachaOpenResult);
 
             if (gachaOpenResult.isConsumedGachaRemoved()) {
                 S2CInventoryItemRemoveAnswerPacket inventoryItemRemoveAnswerPacket = new S2CInventoryItemRemoveAnswerPacket(openGachaReqPacket.getPlayerPocketId());
@@ -59,16 +62,40 @@ public class OpenGachaRequestPacketHandler implements PacketHandler<FTConnection
                 S2COpenGachaAnswerPacket openGachaAnswerPacket = new S2COpenGachaAnswerPacket(SUCCESS, List.of(gachaOpenResult.getAwardedItem()));
                 connection.sendTCP(openGachaAnswerPacket);
             } else {
-                log.debug("Gacha open failed for player {}: {}", client.getPlayer().getName(), gachaOpenResult.getFailureReason());
+                log.debug("Gacha open failed for playerId {}: {}", client.getPlayer().getId(), gachaOpenResult.getFailureReason());
 
                 S2COpenGachaAnswerPacket openGachaAnswerPacket = new S2COpenGachaAnswerPacket(FAILURE, List.of());
                 connection.sendTCP(openGachaAnswerPacket);
             }
         } catch (ValidationException e) {
-            log.error("Failed to open gacha for player {}: {}", client.getPlayer().getName(), e.getMessage());
+            log.error("Failed to open gacha for playerId {}: {}", client.getPlayer().getId(), e.getMessage());
 
             S2COpenGachaAnswerPacket openGachaAnswerPacket = new S2COpenGachaAnswerPacket(FAILURE, List.of());
             connection.sendTCP(openGachaAnswerPacket);
         }
+    }
+
+    private void logGachaResult(FTPlayer player, int productIndex, GachaOpenResult result) {
+        PlayerPocket awarded = result.getAwardedItem();
+        PlayerPocket consumed = result.getConsumedGachaPocket();
+
+        log.debug(
+                "GACHA_OPEN playerId={} productIndex={} success={} awardedItemIndex={} awardedCategory={} awardedCount={} duplicateConverted={} tokensAdded={} pityBefore={} pityAfter={} pityGuaranteed={} rareItemHit={} consumedRemoved={} consumedRemaining={} failureReason={}",
+                player.getId(),
+                productIndex,
+                result.isSuccess(),
+                awarded != null ? awarded.getItemIndex() : null,
+                awarded != null ? awarded.getCategory() : null,
+                awarded != null ? awarded.getItemCount() : null,
+                result.isDuplicateConverted(),
+                result.getGachaTokensAdded(),
+                result.getPityBefore(),
+                result.getPityAfter(),
+                result.isPityGuaranteed(),
+                result.isRareItemHit(),
+                result.isConsumedGachaRemoved(),
+                consumed != null ? consumed.getItemCount() : 0,
+                result.getFailureReason()
+        );
     }
 }

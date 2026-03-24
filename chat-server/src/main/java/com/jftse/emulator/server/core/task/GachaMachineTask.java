@@ -106,6 +106,8 @@ public class GachaMachineTask extends AbstractTask {
                     timesDrawn++;
                     resultDisplay.put(p.getName(), timesDrawn);
 
+                    log.debug("GACHA_OPEN playerId={} awardedItemIndex={} awardedCategory={} awardedCount={}", client.getPlayer().getId(), result.getAwardedItem().getItemIndex(), result.getAwardedItem().getCategory(), result.getAwardedItem().getItemCount());
+
                     PlayerPocket existing = filteredResult.get(result.getAwardedItem().getItemIndex());
 
                     // we only keep the playerpocket with highest item count in result
@@ -113,7 +115,7 @@ public class GachaMachineTask extends AbstractTask {
                         filteredResult.put(result.getAwardedItem().getItemIndex(), result.getAwardedItem());
                     }
                 } else {
-                    log.debug("Gacha open failed for player {}: {}", client.getPlayer().getName(), result.getFailureReason());
+                    log.debug("Gacha open failed for playerId {}: {}", client.getPlayer().getId(), result.getFailureReason());
 
                     chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", result.getFailureReason());
                     connection.sendTCP(chatLobbyAnswerPacket);
@@ -134,13 +136,40 @@ public class GachaMachineTask extends AbstractTask {
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(finalResult);
             connection.sendTCP(inventoryDataPacket);
 
+            logGachaResultSummary(player, gacha, count, resultList);
         } catch (ValidationException e) {
-            log.error("Failed to open gacha for player {}: {}", client.getPlayer().getName(), e.getMessage());
+            log.error("Failed to open gacha for playerId {}: {}", client.getPlayer().getId(), e.getMessage());
 
             S2CChatLobbyAnswerPacket chatLobbyAnswerPacket = new S2CChatLobbyAnswerPacket((char) 0, "GachaMachine", "Failed to open gacha.");
             connection.sendTCP(chatLobbyAnswerPacket);
         } finally {
             client.setUsingGachaMachine(false);
         }
+    }
+
+    private void logGachaResultSummary(FTPlayer player, Product gacha, int requestedCount, List<GachaOpenResult> resultList) {
+        long successCount = resultList.stream().filter(GachaOpenResult::isSuccess).count();
+        long duplicateCount = resultList.stream().filter(GachaOpenResult::isDuplicateConverted).count();
+        long rareCount = resultList.stream().filter(GachaOpenResult::isRareItemHit).count();
+        long guaranteedCount = resultList.stream().filter(GachaOpenResult::isPityGuaranteed).count();
+        int tokenSum = resultList.stream().mapToInt(GachaOpenResult::getGachaTokensAdded).sum();
+
+        GachaOpenResult last = resultList.isEmpty() ? null : resultList.getLast();
+
+        log.debug(
+                "GACHA_OPEN_SUMMARY playerId={} gachaName={} productIndex={} requestedCount={} actualCount={} successCount={} duplicateCount={} rareCount={} pityGuaranteedCount={} tokensAddedTotal={} finalPity={} consumedRemoved={}",
+                player.getId(),
+                gacha.getName(),
+                gacha.getProductIndex(),
+                requestedCount,
+                resultList.size(),
+                successCount,
+                duplicateCount,
+                rareCount,
+                guaranteedCount,
+                tokenSum,
+                last != null ? last.getPityAfter() : null,
+                last != null && last.isConsumedGachaRemoved()
+        );
     }
 }
