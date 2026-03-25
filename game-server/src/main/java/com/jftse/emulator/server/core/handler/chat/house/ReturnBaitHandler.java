@@ -42,7 +42,7 @@ public class ReturnBaitHandler implements PacketHandler<FTConnection, CMSGReturn
                 FishManager.getInstance().frightenFishes(room.getRoomId(), roomPlayer.getBaitX(), roomPlayer.getBaitY());
             }
 
-            FishManager.getInstance().removeBaitPosition(roomPlayer.getBaitX(), roomPlayer.getBaitY());
+            FishManager.getInstance().removeBaitPosition(room.getRoomId(), roomPlayer.getBaitX(), roomPlayer.getBaitY());
             roomPlayer.setBaitX(0.0f);
             roomPlayer.setBaitY(0.0f);
 

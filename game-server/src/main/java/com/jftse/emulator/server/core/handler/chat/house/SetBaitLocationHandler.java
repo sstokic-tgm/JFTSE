@@ -26,7 +26,7 @@ public class SetBaitLocationHandler implements PacketHandler<FTConnection, CMSGS
 
         roomPlayer.setBaitX(packet.getX());
         roomPlayer.setBaitY(packet.getY());
-        FishManager.getInstance().registerBaitPosition(roomPlayer.getBaitX(), roomPlayer.getBaitY());
+        FishManager.getInstance().registerBaitPosition(room.getRoomId(), roomPlayer.getBaitX(), roomPlayer.getBaitY());
         FishManager.getInstance().frightenFishes(room.getRoomId(), roomPlayer.getBaitX(), roomPlayer.getBaitY());
 
         SMSGSetBaitLocation smsgSetBaitLocation = SMSGSetBaitLocation.builder()
