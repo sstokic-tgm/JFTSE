@@ -411,10 +411,6 @@ public class FishManager {
                     (fish.getState() == FishState.MOVING || fish.getState() == FishState.IDLE)) {
                 tryAcquireNearbyBait(roomId, fish, clients);
             }
-
-            if (fish.getState() != FishState.IDLE && fish.getState() != FishState.MOVING) {
-                log.debug(fish.debugString());
-            }
         }
 
         for (Fish inactiveFish : inactiveFishes) {
