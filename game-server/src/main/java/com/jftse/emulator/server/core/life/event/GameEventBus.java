@@ -31,8 +31,8 @@ public class GameEventBus {
 
     private static final Logger scriptLogger = LogManager.getLogger("ScriptLogger");
 
-    private static final Map<GameEventType, CopyOnWriteArrayList<GameEventCallback>> eventListeners = new ConcurrentHashMap<>();
-    private static final Map<GameEventType, ReentrantLock> eventLocks = new ConcurrentHashMap<>();
+    private static final Map<String, CopyOnWriteArrayList<GameEventCallback>> eventListeners = new ConcurrentHashMap<>();
+    private static final Map<String, ReentrantLock> eventLocks = new ConcurrentHashMap<>();
     private static final ReentrantReadWriteLock lifecycleLock = new ReentrantReadWriteLock();
 
     @Getter
@@ -50,13 +50,24 @@ public class GameEventBus {
     }
 
     public void on(String eventType, GameEventCallback listener) {
-        GameEventType type = GameEventType.valueOf(eventType.toUpperCase());
+        String type = null;
+        try {
+            type = GameEventType.valueOf(eventType.toUpperCase()).getName();
+        } catch (IllegalArgumentException e) {
+            log.warn("Event {} not found in enum GameEventType. Custom Listener will be registered without enum type. Make sure to handle this event properly in your script.", eventType);
+            type = eventType.toUpperCase();
+        }
+
         eventListeners.computeIfAbsent(type, k -> new CopyOnWriteArrayList<>()).add(listener);
         eventLocks.computeIfAbsent(type, k -> new ReentrantLock());
-        log.info("Registered event for {}", type.getName());
+        log.info("Registered event for {}", type);
     }
 
     public static void call(GameEventType eventType, Object... args) {
+        call0(eventType.getName(), args);
+    }
+
+    private static void call0(String eventType, Object... args) {
         lifecycleLock.readLock().lock();
         try {
             ReentrantLock lock = eventLocks.computeIfAbsent(eventType, k -> new ReentrantLock());
@@ -71,7 +82,7 @@ public class GameEventBus {
                     try {
                         listener.onEvent(args);
                     } catch (Exception e) {
-                        log.error("Error while executing event: {}. Exception: {}", eventType.getName(), e.getMessage(), e);
+                        log.error("Error while executing event: {}. Exception: {}", eventType, e.getMessage(), e);
                     }
                 }
             } finally {
@@ -83,8 +94,7 @@ public class GameEventBus {
     }
 
     public void call(String eventType, Object... args) {
-        GameEventType type = GameEventType.valueOf(eventType.toUpperCase());
-        call(type, args);
+        call0(eventType.toUpperCase(), args);
     }
 
     private boolean registerEvents() {
