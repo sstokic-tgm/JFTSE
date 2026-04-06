@@ -5,6 +5,7 @@ import com.jftse.emulator.common.scripting.ScriptManagerV2;
 import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.emulator.server.core.command.commands.gm.*;
 import com.jftse.emulator.server.core.command.commands.player.*;
+import com.jftse.emulator.server.core.life.script.ScriptContextHelper;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
 import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
@@ -12,9 +13,13 @@ import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.account.Account;
 import com.jftse.entities.database.model.log.CommandLog;
+import com.jftse.server.core.service.ScriptStateService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -29,9 +34,19 @@ import java.util.regex.Pattern;
 public class CommandManager {
     private static CommandManager instance;
 
+    private static final Logger scriptLogger = LogManager.getLogger("ScriptLogger");
+
     private static final char COMMAND_HEADING = '-';
 
     private HashMap<String, Command> registeredCommands;
+
+    @Getter
+    private final ScriptStateService scriptStateService;
+
+    @Autowired
+    public CommandManager(ScriptStateService scriptStateService) {
+        this.scriptStateService = scriptStateService;
+    }
 
     @PostConstruct
     public void init() {
@@ -167,7 +182,11 @@ public class CommandManager {
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("gameManager", GameManager.getInstance());
         bindings.put("serviceManager", GameManager.getInstance().getServiceManager());
+        bindings.put("threadManager", GameManager.getInstance().getThreadManager());
+        bindings.put("eventHandler", GameManager.getInstance().getEventHandler());
+        bindings.put("state", new ScriptContextHelper(scriptStateService, scriptFile));
         bindings.put("commandManager", this);
+        bindings.put("log", scriptLogger);
 
         AbstractCommand command = sm.getInterfaceByImplementingObject(scriptFile, "impl", AbstractCommand.class, bindings);
         if (command == null) {
