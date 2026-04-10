@@ -42,9 +42,14 @@ public class Account extends AbstractBaseModel {
     private Set<Role> roles;
 
     @Column(nullable = false, columnDefinition = "int(11) DEFAULT 0")
-    private Integer verifyLevel = 0;
+    private Integer verificationLevel = 0;
 
     private String discordId;
+    private Date discordLinkDate;
+
+    @Column(nullable = false, columnDefinition = "bit(1) DEFAULT 0")
+    private Boolean emailVerified = false;
+    private Date emailVerifiedDate;
 
     private String agreements;
 }
