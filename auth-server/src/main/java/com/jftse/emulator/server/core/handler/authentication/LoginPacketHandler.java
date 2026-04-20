@@ -39,14 +39,19 @@ public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin
     private final AuthTokenService authTokenService;
     private final PlayerService playerService;
     private final JdbcUtil jdbcUtil;
-    private final ConfigService configService;
+
+    private final int AC_VERSION;
+    private final boolean VERIFICATION_ENABLED;
 
     public LoginPacketHandler() {
         authenticationService = ServiceManager.getInstance().getAuthenticationService();
         authTokenService = ServiceManager.getInstance().getAuthTokenService();
         playerService = ServiceManager.getInstance().getPlayerService();
         jdbcUtil = AuthenticationManager.getInstance().getJdbcUtil();
-        configService = ServiceManager.getInstance().getConfigService();
+        final ConfigService configService = ServiceManager.getInstance().getConfigService();
+
+        this.AC_VERSION = configService.getValue("anticheat.version", 0);
+        this.VERIFICATION_ENABLED = configService.getValue("verification.enabled", false);
     }
 
     @Override
@@ -74,7 +79,7 @@ public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin
         if (antiCheatEnabled) {
             if (loginPacket.remaining() >= 4) {
                 int ver = loginPacket.read(Integer.class);
-                if (ver != configService.getValue("anticheat.version", 0)) {
+                if (ver != this.AC_VERSION) {
                     SMSGLogin loginAnswer = SMSGLogin.builder()
                             .result(AuthenticationServiceImpl.INVAILD_VERSION)
                             .build();
@@ -97,6 +102,16 @@ public class LoginPacketHandler implements PacketHandler<FTConnection, CMSGLogin
                     .build();
             connection.sendTCP(loginAnswer);
             return;
+        }
+
+        if (VERIFICATION_ENABLED) {
+            if (!account.getEmailVerified() && StringUtils.isEmpty(account.getEmail())) {
+                SMSGLogin loginAnswer = SMSGLogin.builder()
+                        .result(AuthenticationServiceImpl.ACCOUNT_EXPIRED_USER_ID)
+                        .build();
+                connection.sendTCP(loginAnswer);
+                return;
+            }
         }
 
         int passwordCheck = authenticationService.checkPassword(account.getPassword(), loginPacket.getPassword());

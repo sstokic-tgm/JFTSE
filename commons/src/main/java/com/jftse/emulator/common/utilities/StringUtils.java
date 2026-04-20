@@ -25,7 +25,7 @@ public class StringUtils {
     }
 
     public static boolean isEmpty(String string) {
-        return string == null || string.trim().equals("");
+        return string == null || string.trim().isEmpty();
     }
 
     public static String randomString(int length) {
