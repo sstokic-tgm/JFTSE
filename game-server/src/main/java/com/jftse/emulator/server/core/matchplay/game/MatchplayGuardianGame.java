@@ -620,6 +620,9 @@ public class MatchplayGuardianGame extends MatchplayGame {
         reward.addItemRewards(finalItemRewards);
         reward.assignItemRewardsToSlots(finalItemRewards);
 
+        final long lootedGuardiansCount = lootedGuardians.size();
+        final long guardiansInBossStageCount = guardian2MapsBoss.size();
+
         this.playerBattleStates.forEach(x -> {
             PlayerReward playerReward = new PlayerReward(x.getPosition());
             playerReward.setPlayerPosition(x.getPosition());
@@ -630,8 +633,37 @@ public class MatchplayGuardianGame extends MatchplayGame {
             playerReward.setGold((int) (this.getGoldPot().get() * goldMultiplier));
 
             if (!wonGame) {
-                playerReward.setExp(playerReward.getExp() / 2);
-                playerReward.setGold(playerReward.getGold() / 2);
+                double lossMultiplier;
+
+                if (isBoss) {
+                    // boss stage reached
+                    lossMultiplier = 0.30;
+                } else if (map.getIsBossStage()) {
+                    // failed/skipped boss stage
+                    lossMultiplier = 0.15;
+                } else {
+                    // non boss stage lost
+                    lossMultiplier = 0.25;
+                }
+
+                if (lootedGuardiansCount == 0) {
+                    lossMultiplier = 0.05; // if no guardians were looted, the loss is more severe
+                } else if (isBoss && guardiansInBossStageCount == 0) {
+                    lossMultiplier = 0.10; // if it was a boss stage but no boss guardian was looted, the loss is more severe
+                }
+
+                if (isRandomGuardiansMode.get() && isHardMode.get()) {
+                    lossMultiplier *= 0.55;
+                } else if (isRandomGuardiansMode.get()) {
+                    lossMultiplier *= 0.70;
+                } else if (isHardMode.get()) {
+                    lossMultiplier *= 0.85;
+                }
+
+                lossMultiplier = Math.max(0.03, Math.min(lossMultiplier, 0.30)); // ensure loss multiplier is between 3% and 30%
+
+                playerReward.setExp((int) Math.round(playerReward.getExp() * lossMultiplier));
+                playerReward.setGold((int) Math.round(playerReward.getGold() * lossMultiplier));
             }
 
             reward.addPlayerReward(playerReward);
