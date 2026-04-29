@@ -19,7 +19,10 @@ public enum BallHitAction {
     DEF_CURVE_RETURN(15),
     DEF_ROB_RETURN(16),
     ATT_DRAGON(17),
-    ATT_UNDER(18);
+    ATT_UNDER(18),
+    ATT_SUPER_EAGLE(19),
+    ATT_TORNADO(20),
+    ATT_DRAGON_BLACK(21);
 
     private final int id;
 
