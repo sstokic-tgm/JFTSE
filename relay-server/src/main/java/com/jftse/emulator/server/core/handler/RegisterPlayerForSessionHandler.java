@@ -27,6 +27,8 @@ public class RegisterPlayerForSessionHandler implements PacketHandler<FTConnecti
 
             FTClient client = connection.getClient();
             client.setGameSessionId(sessionId);
+            client.setPlayerId(playerId);
+            client.setSpectator(isSpectator);
 
             log.info("playerId {} connected for session: {}", playerId, sessionId);
 
