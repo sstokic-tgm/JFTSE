@@ -19,7 +19,9 @@ public class ScriptManagerV2 {
     private static ScriptManagerV2 instance;
 
     private final ConcurrentHashMap<String, List<ScriptFile>> scripts = new ConcurrentHashMap<>();
-    public final static List<String> allowedTypes = Arrays.asList("EVENT", "QUEST", "COMMAND", "GUARDIAN-PHASE");
+    private final ConcurrentHashMap<String, ScriptFile> libraries = new ConcurrentHashMap<>();
+
+    public final static List<String> allowedTypes = Arrays.asList("EVENT", "QUEST", "COMMAND", "GUARDIAN-PHASE", "LIB");
 
     private ScriptManagerV2() {
         initialize(new ArrayList<>());
@@ -50,8 +52,13 @@ public class ScriptManagerV2 {
                 scriptFile.setContext(context);
                 scriptFile.setSource(source);
 
-                scripts.computeIfAbsent(scriptFile.getType(), k -> new ArrayList<>()).add(scriptFile);
-                log.info("Script loaded: {} of type {}", scriptFile.getName(), scriptFile.getType());
+                if (scriptFile.isLibrary()) {
+                    libraries.put(scriptFile.getIncludeKey(), scriptFile);
+                    log.info("Library loaded: {}", scriptFile.getIncludeKey());
+                } else {
+                    scripts.computeIfAbsent(scriptFile.getType(), k -> new ArrayList<>()).add(scriptFile);
+                    log.info("Script loaded: {} of type {}", scriptFile.getName(), scriptFile.getType());
+                }
             } catch (IOException e) {
                 log.error("Error reading script file: {}", scriptFile.getFile().getAbsolutePath(), e);
             } catch (Exception e) {
@@ -75,6 +82,8 @@ public class ScriptManagerV2 {
        try {
            Value jsBindings = context.getBindings("js");
            bindings.forEach(jsBindings::putMember);
+           installInclude(scriptFile, context, jsBindings);
+
            return context.eval(source);
        } catch (Exception e) {
               log.error("Error evaluating script: {}", scriptFile.getName(), e);
@@ -100,5 +109,13 @@ public class ScriptManagerV2 {
             log.error("Error getting interface '{}' from script: {}", key, scriptFile.getName(), e);
             return null;
         }
+    }
+
+    private void installInclude(ScriptFile owner, Context context, Value jsBindings) {
+        if (jsBindings.hasMember("include")) {
+            return;
+        }
+
+        jsBindings.putMember("include", new IncludeFunction(owner, context, libraries));
     }
 }

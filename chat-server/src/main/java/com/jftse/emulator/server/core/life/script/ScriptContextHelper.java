@@ -2,7 +2,6 @@ package com.jftse.emulator.server.core.life.script;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.common.scripting.ScriptFile;
-import com.jftse.emulator.common.utilities.StringUtils;
 import com.jftse.server.core.service.ScriptStateService;
 import lombok.extern.log4j.Log4j2;
 
@@ -41,13 +40,7 @@ public class ScriptContextHelper {
      */
     public ScriptContextHelper(ScriptStateService stateService, ScriptFile scriptFile) {
         this.stateService = stateService;
-
-        final String type = StringUtils.isEmpty(scriptFile.getType()) ? "unknown" : scriptFile.getType().toLowerCase();
-        final String id = String.valueOf(scriptFile.getId());
-        this.scriptId = StringUtils.isEmpty(scriptFile.getSubType())
-                ? String.format("%s:%s:%s", type, id, scriptFile.getName())
-                : String.format("%s-%s:%s:%s", type, scriptFile.getSubType().toLowerCase(), id, scriptFile.getName());
-        log.debug(scriptId);
+        this.scriptId = scriptFile.getScriptKey();
     }
 
     /**

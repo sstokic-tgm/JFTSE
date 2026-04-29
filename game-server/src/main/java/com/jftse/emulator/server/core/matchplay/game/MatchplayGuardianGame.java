@@ -781,9 +781,8 @@ public class MatchplayGuardianGame extends MatchplayGame {
         if (scriptManager.isPresent()) {
             ScriptManagerV2 sm = scriptManager.get();
             List<ScriptFile> scriptFiles = sm.getScriptFiles("GUARDIAN-PHASE");
-            scriptFiles.sort(Comparator.comparing(ScriptFile::getId));
             for (ScriptFile scriptFile : scriptFiles) {
-                if (!scriptFile.getSubType().equals(map.getMap().toString())) {
+                if (!scriptFile.getGroupPath().equals(map.getMap().toString())) {
                     continue;
                 }
 

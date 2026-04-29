@@ -1,32 +1,69 @@
 package com.jftse.emulator.common.scripting;
 
+import com.jftse.emulator.common.utilities.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
 
-import javax.script.CompiledScript;
 import java.io.File;
 
 @Getter
 @Setter
 public class ScriptFile {
-    private Long id;
     private String name;
     private File file;
     private String type;
-    private String subType;
+    private String groupPath;
 
-    private CompiledScript compiledScript;
     private Context context;
     private Source source;
 
-    public ScriptFile(Long id, String name, File file, String type, String subType) {
-        this.id = id;
+    public ScriptFile(String name, File file, String type, String groupPath) {
         this.name = name;
         this.file = file;
         this.type = type;
-        this.subType = subType;
+        this.groupPath = groupPath;
+    }
+
+    public String getGroupKey() {
+        return groupPath == null ? "" : groupPath.replace("\\", "/");
+    }
+
+    public String getScriptKey() {
+        String scriptName = StringUtils.isEmpty(name)
+                ? "unknown"
+                : name.toLowerCase();
+
+        String base = StringUtils.isEmpty(type)
+                ? "unknown"
+                : type.toLowerCase();
+
+        String group = getGroupKey().toLowerCase();
+
+        if (!group.isEmpty()) {
+            return base + ":" + group + ":" + scriptName;
+        }
+
+        return base + ":" + scriptName;
+    }
+
+    public boolean isLibrary() {
+        return "LIB".equalsIgnoreCase(type);
+    }
+
+    public String getIncludeKey() {
+        if (!isLibrary()) {
+            return "";
+        }
+
+        String group = getGroupKey();
+
+        if (!group.isEmpty()) {
+            return (group + "/" + name).toLowerCase();
+        }
+
+        return name.toLowerCase();
     }
 
     @Override
@@ -34,8 +71,7 @@ public class ScriptFile {
         return "ScriptFile { " +
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
-                ", subType='" + subType + '\'' +
-                ", id=" + id +
+                ", groupPath='" + groupPath + '\'' +
                 ", file=" + file.getName() +
                 " }";
     }
