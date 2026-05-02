@@ -1,16 +1,24 @@
 message CMSG_BallAnimation (0x10E3) {
-    float unk0 = 1;
-    byte unk1 = 2;
-    int16 absoluteStartXPositionOnMap = 3;
-    int16 absoluteStartYPositionOnMap = 4;
-    int16 absoluteStartZPositionOnMap = 5;
-    int16 absoluteTouchXPositionOnMap = 6;
-    int16 absoluteTouchYPositionOnMap = 7;
-    int16 absoluteTouchZPositionOnMap = 8;
+    // progress value, 0.0-1.0
+    float progress = 1;
+    byte state = 2;
+    // ball origin/current hit position, fixed-point /100
+    int16 originX = 3;
+    int16 originY = 4;
+    int16 originZ = 5;
+    // outgoing path vector on the coirt plane, fixed-point /100
+    // pathY is reconstructed by the client as 0.0
+    int16 pathX = 6;
+    int16 pathZ = 7;
+    // curve control point, fixed-point /100
+    int16 curveControl = 8;
+    // ball speed, fixed-point /100
     int16 speed = 9;
     byte hitAct = 10;
-    byte unk2 = 11;
+    // shot code: special shot path appears to force this to 13
+    byte shotCode = 11;
     byte powerLevel = 12;
-    byte unk3 = 13;
+    // special shot info/index/mode. Usually 0 for normal shots
+    byte specialShotId = 13;
     byte playerPosition = 14;
 }

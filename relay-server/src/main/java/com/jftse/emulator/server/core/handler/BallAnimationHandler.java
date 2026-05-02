@@ -18,12 +18,6 @@ public class BallAnimationHandler implements PacketHandler<FTConnection, CMSGBal
 
     @Override
     public void handle(FTConnection connection, CMSGBallAnimation packet) {
-        connection.getClient().getAnimationDebugStats().recordBallAnimation(
-                packet.getHitAct(),
-                packet.getPowerLevel(),
-                packet.getSpeed()
-        );
-
         SMSGBallAnimation relayPacket = packet.translate(translator);
         connection.getClient().getGameSessionId().ifPresent(gameSessionId -> {
             final List<FTClient> clients = RelayManager.getInstance().getClientsInSession(gameSessionId);

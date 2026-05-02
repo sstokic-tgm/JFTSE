@@ -1,4 +1,4 @@
-package com.jftse.emulator.server.core.constants;
+package com.jftse.server.core.constants;
 
 public enum BallHitAction {
     STROKE(0),
