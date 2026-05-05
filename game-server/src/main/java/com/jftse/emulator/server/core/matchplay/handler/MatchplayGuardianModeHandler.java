@@ -14,6 +14,8 @@ import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
 import com.jftse.emulator.server.core.life.item.special.RingOfGold;
 import com.jftse.emulator.server.core.life.item.special.RingOfWiseman;
+import com.jftse.emulator.server.core.life.match.PlayerStats;
+import com.jftse.emulator.server.core.life.match.RallyResult;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -29,6 +31,7 @@ import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardianStats;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetGuardians;
 import com.jftse.emulator.server.core.packets.matchplay.*;
+import com.jftse.emulator.server.core.rabbit.MatchRallyStatsConsumer;
 import com.jftse.emulator.server.core.rabbit.messages.MatchFinishedMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
@@ -46,6 +49,7 @@ import com.jftse.entities.database.model.log.GameLogType;
 import com.jftse.entities.database.model.map.SMaps;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.entities.database.model.scenario.MScenarios;
+import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.jdbc.JdbcUtil;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.protocol.Packet;
@@ -77,6 +81,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     private final ScenarioService scenarioService;
     private final PlayerStatisticService playerStatisticService;
     private final MapService mapService;
+    private final MatchRallyStatsConsumer matchRallyStatsConsumer;
 
     private final JdbcUtil jdbcUtil;
 
@@ -91,6 +96,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         this.scenarioService = ServiceManager.getInstance().getScenarioService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         this.mapService = ServiceManager.getInstance().getMapService();
+        this.matchRallyStatsConsumer = GameManager.getInstance().getMatchRallyStatsConsumer();
 
         this.jdbcUtil = ServiceManager.getInstance().getJdbcUtil();
     }
@@ -207,6 +213,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 gameLog.setContent(gameLogContent.toString());
                 gameLogService.save(gameLog);
 
+                matchRallyStatsConsumer.clearSession(gameSessionId);
+
                 gameSession.getClients().removeIf(c -> c.getActiveGameSession() == null);
                 if (game.getFinished().get() && gameSession.getClients().isEmpty()) {
                     GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
@@ -289,12 +297,9 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 levelService.setNewLevelStatusPoints((byte) level, player.getPlayer());
                 player.syncLevel(level);
 
-                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatisticId());
-                if (wonGame) {
-                    playerStatistic.setGuardianRecordWin(playerStatistic.getGuardianRecordWin() + 1);
-                } else {
-                    playerStatistic.setGuardianRecordLoss(playerStatistic.getGuardianRecordLoss() + 1);
-                }
+                PlayerStatisticView playerStatistic = player.getPlayerStatistic();
+
+                PlayerStats playerStats = matchRallyStatsConsumer.getPlayerStats(gameSessionId, Math.toIntExact(player.getId()));
 
                 final ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = game.getGuardianBattleStates();
                 List<Integer> guardianRewardRankingPointList = guardianBattleStates.stream()
@@ -331,10 +336,15 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                         playerReward.setRankingPoints(-guardianRewardRankingPointSum);
                     }
                 }
-                playerStatistic.setGuardianRP(playerStatistic.getGuardianRP() + playerReward.getRankingPoints());
 
-                playerStatistic = playerStatisticService.save(playerStatistic);
-                player.setPlayerStatistic(PlayerStatisticView.fromEntity(playerStatistic));
+                int playerNewRating = playerStatistic.guardianRP() + playerReward.getRankingPoints();
+
+                PlayerStatistic dbPlayerStatistic = playerStatisticService.updatePlayerStats(player.getPlayerStatisticId(), GameMode.GUARDIAN, wonGame,
+                        playerNewRating, 0, 0, playerStats.getStroke(), playerStats.getSlice(), playerStats.getLob(),
+                        playerStats.getSmash(), playerStats.getVolley(), playerStats.getTopSpin(), playerStats.getRising(),
+                        playerStats.getServe(), playerStats.getGuardBreakShot(), playerStats.getChargeShot(), playerStats.getSkillShot());
+
+                player.setPlayerStatistic(PlayerStatisticView.fromEntity(dbPlayerStatistic));
 
                 rp.setReady(false);
                 int playerLevel = player.getLevel();
@@ -364,6 +374,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
             eventHandler.offer(eventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)));
             client.setActiveGameSession(null);
         }
+
+        matchRallyStatsConsumer.clearSession(gameSessionId);
 
         GameEventBus.call(GameEventType.MP_MATCH_END, game, activeRoom, clients);
 
@@ -509,6 +521,9 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     @Override
     public void onPoint(FTClient ftClient, CMSGPoint pointPacket) {
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide().get() == GameFieldSide.Guardian;
+
+        // winner doesn't matter as service or return ace doesn't exist in guardian mode, so we can just pass false
+        RallyResult rallyResult = matchRallyStatsConsumer.onPoint(ftClient.getGameSessionId(), false);
 
         byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
         byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);

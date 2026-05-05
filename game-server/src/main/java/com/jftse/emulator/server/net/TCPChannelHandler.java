@@ -144,6 +144,8 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
                 game.getScheduledFutures().forEach(sf -> sf.cancel(false));
                 game.getScheduledFutures().clear();
 
+                GameManager.getInstance().getMatchRallyStatsConsumer().clearSession(client.getGameSessionId());
+
                 client.setActiveGameSession(null);
             }
         }

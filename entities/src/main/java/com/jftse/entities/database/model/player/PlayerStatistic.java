@@ -25,7 +25,22 @@ public class PlayerStatistic extends AbstractBaseModel {
     private Integer guardianRP = 0;
     private Integer consecutiveWins = 0;
     private Integer maxConsecutiveWins = 0;
+
     private Integer numberOfDisconnects = 0;
+
+    private Integer serviceAce = 0;
+    private Integer returnAce = 0;
+    private Integer stroke = 0;
+    private Integer slice = 0;
+    private Integer lob = 0;
+    private Integer smash = 0;
+    private Integer volley = 0;
+    private Integer topSpin = 0;
+    private Integer rising = 0;
+    private Integer serve = 0;
+    private Integer guardBreakShot = 0;
+    private Integer chargeShot = 0;
+    private Integer skillShot = 0;
 
     @NotAudited
     @Formula("basicRecordWin + basicRecordLoss + battleRecordWin + battleRecordLoss")

@@ -1,5 +1,6 @@
 package com.jftse.server.core.rabbit;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.aopalliance.aop.Advice;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
@@ -85,6 +86,8 @@ public abstract class AbstractRabbitMQConfiguration implements RabbitContract {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        objectMapper.registerModule(new JavaTimeModule());
 
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter(objectMapper);
         converter.setAlwaysConvertToInferredType(true);

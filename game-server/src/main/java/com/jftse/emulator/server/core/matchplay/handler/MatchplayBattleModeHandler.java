@@ -14,6 +14,8 @@ import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
 import com.jftse.emulator.server.core.life.item.special.RingOfGold;
 import com.jftse.emulator.server.core.life.item.special.RingOfWiseman;
+import com.jftse.emulator.server.core.life.match.PlayerStats;
+import com.jftse.emulator.server.core.life.match.RallyResult;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.PlayerPositionInfo;
 import com.jftse.emulator.server.core.life.room.Room;
@@ -28,6 +30,7 @@ import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.packets.matchplay.*;
+import com.jftse.emulator.server.core.rabbit.MatchRallyStatsConsumer;
 import com.jftse.emulator.server.core.rabbit.messages.MatchFinishedMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
@@ -66,6 +69,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
 
     private final MapService mapService;
 
+    private final MatchRallyStatsConsumer matchRallyStatsConsumer;
+
     public MatchplayBattleModeHandler(MatchplayBattleGame game) {
         this.game = game;
         this.gameLogService = ServiceManager.getInstance().getGameLogService();
@@ -73,6 +78,7 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
         this.levelService = ServiceManager.getInstance().getLevelService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         this.mapService = ServiceManager.getInstance().getMapService();
+        this.matchRallyStatsConsumer = GameManager.getInstance().getMatchRallyStatsConsumer();
     }
 
     @Override
@@ -232,31 +238,21 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
                 levelService.setNewLevelStatusPoints((byte) level, player.getPlayer());
                 player.syncLevel(level);
 
-                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatisticId());
-                if (wonGame) {
-                    playerStatistic.setBattleRecordWin(playerStatistic.getBattleRecordWin() + 1);
+                PlayerStatisticView playerStatistic = player.getPlayerStatistic();
 
-                    int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
-                    if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
-                        playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
-                    }
-
-                    playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
-                } else {
-                    playerStatistic.setBattleRecordLoss(playerStatistic.getBattleRecordLoss() + 1);
-                    playerStatistic.setConsecutiveWins(0);
-                }
-
+                PlayerStats playerStats = matchRallyStatsConsumer.getPlayerStats(gameSessionId, Math.toIntExact(player.getId()));
                 HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BATTLE);
-                int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBattleRP();
+                int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.battleRP();
                 int playerNewRating = playerRatings.get(player.getId());
 
                 playerReward.setRankingPoints(playerRankingPoints);
 
-                playerStatistic.setBattleRP(Math.max(playerNewRating, 0));
+                PlayerStatistic dbPlayerStatistic = playerStatisticService.updatePlayerStats(player.getPlayerStatisticId(), GameMode.BATTLE, wonGame,
+                        playerNewRating, 0, 0, playerStats.getStroke(), playerStats.getSlice(), playerStats.getLob(),
+                        playerStats.getSmash(), playerStats.getVolley(), playerStats.getTopSpin(), playerStats.getRising(),
+                        playerStats.getServe(), playerStats.getGuardBreakShot(), playerStats.getChargeShot(), playerStats.getSkillShot());
 
-                playerStatistic = playerStatisticService.save(playerStatistic);
-                player.setPlayerStatistic(PlayerStatisticView.fromEntity(playerStatistic));
+                player.setPlayerStatistic(PlayerStatisticView.fromEntity(dbPlayerStatistic));
 
                 rp.setReady(false);
                 int playerLevel = player.getLevel();
@@ -286,6 +282,8 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
             eventHandler.offer(eventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)));
             client.setActiveGameSession(null);
         }
+
+        matchRallyStatsConsumer.clearSession(gameSessionId);
 
         GameEventBus.call(GameEventType.MP_MATCH_END, game, activeRoom, clients);
 
@@ -337,6 +335,9 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
     @Override
     public void onPoint(FTClient ftClient, CMSGPoint pointPacket) {
         boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide().get() == GameFieldSide.BlueTeam;
+
+        // winner doesn't matter as service or return ace doesn't exist in battle mode, so we can just pass false
+        RallyResult rallyResult = matchRallyStatsConsumer.onPoint(ftClient.getGameSessionId(), false);
 
         byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
         byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);

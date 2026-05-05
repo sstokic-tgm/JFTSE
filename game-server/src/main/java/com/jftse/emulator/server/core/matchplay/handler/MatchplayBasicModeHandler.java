@@ -14,6 +14,8 @@ import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.special.RingOfExp;
 import com.jftse.emulator.server.core.life.item.special.RingOfGold;
 import com.jftse.emulator.server.core.life.item.special.RingOfWiseman;
+import com.jftse.emulator.server.core.life.match.PlayerStats;
+import com.jftse.emulator.server.core.life.match.RallyResult;
 import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
@@ -27,6 +29,7 @@ import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.packets.matchplay.*;
+import com.jftse.emulator.server.core.rabbit.MatchRallyStatsConsumer;
 import com.jftse.emulator.server.core.rabbit.messages.MatchFinishedMessage;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.task.AutoItemRewardPickerTask;
@@ -45,10 +48,8 @@ import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -62,6 +63,9 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
     private final PocketService pocketService;
     private final PlayerStatisticService playerStatisticService;
     private final MapService mapService;
+    private final MatchRallyStatsConsumer matchRallyStatsConsumer;
+
+    private final Map<Integer, List<RallyResult>> rallyResultMap = new HashMap<>();
 
     public MatchplayBasicModeHandler(MatchplayBasicGame game) {
         this.game = game;
@@ -71,6 +75,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         this.pocketService = ServiceManager.getInstance().getPocketService();
         this.playerStatisticService = ServiceManager.getInstance().getPlayerStatisticService();
         this.mapService = ServiceManager.getInstance().getMapService();
+        this.matchRallyStatsConsumer = GameManager.getInstance().getMatchRallyStatsConsumer();
     }
 
     @Override
@@ -210,31 +215,25 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 levelService.setNewLevelStatusPoints((byte) level, player.getPlayer());
                 player.syncLevel(level);
 
-                PlayerStatistic playerStatistic = playerStatisticService.findPlayerStatisticById(player.getPlayerStatisticId());
-                if (wonGame) {
-                    playerStatistic.setBasicRecordWin(playerStatistic.getBasicRecordWin() + 1);
+                PlayerStatisticView playerStatistic = player.getPlayerStatistic();
 
-                    int newCurrentConsecutiveWins = playerStatistic.getConsecutiveWins() + 1;
-                    if (newCurrentConsecutiveWins > playerStatistic.getMaxConsecutiveWins()) {
-                        playerStatistic.setMaxConsecutiveWins(newCurrentConsecutiveWins);
-                    }
-
-                    playerStatistic.setConsecutiveWins(newCurrentConsecutiveWins);
-                } else {
-                    playerStatistic.setBasicRecordLoss(playerStatistic.getBasicRecordLoss() + 1);
-                    playerStatistic.setConsecutiveWins(0);
-                }
+                List<RallyResult> rallyResultsForPlayer = rallyResultMap.getOrDefault((int) rp.getPosition(), Collections.emptyList());
+                PlayerStats playerStats = matchRallyStatsConsumer.getPlayerStats(gameSessionId, Math.toIntExact(player.getId()));
+                int serviceAces = Math.toIntExact(rallyResultsForPlayer.stream().filter(RallyResult::serviceAce).count());
+                int returnAces = Math.toIntExact(rallyResultsForPlayer.stream().filter(RallyResult::returnAce).count());
 
                 HashMap<Long, Integer> playerRatings = RankingUtils.calculateNewRating(playerList, player, wonGame, (byte) GameMode.BASIC);
-                int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.getBasicRP();
+                int playerRankingPoints = playerRatings.get(player.getId()) - playerStatistic.basicRP();
                 int playerNewRating = playerRatings.get(player.getId());
 
                 playerReward.setRankingPoints(playerRankingPoints);
 
-                playerStatistic.setBasicRP(Math.max(playerNewRating, 0));
+                PlayerStatistic dbPlayerStatistic = playerStatisticService.updatePlayerStats(player.getPlayerStatisticId(), GameMode.BASIC, wonGame,
+                        playerNewRating, serviceAces, returnAces, playerStats.getStroke(), playerStats.getSlice(), playerStats.getLob(),
+                        playerStats.getSmash(), playerStats.getVolley(), playerStats.getTopSpin(), playerStats.getRising(),
+                        playerStats.getServe(), playerStats.getGuardBreakShot(), playerStats.getChargeShot(), playerStats.getSkillShot());
 
-                playerStatistic = playerStatisticService.save(playerStatistic);
-                player.setPlayerStatistic(PlayerStatisticView.fromEntity(playerStatistic));
+                player.setPlayerStatistic(PlayerStatisticView.fromEntity(dbPlayerStatistic));
 
                 rp.setReady(false);
                 int playerLevel = player.getLevel();
@@ -263,6 +262,8 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
             eventHandler.offer(eventHandler.createPacketEvent(client, backToRoomPacket, PacketEventType.FIRE_DELAYED, TimeUnit.SECONDS.toMillis(12)));
             client.setActiveGameSession(null);
         }
+
+        matchRallyStatsConsumer.clearSession(gameSessionId);
 
         GameEventBus.call(GameEventType.MP_MATCH_END, game, activeRoom, clients);
 
@@ -322,8 +323,13 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         final int setsTeamRead = game.getSetsRedTeam().get();
         final int setsTeamBlue = game.getSetsBlueTeam().get();
 
-        if (pointPacket.getPlayerPosition() < 4)
+        boolean winningTeamIsRed = game.isRedTeam(pointPacket.getPointsTeam());
+        RallyResult rallyResult = matchRallyStatsConsumer.onPoint(ftClient.getGameSessionId(), winningTeamIsRed);
+
+        if (pointPacket.getPlayerPosition() < 4) {
             game.increasePerformancePointForPlayer(pointPacket.getPlayerPosition());
+            rallyResultMap.computeIfAbsent((int) pointPacket.getPlayerPosition(), k -> new ArrayList<>()).add(rallyResult);
+        }
 
         if (game.isRedTeam(pointPacket.getPointsTeam()))
             game.setPoints((byte) (pointsTeamRed + 1), (byte) pointsTeamBlue);

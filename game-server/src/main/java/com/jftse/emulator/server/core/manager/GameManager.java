@@ -19,6 +19,7 @@ import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.S2CLobbyUserListAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
+import com.jftse.emulator.server.core.rabbit.MatchRallyStatsConsumer;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
 import com.jftse.emulator.server.core.utils.BattleUtils;
 import com.jftse.emulator.server.net.FTClient;
@@ -78,6 +79,8 @@ public class GameManager implements ServerLoopHandler {
     private ServiceManager serviceManager;
     @Autowired
     private RProducerService rProducerService;
+    @Autowired
+    private MatchRallyStatsConsumer matchRallyStatsConsumer;
 
     @Autowired
     private ConfigService configService;

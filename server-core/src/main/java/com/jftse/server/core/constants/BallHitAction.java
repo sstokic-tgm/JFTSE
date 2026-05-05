@@ -42,4 +42,13 @@ public enum BallHitAction {
         }
         return "UnknownHitAct_" + id;
     }
+
+    public  static BallHitAction valueOf(int id) {
+        for (BallHitAction action : values()) {
+            if (action.getId() == id) {
+                return action;
+            }
+        }
+        throw new IllegalArgumentException("No BallHitAction with id " + id);
+    }
 }
