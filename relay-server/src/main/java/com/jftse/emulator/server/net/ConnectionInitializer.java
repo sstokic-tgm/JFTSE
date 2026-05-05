@@ -39,7 +39,7 @@ public class ConnectionInitializer extends ChannelInitializer<SocketChannel> {
         ch.attr(FT_CONNECTION_ATTRIBUTE_KEY).set(connection);
 
         ch.pipeline().addLast(new FlushConsolidationHandler());
-        ch.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(1, TimeUnit.MINUTES));
+        ch.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(5, TimeUnit.MINUTES));
         ch.pipeline().addLast("decoder", new PacketDecoderV2(decryptionKey, packetLogger));
         ch.pipeline().addLast("encoder", new PacketEncoderV2(encryptionKey, packetLogger));
         ch.pipeline().addLast(tcpChannelHandler);
