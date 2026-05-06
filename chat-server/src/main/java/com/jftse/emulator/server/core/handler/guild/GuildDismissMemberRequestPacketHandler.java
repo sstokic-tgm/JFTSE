@@ -52,14 +52,15 @@ public class GuildDismissMemberRequestPacketHandler implements PacketHandler<FTC
                             .findFirst()
                             .orElse(null);
 
+                    SMSGGuildDismissMember dismissMemberPacket = SMSGGuildDismissMember.builder().result((short) 0).build();
                     if (targetClient != null) {
                         FTPlayer targetPlayer = targetClient.getPlayer();
                         targetPlayer.setGuildMemberId(null);
                         targetPlayer.setGuild(null);
 
-                        SMSGGuildDismissMember dismissMemberPacket = SMSGGuildDismissMember.builder().result((short) 0).build();
                         targetClient.getConnection().sendTCP(dismissMemberPacket);
                     }
+                    connection.sendTCP(dismissMemberPacket);
                 }
             }
         }
