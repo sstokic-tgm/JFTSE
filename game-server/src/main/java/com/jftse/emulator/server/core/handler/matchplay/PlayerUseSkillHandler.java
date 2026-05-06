@@ -245,6 +245,8 @@ public class PlayerUseSkillHandler implements PacketHandler<FTConnection, CMSGPl
                     S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(playerPocket);
                     connection.sendTCP(inventoryItemCountPacket);
                 }
+
+                GameEventBus.call(GameEventType.PLAYER_QUICK_SLOT_USE, connection.getClient(), slotIndex);
             }
         }
     }

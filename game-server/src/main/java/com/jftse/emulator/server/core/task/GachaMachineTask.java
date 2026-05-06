@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.task;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.lottery.GachaOpenResult;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.chat.S2CChatLobbyAnswerPacket;
@@ -135,6 +137,8 @@ public class GachaMachineTask extends AbstractTask {
 
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(finalResult);
             connection.sendTCP(inventoryDataPacket);
+
+            GameEventBus.call(GameEventType.GACHA_OPENED, client, gacha.getProductIndex(), resultList);
 
             logGachaResultSummary(player, gacha, count, resultList);
         } catch (ValidationException e) {

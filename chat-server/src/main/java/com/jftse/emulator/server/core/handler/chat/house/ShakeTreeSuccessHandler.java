@@ -1,5 +1,7 @@
 package com.jftse.emulator.server.core.handler.chat.house;
 
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.housing.FruitManager;
 import com.jftse.emulator.server.core.life.housing.FruitReward;
 import com.jftse.emulator.server.core.life.housing.FruitTree;
@@ -135,5 +137,7 @@ public class ShakeTreeSuccessHandler implements PacketHandler<FTConnection, CMSG
                 .unk0((short) 1)
                 .build();
         GameManager.getInstance().sendPacketToAllClientsInSameRoom(success, connection);
+
+        GameEventBus.call(GameEventType.TREE_SHAKE_SUCCESS, client, item);
     }
 }

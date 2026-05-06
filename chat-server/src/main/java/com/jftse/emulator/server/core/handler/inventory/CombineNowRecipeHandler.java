@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.inventory;
 
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.item.ItemFactory;
 import com.jftse.emulator.server.core.life.item.recipe.Recipe;
 import com.jftse.emulator.server.core.packets.inventory.S2CCombineNowRecipeAnswerPacket;
@@ -59,6 +61,10 @@ public class CombineNowRecipeHandler implements PacketHandler<FTConnection, CMSG
         List<PlayerPocket> playerPocketList = recipe.getItemsToUpdateFromClient();
         if (!playerPocketList.isEmpty()) {
             connection.sendTCP(playerPocketList.stream().map(S2CInventoryItemCountPacket::new).toArray(Packet[]::new));
+        }
+
+        if (packetResult == 0) {
+            GameEventBus.call(GameEventType.RECIPE_COMBINED, client, recipe);
         }
     }
 }

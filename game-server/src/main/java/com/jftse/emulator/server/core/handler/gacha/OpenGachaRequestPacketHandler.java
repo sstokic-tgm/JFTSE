@@ -2,6 +2,8 @@ package com.jftse.emulator.server.core.handler.gacha;
 
 import com.jftse.emulator.common.exception.ValidationException;
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.lottery.GachaOpenResult;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
@@ -61,6 +63,8 @@ public class OpenGachaRequestPacketHandler implements PacketHandler<FTConnection
             if (gachaOpenResult.isSuccess()) {
                 S2COpenGachaAnswerPacket openGachaAnswerPacket = new S2COpenGachaAnswerPacket(SUCCESS, List.of(gachaOpenResult.getAwardedItem()));
                 connection.sendTCP(openGachaAnswerPacket);
+
+                GameEventBus.call(GameEventType.GACHA_OPENED, client, productIndex, List.of(gachaOpenResult));
             } else {
                 log.debug("Gacha open failed for playerId {}: {}", client.getPlayer().getId(), gachaOpenResult.getFailureReason());
 

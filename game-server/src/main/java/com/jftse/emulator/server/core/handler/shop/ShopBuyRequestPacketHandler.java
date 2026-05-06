@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.shop;
 
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.pet.S2CPetAddPacket;
 import com.jftse.emulator.server.core.packets.shop.S2CShopBuyPacket;
@@ -167,5 +169,7 @@ public class ShopBuyRequestPacketHandler implements PacketHandler<FTConnection, 
                 .gold(player.getGold())
                 .build();
         connection.sendTCP(moneyPacket);
+
+        GameEventBus.call(GameEventType.SHOP_ITEM_BOUGHT, client, playerPocketList, costsGold, costsAp);
     }
 }

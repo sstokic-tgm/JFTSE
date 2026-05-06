@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.chat.house;
 
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.housing.Fish;
 import com.jftse.emulator.server.core.life.housing.FishManager;
 import com.jftse.emulator.server.core.life.housing.FishState;
@@ -106,6 +108,8 @@ public class FishingEndHandler implements PacketHandler<FTConnection, CMSGFishin
 
                 S2CHousingRewardItemPacket housingRewardItemPacket = new S2CHousingRewardItemPacket(playerPocket, true);
                 connection.sendTCP(housingRewardItemPacket);
+
+                GameEventBus.call(GameEventType.FISHING_SUCCESS, client, item);
             }
         }
     }

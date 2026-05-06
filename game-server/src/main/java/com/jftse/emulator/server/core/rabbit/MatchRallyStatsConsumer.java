@@ -1,5 +1,7 @@
 package com.jftse.emulator.server.core.rabbit;
 
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.life.match.PlayerStats;
 import com.jftse.emulator.server.core.life.match.RallyResult;
 import com.jftse.emulator.server.core.life.match.RallyState;
@@ -47,6 +49,8 @@ public class MatchRallyStatsConsumer {
             synchronized (stats) {
                 updatePlayerStats(stats, message);
             }
+
+            GameEventBus.call(GameEventType.MP_BALL_HIT, message);
         }
     }
 

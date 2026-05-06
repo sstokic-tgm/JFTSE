@@ -1,6 +1,8 @@
 package com.jftse.emulator.server.core.handler.enchant;
 
 import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.life.event.GameEventBus;
+import com.jftse.emulator.server.core.life.event.GameEventType;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
@@ -203,6 +205,8 @@ public class ItemEnchantHandler implements PacketHandler<FTConnection, CMSGEncha
 
             S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
             connection.sendTCP(inventoryDataPacket);
+
+            GameEventBus.call(GameEventType.ON_ENCHANT, client, itemPocket, costs);
         }
     }
 
