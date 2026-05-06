@@ -1,0 +1,227 @@
+package com.jftse.emulator.server.core.handler.enchant;
+
+import com.jftse.emulator.server.core.client.FTPlayer;
+import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemCountPacket;
+import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
+import com.jftse.emulator.server.net.FTClient;
+import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.item.ItemEnchant;
+import com.jftse.entities.database.model.item.ItemEnchantLevel;
+import com.jftse.entities.database.model.pocket.PlayerPocket;
+import com.jftse.entities.database.model.pocket.Pocket;
+import com.jftse.server.core.enchant.EnchantForge;
+import com.jftse.server.core.enchant.EnchantResultMessage;
+import com.jftse.server.core.enchant.EnchantingItem;
+import com.jftse.server.core.handler.PacketHandler;
+import com.jftse.server.core.handler.PacketId;
+import com.jftse.server.core.item.EElementalKind;
+import com.jftse.server.core.service.EnchantService;
+import com.jftse.server.core.service.PlayerPocketService;
+import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.service.PocketService;
+import com.jftse.server.core.shared.packets.enchant.CMSGEnchantRequest;
+import com.jftse.server.core.shared.packets.enchant.SMSGEnchantAnswer;
+import com.jftse.server.core.shared.packets.inventory.SMSGInventoryRemoveItem;
+import com.jftse.server.core.shared.packets.shop.SMSGSetMoney;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+@PacketId(CMSGEnchantRequest.PACKET_ID)
+public class ItemEnchantHandler implements PacketHandler<FTConnection, CMSGEnchantRequest> {
+    private final EnchantService enchantService;
+    private final PlayerPocketService playerPocketService;
+    private final PocketService pocketService;
+    private final PlayerService playerService;
+
+    public ItemEnchantHandler() {
+        enchantService = ServiceManager.getInstance().getEnchantService();
+        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
+        pocketService = ServiceManager.getInstance().getPocketService();
+        playerService = ServiceManager.getInstance().getPlayerService();
+    }
+
+    @Override
+    public void handle(FTConnection connection, CMSGEnchantRequest enchantRequestPacket) {
+        FTClient client = connection.getClient();
+        if (!client.hasPlayer())
+            return;
+
+        FTPlayer player = client.getPlayer();
+        Pocket pocket = pocketService.findById(player.getPocketId());
+
+        int itemPocketId = enchantRequestPacket.getItemPocketId();
+        boolean isValidPlayerPocketId = enchantService.isValidPlayerPocketId(itemPocketId, pocket);
+        if (!isValidPlayerPocketId) {
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_02.getCode())
+                    .build();
+            connection.sendTCP(result);
+            return;
+        }
+
+        int elementPocketId = enchantRequestPacket.getElementPocketId();
+        int jewelPocketId = enchantRequestPacket.getJewelPocketId();
+        boolean hasIngredients = enchantService.hasJewel(jewelPocketId, pocket) && enchantService.hasElemental(elementPocketId, pocket);
+        if (!hasIngredients) {
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_03.getCode())
+                    .build();
+            connection.sendTCP(result);
+            return;
+        }
+
+        if (!enchantService.isElemental(itemPocketId) && !enchantService.isEnchantable(itemPocketId)) {
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_07.getCode())
+                    .build();
+            connection.sendTCP(result);
+            return;
+        }
+
+        PlayerPocket itemPocket = enchantService.getPlayerPocket(itemPocketId);
+        PlayerPocket elementPocket = enchantService.getPlayerPocket(elementPocketId);
+        PlayerPocket jewelPocket = enchantService.getPlayerPocket(jewelPocketId);
+        final int currentEnchantLevel = itemPocket.getEnchantLevel();
+
+        ItemEnchant itemJewel = enchantService.getItemEnchant(jewelPocketId);
+        ItemEnchant itemEnchant = enchantService.getItemEnchant(elementPocketId);
+        if (itemEnchant == null) {
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01.getCode())
+                    .build();
+            connection.sendTCP(result);
+            return;
+        }
+
+        int grade = currentEnchantLevel + 1;
+        if (itemPocket.getEnchantElement().byteValue() != EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()).getValue() && itemPocket.getEnchantLevel() > 0) {
+            grade = 1;
+        }
+
+        ItemEnchantLevel itemEnchantLevel = enchantService.getItemEnchantLevel(itemEnchant.getElementalKind(), grade);
+        if (itemJewel == null || itemEnchantLevel == null) {
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01.getCode())
+                    .build();
+            connection.sendTCP(result);
+            return;
+        }
+
+        final int costs = itemEnchantLevel.getRequireGold();
+        if (player.getGold() < costs) {
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_06.getCode())
+                    .build();
+            connection.sendTCP(result);
+            return;
+        }
+
+        List<EElementalKind> elementals = Stream.of(EElementalKind.values())
+                .filter(e -> e.getValue() >= 5 && e.getValue() <= 8)
+                .toList();
+        if (elementals.contains(EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
+            if (enchantService.isMaxEnchantLevel(itemPocketId, true, EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
+                SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                        .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_05.getCode())
+                        .build();
+                connection.sendTCP(result);
+                return;
+            }
+        } else {
+            if (enchantService.isMaxEnchantLevel(itemPocketId, false, EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
+                SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                        .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_05.getCode())
+                        .build();
+                connection.sendTCP(result);
+                return;
+            }
+        }
+
+        EnchantForge enchantForge = new EnchantForge();
+        EnchantingItem enchantingItem = enchantForge.createEnchantingItem(itemJewel, itemEnchantLevel, grade != 1 ? currentEnchantLevel : 0);
+
+        int newGold = player.getGold() - costs;
+        player.syncGold(newGold);
+        playerService.setMoney(player.getPlayer(), newGold);
+
+        SMSGSetMoney moneyAnswerPacket = SMSGSetMoney.builder()
+                .ap(client.getAp().get())
+                .gold(player.getGold())
+                .build();
+        connection.sendTCP(moneyAnswerPacket);
+
+        consumeIngredients(connection, pocket, elementPocket);
+        consumeIngredients(connection, pocket, jewelPocket);
+
+        int newEnchantLevel = enchantForge.enchantItem(enchantingItem);
+        if (newEnchantLevel <= currentEnchantLevel && grade != 1) {
+            if (elementals.contains(EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
+                if (itemPocket.getEnchantElement().byteValue() == EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()).getValue()) {
+                    itemPocket.setEnchantLevel(newEnchantLevel);
+                } else {
+                    itemPocket.setEnchantLevel(1);
+                    itemPocket.setEnchantElement((int) EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()).getValue());
+                }
+            }
+            itemPocket = playerPocketService.save(itemPocket);
+
+            List<PlayerPocket> playerPocketList = new ArrayList<>();
+            playerPocketList.add(itemPocket);
+
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_FAILED_01.getCode())
+                    .build();
+            connection.sendTCP(result);
+
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
+            connection.sendTCP(inventoryDataPacket);
+        } else {
+            if (elementals.contains(EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()))) {
+                itemPocket.setEnchantElement((int) EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()).getValue());
+                itemPocket.setEnchantLevel(newEnchantLevel);
+            } else {
+                int elementalKind = EElementalKind.valueOf(itemEnchant.getElementalKind().toUpperCase()).getValue();
+                switch (elementalKind) {
+                    case 1 -> itemPocket.setEnchantStr(itemPocket.getEnchantStr() + 1);
+                    case 2 -> itemPocket.setEnchantSta(itemPocket.getEnchantSta() + 1);
+                    case 3 -> itemPocket.setEnchantDex(itemPocket.getEnchantDex() + 1);
+                    case 4 -> itemPocket.setEnchantWil(itemPocket.getEnchantWil() + 1);
+                }
+            }
+            itemPocket = playerPocketService.save(itemPocket);
+
+            List<PlayerPocket> playerPocketList = new ArrayList<>();
+            playerPocketList.add(itemPocket);
+
+            SMSGEnchantAnswer result = SMSGEnchantAnswer.builder()
+                    .result(EnchantResultMessage.MSG_ITEM_ENCHANT_SUCCESS.getCode())
+                    .build();
+            connection.sendTCP(result);
+
+            S2CInventoryItemsPlacePacket inventoryDataPacket = new S2CInventoryItemsPlacePacket(playerPocketList);
+            connection.sendTCP(inventoryDataPacket);
+        }
+    }
+
+    private void consumeIngredients(final FTConnection connection, Pocket pocket, PlayerPocket pp) {
+        int itemCountJewel = pp.getItemCount() - 1;
+        if (itemCountJewel <= 0) {
+            playerPocketService.remove(pp.getId());
+            pocketService.decrementPocketBelongings(pocket);
+
+            SMSGInventoryRemoveItem inventoryRemoveItemPacket = SMSGInventoryRemoveItem.builder()
+                    .itemPocketId(Math.toIntExact(pp.getId()))
+                    .build();
+            connection.sendTCP(inventoryRemoveItemPacket);
+        } else {
+            pp.setItemCount(itemCountJewel);
+            playerPocketService.save(pp);
+
+            S2CInventoryItemCountPacket inventoryItemCountPacket = new S2CInventoryItemCountPacket(pp);
+            connection.sendTCP(inventoryItemCountPacket);
+        }
+    }
+}

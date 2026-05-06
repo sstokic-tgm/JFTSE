@@ -1,0 +1,6 @@
+message SMSG_ChatHousePosition (0x190B) {
+    short position = 1;
+    byte level = 2;
+    int32 x = 3;
+    int32 y = 4;
+}

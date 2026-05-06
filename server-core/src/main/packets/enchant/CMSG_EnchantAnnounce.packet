@@ -1,0 +1,5 @@
+message CMSG_EnchantAnnounce (0x2459) {
+    byte textSize = 1;
+    byte textColor = 2;
+    string message = 3;
+}

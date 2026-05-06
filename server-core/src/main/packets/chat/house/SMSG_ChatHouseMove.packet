@@ -1,0 +1,9 @@
+message SMSG_ChatHouseMove (0x18A6) {
+    short position = 1;
+    byte unk0 = 2;
+    byte unk1 = 3;
+    short x = 4;
+    short y = 5;
+    byte animationType = 6;
+    byte unk2 = 7;
+}

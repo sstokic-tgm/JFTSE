@@ -1,0 +1,3 @@
+message SMSG_InitSinglePlayGame (0x220D) {
+    char result = 1;
+}

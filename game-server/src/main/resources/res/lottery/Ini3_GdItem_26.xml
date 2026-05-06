@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Solid Guardian Item 팬블러드-->
+<GuardianItemList>
+	<GuardianItem Index="1" _Name_="No Item" ShopIndex="0" MaterialIndex="0" QuantityMin="0" QuantityMax="0" ChansPer="20" ProductOpt="0"/>
+	<GuardianItem Index="2" _Name_="Scrap Of Steel" ShopIndex="0" MaterialIndex="139" QuantityMin="1" QuantityMax="2" ChansPer="7" ProductOpt="0"/>
+	<GuardianItem Index="3" _Name_="Iron Ore" ShopIndex="0" MaterialIndex="143" QuantityMin="1" QuantityMax="2" ChansPer="1" ProductOpt="0"/>
+	<GuardianItem Index="4" _Name_="Holy Shield" ShopIndex="3000" MaterialIndex="0" QuantityMin="1" QuantityMax="30" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="5" _Name_="Medium Potion" ShopIndex="3002" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="6" _Name_="Large Potion" ShopIndex="3003" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="7" _Name_="Meteor" ShopIndex="3007" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="8" _Name_="Homing Soul" ShopIndex="3008" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="9" _Name_="Fireball" ShopIndex="3009" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="10" _Name_="Polymorph" ShopIndex="3010" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="11" _Name_="Minimum" ShopIndex="3011" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="12" _Name_="Apollon Flash" ShopIndex="3013" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="13" _Name_="Spider Trap" ShopIndex="3014" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="14" _Name_="Blizzard" ShopIndex="3015" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="15" _Name_="Magic Circle" ShopIndex="3016" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="0" ProductOpt="0"/>
+	<GuardianItem Index="16" _Name_="Kiss of Medusa" ShopIndex="3017" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="0" ProductOpt="0"/>
+	<GuardianItem Index="17" _Name_="Healing(Small)" ShopIndex="3018" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="3" ProductOpt="0"/>
+	<GuardianItem Index="18" _Name_="Healing(Medium)" ShopIndex="3019" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="0" ProductOpt="0"/>
+	<GuardianItem Index="19" _Name_="Healing(Big)" ShopIndex="3020" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="0" ProductOpt="0"/>
+	<GuardianItem Index="20" _Name_="Healing(Deluxe)" ShopIndex="3021" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="0" ProductOpt="0"/>
+	<GuardianItem Index="21" _Name_="Area Shield " ShopIndex="3022" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="0" ProductOpt="0"/>
+	<GuardianItem Index="22" _Name_="Inferno" ShopIndex="3023" MaterialIndex="0" QuantityMin="7" QuantityMax="10" ChansPer="0" ProductOpt="0"/>
+	<GuardianItem Index="23" _Name_="Old Green T-shirt" ShopIndex="30000" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="24" _Name_="Old Green Pants" ShopIndex="30001" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="25" _Name_="Old Green White Shoes" ShopIndex="30002" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="26" _Name_="Old Petit Pink Camisole" ShopIndex="30003" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="27" _Name_="Old Petit White Hot Pants" ShopIndex="30004" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="28" _Name_="Old Petit Coral Shoes" ShopIndex="30005" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="29" _Name_="Old Lizard Neck" ShopIndex="30006" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="30" _Name_="Old Lizard Pants" ShopIndex="30007" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="31" _Name_="Old Lizard Boots" ShopIndex="30008" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="32" _Name_="Old Caribbean Red Tanktop" ShopIndex="30009" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="33" _Name_="Old Caribbean Navajo Pants" ShopIndex="30010" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="34" _Name_="Old Caribbean Navajo Sandal" ShopIndex="30011" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="35" _Name_="Old Cute Beige Sleeveless " ShopIndex="30012" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="36" _Name_="Old Cutie Pink Hot Pants" ShopIndex="30013" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="37" _Name_="Old Cuite Orange Sandal" ShopIndex="30014" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="38" _Name_="Old Water Blue Camisole" ShopIndex="30021" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="39" _Name_="Old Water Blue Skirt" ShopIndex="30022" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="40" _Name_="Old Water Blue Sandal" ShopIndex="30023" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="2" ProductOpt="0"/>
+	<GuardianItem Index="41" _Name_="Parasol" ShopIndex="1156" MaterialIndex="0" QuantityMin="1" QuantityMax="1" ChansPer="0" ProductOpt="0"/>
+</GuardianItemList>

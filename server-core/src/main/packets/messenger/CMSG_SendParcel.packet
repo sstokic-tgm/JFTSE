@@ -1,0 +1,7 @@
+message CMSG_SendParcel (0x2199) {
+    string receiverName = 1;
+    string message = 2;
+    int32 playerPocketId = 3;
+    byte unk0 = 4;
+    int32 cashOnDelivery = 5;
+}

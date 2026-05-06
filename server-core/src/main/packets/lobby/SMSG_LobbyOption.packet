@@ -1,0 +1,3 @@
+message SMSG_LobbyOption (0x189F) {
+    byte option = 1;
+}

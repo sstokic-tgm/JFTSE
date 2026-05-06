@@ -1,0 +1,3 @@
+message SMSG_SendProposal (0x251E) {
+    byte status = 1;
+}

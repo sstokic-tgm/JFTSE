@@ -1,0 +1,2 @@
+message CMSG_RequestPlayerList (0x1009) {
+}

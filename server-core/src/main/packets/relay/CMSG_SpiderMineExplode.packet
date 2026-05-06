@@ -1,0 +1,4 @@
+message CMSG_SpiderMineExplode (0x3391) {
+    byte targetPosition = 1;
+    short spiderMineId = 2;
+}

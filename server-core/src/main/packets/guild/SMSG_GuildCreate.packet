@@ -1,0 +1,3 @@
+message SMSG_GuildCreate (0x200C) {
+    char result = 1;
+}

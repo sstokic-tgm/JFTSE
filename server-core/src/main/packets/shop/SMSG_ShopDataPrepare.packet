@@ -1,0 +1,6 @@
+message SMSG_ShopDataPrepare (0x238A) {
+    byte category = 1;
+    byte part = 2;
+    byte player = 3;
+    int32 size = 4;
+}

@@ -1,0 +1,2 @@
+message CMSG_ReadyToSkip (0x17DD) {
+}

@@ -1,0 +1,3 @@
+message CMSG_AddFriend (0x1F41) {
+    string playerName = 1;
+}

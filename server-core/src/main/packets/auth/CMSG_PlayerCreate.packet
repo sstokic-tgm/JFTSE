@@ -1,0 +1,10 @@
+message CMSG_PlayerCreate (0x101B) {
+     int32 playerId = 1;
+     string nickname = 2;
+     byte strength = 3;
+     byte stamina = 4;
+     byte dexterity = 5;
+     byte willpower = 6;
+     byte statusPoints = 7;
+     byte level = 8;
+}

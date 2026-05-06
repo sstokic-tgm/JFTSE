@@ -1,0 +1,3 @@
+message SMSG_PlayerCreate (0x101C) {
+    char result = 1;
+}

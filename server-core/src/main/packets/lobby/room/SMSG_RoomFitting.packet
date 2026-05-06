@@ -1,0 +1,4 @@
+message SMSG_RoomFitting (0x1D61) {
+    short position = 1;
+    bool ready = 2;
+}

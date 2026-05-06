@@ -1,0 +1,3 @@
+message CMSG_InventoryWearQuick (0x1BD8) {
+    repeated int32 quickSlotList = 1 [len = 5];
+}

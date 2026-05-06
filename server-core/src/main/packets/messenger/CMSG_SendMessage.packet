@@ -1,0 +1,4 @@
+message CMSG_SendMessage (0x1F5F) {
+    string receiverName = 1;
+    string message = 2;
+}

@@ -1,0 +1,4 @@
+message CMSG_GuildChangeSubMaster (0x2021) {
+    byte status = 1;
+    int32 playerPositionInGuild = 2;
+}

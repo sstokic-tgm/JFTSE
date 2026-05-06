@@ -1,0 +1,5 @@
+message CMSG_RoomJoin (0x138B) {
+    short roomId = 1;
+    byte unk0 = 2;
+    string password = 3;
+}

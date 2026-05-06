@@ -1,0 +1,7 @@
+message CMSG_ChatSquareMove (0x18A2) {
+    byte unk0 = 1;
+    float x = 2;
+    float y = 3;
+    float x2 = 4;
+    float y2 = 5;
+}

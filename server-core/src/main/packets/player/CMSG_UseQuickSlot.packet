@@ -1,0 +1,3 @@
+message CMSG_UseQuickSlot (0x1BDA) {
+    int32 quickSlotId = 1;
+}

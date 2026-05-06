@@ -1,0 +1,4 @@
+message CMSG_SessionTime (0xFA5) {
+    int32 accountSessionTime = 1;
+    int32 playerSessionTime = 2;
+}

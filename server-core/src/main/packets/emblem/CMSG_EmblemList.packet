@@ -1,0 +1,2 @@
+message CMSG_EmblemList (0x226A) {
+}

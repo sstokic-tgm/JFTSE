@@ -1,0 +1,3 @@
+message SMSG_AuthLogin (0xFAA) {
+    char result = 1;
+}

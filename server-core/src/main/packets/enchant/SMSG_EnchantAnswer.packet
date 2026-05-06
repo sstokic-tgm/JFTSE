@@ -1,0 +1,3 @@
+message SMSG_EnchantAnswer (0x2456) {
+    byte result = 1;
+}

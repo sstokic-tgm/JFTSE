@@ -1,0 +1,8 @@
+message CMSG_ChatHouseMove (0x18A5) {
+    byte unk0 = 1;
+    byte unk1 = 2;
+    short x = 3;
+    short y = 4;
+    byte animationType = 5;
+    byte unk2 = 6;
+}

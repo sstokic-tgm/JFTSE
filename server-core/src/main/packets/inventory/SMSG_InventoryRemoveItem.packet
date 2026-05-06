@@ -1,0 +1,3 @@
+message SMSG_InventoryRemoveItem (0x1B74) {
+    int32 itemPocketId = 1;
+}

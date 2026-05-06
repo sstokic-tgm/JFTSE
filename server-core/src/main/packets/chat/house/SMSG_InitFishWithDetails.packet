@@ -1,0 +1,18 @@
+message SMSG_InitFishWithDetails (0x2B0C) {
+    short fishId = 1;
+    byte fishModel = 2;
+    byte fishState = 3;
+    float unk0 = 4;
+    float z = 5;
+    float unk1 = 6;
+    float x = 7;
+    float y = 8;
+    float dirX = 9;
+    float dirY = 10;
+    float destX = 11;
+    float destY = 12;
+    float speed = 13;
+    float unk5 = 14;
+    float unk6 = 15;
+    short unk7 = 16;
+}

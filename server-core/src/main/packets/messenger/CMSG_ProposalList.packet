@@ -1,0 +1,4 @@
+message CMSG_ProposalList (0x2526) {
+    byte listType = 1;
+    int32 unk0 = 2;
+}

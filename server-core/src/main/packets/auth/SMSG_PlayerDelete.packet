@@ -1,0 +1,3 @@
+message SMSG_PlayerDelete (0x1B6C) {
+    char result = 1;
+}

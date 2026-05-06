@@ -1,0 +1,4 @@
+message CMSG_DeleteMessage (0x1F62) {
+    byte type = 1;
+    repeated int32 messageIds = 2;
+}

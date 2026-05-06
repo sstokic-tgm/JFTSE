@@ -1,0 +1,3 @@
+message SMSG_GuildCastleChangeInformation (0x2047) {
+    int32 result = 1;
+}

@@ -1,0 +1,20 @@
+package com.jftse.emulator.server.core.packets.messenger;
+
+import com.jftse.entities.database.model.player.Player;
+import com.jftse.server.core.protocol.Packet;
+import com.jftse.server.core.protocol.PacketOperations;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+public class S2CFriendRequestNotificationPacket extends Packet {
+    public S2CFriendRequestNotificationPacket(List<Player> friendList) {
+        super(PacketOperations.S2CFriendRequestNotification);
+
+        this.write((byte) friendList.size());
+        friendList.stream().map(Player::getName).forEach(this::write);
+    }
+}

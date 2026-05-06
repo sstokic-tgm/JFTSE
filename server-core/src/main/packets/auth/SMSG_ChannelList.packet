@@ -1,0 +1,14 @@
+message Channel {
+    byte id = 1;
+    short id2 = 2;
+    byte type = 3;
+    string hostname = 4;
+    short port = 5;
+    short population = 6;
+    boolean customChannel = 7;
+    string name = 8;
+}
+
+message SMSG_ChannelList (0x1010) {
+    repeated Channel channels = 1;
+}

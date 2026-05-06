@@ -1,0 +1,4 @@
+message CMSG_ChatMessageLobby (0x1705) {
+    char unk = 1;
+    string message = 2;
+}

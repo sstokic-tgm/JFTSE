@@ -1,0 +1,2 @@
+message CMSG_LobbyJoin (0x237A) {
+}

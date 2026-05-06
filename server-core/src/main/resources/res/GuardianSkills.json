@@ -1,0 +1,687 @@
+[
+  {
+    "btItemId": 1,
+    "guardianBtItems": [
+      {
+        "skillIndex": 11,
+        "chance": 50
+      },
+      {
+        "skillIndex": 10,
+        "chance": 15
+      },
+      {
+        "skillIndex": 5,
+        "chance": 25
+      },
+      {
+        "skillIndex": 3,
+        "chance": 10
+      }
+    ]
+  },
+  {
+    "btItemId": 2,
+    "guardianBtItems": [
+      {
+        "skillIndex": 11,
+        "chance": 20
+      },
+      {
+        "skillIndex": 7,
+        "chance": 20
+      },
+      {
+        "skillIndex": 5,
+        "chance": 20
+      },
+      {
+        "skillIndex": 3,
+        "chance": 20
+      },
+      {
+        "skillIndex": 10,
+        "chance": 20
+      }
+    ]
+  },
+  {
+    "btItemId": 3,
+    "guardianBtItems": [
+      {
+        "skillIndex": 14,
+        "chance": 20
+      },
+      {
+        "skillIndex": 8,
+        "chance": 20
+      },
+      {
+        "skillIndex": 3,
+        "chance": 20
+      },
+      {
+        "skillIndex": 12,
+        "chance": 20
+      },
+      {
+        "skillIndex": 7,
+        "chance": 20
+      }
+    ]
+  },
+  {
+    "btItemId": 4,
+    "guardianBtItems": [
+      {
+        "skillIndex": 3,
+        "chance": 20
+      },
+      {
+        "skillIndex": 7,
+        "chance": 20
+      },
+      {
+        "skillIndex": 5,
+        "chance": 30
+      },
+      {
+        "skillIndex": 21,
+        "chance": 30
+      }
+    ]
+  },
+  {
+    "btItemId": 5,
+    "guardianBtItems": [
+      {
+        "skillIndex": 20,
+        "chance": 50
+      },
+      {
+        "skillIndex": 3,
+        "chance": 10
+      },
+      {
+        "skillIndex": 5,
+        "chance": 20
+      },
+      {
+        "skillIndex": 12,
+        "chance": 20
+      }
+    ]
+  },
+  {
+    "btItemId": 6,
+    "guardianBtItems": [
+      {
+        "skillIndex": 20,
+        "chance": 50
+      },
+      {
+        "skillIndex": 3,
+        "chance": 10
+      },
+      {
+        "skillIndex": 5,
+        "chance": 20
+      },
+      {
+        "skillIndex": 12,
+        "chance": 20
+      }
+    ]
+  },
+  {
+    "btItemId": 7,
+    "guardianBtItems": [
+      {
+        "skillIndex": 3,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 45
+      },
+      {
+        "skillIndex": 24,
+        "chance": 25
+      },
+      {
+        "skillIndex": 15,
+        "chance": 5
+      }
+    ]
+  },
+  {
+    "btItemId": 8,
+    "guardianBtItems": [
+      {
+        "skillIndex": 21,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 20
+      },
+      {
+        "skillIndex": 3,
+        "chance": 25
+      },
+      {
+        "skillIndex": 10,
+        "chance": 20
+      },
+      {
+        "skillIndex": 24,
+        "chance": 10
+      }
+    ]
+  },
+  {
+    "btItemId": 9,
+    "guardianBtItems": [
+      {
+        "skillIndex": 5,
+        "chance": 35
+      },
+      {
+        "skillIndex": 3,
+        "chance": 20
+      },
+      {
+        "skillIndex": 10,
+        "chance": 20
+      },
+      {
+        "skillIndex": 24,
+        "chance": 20
+      },
+      {
+        "skillIndex": 16,
+        "chance": 5
+      }
+    ]
+  },
+  {
+    "btItemId": 10,
+    "guardianBtItems": [
+      {
+        "skillIndex": 14,
+        "chance": 20
+      },
+      {
+        "skillIndex": 8,
+        "chance": 20
+      },
+      {
+        "skillIndex": 3,
+        "chance": 20
+      },
+      {
+        "skillIndex": 12,
+        "chance": 20
+      },
+      {
+        "skillIndex": 24,
+        "chance": 20
+      }
+    ]
+  },
+  {
+    "btItemId": 11,
+    "guardianBtItems": [
+      {
+        "skillIndex": 3,
+        "chance": 25
+      },
+      {
+        "skillIndex": 25,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 25
+      },
+      {
+        "skillIndex": 24,
+        "chance": 25
+      }
+    ]
+  },
+  {
+    "btItemId": 12,
+    "guardianBtItems": [
+      {
+        "skillIndex": 26,
+        "chance": 25
+      },
+      {
+        "skillIndex": 3,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 25
+      },
+      {
+        "skillIndex": 24,
+        "chance": 25
+      }
+    ]
+  },
+  {
+    "btItemId": 13,
+    "guardianBtItems": [
+      {
+        "skillIndex": 27,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 45
+      },
+      {
+        "skillIndex": 24,
+        "chance": 25
+      },
+      {
+        "skillIndex": 15,
+        "chance": 5
+      }
+    ]
+  },
+  {
+    "btItemId": 14,
+    "guardianBtItems": [
+      {
+        "skillIndex": 21,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 20
+      },
+      {
+        "skillIndex": 3,
+        "chance": 25
+      },
+      {
+        "skillIndex": 10,
+        "chance": 20
+      },
+      {
+        "skillIndex": 27,
+        "chance": 10
+      }
+    ]
+  },
+  {
+    "btItemId": 15,
+    "guardianBtItems": [
+      {
+        "skillIndex": 27,
+        "chance": 25
+      },
+      {
+        "skillIndex": 3,
+        "chance": 30
+      },
+      {
+        "skillIndex": 10,
+        "chance": 20
+      },
+      {
+        "skillIndex": 24,
+        "chance": 20
+      },
+      {
+        "skillIndex": 16,
+        "chance": 5
+      }
+    ]
+  },
+  {
+    "btItemId": 16,
+    "guardianBtItems": [
+      {
+        "skillIndex": 14,
+        "chance": 20
+      },
+      {
+        "skillIndex": 8,
+        "chance": 20
+      },
+      {
+        "skillIndex": 3,
+        "chance": 20
+      },
+      {
+        "skillIndex": 12,
+        "chance": 20
+      },
+      {
+        "skillIndex": 27,
+        "chance": 20
+      }
+    ]
+  },
+  {
+    "btItemId": 17,
+    "guardianBtItems": [
+      {
+        "skillIndex": 3,
+        "chance": 25
+      },
+      {
+        "skillIndex": 25,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 25
+      },
+      {
+        "skillIndex": 27,
+        "chance": 25
+      }
+    ]
+  },
+  {
+    "btItemId": 18,
+    "guardianBtItems": [
+      {
+        "skillIndex": 26,
+        "chance": 25
+      },
+      {
+        "skillIndex": 3,
+        "chance": 25
+      },
+      {
+        "skillIndex": 5,
+        "chance": 25
+      },
+      {
+        "skillIndex": 27,
+        "chance": 25
+      }
+    ]
+  },
+  {
+    "btItemId": 19,
+    "guardianBtItems": [
+      {
+        "skillIndex": 3,
+        "chance": 20
+      },
+      {
+        "skillIndex": 7,
+        "chance": 20
+      },
+      {
+        "skillIndex": 5,
+        "chance": 30
+      },
+      {
+        "skillIndex": 31,
+        "chance": 30
+      }
+    ]
+  },
+  {
+    "btItemId": 20,
+    "guardianBtItems": [
+      {
+        "skillIndex": 2,
+        "chance": 20
+      },
+      {
+        "skillIndex": 20,
+        "chance": 30
+      },
+      {
+        "skillIndex": 36,
+        "chance": 50
+      }
+    ]
+  },
+  {
+    "btItemId": 21,
+    "guardianBtItems": [
+      {
+        "skillIndex": 55,
+        "chance": 20
+      },
+      {
+        "skillIndex": 7,
+        "chance": 20
+      },
+      {
+        "skillIndex": 5,
+        "chance": 30
+      },
+      {
+        "skillIndex": 21,
+        "chance": 30
+      }
+    ]
+  },
+  {
+    "btItemId": 22,
+    "guardianBtItems": [
+      {
+        "skillIndex": 55,
+        "chance": 20
+      },
+      {
+        "skillIndex": 7,
+        "chance": 20
+      },
+      {
+        "skillIndex": 5,
+        "chance": 30
+      },
+      {
+        "skillIndex": 31,
+        "chance": 30
+      }
+    ]
+  },
+  {
+    "btItemId": 23,
+    "guardianBtItems": [
+      {
+        "skillIndex": 5,
+        "chance": 20
+      },
+      {
+        "skillIndex": 26,
+        "chance": 30
+      },
+      {
+        "skillIndex": 56,
+        "chance": 50
+      }
+    ]
+  },
+  {
+    "btItemId": 24,
+    "guardianBtItems": [
+      {
+        "skillIndex": 27,
+        "chance": 30
+      },
+      {
+        "skillIndex": 20,
+        "chance": 20
+      },
+      {
+        "skillIndex": 61,
+        "chance": 50
+      }
+    ]
+  },
+  {
+    "btItemId": 25,
+    "guardianBtItems": [
+      {
+        "skillIndex": 2,
+        "chance": 10
+      },
+      {
+        "skillIndex": 5,
+        "chance": 30
+      },
+      {
+        "skillIndex": 20,
+        "chance": 20
+      },
+      {
+        "skillIndex": 62,
+        "chance": 40
+      }
+    ]
+  },
+  {
+    "btItemId": 26,
+    "guardianBtItems": [
+      {
+        "skillIndex": 2,
+        "chance": 15
+      },
+      {
+        "skillIndex": 5,
+        "chance": 50
+      },
+      {
+        "skillIndex": 12,
+        "chance": 20
+      },
+      {
+        "skillIndex": 18,
+        "chance": 5
+      },
+      {
+        "skillIndex": 28,
+        "chance": 5
+      },
+      {
+        "skillIndex": 30,
+        "chance": 5
+      }
+    ]
+  },
+  {
+    "btItemId": 27,
+    "guardianBtItems": [
+      {
+        "skillIndex": 5,
+        "chance": 5
+      },
+      {
+        "skillIndex": 7,
+        "chance": 5
+      },
+      {
+        "skillIndex": 12,
+        "chance": 5
+      },
+      {
+        "skillIndex": 28,
+        "chance": 5
+      },
+      {
+        "skillIndex": 30,
+        "chance": 5
+      },
+      {
+        "skillIndex": 63,
+        "chance": 75
+      }
+    ]
+  },
+  {
+    "btItemId": 28,
+    "guardianBtItems": [
+      {
+        "skillIndex": 7,
+        "chance": 10
+      },
+      {
+        "skillIndex": 5,
+        "chance": 40
+      },
+      {
+        "skillIndex": 12,
+        "chance": 25
+      },
+      {
+        "skillIndex": 8,
+        "chance": 5
+      },
+      {
+        "skillIndex": 14,
+        "chance": 5
+      },
+      {
+        "skillIndex": 18,
+        "chance": 5
+      },
+      {
+        "skillIndex": 28,
+        "chance": 5
+      },
+      {
+        "skillIndex": 30,
+        "chance": 5
+      }
+    ]
+  },
+  {
+    "btItemId": 29,
+    "guardianBtItems": [
+      {
+        "skillIndex": 2,
+        "chance": 10
+      },
+      {
+        "skillIndex": 5,
+        "chance": 30
+      },
+      {
+        "skillIndex": 12,
+        "chance": 20
+      },
+      {
+        "skillIndex": 8,
+        "chance": 5
+      },
+      {
+        "skillIndex": 14,
+        "chance": 5
+      },
+      {
+        "skillIndex": 31,
+        "chance": 5
+      },
+      {
+        "skillIndex": 18,
+        "chance": 5
+      },
+      {
+        "skillIndex": 28,
+        "chance": 5
+      },
+      {
+        "skillIndex": 30,
+        "chance": 5
+      },
+      {
+        "skillIndex": 64,
+        "chance": 10
+      }
+    ]
+  }
+]

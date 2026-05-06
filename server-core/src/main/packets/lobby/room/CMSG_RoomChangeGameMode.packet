@@ -1,0 +1,3 @@
+message CMSG_RoomChangeGameMode (0x18B2) {
+    byte mode = 1;
+}

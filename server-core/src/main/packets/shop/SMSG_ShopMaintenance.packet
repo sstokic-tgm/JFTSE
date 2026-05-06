@@ -1,0 +1,4 @@
+message SMSG_ShopMaintenance (0x2383) {
+    short result = 1;
+    int32 playerId = 2;
+}

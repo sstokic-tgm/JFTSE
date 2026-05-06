@@ -1,0 +1,4 @@
+message CMSG_SeeMessage (0x1F67) {
+    byte type = 1;
+    int32 messageId = 2;
+}

@@ -1,0 +1,3 @@
+message CMSG_RoomChangeName (0x1791) {
+    string roomName = 1;
+}

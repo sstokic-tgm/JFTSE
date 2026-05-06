@@ -1,0 +1,2 @@
+message CMSG_GuildMemberList (0x1FBA) {
+}

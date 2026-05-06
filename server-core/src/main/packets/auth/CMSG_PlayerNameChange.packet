@@ -1,0 +1,5 @@
+message CMSG_PlayerNameChange (0x1022) {
+    int32 playerId = 1;
+    string playerName = 2;
+    string newPlayerName = 3;
+}

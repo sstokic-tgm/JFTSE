@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<ItemList> 
+    <Item Index="1" _Name_="힘" ElementalKind="STR" BasicPer="0.0" FailedPercent="0" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="0" RequireGold="1000"/>  
+    <Item Index="2" _Name_="체력" ElementalKind="STA" BasicPer="0.0" FailedPercent="0" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="0" RequireGold="1000"/>  
+    <Item Index="3" _Name_="민첩" ElementalKind="DEX" BasicPer="0.0" FailedPercent="0" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="0" RequireGold="1000"/>  
+    <Item Index="4" _Name_="마력" ElementalKind="WIS" BasicPer="0.0" FailedPercent="0" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="0" RequireGold="1000"/>  
+    <Item Index="5" _Name_="대지 +1" ElementalKind="Earth" BasicPer="0.0" FailedPercent="5" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="5" RequireGold="180"/>  
+    <Item Index="6" _Name_="대지 +2" ElementalKind="Earth" BasicPer="0.0" FailedPercent="10" Grade="2" DownGrade="0" MinEfficiency="6" MaxEfficiency="8" RequireGold="360"/>  
+    <Item Index="7" _Name_="대지 +3" ElementalKind="Earth" BasicPer="0.0" FailedPercent="20" Grade="3" DownGrade="0" MinEfficiency="6" MaxEfficiency="11" RequireGold="540"/>  
+    <Item Index="8" _Name_="대지 +4" ElementalKind="Earth" BasicPer="0.0" FailedPercent="25" Grade="4" DownGrade="0" MinEfficiency="6" MaxEfficiency="14" RequireGold="720"/>  
+    <Item Index="9" _Name_="대지 +5" ElementalKind="Earth" BasicPer="0.0" FailedPercent="30" Grade="5" DownGrade="0" MinEfficiency="6" MaxEfficiency="17" RequireGold="900"/>  
+    <Item Index="10" _Name_="대지 +6" ElementalKind="Earth" BasicPer="0.0" FailedPercent="35" Grade="6" DownGrade="1" MinEfficiency="10" MaxEfficiency="20" RequireGold="1080"/>  
+    <Item Index="11" _Name_="대지 +7" ElementalKind="Earth" BasicPer="0.0" FailedPercent="40" Grade="7" DownGrade="1" MinEfficiency="14" MaxEfficiency="24" RequireGold="1260"/>  
+    <Item Index="12" _Name_="대지 +8" ElementalKind="Earth" BasicPer="0.0" FailedPercent="45" Grade="8" DownGrade="1" MinEfficiency="18" MaxEfficiency="28" RequireGold="1440"/>  
+    <Item Index="13" _Name_="대지 +9" ElementalKind="Earth" BasicPer="0.0" FailedPercent="50" Grade="9" DownGrade="1" MinEfficiency="22" MaxEfficiency="32" RequireGold="1530"/>  
+    <Item Index="14" _Name_="바람 +1" ElementalKind="Wind" BasicPer="0.0" FailedPercent="5" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="5" RequireGold="180"/>  
+    <Item Index="15" _Name_="바람 +2" ElementalKind="Wind" BasicPer="0.0" FailedPercent="10" Grade="2" DownGrade="0" MinEfficiency="6" MaxEfficiency="8" RequireGold="360"/>  
+    <Item Index="16" _Name_="바람 +3" ElementalKind="Wind" BasicPer="0.0" FailedPercent="20" Grade="3" DownGrade="0" MinEfficiency="6" MaxEfficiency="11" RequireGold="540"/>  
+    <Item Index="17" _Name_="바람 +4" ElementalKind="Wind" BasicPer="0.0" FailedPercent="25" Grade="4" DownGrade="0" MinEfficiency="6" MaxEfficiency="14" RequireGold="720"/>  
+    <Item Index="18" _Name_="바람 +5" ElementalKind="Wind" BasicPer="0.0" FailedPercent="30" Grade="5" DownGrade="0" MinEfficiency="6" MaxEfficiency="17" RequireGold="900"/>  
+    <Item Index="19" _Name_="바람 +6" ElementalKind="Wind" BasicPer="0.0" FailedPercent="35" Grade="6" DownGrade="1" MinEfficiency="10" MaxEfficiency="20" RequireGold="1080"/>  
+    <Item Index="20" _Name_="바람 +7" ElementalKind="Wind" BasicPer="0.0" FailedPercent="40" Grade="7" DownGrade="1" MinEfficiency="14" MaxEfficiency="24" RequireGold="1260"/>  
+    <Item Index="21" _Name_="바람 +8" ElementalKind="Wind" BasicPer="0.0" FailedPercent="45" Grade="8" DownGrade="1" MinEfficiency="18" MaxEfficiency="28" RequireGold="1440"/>  
+    <Item Index="22" _Name_="바람 +9" ElementalKind="Wind" BasicPer="0.0" FailedPercent="50" Grade="9" DownGrade="1" MinEfficiency="22" MaxEfficiency="32" RequireGold="1530"/>  
+    <Item Index="23" _Name_="물 +1" ElementalKind="Water" BasicPer="0.0" FailedPercent="5" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="5" RequireGold="180"/>  
+    <Item Index="24" _Name_="물 +2" ElementalKind="Water" BasicPer="0.0" FailedPercent="10" Grade="2" DownGrade="0" MinEfficiency="6" MaxEfficiency="8" RequireGold="360"/>  
+    <Item Index="25" _Name_="물 +3" ElementalKind="Water" BasicPer="0.0" FailedPercent="20" Grade="3" DownGrade="0" MinEfficiency="6" MaxEfficiency="11" RequireGold="540"/>  
+    <Item Index="26" _Name_="물 +4" ElementalKind="Water" BasicPer="0.0" FailedPercent="25" Grade="4" DownGrade="0" MinEfficiency="6" MaxEfficiency="14" RequireGold="720"/>  
+    <Item Index="27" _Name_="물 +5" ElementalKind="Water" BasicPer="0.0" FailedPercent="30" Grade="5" DownGrade="0" MinEfficiency="6" MaxEfficiency="17" RequireGold="900"/>  
+    <Item Index="28" _Name_="물 +6" ElementalKind="Water" BasicPer="0.0" FailedPercent="35" Grade="6" DownGrade="1" MinEfficiency="10" MaxEfficiency="20" RequireGold="1080"/>  
+    <Item Index="29" _Name_="물 +7" ElementalKind="Water" BasicPer="0.0" FailedPercent="40" Grade="7" DownGrade="1" MinEfficiency="14" MaxEfficiency="24" RequireGold="1260"/>  
+    <Item Index="30" _Name_="물 +8" ElementalKind="Water" BasicPer="0.0" FailedPercent="45" Grade="8" DownGrade="1" MinEfficiency="18" MaxEfficiency="28" RequireGold="1440"/>  
+    <Item Index="31" _Name_="물 +9" ElementalKind="Water" BasicPer="0.0" FailedPercent="50" Grade="9" DownGrade="1" MinEfficiency="22" MaxEfficiency="32" RequireGold="1530"/>  
+    <Item Index="32" _Name_="불 +1" ElementalKind="Fire" BasicPer="0.0" FailedPercent="5" Grade="1" DownGrade="0" MinEfficiency="0" MaxEfficiency="5" RequireGold="180"/>  
+    <Item Index="33" _Name_="불 +2" ElementalKind="Fire" BasicPer="0.0" FailedPercent="10" Grade="2" DownGrade="0" MinEfficiency="6" MaxEfficiency="8" RequireGold="360"/>  
+    <Item Index="34" _Name_="불 +3" ElementalKind="Fire" BasicPer="0.0" FailedPercent="20" Grade="3" DownGrade="0" MinEfficiency="6" MaxEfficiency="11" RequireGold="540"/>  
+    <Item Index="35" _Name_="불 +4" ElementalKind="Fire" BasicPer="0.0" FailedPercent="25" Grade="4" DownGrade="0" MinEfficiency="6" MaxEfficiency="14" RequireGold="720"/>  
+    <Item Index="36" _Name_="불 +5" ElementalKind="Fire" BasicPer="0.0" FailedPercent="30" Grade="5" DownGrade="0" MinEfficiency="6" MaxEfficiency="17" RequireGold="900"/>  
+    <Item Index="37" _Name_="불 +6" ElementalKind="Fire" BasicPer="0.0" FailedPercent="35" Grade="6" DownGrade="1" MinEfficiency="10" MaxEfficiency="20" RequireGold="1080"/>  
+    <Item Index="38" _Name_="불 +7" ElementalKind="Fire" BasicPer="0.0" FailedPercent="40" Grade="7" DownGrade="1" MinEfficiency="14" MaxEfficiency="24" RequireGold="1260"/>  
+    <Item Index="39" _Name_="불 +8" ElementalKind="Fire" BasicPer="0.0" FailedPercent="45" Grade="8" DownGrade="1" MinEfficiency="18" MaxEfficiency="28" RequireGold="1440"/>  
+    <Item Index="40" _Name_="불 +9" ElementalKind="Fire" BasicPer="0.0" FailedPercent="50" Grade="9" DownGrade="1" MinEfficiency="22" MaxEfficiency="32" RequireGold="1530"/> 
+</ItemList>

@@ -1,0 +1,4 @@
+message SMSG_GuildChangeSubMaster (0x2022) {
+    byte status = 1;
+    short result = 2;
+}

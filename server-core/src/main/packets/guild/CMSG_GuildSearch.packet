@@ -1,0 +1,5 @@
+message CMSG_GuildSearch (0x203A) {
+    byte searchType = 1;
+    int32 number = 2;
+    string name = 3;
+}

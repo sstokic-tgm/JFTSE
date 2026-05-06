@@ -1,0 +1,3 @@
+message CMSG_DeleteFriend (0x1F55) {
+    int32 friendId = 1;
+}

@@ -1,0 +1,6 @@
+message CMSG_RankingPersonalData (0x206D) {
+    int32 unk0 = 1;
+    byte unk1 = 2;
+    byte gameMode = 3;
+    string nickname = 4;
+}

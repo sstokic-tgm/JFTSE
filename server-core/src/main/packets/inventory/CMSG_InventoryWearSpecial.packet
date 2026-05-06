@@ -1,0 +1,3 @@
+message CMSG_InventoryWearSpecial (0x1B70) {
+    repeated int32 specialSlotList = 1 [len = 4];
+}

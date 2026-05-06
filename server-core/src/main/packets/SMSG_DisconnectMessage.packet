@@ -1,0 +1,3 @@
+message SMSG_DisconnectMessage (0x2329) {
+    byte result = 1;
+}

@@ -1,0 +1,7 @@
+message CMSG_SpiderMinePlaced (0x3390) {
+    int32 position = 1;
+    boolean isActive = 2;
+    short mineId = 3;
+    short posX = 4;
+    short posY = 5;
+}

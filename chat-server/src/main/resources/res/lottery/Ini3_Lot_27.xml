@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Ini3 Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Mimimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Gym Shirt(Blue)" ShopIndex="52411" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Gym Pants(Blue)" ShopIndex="52412" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Indoor Shoes(Blue)" ShopIndex="52413" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="14" _Name_="Gym Shirt(Green)" ShopIndex="52414" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="15" _Name_="Gym Pants(Green)" ShopIndex="52415" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="16" _Name_="Indoor Shoes(Green)" ShopIndex="52416" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="17" _Name_="Indoor Shoes(Red)" ShopIndex="52417" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="18" _Name_="Indoor Shoes(Yellow)" ShopIndex="52418" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="19" _Name_="Indoor Shoes(White)" ShopIndex="52419" QuantityMin="1" QuantityMax="1" ChansPer="3.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="20" _Name_="Steel Racket(Blue)" ShopIndex="53969" QuantityMin="1" QuantityMax="1" ChansPer="25.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="21" _Name_="Steel Racket(Pink)" ShopIndex="53976" QuantityMin="1" QuantityMax="1" ChansPer="25.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="22" _Name_="Fanta Logo Tennis Bag(Purple)" ShopIndex="52555" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="23" _Name_="Fanta Logo Tennis Bag(Water)" ShopIndex="52561" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="24" _Name_="Fanta Logo Tennis Bag(Blue)" ShopIndex="52567" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="25" _Name_="Fanta Logo Tennis Bag(Red)" ShopIndex="52573" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="26" _Name_="Fanta Logo Tennis Bag(Green)" ShopIndex="52579" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="27" _Name_="Fanta Logo Tennis Bag(Yellow)" ShopIndex="52914" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Mimimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Gym Shirt(Blue)" ShopIndex="52420" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Gym Pants(Blue)" ShopIndex="52421" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Indoor Shoes(Blue)" ShopIndex="52422" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="14" _Name_="Gym Shirt(Green)" ShopIndex="52423" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="15" _Name_="Gym Pants(Green)" ShopIndex="52424" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="16" _Name_="Indoor Shoes(Green)" ShopIndex="52425" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="17" _Name_="Indoor Shoes(Red)" ShopIndex="52426" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="18" _Name_="Indoor Shoes(Yellow)" ShopIndex="52427" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="19" _Name_="Indoor Shoes(White)" ShopIndex="52428" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="20" _Name_="Steel Racket(Blue)" ShopIndex="53970" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="21" _Name_="Steel Racket(Pink)" ShopIndex="53977" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="22" _Name_="Fanta Logo Tennis Bag(Purple)" ShopIndex="52556" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="23" _Name_="Fanta Logo Tennis Bag(Water)" ShopIndex="52562" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="24" _Name_="Fanta Logo Tennis Bag(Blue)" ShopIndex="52568" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="25" _Name_="Fanta Logo Tennis Bag(Red)" ShopIndex="52574" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="26" _Name_="Fanta Logo Tennis Bag(Green)" ShopIndex="52580" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="27" _Name_="Fanta Logo Tennis Bag(Yellow)" ShopIndex="52915" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Mimimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Gym Shirt(Blue)" ShopIndex="52429" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Gym Pants(Blue)" ShopIndex="52430" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Indoor Shoes(Blue)" ShopIndex="52431" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="14" _Name_="Gym Shirt(Green)" ShopIndex="52432" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="15" _Name_="Gym Pants(Green)" ShopIndex="52433" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="16" _Name_="Indoor Shoes(Green)" ShopIndex="52434" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="17" _Name_="Indoor Shoes(Red)" ShopIndex="52435" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="18" _Name_="Indoor Shoes(Yellow)" ShopIndex="52436" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="19" _Name_="Indoor Shoes(White)" ShopIndex="52437" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="20" _Name_="Steel Racket(Blue)" ShopIndex="53971" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="21" _Name_="Steel Racket(Pink)" ShopIndex="53978" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="22" _Name_="Fanta Logo Tennis Bag(Purple)" ShopIndex="52557" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="23" _Name_="Fanta Logo Tennis Bag(Water)" ShopIndex="52563" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="24" _Name_="Fanta Logo Tennis Bag(Blue)" ShopIndex="52569" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="25" _Name_="Fanta Logo Tennis Bag(Red)" ShopIndex="52575" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="26" _Name_="Fanta Logo Tennis Bag(Green)" ShopIndex="52581" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="27" _Name_="Fanta Logo Tennis Bag(Yellow)" ShopIndex="52916" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Mimimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Gym Shirt(Blue)" ShopIndex="52438" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Gym Pants(Blue)" ShopIndex="52439" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Indoor Shoes(Blue)" ShopIndex="52440" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="14" _Name_="Gym Shirt(Green)" ShopIndex="52441" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="15" _Name_="Gym Pants(Green)" ShopIndex="52442" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="16" _Name_="Indoor Shoes(Green)" ShopIndex="52443" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="17" _Name_="Indoor Shoes(Red)" ShopIndex="52444" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="18" _Name_="Indoor Shoes(Yellow)" ShopIndex="52445" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="19" _Name_="Indoor Shoes(White)" ShopIndex="52446" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="20" _Name_="Steel Racket(Blue)" ShopIndex="53972" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="21" _Name_="Steel Racket(Pink)" ShopIndex="53979" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="22" _Name_="Fanta Logo Tennis Bag(Purple)" ShopIndex="52558" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="23" _Name_="Fanta Logo Tennis Bag(Water)" ShopIndex="52564" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="24" _Name_="Fanta Logo Tennis Bag(Blue)" ShopIndex="52570" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="25" _Name_="Fanta Logo Tennis Bag(Red)" ShopIndex="52576" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="26" _Name_="Fanta Logo Tennis Bag(Green)" ShopIndex="52582" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="27" _Name_="Fanta Logo Tennis Bag(Yellow)" ShopIndex="52917" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Mimimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Gym Shirt(Blue)" ShopIndex="52447" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Gym Pants(Blue)" ShopIndex="52448" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Indoor Shoes(Blue)" ShopIndex="52449" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="14" _Name_="Gym Shirt(Green)" ShopIndex="52450" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="15" _Name_="Gym Pants(Green)" ShopIndex="52451" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="16" _Name_="Indoor Shoes(Green)" ShopIndex="52452" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="17" _Name_="Indoor Shoes(Red)" ShopIndex="52453" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="18" _Name_="Indoor Shoes(Yellow)" ShopIndex="52454" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="19" _Name_="Indoor Shoes(White)" ShopIndex="52455" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="20" _Name_="Steel Racket(Blue)" ShopIndex="53973" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="21" _Name_="Steel Racket(Pink)" ShopIndex="53980" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="22" _Name_="Fanta Logo Tennis Bag(Purple)" ShopIndex="52559" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="23" _Name_="Fanta Logo Tennis Bag(Water)" ShopIndex="52565" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="24" _Name_="Fanta Logo Tennis Bag(Blue)" ShopIndex="52571" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="25" _Name_="Fanta Logo Tennis Bag(Red)" ShopIndex="52577" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="26" _Name_="Fanta Logo Tennis Bag(Green)" ShopIndex="52583" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="27" _Name_="Fanta Logo Tennis Bag(Yellow)" ShopIndex="52918" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Mimimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Gym Shirt(Blue)" ShopIndex="52456" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Gym Pants(Blue)" ShopIndex="52457" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Indoor Shoes(Blue)" ShopIndex="52458" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="14" _Name_="Gym Shirt(Green)" ShopIndex="52459" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="15" _Name_="Gym Pants(Green)" ShopIndex="52460" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="16" _Name_="Indoor Shoes(Green)" ShopIndex="52461" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="17" _Name_="Indoor Shoes(Red)" ShopIndex="52462" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="18" _Name_="Indoor Shoes(Yellow)" ShopIndex="52463" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="19" _Name_="Indoor Shoes(White)" ShopIndex="52464" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="20" _Name_="Steel Racket(Blue)" ShopIndex="53974" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="21" _Name_="Steel Racket(Pink)" ShopIndex="53981" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="22" _Name_="Fanta Logo Tennis Bag(Purple)" ShopIndex="52560" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="23" _Name_="Fanta Logo Tennis Bag(Water)" ShopIndex="52566" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="24" _Name_="Fanta Logo Tennis Bag(Blue)" ShopIndex="52572" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="25" _Name_="Fanta Logo Tennis Bag(Red)" ShopIndex="52578" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="26" _Name_="Fanta Logo Tennis Bag(Green)" ShopIndex="52584" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="27" _Name_="Fanta Logo Tennis Bag(Yellow)" ShopIndex="52919" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Crab Trap" ShopIndex="3014" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Flash Bomb" ShopIndex="3013" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Rebirth" ShopIndex="3001" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Polymorph" ShopIndex="3010" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Meteor" ShopIndex="3007" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Fireball" ShopIndex="3009" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Medium Potion" ShopIndex="3002" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Mimimum" ShopIndex="3011" QuantityMin="5" QuantityMax="5" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="2" QuantityMax="2" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Gym Shirt(Blue)" ShopIndex="52878" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Gym Pants(Blue)" ShopIndex="52879" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Indoor Shoes(Blue)" ShopIndex="52880" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="14" _Name_="Gym Shirt(Green)" ShopIndex="52882" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="15" _Name_="Gym Pants(Green)" ShopIndex="52883" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="16" _Name_="Indoor Shoes(Green)" ShopIndex="52884" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="17" _Name_="Indoor Shoes(Red)" ShopIndex="52886" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="18" _Name_="Indoor Shoes(Yellow)" ShopIndex="52887" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="19" _Name_="Indoor Shoes(White)" ShopIndex="52888" QuantityMin="1" QuantityMax="1" ChansPer="3" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="20" _Name_="Steel Racket(Blue)" ShopIndex="53975" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="21" _Name_="Steel Racket(Pink)" ShopIndex="53982" QuantityMin="1" QuantityMax="1" ChansPer="25" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="22" _Name_="Fanta Logo Tennis Bag(Purple)" ShopIndex="52908" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="23" _Name_="Fanta Logo Tennis Bag(Water)" ShopIndex="52909" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="24" _Name_="Fanta Logo Tennis Bag(Blue)" ShopIndex="52910" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="25" _Name_="Fanta Logo Tennis Bag(Red)" ShopIndex="52911" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="26" _Name_="Fanta Logo Tennis Bag(Green)" ShopIndex="52912" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="27" _Name_="Fanta Logo Tennis Bag(Yellow)" ShopIndex="52913" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

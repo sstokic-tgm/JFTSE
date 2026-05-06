@@ -1,0 +1,3 @@
+message SMSG_RoomChangeMap (0x1789) {
+    byte map = 1;
+}

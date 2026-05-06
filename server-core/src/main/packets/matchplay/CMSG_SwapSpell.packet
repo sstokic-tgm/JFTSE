@@ -1,0 +1,7 @@
+message CMSG_SwapSpell (0xC97) {
+    int32 itemPocketId = 1;
+    int32 newLeftSkillIndex = 2;
+    int32 newLeftCrystalId = 3;
+    int32 newRightSkillIndex = 4;
+    int32 newRightCrystalId = 5;
+}

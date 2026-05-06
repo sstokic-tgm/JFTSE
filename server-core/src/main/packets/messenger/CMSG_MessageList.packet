@@ -1,0 +1,4 @@
+message CMSG_MessageList (0x1F63) {
+    byte listType = 1;
+    int32 unk0 = 2;
+}

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--Divinity Gifts I-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Souvenir Racket - Bench" ShopIndex="57795" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Souvenir Racket - Zoe" ShopIndex="57802" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Souvenir Racket - harCs" ShopIndex="57809" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Souvenir Racket - KillerZXN" ShopIndex="57816" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Souvenir Racket - ali" ShopIndex="57823" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="JFTSE Racket" ShopIndex="57867" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Lucky Bag" ShopIndex="4081" QuantityMin="1" QuantityMax="1" ChansPer="97" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Souvenir Racket - Bench" ShopIndex="57796" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Souvenir Racket - Zoe" ShopIndex="57803" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Souvenir Racket - harCs" ShopIndex="57810" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Souvenir Racket - KillerZXN" ShopIndex="57817" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Souvenir Racket - ali" ShopIndex="57824" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="JFTSE Racket" ShopIndex="57868" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Lucky Bag" ShopIndex="4081" QuantityMin="1" QuantityMax="1" ChansPer="97" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Souvenir Racket - Bench" ShopIndex="57797" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Souvenir Racket - Zoe" ShopIndex="57804" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Souvenir Racket - harCs" ShopIndex="57811" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Souvenir Racket - KillerZXN" ShopIndex="57818" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Souvenir Racket - ali" ShopIndex="57825" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="JFTSE Racket" ShopIndex="57869" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Lucky Bag" ShopIndex="4081" QuantityMin="1" QuantityMax="1" ChansPer="97" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Souvenir Racket - Bench" ShopIndex="57798" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Souvenir Racket - Zoe" ShopIndex="57805" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Souvenir Racket - harCs" ShopIndex="57812" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Souvenir Racket - KillerZXN" ShopIndex="57819" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Souvenir Racket - ali" ShopIndex="57826" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="JFTSE Racket" ShopIndex="57870" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Lucky Bag" ShopIndex="4081" QuantityMin="1" QuantityMax="1" ChansPer="97" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Souvenir Racket - Bench" ShopIndex="57799" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Souvenir Racket - Zoe" ShopIndex="57806" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Souvenir Racket - harCs" ShopIndex="57813" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Souvenir Racket - KillerZXN" ShopIndex="57820" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Souvenir Racket - ali" ShopIndex="57827" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="JFTSE Racket" ShopIndex="57871" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Lucky Bag" ShopIndex="4081" QuantityMin="1" QuantityMax="1" ChansPer="97" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Souvenir Racket - Bench" ShopIndex="57800" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Souvenir Racket - Zoe" ShopIndex="57807" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Souvenir Racket - harCs" ShopIndex="57814" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Souvenir Racket - KillerZXN" ShopIndex="57821" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Souvenir Racket - ali" ShopIndex="57828" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="JFTSE Racket" ShopIndex="57872" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Lucky Bag" ShopIndex="4081" QuantityMin="1" QuantityMax="1" ChansPer="97" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Souvenir Racket - Bench" ShopIndex="57801" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Souvenir Racket - Zoe" ShopIndex="57808" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Souvenir Racket - harCs" ShopIndex="57815" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Souvenir Racket - KillerZXN" ShopIndex="57822" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Souvenir Racket - ali" ShopIndex="57829" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="JFTSE Racket" ShopIndex="57873" QuantityMin="1" QuantityMax="1" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Lucky Bag" ShopIndex="4081" QuantityMin="1" QuantityMax="1" ChansPer="97" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

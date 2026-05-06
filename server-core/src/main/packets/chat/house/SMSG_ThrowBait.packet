@@ -1,0 +1,4 @@
+message SMSG_ThrowBait (0x2BC6) {
+    short playerPosition = 1;
+    byte displayMessage = 2;
+}

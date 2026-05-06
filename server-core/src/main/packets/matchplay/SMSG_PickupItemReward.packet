@@ -1,0 +1,7 @@
+message SMSG_PickupItemReward (0x1D53) {
+    byte playerPos = 1;
+    byte slot = 2;
+    byte type = 3; // 0 = product, 1 = material
+    int32 productIndex = 4;
+    int32 quantity = 5;
+}

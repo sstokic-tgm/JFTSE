@@ -1,0 +1,5 @@
+message CMSG_ChatMessageWhisper (0x1702) {
+    char unk = 1;
+    string receiver = 2;
+    string message = 3;
+}

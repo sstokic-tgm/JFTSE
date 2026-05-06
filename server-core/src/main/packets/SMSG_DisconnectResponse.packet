@@ -1,0 +1,3 @@
+message SMSG_DisconnectResponse (0xFA8) {
+    byte status = 1;
+}

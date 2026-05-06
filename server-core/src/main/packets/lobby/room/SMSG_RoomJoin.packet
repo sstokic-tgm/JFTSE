@@ -1,0 +1,6 @@
+message SMSG_RoomJoin (0x138C) {
+    char result = 1;
+    byte roomType = 2;
+    int32 mode = 3;
+    byte mapId = 4;
+}

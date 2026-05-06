@@ -1,0 +1,5 @@
+message SMSG_Login (0xFA2) {
+    short result = 1;
+    string token = 2 [len = 16];
+    int64 timestamp = 3;
+}

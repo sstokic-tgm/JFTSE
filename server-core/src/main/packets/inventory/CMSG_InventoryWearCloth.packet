@@ -1,0 +1,14 @@
+message CMSG_InventoryWearCloth (0x1B63) {
+    int32 hair = 1;
+    int32 face = 2;
+    int32 dress = 3;
+    int32 pants = 4;
+    int32 socks = 5;
+    int32 shoes = 6;
+    int32 gloves = 7;
+    int32 racket = 8;
+    int32 glasses = 9;
+    int32 bag = 10;
+    int32 hat = 11;
+    int32 dye = 12;
+}

@@ -1,0 +1,3 @@
+message SMSG_ReceivedPresent (0x2135) {
+    byte result = 1;
+}

@@ -1,0 +1,4 @@
+message SMSG_LoginData (0x106A) {
+    char result = 1;
+    byte serverType = 2;
+}

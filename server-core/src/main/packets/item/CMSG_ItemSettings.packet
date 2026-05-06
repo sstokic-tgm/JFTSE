@@ -1,0 +1,11 @@
+message ItemSetting {
+    byte damage = 1;
+    byte damageRate = 2;
+    byte coolingTime = 3;
+    byte gdCoolingTime = 4;
+    byte shotCnt = 5;
+}
+
+message CMSG_ItemSettings (0x18B7) {
+    repeated ItemSetting itemSettings = 1;
+}

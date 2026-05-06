@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Jin Young Jang (NPICSoft Co., Ltd.) -->
+<!--JFTSE Capsule-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Titan Face Mask" ShopIndex="57839" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Happier Face Mask" ShopIndex="57846" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Angrier Face Mask" ShopIndex="57853" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Crier Face Mask" ShopIndex="57860" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Titan Face Mask" ShopIndex="57840" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Happier Face Mask" ShopIndex="57847" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Angrier Face Mask" ShopIndex="57854" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Crier Face Mask" ShopIndex="57861" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Titan Face Mask" ShopIndex="57841" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Happier Face Mask" ShopIndex="57848" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Angrier Face Mask" ShopIndex="57855" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Crier Face Mask" ShopIndex="57862" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Titan Face Mask" ShopIndex="57842" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Happier Face Mask" ShopIndex="57849" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Angrier Face Mask" ShopIndex="57856" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Crier Face Mask" ShopIndex="57863" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Titan Face Mask" ShopIndex="57843" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Happier Face Mask" ShopIndex="57850" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Angrier Face Mask" ShopIndex="57857" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Crier Face Mask" ShopIndex="57864" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Titan Face Mask" ShopIndex="57844" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Happier Face Mask" ShopIndex="57851" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Angrier Face Mask" ShopIndex="57858" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Crier Face Mask" ShopIndex="57865" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Titan Face Mask" ShopIndex="57845" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Happier Face Mask" ShopIndex="57852" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Angrier Face Mask" ShopIndex="57859" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Crier Face Mask" ShopIndex="57866" QuantityMin="7" QuantityMax="90" ChansPer="0.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Blue Gem" ShopIndex="4037" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Blue Crystal" ShopIndex="4103" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Red Gem" ShopIndex="4055" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Red Light" ShopIndex="4586" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Yellow Gem" ShopIndex="4049" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Yellow Crystal" ShopIndex="4102" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Green Crystal" ShopIndex="4061" QuantityMin="1" QuantityMax="1" ChansPer="14.0" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

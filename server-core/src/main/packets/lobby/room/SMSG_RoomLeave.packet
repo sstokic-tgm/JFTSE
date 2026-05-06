@@ -1,0 +1,3 @@
+message SMSG_RoomLeave (0x1772) {
+    short result = 1;
+}

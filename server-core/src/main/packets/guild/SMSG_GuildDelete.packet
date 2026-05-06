@@ -1,0 +1,3 @@
+message SMSG_GuildDelete (0x2027) {
+    short result = 1;
+}

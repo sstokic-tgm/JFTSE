@@ -1,0 +1,4 @@
+message SMSG_AntiCheatHeartBeat (0x9793) {
+    int64 clientTimestamp = 1;
+    int64 serverTimestamp = 2;
+}

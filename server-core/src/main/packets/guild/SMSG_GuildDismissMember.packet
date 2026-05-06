@@ -1,0 +1,3 @@
+message SMSG_GuildDismissMember (0x2024) {
+    short result = 1;
+}

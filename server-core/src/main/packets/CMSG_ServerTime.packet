@@ -1,0 +1,2 @@
+message CMSG_ServerTime (0xFAB) {
+}

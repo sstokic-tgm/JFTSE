@@ -1,0 +1,8 @@
+message CMSG_GuildCreate (0x200B) {
+    string name = 1;
+    string introduction = 2;
+    bool isPublic = 3;
+    byte levelRestriction = 4;
+    byte allowedCharacterTypeCount = 5;
+    repeated byte allowedCharacterType = 6 [len = msg.allowedCharacterTypeCount];
+}

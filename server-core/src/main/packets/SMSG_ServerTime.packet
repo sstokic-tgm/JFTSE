@@ -1,0 +1,3 @@
+message SMSG_ServerTime (0xFAC) {
+    long currentTime = 1;
+}

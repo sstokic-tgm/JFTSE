@@ -1,0 +1,5 @@
+message CMSG_EnchantRequest (0x2455) {
+    int32 itemPocketId = 1;
+    int32 elementPocketId = 2;
+    int32 jewelPocketId = 3;
+}

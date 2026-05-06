@@ -1,0 +1,5 @@
+message CMSG_FireCracker (0xC9E) {
+    int32 playerPocketId = 1;
+    byte fireCrackerType = 2;
+    short position = 3;
+}

@@ -1,0 +1,3 @@
+message SMSG_GuildChangeMaster (0x2020) {
+    short result = 1;
+}

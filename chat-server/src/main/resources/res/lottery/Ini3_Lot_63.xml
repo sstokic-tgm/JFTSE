@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Cn Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Homing Soul" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="White Tiger Bodysuit" ShopIndex="56362" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="White Tiger Shoes" ShopIndex="56363" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="White Tiger Mask" ShopIndex="56364" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="White Tiger Glove" ShopIndex="56365" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Large Potion" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Healing (Small)" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Magic Circle" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Kiss of Medusa" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="White Tiger Bodysuit" ShopIndex="56366" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="White Tiger Shoes" ShopIndex="56367" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="White Tiger Mask" ShopIndex="56368" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="White Tiger Glove" ShopIndex="56369" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Large Potion" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Healing (Small)" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Magic Circle" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Kiss of Medusa" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="White Tiger Bodysuit" ShopIndex="56370" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="White Tiger Shoes" ShopIndex="56371" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="White Tiger Mask" ShopIndex="56372" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="White Tiger Glove" ShopIndex="56373" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Large Potion" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Healing (Small)" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Magic Circle" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Kiss of Medusa" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="White Tiger Bodysuit" ShopIndex="56374" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="White Tiger Shoes" ShopIndex="56375" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="White Tiger Mask" ShopIndex="56376" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="White Tiger Glove" ShopIndex="56377" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Large Potion" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Healing (Small)" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Magic Circle" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Kiss of Medusa" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="White Tiger Bodysuit" ShopIndex="56378" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="White Tiger Shoes" ShopIndex="56379" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="White Tiger Mask" ShopIndex="56380" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="White Tiger Glove" ShopIndex="56381" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Large Potion" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Healing (Small)" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Magic Circle" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Kiss of Medusa" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="White Tiger Bodysuit" ShopIndex="56382" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="White Tiger Shoes" ShopIndex="56383" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="White Tiger Mask" ShopIndex="56384" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="White Tiger Glove" ShopIndex="56385" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Large Potion" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Healing (Small)" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Magic Circle" ShopIndex="3008" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Kiss of Medusa" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Ring of EXP" ShopIndex="287" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Ring of Gold" ShopIndex="288" QuantityMin="5" QuantityMax="5" ChansPer="15" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="White Tiger Bodysuit" ShopIndex="56386" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="White Tiger Shoes" ShopIndex="56387" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="White Tiger Mask" ShopIndex="56388" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="White Tiger Glove" ShopIndex="56389" QuantityMin="1" QuantityMax="1" ChansPer="2.5" Effect="3" ProductOpt="0"/>
+</LotteryItemList>

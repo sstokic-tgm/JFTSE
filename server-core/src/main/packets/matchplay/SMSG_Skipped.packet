@@ -1,0 +1,3 @@
+message SMSG_Skipped (0x17E2) {
+    char result = 1;
+}

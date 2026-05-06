@@ -1,0 +1,4 @@
+message CMSG_PlayerPickupCrystal (0x18E7) {
+    byte playerPosition = 1;
+    short crystalId = 2;
+}

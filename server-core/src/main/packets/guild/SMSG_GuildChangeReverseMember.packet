@@ -1,0 +1,4 @@
+message SMSG_GuildChangeReverseMember (0x2040) {
+    byte status = 1;
+    short result = 2;
+}

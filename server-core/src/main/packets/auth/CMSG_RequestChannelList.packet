@@ -1,0 +1,2 @@
+message CMSG_RequestChannelList (0x100F) {
+}

@@ -1,0 +1,6 @@
+message SMSG_ChatMessageLobby (0x1706) {
+    char unk = 1;
+    string sender = 2;
+    string message = 3;
+    uint32 textColor = 4;
+}

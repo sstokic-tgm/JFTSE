@@ -1,0 +1,6 @@
+message SMSG_PlayerAnnounce (0x22C7) {
+    string playerName = 1;
+    byte textSize = 2;
+    byte textColor = 3;
+    string message = 4;
+}

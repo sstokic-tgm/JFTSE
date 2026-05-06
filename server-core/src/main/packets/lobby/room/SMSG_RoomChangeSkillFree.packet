@@ -1,0 +1,3 @@
+message SMSG_RoomChangeSkillFree (0x1796) {
+    bool enable = 1;
+}

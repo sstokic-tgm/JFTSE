@@ -1,0 +1,6 @@
+message CMSG_GuildCastleChangeInformation (0x2046) {
+    int32 unk0 = 1;
+    int32 unk1 = 2;
+    byte accessLimit = 3;
+    int32 admissionFee = 4;
+}

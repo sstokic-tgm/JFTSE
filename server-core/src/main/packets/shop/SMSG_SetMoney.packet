@@ -1,0 +1,4 @@
+message SMSG_SetMoney (0x1B61) {
+    int32 ap = 1;
+    int32 gold = 2;
+}

@@ -1,0 +1,4 @@
+message CMSG_AddFriendApproval (0x1F45) {
+    bool approved = 1;
+    string playerName = 2;
+}

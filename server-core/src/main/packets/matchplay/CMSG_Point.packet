@@ -1,0 +1,6 @@
+message CMSG_Point (0x183F) {
+    byte pointsTeam = 1;
+    byte unk0 = 2;
+    byte ballState = 3;
+    byte playerPosition = 4;
+}

@@ -1,0 +1,5 @@
+message CMSG_AuthLogin (0xFA9) {
+    string username = 1;
+    string token = 2 [len = 16];
+    int64 timestamp = 3;
+}

@@ -1,0 +1,2 @@
+message CMSG_DisconnectRequest (0xFA7) {
+}

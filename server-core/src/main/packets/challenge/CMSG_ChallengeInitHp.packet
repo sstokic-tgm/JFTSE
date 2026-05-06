@@ -1,0 +1,4 @@
+message CMSG_ChallengeInitHp (0x2209) {
+    char playerHp = 1;
+    char npcHp = 2;
+}

@@ -1,0 +1,3 @@
+message CMSG_GuildReverseMemberData (0x2018) {
+    int32 page = 1;
+}

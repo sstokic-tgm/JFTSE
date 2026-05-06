@@ -1,0 +1,3 @@
+message SMSG_InventorySellItemCheck (0x1D09) {
+    byte status = 1;
+}

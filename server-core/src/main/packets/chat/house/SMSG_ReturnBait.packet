@@ -1,0 +1,3 @@
+message SMSG_ReturnBait (0x2B75) {
+    short playerPosition = 1;
+}

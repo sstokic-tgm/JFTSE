@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Cn Lottery 1-->
+<LotteryItemList>
+	<LotteryItem_Niki Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="9" _Name_="Rider Mask" ShopIndex="54558" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="10" _Name_="Rider Suit" ShopIndex="54559" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="11" _Name_="Rider Boots" ShopIndex="54560" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="12" _Name_="Rider Glove" ShopIndex="54561" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Niki Index="13" _Name_="Rider Whip Racket" ShopIndex="54586" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="9" _Name_="Rider Mask" ShopIndex="54562" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="10" _Name_="Rider Suit" ShopIndex="54563" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="11" _Name_="Rider Boots" ShopIndex="54564" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="12" _Name_="Rider Glove" ShopIndex="54565" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lunlun Index="13" _Name_="Rider Whip Racket" ShopIndex="54587" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="9" _Name_="Rider Mask" ShopIndex="54566" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="10" _Name_="Rider Suit" ShopIndex="54567" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="11" _Name_="Rider Boots" ShopIndex="54568" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="12" _Name_="Rider Glove" ShopIndex="54569" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Dhanpir Index="13" _Name_="Rider Whip Racket" ShopIndex="54588" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="9" _Name_="Rider Mask" ShopIndex="54570" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="10" _Name_="Rider Suit" ShopIndex="54571" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="11" _Name_="Rider Boots" ShopIndex="54572" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="12" _Name_="Rider Glove" ShopIndex="54573" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Lucy Index="13" _Name_="Rider Whip Racket" ShopIndex="54589" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="9" _Name_="Rider Mask" ShopIndex="54574" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="10" _Name_="Rider Suit" ShopIndex="54575" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="11" _Name_="Rider Boots" ShopIndex="54576" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="12" _Name_="Rider Glove" ShopIndex="54577" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Shua Index="13" _Name_="Rider Whip Racket" ShopIndex="54590" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="9" _Name_="Rider Mask" ShopIndex="54578" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="10" _Name_="Rider Suit" ShopIndex="54579" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="11" _Name_="Rider Boots" ShopIndex="54580" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="12" _Name_="Rider Glove" ShopIndex="54581" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Pochi Index="13" _Name_="Rider Whip Racket" ShopIndex="54591" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="1" _Name_="Holy Shield" ShopIndex="3000" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="2" _Name_="Large Potion" ShopIndex="3003" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="3" _Name_="Blizzard" ShopIndex="3015" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="4" _Name_="Homing Soul" ShopIndex="4009" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="5" _Name_="Magic Circle" ShopIndex="3016" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="6" _Name_="Kiss of Medusa" ShopIndex="3017" QuantityMin="10" QuantityMax="10" ChansPer="11" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="7" _Name_="Ring of EXP" ShopIndex="556" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="8" _Name_="Ring of Gold" ShopIndex="559" QuantityMin="10" QuantityMax="10" ChansPer="12" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="9" _Name_="Rider Mask" ShopIndex="54582" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="10" _Name_="Rider Suit" ShopIndex="54583" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="11" _Name_="Rider Boots" ShopIndex="54584" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="12" _Name_="Rider Glove" ShopIndex="54585" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+	<LotteryItem_Al Index="13" _Name_="Rider Whip Racket" ShopIndex="54592" QuantityMin="1" QuantityMax="1" ChansPer="2" Effect="3" ProductOpt="0"/>
+</LotteryItemList>
