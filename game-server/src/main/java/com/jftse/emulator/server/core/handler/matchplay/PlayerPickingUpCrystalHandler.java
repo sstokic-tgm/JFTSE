@@ -98,11 +98,13 @@ public class PlayerPickingUpCrystalHandler implements PacketHandler<FTConnection
         if (skillCrystal.getPickedUpByPlayerId() == -1) {
             PlayerBattleState playerBattleState = isBattleGame ?
                     ((MatchplayBattleGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition()) && x.isDead())
+                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition()) && x.isDead()
+                                    || !isRedTeam == !game.isRedTeam(x.getPosition()) && x.isDead())
                             .findFirst()
                             .orElse(null) :
                     ((MatchplayGuardianGame) game).getPlayerBattleStates().stream()
-                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition()) && x.isDead())
+                            .filter(x -> isRedTeam == game.isRedTeam(x.getPosition()) && x.isDead()
+                                    || !isRedTeam == !game.isRedTeam(x.getPosition()) && x.isDead())
                             .findFirst()
                             .orElse(null);
             boolean levelRequired = !isBattleGame && activeRoom.getRoomPlayerList().stream()
