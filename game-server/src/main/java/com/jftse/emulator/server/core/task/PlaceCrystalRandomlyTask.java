@@ -14,6 +14,7 @@ import com.jftse.server.core.matchplay.battle.SkillCrystal;
 import com.jftse.server.core.thread.AbstractTask;
 
 import java.awt.geom.Point2D;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlaceCrystalRandomlyTask extends AbstractTask {
     private final FTConnection connection;
@@ -47,16 +48,10 @@ public class PlaceCrystalRandomlyTask extends AbstractTask {
 
         Point2D point = isBattleGame ? this.getRandomPoint(gameFieldSide) : this.getRandomPoint();
 
-        int crystalId = isBattleGame ?
-                (((MatchplayBattleGame) game).getLastCrystalId().getAndIncrement()) :
-                (((MatchplayGuardianGame) game).getLastCrystalId().getAndIncrement());
-        if (crystalId > 100) {
-            crystalId = 0;
-            if (isBattleGame)
-                ((MatchplayBattleGame) game).getLastCrystalId().set(0);
-            else
-                ((MatchplayGuardianGame) game).getLastCrystalId().set(0);
-        }
+        AtomicInteger lastCrystalId = isBattleGame ?
+                ((MatchplayBattleGame) game).getLastCrystalId() :
+                ((MatchplayGuardianGame) game).getLastCrystalId();
+        int crystalId = lastCrystalId.getAndUpdate(id -> id >= 100 ? 0 : id + 1);
 
         SkillCrystal skillCrystal = new SkillCrystal(crystalId);
         if (isBattleGame)
