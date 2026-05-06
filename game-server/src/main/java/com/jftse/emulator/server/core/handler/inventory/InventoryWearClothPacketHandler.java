@@ -32,6 +32,7 @@ public class InventoryWearClothPacketHandler implements PacketHandler<FTConnecti
         clothEquipmentService.updateCloths(player.getPlayer(), packet);
 
         Player dbPlayer = playerService.findWithEquipmentById(player.getId());
+        player.sync(dbPlayer);
         player.loadItemParts(dbPlayer);
 
         S2CInventoryWearClothAnswerPacket inventoryWearClothAnswerPacket = new S2CInventoryWearClothAnswerPacket((char) 0, player);
