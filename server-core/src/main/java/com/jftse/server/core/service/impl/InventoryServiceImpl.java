@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -91,11 +92,13 @@ public class InventoryServiceImpl implements InventoryService {
 
             if (product.getItem1() != 0) {
 
-                List<Integer> itemPartList = List.of(
-                        product.getItem0(), product.getItem1(), product.getItem2(), product.getItem3(),
-                        product.getItem4(), product.getItem5(), product.getItem6(), product.getItem7(),
-                        product.getItem8(), product.getItem9()
-                );
+                List<Integer> itemPartList = Stream.of(
+                                product.getItem0(), product.getItem1(), product.getItem2(), product.getItem3(),
+                                product.getItem4(), product.getItem5(), product.getItem6(), product.getItem7(),
+                                product.getItem8(), product.getItem9()
+                        )
+                        .filter(itemIndex -> itemIndex != 0)
+                        .toList();
 
                 if (product.getForPlayer() != -1) {
 
