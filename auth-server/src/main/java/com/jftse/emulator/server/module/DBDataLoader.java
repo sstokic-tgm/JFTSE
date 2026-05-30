@@ -405,6 +405,11 @@ public class DBDataLoader implements CommandLineRunner {
                 i++;
                 BossGuardian guardian = bossGuardianRepository.findById(i).orElse(new BossGuardian());
 
+                if (Integer.valueOf(skillNode.valueOf("@Index")) > 7) { // max guardIndex is 7
+                    continue;
+                }
+
+                guardian.setGuardIndex(Integer.valueOf(skillNode.valueOf("@Index")));
                 guardian.setName(String.valueOf(skillNode.valueOf("@Name_en")));
                 guardian.setHpBase(Integer.valueOf(skillNode.valueOf("@HPBase")));
                 guardian.setHpPer(Integer.valueOf(skillNode.valueOf("@HPPer")));
@@ -456,6 +461,11 @@ public class DBDataLoader implements CommandLineRunner {
                 i++;
                 Guardian guardian = guardianRepository.findById(i).orElse(new Guardian());
 
+                if (Integer.valueOf(skillNode.valueOf("@Index")) > 72) { // max guardIndex is 72
+                    continue;
+                }
+
+                guardian.setGuardIndex(Integer.valueOf(skillNode.valueOf("@Index")));
                 guardian.setName(String.valueOf(skillNode.valueOf("@Name_en")));
                 guardian.setHpBase(Integer.valueOf(skillNode.valueOf("@HPBase")));
                 guardian.setHpPer(Integer.valueOf(skillNode.valueOf("@HPPer")));

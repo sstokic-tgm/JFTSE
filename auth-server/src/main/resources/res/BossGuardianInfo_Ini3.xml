@@ -9,3 +9,5 @@
   <Guardian Index="6" GdName="TB-255" Earth="1" Wind="1" Fire="1" Water="0" ElementGrade="9" ResID="4" TexID="0" BtItemID="27" HPBase="13000" HPPer="300" GdLevel="60" BaseSTR="95" BaseSTA="10" BaseDEX="140" BaseWILL="105" AddSTR="1" AddSTA="15" AddDEX="1" AddWILL="1" RewardEXP="240" RewardGOLD="300" Name_kr="TB-255" Name_en="TB-255" Name_jp="TB-255" Name_th="TB-255" Name_cn="TB-255" Name_tw="TB-255" Name_de="TB-255" Name_uk="TB-255" Name_po="TB-255" Name_fr="TB-255" Name_es="TB-255" Name_it="TB-255"/>  
   <Guardian Index="7" GdName="댄스 킹" Earth="1" Wind="0" Fire="1" Water="1" ElementGrade="9" ResID="5" TexID="0" BtItemID="29" HPBase="15000" HPPer="400" GdLevel="60" BaseSTR="105" BaseSTA="30" BaseDEX="160" BaseWILL="115" AddSTR="1" AddSTA="15" AddDEX="1" AddWILL="1" RewardEXP="280" RewardGOLD="300" Name_kr="댄스 킹" Name_en="Dance King" Name_jp="Dance King" Name_th="Dance King" Name_cn="Dance King" Name_tw="Dance King" Name_de="Dance King" Name_uk="Dance King" Name_po="Dance King" Name_fr="Dance King" Name_es="Dance King" Name_it="Dance King"/> 
 </GuardianList>
+
+<!-- MaxIndex:7, if Index exceeds 7, Boss guardians will not spawn -->

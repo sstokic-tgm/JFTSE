@@ -74,3 +74,5 @@
   <Guardian Index="71" GdName="활짝이" Earth="1" Wind="0" Fire="0" Water="1" ElementGrade="9" ResID="10" TexID="2" BtItemID="28" HPBase="4400" HPPer="850" GdLevel="58" BaseSTR="78" BaseSTA="25" BaseDEX="130" BaseWILL="100" AddSTR="1" AddSTA="11" AddDEX="1" AddWILL="1" RewardEXP="170" RewardGOLD="140" Name_kr="활짝이" Name_en="Hwaljjagi" Name_jp="Hwaljjagi" Name_th="Hwaljjagi" Name_cn="灿烂" Name_tw="Hwaljjagi" Name_de="Hwaljjagi" Name_uk="Hwaljjagi" Name_po="Hwaljjagi" Name_fr="Hwaljjagi" Name_es="Hwaljjagi" Name_it="Hwaljjagi"/>  
   <Guardian Index="72" GdName="새침이" Earth="1" Wind="0" Fire="0" Water="1" ElementGrade="9" ResID="10" TexID="4" BtItemID="28" HPBase="4500" HPPer="850" GdLevel="60" BaseSTR="80" BaseSTA="25" BaseDEX="135" BaseWILL="103" AddSTR="1" AddSTA="11" AddDEX="1" AddWILL="1" RewardEXP="175" RewardGOLD="145" Name_kr="새침이" Name_en="Saechimi" Name_jp="Saechimi" Name_th="Saechimi" Name_cn="装嫩" Name_tw="Saechimi" Name_de="Saechimi" Name_uk="Saechimi" Name_po="Saechimi" Name_fr="Saechimi" Name_es="Saechimi" Name_it="Saechimi"/> 
 </GuardianList>
+
+<!-- MaxIndex:72, if Index exceeds 72, guardians will not spawn -->
