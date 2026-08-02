@@ -81,6 +81,7 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
         final FTClient client = connection.getClient();
         boolean notifyClients = true;
 
+        try {
         final FTPlayer player = client.getPlayer();
         if (player != null) {
             Player p = player.getPlayer();
@@ -147,7 +148,9 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
                 client.setActiveGameSession(null);
             }
         }
-        GameManager.getInstance().handleRoomPlayerChanges(connection, notifyClients);
+        } finally {
+            GameManager.getInstance().handleRoomPlayerChanges(connection, notifyClients);
+        }
     }
 
     @Override

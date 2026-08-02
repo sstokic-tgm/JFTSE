@@ -54,6 +54,14 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             return;
         }
 
+        Room joiningRoom = null;
+        RoomPlayer joiningRoomPlayer = null;
+        int reservedPosition = -1;
+        short reservedPositionState = RoomPositionState.Free;
+        boolean joinCommitted = false;
+        boolean wasInLobby = ftClient.isInLobby();
+
+        try {
         Room room = GameManager.getInstance().getRooms().stream()
                 .filter(r -> r.getRoomId() == roomJoinRequestPacket.getRoomId())
                 .findAny()
@@ -244,8 +252,11 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
             return;
         }
 
+        joiningRoom = room;
         if (!isTownSquare) {
+            reservedPositionState = room.getPositions().get(newPosition);
             room.getPositions().set(newPosition, RoomPositionState.InUse);
+            reservedPosition = newPosition;
         }
 
         Friend couple = socialService.getRelationshipWithFriend(activePlayer.getPlayerRef());
@@ -268,26 +279,55 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
         }
 
         room.getRoomPlayerList().add(roomPlayer);
+        joiningRoomPlayer = roomPlayer;
 
-        handleRoomUponJoin(connection, room, false);
-
-        ftClient.getIsJoiningOrLeavingRoom().set(false);
+        sendRoomJoinAnswer(connection, room);
+        if (connection.getIsClosingConnection().get()) {
+            throw new IllegalStateException("Connection closed during room join");
+        }
+        joinCommitted = true;
+        handleRoomAfterJoin(connection, room, false);
+        } catch (RuntimeException exception) {
+            if (!joinCommitted) {
+                if (joiningRoomPlayer != null) {
+                    joiningRoom.getRoomPlayerList().remove(joiningRoomPlayer);
+                }
+                if (reservedPosition >= 0) {
+                    joiningRoom.getPositions().set(reservedPosition, reservedPositionState);
+                }
+                if (ftClient.getActiveRoom() == joiningRoom) {
+                    ftClient.setActiveRoom(null);
+                    ftClient.setInLobby(wasInLobby);
+                }
+            }
+            throw exception;
+        } finally {
+            ftClient.getIsJoiningOrLeavingRoom().set(false);
+        }
     }
 
     private void handleRoomUponJoin(final FTConnection connection, Room room, boolean existingRoom) {
-        FTClient client = connection.getClient();
-        RoomPlayer roomPlayer = client.getRoomPlayer();
-        final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
+        sendRoomJoinAnswer(connection, room);
+        handleRoomAfterJoin(connection, room, existingRoom);
+    }
 
+    private void sendRoomJoinAnswer(final FTConnection connection, Room room) {
         SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
                 .result((char) 0)
                 .roomType(room.getRoomType())
                 .mode(room.getMode())
                 .mapId(room.getMap())
                 .build();
+        connection.sendTCP(roomJoinAnswerPacket);
+    }
+
+    private void handleRoomAfterJoin(final FTConnection connection, Room room, boolean existingRoom) {
+        FTClient client = connection.getClient();
+        RoomPlayer roomPlayer = client.getRoomPlayer();
+        final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
+
         S2CRoomInformationPacket roomInformationPacket = new S2CRoomInformationPacket(room);
 
-        connection.sendTCP(roomJoinAnswerPacket);
         connection.sendTCP(roomInformationPacket);
 
         List<RoomPlayer> filteredRoomPlayerList = roomPlayer.getPosition() == MiscConstants.InvisibleGmSlot
