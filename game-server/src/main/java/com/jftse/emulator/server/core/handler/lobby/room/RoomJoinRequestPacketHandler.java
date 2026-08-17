@@ -6,13 +6,17 @@ import com.jftse.emulator.server.core.client.FTPlayer;
 import com.jftse.emulator.server.core.constants.MiscConstants;
 import com.jftse.emulator.server.core.constants.RoomPositionState;
 import com.jftse.emulator.server.core.constants.RoomStatus;
+import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.life.room.Room;
 import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.manager.ServiceManager;
+import com.jftse.emulator.server.core.matchplay.GameSessionManager;
 import com.jftse.emulator.server.core.packets.lobby.room.*;
+import com.jftse.emulator.server.core.packets.matchplay.S2CGameNetworkSettingsPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
+import com.jftse.entities.database.model.gameserver.GameServer;
 import com.jftse.entities.database.model.messenger.Friend;
 import com.jftse.entities.database.model.player.*;
 import com.jftse.server.core.handler.PacketHandler;
@@ -23,9 +27,11 @@ import com.jftse.server.core.service.SocialService;
 import com.jftse.server.core.shared.packets.lobby.room.CMSGRoomJoin;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomCloseSlot;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomJoin;
+import com.jftse.server.core.shared.packets.matchplay.SMSGUnsetHost;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
 @PacketId(CMSGRoomJoin.PACKET_ID)
@@ -77,7 +83,8 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
         final boolean isTownSquare = room.getRoomType() == 1 && room.getMode() == 2;
         final ConcurrentLinkedDeque<RoomPlayer> roomPlayerList = room.getRoomPlayerList();
 
-        if (room.getStatus() != RoomStatus.NotRunning) {
+        boolean joiningRunningMatch = room.getStatus() == RoomStatus.Running;
+        if (room.getStatus() != RoomStatus.NotRunning && !joiningRunningMatch) {
             SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
                     .result((char) -1)
                     .roomType((byte) 0)
@@ -90,6 +97,28 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
 
             GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
             return;
+        }
+
+        GameSession joiningGameSession = null;
+        int joiningGameSessionId = 0;
+        if (joiningRunningMatch) {
+            FTClient matchClient = GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
+                    .filter(client -> client.getActiveGameSession() != null)
+                    .findFirst()
+                    .orElse(null);
+            if (matchClient == null) {
+                SMSGRoomJoin roomJoinAnswerPacket = SMSGRoomJoin.builder()
+                        .result((char) -1)
+                        .roomType((byte) 0)
+                        .mode((byte) 0)
+                        .mapId((byte) 0)
+                        .build();
+                connection.sendTCP(roomJoinAnswerPacket);
+                resetIsJoiningOrLeavingRoom(ftClient);
+                return;
+            }
+            joiningGameSession = matchClient.getActiveGameSession();
+            joiningGameSessionId = matchClient.getGameSessionId();
         }
 
         FTPlayer activePlayer = ftClient.getPlayer();
@@ -219,8 +248,14 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
 
         int newPosition = -1;
         if (!isTownSquare) {
-            Optional<Short> num = room.getPositions().stream().filter(x -> x == RoomPositionState.Free).findFirst();
-            newPosition = useGmSlot ? 9 : num.map(pos -> room.getPositions().indexOf(pos)).orElse(-1);
+            if (joiningRunningMatch) {
+                newPosition = useGmSlot ? 9 : findAvailableSpectatorPosition(room).orElse(-1);
+            } else {
+                Optional<Short> position = room.getPositions().stream()
+                        .filter(state -> state == RoomPositionState.Free)
+                        .findFirst();
+                newPosition = useGmSlot ? 9 : position.map(room.getPositions()::indexOf).orElse(-1);
+            }
         } else {
             List<Short> positions = roomPlayerList.stream().map(RoomPlayer::getPosition).toList();
             newPosition = (short) IntStream.range(0, room.getPlayers())
@@ -269,9 +304,78 @@ public class RoomJoinRequestPacketHandler implements PacketHandler<FTConnection,
 
         room.getRoomPlayerList().add(roomPlayer);
 
+        if (joiningRunningMatch
+                && !attachToRunningSession(room, ftClient, joiningGameSessionId, joiningGameSession)) {
+            room.getRoomPlayerList().remove(roomPlayer);
+            room.getPositions().set(newPosition, RoomPositionState.Free);
+            ftClient.setActiveRoom(null);
+            ftClient.setInLobby(true);
+            SMSGRoomJoin failedJoin = SMSGRoomJoin.builder()
+                    .result((char) -1)
+                    .roomType((byte) 0)
+                    .mode((byte) 0)
+                    .mapId((byte) 0)
+                    .build();
+            connection.sendTCP(failedJoin);
+            resetIsJoiningOrLeavingRoom(ftClient);
+            return;
+        }
+
         handleRoomUponJoin(connection, room, false);
 
+        if (joiningRunningMatch) {
+            sendRunningMatchConnectionSettings(connection, room, joiningGameSessionId);
+        }
+
         ftClient.getIsJoiningOrLeavingRoom().set(false);
+    }
+
+    private static OptionalInt findAvailableSpectatorPosition(Room room) {
+        return IntStream.rangeClosed(5, 8)
+                .filter(position -> room.getPositions().get(position) == RoomPositionState.Free)
+                .findFirst();
+    }
+
+    private static boolean attachToRunningSession(
+            Room room,
+            FTClient client,
+            int gameSessionId,
+            GameSession capturedSession) {
+        AtomicBoolean attached = new AtomicBoolean(false);
+        GameSessionManager.getInstance().getGameSessionList().computeIfPresent(gameSessionId, (id, currentSession) -> {
+            if (currentSession == capturedSession && room.getStatus() == RoomStatus.Running) {
+                currentSession.getClients().add(client);
+                client.setActiveGameSession(gameSessionId);
+                attached.set(true);
+            }
+            return currentSession;
+        });
+        return attached.get();
+    }
+
+    private void sendRunningMatchConnectionSettings(
+            FTConnection connection,
+            Room room,
+            int gameSessionId) {
+        GameServer relayServer = ServiceManager.getInstance().getAuthenticationService()
+                .getGameServerByPort(GameManager.getInstance().getServerConfService().get("RelayPort", Integer.class));
+        FTClient joiningClient = connection.getClient();
+        List<FTClient> relayClients = new ArrayList<>();
+        relayClients.add(joiningClient);
+        GameManager.getInstance().getClientsInRoom(room.getRoomId()).stream()
+                .filter(client -> client != joiningClient)
+                .filter(client -> client.getRoomPlayer() != null && client.getRoomPlayer().getPosition() < 4)
+                .sorted(Comparator.comparingInt(client -> client.getRoomPlayer().getPosition()))
+                .limit(3)
+                .forEach(relayClients::add);
+        SMSGUnsetHost unsetHost = SMSGUnsetHost.builder().result((byte) 0).build();
+        S2CGameNetworkSettingsPacket settings = new S2CGameNetworkSettingsPacket(
+                relayServer.getHost(),
+                relayServer.getPort(),
+                gameSessionId,
+                room,
+                relayClients);
+        connection.sendTCP(unsetHost, settings);
     }
 
     private void handleRoomUponJoin(final FTConnection connection, Room room, boolean existingRoom) {

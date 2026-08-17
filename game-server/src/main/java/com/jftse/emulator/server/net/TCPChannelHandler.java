@@ -112,16 +112,17 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
 
             Room currentClientRoom = client.getActiveRoom();
             if (currentClientRoom != null) {
-                if (player != null && currentClientRoom.getStatus() == RoomStatus.Running) {
+                RoomPlayer roomPlayer = client.getRoomPlayer();
+                boolean isActivePlayer = roomPlayer != null && roomPlayer.getPosition() < 4;
+                if (player != null && isActivePlayer && currentClientRoom.getStatus() == RoomStatus.Running) {
                     PlayerStatistic playerStatistic = ServiceManager.getInstance().getPlayerStatisticService().findPlayerStatisticById(player.getPlayerStatisticId());
                     playerStatistic.setNumberOfDisconnects(playerStatistic.getNumberOfDisconnects() + 1);
                     ServiceManager.getInstance().getPlayerStatisticService().save(playerStatistic);
                 }
 
-                RoomPlayer roomPlayer = client.getRoomPlayer();
                 if (roomPlayer != null) {
                     roomPlayer.getConnectedToRelay().compareAndSet(true, false);
-                    notifyClients = roomPlayer.getPosition() < 4;
+                    notifyClients = isActivePlayer;
                     if (notifyClients) {
                         synchronized (currentClientRoom) {
                             currentClientRoom.setStatus(RoomStatus.NotRunning);
@@ -138,14 +139,15 @@ public class TCPChannelHandler extends TCPHandlerV2<FTConnection> {
                             }
                         });
                         GameSessionManager.getInstance().getGameSessionList().remove(client.getGameSessionId(), gameSession);
+
+                        MatchplayGame game = gameSession.getMatchplayGame();
+                        game.getScheduledFutures().forEach(sf -> sf.cancel(false));
+                        game.getScheduledFutures().clear();
+
+                        GameManager.getInstance().getMatchRallyStatsConsumer().clearSession(client.getGameSessionId());
                     }
                 }
-                MatchplayGame game = gameSession.getMatchplayGame();
-                game.getScheduledFutures().forEach(sf -> sf.cancel(false));
-                game.getScheduledFutures().clear();
-
-                GameManager.getInstance().getMatchRallyStatsConsumer().clearSession(client.getGameSessionId());
-
+            } else {
                 client.setActiveGameSession(null);
             }
         }
