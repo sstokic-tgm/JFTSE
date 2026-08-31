@@ -36,7 +36,10 @@ public class HardModeCommand extends AbstractCommand {
         }
 
         if (roomPlayer.isMaster()) {
-            if (!GameManager.getInstance().isAllowedToChangeMode(room)) {
+            if (!room.isHardMode() && !room.getActiveExtensionModes().isEmpty()) {
+                S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Cannot enable hard mode while an extension mode is active");
+                GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
+            } else if (!GameManager.getInstance().isAllowedToChangeMode(room)) {
                 S2CChatRoomAnswerPacket hardModeChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "All in the room must be lvl 60 to be able to change modes");
                 GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(hardModeChangedPacket));
             } else {

@@ -1,6 +1,10 @@
 package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
+import com.jftse.emulator.server.core.matchplay.extension.GuardianBattleStateProvider;
+import com.jftse.emulator.server.core.matchplay.extension.MatchTimerExtension;
+import com.jftse.emulator.server.core.matchplay.extension.MatchplayLifecycleExtension;
+import com.jftse.emulator.server.core.matchplay.extension.WaveCompletionExtension;
 import com.jftse.emulator.server.core.rpc.GrpcAuthService;
 import com.jftse.emulator.server.core.service.LotteryServiceV2;
 import com.jftse.emulator.server.core.service.impl.ClothEquipmentServiceImpl;
@@ -13,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @Getter
@@ -88,6 +94,25 @@ public class ServiceManager {
     private GuardianService guardianService;
     @Autowired
     private BossGuardianService bossGuardianService;
+    // A plugin's own services (and their entities/repositories) live in the plugin module itself,
+    // not here - game-server can't depend on a plugin module, so they aren't autowired in this
+    // class. A plugin whose own non-Spring classes need static access to such services should
+    // mirror this class's own singleton getInstance() pattern with its own registry bean.
+    // All beans implementing MatchTimerExtension are auto-collected by Spring - a new extension
+    // just needs to be a @Component implementing the interface, no registration code needed here.
+    // required=false + the empty-list default matter: with zero plugins installed (the public repo
+    // on its own, no extension jar present), there are zero beans of these types, and Spring's
+    // default List<T> autowiring throws NoSuchBeanDefinitionException in that case rather than
+    // injecting an empty list - confirmed by actually booting game-server.jar with no plugin on the
+    // classpath before this fix.
+    @Autowired(required = false)
+    private List<MatchTimerExtension> matchTimerExtensions = Collections.emptyList();
+    @Autowired(required = false)
+    private List<WaveCompletionExtension> waveCompletionExtensions = Collections.emptyList();
+    @Autowired(required = false)
+    private List<GuardianBattleStateProvider> guardianBattleStateProviders = Collections.emptyList();
+    @Autowired(required = false)
+    private List<MatchplayLifecycleExtension> matchplayLifecycleExtensions = Collections.emptyList();
     @Autowired
     private GuardianSkillsService guardianSkillsService;
     @Autowired

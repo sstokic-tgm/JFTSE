@@ -26,6 +26,7 @@ import com.jftse.emulator.server.core.matchplay.MatchplayHandleable;
 import com.jftse.emulator.server.core.matchplay.MatchplayReward;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
+import com.jftse.emulator.server.core.matchplay.extension.MatchplayLifecycleExtension;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
@@ -105,6 +106,8 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     @Override
     public void onStart(FTClient ftClient) {
         final GameSession gameSession = ftClient.getActiveGameSession();
+
+        ServiceManager.getInstance().getMatchplayLifecycleExtensions().forEach(ext -> ext.onMatchStarting(ftClient, game));
 
         byte servingPositionXOffset = (byte) ServingPositionGenerator.randomServingPositionXOffset();
         byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
@@ -486,7 +489,16 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
 
         int activePlayingPlayersCount = (int) roomPlayers.stream().filter(x -> x.getPosition() < 4).count();
         byte guardianStartPosition = 10;
-        List<GuardianBase> guardians = game.determineGuardians(game.getGuardiansInStage(), game.getGuardianLevelLimit().get());
+        List<GuardianBase> guardians = null;
+        for (MatchplayLifecycleExtension ext : ServiceManager.getInstance().getMatchplayLifecycleExtensions()) {
+            guardians = ext.overrideInitialGuardians(game, room);
+            if (guardians != null) {
+                break;
+            }
+        }
+        if (guardians == null) {
+            guardians = game.determineGuardians(game.getGuardiansInStage(), game.getGuardianLevelLimit().get());
+        }
 
         if (room.isHardMode()) {
             game.fillRemainingGuardianSlots(false, game, game.getGuardiansInStage(), guardians);

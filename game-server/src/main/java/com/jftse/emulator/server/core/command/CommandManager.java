@@ -143,6 +143,8 @@ public class CommandManager {
         registerCommand("hard", 0, new HardModeCommand());
         registerCommand("arcade", 0, new ArcadeModeCommand());
         registerCommand("random", 0, new RandomModeCommand());
+        // A plugin registers its own commands directly via registerCommand from within its own
+        // Spring component instead of a line here - see PLUGIN_README.md.
         registerCommand("pb", 0, new PointbackCommand());
         registerCommand("ban", 1, new BanPlayerCommand());
         registerCommand("unban", 1, new UnbanPlayerCommand());

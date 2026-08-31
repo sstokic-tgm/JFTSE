@@ -169,8 +169,46 @@
                 </executions>
             </plugin>
             <plugin>
+                <!-- Extra execution (alongside the plugin's own default, unclassified jar) that
+                     archives the same classes a second time under the "classes" classifier -
+                     giving a plugin module a plain jar (classes at the jar root) to depend on,
+                     without touching what the main, unclassified game-server.jar artifact is.
+                     Runs in the same "package" phase as repackage below, but repackage only ever
+                     transforms the *main* (unclassified) artifact in place, so this classified jar
+                     is untouched by it regardless of execution order. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>classes-jar-for-plugins</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>classes</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- No classifier here (default): repackage overwrites target/game-server.jar
+                         in place with the runnable fat jar (classes nested under BOOT-INF/classes)
+                         - this keeps the artifact name/layout identical to before the plugin
+                         system existed, so README.md / docker/emulator/supervisord.conf need no
+                         changes. The plain, dependency-resolvable jar that a plugin module needs
+                         is produced separately above as target/game-server-classes.jar. -->
+                    <!-- ZIP layout uses PropertiesLauncher instead of the default JarLauncher, which
+                         understands a -Dloader.path=... (or LOADER_PATH env var) system property:
+                         extra jars/directories listed there are added to the classpath at startup,
+                         with no rebuild needed. This is how a private plugin jar (built separately
+                         and never committed to the public repo) gets picked up at runtime - drop
+                         the jar anywhere on disk and point loader.path at it. See
+                         PLUGIN_README.md for the bigger picture. -->
+                    <layout>ZIP</layout>
+                </configuration>
             </plugin>
         </plugins>
     </build>

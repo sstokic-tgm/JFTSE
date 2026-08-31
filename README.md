@@ -58,6 +58,8 @@ The project is divided into 12 modules:
 * **docker** - Docker files for the server (needed and not needed ones for running the server)
 * **scripts** - Various scripts for the server (e.g. SQL import script)
 
+Optional, private native plugins (e.g. Tower Mode) can be added under a `plugins/` directory without touching any of the above - see [PLUGIN_README.md](PLUGIN_README.md) for how to write one.
+
 ## Installation
 
 ### Installing docker
@@ -202,6 +204,8 @@ Then you can start other server implementations you need or want to play on:
 cd game-server/target
 java -jar game-server-1.0.0-SNAPSHOT.jar
 ```
+
+To also load optional native plugins (e.g. Tower Mode), add `-Dloader.path=plugins-lib` and drop the plugin jar(s) into a `plugins-lib` folder next to the jar - see [PLUGIN_README.md](PLUGIN_README.md). Without this flag `game-server` runs exactly as above, plugins or not.
 
 The relay-server is needed for playing since it relays/broadcasts the match interaction between players to all players in the match:
 ```

@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
@@ -54,4 +56,21 @@ public class Room {
     private boolean isHardMode; // Guardians are very strong
     private boolean isArcade; // You have to play against all guardians there are
     private boolean isRandomGuardians; // Always random guardians are spawned.
+
+    // Generic extension-point mechanism (see game-server/.../matchplay/extension/) - lets a plugin
+    // register its own mode, identified by an arbitrary string id, without a dedicated boolean
+    // field per mode on this class. See isModeActive/setModeActive below.
+    private final Set<String> activeExtensionModes = new HashSet<>();
+
+    public boolean isModeActive(String modeId) {
+        return activeExtensionModes.contains(modeId);
+    }
+
+    public void setModeActive(String modeId, boolean active) {
+        if (active) {
+            activeExtensionModes.add(modeId);
+        } else {
+            activeExtensionModes.remove(modeId);
+        }
+    }
 }

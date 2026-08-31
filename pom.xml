@@ -58,4 +58,23 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- Optional, private plugin modules live under plugins/ and are .gitignore'd - they're
+         never in a public clone. Each is only added to the reactor when its pom.xml actually
+         exists on disk, so a public clone (no plugins/ directory) builds normally without any
+         profile flag; on a machine that has them (private plugin dev), they're picked up
+         automatically. See plugins/tower-mode/PLUGIN_ARCHITECTURE_PLAN.md. -->
+    <profiles>
+        <profile>
+            <id>with-tower-mode</id>
+            <activation>
+                <file>
+                    <exists>plugins/tower-mode/pom.xml</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>plugins/tower-mode</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
