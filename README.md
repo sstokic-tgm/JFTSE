@@ -205,7 +205,7 @@ cd game-server/target
 java -jar game-server-1.0.0-SNAPSHOT.jar
 ```
 
-To also load optional native plugins (e.g. Tower Mode), add `-Dloader.path=plugins-lib` and drop the plugin jar(s) into a `plugins-lib` folder next to the jar - see [PLUGIN_README.md](PLUGIN_README.md). Without this flag `game-server` runs exactly as above, plugins or not.
+To also load optional native plugins (e.g. Tower Mode), drop the plugin jar(s) into a `plugins-lib` folder next to the jar - it's picked up automatically, no extra flag needed - see [PLUGIN_README.md](PLUGIN_README.md). Without any plugin jar there, `game-server` runs exactly as above.
 
 The relay-server is needed for playing since it relays/broadcasts the match interaction between players to all players in the match:
 ```

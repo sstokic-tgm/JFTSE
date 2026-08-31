@@ -201,12 +201,14 @@
                          changes. The plain, dependency-resolvable jar that a plugin module needs
                          is produced separately above as target/game-server-classes.jar. -->
                     <!-- ZIP layout uses PropertiesLauncher instead of the default JarLauncher, which
-                         understands a -Dloader.path=... (or LOADER_PATH env var) system property:
-                         extra jars/directories listed there are added to the classpath at startup,
-                         with no rebuild needed. This is how a private plugin jar (built separately
-                         and never committed to the public repo) gets picked up at runtime - drop
-                         the jar anywhere on disk and point loader.path at it. See
-                         PLUGIN_README.md for the bigger picture. -->
+                         understands a loader.path setting (system property, LOADER_PATH env var, or
+                         a bundled loader.properties - see src/main/resources/loader.properties,
+                         which defaults it to "plugins-lib" so no flag is needed for the common
+                         case): extra jars/directories listed there are added to the classpath at
+                         startup, with no rebuild needed. This is how a private plugin jar (built
+                         separately and never committed to the public repo) gets picked up at
+                         runtime - drop it into plugins-lib, or override loader.path to point
+                         elsewhere. See PLUGIN_README.md for the bigger picture. -->
                     <layout>ZIP</layout>
                 </configuration>
             </plugin>

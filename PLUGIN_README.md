@@ -50,10 +50,12 @@ it only knows about a handful of small extension-point interfaces (`GuardianBatt
 `game-server` itself. Your plugin depends on `game-server` (one-directional), implements whichever
 of those interfaces it needs as `@Component`-annotated Spring beans, and gets deployed by dropping
 its built jar into a folder (`plugins-lib`) that's added to `game-server`'s classpath **at startup**
-via Spring Boot's `PropertiesLauncher` (`-Dloader.path=plugins-lib`). Spring's own component/entity
-scanning then just... finds your classes, because they're on the classpath and under the right
-package prefix (see next section). No plugin registry, no manual wiring — running `game-server`
-with an empty `plugins-lib` folder behaves exactly like the plugin doesn't exist.
+via Spring Boot's `PropertiesLauncher` — `game-server` ships a bundled `loader.properties` defaulting
+`loader.path=plugins-lib`, so no extra flag is needed for the common case (see Step 6). Spring's own
+component/entity scanning then just... finds your classes, because they're on the classpath and
+under the right package prefix (see next section). No plugin registry, no manual wiring — running
+`game-server` with an empty (or missing) `plugins-lib` folder behaves exactly like the plugin
+doesn't exist.
 
 The whole `plugins/` directory is `.gitignore`'d — plugins are never part of the public repo. The
 root `pom.xml` only adds a plugin to the Maven reactor build if its `pom.xml` is actually present on
@@ -263,23 +265,25 @@ Deploying it is a manual copy — Maven does **not** do this for you:
 cp plugins/<name>/target/<name>-1.0.0-SNAPSHOT.jar game-server/plugins-lib/
 ```
 
-Then run `game-server` with `loader.path` pointing at that folder. **The path is resolved relative
-to the JVM's working directory, not the jar's location** — get this wrong and `loader.path` fails
-silently (see [next section](#sanity-check-your-plugin-actually-loaded)), so match it to however you
-actually launch:
+Then just run `game-server` — no flag needed, since it ships with a bundled `loader.properties`
+that already defaults `loader.path=plugins-lib`. That default is still resolved **relative to the
+JVM's working directory, not the jar's location**, so it only finds your jar automatically if
+`plugins-lib` sits where the default expects it relative to wherever you actually launch from; a
+mismatch here fails silently (see [next section](#sanity-check-your-plugin-actually-loaded)):
 
 ```
-# cwd = game-server/target (the jar's own folder, plugins-lib is a direct sibling)
-java -Dloader.path=plugins-lib -jar game-server.jar
+# cwd = game-server/target (the jar's own folder, plugins-lib is a direct sibling) - default just works
+java -jar game-server.jar
 
 # cwd = game-server/target/dist - the working directory server.conf/scripts/logs actually need
-# (see below), two levels below plugins-lib
+# (see below), two levels below plugins-lib - the bundled default won't reach it, override instead
 java -Dloader.path=../../plugins-lib -jar ../game-server.jar
 ```
 
-(`LOADER_PATH=plugins-lib` as an env var instead of `-Dloader.path=` works the same way, same
-relative-path rule.) Multiple plugin jars can sit in the same `plugins-lib` folder at once;
-`loader.path` also accepts a comma-separated list of paths if you'd rather keep them elsewhere.
+(`LOADER_PATH=...` as an env var instead of `-Dloader.path=` works the same way, same relative-path
+rule, and both take precedence over the bundled default.) Multiple plugin jars can sit in the same
+`plugins-lib` folder at once; `loader.path` also accepts a comma-separated list of paths if you'd
+rather keep them elsewhere.
 
 **Working directory gotcha (unrelated to plugins specifically, but you'll hit it in the same
 breath):** `server.conf` and the `scripts/` folder are copied by the build to
