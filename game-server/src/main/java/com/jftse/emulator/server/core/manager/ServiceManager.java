@@ -2,6 +2,7 @@ package com.jftse.emulator.server.core.manager;
 
 import com.jftse.emulator.common.service.ConfigService;
 import com.jftse.emulator.server.core.matchplay.extension.GuardianBattleStateProvider;
+import com.jftse.emulator.server.core.matchplay.extension.MatchRewardExtension;
 import com.jftse.emulator.server.core.matchplay.extension.MatchTimerExtension;
 import com.jftse.emulator.server.core.matchplay.extension.MatchplayLifecycleExtension;
 import com.jftse.emulator.server.core.matchplay.extension.WaveCompletionExtension;
@@ -113,6 +114,8 @@ public class ServiceManager {
     private List<GuardianBattleStateProvider> guardianBattleStateProviders = Collections.emptyList();
     @Autowired(required = false)
     private List<MatchplayLifecycleExtension> matchplayLifecycleExtensions = Collections.emptyList();
+    @Autowired(required = false)
+    private List<MatchRewardExtension> matchRewardExtensions = Collections.emptyList();
     @Autowired
     private GuardianSkillsService guardianSkillsService;
     @Autowired

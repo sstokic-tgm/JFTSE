@@ -165,7 +165,7 @@ about each other).
 
 ## Step 3 — hook into core behavior
 
-Four extension points exist today, all under
+Five extension points exist today, all under
 `game-server/src/main/java/com/jftse/emulator/server/core/matchplay/extension/`. Implement whichever
 you need as a `@Component` in your plugin module — `ServiceManager` autowires
 `List<TheInterface>` for each of these (`@Autowired(required = false)`, defaulting to an empty
@@ -178,6 +178,7 @@ code.
 | `MatchplayLifecycleExtension` | `MatchplayGuardianModeHandler#onPrepare`/`onStart` | `overrideInitialGuardians(...)` (return `null` to defer) and `onMatchStarting(...)` (notify-only) |
 | `WaveCompletionExtension` | `SpellHitsTargetHandler#handleAllGuardiansDead` | `handlesWaveCompletion(game)` — return `true` to take over "all guardians dead" handling instead of the default boss-transition logic |
 | `MatchTimerExtension` | `DefeatTimerTask` | `overridesTimer(game)` — return `true` to take over (or suppress) the match timer instead of the default map-based `playTime`/`bossPlayTime` |
+| `MatchRewardExtension` | `MatchplayGuardianModeHandler#onEnd` | `tryOverrideMatchRewardTotals(game, reward)` — called after the default `game.getMatchRewards()` built `reward` (item-reward slots, ranking points, etc. untouched) but *before* `addBonusesToRewards()` (house/ring/wiseman bonuses). Overwrite `reward`'s `PlayerReward` exp/gold with the RAW total your plugin already granted over the course of the match (e.g. incrementally) and return `true` — bonuses then apply on top of your total the same way they would on the default calculation, and only the resulting bonus delta (not your whole total again) gets granted to accounts afterwards. Return `false` to leave the default exp/gold in place, which IS applied to accounts in full |
 
 Every one of these has a `room.isModeActive(MODE_ID)` (or equivalent) check as the first line of the
 implementation, so your extension only actually does anything for matches your plugin cares about —

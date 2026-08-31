@@ -26,6 +26,7 @@ import com.jftse.emulator.server.core.matchplay.MatchplayHandleable;
 import com.jftse.emulator.server.core.matchplay.MatchplayReward;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
+import com.jftse.emulator.server.core.matchplay.extension.MatchRewardExtension;
 import com.jftse.emulator.server.core.matchplay.extension.MatchplayLifecycleExtension;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
@@ -228,7 +229,25 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
         }
 
         MatchplayReward matchplayReward = game.getMatchRewards();
-        game.addBonusesToRewards(activeRoom.getRoomPlayerList(), matchplayReward.getPlayerRewards());
+
+        // An extension mode (e.g. tower) that grants its own exp/gold/rankingPoints (bonuses
+        // included) over the course of the match can overwrite the default numbers here with its
+        // own final totals - item-reward slots etc. from game.getMatchRewards() are untouched.
+        // When one does, addBonusesToRewards below is skipped (its total is already final), the
+        // per-client loop further down grants nothing more for exp/gold (already credited to the
+        // account over the course of the match), and that loop's classic per-guardian
+        // ranking-point calculation is skipped too (see the rewardAlreadyGranted check there).
+        boolean rewardAlreadyGranted = false;
+        for (MatchRewardExtension ext : ServiceManager.getInstance().getMatchRewardExtensions()) {
+            if (ext.tryOverrideMatchRewardTotals(game, matchplayReward)) {
+                rewardAlreadyGranted = true;
+                break;
+            }
+        }
+
+        if (!rewardAlreadyGranted) {
+            game.addBonusesToRewards(activeRoom.getRoomPlayerList(), matchplayReward.getPlayerRewards());
+        }
 
         GameSessionManager.getInstance().addMatchplayReward(activeRoom.getRoomId(), matchplayReward);
 
@@ -293,51 +312,60 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
                 }
 
                 final int oldLevel = player.getLevel();
-                final int level = levelService.getLevel(playerReward.getExp(), player.getExpPoints(), (byte) oldLevel);
-                if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
-                    player.syncExpPoints(player.getExpPoints() + playerReward.getExp());
-                player.syncGold(player.getGold() + playerReward.getGold());
-                player.syncCouplePoints(player.getCouplePoints() + playerReward.getCouplePoints());
-                levelService.setNewLevelStatusPoints((byte) level, player.getPlayer());
-                player.syncLevel(level);
+                if (!rewardAlreadyGranted) {
+                    final int level = levelService.getLevel(playerReward.getExp(), player.getExpPoints(), (byte) oldLevel);
+                    if ((level < ConfigService.getInstance().getValue("player.level.max", 60)) || (oldLevel < level))
+                        player.syncExpPoints(player.getExpPoints() + playerReward.getExp());
+                    player.syncGold(player.getGold() + playerReward.getGold());
+                    player.syncCouplePoints(player.getCouplePoints() + playerReward.getCouplePoints());
+                    levelService.setNewLevelStatusPoints((byte) level, player.getPlayer());
+                    player.syncLevel(level);
+                }
 
                 PlayerStatisticView playerStatistic = player.getPlayerStatistic();
 
                 PlayerStats playerStats = matchRallyStatsConsumer.getPlayerStats(gameSessionId, Math.toIntExact(player.getId()));
 
-                final ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = game.getGuardianBattleStates();
-                List<Integer> guardianRewardRankingPointList = guardianBattleStates.stream()
-                        .filter(g -> g.getLooted().get())
-                        .map(GuardianBattleState::getRewardRankingPoint)
-                        .toList();
+                // An extension that already claimed the reward (see rewardAlreadyGranted above) may
+                // have set its own final rankingPoints on playerReward too - e.g. tower's per-floor
+                // RP roll accumulated across the whole run (TowerModeRewardExtension), which this
+                // classic per-guardian calc would otherwise clobber with just game.getGuardianBattleStates()'
+                // CURRENT floor/stage, discarding everything from earlier in the run.
+                if (!rewardAlreadyGranted) {
+                    final ConcurrentLinkedDeque<GuardianBattleState> guardianBattleStates = game.getGuardianBattleStates();
+                    List<Integer> guardianRewardRankingPointList = guardianBattleStates.stream()
+                            .filter(g -> g.getLooted().get())
+                            .map(GuardianBattleState::getRewardRankingPoint)
+                            .toList();
 
-                if (wonGame) {
-                    final int guardianRewardRankingPointSum = guardianRewardRankingPointList.stream()
-                            .mapToInt(v -> {
-                                if (game.getIsHardMode().get() && !game.getIsRandomGuardiansMode().get()) {
-                                    return (int) (v + (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.won.ranking-point.multiplier", 1.0)));
-                                }
-                                return v;
-                            })
-                            .sum();
-
-                    playerReward.setRankingPoints(guardianRewardRankingPointSum);
-                } else {
-                    if (game.getMap().getIsBossStage() && secondsPlayed < 90 && !game.getBossBattleActive().get()) {
-                        guardianRewardRankingPointList = guardianBattleStates.stream()
-                                .map(GuardianBattleState::getRewardRankingPoint)
-                                .toList();
-
+                    if (wonGame) {
                         final int guardianRewardRankingPointSum = guardianRewardRankingPointList.stream()
                                 .mapToInt(v -> {
                                     if (game.getIsHardMode().get() && !game.getIsRandomGuardiansMode().get()) {
-                                        return (int) (v + (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.lost.ranking-point.multiplier", 1.0)));
+                                        return (int) (v + (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.won.ranking-point.multiplier", 1.0)));
                                     }
                                     return v;
                                 })
                                 .sum();
 
-                        playerReward.setRankingPoints(-guardianRewardRankingPointSum);
+                        playerReward.setRankingPoints(guardianRewardRankingPointSum);
+                    } else {
+                        if (game.getMap().getIsBossStage() && secondsPlayed < 90 && !game.getBossBattleActive().get()) {
+                            guardianRewardRankingPointList = guardianBattleStates.stream()
+                                    .map(GuardianBattleState::getRewardRankingPoint)
+                                    .toList();
+
+                            final int guardianRewardRankingPointSum = guardianRewardRankingPointList.stream()
+                                    .mapToInt(v -> {
+                                        if (game.getIsHardMode().get() && !game.getIsRandomGuardiansMode().get()) {
+                                            return (int) (v + (v * ConfigService.getInstance().getValue("matchplay.guardian.hard.lost.ranking-point.multiplier", 1.0)));
+                                        }
+                                        return v;
+                                    })
+                                    .sum();
+
+                            playerReward.setRankingPoints(-guardianRewardRankingPointSum);
+                        }
                     }
                 }
 
