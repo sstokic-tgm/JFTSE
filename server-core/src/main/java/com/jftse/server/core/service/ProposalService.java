@@ -23,4 +23,6 @@ public interface ProposalService {
     long deleteBySender(Player sender);
 
     long deleteByReceiver(Player receiver);
+
+    int deleteBySenderAndReceiver(Player sender, Player receiver);
 }
