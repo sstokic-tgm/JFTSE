@@ -321,7 +321,7 @@ public class LotteryServiceV2Impl implements LotteryServiceV2 {
         List<SLotteryItemPool> dbEntries = lotteryItemPoolRepository.findByGachaIndexAndStatus(gachaIndex, KStatus.ACTIVE);
         for (SLotteryItemPool dbEntry : dbEntries) {
             LotteryResolvedEntry resolvedEntry = result.stream()
-                    .filter(e -> e.getProductIndex() == dbEntry.getProduct().getItem0())
+                    .filter(e -> e.getProductIndex() == dbEntry.getProduct().getProductIndex())
                     .findFirst()
                     .orElse(null);
 
@@ -335,7 +335,7 @@ public class LotteryServiceV2Impl implements LotteryServiceV2 {
                 resolvedEntry.setRarityLevel(dbEntry.getRarity() != null ? dbEntry.getRarity().getRarityLevel() : 0);
             } else {
                 LotteryResolvedEntry newEntry = new LotteryResolvedEntry();
-                newEntry.setProductIndex(dbEntry.getProduct().getItem0());
+                newEntry.setProductIndex(dbEntry.getProduct().getProductIndex());
                 newEntry.setQtyMin(dbEntry.getQtyMin() != null ? dbEntry.getQtyMin() : 1);
                 newEntry.setQtyMax(dbEntry.getQtyMax() != null ? dbEntry.getQtyMax() : 1);
                 newEntry.setWeight(dbEntry.getWeight() != null ? dbEntry.getWeight() : 1.0);
