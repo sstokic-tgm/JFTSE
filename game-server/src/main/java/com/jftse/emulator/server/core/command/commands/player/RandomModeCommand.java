@@ -36,7 +36,10 @@ public class RandomModeCommand extends AbstractCommand {
         }
 
         if (roomPlayer.isMaster()) {
-            if (!GameManager.getInstance().isAllowedToChangeMode(room)) {
+            if (!room.isRandomGuardians() && !room.getActiveExtensionModes().isEmpty()) {
+                S2CChatRoomAnswerPacket randomGuardianChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "Cannot enable random mode while an extension mode is active");
+                GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(randomGuardianChangedPacket));
+            } else if (!GameManager.getInstance().isAllowedToChangeMode(room)) {
                 S2CChatRoomAnswerPacket randomGuardianChangedPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", "All in the room must be lvl 60 to be able to change modes");
                 GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(randomGuardianChangedPacket));
             } else {

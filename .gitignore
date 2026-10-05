@@ -46,3 +46,7 @@
 *.ipr
 
 target/**
+
+# Private plugin modules (e.g. tower-mode) - not part of the public repo. Root pom.xml only
+# builds these when the folder actually exists locally (see its with-tower-mode profile).
+/plugins/

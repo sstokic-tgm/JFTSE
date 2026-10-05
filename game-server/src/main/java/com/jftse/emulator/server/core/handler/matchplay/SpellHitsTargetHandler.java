@@ -11,6 +11,7 @@ import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.event.EventHandler;
 import com.jftse.emulator.server.core.matchplay.event.RunnableEvent;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
+import com.jftse.emulator.server.core.matchplay.extension.WaveCompletionExtension;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomSetBossGuardiansStats;
@@ -495,6 +496,13 @@ public class SpellHitsTargetHandler implements PacketHandler<FTConnection, CMSGS
     }
 
     private void handleAllGuardiansDead(FTConnection connection, MatchplayGuardianGame game) {
+        for (WaveCompletionExtension ext : ServiceManager.getInstance().getWaveCompletionExtensions()) {
+            if (ext.handlesWaveCompletion(game)) {
+                ext.onAllGuardiansDead(connection, game);
+                return;
+            }
+        }
+
         final boolean isHardMode = game.getIsHardMode().get();
         boolean stageChangingToBoss = game.getStageChangingToBoss().get();
         final boolean hasBossGuardianStage = game.getMap().getIsBossStage();

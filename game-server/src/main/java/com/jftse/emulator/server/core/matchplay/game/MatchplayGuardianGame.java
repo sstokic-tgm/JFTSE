@@ -24,6 +24,7 @@ import com.jftse.emulator.server.core.matchplay.MatchplayReward;
 import com.jftse.emulator.server.core.matchplay.PlayerReward;
 import com.jftse.emulator.server.core.matchplay.combat.GuardianCombatSystem;
 import com.jftse.emulator.server.core.matchplay.combat.PlayerCombatSystem;
+import com.jftse.emulator.server.core.matchplay.extension.GuardianBattleStateProvider;
 import com.jftse.emulator.server.core.matchplay.guardian.AdvancedGuardianState;
 import com.jftse.emulator.server.core.matchplay.guardian.BossBattlePhaseable;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
@@ -46,6 +47,7 @@ import com.jftse.server.core.matchplay.*;
 import com.jftse.server.core.matchplay.battle.GuardianBattleState;
 import com.jftse.server.core.matchplay.battle.PlayerBattleState;
 import com.jftse.server.core.matchplay.battle.SkillCrystal;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -54,12 +56,14 @@ import javax.persistence.TypedQuery;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Getter
@@ -87,6 +91,17 @@ public class MatchplayGuardianGame extends MatchplayGame {
     private AtomicInteger spiderMineIdentifier;
 
     private AtomicBoolean stageChangingToBoss;
+
+    // Generic per-match state bag for extension points (see .../matchplay/extension/). A plugin's
+    // own per-match state lives here, keyed by its own state class, instead of as dedicated fields
+    // on this class - see getExtensionState below.
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private final Map<Class<?>, Object> extensionState = new ConcurrentHashMap<>();
+
+    public <T> T getExtensionState(Class<T> type, Supplier<T> factory) {
+        return type.cast(extensionState.computeIfAbsent(type, k -> factory.get()));
+    }
 
     private MScenarios scenario;
     private SMaps map;
@@ -357,6 +372,13 @@ public class MatchplayGuardianGame extends MatchplayGame {
     }
 
     public GuardianBattleState createGuardianBattleState(boolean isHardMode, GuardianBase guardian, short guardianPosition, int activePlayingPlayersCount) {
+        for (GuardianBattleStateProvider provider : ServiceManager.getInstance().getGuardianBattleStateProviders()) {
+            Optional<GuardianBattleState> state = provider.tryCreate(this, guardian, guardianPosition, activePlayingPlayersCount);
+            if (state.isPresent()) {
+                return state.get();
+            }
+        }
+
         if (isHardMode && !isAdvancedBossGuardianMode) {
             GuardianBattleState gbs = new GuardianBattleState(guardian, guardianPosition, 8000, 110, 45, 165, 120, guardian.getRewardExp(), guardian.getRewardGold(), guardian.getRewardRankingPoint());
             addElementsToGuardian(guardian, gbs.getElements());
