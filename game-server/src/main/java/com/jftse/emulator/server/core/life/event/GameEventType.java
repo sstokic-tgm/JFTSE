@@ -47,6 +47,7 @@ public enum GameEventType {
     ON_SHOP_LOAD,
     ON_SHOP_LOAD_PREPARE,
     SHOP_ITEM_BOUGHT,
+    INVENTORY_ITEM_SOLD,
 
     TUTORIAL_INIT,
     TUTORIAL_FINISH,
@@ -61,3 +62,4 @@ public enum GameEventType {
         return toString();
     }
 }
+
