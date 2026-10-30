@@ -24,7 +24,6 @@ public class S2CGameSetNameColorAndRemoveBlackBar extends Packet {
             this.write((char) activePlayers.size());
             for (RoomPlayer roomPlayer : activePlayers) {
                 this.write(roomPlayer.getPosition());
-                this.write(roomPlayer.getPosition());
             }
         }
     }
