@@ -3,6 +3,7 @@ package com.jftse.server.core.protocol;
 import com.jftse.emulator.common.utilities.BitKit;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class CompositePacket extends Packet {
@@ -14,13 +15,19 @@ public class CompositePacket extends Packet {
 
     @Override
     public byte[] toBytes() {
-        final int totalLength = packets.stream().mapToInt(p -> p.getDataLength() + 8).sum();
+        List<byte[]> encodedPackets = new ArrayList<>(packets.size());
+        int totalLength = 0;
+        for (IPacket packet : packets) {
+            byte[] encoded = packet.toBytes();
+            PacketFrames.validate(encoded);
+            totalLength = Math.addExact(totalLength, encoded.length);
+            encodedPackets.add(encoded);
+        }
         byte[] data = new byte[totalLength];
         int offset = 0;
-        for (IPacket packet : packets) {
-            final int packetLength = packet.getDataLength() + 8;
-            BitKit.blockCopy(packet.toBytes(), 0, data, offset, packetLength);
-            offset += packetLength;
+        for (byte[] encoded : encodedPackets) {
+            BitKit.blockCopy(encoded, 0, data, offset, encoded.length);
+            offset += encoded.length;
         }
         return data;
     }

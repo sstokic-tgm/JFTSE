@@ -5,6 +5,7 @@ import com.jftse.emulator.common.utilities.BitKit;
 import com.jftse.emulator.common.utilities.LogConfigurator;
 import com.jftse.server.core.protocol.IPacket;
 import com.jftse.server.core.protocol.SerialTable;
+import com.jftse.server.core.protocol.PacketFrames;
 import com.jftse.server.core.shared.packets.SMSGInitHandshake;
 import com.jftse.server.core.util.GsonUtils;
 import com.jftse.server.core.util.ValidationUtil;
@@ -38,11 +39,8 @@ public class PacketEncoderV2 extends MessageToByteEncoder<IPacket> {
     @Override
     protected void encode(ChannelHandlerContext ctx, IPacket packet, ByteBuf out) throws Exception {
         byte[] data = packet.toBytes();
+        PacketFrames.validate(data);
         final int length = data.length;
-        if (length < HEADER_SIZE) {
-            out.writeBytes(data);
-            return;
-        }
 
         final int packetId = BitKit.bytesToChar(data, 4);
         final boolean isHandshakePacket = packetId == SMSGInitHandshake.PACKET_ID;
@@ -52,7 +50,7 @@ public class PacketEncoderV2 extends MessageToByteEncoder<IPacket> {
         if (!isHandshakePacket) {
             int offset = 0;
             while (offset < length) {
-                final int packetSize = BitKit.bytesToShort(data, offset + 6);
+                final int packetSize = BitKit.bytesToShort(data, offset + 6) & 0xFFFF;
                 int currentPacketLength = packetSize + HEADER_SIZE;
 
                 createSerial(data, offset);
