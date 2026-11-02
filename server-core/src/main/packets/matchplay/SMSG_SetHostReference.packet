@@ -1,0 +1,3 @@
+// Sets the host reference to the local player's slot.
+message SMSG_SetHostReference (0x17DA) {
+}

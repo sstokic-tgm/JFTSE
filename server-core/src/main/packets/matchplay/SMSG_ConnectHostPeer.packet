@@ -1,0 +1,6 @@
+// Establishes a RakPeer connection.
+message SMSG_ConnectHostPeer (0x17DA) {
+    short referenceSlot = 1;
+    string host = 2;
+    short port = 3;
+}

@@ -1,0 +1,10 @@
+// Position and velocity use hundredths of native units.
+message SMSG_PlayerMovementSnapshot (0x32C9) {
+    byte playerPosition = 1;
+    byte ackRttLowByte = 2;
+    short positionX100 = 3;
+    short positionZ100 = 4;
+    short velocityX100 = 5;
+    short velocityZ100 = 6;
+    byte action = 7;
+}

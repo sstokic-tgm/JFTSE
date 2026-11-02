@@ -602,6 +602,14 @@ public class FTPacketGen {
             return getObjectFields(f, 0);
         }
 
+        if (f.repeated && o.containsKey("len") && supportedType(f.type) && !f.type.equals("bytes")) {
+            return "if (msg." + f.name + ".size() != " + o.get("len") + ") throw new IllegalArgumentException(\"Expected " + o.get("len") + " entries for " + f.name + "\");\n\t\tmsg." + f.name + ".forEach(msg::write);";
+        }
+
+        if (f.type.equals("bytes") && o.containsKey("len")) {
+            return "if (msg." + f.name + " == null || msg." + f.name + ".length != " + o.get("len") + ") throw new IllegalArgumentException(\"Expected " + o.get("len") + " bytes for " + f.name + "\");\n\t\tmsg.write(msg." + f.name + ");";
+        }
+
         // default behavior
         if (f.repeated && !f.type.equals("bytes")) {
             return "msg.write((" + mapType(new Field("byte", "tmp", false, o)) + ") msg." + f.name + ".size());\n\t\tmsg." + f.name + ".forEach(msg::write);";

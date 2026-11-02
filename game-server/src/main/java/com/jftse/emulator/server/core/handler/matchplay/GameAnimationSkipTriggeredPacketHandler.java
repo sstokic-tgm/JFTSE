@@ -10,7 +10,7 @@ import com.jftse.emulator.server.core.life.room.RoomPlayer;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameDisplayPlayerStatsPacket;
-import com.jftse.emulator.server.core.packets.matchplay.S2CGameSetNameColorAndRemoveBlackBar;
+import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayActivatePlayersPacket;
 import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.PacketHandler;
@@ -77,8 +77,8 @@ public class GameAnimationSkipTriggeredPacketHandler implements PacketHandler<FT
                     return;
                 }
 
-                S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(room);
-                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setNameColorAndRemoveBlackBarPacket, client.getConnection());
+                S2CMatchplayActivatePlayersPacket activatePlayersPacket = new S2CMatchplayActivatePlayersPacket(room);
+                GameManager.getInstance().sendPacketToAllClientsInSameGameSession(activatePlayersPacket, client.getConnection());
 
                 GameSession gameSession = client.getActiveGameSession();
                 MatchplayGame game = gameSession.getMatchplayGame();

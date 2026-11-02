@@ -1,0 +1,15 @@
+// Direction and position use hundredths; duration uses hundredths of a second.
+message SMSG_PlayerMovementState (0x32C9) {
+    byte playerPosition = 1;
+    byte movementState = 2;
+    byte movementSpeed = 3;
+    short directionX100 = 4;
+    short directionZ100 = 5;
+    short positionX100 = 6;
+    short positionZ100 = 7;
+    byte knockbackSpeed = 8;
+    short approachTargetX100 = 9;
+    short approachTargetZ100 = 10;
+    byte followThrough = 11;
+    byte followThroughDuration100 = 12;
+}

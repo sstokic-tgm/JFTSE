@@ -1,0 +1,4 @@
+// Host-enabled variant.
+message SMSG_SetMatchHost (0x177E) {
+    boolean isHost = 1;
+}

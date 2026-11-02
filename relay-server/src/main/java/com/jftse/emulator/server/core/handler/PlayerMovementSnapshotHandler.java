@@ -6,19 +6,19 @@ import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.IPacketTranslator;
-import com.jftse.server.core.shared.packets.relay.CMSGPlayerAnimation;
-import com.jftse.server.core.shared.packets.relay.SMSGPlayerAnimation;
-import com.jftse.server.core.shared.packets.translator.PlayerAnimationTranslator;
+import com.jftse.server.core.shared.packets.relay.CMSGPlayerMovementSnapshot;
+import com.jftse.server.core.shared.packets.relay.SMSGPlayerMovementSnapshot;
+import com.jftse.server.core.shared.packets.translator.PlayerMovementSnapshotTranslator;
 
 import java.util.List;
 
-@PacketId(CMSGPlayerAnimation.PACKET_ID)
-public class PlayerAnimationHandler implements PacketHandler<FTConnection, CMSGPlayerAnimation> {
-    private static final IPacketTranslator<SMSGPlayerAnimation, CMSGPlayerAnimation> translator = new PlayerAnimationTranslator();
+@PacketId(CMSGPlayerMovementSnapshot.PACKET_ID)
+public class PlayerMovementSnapshotHandler implements PacketHandler<FTConnection, CMSGPlayerMovementSnapshot> {
+    private static final IPacketTranslator<SMSGPlayerMovementSnapshot, CMSGPlayerMovementSnapshot> translator = new PlayerMovementSnapshotTranslator();
 
     @Override
-    public void handle(FTConnection connection, CMSGPlayerAnimation packet) {
-        SMSGPlayerAnimation relayPacket = packet.translate(translator);
+    public void handle(FTConnection connection, CMSGPlayerMovementSnapshot packet) {
+        SMSGPlayerMovementSnapshot relayPacket = packet.translate(translator);
         connection.getClient().getGameSessionId().ifPresent(gameSessionId -> {
             final List<FTClient> clients = RelayManager.getInstance().getClientsInSession(gameSessionId);
             clients.forEach(c -> {

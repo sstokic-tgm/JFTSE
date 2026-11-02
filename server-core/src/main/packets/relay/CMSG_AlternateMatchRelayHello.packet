@@ -1,0 +1,4 @@
+// Returns the relay handshake tag.
+message CMSG_AlternateMatchRelayHello (0x401) {
+    byte handshakeTag = 1;
+}

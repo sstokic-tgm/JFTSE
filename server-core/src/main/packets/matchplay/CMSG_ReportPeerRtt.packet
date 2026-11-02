@@ -1,0 +1,4 @@
+message CMSG_ReportPeerRtt (0x2EE2) {
+    short playerSlot = 1;
+    int32 rttMilliseconds = 2;
+}

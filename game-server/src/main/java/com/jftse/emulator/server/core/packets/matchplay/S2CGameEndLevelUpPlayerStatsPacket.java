@@ -12,8 +12,8 @@ public class S2CGameEndLevelUpPlayerStatsPacket extends Packet {
 
         EquippedItemStats equippedItemStats = player.getItemStats();
 
-        this.write(playerPosition); // not sure if it's the pos
-        this.write((byte) player.getLevel());
+        this.write(playerPosition);
+        this.write((short) player.getLevel());
 
         this.write((BattleUtils.calculatePlayerHp(player.getLevel()) + equippedItemStats.getAddHp()));
 

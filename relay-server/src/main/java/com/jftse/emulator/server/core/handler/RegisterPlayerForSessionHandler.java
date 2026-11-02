@@ -6,7 +6,7 @@ import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.shared.packets.relay.CMSGPlayerJoinSession;
-import com.jftse.server.core.shared.packets.relay.SMSGPlayerJoinSessionResult;
+import com.jftse.server.core.shared.packets.matchplay.SMSGMatchRelayRegistrationResult;
 import lombok.extern.log4j.Log4j2;
 
 @PacketId(CMSGPlayerJoinSession.PACKET_ID)
@@ -18,9 +18,9 @@ public class RegisterPlayerForSessionHandler implements PacketHandler<FTConnecti
         boolean isSpectator = matchplayPlayerIdsInSessionPacket.getIsSpectator();
         int sessionId = matchplayPlayerIdsInSessionPacket.getSessionId();
 
-        SMSGPlayerJoinSessionResult.Builder sessionResultBuilder = new SMSGPlayerJoinSessionResult.Builder();
+        SMSGMatchRelayRegistrationResult.Builder sessionResultBuilder = new SMSGMatchRelayRegistrationResult.Builder();
 
-        if (playerId != -1) {
+        if (playerId > 0) {
             if (isSpectator) {
                 connection.getChannelHandlerContext().pipeline().remove("readTimeoutHandler");
             }
@@ -34,15 +34,15 @@ public class RegisterPlayerForSessionHandler implements PacketHandler<FTConnecti
 
             RelayManager.getInstance().addClientToSession(sessionId, client);
 
-            sessionResultBuilder.result((byte) 0);
+            sessionResultBuilder.status((byte) 0);
         } else {
-            sessionResultBuilder.result((byte) 1);
+            sessionResultBuilder.status((byte) 1);
         }
 
         connection.sendTCP(sessionResultBuilder.build());
 
-        if (playerId == -1) {
-            log.error("playerId is -1");
+        if (playerId <= 0) {
+            log.error("Invalid relay player ID: {}", playerId);
             connection.close();
         }
     }

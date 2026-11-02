@@ -1,0 +1,5 @@
+message SMSG_AlternateMatchRelayContext (0x403) {
+    byte status = 1;
+    int32 relayResponseValue = 2;
+    bytes relayResponseData = 3 [len = 16];
+}

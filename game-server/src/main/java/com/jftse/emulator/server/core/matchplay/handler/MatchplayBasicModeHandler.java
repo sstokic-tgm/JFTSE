@@ -44,7 +44,7 @@ import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.*;
-import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
+import com.jftse.server.core.shared.packets.matchplay.CMSGReportMatchPoint;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
@@ -308,7 +308,7 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
     }
 
     @Override
-    public void onPoint(final FTClient ftClient, CMSGPoint pointPacket) {
+    public void onPoint(final FTClient ftClient, CMSGReportMatchPoint pointPacket) {
         GameSession gameSession = ftClient.getActiveGameSession();
         if (gameSession == null)
             return;
@@ -323,17 +323,17 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
         final int setsTeamRead = game.getSetsRedTeam().get();
         final int setsTeamBlue = game.getSetsBlueTeam().get();
 
-        boolean winningTeamIsRed = game.isRedTeam(pointPacket.getPointsTeam());
+        boolean winningTeamIsRed = game.isRedTeam(pointPacket.getScoringTeamSlot());
         RallyResult rallyResult = matchRallyStatsConsumer.onPoint(ftClient.getGameSessionId(), winningTeamIsRed);
 
-        if (pointPacket.getPlayerPosition() < 4) {
-            game.increasePerformancePointForPlayer(pointPacket.getPlayerPosition());
-            rallyResultMap.computeIfAbsent((int) pointPacket.getPlayerPosition(), k -> new ArrayList<>()).add(rallyResult);
+        if (pointPacket.getPlayerSlot() >= 0 && pointPacket.getPlayerSlot() < 4) {
+            game.increasePerformancePointForPlayer(pointPacket.getPlayerSlot());
+            rallyResultMap.computeIfAbsent((int) pointPacket.getPlayerSlot(), k -> new ArrayList<>()).add(rallyResult);
         }
 
-        if (game.isRedTeam(pointPacket.getPointsTeam()))
+        if (game.isRedTeam(pointPacket.getScoringTeamSlot()))
             game.setPoints((byte) (pointsTeamRed + 1), (byte) pointsTeamBlue);
-        else if (game.isBlueTeam(pointPacket.getPointsTeam()))
+        else if (game.isBlueTeam(pointPacket.getScoringTeamSlot()))
             game.setPoints((byte) pointsTeamRed, (byte) (pointsTeamBlue + 1));
 
         final boolean isFinished = game.getFinished().get();
@@ -366,12 +366,12 @@ public class MatchplayBasicModeHandler implements MatchplayHandleable {
                 }
 
                 short pointingTeamPosition = -1;
-                if (game.isRedTeam(pointPacket.getPointsTeam()))
+                if (game.isRedTeam(pointPacket.getScoringTeamSlot()))
                     pointingTeamPosition = 0;
-                else if (game.isBlueTeam(pointPacket.getPointsTeam()))
+                else if (game.isBlueTeam(pointPacket.getScoringTeamSlot()))
                     pointingTeamPosition = 1;
 
-                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint(pointingTeamPosition, pointPacket.getBallState(), (byte) game.getPointsRedTeam().get(), (byte) game.getPointsBlueTeam().get());
+                S2CMatchplayTeamWinsPoint matchplayTeamWinsPoint = new S2CMatchplayTeamWinsPoint(pointingTeamPosition, pointPacket.getPointReason(), (byte) game.getPointsRedTeam().get(), (byte) game.getPointsBlueTeam().get());
                 eventHandler.offer(eventHandler.createPacketEvent(client, matchplayTeamWinsPoint, PacketEventType.DEFAULT, 0));
 
                 if (anyTeamWonSet) {

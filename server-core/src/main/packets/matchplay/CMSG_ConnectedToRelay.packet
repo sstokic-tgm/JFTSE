@@ -1,2 +1,0 @@
-message CMSG_ConnectedToRelay (0x3F3) {
-}

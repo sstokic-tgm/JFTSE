@@ -1,0 +1,5 @@
+// Starts peer discovery (enabled=true).
+message SMSG_StartMatchPeerDiscovery (0x17D6) {
+    boolean enabled = 1;
+    byte participantCount = 2;
+}

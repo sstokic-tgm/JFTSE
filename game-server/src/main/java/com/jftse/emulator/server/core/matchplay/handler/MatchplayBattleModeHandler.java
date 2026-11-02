@@ -46,7 +46,7 @@ import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.server.core.constants.GameMode;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.service.*;
-import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
+import com.jftse.server.core.shared.packets.matchplay.CMSGReportMatchPoint;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
@@ -333,7 +333,7 @@ public class MatchplayBattleModeHandler implements MatchplayHandleable {
     }
 
     @Override
-    public void onPoint(FTClient ftClient, CMSGPoint pointPacket) {
+    public void onPoint(FTClient ftClient, CMSGReportMatchPoint pointPacket) {
         boolean lastGuardianServeWasOnBlueTeamsSide = game.getLastGuardianServeSide().get() == GameFieldSide.BlueTeam;
 
         // winner doesn't matter as service or return ace doesn't exist in battle mode, so we can just pass false

@@ -1,0 +1,4 @@
+// Clears the match host role (enabled=false).
+message SMSG_ClearMatchHost (0x17D6) {
+    boolean enabled = 1;
+}

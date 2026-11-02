@@ -1,0 +1,3 @@
+// Closes match transports and reports a relay error.
+message SMSG_MatchRelayError (0x3F5) {
+}
