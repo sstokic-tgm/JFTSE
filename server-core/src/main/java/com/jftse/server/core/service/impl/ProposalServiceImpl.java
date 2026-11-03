@@ -69,4 +69,10 @@ public class ProposalServiceImpl implements ProposalService {
     public long deleteByReceiver(Player receiver) {
         return proposalRepository.deleteByReceiver(receiver);
     }
+
+    @Override
+    @Transactional
+    public int deleteBySenderAndReceiver(Player sender, Player receiver) {
+        return proposalRepository.deleteBySenderAndReceiver(sender, receiver);
+    }
 }

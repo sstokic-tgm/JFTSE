@@ -3,7 +3,9 @@ package com.jftse.entities.database.repository.messenger;
 import com.jftse.entities.database.model.messenger.Proposal;
 import com.jftse.entities.database.model.player.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,4 +23,8 @@ public interface ProposalRepository extends JpaRepository<Proposal, Long> {
 
     long deleteBySender(Player sender);
     long deleteByReceiver(Player receiver);
+
+    @Modifying
+    @Query("DELETE FROM Proposal p WHERE p.sender = :sender AND p.receiver = :receiver")
+    int deleteBySenderAndReceiver(@Param("sender") Player sender, @Param("receiver") Player receiver);
 }
