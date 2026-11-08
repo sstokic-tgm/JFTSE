@@ -217,7 +217,36 @@ public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, C
             SMSGSetHostReference hostReferencePacket = SMSGSetHostReference.builder().build();
             clientToHostGame.getConnection().sendTCP(hostReferencePacket);
 
-            game.getHandleable().onPrepare(ftClient);
+            try {
+                game.getHandleable().onPrepare(ftClient);
+            } catch (Throwable t) {
+                // This runs on a pooled thread without an uncaught-exception logger, so without this
+                // catch a failure here would never reach the log files and the room would hang on "starting".
+                log.error("Match preparation failed for room {} (mode {}), cancelling start", room.getRoomId(), room.getMode(), t);
+                synchronized (room) {
+                    room.setStatus(RoomStatus.NotRunning);
+                    room.getRoomPlayerList().forEach(rp -> {
+                        rp.setReady(false);
+                        rp.getConnectedToRelay().set(false);
+                    });
+                }
+                clientsInRoom.forEach(c -> {
+                    if (c.getActiveGameSession() == gameSession)
+                        c.setActiveGameSession(null);
+                });
+                GameSessionManager.getInstance().removeGameSession(gameSessionId, gameSession);
+
+                SMSGCancelStartGame cancelStartGamePacket = SMSGCancelStartGame.builder().result((char) 0).build();
+                GameManager.getInstance().updateRoomForAllClientsInMultiplayer(ftClient.getConnection(), room);
+                GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> {
+                    if (c.getConnection() != null) {
+                        c.getConnection().sendTCP(cancelStartGamePacket);
+                        c.getConnection().sendTCP(roomStartGameAck);
+                        c.getConnection().sendTCP(clearHostPacket);
+                    }
+                });
+                return;
+            }
 
             SMSGStartGame startGamePacket = SMSGStartGame.builder().result((char) 0).build();
 
