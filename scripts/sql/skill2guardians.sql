@@ -96,6 +96,7 @@ INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian
 INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian_2_maps_id, skill_id, status_id) VALUES(96, '2023-11-14 01:30:45', '2023-11-14 01:30:45', 23, 20.0, NULL, 6, 1);
 INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian_2_maps_id, skill_id, status_id) VALUES(97, '2023-11-14 01:30:45', '2023-11-14 01:30:45', 23, 30.0, NULL, 27, 1);
 INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian_2_maps_id, skill_id, status_id) VALUES(98, '2023-11-14 01:30:46', '2023-11-14 01:30:46', 23, 50.0, NULL, 57, 1);
+INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian_2_maps_id, skill_id, status_id) VALUES(454, '2023-11-14 01:30:46', '2023-11-14 01:30:46', 23, 20.0, NULL, 58, 1);
 INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian_2_maps_id, skill_id, status_id) VALUES(99, '2023-11-14 01:30:46', '2023-11-14 01:30:46', 24, 30.0, NULL, 28, 1);
 INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian_2_maps_id, skill_id, status_id) VALUES(100, '2023-11-14 01:30:46', '2023-11-14 01:30:46', 24, 20.0, NULL, 21, 1);
 INSERT INTO Skill_2_Guardians (id, created, modified, btItemID, chance, guardian_2_maps_id, skill_id, status_id) VALUES(101, '2023-11-14 01:30:46', '2023-11-14 01:30:46', 24, 50.0, NULL, 62, 1);
