@@ -15,9 +15,8 @@ import com.jftse.emulator.server.net.FTConnection;
 import com.jftse.entities.database.model.player.PlayerStatistic;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
-import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.service.PlayerStatisticService;
+import com.jftse.server.core.shared.packets.matchplay.SMSGClearMatchHost;
 import com.jftse.server.core.shared.packets.lobby.room.CMSGClientBackInRoom;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGClientBackInRoom;
 import com.jftse.server.core.shared.packets.player.SMSGSetCouplePoints;
@@ -55,9 +54,8 @@ public class ClientBackInRoomPacketHandler implements PacketHandler<FTConnection
         SMSGClientBackInRoom backInRoomPacket = SMSGClientBackInRoom.builder().position(position).build();
         connection.sendTCP(backInRoomPacket);
 
-        Packet unsetHostPacket = new Packet(PacketOperations.S2CUnsetHost);
-        unsetHostPacket.write((byte) 0);
-        connection.sendTCP(unsetHostPacket);
+        SMSGClearMatchHost clearHostPacket = SMSGClearMatchHost.builder().enabled(false).build();
+        connection.sendTCP(clearHostPacket);
 
         roomPlayer.setReady(false);
         roomPlayer.setGameAnimationSkipReady(false);

@@ -1,0 +1,4 @@
+// status=0 means success.
+message SMSG_MatchRelayRegistrationResult (0x3EF) {
+    byte status = 1;
+}

@@ -130,6 +130,14 @@ public class ServiceManager {
     private EnchantService enchantService;
     @Autowired
     private InventoryService inventoryService;
+    @Autowired
+    private ShopTransactionService shopTransactionService;
+    @Autowired
+    private InventorySaleService inventorySaleService;
+    @Autowired
+    private GiftTransactionService giftTransactionService;
+    @Autowired
+    private ParcelTransactionService parcelTransactionService;
 
     @Autowired
     private ProfaneWordsService profaneWordsService;
@@ -174,3 +182,4 @@ public class ServiceManager {
         return instance;
     }
 }
+

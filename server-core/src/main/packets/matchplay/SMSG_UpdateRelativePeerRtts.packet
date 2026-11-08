@@ -1,0 +1,4 @@
+// Updates host-relative RTT values (at most three entries).
+message SMSG_UpdateRelativePeerRtts (0x2EE1) {
+    repeated int32 rttMilliseconds = 1 [type = short];
+}

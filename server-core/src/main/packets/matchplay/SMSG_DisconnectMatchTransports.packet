@@ -1,0 +1,3 @@
+// Closes match transports.
+message SMSG_DisconnectMatchTransports (0x416) {
+}

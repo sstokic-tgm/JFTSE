@@ -78,8 +78,10 @@ public class InventoryServiceImpl implements InventoryService {
                 ItemHouse itemHouse = homeService.findItemHouseByItemIndex(product.getItem0());
                 AccountHome accountHome = homeService.findAccountHomeByAccountId(player.getAccount().getId());
 
+                int previousLevel = accountHome.getLevel();
                 accountHome.setLevel(itemHouse.getLevel());
                 homeService.save(accountHome);
+                emit(postActions, new HomeUpdated(accountHome.getId(), previousLevel, accountHome.getLevel()));
 
                 return playerPocketList;
             }
@@ -115,6 +117,7 @@ public class InventoryServiceImpl implements InventoryService {
                         playerPocket.setPocket(newPlayerPocket);
 
                         playerPocketService.save(playerPocket);
+                        emit(postActions, new PocketItemAdded(null, InventoryItemSnapshot.from(playerPocket)));
                         newPlayerPocket = pocketService.incrementPocketBelongings(newPlayerPocket);
                     }
 
@@ -130,6 +133,7 @@ public class InventoryServiceImpl implements InventoryService {
                     playerPocket.setPocket(pocket);
 
                     playerPocketService.save(playerPocket);
+                    emit(postActions, new PocketItemAdded(null, InventoryItemSnapshot.from(playerPocket)));
                     pocket = pocketService.incrementPocketBelongings(pocket);
 
                     // add item to result
@@ -150,6 +154,7 @@ public class InventoryServiceImpl implements InventoryService {
                 playerPocket = new PlayerPocket();
             }
 
+            InventoryItemSnapshot before = existingItem ? InventoryItemSnapshot.from(playerPocket) : null;
             playerPocket.setCategory(product.getCategory());
             playerPocket.setItemIndex(product.getItem0());
             playerPocket.setUseType(product.getUseType());
@@ -169,6 +174,7 @@ public class InventoryServiceImpl implements InventoryService {
             playerPocket.setPocket(pocket);
 
             playerPocketService.save(playerPocket);
+            emit(postActions, new PocketItemAdded(before, InventoryItemSnapshot.from(playerPocket)));
             if (!existingItem)
                 pocketService.incrementPocketBelongings(pocket);
 
@@ -252,3 +258,6 @@ public class InventoryServiceImpl implements InventoryService {
         return true;
     }
 }
+
+
+

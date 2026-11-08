@@ -60,7 +60,7 @@ import com.jftse.server.core.service.*;
 import com.jftse.server.core.shared.packets.S2CDCMsgPacket;
 import com.jftse.server.core.shared.packets.item.SMSGItemSettings;
 import com.jftse.server.core.shared.packets.lobby.room.SMSGRoomChangeMap;
-import com.jftse.server.core.shared.packets.matchplay.CMSGPoint;
+import com.jftse.server.core.shared.packets.matchplay.CMSGReportMatchPoint;
 import com.jftse.server.core.thread.ThreadManager;
 import lombok.extern.log4j.Log4j2;
 
@@ -577,7 +577,7 @@ public class MatchplayGuardianModeHandler implements MatchplayHandleable {
     }
 
     @Override
-    public void onPoint(FTClient ftClient, CMSGPoint pointPacket) {
+    public void onPoint(FTClient ftClient, CMSGReportMatchPoint pointPacket) {
         boolean lastGuardianServeWasOnGuardianSide = game.getLastGuardianServeSide().get() == GameFieldSide.Guardian;
 
         // winner doesn't matter as service or return ace doesn't exist in guardian mode, so we can just pass false

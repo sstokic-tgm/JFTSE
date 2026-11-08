@@ -99,21 +99,26 @@ public class Packet implements IPacket {
         byte[] dataElement;
         if (element instanceof Character) {
             dataElement = BitKit.getBytes((char) element);
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 2);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 2);
             this.dataLength += (char) 2;
         } else if (element instanceof Short) {
             dataElement = BitKit.getBytes((short) element);
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 2);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 2);
             this.dataLength += (char) 2;
         } else if (element instanceof Integer) {
             dataElement = BitKit.getBytes((int) element);
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 4);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 4);
             this.dataLength += (char) 4;
         } else if (element instanceof Long) {
             dataElement = BitKit.getBytes((long) element);
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 8);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 8);
             this.dataLength += (char) 8;
         } else if (element instanceof String e) {
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, PacketBuffer.utf16Size(e));
             if (!e.isEmpty()) {
                 dataElement = e.getBytes(java.nio.charset.StandardCharsets.UTF_16LE);
                 BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, dataElement.length);
@@ -124,26 +129,32 @@ public class Packet implements IPacket {
             this.dataLength += 2;
         } else if (element instanceof Byte) {
             dataElement = BitKit.getBytes(BitKit.byteToChar((byte) element));
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 1);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 1);
             this.dataLength += (char) 1;
         } else if (element instanceof Boolean) {
             dataElement = BitKit.getBytes((byte) ((boolean) element ? 1 : 0));
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 1);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 1);
             this.dataLength += (char) 1;
         } else if (element instanceof Float) {
             dataElement = BitKit.getBytes((float) element);
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 4);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 4);
             this.dataLength += (char) 4;
         } else if (element instanceof Double) {
             dataElement = BitKit.getBytes((double) element);
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 8);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 8);
             this.dataLength += (char) 8;
         } else if (element instanceof java.util.Date) {
             dataElement = BitKit.getBytes((((java.util.Date) element).getTime() + 11644473600000L) * 10000L);
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, 8);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, 8);
             this.dataLength += (char) 8;
         } else if (element instanceof byte[]) {
             dataElement = (byte[]) element;
+            this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, dataElement.length);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, dataElement.length);
             this.dataLength += (char) dataElement.length;
         } else if (element == null) {
@@ -152,6 +163,7 @@ public class Packet implements IPacket {
     }
 
     public void writeStringUTF8(String text) {
+        this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, PacketBuffer.utf8Size(text));
         if (text != null && !text.isEmpty()) {
             byte[] dataElement = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
             BitKit.blockCopy(dataElement, 0, this.data, this.dataLength, dataElement.length);
@@ -163,6 +175,7 @@ public class Packet implements IPacket {
 
     public void writeFixedString(String text, int len) {
         if (text == null || text.length() < len) return;
+        this.data = PacketBuffer.ensureCapacity(this.data, this.dataLength, len);
         byte[] dataElement = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         for (int i = 0; i < len; i++)
             write(dataElement[i]);

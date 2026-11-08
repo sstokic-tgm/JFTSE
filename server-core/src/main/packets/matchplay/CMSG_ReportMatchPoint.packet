@@ -1,0 +1,5 @@
+message CMSG_ReportMatchPoint (0x183F) {
+    short scoringTeamSlot = 1;
+    byte pointReason = 2;
+    byte playerSlot = 3;
+}

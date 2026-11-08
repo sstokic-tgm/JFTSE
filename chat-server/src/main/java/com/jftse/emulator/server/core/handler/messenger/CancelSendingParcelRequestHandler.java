@@ -3,14 +3,15 @@ package com.jftse.emulator.server.core.handler.messenger;
 import com.jftse.emulator.server.core.manager.ServiceManager;
 import com.jftse.emulator.server.core.packets.inventory.S2CInventoryItemsPlacePacket;
 import com.jftse.emulator.server.core.rabbit.service.RProducerService;
+import com.jftse.emulator.server.net.FTClient;
 import com.jftse.emulator.server.net.FTConnection;
-import com.jftse.entities.database.model.messenger.Parcel;
-import com.jftse.entities.database.model.pocket.PlayerPocket;
 import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.protocol.Packet;
-import com.jftse.server.core.service.ParcelService;
-import com.jftse.server.core.service.PlayerPocketService;
+import com.jftse.server.core.service.ParcelTransactionService;
+import com.jftse.server.core.service.transaction.ParcelTransactionResult;
+import com.jftse.server.core.service.transaction.TransactionException;
+import com.jftse.server.core.service.transaction.TransactionNotifications;
 import com.jftse.server.core.shared.packets.messenger.CMSGCancelParcel;
 import com.jftse.server.core.shared.packets.messenger.SMSGCancelParcel;
 import com.jftse.server.core.shared.packets.messenger.SMSGDeleteParcel;
@@ -20,55 +21,47 @@ import java.util.List;
 
 @PacketId(CMSGCancelParcel.PACKET_ID)
 public class CancelSendingParcelRequestHandler implements PacketHandler<FTConnection, CMSGCancelParcel> {
-    private final ParcelService parcelService;
-    private final PlayerPocketService playerPocketService;
-
+    private final ParcelTransactionService parcelTransactionService;
     private final RProducerService rProducerService;
 
     public CancelSendingParcelRequestHandler() {
-        parcelService = ServiceManager.getInstance().getParcelService();
-        playerPocketService = ServiceManager.getInstance().getPlayerPocketService();
+        parcelTransactionService = ServiceManager.getInstance().getParcelTransactionService();
         rProducerService = RProducerService.getInstance();
     }
 
     @Override
     public void handle(FTConnection connection, CMSGCancelParcel packet) {
-        Parcel parcel = parcelService.findById((long) packet.getParcelId());
-        if (parcel == null) return;
-
-        PlayerPocket item = playerPocketService.getItemAsPocketByItemIndexAndCategoryAndPocket(parcel.getItemIndex(), parcel.getCategory(), parcel.getSender().getPocket());
-        if (item == null) {
-            item = new PlayerPocket();
-            item.setCategory(parcel.getCategory());
-            item.setItemCount(parcel.getItemCount());
-            item.setItemIndex(parcel.getItemIndex());
-            item.setUseType(parcel.getUseType());
-            item.setPocket(parcel.getSender().getPocket());
-            item.setEnchantStr(parcel.getEnchantStr());
-            item.setEnchantSta(parcel.getEnchantSta());
-            item.setEnchantDex(parcel.getEnchantDex());
-            item.setEnchantWil(parcel.getEnchantWil());
-            item.setEnchantElement(parcel.getEnchantElement());
-            item.setEnchantLevel(parcel.getEnchantLevel());
-        } else {
-            item.setItemCount(item.getItemCount() + parcel.getItemCount());
+        FTClient client = connection.getClient();
+        if (client == null || !client.hasPlayer()) {
+            return;
         }
 
-        item = playerPocketService.save(item);
-        parcelService.remove(parcel.getId());
+        ParcelTransactionResult result;
+        try {
+            result = parcelTransactionService.cancel(client.getAccountId(), client.getPlayer().getId(), (long) packet.getParcelId());
+        } catch (TransactionException exception) {
+            if (exception.getReason() != TransactionException.Reason.NOT_FOUND) {
+                connection.sendTCP(SMSGCancelParcel.builder().status((short) -1).build());
+            }
+            return;
+        } catch (ArithmeticException exception) {
+            connection.sendTCP(SMSGCancelParcel.builder().status((short) -1).build());
+            return;
+        }
 
-        S2CInventoryItemsPlacePacket s2CInventoryItemsPlacePacket = new S2CInventoryItemsPlacePacket(List.of(item));
-        connection.sendTCP(s2CInventoryItemsPlacePacket);
+        TransactionNotifications.afterCommit(() -> {
+            connection.sendTCP(new S2CInventoryItemsPlacePacket(List.of(result.item())));
+            connection.sendTCP(SMSGCancelParcel.builder().status((short) 0).build());
 
-        SMSGCancelParcel answer = SMSGCancelParcel.builder().status((short) 0).build();
-        connection.sendTCP(answer);
-
-        SMSGDeleteParcel answerPacket = SMSGDeleteParcel.builder().parcelId(parcel.getId().intValue()).build();
-
-        PacketMessage packetMessage = PacketMessage.builder()
-                .receivingPlayerId(parcel.getReceiver().getId())
-                .packet(new Packet(answerPacket))
-                .build();
-        rProducerService.send(packetMessage, "game.messenger.parcel chat.messenger.parcel", parcel.getSender().getName() + "(ChatServer)");
+            SMSGDeleteParcel deletePacket = SMSGDeleteParcel.builder()
+                    .parcelId(result.parcel().getId().intValue())
+                    .build();
+            PacketMessage message = PacketMessage.builder()
+                    .receivingPlayerId(result.parcel().getReceiver().getId())
+                    .packet(new Packet(deletePacket))
+                    .build();
+            rProducerService.send(message, "game.messenger.parcel chat.messenger.parcel",
+                    result.parcel().getSender().getName() + "(ChatServer)");
+        });
     }
 }

@@ -5,7 +5,7 @@ import com.jftse.emulator.server.core.life.room.GameSession;
 import com.jftse.emulator.server.core.manager.GameManager;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
 import com.jftse.emulator.server.core.matchplay.guardian.PhaseManager;
-import com.jftse.emulator.server.core.packets.matchplay.S2CGameSetNameColorAndRemoveBlackBar;
+import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayActivatePlayersPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CMatchplayTriggerGuardianServe;
 import com.jftse.emulator.server.core.utils.ServingPositionGenerator;
 import com.jftse.emulator.server.net.FTClient;
@@ -39,8 +39,8 @@ public class GuardianServeTask extends AbstractTask {
         byte servingPositionYOffset = (byte) ServingPositionGenerator.randomServingPositionYOffset(servingPositionXOffset);
 
         S2CMatchplayTriggerGuardianServe triggerGuardianServePacket = new S2CMatchplayTriggerGuardianServe(GameFieldSide.Guardian, servingPositionXOffset, servingPositionYOffset);
-        S2CGameSetNameColorAndRemoveBlackBar setNameColorAndRemoveBlackBarPacket = new S2CGameSetNameColorAndRemoveBlackBar(null);
-        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(setNameColorAndRemoveBlackBarPacket, connection);
+        S2CMatchplayActivatePlayersPacket activatePlayersPacket = new S2CMatchplayActivatePlayersPacket(null);
+        GameManager.getInstance().sendPacketToAllClientsInSameGameSession(activatePlayersPacket, connection);
         GameManager.getInstance().sendPacketToAllClientsInSameGameSession(triggerGuardianServePacket, connection);
         game.resetStageStartTime();
 

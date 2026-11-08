@@ -1,0 +1,7 @@
+// Connects a legacy peer (isHost=false).
+message SMSG_ConnectLegacyMatchPeer (0x177E) {
+    boolean isHost = 1;
+    short peerSlot = 2;
+    string host = 3;
+    short port = 4;
+}

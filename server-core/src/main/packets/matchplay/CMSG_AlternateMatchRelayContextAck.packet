@@ -1,0 +1,6 @@
+// Returns relay handshake context to the game server.
+message CMSG_AlternateMatchRelayContextAck (0x405) {
+    short handshakeContext = 1;
+    int32 relayResponseValue = 2;
+    bytes relayResponseData = 3 [len = 16];
+}

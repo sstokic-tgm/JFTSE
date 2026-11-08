@@ -1,0 +1,6 @@
+message SMSG_ConnectMatchRelay (0x3EA) {
+    string host = 1;
+    short port = 2;
+    int32 sessionId = 3;
+    repeated int32 playerIds = 4 [len = 4];
+}

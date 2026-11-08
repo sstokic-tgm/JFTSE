@@ -1,0 +1,8 @@
+// Starts the alternate relay handshake.
+// Port occupies four bytes; only its low word is used.
+message SMSG_ConnectAlternateMatchRelay (0x3F7) {
+    string host = 1;
+    int32 port = 2;
+    byte handshakeTag = 3;
+    short handshakeContext = 4;
+}

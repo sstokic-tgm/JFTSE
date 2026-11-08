@@ -6,6 +6,7 @@ import com.jftse.emulator.common.utilities.LogConfigurator;
 import com.jftse.server.core.protocol.Packet;
 import com.jftse.server.core.protocol.PacketOperations;
 import com.jftse.server.core.protocol.SerialTable;
+import com.jftse.server.core.protocol.PacketFrames;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -36,6 +37,7 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
     @Override
     protected void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) throws Exception {
         byte[] data = packet.getRawPacket();
+        PacketFrames.validate(data);
         final int packetId = BitKit.bytesToChar(data, 4);
         final int length = data.length;
 
@@ -44,7 +46,7 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
         if (packetId != PacketOperations.S2CLoginWelcomePacket.getValue()) {
            int processed = 0;
            while (processed < length) {
-               final int packetSize = BitKit.bytesToShort(data, 6);
+               final int packetSize = BitKit.bytesToShort(data, 6) & 0xFFFF;
                int currentObjectLength = packetSize + HEADER_SIZE;
 
                createSerial(data);

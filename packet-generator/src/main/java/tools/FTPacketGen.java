@@ -602,6 +602,14 @@ public class FTPacketGen {
             return getObjectFields(f, 0);
         }
 
+        if (f.repeated && o.containsKey("len") && supportedType(f.type) && !f.type.equals("bytes")) {
+            return "if (msg." + f.name + ".size() != " + o.get("len") + ") throw new IllegalArgumentException(\"Expected " + o.get("len") + " entries for " + f.name + "\");\n\t\tmsg." + f.name + ".forEach(msg::write);";
+        }
+
+        if (f.type.equals("bytes") && o.containsKey("len")) {
+            return "if (msg." + f.name + " == null || msg." + f.name + ".length != " + o.get("len") + ") throw new IllegalArgumentException(\"Expected " + o.get("len") + " bytes for " + f.name + "\");\n\t\tmsg.write(msg." + f.name + ");";
+        }
+
         // default behavior
         if (f.repeated && !f.type.equals("bytes")) {
             return "msg.write((" + mapType(new Field("byte", "tmp", false, o)) + ") msg." + f.name + ".size());\n\t\tmsg." + f.name + ".forEach(msg::write);";
@@ -732,21 +740,26 @@ public class FTPacketGen {
                          byte[] dataElement;
                          if (element instanceof Character) {
                              dataElement = BitKit.getBytes((char) element);
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 2);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 2);
                              this.metaData.dataLen += (char) 2;
                          } else if (element instanceof Short) {
                              dataElement = BitKit.getBytes((short) element);
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 2);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 2);
                              this.metaData.dataLen += (char) 2;
                          } else if (element instanceof Integer) {
                              dataElement = BitKit.getBytes((int) element);
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 4);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 4);
                              this.metaData.dataLen += (char) 4;
                          } else if (element instanceof Long) {
                              dataElement = BitKit.getBytes((long) element);
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 8);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 8);
                              this.metaData.dataLen += (char) 8;
                          } else if (element instanceof String e) {
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, com.jftse.server.core.protocol.PacketBuffer.utf16Size(e));
                              if (!e.isEmpty()) {
                                  dataElement = e.getBytes(java.nio.charset.StandardCharsets.UTF_16LE);
                                  BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, dataElement.length);
@@ -757,26 +770,32 @@ public class FTPacketGen {
                              this.metaData.dataLen += 2;
                          } else if (element instanceof Byte) {
                              dataElement = BitKit.getBytes(BitKit.byteToChar((byte) element));
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 1);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 1);
                              this.metaData.dataLen += (char) 1;
                          } else if (element instanceof Boolean) {
                              dataElement = BitKit.getBytes((byte) ((boolean) element ? 1 : 0));
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 1);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 1);
                              this.metaData.dataLen += (char) 1;
                          } else if (element instanceof Float) {
                              dataElement = BitKit.getBytes((float) element);
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 4);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 4);
                              this.metaData.dataLen += (char) 4;
                          } else if (element instanceof Double) {
                              dataElement = BitKit.getBytes((double) element);
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 8);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 8);
                              this.metaData.dataLen += (char) 8;
                          } else if (element instanceof java.util.Date) {
                              dataElement = BitKit.getBytes((((java.util.Date) element).getTime() + 11644473600000L) * 10000L);
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, 8);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, 8);
                              this.metaData.dataLen += (char) 8;
                          } else if (element instanceof byte[]) {
                              dataElement = (byte[]) element;
+                             this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, dataElement.length);
                              BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, dataElement.length);
                              this.metaData.dataLen += (char) dataElement.length;
                          } else if (element == null) {
@@ -785,6 +804,7 @@ public class FTPacketGen {
                      }
                      
                      public void writeStringUTF8(String text) {
+                            this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, com.jftse.server.core.protocol.PacketBuffer.utf8Size(text));
                             if (text != null && !text.isEmpty()) {
                                 byte[] dataElement = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                                 BitKit.blockCopy(dataElement, 0, this.data, this.metaData.dataLen, dataElement.length);
@@ -796,6 +816,7 @@ public class FTPacketGen {
                      
                      public void writeFixedString(String text, int len) {
                             if (text == null || text.length() < len) return;
+                            this.data = com.jftse.server.core.protocol.PacketBuffer.ensureCapacity(this.data, this.metaData.dataLen, len);
                             byte[] dataElement = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                             for (int i = 0; i < len; i++)
                                 write(dataElement[i]);

@@ -1,3 +1,0 @@
-message SMSG_ConnectedToRelay (0x3EF) {
-    byte result = 1;
-}

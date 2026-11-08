@@ -6,6 +6,7 @@ public enum GameEventType {
     ON_LOGOUT,
 
     SHOP_ITEM_BOUGHT,
+    INVENTORY_ITEM_SOLD,
 
     RECIPE_COMBINED,
 
@@ -22,3 +23,4 @@ public enum GameEventType {
         return toString();
     }
 }
+
