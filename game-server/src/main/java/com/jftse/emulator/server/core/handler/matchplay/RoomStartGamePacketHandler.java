@@ -13,6 +13,8 @@ import com.jftse.emulator.server.core.matchplay.MatchplayGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBasicGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayBattleGame;
 import com.jftse.emulator.server.core.matchplay.game.MatchplayGuardianGame;
+import com.jftse.emulator.server.core.matchplay.extension.MatchplayLifecycleExtension;
+import com.jftse.emulator.server.core.packets.chat.S2CChatRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CPetRequestRoomAnswerPacket;
 import com.jftse.emulator.server.core.packets.lobby.room.S2CRoomPlayerListInformationPacket;
 import com.jftse.emulator.server.core.packets.matchplay.S2CGameNetworkSettingsPacket;
@@ -62,6 +64,16 @@ public class RoomStartGamePacketHandler implements PacketHandler<FTConnection, C
         if (room == null) {
             connection.sendTCP(roomStartGameAck);
             return;
+        }
+
+        for (MatchplayLifecycleExtension ext : ServiceManager.getInstance().getMatchplayLifecycleExtensions()) {
+            String rejectionReason = ext.validateMatchStart(room);
+            if (rejectionReason != null) {
+                S2CChatRoomAnswerPacket rejectionPacket = new S2CChatRoomAnswerPacket((byte) 2, "Room", rejectionReason);
+                GameManager.getInstance().getClientsInRoom(room.getRoomId()).forEach(c -> c.getConnection().sendTCP(rejectionPacket));
+                connection.sendTCP(roomStartGameAck);
+                return;
+            }
         }
 
         synchronized (room) {

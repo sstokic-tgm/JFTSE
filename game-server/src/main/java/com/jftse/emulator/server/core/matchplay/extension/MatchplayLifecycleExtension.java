@@ -17,4 +17,12 @@ public interface MatchplayLifecycleExtension {
 
     default void onMatchStarting(FTClient client, MatchplayGuardianGame game) {
     }
+
+    // Consulted by RoomStartGamePacketHandler before a room's match is actually started (before
+    // the room's status changes or a game session is created). Return null to allow the start, or
+    // a rejection message to block it - the message is broadcast to the room as a chat message and
+    // the start is aborted, leaving the room untouched.
+    default String validateMatchStart(Room room) {
+        return null;
+    }
 }
