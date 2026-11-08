@@ -12,6 +12,7 @@ import com.jftse.server.core.handler.PacketHandler;
 import com.jftse.server.core.handler.PacketId;
 import com.jftse.server.core.service.MessageService;
 import com.jftse.server.core.service.PlayerService;
+import com.jftse.server.core.service.ProposalService;
 import com.jftse.server.core.shared.packets.messenger.CMSGSendMessage;
 import com.jftse.server.core.shared.rabbit.messages.PacketMessage;
 
@@ -21,12 +22,14 @@ import java.util.List;
 public class SendMessageRequestHandler implements PacketHandler<FTConnection, CMSGSendMessage> {
     private final PlayerService playerService;
     private final MessageService messageService;
+    private final ProposalService proposalService;
 
     private final RProducerService rProducerService;
 
     public SendMessageRequestHandler() {
         playerService = ServiceManager.getInstance().getPlayerService();
         messageService = ServiceManager.getInstance().getMessageService();
+        proposalService = ServiceManager.getInstance().getProposalService();
         rProducerService = RProducerService.getInstance();
     }
 
@@ -51,6 +54,7 @@ public class SendMessageRequestHandler implements PacketHandler<FTConnection, CM
             message.setMessage(packet.getMessage());
             message.setSeen(false);
             messageService.save(message);
+            proposalService.deleteBySenderAndReceiver(receiver, player.getPlayerRef());
 
             S2CReceivedMessageNotificationPacket s2CReceivedMessageNotificationPacket = new S2CReceivedMessageNotificationPacket(message, player.getName());
 
